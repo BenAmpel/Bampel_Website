@@ -40,7 +40,7 @@ sections:
       columns: '1'
   
   - block: collection
-    id: papers
+    id: publications
     content:
       title: Recent Publications
       text: ""
