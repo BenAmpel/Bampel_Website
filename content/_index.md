@@ -27,7 +27,7 @@ sections:
           size: cover
           placement: center
           overlay_color: "#000000"
-          overlay_opacity: 0.95   # ← dialled up
+          overlay_opacity: 0.7   # ← dialled up
   
   - block: markdown
     id: research
