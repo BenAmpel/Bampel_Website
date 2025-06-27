@@ -4,24 +4,27 @@
   #   The weight parameter defines the order that the links will appear in.
 
 main:
-  - name: Bio
-    url: /
+  - name: Home
+    url: "/#home"         # We’ll define an id for the top section
     weight: 10
-  - name: Papers
-    url: /#papers
-    weight: 11
-  - name: Talks
-    url: /#talks
-    weight: 12
-  - name: News
-    url: /#news
-    weight: 13
-  - name: Experience
-    url: experience/
+  - name: Research Interests
+    url: "/#research"     # anchor to Research section
     weight: 20
-  - name: Projects
-    url: projects/
+  - name: Publications
+    url: "/#publications"
     weight: 30
-  - name: Teaching
-    url: teaching/
+  - name: Projects
+    url: "/#projects"
     weight: 40
+  - name: Teaching
+    url: "/#teaching"
+    weight: 50
+  - name: Invited Talks
+    url: "/#talks"
+    weight: 60
+  - name: Awards
+    url: "/#awards"
+    weight: 70
+  - name: CV
+    url: "uploads/cv.pdf"
+    weight: 80
