@@ -29,6 +29,7 @@ sections:
           size: cover
           position: center
           parallax: false
+          overlay_opacity: 0.70 
   
   - block: markdown
     id: research
