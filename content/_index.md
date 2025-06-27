@@ -18,12 +18,18 @@ sections:
         text: Download CV
         url: uploads/cv.pdf
     design:
+      css_class: dark
       background:
-        image: background.jpeg
-        size: cover
-        placement: center
-        overlay_color: "#000000"
-        overlay_opacity: 0.70 
+        color: black
+        image:
+          # Add your image background to `assets/media/`.
+          filename: background.jpeg
+          filters:
+            brightness: 1.0
+          size: cover
+          position: center
+          parallax: false
+          overlay_opacity: 0.9 
   
   - block: markdown
     id: research
