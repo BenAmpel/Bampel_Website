@@ -1,16 +1,20 @@
-/* Put a subtle outline on hero headings */
+/* strong outline for hero headings */
 .hero-stroke h1,
 .hero-stroke h2,
 .hero-stroke h3 {
-  /* two-pixel soft outline built from shadows */
+  color: #fff;
+  /* crisp 1-px stroke (WebKit/Chromium/Edge/Safari) */
+  -webkit-text-stroke: 1px #000;
+  /* multi-direction shadow so Firefox sees an outline too */
   text-shadow:
-      -1px -1px 2px #000,
-       1px -1px 2px #000,
-      -1px  1px 2px #000,
-       1px  1px 2px #000;
+    0 0 3px   rgba(0,0,0,0.9),
+    0 0 6px   rgba(0,0,0,0.6),
+   -2px 0 2px #000,   2px 0 2px #000,
+    0 -2px 2px #000,  0 2px 2px #000;
 }
 
 .hero-stroke p,
 .hero-stroke .hero-subtitle {
-  text-shadow: 0 0 3px #000;   /* light halo for body text */
+  -webkit-text-stroke: 0.5px #000;
+  text-shadow: 0 0 4px rgba(0,0,0,0.9);
 }
