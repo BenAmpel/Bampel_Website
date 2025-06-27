@@ -10,6 +10,7 @@ design:
 
 sections:
   - block: resume-biography-3
+    id: home
     css_class: dark hero-stroke
     content:
       username: admin
@@ -26,7 +27,7 @@ sections:
           size: cover
           placement: center
           overlay_color: "#000000"
-          overlay_opacity: 0.7   # ← dialled up
+          overlay_opacity: 0.7
   
   - block: markdown
     id: research
