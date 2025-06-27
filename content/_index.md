@@ -24,12 +24,10 @@ sections:
         image:
           # Add your image background to `assets/media/`.
           filename: background.jpeg
-          filters:
-            brightness: 1.0
           size: cover
-          position: center
-          parallax: false
-          overlay_opacity: 0.2 
+          placement: center
+          overlay_color: "#000000"
+          overlay_opacity: 0.95   # ← dialled up
   
   - block: markdown
     id: research
