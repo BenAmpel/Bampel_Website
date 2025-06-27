@@ -1,0 +1,16 @@
+/* Put a subtle outline on hero headings */
+.hero-stroke h1,
+.hero-stroke h2,
+.hero-stroke h3 {
+  /* two-pixel soft outline built from shadows */
+  text-shadow:
+      -1px -1px 2px #000,
+       1px -1px 2px #000,
+      -1px  1px 2px #000,
+       1px  1px 2px #000;
+}
+
+.hero-stroke p,
+.hero-stroke .hero-subtitle {
+  text-shadow: 0 0 3px #000;   /* light halo for body text */
+}
