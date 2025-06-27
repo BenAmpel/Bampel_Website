@@ -10,6 +10,7 @@ design:
 
 sections:
   - block: resume-biography-3
+    css_class: hero-stroke
     content:
       username: admin
       text: ""
