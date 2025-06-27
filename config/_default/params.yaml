@@ -7,6 +7,10 @@ appearance:
   mode: system
   color: blue
 
+extensions:
+  academicons:
+    enable: true
+
 assets:
   custom_css_files:
     - css/hero-stroke.css      # <- will load assets/css/hero-stroke.css
