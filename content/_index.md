@@ -18,7 +18,7 @@ sections:
         text: Download CV
         url: uploads/cv.pdf
     design:
-      css_class: dark
+      # css_class: dark
       background:
         color: black
         image:
@@ -29,7 +29,7 @@ sections:
           size: cover
           position: center
           parallax: false
-          overlay_opacity: 0.9 
+          overlay_opacity: 0.2 
   
   - block: markdown
     id: research
