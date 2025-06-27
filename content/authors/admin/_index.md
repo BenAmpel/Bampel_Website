@@ -29,19 +29,23 @@ organizations:
 
 # Social network links
 # Need to use another icon? Simply download the SVG icon to your `assets/media/icons/` folder.
-profiles:
-  - icon: linkedin 
-    icon_pack: fab 
+social:
+  - icon: linkedin            # ✔ correct name
+    icon_pack: fab            # ✔ Font-Awesome Brands
     link: https://www.linkedin.com/in/benampel/
-  - icon: google-scholar 
-    icon_pack: ai 
+
+  - icon: google-scholar      # ✔ correct name
+    icon_pack: ai             # ✔ Academic-Icons
     link: https://scholar.google.com/citations?user=XDdwaZUAAAAJ
-  - icon: envelope
-    icon_pack: fas
+
+  - icon: envelope            # ✔ “mail” icon
+    icon_pack: fas            # ✔ Font-Awesome Solid
     link: mailto:bampel@gsu.edu
-  - icon: cv 
-    icon_pack: ai 
+
+  - icon: cv                  # optional – shows a little CV glyph
+    icon_pack: ai
     link: uploads/cv.pdf
+
 
 interests:
   - Artificial Intelligence
