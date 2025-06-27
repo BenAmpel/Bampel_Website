@@ -75,13 +75,14 @@ sections:
         **CIS 8080 – IS Security and Privacy** – Graduate course in information security.
     design:
       columns: "1"
-- block: markdown
-  id: awards
-  content:
-    title: Awards & Honors
-    text: |-
-      - **ACM SIGMIS Doctoral Dissertation Award**, 2024 (for the top IS dissertation of the year).  
-      - **Best Paper Award**, IEEE International Conference on Intelligence and Security Informatics (ISI) 2020 and 2023.  
-      - NSF Scholarship-for-Service Fellowship, 2018–2021 (full scholarship and stipend for cybersecurity study).
-  design: { columns: "1" }
+
+  - block: markdown
+    id: awards
+    content:
+      title: Awards & Honors
+      text: |-
+        - **ACM SIGMIS Doctoral Dissertation Award**, 2024 (for the top IS dissertation of the year).  
+        - **Best Paper Award**, IEEE International Conference on Intelligence and Security Informatics (ISI) 2020 and 2023.  
+        - NSF Scholarship-for-Service Fellowship, 2018–2021 (full scholarship and stipend for cybersecurity study).
+    design: { columns: "1" }
 ---
