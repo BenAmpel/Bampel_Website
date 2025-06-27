@@ -1,20 +1,19 @@
-/* strong outline for hero headings */
+/* ========= STRONG CONTRAST ========== */
 .hero-stroke h1,
 .hero-stroke h2,
 .hero-stroke h3 {
   color: #fff;
-  /* crisp 1-px stroke (WebKit/Chromium/Edge/Safari) */
-  -webkit-text-stroke: 1px #000;
-  /* multi-direction shadow so Firefox sees an outline too */
+  -webkit-text-stroke: 2px #000;    /* crisp 2-px outline */
   text-shadow:
-    0 0 3px   rgba(0,0,0,0.9),
-    0 0 6px   rgba(0,0,0,0.6),
-   -2px 0 2px #000,   2px 0 2px #000,
-    0 -2px 2px #000,  0 2px 2px #000;
+      0 0 4px  rgba(0,0,0,0.95),
+      0 0 10px rgba(0,0,0,0.85);
 }
 
 .hero-stroke p,
 .hero-stroke .hero-subtitle {
-  -webkit-text-stroke: 0.5px #000;
-  text-shadow: 0 0 4px rgba(0,0,0,0.9);
+  color: #fff;
+  -webkit-text-stroke: 1px #000;    /* thinner outline */
+  text-shadow:
+      0 0 3px rgba(0,0,0,0.9),
+      0 0 6px rgba(0,0,0,0.7);
 }
