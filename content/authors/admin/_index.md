@@ -34,7 +34,7 @@ profiles:
     icon_pack: custom
     link: https://www.linkedin.com/in/benampel/
 
-  - icon: google-scholar      # custom icon
+  - icon: google_scholar      # custom icon
     icon_pack: custom
     link: https://scholar.google.com/citations?user=XDdwaZUAAAAJ
 

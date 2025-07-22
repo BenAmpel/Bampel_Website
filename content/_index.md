@@ -22,8 +22,8 @@ sections:
       css_class: dark
       background:
         image:
-          # Add your image background to `assets/media/`.
-          filename: background.jpeg
+          # Background image in `assets/media/`.
+          filename: atlanta.jpeg
           size: cover
           placement: center
           overlay_color: "#000000"
