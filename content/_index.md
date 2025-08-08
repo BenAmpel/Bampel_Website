@@ -14,7 +14,7 @@ sections:
     css_class: dark hero-stroke
     content:
       username: admin
-      text: "I'm an Assistant Professor at Georgia State University exploring artificial intelligence for cybersecurity. [Learn more about me.](/authors/admin/)"
+      text: "I'm an Assistant Professor at Georgia State University exploring artificial intelligence for cybersecurity. [Learn more about me.](/author/admin/)"
       button:
         text: Download CV
         url: uploads/cv.pdf
