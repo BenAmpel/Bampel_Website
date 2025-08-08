@@ -7,6 +7,9 @@ main:
   - name: Home
     url: "/#home"         # We’ll define an id for the top section
     weight: 10
+  - name: About
+    url: "/author/admin/"
+    weight: 15
   - name: Research Interests
     url: "/#research"     # anchor to Research section
     weight: 20
@@ -22,3 +25,6 @@ main:
   - name: CV
     url: "uploads/cv.pdf"
     weight: 80
+  - name: Contact
+    url: "/#contact"
+    weight: 90
