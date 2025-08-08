@@ -23,11 +23,11 @@ sections:
       background:
         image:
           # Background image in `assets/media/`.
-          filename: atlanta.jpeg
+          filename: stacked-peaks.svg
           size: cover
           placement: center
           overlay_color: "#000000"
-          overlay_opacity: 0.7
+          overlay_opacity: 0.6
   
   - block: markdown
     id: research
