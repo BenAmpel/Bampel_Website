@@ -14,7 +14,7 @@ sections:
     css_class: dark hero-stroke
     content:
       username: admin
-      text: ""
+      text: "I'm an Assistant Professor at Georgia State University exploring artificial intelligence for cybersecurity. [Learn more about me.](/authors/admin/)"
       button:
         text: Download CV
         url: uploads/cv.pdf
@@ -23,11 +23,11 @@ sections:
       background:
         image:
           # Background image in `assets/media/`.
-          filename: atlanta.jpeg
+          filename: stacked-peaks.svg
           size: cover
           placement: center
           overlay_color: "#000000"
-          overlay_opacity: 0.7
+          overlay_opacity: 0.6
   
   - block: markdown
     id: research
@@ -68,8 +68,17 @@ sections:
     content:
       title: Awards & Honors
       text: |-
-        - **ACM SIGMIS Doctoral Dissertation Award**, 2024 (for the top IS dissertation of the year).  
-        - **Best Paper Award**, IEEE International Conference on Intelligence and Security Informatics (ISI) 2020 and 2023.  
+        - **ACM SIGMIS Doctoral Dissertation Award**, 2024 (for the top IS dissertation of the year).
+        - **Best Paper Award**, IEEE International Conference on Intelligence and Security Informatics (ISI) 2020 and 2023.
         - NSF Scholarship-for-Service Fellowship, 2018–2021 (full scholarship and stipend for cybersecurity study).
     design: { columns: "1" }
+
+  - block: markdown
+    id: contact
+    content:
+      title: Contact
+      text: |-
+        I'd love to connect. Email me at [bampel@gsu.edu](mailto:bampel@gsu.edu) or reach out on [LinkedIn](https://www.linkedin.com/in/benampel/).
+    design:
+      columns: "1"
 ---
