@@ -8,6 +8,7 @@
   HUGO_ENV = "production"
   HUGO_IGNORECACHE = "true"
   NODE_VERSION = "18"
+  BROWSERSLIST_IGNORE_OLD_DATA = "1"
 
 [context.production.environment]
   HUGO_ENV = "production"
