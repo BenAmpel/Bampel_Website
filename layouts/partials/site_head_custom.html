@@ -1,0 +1,58 @@
+<link rel="stylesheet" href="/css/custom.css">
+
+<!-- Schema.org Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Dr. Benjamin M. Ampel",
+  "jobTitle": "Assistant Professor of Computer Information Systems",
+  "worksFor": {
+    "@type": "Organization",
+    "name": "Georgia State University",
+    "url": "https://www.gsu.edu"
+  },
+  "alumniOf": {
+    "@type": "Organization", 
+    "name": "University of Arizona"
+  },
+  "description": "Leading researcher in AI-powered cybersecurity, specializing in large-scale text analytics for cyber threat intelligence",
+  "url": "https://bampel.com",
+  "sameAs": [
+    "https://www.linkedin.com/in/benampel/",
+    "https://scholar.google.com/citations?user=XDdwaZUAAAAJ"
+  ],
+  "knowsAbout": [
+    "Cybersecurity",
+    "Artificial Intelligence",
+    "Machine Learning",
+    "Threat Intelligence",
+    "Computer Information Systems"
+  ]
+}
+</script>
+
+<script>
+// Inject Back to Top button after DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+  var btn = document.createElement('button');
+  btn.className = 'back-to-top';
+  btn.title = 'Back to top';
+  btn.textContent = '↑';
+  btn.addEventListener('click', function() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  document.body.appendChild(btn);
+
+  function onScroll() {
+    if (window.scrollY > 300) {
+      btn.classList.add('visible');
+    } else {
+      btn.classList.remove('visible');
+    }
+  }
+  window.addEventListener('scroll', onScroll);
+  onScroll();
+});
+</script>
+

@@ -1,0 +1,124 @@
+<style>
+/* MODERN HERO DESIGN - NO TEXT OVERLAY ISSUES */
+
+/* Beautiful gradient overlay for the background */
+.modern-hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    linear-gradient(
+      135deg,
+      rgba(0, 0, 0, 0.2) 0%,
+      rgba(0, 0, 0, 0.4) 50%,
+      rgba(0, 0, 0, 0.6) 100%
+    );
+  z-index: 1;
+}
+
+.modern-hero > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Elegant card-based content container */
+.modern-hero .container {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 3rem;
+  margin: 2rem auto;
+  max-width: 900px;
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.1),
+    0 10px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Clean, readable text styling */
+.modern-hero .bio-text,
+.modern-hero div.bio-text,
+.modern-hero .resume-biography .bio-text {
+  color: #1a202c !important;
+  font-weight: 500 !important;
+  font-size: 1.2rem !important;
+  line-height: 1.8 !important;
+  text-shadow: none !important;
+  margin-bottom: 2rem !important;
+  max-width: 100% !important;
+  background: none !important;
+  padding: 0 !important;
+  border: none !important;
+}
+
+/* Professional title styling */
+.modern-hero .portrait-title,
+.modern-hero div.portrait-title {
+  color: #2d3748 !important;
+  font-weight: 700 !important;
+  font-size: 2.5rem !important;
+  text-shadow: none !important;
+  margin-bottom: 1.5rem !important;
+  letter-spacing: -0.02em !important;
+}
+
+/* Modern button styling */
+.modern-hero a[href*="cv.pdf"] {
+  background: linear-gradient(135deg, #3182ce 0%, #2c5aa0 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 1rem 2rem !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  font-size: 1.1rem !important;
+  text-shadow: none !important;
+  box-shadow: 
+    0 4px 12px rgba(49, 130, 206, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  display: inline-block !important;
+  text-decoration: none !important;
+}
+
+.modern-hero a[href*="cv.pdf"]:hover {
+  background: linear-gradient(135deg, #2c5aa0 0%, #1e40af 100%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 
+    0 8px 24px rgba(49, 130, 206, 0.4),
+    0 4px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Clean links within the card */
+.modern-hero .bio-text a {
+  color: #3182ce !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  border-bottom: 2px solid transparent !important;
+  transition: border-color 0.3s ease !important;
+}
+
+.modern-hero .bio-text a:hover {
+  border-bottom-color: #3182ce !important;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .modern-hero .container {
+    margin: 1rem;
+    padding: 2rem;
+  }
+  
+  .modern-hero .portrait-title,
+  .modern-hero div.portrait-title {
+    font-size: 2rem !important;
+  }
+  
+  .modern-hero .bio-text,
+  .modern-hero div.bio-text {
+    font-size: 1.1rem !important;
+  }
+}
+</style>

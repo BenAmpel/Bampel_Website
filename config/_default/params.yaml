@@ -14,6 +14,7 @@ extensions:
 assets:
   custom_css_files:
     - css/hero-stroke.css      # <- will load assets/css/hero-stroke.css
+    - css/custom.css           # <- will load assets/css/custom.css
 
 icon:
   packs:
@@ -27,8 +28,10 @@ marketing:
   seo:
     site_type: Person
     local_business_type: ''
-    org_name: ''
-    description: 'Personal website and academic CV of Benjamin Ampel.'
+    org_name: 'Georgia State University'
+    description: 'Dr. Benjamin M. Ampel - Assistant Professor of Computer Information Systems at Georgia State University. Leading researcher in AI-powered cybersecurity, specializing in large-scale text analytics for cyber threat intelligence. 400+ citations, Best Paper Awards, and publications in top-tier journals including MIS Quarterly and JMIS.'
+    keywords: "cybersecurity, AI, machine learning, threat intelligence, Georgia State University, Benjamin Ampel, computer information systems, research, academic"
+    author: "Dr. Benjamin M. Ampel"
     twitter: ''
   analytics:
     google_analytics: ''
@@ -49,12 +52,12 @@ header:
     show_search: false
     show_theme_chooser: true
     logo:
-      text: "Benjamin M. Ampel"
+      text: "Dr. Benjamin M. Ampel"
 
 # Site footer
 footer:
   copyright:
-    notice: '© {year} Me. This work is licensed under {license}'
+    notice: '© {year} Dr. Benjamin M. Ampel. This work is licensed under {license}'
     license:
       enable: true
       allow_derivatives: false

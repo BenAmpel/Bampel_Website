@@ -1,15 +1,448 @@
-/* file: assets/css/hero-stroke.css  */
+/* SIMPLE TEXT READABILITY FIX */
 
-/* translucent pill behind hero headings */
-.hero-stroke .hero-title,
-.hero-stroke .hero-subtitle {
-  display: inline-block;
-  padding: 0.15em 0.5em;
-  background: rgba(0,0,0,0.60);   /* 60 % black */
-  border-radius: 0.25rem;
-  color: #fff;
-  -webkit-text-stroke: 2px #000;
-  text-shadow:
-    0 0 4px #000,
-    0 0 8px rgba(0,0,0,0.8);
+/* Make ALL white text much more readable with strong text shadows */
+.dark-overlay,
+.dark-overlay *,
+.dark-overlay p,
+.dark-overlay div,
+.dark-overlay span,
+.dark-overlay h1,
+.dark-overlay h2,
+.dark-overlay h3,
+.dark-overlay h4,
+.dark-overlay h5,
+.dark-overlay h6 {
+  color: #ffffff !important;
+  text-shadow: 
+    -2px -2px 0 #000,
+    2px -2px 0 #000,
+    -2px 2px 0 #000,
+    2px 2px 0 #000,
+    0 0 8px rgba(0,0,0,1),
+    0 0 16px rgba(0,0,0,0.8) !important;
+}
+
+/* Extra strong text shadow for the main title */
+.dark-overlay .portrait-title,
+.dark-overlay div.portrait-title {
+  text-shadow: 
+    -3px -3px 0 #000,
+    3px -3px 0 #000,
+    -3px 3px 0 #000,
+    3px 3px 0 #000,
+    0 0 12px rgba(0,0,0,1),
+    0 0 24px rgba(0,0,0,0.8) !important;
+}
+
+/* Make bio text extra readable */
+.dark-overlay .bio-text,
+.dark-overlay div.bio-text,
+.dark-overlay .resume-biography .bio-text {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  padding: 1.5rem !important;
+  border-radius: 0.75rem !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Keep button styling clean */
+.dark-overlay a[href*="cv.pdf"] {
+  text-shadow: none !important;
+  background: linear-gradient(135deg, #3182ce 0%, #2c5aa0 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 1rem 2rem !important;
+  border-radius: 0.75rem !important;
+  font-weight: 700 !important;
+  font-size: 1.1rem !important;
+  box-shadow: 
+    0 4px 12px rgba(49, 130, 206, 0.4),
+    0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  display: inline-block !important;
+  text-decoration: none !important;
+}
+
+/* Interests + Education: match bio readability */
+.dark-overlay .ul-interests,
+.dark-overlay .ul-edu {
+  background-color: rgba(0, 0, 0, 0.65) !important;
+  padding: 1.25rem 1.5rem !important;
+  border-radius: 0.75rem !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+}
+
+.dark-overlay .ul-interests li,
+.dark-overlay .ul-edu li {
+  color: #ffffff !important;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000 !important;
+}
+
+.dark-overlay h2,
+.dark-overlay h3 {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 0 0 8px rgba(0,0,0,0.8) !important;
+}
+
+/* ===== ENHANCEMENT 1: SMOOTH ANIMATIONS & TRANSITIONS ===== */
+.dark-overlay * {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.dark-overlay .bio-text,
+.dark-overlay .ul-interests,
+.dark-overlay .ul-edu {
+  animation: fadeInUp 0.8s ease-out !important;
+}
+
+@keyframes fadeInUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+/* ===== ENHANCEMENT 2: ENHANCED BUTTON STYLING ===== */
+.dark-overlay a[href*="cv.pdf"] {
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.dark-overlay a[href*="cv.pdf"]::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -100% !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent) !important;
+  transition: left 0.5s !important;
+}
+
+.dark-overlay a[href*="cv.pdf"]:hover::before {
+  left: 100% !important;
+}
+
+/* Enhanced social media icons */
+.dark-overlay .network-icon a {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  transition: all 0.3s ease !important;
+}
+
+.dark-overlay .network-icon a:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* ===== ENHANCEMENT 3: BETTER MOBILE TYPOGRAPHY ===== */
+@media (max-width: 768px) {
+  .dark-overlay .portrait-title,
+  .dark-overlay div.portrait-title {
+    font-size: 2.2rem !important;
+    line-height: 1.2 !important;
+    margin-bottom: 1rem !important;
+  }
+  
+  .dark-overlay .bio-text,
+  .dark-overlay div.bio-text,
+  .dark-overlay .resume-biography .bio-text {
+    font-size: 1.1rem !important;
+    line-height: 1.7 !important;
+    padding: 1rem !important;
+  }
+  
+  .dark-overlay .ul-interests,
+  .dark-overlay .ul-edu {
+    padding: 1rem !important;
+  }
+  
+  .dark-overlay h2,
+  .dark-overlay h3 {
+    font-size: 1.5rem !important;
+    line-height: 1.3 !important;
+  }
+  
+  .dark-overlay a[href*="cv.pdf"] {
+    padding: 0.875rem 1.75rem !important;
+    font-size: 1rem !important;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+  .dark-overlay .portrait-title,
+  .dark-overlay div.portrait-title {
+    font-size: 1.9rem !important;
+  }
+  
+  .dark-overlay .bio-text,
+  .dark-overlay div.bio-text {
+    font-size: 1rem !important;
+    padding: 0.875rem !important;
+  }
+  
+  .dark-overlay .ul-interests,
+  .dark-overlay .ul-edu {
+    padding: 0.875rem !important;
+  }
+}
+
+/* ===== ENHANCEMENT 4: NEW SECTIONS STYLING ===== */
+
+/* Latest Research Highlight Box */
+.highlight-box {
+  background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%) !important;
+  border-radius: 1rem !important;
+  padding: 2rem !important;
+  margin: 2rem 0 !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.highlight-box h2 {
+  color: #ffffff !important;
+  font-size: 2rem !important;
+  font-weight: 800 !important;
+  margin-bottom: 0.5rem !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8) !important;
+}
+
+.highlight-box h3 {
+  color: #a0aec0 !important;
+  font-size: 1.2rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 1.5rem !important;
+}
+
+.highlight-box p {
+  color: #ffffff !important;
+  font-size: 1.1rem !important;
+  line-height: 1.7 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+}
+
+.highlight-box a {
+  color: #63b3ed !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  border-bottom: 2px solid transparent !important;
+  transition: border-color 0.3s ease !important;
+}
+
+.highlight-box a:hover {
+  border-bottom-color: #63b3ed !important;
+}
+
+/* Stats Grid */
+.stats-grid {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: 1rem !important;
+  padding: 2rem !important;
+  margin: 2rem 0 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.stats-grid h2 {
+  color: #ffffff !important;
+  font-size: 1.8rem !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+  margin-bottom: 1.5rem !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8) !important;
+}
+
+.stats-grid p {
+  color: #ffffff !important;
+  font-size: 1.3rem !important;
+  font-weight: 600 !important;
+  text-align: center !important;
+  line-height: 1.8 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Research Areas Grid */
+.research-grid {
+  background: rgba(255, 255, 255, 0.03) !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: 1rem !important;
+  padding: 2rem !important;
+  margin: 2rem 0 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.research-grid h2 {
+  color: #ffffff !important;
+  font-size: 2rem !important;
+  font-weight: 800 !important;
+  margin-bottom: 1.5rem !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8) !important;
+}
+
+.research-grid table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  margin-top: 1rem !important;
+}
+
+.research-grid th,
+.research-grid td {
+  padding: 1rem !important;
+  text-align: left !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+}
+
+.research-grid th {
+  font-weight: 700 !important;
+  font-size: 1.1rem !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.research-grid td {
+  font-size: 1rem !important;
+}
+
+/* Collaboration CTA Section */
+.cta-section {
+  background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%) !important;
+  border-radius: 1rem !important;
+  padding: 2.5rem !important;
+  margin: 2rem 0 !important;
+  text-align: center !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.cta-section h2 {
+  color: #ffffff !important;
+  font-size: 2.2rem !important;
+  font-weight: 800 !important;
+  margin-bottom: 1rem !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8) !important;
+}
+
+.cta-section p {
+  color: #e2e8f0 !important;
+  font-size: 1.2rem !important;
+  line-height: 1.7 !important;
+  margin-bottom: 1.5rem !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+}
+
+.cta-section a {
+  display: inline-block !important;
+  background: linear-gradient(135deg, #3182ce 0%, #2c5aa0 100%) !important;
+  color: #ffffff !important;
+  padding: 1rem 2rem !important;
+  border-radius: 0.75rem !important;
+  font-weight: 700 !important;
+  font-size: 1.1rem !important;
+  text-decoration: none !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 4px 12px rgba(49, 130, 206, 0.4) !important;
+}
+
+.cta-section a:hover {
+  background: linear-gradient(135deg, #2c5aa0 0%, #1e40af 100%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(49, 130, 206, 0.5) !important;
+}
+
+/* ===== ENHANCEMENT 5: ENHANCED BACKGROUND GRADIENT ===== */
+.dark-overlay::before {
+  background: 
+    linear-gradient(
+      135deg,
+      rgba(0, 0, 0, 0.55) 0%,
+      rgba(0, 0, 0, 0.45) 50%,
+      rgba(0, 0, 0, 0.6) 100%
+    ) !important;
+}
+
+/* ===== ENHANCEMENT 6: TOUCH-FRIENDLY MOBILE INTERACTIONS ===== */
+@media (max-width: 768px) {
+  .dark-overlay a[href*="cv.pdf"] {
+    min-height: 44px !important; /* Apple's recommended touch target */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  .dark-overlay .network-icon a {
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+  
+  .cta-section a {
+    min-height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 auto !important;
+    max-width: 300px !important;
+  }
+  
+  .research-grid table {
+    font-size: 0.9rem !important;
+  }
+  
+  .research-grid th,
+  .research-grid td {
+    padding: 0.75rem 0.5rem !important;
+  }
+}
+
+/* ===== ENHANCEMENT 7: LOADING STATES ===== */
+.dark-overlay {
+  opacity: 0 !important;
+  animation: fadeIn 1s ease-out forwards !important;
+}
+
+@keyframes fadeIn {
+  to { 
+    opacity: 1 !important; 
+  }
+}
+
+/* ===== ENHANCEMENT 8: BACK TO TOP BUTTON ===== */
+.back-to-top {
+  position: fixed !important;
+  bottom: 2rem !important;
+  right: 2rem !important;
+  background: rgba(49, 130, 206, 0.9) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 50% !important;
+  width: 3rem !important;
+  height: 3rem !important;
+  cursor: pointer !important;
+  opacity: 0 !important;
+  transition: opacity 0.3s !important;
+  z-index: 1000 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 1.2rem !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+.back-to-top.visible {
+  opacity: 1 !important;
+}
+
+.back-to-top:hover {
+  background: rgba(49, 130, 206, 1) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4) !important;
 }

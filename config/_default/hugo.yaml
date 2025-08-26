@@ -8,6 +8,11 @@ title: Benjamin M. Ampel
 # Website URL
 baseURL: 'https://bampel.com/'
 
+# Favicon
+favicon: '/assets/media/gsu-favicon.svg'
+favicon_32x32: '/assets/media/gsu-favicon.svg'
+favicon_16x16: '/assets/media/gsu-favicon.svg'
+
 ############################
 ## LANGUAGE
 ############################
@@ -23,6 +28,8 @@ removePathAccents: true
 
 build:
   writeStats: true
+  future: true
+buildFuture: true
 enableGitInfo: false
 summaryLength: 30
 pagination:

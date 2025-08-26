@@ -1,0 +1,237 @@
+---
+# Leave the homepage title empty to use the site title
+title: ""
+date: 2022-10-24
+type: landing
+
+design:
+  # Default section spacing
+  spacing: "6rem"
+
+sections:
+  - block: resume-biography-3
+    id: home
+    css_class: dark hero-stroke
+    content:
+      username: admin
+      text: "I'm an Assistant Professor at Georgia State University pioneering AI-driven cybersecurity research. My work focuses on large-scale text analytics for cyber threat intelligence, leveraging advanced machine learning to defend against evolving cyber threats. [Learn more about my research.](https://robinson.gsu.edu/profile/benjamin-ampel/)"
+      button:
+        text: Download CV
+        url: /uploads/cv.pdf
+    design:
+      css_class: dark
+      background:
+        image:
+          # Background image in `assets/media/`.
+          filename: gsu-campus.jpg
+          size: cover
+          placement: center
+          overlay_color: "#000000"
+          overlay_opacity: 0.9
+  
+  - block: markdown
+    id: research
+    content:
+      title: '🔬 Research Excellence'
+      subtitle: 'AI-Powered Cybersecurity Innovation'
+      text: |-
+        My research sits at the intersection of artificial intelligence and cybersecurity, focusing on developing cutting-edge solutions for cyber threat intelligence and adversary modeling. I leverage advanced machine learning techniques, including large language models, to analyze and defend against evolving cyber threats.
+        
+        **Core Research Areas:**
+        
+        🎯 **Cyber Threat Intelligence**
+        - Large-scale text analytics of hacker forums and dark web content
+        - Automated threat detection and classification systems
+        - Real-time cyber threat assessment and response
+        
+        🤖 **AI/ML for Security**
+        - Deep learning applications in cybersecurity
+        - Large language models for security text analysis
+        - Adversarial machine learning and defense mechanisms
+        
+        📊 **Computational Design Science**
+        - Novel methodologies for security research
+        - Design and evaluation of security artifacts
+        - Empirical validation of security solutions
+        
+        **Research Impact:**
+        - **400+ citations** across top-tier publications
+        - **2 Best Paper Awards** at IEEE ISI (2020, 2023)
+        - Publications in **MIS Quarterly**, **JMIS**, and **ACM TMIS**
+        - Active collaboration with industry and government partners
+        
+        I'm always excited to discuss potential collaborations and research opportunities!
+    design:
+      columns: '1'
+      background:
+        color: light
+        gradient_end: '#f8f9fa'
+        gradient_start: '#ffffff'
+      spacing:
+        padding: ['20px', '0', '20px', '0']
+
+  - block: markdown
+    id: highlights
+    content:
+      title: '🌟 Research Highlights'
+      subtitle: 'Key Contributions and Breakthroughs'
+      text: |-
+        **Recent Breakthroughs:**
+        
+        🔥 **Large Language Models for Cybersecurity** (2025)
+        - Pioneering work on LLM applications in security text analysis
+        - Published in ACM Transactions on Management Information Systems
+        - Novel methodologies for adapting LLMs to security domains
+        
+        🛡️ **Threat Mitigation Framework** (2024)
+        - Comprehensive cybersecurity risk management approach
+        - Published in Journal of Management Information Systems
+        - Computational design science methodology for security
+        
+        📈 **Academic Recognition:**
+        - **ACM SIGMIS Doctoral Dissertation Award** (2024) - Top IS dissertation
+        - **Best Paper Awards** at IEEE ISI (2020, 2023)
+        - **NSF Scholarship-for-Service Fellowship** (2018-2021)
+        
+        **Industry Applications:**
+        - Research findings adopted by security operations centers
+        - Collaboration with government cybersecurity agencies
+        - Technology transfer to cybersecurity firms
+    design:
+      columns: '1'
+      background:
+        color: primary
+        gradient_end: '#1e3a8a'
+        gradient_start: '#3b82f6'
+      spacing:
+        padding: ['20px', '0', '20px', '0']
+
+  - block: collection
+    id: publications
+    content:
+      title: '📖 Recent Publications'
+      subtitle: 'Peer-Reviewed Research Contributions'
+      text: "My research has been published in leading academic journals and conferences, contributing to the advancement of AI-powered cybersecurity solutions."
+      filters:
+        folders:
+          - publication
+        exclude_featured: false
+    design:
+      view: citation
+      background:
+        color: light
+        gradient_end: '#f8f9fa'
+        gradient_start: '#ffffff'
+      spacing:
+        padding: ['20px', '0', '20px', '0']
+
+  - block: collection
+    id: projects
+    content:
+      title: '🚀 Research Projects'
+      subtitle: 'Innovative Solutions for Cybersecurity Challenges'
+      text: "Explore my key research projects that demonstrate the application of AI and machine learning in cybersecurity domains."
+      filters:
+        folders:
+          - project
+        exclude_featured: false
+    design:
+      view: showcase
+      background:
+        color: primary
+        gradient_end: '#1e3a8a'
+        gradient_start: '#3b82f6'
+      spacing:
+        padding: ['20px', '0', '20px', '0']
+
+  - block: markdown
+    id: teaching
+    content:
+      title: '🎓 Teaching Excellence'
+      subtitle: 'Educating the Next Generation of Cybersecurity Professionals'
+      text: |-
+        I'm passionate about preparing students for careers in cybersecurity and information systems. My teaching philosophy emphasizes hands-on learning, real-world applications, and cutting-edge research integration.
+        
+        **Current Courses:**
+        - **CIS 8684 – Cyber Threat Intelligence** (Graduate)
+          - Course evaluation: **4.91/5.0**
+          - Covers threat modeling, intelligence analysis, and AI applications
+        
+        - **CIS 4680 – Introduction to Information Security** (Undergraduate)
+          - Foundational security concepts and practical applications
+        
+        - **CIS 8080 – IS Security and Privacy** (Graduate)
+          - Advanced topics in information security and privacy management
+        
+        **Teaching Philosophy:**
+        I believe in bridging theory and practice, incorporating real-world case studies and current research findings into the classroom experience.
+    design:
+      columns: "1"
+      background:
+        color: light
+        gradient_end: '#f8f9fa'
+        gradient_start: '#ffffff'
+      spacing:
+        padding: ['20px', '0', '20px', '0']
+
+  - block: markdown
+    id: awards
+    content:
+      title: '🏆 Awards & Honors'
+      subtitle: 'Recognition for Academic Excellence'
+      text: |-
+        **Major Awards:**
+        - **ACM SIGMIS Doctoral Dissertation Award** (2024)
+          - Recognized as the top Information Systems dissertation of the year
+          - Awarded at the International Conference on Information Systems (ICIS)
+        
+        - **Best Paper Awards** (IEEE ISI 2020 & 2023)
+          - IEEE International Conference on Intelligence and Security Informatics
+          - Recognition for innovative research contributions
+        
+        - **NSF Scholarship-for-Service Fellowship** (2018-2021)
+          - Full scholarship and stipend for cybersecurity education
+          - Competitive national program supporting cybersecurity workforce development
+        
+        **Additional Recognition:**
+        - Multiple conference presentation awards
+        - Outstanding reviewer recognition at top-tier conferences
+        - Invited speaker at industry and academic events
+    design: 
+      columns: "1"
+      background:
+        color: primary
+        gradient_end: '#1e3a8a'
+        gradient_start: '#3b82f6'
+      spacing:
+        padding: ['20px', '0', '20px', '0']
+
+  - block: markdown
+    id: contact
+    content:
+      title: '🤝 Let\'s Connect'
+      subtitle: 'Get in Touch for Collaboration & Opportunities'
+      text: |-
+        I'm always excited to discuss research opportunities, potential collaborations, and academic partnerships. Whether you're a student interested in cybersecurity research, a fellow academic looking to collaborate, or an industry professional seeking expertise, I'd love to hear from you.
+        
+        **Contact Information:**
+        - **Email**: [bampel@gsu.edu](mailto:bampel@gsu.edu)
+        - **LinkedIn**: [Connect on LinkedIn](https://www.linkedin.com/in/benampel/)
+        - **Google Scholar**: [View Publications](https://scholar.google.com/citations?user=XDdwaZUAAAAJ)
+        - **Office**: Georgia State University, Robinson College of Business
+        
+        **Research Collaboration:**
+        I'm particularly interested in collaborations involving:
+        - AI/ML applications in cybersecurity
+        - Large-scale text analytics for security
+        - Cyber threat intelligence and adversary modeling
+        - Blockchain security and analysis
+    design:
+      columns: "1"
+      background:
+        color: light
+        gradient_end: '#f8f9fa'
+        gradient_start: '#ffffff'
+      spacing:
+        padding: ['20px', '0', '20px', '0']
+---

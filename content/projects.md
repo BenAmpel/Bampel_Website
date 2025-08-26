@@ -12,7 +12,7 @@ sections:
   - block: collection
     content:
       title: Selected Projects
-      text: I enjoy making things. Here are a selection of projects that I have worked on over the years.
+      text: My research projects focus on AI-powered cybersecurity solutions, including large-scale text analytics, phishing detection, and cyber threat intelligence. Here are some of my key research initiatives and collaborations.
       filters:
         folders:
           - project
