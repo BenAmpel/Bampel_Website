@@ -1,5 +1,5 @@
 [build]
-  command = "hugo --gc --minify --ignoreCache --cleanDestinationDir"
+  command = "hugo --gc --ignoreCache --cleanDestinationDir --log --logLevel debug --printPathWarnings --printI18nWarnings --printUnusedTemplates --templateMetrics --templateMetricsHints"
   publish = "public"
 
 [build.environment]
@@ -17,7 +17,4 @@
 [context.branch-deploy]
   command = "hugo --gc --minify -b $DEPLOY_PRIME_URL"
 
-[[plugins]]
-  package = "netlify-plugin-hugo-cache-resources"
-  [plugins.inputs]
-    debug = true
+
