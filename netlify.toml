@@ -1,5 +1,5 @@
 [build]
-  command = "hugo mod get && hugo --gc --minify --ignoreCache --cleanDestinationDir && npx pagefind --source 'public'"
+  command = "npm ci && hugo --gc --minify --ignoreCache --cleanDestinationDir && npx pagefind --source 'public'"
   publish = "public"
 
 [build.environment]
