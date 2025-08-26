@@ -1,0 +1,16 @@
+@import "./libs/chroma/light.css";
+@import "./libs/chroma/dark.css";
+
+/* Code Blocks: Apply theme background */
+/* Requires relative position for Code Copy button */
+.prose .chroma,
+.prose pre {
+  @apply relative rounded-md dark:bg-slate-700 dark:text-white;
+  color: rgb(var(--color-neutral-700));
+  background-color: rgb(var(--color-neutral-50));
+}
+
+.dark .prose .chroma,
+.dark .prose pre {
+  color: white;
+}
