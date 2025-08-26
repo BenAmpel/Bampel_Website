@@ -1,5 +1,5 @@
 [build]
-  command = "hugo version && hugo --gc --minify --ignoreCache --cleanDestinationDir -b $URL && npx pagefind --source 'public'"
+  command = "hugo mod get && hugo --gc --minify --ignoreCache --cleanDestinationDir && npx pagefind --source 'public'"
   publish = "public"
 
 [build.environment]
