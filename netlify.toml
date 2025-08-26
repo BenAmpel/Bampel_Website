@@ -1,5 +1,5 @@
 [build]
-  command = "hugo --gc --ignoreCache --cleanDestinationDir --log --printPathWarnings --printI18nWarnings --printUnusedTemplates --templateMetrics --templateMetricsHints"
+  command = "hugo --gc --ignoreCache --cleanDestinationDir --printPathWarnings --printI18nWarnings --printUnusedTemplates --templateMetrics --templateMetricsHints"
   publish = "public"
 
 [build.environment]
