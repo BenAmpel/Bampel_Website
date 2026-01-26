@@ -25,7 +25,7 @@ sections:
         - **Deep Learning**: Transfer learning and transformer-based approaches for security applications
         - **Computational Design Science**: Building actionable security systems and frameworks
         
-        *Google Scholar Metrics: 500+ Citations | h-index: 8 | i10-index: 8*
+        *Google Scholar Metrics: 500+ Citations | h-index: 9 | i10-index: 9*
     design:
       columns: '1'
 
