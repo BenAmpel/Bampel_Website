@@ -2684,6 +2684,14 @@ body:not(.dark) .visitor-terminal {
   vertical-align: middle;
   margin-left: 8px;
   display: inline-block;
+  min-width: 120px;
+  min-height: 20px;
+  
+  // Ensure iframe inside badge is visible
+  iframe {
+    min-width: 100px !important;
+    min-height: 18px !important;
+  }
 }
 
 // Dimensions badge section styling
@@ -2691,31 +2699,35 @@ body:not(.dark) .visitor-terminal {
   margin: 30px 0;
   padding: 20px;
   border-radius: 12px;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border: 1px solid #334155;
   
   h4 {
     font-weight: 600;
     margin-bottom: 15px;
+    color: #00ff41;
   }
   
   p {
     font-size: 0.9rem;
+    color: #94a3b8;
   }
   
   a {
     font-weight: 600;
     transition: color 0.2s ease;
+    color: #58a6ff !important;
   }
 }
 
-// Cyber mode - grayscale the badge for terminal aesthetic
+// Cyber mode - keep badge visible but slightly muted
 body.dark .__dimensions_badge_embed__ {
-  filter: grayscale(100%) contrast(120%);
-  opacity: 0.8;
+  filter: none; // Remove grayscale - was making badge invisible
+  opacity: 1;
   transition: all 0.3s ease;
   
   &:hover {
-    filter: none;
-    opacity: 1;
+    filter: brightness(1.1);
   }
 }
 
