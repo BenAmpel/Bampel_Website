@@ -1103,15 +1103,38 @@ document.addEventListener('DOMContentLoaded', function() {
   updateScrollProgress(); // Initial call
   
   // ===== SKILLS & EXPERTISE INJECTION =====
-  const skillsSection = document.getElementById('skills');
+  // Try multiple ways to find the skills section
+  let skillsSection = document.getElementById('skills');
+  
+  // If not found by ID, try finding by section with skills in the URL hash or by title
+  if (!skillsSection) {
+    skillsSection = document.querySelector('section[id*="skills"]') ||
+                    document.querySelector('[id*="skills"]');
+  }
+  
+  // Also try finding by the section title
+  if (!skillsSection) {
+    const allSections = document.querySelectorAll('section, .home-section, .wg-markdown');
+    allSections.forEach(sec => {
+      const title = sec.querySelector('h1, h2, .section-heading');
+      if (title && title.textContent.includes('Skills')) {
+        skillsSection = sec;
+      }
+    });
+  }
+  
   if (skillsSection) {
     const skillsContent = skillsSection.querySelector('.prose') || 
+                          skillsSection.querySelector('.hb-section-content') ||
                           skillsSection.querySelector('.container') ||
                           skillsSection.querySelector('.article-container') ||
                           skillsSection;
     
-    // Find the inner content area
-    const innerContent = skillsContent.querySelector('p') || skillsContent;
+    // Find the inner content area - look for empty paragraph or div
+    let innerContent = skillsContent.querySelector('p:empty') || 
+                       skillsContent.querySelector('.prose > p') ||
+                       skillsContent.querySelector('p') || 
+                       skillsContent;
     
     const skillsHTML = `
       <div class="skills-container">
@@ -1202,13 +1225,24 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
     `;
     
-    if (innerContent.tagName === 'P') {
-      innerContent.innerHTML = skillsHTML;
+    // Create a container for the skills
+    const skillsWrapper = document.createElement('div');
+    skillsWrapper.className = 'skills-wrapper';
+    skillsWrapper.innerHTML = skillsHTML;
+    
+    // Try to find the best place to insert
+    const proseArea = skillsSection.querySelector('.prose') || 
+                      skillsSection.querySelector('.hb-section-content') ||
+                      skillsSection.querySelector('.article-content');
+    
+    if (proseArea) {
+      // Clear any empty paragraphs and append
+      const emptyP = proseArea.querySelector('p:empty');
+      if (emptyP) emptyP.remove();
+      proseArea.appendChild(skillsWrapper);
     } else {
-      // Find or create an element to hold the content
-      const contentDiv = document.createElement('div');
-      contentDiv.innerHTML = skillsHTML;
-      skillsContent.appendChild(contentDiv);
+      // Append directly to the section content area
+      skillsContent.appendChild(skillsWrapper);
     }
   }
   
