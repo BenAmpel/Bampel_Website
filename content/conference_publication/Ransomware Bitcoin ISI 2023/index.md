@@ -3,13 +3,13 @@ title: 'Disrupting Ransomware Actors on the Bitcoin Blockchain: A Graph Embeddin
 
 authors:
   - admin
-  - Kate Otto
+  - Kaeli Otto
   - Sagar Samtani
   - Hongyi Zhu
   - Hsinchun Chen
 
 date: '2023-10-01T00:00:00Z'
-doi: ''
+doi: '10.1109/ISI58743.2023.10297290'
 
 publishDate: '2023-10-01T00:00:00Z'
 
@@ -29,5 +29,5 @@ tags:
 
 featured: false
 
-url_pdf: ''
+url_pdf: 'https://ieeexplore.ieee.org/document/10297290'
 ---

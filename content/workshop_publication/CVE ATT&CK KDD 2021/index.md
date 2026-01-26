@@ -8,7 +8,7 @@ authors:
   - Hsinchun Chen
 
 date: '2021-08-01T00:00:00Z'
-doi: ''
+doi: '10.48550/arXiv.2108.01696'
 
 publishDate: '2021-08-01T00:00:00Z'
 
@@ -17,7 +17,7 @@ publication_types: ['1']
 publication: In *ACM KDD Workshop on AI-enabled Cybersecurity Analytics*
 publication_short: In *AI4Cyber-KDD*
 
-abstract: The Common Vulnerabilities and Exposures (CVE) database and the MITRE ATT&CK framework are essential resources for cybersecurity practitioners. This paper presents a self-distillation approach to automatically link CVEs to relevant ATT&CK techniques, enabling more efficient threat assessment and prioritization of vulnerability remediation efforts.
+abstract: Common Vulnerabilities and Exposures (CVEs) are used by cybersecurity analysts, networks, and endpoints managers to identify and address system vulnerabilities. The MITRE ATT&CK framework provides mitigation techniques for malicious tactics and can assist organizations in addressing their vulnerabilities. This paper presents a CVE Transformer (CVET) that uses fine-tuning and self-knowledge distillation to automatically link CVEs to relevant ATT&CK tactics, enabling more efficient threat assessment and prioritization of vulnerability remediation efforts.
 
 tags:
 - CVE
@@ -28,5 +28,5 @@ tags:
 
 featured: false
 
-url_pdf: ''
+url_pdf: 'https://arxiv.org/abs/2108.01696'
 ---

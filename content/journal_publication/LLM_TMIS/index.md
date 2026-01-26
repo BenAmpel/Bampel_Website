@@ -1,14 +1,14 @@
 ---
 title: "Large Language Models for Conducting Advanced Text Analytics Information Systems Research"
 authors:
-  - "Benjamin M. Ampel"
+  - admin
   - "Chi-Heng Yang"
   - "James Hu"
   - "Hsinchun Chen"
-date: 2025-02-01
+date: 2025-02-07
 publication: "ACM Transactions on Management Information Systems"
-publication_types: ["2"]   # 2 = journal in Wowchemy/Hugo Blox
-doi: "10.1145/xxxxxxx"
+publication_types: ["2"]
+doi: "10.1145/3682069"
 draft: false
 
 # Schedule page publish date (NOT publication's date).

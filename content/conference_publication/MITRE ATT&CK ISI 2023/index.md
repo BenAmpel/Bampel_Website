@@ -3,12 +3,12 @@ title: 'Mapping Exploit Code on Paste Sites to the MITRE ATT&CK Framework: A Mul
 
 authors:
   - admin
-  - Taha Vahedi
+  - Tala Vahedi
   - Sagar Samtani
   - Hsinchun Chen
 
 date: '2023-10-01T00:00:00Z'
-doi: ''
+doi: '10.1109/ISI58743.2023.10297177'
 
 publishDate: '2023-10-01T00:00:00Z'
 
@@ -31,5 +31,5 @@ featured: true
 awards:
 - Best Paper Award
 
-url_pdf: ''
+url_pdf: 'https://ieeexplore.ieee.org/document/10297177'
 ---

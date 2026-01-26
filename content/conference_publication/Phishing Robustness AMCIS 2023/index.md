@@ -15,10 +15,10 @@ publishDate: '2023-08-01T00:00:00Z'
 
 publication_types: ['1']
 
-publication: In *Proceedings of the Americas Conference on Information Systems (AMCIS)*
+publication: In *Proceedings of the 29th Americas Conference on Information Systems (AMCIS)*
 publication_short: In *AMCIS*
 
-abstract: Phishing email detection systems are critical for organizational security, yet their robustness against adversarial attacks remains understudied. This paper presents a comprehensive benchmark evaluating the robustness of state-of-the-art phishing email detection systems against various adversarial perturbations, revealing vulnerabilities and providing recommendations for more resilient detection approaches.
+abstract: Phishing emails have emerged as one of the most common forms of social engineering attacks inflicting organizations. To combat this ever-present threat, organizations are turning toward AI-enabled phishing email detection systems (PEDS). However, the robustness of AI-enabled PEDS against adversarial text perturbations is currently unclear. In this study, we benchmark the robustness of prevailing AI-enabled PEDS against character, word, sentence, and multi-level adversarial text perturbations to quantitatively demonstrate how these systems respond to specific types of text-based attacks.
 
 tags:
 - Phishing
@@ -29,5 +29,5 @@ tags:
 
 featured: false
 
-url_pdf: ''
+url_pdf: 'https://aisel.aisnet.org/amcis2023/sig_sec/sig_sec/11/'
 ---

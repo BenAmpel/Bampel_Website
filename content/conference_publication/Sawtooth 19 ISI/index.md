@@ -9,7 +9,7 @@ authors:
   - Mark Patton
   - Hsinchun Chen
 
-date: '2013-07-01T00:00:00Z'
+date: '2019-07-01T00:00:00Z'
 doi: '10.1109/ISI.2019.8823238'
 
 # Schedule page publish date (NOT publication's date).
