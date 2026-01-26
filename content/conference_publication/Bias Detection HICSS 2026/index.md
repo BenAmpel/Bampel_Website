@@ -30,3 +30,7 @@ featured: false
 
 url_pdf: 'https://hdl.handle.net/10125/111610'
 ---
+
+<div class="altmetric-badge" style="display: inline-block; margin: 20px 0;">
+  <div data-badge-type="medium-donut" data-doi="10.24251/HICSS.2026.218" data-badge-popover="right" class="altmetric-embed"></div>
+</div>

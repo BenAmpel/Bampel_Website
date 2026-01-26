@@ -31,3 +31,7 @@ featured: false
 
 url_pdf: 'https://ai4cyber-kdd.com/'
 ---
+
+<div class="altmetric-badge" style="display: inline-block; margin: 20px 0;">
+  <div data-badge-type="medium-donut" data-doi="10.1145/3637528.3671469" data-badge-popover="right" class="altmetric-embed"></div>
+</div>

@@ -69,3 +69,7 @@ url_pdf: 'https://par.nsf.gov/servlets/purl/10258092'
 #   Otherwise, set `slides: ""`.
 # slides: example
 ---
+
+<div class="altmetric-badge" style="display: inline-block; margin: 20px 0;">
+  <div data-badge-type="medium-donut" data-doi="10.1109/ISI49825.2020.9280545" data-badge-popover="right" class="altmetric-embed"></div>
+</div>

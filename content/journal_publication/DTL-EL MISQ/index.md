@@ -67,3 +67,7 @@ image:
 #   Otherwise, set `slides: ""`.
 # slides: example
 ---
+
+<div class="altmetric-badge" style="display: inline-block; margin: 20px 0;">
+  <div data-badge-type="medium-donut" data-doi="10.25300/MISQ/2023/17316" data-badge-popover="right" class="altmetric-embed"></div>
+</div>
