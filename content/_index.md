@@ -81,7 +81,10 @@ sections:
     id: network
     content:
       title: Collaboration Network
-      text: ""
+      text: |
+        ![Research Collaboration Network](/images/coauthor-network.png)
+        
+        *Research collaboration network based on co-authored publications*
     design:
       columns: '1'
 

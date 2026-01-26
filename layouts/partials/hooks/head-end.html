@@ -725,78 +725,30 @@ document.addEventListener('DOMContentLoaded', function() {
     pubChartObserver.observe(pubChart);
   }
   
-  // ===== NETWORK IMAGE WITH THEME SWITCHING =====
-  let networkContainer = null;
-  
-  function initNetworkContainer() {
-    // Try multiple ways to find the network section
-    let networkSection = document.getElementById('network') ||
-                         document.querySelector('section[id="network"]') ||
-                         document.querySelector('[id*="network"]') ||
-                         document.querySelector('.wg-markdown h2')?.closest('section');
+  // ===== NETWORK IMAGE THEME SWITCHING =====
+  function updateNetworkImageTheme() {
+    // Find the network image by its src or alt text
+    const networkImg = document.querySelector('img[src*="coauthor-network"]') ||
+                       document.querySelector('img[alt*="Collaboration Network"]');
     
-    // If we can't find by ID, look for the section with "Collaboration Network" title
-    if (!networkSection) {
-      const headers = document.querySelectorAll('h2, h3');
-      for (const h of headers) {
-        if (h.textContent.includes('Collaboration Network')) {
-          networkSection = h.closest('section') || h.parentElement;
-          break;
-        }
-      }
-    }
-    
-    if (!networkSection) {
-      console.log('Network section not found');
-      return null;
-    }
-    
-    // Look for existing container
-    let container = document.getElementById('network-image-container');
-    if (container) return container;
-    
-    // Find a suitable place to insert the container
-    const contentArea = networkSection.querySelector('.prose') || 
-                        networkSection.querySelector('.article-style') ||
-                        networkSection.querySelector('.container .row .col-12') ||
-                        networkSection.querySelector('.container .row') ||
-                        networkSection.querySelector('.container') ||
-                        networkSection.querySelector('.col-12') ||
-                        networkSection;
-    
-    // Create container
-    container = document.createElement('div');
-    container.id = 'network-image-container';
-    container.style.textAlign = 'center';
-    container.style.padding = '20px 0';
-    container.style.width = '100%';
-    contentArea.appendChild(container);
-    return container;
-  }
-  
-  function updateNetworkImage() {
-    if (!networkContainer) {
-      networkContainer = initNetworkContainer();
-    }
-    if (!networkContainer) return;
+    if (!networkImg) return;
     
     const isDark = document.body.classList.contains('dark');
-    const imgSrc = isDark ? '/images/coauthor-network-dark.png' : '/images/coauthor-network.png';
+    const newSrc = isDark ? '/images/coauthor-network-dark.png' : '/images/coauthor-network.png';
     
-    networkContainer.innerHTML = `
-      <img src="${imgSrc}" alt="Research Collaboration Network" style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
-      <p style="font-size: 0.9rem; color: ${isDark ? '#aaa' : '#666'}; margin-top: 12px; font-style: italic;">Research collaboration network based on co-authored publications</p>
-    `;
+    if (networkImg.src !== newSrc && !networkImg.src.endsWith(newSrc)) {
+      networkImg.src = newSrc;
+    }
   }
   
-  // Initialize network image (with small delay to ensure DOM is ready)
-  setTimeout(updateNetworkImage, 100);
+  // Update on page load
+  updateNetworkImageTheme();
   
   // Listen for theme changes
   const themeObserver = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
       if (mutation.attributeName === 'class') {
-        updateNetworkImage();
+        updateNetworkImageTheme();
       }
     });
   });
