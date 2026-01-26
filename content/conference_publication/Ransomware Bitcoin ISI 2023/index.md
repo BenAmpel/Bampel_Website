@@ -36,5 +36,7 @@ links:
 url_pdf: 'https://ieeexplore.ieee.org/document/10297290'
 ---
 
+{{< altmetric doi="10.1109/ISI58743.2023.10297290" >}}
+
 
 

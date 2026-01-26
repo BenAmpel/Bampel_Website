@@ -70,3 +70,5 @@ image:
 # slides: example
 ---
 
+{{< altmetric doi="10.1080/07421222.2023.2301178" >}}
+

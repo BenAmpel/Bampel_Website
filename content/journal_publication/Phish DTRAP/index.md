@@ -64,3 +64,5 @@ url_pdf: https://dl.acm.org/doi/pdf/10.1145/3603507
 #slides: example
 ---
 
+{{< altmetric doi="10.1145/3603507" >}}
+

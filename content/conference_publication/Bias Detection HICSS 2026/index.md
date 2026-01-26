@@ -35,5 +35,7 @@ links:
 url_pdf: 'https://hdl.handle.net/10125/111610'
 ---
 
+{{< altmetric doi="10.24251/HICSS.2026.218" >}}
+
 
 
