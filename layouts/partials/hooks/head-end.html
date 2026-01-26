@@ -788,8 +788,7 @@ section:hover h1::after {
 }
 
 /* ===== AVATAR POSITIONING & QUALITY ===== */
-/* Multiple selectors to catch Hugo Blox avatar elements */
-/* Using transform to shift the image up within its container */
+/* High-quality avatar rendering */
 .hb-about-avatar img,
 .about-avatar img,
 .avatar img,
@@ -803,7 +802,7 @@ section#about img {
   object-fit: cover !important;
   object-position: center 20% !important;
   image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
+  image-rendering: high-quality;
 }
 
 /* Make avatar container larger for better quality */
@@ -1264,6 +1263,16 @@ table tbody tr:hover {
 <script>
 // Run enhancements after page is fully loaded
 function runEnhancements() {
+  
+  // ===== HIGH-RES AVATAR REPLACEMENT =====
+  // Replace Hugo's processed avatar with full-resolution static version
+  const avatarImages = document.querySelectorAll('.avatar img, .hb-about-avatar img, .about-avatar img, [class*="avatar"] img');
+  avatarImages.forEach(img => {
+    if (img.src && !img.src.includes('/media/avatar.png')) {
+      img.src = '/media/avatar.png';
+      img.srcset = '/media/avatar.png 1x, /media/avatar.png 2x';
+    }
+  });
   
   // ===== SCROLL PROGRESS BAR =====
   if (!document.querySelector('.scroll-progress')) {
