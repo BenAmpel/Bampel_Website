@@ -26,6 +26,213 @@ html {
   box-shadow: 0 0 10px rgba(21, 101, 192, 0.5);
 }
 
+/* ===== COMPACT SKILLS & EXPERTISE ===== */
+.skills-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 10px 0;
+}
+
+.skills-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.skill-tag {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 50px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.skill-tag:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+}
+
+/* Category-specific colors */
+.skill-tag[data-category="ai"] {
+  border-color: #bfdbfe;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+}
+.skill-tag[data-category="ai"]:hover {
+  border-color: #3b82f6;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+}
+
+.skill-tag[data-category="cyber"] {
+  border-color: #fecaca;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+}
+.skill-tag[data-category="cyber"]:hover {
+  border-color: #ef4444;
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+}
+
+.skill-tag[data-category="tools"] {
+  border-color: #bbf7d0;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+}
+.skill-tag[data-category="tools"]:hover {
+  border-color: #22c55e;
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+}
+
+.skill-tag[data-category="research"] {
+  border-color: #ddd6fe;
+  background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+}
+.skill-tag[data-category="research"]:hover {
+  border-color: #8b5cf6;
+  background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+}
+
+/* Dark mode */
+.dark .skill-tag {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border-color: #475569;
+  color: #e2e8f0;
+}
+
+.dark .skill-tag[data-category="ai"] {
+  border-color: #1e40af;
+  background: linear-gradient(135deg, #1e3a5f 0%, #1e40af40 100%);
+}
+.dark .skill-tag[data-category="cyber"] {
+  border-color: #991b1b;
+  background: linear-gradient(135deg, #3f1515 0%, #991b1b40 100%);
+}
+.dark .skill-tag[data-category="tools"] {
+  border-color: #166534;
+  background: linear-gradient(135deg, #14352a 0%, #16653440 100%);
+}
+.dark .skill-tag[data-category="research"] {
+  border-color: #5b21b6;
+  background: linear-gradient(135deg, #2e1a47 0%, #5b21b640 100%);
+}
+
+.skill-icon {
+  font-size: 1.1rem;
+}
+
+.skill-name {
+  white-space: nowrap;
+}
+
+/* Dropdown on hover */
+.skill-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  min-width: 280px;
+  padding: 16px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+  border: 1px solid #e2e8f0;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 100;
+  text-align: left;
+}
+
+.skill-dropdown::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid white;
+}
+
+.skill-tag:hover .skill-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.dark .skill-dropdown {
+  background: #1e293b;
+  border-color: #475569;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+}
+
+.dark .skill-dropdown::before {
+  border-bottom-color: #1e293b;
+}
+
+.skill-desc {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.dark .skill-desc {
+  color: #94a3b8;
+}
+
+.skill-papers {
+  font-size: 0.85rem;
+  color: #334155;
+  padding-top: 10px;
+  border-top: 1px solid #e2e8f0;
+  line-height: 1.6;
+}
+
+.skill-papers strong {
+  color: #1e40af;
+}
+
+.dark .skill-papers {
+  color: #cbd5e1;
+  border-top-color: #475569;
+}
+
+.dark .skill-papers strong {
+  color: #60a5fa;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .skill-tag {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+  }
+  
+  .skill-dropdown {
+    min-width: 240px;
+    left: 0;
+    transform: translateX(0) translateY(10px);
+  }
+  
+  .skill-tag:hover .skill-dropdown {
+    transform: translateX(0) translateY(0);
+  }
+  
+  .skill-dropdown::before {
+    left: 30px;
+    transform: none;
+  }
+}
+
 /* ===== GRADIENT ACCENTS FOR SECTION HEADERS ===== */
 /* Target section h1 titles with gradient underline */
 section h1 {

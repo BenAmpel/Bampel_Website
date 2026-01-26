@@ -28,35 +28,99 @@ sections:
       columns: '1'
 
   # ---------- SKILLS & EXPERTISE ----------
-  - block: features
+  - block: markdown
     id: skills
     content:
       title: Skills & Expertise
-      items:
-        - name: Large Language Models
-          icon: robot
-          icon_pack: fas
-          description: GPT, BERT, transformer architectures for NLP and security applications
-        - name: Cybersecurity & CTI
-          icon: shield-halved
-          icon_pack: fas
-          description: Threat intelligence, hacker community analysis, vulnerability research
-        - name: Deep Learning / NLP
-          icon: brain
-          icon_pack: fas
-          description: Neural networks, text analytics, transfer learning approaches
-        - name: Python & ML Frameworks
-          icon: python
-          icon_pack: fab
-          description: PyTorch, TensorFlow, scikit-learn, pandas, NumPy
-        - name: Academic Research
-          icon: graduation-cap
-          icon_pack: fas
-          description: Design science, empirical research, peer-reviewed publications
-        - name: Teaching & Mentoring
-          icon: chalkboard-teacher
-          icon_pack: fas
-          description: Course development, PhD mentoring, workshop facilitation
+      text: |
+        <div class="skills-container">
+          <div class="skills-row">
+            <div class="skill-tag" data-category="ai">
+              <span class="skill-icon">🤖</span>
+              <span class="skill-name">Large Language Models</span>
+              <div class="skill-dropdown">
+                <div class="skill-desc">GPT, BERT, LLaMA, transformer architectures</div>
+                <div class="skill-papers">
+                  <strong>Related Work:</strong> MISQ (Vishing), TMIS (LLM Text Analytics), JMIS (Risk Framework)
+                </div>
+              </div>
+            </div>
+            <div class="skill-tag" data-category="ai">
+              <span class="skill-icon">🧠</span>
+              <span class="skill-name">Deep Learning & NLP</span>
+              <div class="skill-dropdown">
+                <div class="skill-desc">Neural networks, text analytics, transfer learning</div>
+                <div class="skill-papers">
+                  <strong>Related Work:</strong> MISQ (DTL-EL), IEEE ISI (Hack2Vec), KDD Workshop
+                </div>
+              </div>
+            </div>
+            <div class="skill-tag" data-category="cyber">
+              <span class="skill-icon">🛡️</span>
+              <span class="skill-name">Cyber Threat Intelligence</span>
+              <div class="skill-dropdown">
+                <div class="skill-desc">Hacker communities, dark web, vulnerability research</div>
+                <div class="skill-papers">
+                  <strong>Related Work:</strong> ISF, JMIS, IEEE ISI (multiple), HICSS
+                </div>
+              </div>
+            </div>
+            <div class="skill-tag" data-category="cyber">
+              <span class="skill-icon">🎣</span>
+              <span class="skill-name">Phishing Detection</span>
+              <div class="skill-dropdown">
+                <div class="skill-desc">Adversarial attacks, robustness testing, email/web phishing</div>
+                <div class="skill-papers">
+                  <strong>Related Work:</strong> DTRAP, AMCIS, IEEE SPW, CRC Book Chapter
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="skills-row">
+            <div class="skill-tag" data-category="tools">
+              <span class="skill-icon">🐍</span>
+              <span class="skill-name">Python & ML Stack</span>
+              <div class="skill-dropdown">
+                <div class="skill-desc">PyTorch, TensorFlow, Hugging Face, scikit-learn, pandas</div>
+                <div class="skill-papers">
+                  <strong>Used in:</strong> All 30 publications
+                </div>
+              </div>
+            </div>
+            <div class="skill-tag" data-category="tools">
+              <span class="skill-icon">📊</span>
+              <span class="skill-name">Graph Analytics</span>
+              <div class="skill-dropdown">
+                <div class="skill-desc">NetworkX, graph embeddings, knowledge graphs</div>
+                <div class="skill-papers">
+                  <strong>Related Work:</strong> IEEE ISI (Ransomware Bitcoin, Exploit-Sharing)
+                </div>
+              </div>
+            </div>
+            <div class="skill-tag" data-category="research">
+              <span class="skill-icon">🔬</span>
+              <span class="skill-name">Design Science</span>
+              <div class="skill-dropdown">
+                <div class="skill-desc">Computational artifacts, evaluation frameworks</div>
+                <div class="skill-papers">
+                  <strong>Related Work:</strong> JMIS (Risk Framework), ACM SIGMIS Dissertation
+                </div>
+              </div>
+            </div>
+            <div class="skill-tag" data-category="research">
+              <span class="skill-icon">👨‍🏫</span>
+              <span class="skill-name">Teaching & Mentoring</span>
+              <div class="skill-dropdown">
+                <div class="skill-desc">Course development, PhD advising, workshops</div>
+                <div class="skill-papers">
+                  <strong>Experience:</strong> 10 PhD mentees, 14 courses, 4.7+ avg rating
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    design:
+      columns: '1'
 
   # ---------- RESEARCH IMPACT ----------
   - block: markdown
