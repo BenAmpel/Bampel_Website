@@ -724,5 +724,33 @@ document.addEventListener('DOMContentLoaded', function() {
   if (pubChart) {
     pubChartObserver.observe(pubChart);
   }
+  
+  // ===== NETWORK IMAGE WITH THEME SWITCHING =====
+  function updateNetworkImage() {
+    const container = document.getElementById('network-image-container');
+    if (!container) return;
+    
+    const isDark = document.body.classList.contains('dark');
+    const imgSrc = isDark ? '/images/coauthor-network-dark.png' : '/images/coauthor-network.png';
+    
+    container.innerHTML = `
+      <img src="${imgSrc}" alt="Research Collaboration Network" class="network-image" style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+      <p style="font-size: 0.9rem; color: ${isDark ? '#aaa' : '#666'}; margin-top: 12px; font-style: italic; text-align: center;">Research collaboration network based on co-authored publications</p>
+    `;
+  }
+  
+  // Initialize network image
+  updateNetworkImage();
+  
+  // Listen for theme changes
+  const themeObserver = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.attributeName === 'class') {
+        updateNetworkImage();
+      }
+    });
+  });
+  
+  themeObserver.observe(document.body, { attributes: true });
 });
 </script>

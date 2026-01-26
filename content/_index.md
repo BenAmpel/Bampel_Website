@@ -82,11 +82,7 @@ sections:
     content:
       title: Collaboration Network
       text: |
-        <div class="network-image-container">
-          <img src="/images/coauthor-network.png" alt="Research Collaboration Network" class="network-image light-mode-img">
-          <img src="/images/coauthor-network-dark.png" alt="Research Collaboration Network" class="network-image dark-mode-img">
-          <p class="network-caption">Research collaboration network based on co-authored publications</p>
-        </div>
+        <div id="network-image-container"></div>
     design:
       columns: '1'
 
