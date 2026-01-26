@@ -26,211 +26,117 @@ html {
   box-shadow: 0 0 10px rgba(21, 101, 192, 0.5);
 }
 
-/* ===== COMPACT SKILLS & EXPERTISE ===== */
-.skills-container {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin: 10px 0;
+/* ===== ENHANCED FEATURES/SKILLS BLOCK ===== */
+/* Style Hugo Blox's native features block */
+.hb-features,
+.wg-features,
+section[id="skills"] .features {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 20px !important;
 }
 
-.skills-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  justify-content: center;
+@media (max-width: 992px) {
+  .hb-features,
+  .wg-features,
+  section[id="skills"] .features {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
 }
 
-.skill-tag {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 18px;
+@media (max-width: 576px) {
+  .hb-features,
+  .wg-features,
+  section[id="skills"] .features {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Style individual feature items */
+.hb-features .feature,
+.wg-features .col-12,
+section[id="skills"] .feature-item,
+.featurette {
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   border: 1px solid #e2e8f0;
-  border-radius: 50px;
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: #334155;
-  cursor: pointer;
+  border-radius: 12px;
+  padding: 20px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  text-align: center;
 }
 
-.skill-tag:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.12);
-}
-
-/* Category-specific colors */
-.skill-tag[data-category="ai"] {
-  border-color: #bfdbfe;
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-}
-.skill-tag[data-category="ai"]:hover {
+.hb-features .feature:hover,
+.wg-features .col-12:hover,
+section[id="skills"] .feature-item:hover,
+.featurette:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
   border-color: #3b82f6;
-  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
 }
 
-.skill-tag[data-category="cyber"] {
-  border-color: #fecaca;
-  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-}
-.skill-tag[data-category="cyber"]:hover {
-  border-color: #ef4444;
-  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-}
-
-.skill-tag[data-category="tools"] {
-  border-color: #bbf7d0;
-  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-}
-.skill-tag[data-category="tools"]:hover {
-  border-color: #22c55e;
-  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-}
-
-.skill-tag[data-category="research"] {
-  border-color: #ddd6fe;
-  background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
-}
-.skill-tag[data-category="research"]:hover {
-  border-color: #8b5cf6;
-  background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
-}
-
-/* Dark mode */
-.dark .skill-tag {
+.dark .hb-features .feature,
+.dark .wg-features .col-12,
+.dark section[id="skills"] .feature-item,
+.dark .featurette {
   background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
   border-color: #475569;
-  color: #e2e8f0;
 }
 
-.dark .skill-tag[data-category="ai"] {
-  border-color: #1e40af;
-  background: linear-gradient(135deg, #1e3a5f 0%, #1e40af40 100%);
-}
-.dark .skill-tag[data-category="cyber"] {
-  border-color: #991b1b;
-  background: linear-gradient(135deg, #3f1515 0%, #991b1b40 100%);
-}
-.dark .skill-tag[data-category="tools"] {
-  border-color: #166534;
-  background: linear-gradient(135deg, #14352a 0%, #16653440 100%);
-}
-.dark .skill-tag[data-category="research"] {
-  border-color: #5b21b6;
-  background: linear-gradient(135deg, #2e1a47 0%, #5b21b640 100%);
+.dark .hb-features .feature:hover,
+.dark .wg-features .col-12:hover,
+.dark section[id="skills"] .feature-item:hover,
+.dark .featurette:hover {
+  border-color: #60a5fa;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
-.skill-icon {
-  font-size: 1.1rem;
+/* Style feature icons */
+.hb-features .feature i,
+.wg-features .feature-icon,
+section[id="skills"] .fas,
+section[id="skills"] .fab {
+  font-size: 2rem;
+  color: #3b82f6;
+  margin-bottom: 12px;
 }
 
-.skill-name {
-  white-space: nowrap;
-}
-
-/* Dropdown on hover */
-.skill-dropdown {
-  position: absolute;
-  top: calc(100% + 10px);
-  left: 50%;
-  transform: translateX(-50%) translateY(10px);
-  min-width: 280px;
-  padding: 16px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-  border: 1px solid #e2e8f0;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 100;
-  text-align: left;
-}
-
-.skill-dropdown::before {
-  content: '';
-  position: absolute;
-  top: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  border-left: 8px solid transparent;
-  border-right: 8px solid transparent;
-  border-bottom: 8px solid white;
-}
-
-.skill-tag:hover .skill-dropdown {
-  opacity: 1;
-  visibility: visible;
-  transform: translateX(-50%) translateY(0);
-}
-
-.dark .skill-dropdown {
-  background: #1e293b;
-  border-color: #475569;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-}
-
-.dark .skill-dropdown::before {
-  border-bottom-color: #1e293b;
-}
-
-.skill-desc {
-  font-size: 0.9rem;
-  color: #64748b;
-  margin-bottom: 10px;
-  line-height: 1.5;
-}
-
-.dark .skill-desc {
-  color: #94a3b8;
-}
-
-.skill-papers {
-  font-size: 0.85rem;
-  color: #334155;
-  padding-top: 10px;
-  border-top: 1px solid #e2e8f0;
-  line-height: 1.6;
-}
-
-.skill-papers strong {
-  color: #1e40af;
-}
-
-.dark .skill-papers {
-  color: #cbd5e1;
-  border-top-color: #475569;
-}
-
-.dark .skill-papers strong {
+.dark .hb-features .feature i,
+.dark .wg-features .feature-icon,
+.dark section[id="skills"] .fas,
+.dark section[id="skills"] .fab {
   color: #60a5fa;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .skill-tag {
-    padding: 8px 14px;
-    font-size: 0.85rem;
-  }
-  
-  .skill-dropdown {
-    min-width: 240px;
-    left: 0;
-    transform: translateX(0) translateY(10px);
-  }
-  
-  .skill-tag:hover .skill-dropdown {
-    transform: translateX(0) translateY(0);
-  }
-  
-  .skill-dropdown::before {
-    left: 30px;
-    transform: none;
-  }
+/* Style feature titles */
+.hb-features .feature h3,
+.wg-features h3,
+section[id="skills"] .feature-item h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #1e293b;
+}
+
+.dark .hb-features .feature h3,
+.dark .wg-features h3,
+.dark section[id="skills"] .feature-item h3 {
+  color: #f1f5f9;
+}
+
+/* Style feature descriptions */
+.hb-features .feature p,
+.wg-features p,
+section[id="skills"] .feature-item p {
+  font-size: 0.85rem;
+  color: #64748b;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.dark .hb-features .feature p,
+.dark .wg-features p,
+.dark section[id="skills"] .feature-item p {
+  color: #94a3b8;
 }
 
 /* ===== GRADIENT ACCENTS FOR SECTION HEADERS ===== */
@@ -1101,150 +1007,6 @@ document.addEventListener('DOMContentLoaded', function() {
   
   window.addEventListener('scroll', updateScrollProgress);
   updateScrollProgress(); // Initial call
-  
-  // ===== SKILLS & EXPERTISE INJECTION =====
-  // Try multiple ways to find the skills section
-  let skillsSection = document.getElementById('skills');
-  
-  // If not found by ID, try finding by section with skills in the URL hash or by title
-  if (!skillsSection) {
-    skillsSection = document.querySelector('section[id*="skills"]') ||
-                    document.querySelector('[id*="skills"]');
-  }
-  
-  // Also try finding by the section title
-  if (!skillsSection) {
-    const allSections = document.querySelectorAll('section, .home-section, .wg-markdown');
-    allSections.forEach(sec => {
-      const title = sec.querySelector('h1, h2, .section-heading');
-      if (title && title.textContent.includes('Skills')) {
-        skillsSection = sec;
-      }
-    });
-  }
-  
-  if (skillsSection) {
-    const skillsContent = skillsSection.querySelector('.prose') || 
-                          skillsSection.querySelector('.hb-section-content') ||
-                          skillsSection.querySelector('.container') ||
-                          skillsSection.querySelector('.article-container') ||
-                          skillsSection;
-    
-    // Find the inner content area - look for empty paragraph or div
-    let innerContent = skillsContent.querySelector('p:empty') || 
-                       skillsContent.querySelector('.prose > p') ||
-                       skillsContent.querySelector('p') || 
-                       skillsContent;
-    
-    const skillsHTML = `
-      <div class="skills-container">
-        <div class="skills-row">
-          <div class="skill-tag" data-category="ai">
-            <span class="skill-icon">🤖</span>
-            <span class="skill-name">Large Language Models</span>
-            <div class="skill-dropdown">
-              <div class="skill-desc">GPT, BERT, LLaMA, transformer architectures</div>
-              <div class="skill-papers">
-                <strong>Related Work:</strong> MISQ (Vishing), TMIS (LLM Text Analytics), JMIS (Risk Framework)
-              </div>
-            </div>
-          </div>
-          <div class="skill-tag" data-category="ai">
-            <span class="skill-icon">🧠</span>
-            <span class="skill-name">Deep Learning & NLP</span>
-            <div class="skill-dropdown">
-              <div class="skill-desc">Neural networks, text analytics, transfer learning</div>
-              <div class="skill-papers">
-                <strong>Related Work:</strong> MISQ (DTL-EL), IEEE ISI (Hack2Vec), KDD Workshop
-              </div>
-            </div>
-          </div>
-          <div class="skill-tag" data-category="cyber">
-            <span class="skill-icon">🛡️</span>
-            <span class="skill-name">Cyber Threat Intelligence</span>
-            <div class="skill-dropdown">
-              <div class="skill-desc">Hacker communities, dark web, vulnerability research</div>
-              <div class="skill-papers">
-                <strong>Related Work:</strong> ISF, JMIS, IEEE ISI (multiple), HICSS
-              </div>
-            </div>
-          </div>
-          <div class="skill-tag" data-category="cyber">
-            <span class="skill-icon">🎣</span>
-            <span class="skill-name">Phishing Detection</span>
-            <div class="skill-dropdown">
-              <div class="skill-desc">Adversarial attacks, robustness testing, email/web phishing</div>
-              <div class="skill-papers">
-                <strong>Related Work:</strong> DTRAP, AMCIS, IEEE SPW, CRC Book Chapter
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="skills-row">
-          <div class="skill-tag" data-category="tools">
-            <span class="skill-icon">🐍</span>
-            <span class="skill-name">Python & ML Stack</span>
-            <div class="skill-dropdown">
-              <div class="skill-desc">PyTorch, TensorFlow, Hugging Face, scikit-learn, pandas</div>
-              <div class="skill-papers">
-                <strong>Used in:</strong> All 30 publications
-              </div>
-            </div>
-          </div>
-          <div class="skill-tag" data-category="tools">
-            <span class="skill-icon">📊</span>
-            <span class="skill-name">Graph Analytics</span>
-            <div class="skill-dropdown">
-              <div class="skill-desc">NetworkX, graph embeddings, knowledge graphs</div>
-              <div class="skill-papers">
-                <strong>Related Work:</strong> IEEE ISI (Ransomware Bitcoin, Exploit-Sharing)
-              </div>
-            </div>
-          </div>
-          <div class="skill-tag" data-category="research">
-            <span class="skill-icon">🔬</span>
-            <span class="skill-name">Design Science</span>
-            <div class="skill-dropdown">
-              <div class="skill-desc">Computational artifacts, evaluation frameworks</div>
-              <div class="skill-papers">
-                <strong>Related Work:</strong> JMIS (Risk Framework), ACM SIGMIS Dissertation
-              </div>
-            </div>
-          </div>
-          <div class="skill-tag" data-category="research">
-            <span class="skill-icon">👨‍🏫</span>
-            <span class="skill-name">Teaching & Mentoring</span>
-            <div class="skill-dropdown">
-              <div class="skill-desc">Course development, PhD advising, workshops</div>
-              <div class="skill-papers">
-                <strong>Experience:</strong> 10 PhD mentees, 14 courses, 4.7+ avg rating
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-    
-    // Create a container for the skills
-    const skillsWrapper = document.createElement('div');
-    skillsWrapper.className = 'skills-wrapper';
-    skillsWrapper.innerHTML = skillsHTML;
-    
-    // Try to find the best place to insert
-    const proseArea = skillsSection.querySelector('.prose') || 
-                      skillsSection.querySelector('.hb-section-content') ||
-                      skillsSection.querySelector('.article-content');
-    
-    if (proseArea) {
-      // Clear any empty paragraphs and append
-      const emptyP = proseArea.querySelector('p:empty');
-      if (emptyP) emptyP.remove();
-      proseArea.appendChild(skillsWrapper);
-    } else {
-      // Append directly to the section content area
-      skillsContent.appendChild(skillsWrapper);
-    }
-  }
   
   // ===== RESEARCH VISUALIZATIONS INJECTION (into Research Impact section) =====
   let statsSection = document.getElementById('stats');

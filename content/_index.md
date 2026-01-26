@@ -12,13 +12,43 @@ sections:
       username: admin
 
   # ---------- SKILLS & EXPERTISE ----------
-  - block: markdown
+  - block: features
     id: skills
     content:
       title: Skills & Expertise
-      text: ""
-    design:
-      columns: '1'
+      items:
+        - name: Large Language Models
+          icon: robot
+          icon_pack: fas
+          description: GPT, BERT, LLaMA, transformers — MISQ, TMIS, JMIS
+        - name: Deep Learning & NLP
+          icon: brain
+          icon_pack: fas
+          description: Neural networks, transfer learning — MISQ, IEEE ISI
+        - name: Cyber Threat Intelligence
+          icon: shield-halved
+          icon_pack: fas
+          description: Hacker communities, dark web — ISF, JMIS, HICSS
+        - name: Phishing Detection
+          icon: fish
+          icon_pack: fas
+          description: Adversarial attacks, robustness — DTRAP, SPW
+        - name: Python & ML Stack
+          icon: python
+          icon_pack: fab
+          description: PyTorch, TensorFlow, Hugging Face, scikit-learn
+        - name: Graph Analytics
+          icon: diagram-project
+          icon_pack: fas
+          description: NetworkX, embeddings — IEEE ISI
+        - name: Design Science
+          icon: flask
+          icon_pack: fas
+          description: Computational artifacts — JMIS, ACM SIGMIS
+        - name: Teaching & Mentoring
+          icon: chalkboard-user
+          icon_pack: fas
+          description: 10 PhD mentees, 14 courses, 4.7+ rating
 
   # ---------- RESEARCH IMPACT ----------
   - block: markdown
