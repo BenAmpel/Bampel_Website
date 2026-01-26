@@ -535,10 +535,66 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
-  // ===== CO-AUTHOR NETWORK GRAPH =====
-  function initCoauthorNetwork() {
+  // ===== CO-AUTHOR NETWORK GRAPH (DYNAMIC) =====
+  async function initCoauthorNetwork() {
     const container = document.getElementById('coauthor-network');
     if (!container) return;
+    
+    // Fetch publications data
+    let publications = [];
+    try {
+      const response = await fetch('/data/publications.json');
+      publications = await response.json();
+    } catch (error) {
+      console.error('Error loading publications:', error);
+      return;
+    }
+    
+    // Author name normalization map
+    const authorNormalization = {
+      'H Chen': 'Hsinchun Chen',
+      'S Samtani': 'Sagar Samtani',
+      'S Ullman': 'Steven Ullman',
+      'H Zhu': 'Hongyi Zhu',
+      'Y Gao': 'Yang Gao',
+      'B Lazarine': 'Ben Lazarine',
+      'T Vahedi': 'Tala Vahedi',
+      'K Otto': 'Kaeli Otto',
+      'J Hu': 'James Hu',
+      'CH Yang': 'Chi-Heng Yang',
+      'M Hashim': 'Matthew Hashim',
+      'JF Nunamaker Jr': 'Jay Nunamaker',
+      'M Patton': 'Mark Patton',
+      'C Marx': 'Carolin Marx',
+      'S Yang': 'Shuo Yang',
+      'C Dacosta': 'Cade Dacosta',
+      'C Zhang': 'Chengjun Zhang',
+      'RY Reyes': 'Raul Reyes',
+      'M Wagner': 'Mason Wagner'
+    };
+    
+    // Check if author is the main author (Benjamin Ampel)
+    function isMainAuthor(author) {
+      const normalized = author.trim().toLowerCase();
+      return normalized.includes('ampel') || normalized === 'b ampel' || normalized === 'bm ampel';
+    }
+    
+    // Normalize author name
+    function normalizeAuthor(author) {
+      const trimmed = author.trim();
+      return authorNormalization[trimmed] || trimmed;
+    }
+    
+    // Build co-author counts
+    const coauthorCounts = {};
+    publications.forEach(pub => {
+      pub.authors.forEach(author => {
+        if (!isMainAuthor(author)) {
+          const normalized = normalizeAuthor(author);
+          coauthorCounts[normalized] = (coauthorCounts[normalized] || 0) + 1;
+        }
+      });
+    });
     
     // Check if dark mode
     const isDark = document.body.classList.contains('dark');
@@ -550,45 +606,62 @@ document.addEventListener('DOMContentLoaded', function() {
     const textColor = isDark ? '#e0e0e0' : '#333';
     const edgeColor = isDark ? 'rgba(144, 202, 249, 0.4)' : 'rgba(21, 101, 192, 0.3)';
     
-    // Nodes: You (center) + co-authors with collaboration counts
-    const nodes = new vis.DataSet([
-      { id: 1, label: 'Benjamin\nAmpel', color: primaryColor, size: 45, font: { color: textColor, size: 14, bold: true } },
-      { id: 2, label: 'Hsinchun\nChen', color: frequentColor, size: 38, font: { color: textColor, size: 12 } },
-      { id: 3, label: 'Sagar\nSamtani', color: frequentColor, size: 36, font: { color: textColor, size: 12 } },
-      { id: 4, label: 'Steven\nUllman', color: frequentColor, size: 30, font: { color: textColor, size: 11 } },
-      { id: 5, label: 'Hongyi\nZhu', color: frequentColor, size: 28, font: { color: textColor, size: 11 } },
-      { id: 6, label: 'Yang\nGao', color: occasionalColor, size: 24, font: { color: textColor, size: 10 } },
-      { id: 7, label: 'Ben\nLazarine', color: occasionalColor, size: 22, font: { color: textColor, size: 10 } },
-      { id: 8, label: 'Tala\nVahedi', color: occasionalColor, size: 22, font: { color: textColor, size: 10 } },
-      { id: 9, label: 'Kaeli\nOtto', color: occasionalColor, size: 20, font: { color: textColor, size: 10 } },
-      { id: 10, label: 'James\nHu', color: occasionalColor, size: 20, font: { color: textColor, size: 10 } },
-      { id: 11, label: 'Chi-Heng\nYang', color: occasionalColor, size: 18, font: { color: textColor, size: 10 } },
-      { id: 12, label: 'Matthew\nHashim', color: occasionalColor, size: 18, font: { color: textColor, size: 10 } },
-      { id: 13, label: 'J.F.\nNunamaker', color: occasionalColor, size: 18, font: { color: textColor, size: 10 } }
-    ]);
+    // Generate nodes dynamically
+    const nodesArray = [
+      { id: 0, label: 'Benjamin\nAmpel', color: primaryColor, size: 45, font: { color: textColor, size: 14, bold: true } }
+    ];
     
-    // Edges: connections with width based on collaboration count
-    const edges = new vis.DataSet([
-      { from: 1, to: 2, width: 6, color: { color: edgeColor, highlight: primaryColor } },
-      { from: 1, to: 3, width: 5, color: { color: edgeColor, highlight: primaryColor } },
-      { from: 1, to: 4, width: 3, color: { color: edgeColor, highlight: primaryColor } },
-      { from: 1, to: 5, width: 3, color: { color: edgeColor, highlight: primaryColor } },
-      { from: 1, to: 6, width: 2, color: { color: edgeColor, highlight: primaryColor } },
-      { from: 1, to: 7, width: 2, color: { color: edgeColor, highlight: primaryColor } },
-      { from: 1, to: 8, width: 2, color: { color: edgeColor, highlight: primaryColor } },
-      { from: 1, to: 9, width: 2, color: { color: edgeColor, highlight: primaryColor } },
-      { from: 1, to: 10, width: 2, color: { color: edgeColor, highlight: primaryColor } },
-      { from: 1, to: 11, width: 1, color: { color: edgeColor, highlight: primaryColor } },
-      { from: 1, to: 12, width: 1, color: { color: edgeColor, highlight: primaryColor } },
-      { from: 1, to: 13, width: 1, color: { color: edgeColor, highlight: primaryColor } },
-      // Co-author connections (they've also worked together)
-      { from: 2, to: 3, width: 2, color: { color: edgeColor, highlight: frequentColor } },
-      { from: 2, to: 5, width: 2, color: { color: edgeColor, highlight: frequentColor } },
-      { from: 3, to: 4, width: 2, color: { color: edgeColor, highlight: frequentColor } },
-      { from: 3, to: 5, width: 2, color: { color: edgeColor, highlight: frequentColor } },
-      { from: 3, to: 6, width: 1, color: { color: edgeColor, highlight: frequentColor } },
-      { from: 4, to: 7, width: 1, color: { color: edgeColor, highlight: frequentColor } }
-    ]);
+    const edgesArray = [];
+    let nodeId = 1;
+    
+    // Sort co-authors by count (descending)
+    const sortedCoauthors = Object.entries(coauthorCounts).sort((a, b) => b[1] - a[1]);
+    
+    sortedCoauthors.forEach(([name, count]) => {
+      // Determine color and size based on collaboration count
+      let color, size, fontSize;
+      if (count >= 5) {
+        color = frequentColor;
+        size = 25 + count * 2;
+        fontSize = 12;
+      } else if (count >= 2) {
+        color = occasionalColor;
+        size = 18 + count * 2;
+        fontSize = 10;
+      } else {
+        color = occasionalColor;
+        size = 16;
+        fontSize = 9;
+      }
+      
+      // Format name for display (split into two lines if needed)
+      const nameParts = name.split(' ');
+      let displayName = name;
+      if (nameParts.length >= 2) {
+        displayName = nameParts.slice(0, -1).join(' ') + '\n' + nameParts[nameParts.length - 1];
+      }
+      
+      nodesArray.push({
+        id: nodeId,
+        label: displayName,
+        color: color,
+        size: Math.min(size, 40),
+        font: { color: textColor, size: fontSize }
+      });
+      
+      // Create edge to main author
+      edgesArray.push({
+        from: 0,
+        to: nodeId,
+        width: Math.min(count, 6),
+        color: { color: edgeColor, highlight: primaryColor }
+      });
+      
+      nodeId++;
+    });
+    
+    const nodes = new vis.DataSet(nodesArray);
+    const edges = new vis.DataSet(edgesArray);
     
     const data = { nodes: nodes, edges: edges };
     
