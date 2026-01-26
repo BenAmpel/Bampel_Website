@@ -2,8 +2,8 @@
 // This file overrides theme styles
 
 // ===== FONT IMPORTS =====
-// Fira Code for Cyber/Terminal mode, Merriweather for Manuscript mode
-@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap');
+// Fira Code for Cyber/Terminal mode, Merriweather + Playfair Display for Manuscript mode
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Playfair+Display:wght@400;700&display=swap');
 
 // ===== HIGH-SEVERITY CYBERPUNK GLITCH SYSTEM =====
 // Violent, jerky, instant digital glitches with RGB splitting (chromatic aberration)
@@ -2247,6 +2247,130 @@ body:not(.dark) {
     text-shadow: none !important;
     border-left-color: #333 !important;
     background: transparent !important;
+  }
+  
+  // =============================================================================
+  // MANUSCRIPT-EXCLUSIVE FEATURES
+  // =============================================================================
+  
+  // ---------------------------------------------------------------------------
+  // 1. DIGITAL HIGHLIGHTER EFFECT
+  // Yellow highlighter when selecting text (like marking up a physical paper)
+  // ---------------------------------------------------------------------------
+  ::selection {
+    background: #fff2a8 !important; /* Highlighter Yellow */
+    color: #000 !important;
+    text-shadow: none !important;
+  }
+  
+  ::-moz-selection {
+    background: #fff2a8 !important;
+    color: #000 !important;
+    text-shadow: none !important;
+  }
+  
+  // ---------------------------------------------------------------------------
+  // 2. FOUNTAIN PEN LINK ANIMATION
+  // Red underline that animates from left to right on hover (like a red pen)
+  // ---------------------------------------------------------------------------
+  .article-style a,
+  .prose a,
+  section p a,
+  .hb-about a:not(.btn):not(.social-icon) {
+    position: relative;
+    text-decoration: none !important;
+    color: #1a0dab !important; /* Classic academic blue */
+    font-weight: 600;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: -2px;
+      left: 0;
+      background-color: #d93025; /* Red Pen color */
+      transition: width 0.3s ease-in-out;
+    }
+
+    &:hover::after {
+      width: 100%;
+    }
+    
+    &:hover {
+      color: #1a0dab !important;
+    }
+  }
+  
+  // ---------------------------------------------------------------------------
+  // 3. DROP CAPS FOR FIELD NOTES / BLOG POSTS
+  // Prestigious journal-like opening with enlarged first letter
+  // ---------------------------------------------------------------------------
+  .article-style p:first-of-type::first-letter,
+  .prose p:first-of-type::first-letter,
+  article .content p:first-of-type::first-letter {
+    float: left;
+    font-family: 'Playfair Display', 'Georgia', 'Times New Roman', serif;
+    font-size: 3.5rem;
+    line-height: 0.8;
+    font-weight: bold;
+    padding-right: 8px;
+    padding-top: 4px;
+    color: #333;
+  }
+  
+  // ---------------------------------------------------------------------------
+  // 4. FINE PAPER TEXTURE
+  // Subtle noise/grain background to simulate high-quality bond paper
+  // ---------------------------------------------------------------------------
+  background-color: #fdfdfd !important;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+  
+  // Main container looks like a sheet of paper on a desk
+  .page-wrapper,
+  main,
+  .home-section .container,
+  article .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: #fff !important;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.06) !important;
+  }
+  
+  // ---------------------------------------------------------------------------
+  // 5. POLAROID FIGURE STYLING
+  // Images look like physical figures placed on a manuscript
+  // ---------------------------------------------------------------------------
+  .article-style img,
+  .prose img,
+  article img:not(.avatar):not([class*="icon"]):not([width="32"]):not([height="32"]) {
+    border: 1px solid #ddd !important;
+    padding: 10px !important;
+    background: #fff !important;
+    box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.1) !important;
+    transform: rotate(-0.5deg);
+    transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+    margin: 1rem auto;
+    display: block;
+  }
+
+  // Straighten and lift slightly on hover
+  .article-style img:hover,
+  .prose img:hover,
+  article img:not(.avatar):not([class*="icon"]):hover {
+    transform: rotate(0deg) scale(1.02) !important;
+    box-shadow: 6px 6px 18px rgba(0, 0, 0, 0.15) !important;
+  }
+  
+  // Figure captions styled like typed labels
+  figcaption,
+  .figure-caption {
+    font-family: 'Courier New', monospace !important;
+    font-size: 0.85rem;
+    color: #666 !important;
+    text-align: center;
+    margin-top: 8px;
+    font-style: italic;
   }
 }
 
