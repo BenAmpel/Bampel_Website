@@ -68,4 +68,5 @@ image:
 # slides: example
 ---
 
-
+<script type="text/javascript" src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+<div class="altmetric-embed" data-badge-type="large-donut" data-doi="10.25300/MISQ/2023/17316"></div>
