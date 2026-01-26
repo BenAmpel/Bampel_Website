@@ -1,0 +1,172 @@
+{{/* Interactive Research Footprint Map - Usage: {{< impact_map >}} */}}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<div id="impact-map-container" style="height: 500px; width: 100%; border-radius: 8px; z-index: 1;"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // 1. Initialize Map - Center on US with good world view
+    var map = L.map('impact-map-container').setView([30, -20], 2);
+
+    // 2. Define Tile Layers (The "Skin" of the map)
+    var lightTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 18
+    });
+
+    var darkTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 18
+    });
+
+    // 3. Set Initial Theme based on site's current mode
+    var currentTiles;
+    if (document.body.classList.contains('dark')) {
+        currentTiles = darkTiles;
+    } else {
+        currentTiles = lightTiles;
+    }
+    currentTiles.addTo(map);
+
+    // 4. Define custom icons by category
+    var conferenceIcon = L.divIcon({
+        className: 'custom-marker conference-marker',
+        html: '<div class="marker-pin"></div>',
+        iconSize: [20, 20],
+        iconAnchor: [10, 10]
+    });
+    
+    var collaborationIcon = L.divIcon({
+        className: 'custom-marker collaboration-marker',
+        html: '<div class="marker-pin"></div>',
+        iconSize: [20, 20],
+        iconAnchor: [10, 10]
+    });
+    
+    var institutionIcon = L.divIcon({
+        className: 'custom-marker institution-marker',
+        html: '<div class="marker-pin"></div>',
+        iconSize: [20, 20],
+        iconAnchor: [10, 10]
+    });
+
+    // 5. Add Pins from Hugo Data
+    var points = [
+        {{ range $.Site.Data.impact_map }}
+        {
+            "title": "{{ .title }}",
+            "lat": {{ .lat }},
+            "lng": {{ .lng }},
+            "location": "{{ .location }}",
+            "desc": "{{ .description }}",
+            "cat": "{{ .category }}"
+        },
+        {{ end }}
+    ];
+
+    points.forEach(function(point) {
+        var icon;
+        var categoryClass;
+        
+        switch(point.cat) {
+            case 'Conference':
+                icon = conferenceIcon;
+                categoryClass = 'conference';
+                break;
+            case 'Collaboration':
+                icon = collaborationIcon;
+                categoryClass = 'collaboration';
+                break;
+            case 'Institution':
+                icon = institutionIcon;
+                categoryClass = 'institution';
+                break;
+            default:
+                icon = conferenceIcon;
+                categoryClass = 'conference';
+        }
+        
+        var popupContent = '<div class="map-popup ' + categoryClass + '">' +
+                           '<strong>' + point.title + '</strong><br>' + 
+                           '<span class="location">' + point.location + '</span><br>' +
+                           '<span class="category">' + point.cat + '</span><br>' + 
+                           '<span class="description">' + point.desc + '</span>' +
+                           '</div>';
+        
+        L.marker([point.lat, point.lng], {icon: icon})
+         .addTo(map)
+         .bindPopup(popupContent);
+    });
+
+    // 6. Dynamic Theme Switching Listener
+    var observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.attributeName === 'class') {
+                if (document.body.classList.contains('dark')) {
+                    map.removeLayer(lightTiles);
+                    if (!map.hasLayer(darkTiles)) {
+                        darkTiles.addTo(map);
+                    }
+                } else {
+                    map.removeLayer(darkTiles);
+                    if (!map.hasLayer(lightTiles)) {
+                        lightTiles.addTo(map);
+                    }
+                }
+            }
+        });
+    });
+    
+    observer.observe(document.body, { attributes: true });
+});
+</script>
+
+<style>
+/* Custom Marker Styles */
+.custom-marker {
+    background: transparent;
+}
+
+.custom-marker .marker-pin {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 4px rgba(0,0,0,0.3);
+}
+
+.conference-marker .marker-pin {
+    background: #00ff41; /* Green for conferences */
+}
+
+.collaboration-marker .marker-pin {
+    background: #00bfff; /* Cyan for collaborations */
+}
+
+.institution-marker .marker-pin {
+    background: #ff6b35; /* Orange for institutions */
+}
+
+/* Dark mode marker adjustments */
+body.dark .custom-marker .marker-pin {
+    border-color: #000;
+    box-shadow: 0 0 8px currentColor;
+}
+
+body.dark .conference-marker .marker-pin {
+    box-shadow: 0 0 8px #00ff41;
+}
+
+body.dark .collaboration-marker .marker-pin {
+    box-shadow: 0 0 8px #00bfff;
+}
+
+body.dark .institution-marker .marker-pin {
+    box-shadow: 0 0 8px #ff6b35;
+}
+</style>

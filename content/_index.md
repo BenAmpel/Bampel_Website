@@ -53,8 +53,11 @@ sections:
         {{< /spoiler >}}
         
         {{< spoiler text="🌍 Research Footprint" >}}
-        ![Research Map](/images/research-map.png)
-        *Conference presentations and collaborator institutions worldwide*
+        {{< impact_map >}}
+        
+        **Legend:** 🟢 Conference | 🔵 Collaboration | 🟠 Institution
+        
+        *Interactive map of conference presentations and collaborator institutions worldwide*
         {{< /spoiler >}}
     design:
       columns: '1'

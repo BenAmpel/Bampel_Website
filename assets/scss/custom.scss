@@ -2781,3 +2781,137 @@ body.dark .altmetric-embed {
   }
 }
 
+// =============================================================================
+// ===== INTERACTIVE RESEARCH MAP STYLING =====
+// =============================================================================
+
+#impact-map-container {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  margin: 1.5rem 0;
+  border: 1px solid #333;
+}
+
+// Cyber mode map container
+body.dark #impact-map-container {
+  border: 1px solid #00ff41;
+  box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+}
+
+// Manuscript mode map container
+body:not(.dark) #impact-map-container {
+  border: 1px solid #ccc;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+// Popup styling - Manuscript mode (default)
+.leaflet-popup-content-wrapper {
+  font-family: 'Merriweather', serif;
+  border-radius: 4px;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.2);
+}
+
+.leaflet-popup-content {
+  margin: 12px 16px;
+  line-height: 1.5;
+}
+
+.map-popup strong {
+  color: #1a0dab;
+  font-size: 1.1em;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.map-popup .location {
+  color: #666;
+  font-style: italic;
+}
+
+.map-popup .category {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75em;
+  font-weight: bold;
+  margin: 4px 0;
+}
+
+.map-popup.conference .category {
+  background: #00ff41;
+  color: #000;
+}
+
+.map-popup.collaboration .category {
+  background: #00bfff;
+  color: #000;
+}
+
+.map-popup.institution .category {
+  background: #ff6b35;
+  color: #fff;
+}
+
+.map-popup .description {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.9em;
+  color: #444;
+}
+
+// Cyber mode popup styling
+body.dark .leaflet-popup-content-wrapper {
+  background: #0a0a0a;
+  color: #00ff41;
+  border: 1px solid #00ff41;
+  font-family: 'Fira Code', monospace;
+  box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+}
+
+body.dark .leaflet-popup-tip {
+  background: #0a0a0a;
+  border: 1px solid #00ff41;
+}
+
+body.dark .map-popup strong {
+  color: #00ff41;
+  text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+}
+
+body.dark .map-popup .location {
+  color: #58a6ff;
+}
+
+body.dark .map-popup .description {
+  color: #c9d1d9;
+}
+
+body.dark .leaflet-popup-close-button {
+  color: #00ff41 !important;
+}
+
+// Map legend styling
+.map-legend {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 10px;
+  font-size: 0.85rem;
+}
+
+.map-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.map-legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+}
+
+.map-legend-dot.conference { background: #00ff41; }
+.map-legend-dot.collaboration { background: #00bfff; }
+.map-legend-dot.institution { background: #ff6b35; }
+
