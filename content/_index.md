@@ -35,33 +35,33 @@ sections:
     content:
       title: Skills & Expertise
       text: |
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
         
         <div>
-        <strong>🤖 Large Language Models</strong>
+        <div class="skill-label"><strong>🤖 Large Language Models</strong><span class="skill-percentage">95%</span></div>
         <div class="skill-bar"><div class="skill-progress" style="width: 95%"></div></div>
         
-        <strong>🔐 Cybersecurity & CTI</strong>
+        <div class="skill-label"><strong>🔐 Cybersecurity & CTI</strong><span class="skill-percentage">95%</span></div>
         <div class="skill-bar"><div class="skill-progress" style="width: 95%"></div></div>
         
-        <strong>🧠 Deep Learning / NLP</strong>
+        <div class="skill-label"><strong>🧠 Deep Learning / NLP</strong><span class="skill-percentage">90%</span></div>
         <div class="skill-bar"><div class="skill-progress" style="width: 90%"></div></div>
         
-        <strong>📊 Data Science & Analytics</strong>
+        <div class="skill-label"><strong>📊 Data Science & Analytics</strong><span class="skill-percentage">90%</span></div>
         <div class="skill-bar"><div class="skill-progress" style="width: 90%"></div></div>
         </div>
         
         <div>
-        <strong>🐍 Python / PyTorch / TensorFlow</strong>
+        <div class="skill-label"><strong>🐍 Python / PyTorch / TensorFlow</strong><span class="skill-percentage">90%</span></div>
         <div class="skill-bar"><div class="skill-progress" style="width: 90%"></div></div>
         
-        <strong>📝 Academic Writing</strong>
+        <div class="skill-label"><strong>📝 Academic Writing</strong><span class="skill-percentage">95%</span></div>
         <div class="skill-bar"><div class="skill-progress" style="width: 95%"></div></div>
         
-        <strong>🎤 Presentations & Teaching</strong>
+        <div class="skill-label"><strong>🎤 Presentations & Teaching</strong><span class="skill-percentage">90%</span></div>
         <div class="skill-bar"><div class="skill-progress" style="width: 90%"></div></div>
         
-        <strong>🔬 Design Science Research</strong>
+        <div class="skill-label"><strong>🔬 Design Science Research</strong><span class="skill-percentage">85%</span></div>
         <div class="skill-bar"><div class="skill-progress" style="width: 85%"></div></div>
         </div>
         
@@ -75,7 +75,7 @@ sections:
     content:
       title: Research Impact
       text: |
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; margin: 20px 0;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 20px; margin: 20px 0;">
         
         <div class="stat-card">
           <span class="stat-number">8</span>
@@ -99,12 +99,7 @@ sections:
         
         <div class="stat-card">
           <span class="stat-number">2</span>
-          <span>Best Paper Awards</span>
-        </div>
-        
-        <div class="stat-card">
-          <span class="stat-number">$3M+</span>
-          <span>Grant Funding</span>
+          <span>Best Papers</span>
         </div>
         
         </div>
@@ -326,19 +321,6 @@ sections:
         - **Academic Mentor**, Assistive Intelligence Lab, Georgia State University, 2025-Present
         - **Academic Mentor**, Data Science & AI Lab (DSAIL), Indiana University, 2024-Present
         - **Academic Mentor**, Artificial Intelligence Lab, University of Arizona, 2020-Present
-    design:
-      columns: '1'
-  
-  # ---------- GRANTS ----------
-  - block: markdown
-    id: grants
-    content:
-      title: Grant Experience
-      text: |
-        | Year | Funding Source | Grant Title | Amount | Role |
-        |------|---------------|-------------|--------|------|
-        | 2024 | NSF | Cybersecurity Scholarship-for-Service Renewal at The University of Arizona: The AZSecure AI4Cyber SFS Program | $3,000,000 | Lead Grant Writer |
-        | 2024 | TSMC | AI4BI Academic Program | $27,000 | Co-PI |
     design:
       columns: '1'
   
