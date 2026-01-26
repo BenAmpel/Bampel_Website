@@ -75,6 +75,15 @@ sections:
         **Top Venues:** MISQ • JMIS • ACM TMIS • ISF • IEEE ISI • HICSS • AMCIS • ICIS • ACM KDD
     design:
       columns: '1'
+
+  # ---------- IMPACT DASHBOARD ----------
+  - block: markdown
+    id: dashboard
+    content:
+      title: Citation Analytics
+      text: ""
+    design:
+      columns: '1'
   
   # ---------- CO-AUTHOR NETWORK ----------
   - block: markdown
@@ -85,6 +94,15 @@ sections:
         ![Research Collaboration Network](/images/coauthor-network.png)
         
         *Research collaboration network based on co-authored publications*
+    design:
+      columns: '1'
+
+  # ---------- RESEARCH MAP ----------
+  - block: markdown
+    id: map
+    content:
+      title: Research Footprint
+      text: ""
     design:
       columns: '1'
 

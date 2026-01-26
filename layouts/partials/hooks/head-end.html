@@ -3,6 +3,13 @@
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6407975157274256"
      crossorigin="anonymous"></script>
 
+<!-- tsParticles for animated background -->
+<script src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js"></script>
+
+<!-- Leaflet.js for interactive map -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <!-- Custom Animations & Enhancements -->
 <style>
 /* Smooth scrolling */
@@ -52,6 +59,234 @@ section:hover h1::after {
 
 .dark section h1::after {
   background: linear-gradient(90deg, #42a5f5, #90caf9);
+}
+
+/* ===== PARTICLE BACKGROUND ===== */
+#tsparticles {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+#about {
+  position: relative;
+}
+
+#about > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== INTERACTIVE MAP ===== */
+#research-map {
+  height: 400px;
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  z-index: 1;
+}
+
+.map-container {
+  margin: 20px 0;
+}
+
+.map-legend {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-top: 15px;
+  font-size: 0.9rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-marker {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.legend-marker.presentation {
+  background: #1565c0;
+}
+
+.legend-marker.collaborator {
+  background: #43a047;
+}
+
+/* ===== RESEARCH IMPACT DASHBOARD ===== */
+.impact-dashboard {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin: 30px 0;
+}
+
+@media (max-width: 768px) {
+  .impact-dashboard {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.impact-card {
+  background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+  border-radius: 12px;
+  padding: 25px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.impact-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+}
+
+.dark .impact-card {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+.impact-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1565c0;
+  margin-bottom: 5px;
+}
+
+.dark .impact-number {
+  color: #64b5f6;
+}
+
+.impact-label {
+  font-size: 0.9rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.dark .impact-label {
+  color: #aaa;
+}
+
+.citations-chart {
+  margin: 30px 0;
+  padding: 25px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.dark .citations-chart {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+.chart-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.dark .chart-title {
+  color: #e0e0e0;
+}
+
+.chart-bars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  height: 150px;
+  gap: 10px;
+}
+
+.chart-bar-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.chart-bar {
+  width: 100%;
+  max-width: 40px;
+  background: linear-gradient(180deg, #1565c0, #42a5f5);
+  border-radius: 4px 4px 0 0;
+  transition: height 1s ease-out;
+}
+
+.dark .chart-bar {
+  background: linear-gradient(180deg, #42a5f5, #90caf9);
+}
+
+.chart-bar-label {
+  margin-top: 8px;
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.dark .chart-bar-label {
+  color: #aaa;
+}
+
+.chart-bar-value {
+  font-size: 0.7rem;
+  color: #999;
+  margin-bottom: 5px;
+}
+
+.dark .chart-bar-value {
+  color: #888;
+}
+
+.dashboard-footer {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 0.85rem;
+  color: #888;
+  font-style: italic;
+}
+
+.dark .dashboard-footer {
+  color: #666;
+}
+
+/* ===== CITE BUTTON ===== */
+.cite-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #1565c0, #1976d2);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 10px 5px 10px 0;
+}
+
+.cite-button:hover {
+  background: linear-gradient(135deg, #1976d2, #1e88e5);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(21, 101, 192, 0.3);
+}
+
+.cite-button.copied {
+  background: linear-gradient(135deg, #43a047, #66bb6a);
+}
+
+.cite-button svg {
+  width: 16px;
+  height: 16px;
 }
 
 /* ===== PUBLICATIONS TIMELINE CHART ===== */
@@ -754,5 +989,328 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   themeObserver.observe(document.body, { attributes: true });
+  
+  // ===== PARTICLE BACKGROUND =====
+  const aboutSection = document.getElementById('about');
+  if (aboutSection && typeof tsParticles !== 'undefined') {
+    // Create particle container
+    const particleContainer = document.createElement('div');
+    particleContainer.id = 'tsparticles';
+    aboutSection.insertBefore(particleContainer, aboutSection.firstChild);
+    
+    const isDarkMode = document.body.classList.contains('dark');
+    
+    tsParticles.load('tsparticles', {
+      particles: {
+        number: {
+          value: 50,
+          density: {
+            enable: true,
+            value_area: 800
+          }
+        },
+        color: {
+          value: isDarkMode ? '#64b5f6' : '#1565c0'
+        },
+        opacity: {
+          value: 0.3,
+          random: true,
+          animation: {
+            enable: true,
+            speed: 0.5,
+            minimumValue: 0.1
+          }
+        },
+        size: {
+          value: 3,
+          random: true
+        },
+        move: {
+          enable: true,
+          speed: 0.8,
+          direction: 'none',
+          random: true,
+          straight: false,
+          outModes: {
+            default: 'out'
+          }
+        },
+        links: {
+          enable: true,
+          distance: 150,
+          color: isDarkMode ? '#64b5f6' : '#1565c0',
+          opacity: 0.2,
+          width: 1
+        }
+      },
+      detectRetina: true
+    });
+  }
+  
+  // ===== INTERACTIVE RESEARCH MAP =====
+  async function initResearchMap() {
+    if (typeof L === 'undefined') return;
+    
+    // Find the map section and inject the map container
+    const mapSection = document.getElementById('map');
+    if (!mapSection) return;
+    
+    const contentArea = mapSection.querySelector('.prose') || 
+                        mapSection.querySelector('.container') ||
+                        mapSection;
+    
+    // Create map container
+    const mapWrapper = document.createElement('div');
+    mapWrapper.className = 'map-container';
+    mapWrapper.innerHTML = `
+      <div id="research-map"></div>
+      <div class="map-legend">
+        <div class="legend-item"><span class="legend-marker presentation"></span> Conference Presentations</div>
+        <div class="legend-item"><span class="legend-marker collaborator"></span> Collaborator Institutions</div>
+      </div>
+    `;
+    contentArea.appendChild(mapWrapper);
+    
+    const mapContainer = document.getElementById('research-map');
+    if (!mapContainer) return;
+    
+    // Initialize map centered on US
+    const map = L.map('research-map').setView([39.8283, -98.5795], 3);
+    
+    // Add tile layer
+    const isDark = document.body.classList.contains('dark');
+    const tileUrl = isDark 
+      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+      : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+    
+    L.tileLayer(tileUrl, {
+      attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+      maxZoom: 19
+    }).addTo(map);
+    
+    // Fetch location data
+    try {
+      const response = await fetch('/data/locations.json');
+      const data = await response.json();
+      
+      // Custom icons
+      const presentationIcon = L.divIcon({
+        className: 'custom-marker',
+        html: '<div style="background:#1565c0;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);"></div>',
+        iconSize: [16, 16],
+        iconAnchor: [8, 8]
+      });
+      
+      const collaboratorIcon = L.divIcon({
+        className: 'custom-marker',
+        html: '<div style="background:#43a047;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);"></div>',
+        iconSize: [16, 16],
+        iconAnchor: [8, 8]
+      });
+      
+      // Add presentation markers
+      data.presentations.forEach(loc => {
+        L.marker([loc.lat, loc.lng], { icon: presentationIcon })
+          .bindPopup(`<strong>${loc.name}</strong><br>${loc.city}<br><em>${loc.years.join(', ')}</em>`)
+          .addTo(map);
+      });
+      
+      // Add collaborator markers
+      data.collaborators.forEach(loc => {
+        L.marker([loc.lat, loc.lng], { icon: collaboratorIcon })
+          .bindPopup(`<strong>${loc.institution}</strong><br>${loc.city}<br><em>${loc.collaborators.join(', ')}</em>`)
+          .addTo(map);
+      });
+    } catch (error) {
+      console.log('Could not load location data:', error);
+    }
+  }
+  
+  initResearchMap();
+  
+  // ===== RESEARCH IMPACT DASHBOARD =====
+  async function initImpactDashboard() {
+    // Find dashboard section
+    const dashboardSection = document.getElementById('dashboard');
+    if (!dashboardSection) return;
+    
+    const contentArea = dashboardSection.querySelector('.prose') || 
+                        dashboardSection.querySelector('.container') ||
+                        dashboardSection;
+    
+    try {
+      const response = await fetch('/data/scholar-metrics.json');
+      const data = await response.json();
+      
+      // Calculate max citations for chart scaling
+      const maxCitations = Math.max(...data.citationsByYear.map(d => d.citations));
+      
+      // Build dashboard HTML
+      const dashboardHTML = `
+        <div id="impact-dashboard">
+          <div class="impact-dashboard">
+            <div class="impact-card">
+              <div class="impact-number" data-value="${data.metrics.citations}">0</div>
+              <div class="impact-label">Citations</div>
+            </div>
+            <div class="impact-card">
+              <div class="impact-number" data-value="${data.metrics.hIndex}">0</div>
+              <div class="impact-label">h-index</div>
+            </div>
+            <div class="impact-card">
+              <div class="impact-number" data-value="${data.metrics.i10Index}">0</div>
+              <div class="impact-label">i10-index</div>
+            </div>
+            <div class="impact-card">
+              <div class="impact-number" data-value="${data.metrics.publications}">0</div>
+              <div class="impact-label">Publications</div>
+            </div>
+          </div>
+          
+          <div class="citations-chart">
+            <div class="chart-title">Citations by Year</div>
+            <div class="chart-bars">
+              ${data.citationsByYear.map(d => `
+                <div class="chart-bar-wrapper">
+                  <div class="chart-bar-value">${d.citations}</div>
+                  <div class="chart-bar" data-height="${(d.citations / maxCitations) * 120}px" style="height: 0;"></div>
+                  <div class="chart-bar-label">${d.year}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          
+          <div class="dashboard-footer">
+            Data sourced from Google Scholar • Last updated: ${data.lastUpdated}
+          </div>
+        </div>
+      `;
+      
+      contentArea.innerHTML = dashboardHTML;
+      
+      // Set up animation observer
+      const dashboard = document.getElementById('impact-dashboard');
+      
+      const impactObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && !entry.target.dataset.animated) {
+            entry.target.dataset.animated = 'true';
+            
+            // Animate each number
+            const numbers = entry.target.querySelectorAll('.impact-number');
+            numbers.forEach(num => {
+              const target = num.dataset.value;
+              animateCounter(num, target);
+            });
+            
+            // Animate chart bars
+            const bars = entry.target.querySelectorAll('.chart-bar');
+            bars.forEach((bar, index) => {
+              setTimeout(() => {
+                bar.style.height = bar.dataset.height;
+              }, index * 100);
+            });
+          }
+        });
+      }, { threshold: 0.3 });
+      
+      if (dashboard) {
+        impactObserver.observe(dashboard);
+      }
+    } catch (error) {
+      console.log('Could not load scholar metrics:', error);
+    }
+  }
+  
+  initImpactDashboard();
+  
+  // ===== CITE BUTTON FUNCTIONALITY =====
+  window.copyBibtex = function(button) {
+    const bibtex = button.dataset.bibtex;
+    
+    navigator.clipboard.writeText(bibtex).then(() => {
+      const originalText = button.innerHTML;
+      button.classList.add('copied');
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Copied!';
+      
+      setTimeout(() => {
+        button.classList.remove('copied');
+        button.innerHTML = originalText;
+      }, 2000);
+    });
+  };
+  
+  // Add cite buttons to publication pages
+  function addCiteButtons() {
+    // Check if we're on a publication page
+    const isPublicationPage = window.location.pathname.includes('/publication/') ||
+                               window.location.pathname.includes('/journal_publication/') ||
+                               window.location.pathname.includes('/conference_publication/') ||
+                               window.location.pathname.includes('/workshop_publication/');
+    
+    if (!isPublicationPage) return;
+    
+    // Find the publication title
+    const titleEl = document.querySelector('article h1') || document.querySelector('.article-title');
+    if (!titleEl) return;
+    
+    const title = titleEl.textContent.trim();
+    
+    // Find authors (look for author links or text)
+    const authorEls = document.querySelectorAll('.author-card a, .author-notes a, [rel="author"]');
+    let authors = [];
+    authorEls.forEach(el => {
+      const name = el.textContent.trim();
+      if (name && !authors.includes(name)) authors.push(name);
+    });
+    if (authors.length === 0) authors = ['Ampel, Benjamin M.'];
+    
+    // Get year from URL or page content
+    const yearMatch = window.location.pathname.match(/20\d{2}/) || 
+                      document.body.textContent.match(/\b(20\d{2})\b/);
+    const year = yearMatch ? yearMatch[0] : new Date().getFullYear();
+    
+    // Find DOI if present
+    const doiLink = document.querySelector('a[href*="doi.org"]');
+    const doi = doiLink ? doiLink.href.replace('https://doi.org/', '') : '';
+    
+    // Find venue
+    const venueEl = document.querySelector('.pub-publication, .article-metadata');
+    const venue = venueEl ? venueEl.textContent.trim().split(',')[0] : '';
+    
+    // Generate citation key
+    const keyWord = title.split(/\s+/)[0].toLowerCase().replace(/[^a-z]/g, '');
+    const citationKey = `ampel${year}${keyWord}`;
+    
+    // Generate BibTeX
+    const bibtex = `@article{${citationKey},
+  title={${title}},
+  author={${authors.join(' and ')}},
+  journal={${venue}},
+  year={${year}}${doi ? `,\n  doi={${doi}}` : ''}
+}`;
+    
+    // Find the button area (near PDF/links)
+    const buttonArea = document.querySelector('.btn-links') || 
+                       document.querySelector('.article-header-caption') ||
+                       document.querySelector('.article-container');
+    
+    if (buttonArea) {
+      const citeBtn = document.createElement('button');
+      citeBtn.className = 'cite-button';
+      citeBtn.dataset.bibtex = bibtex;
+      citeBtn.onclick = function() { window.copyBibtex(this); };
+      citeBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Cite (BibTeX)';
+      
+      // Insert at beginning of button area or after it
+      if (buttonArea.classList.contains('btn-links')) {
+        buttonArea.insertBefore(citeBtn, buttonArea.firstChild);
+      } else {
+        buttonArea.appendChild(citeBtn);
+      }
+    }
+  }
+  
+  addCiteButtons();
 });
 </script>
