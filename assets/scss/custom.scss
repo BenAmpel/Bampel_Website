@@ -2675,3 +2675,97 @@ body:not(.dark) .visitor-terminal {
   }
 }
 
+// =============================================================================
+// ===== DIMENSIONS BADGE STYLING =====
+// =============================================================================
+
+// Align Dimensions badge with other buttons
+.__dimensions_badge_embed__ {
+  vertical-align: middle;
+  margin-left: 8px;
+  display: inline-block;
+}
+
+// Dimensions badge section styling
+.dimensions-badge-section {
+  margin: 30px 0;
+  padding: 20px;
+  border-radius: 12px;
+  
+  h4 {
+    font-weight: 600;
+    margin-bottom: 15px;
+  }
+  
+  p {
+    font-size: 0.9rem;
+  }
+  
+  a {
+    font-weight: 600;
+    transition: color 0.2s ease;
+  }
+}
+
+// Cyber mode - grayscale the badge for terminal aesthetic
+body.dark .__dimensions_badge_embed__ {
+  filter: grayscale(100%) contrast(120%);
+  opacity: 0.8;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    filter: none;
+    opacity: 1;
+  }
+}
+
+// Manuscript mode - clean academic styling
+body:not(.dark) .dimensions-badge-section {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+  border: 1px solid #bae6fd !important;
+  
+  h4 {
+    color: #0c4a6e !important;
+  }
+  
+  p {
+    color: #475569 !important;
+  }
+  
+  a {
+    color: #0284c7 !important;
+    
+    &:hover {
+      color: #0369a1 !important;
+    }
+  }
+}
+
+// Altmetric badge section styling (matching)
+.altmetric-badge-section {
+  margin: 30px 0;
+  padding: 20px;
+  border-radius: 12px;
+  
+  h4 {
+    font-weight: 600;
+    margin-bottom: 15px;
+  }
+  
+  p {
+    font-size: 0.9rem;
+  }
+}
+
+// Cyber mode for Altmetric
+body.dark .altmetric-embed {
+  filter: grayscale(80%) contrast(110%);
+  opacity: 0.85;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    filter: none;
+    opacity: 1;
+  }
+}
+

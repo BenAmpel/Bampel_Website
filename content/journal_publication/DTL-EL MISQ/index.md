@@ -66,3 +66,5 @@ image:
 ---
 
 {{< altmetric doi="10.25300/MISQ/2023/17316" >}}
+
+{{< dimensions doi="10.25300/MISQ/2023/17316" >}}

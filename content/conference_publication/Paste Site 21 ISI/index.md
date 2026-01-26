@@ -66,5 +66,7 @@ url_pdf: 'https://par.nsf.gov/servlets/purl/10336827'
 
 {{< altmetric doi="10.1109/ISI53945.2021.9624765" >}}
 
+{{< dimensions doi="10.1109/ISI53945.2021.9624765" >}}
+
 
 
