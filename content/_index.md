@@ -175,7 +175,7 @@ sections:
     content:
       title: Teaching
       text: |
-        ### Georgia State University
+        {{< spoiler text="🎓 Georgia State University (7 courses)" >}}
         
         | Course | Title | Semester | Evaluation |
         |--------|-------|----------|------------|
@@ -189,7 +189,9 @@ sections:
         
         **Notable:** Co-developed CIS 4730: Deep Learning for Business (2025); Proposed and developed CIS 8684: Cyber Threat Intelligence (2024)
         
-        ### University of Arizona (Adjunct/GTA)
+        {{< /spoiler >}}
+        
+        {{< spoiler text="📚 University of Arizona - Adjunct/GTA (7 courses)" >}}
         
         | Course | Title | Semester | Evaluation |
         |--------|-------|----------|------------|
@@ -200,6 +202,8 @@ sections:
         | MIS 561 | Data Visualization (GTA) | Summer 2022 | - |
         | MIS 562 | Cyber Threat Intelligence | Fall 2021 | 4.5/5 |
         | MIS 562 | Cyber Threat Intelligence | Summer 2021 | 4.0/5 |
+        
+        {{< /spoiler >}}
     design:
       columns: '1'
 
