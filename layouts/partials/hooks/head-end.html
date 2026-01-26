@@ -10,6 +10,14 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Adjust avatar/headshot position to show more of the top of the head */
+.avatar img,
+.avatar-wrapper img,
+.wg-about-avatar img,
+.about-widget img.avatar {
+  object-position: center 30% !important;
+}
+
 /* Smooth hover effects for cards and links */
 .card, .pub-list-item, .article-container {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
