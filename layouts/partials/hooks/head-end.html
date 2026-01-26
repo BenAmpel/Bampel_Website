@@ -787,7 +787,7 @@ section:hover h1::after {
   display: block;
 }
 
-/* ===== AVATAR POSITIONING ===== */
+/* ===== AVATAR POSITIONING & QUALITY ===== */
 /* Multiple selectors to catch Hugo Blox avatar elements */
 /* Using transform to shift the image up within its container */
 .hb-about-avatar img,
@@ -802,19 +802,38 @@ img.avatar,
 section#about img {
   object-fit: cover !important;
   object-position: center 20% !important;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
 }
 
-/* Alternative: use negative margin to shift image position */
+/* Make avatar container larger for better quality */
 .hb-about-avatar,
 .about-avatar,
 .avatar-wrapper,
 .wg-about-avatar {
   overflow: hidden;
+  width: 270px !important;
+  height: 270px !important;
 }
 
+/* Ensure avatar image fills container at high quality */
 .hb-about-avatar img,
-.about-avatar img {
+.about-avatar img,
+.avatar img {
+  width: 100% !important;
+  height: 100% !important;
   transform: scale(1.1) translateY(5%) !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .hb-about-avatar,
+  .about-avatar,
+  .avatar-wrapper,
+  .wg-about-avatar {
+    width: 200px !important;
+    height: 200px !important;
+  }
 }
 
 /* Smooth hover effects for cards and links */
