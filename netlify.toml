@@ -1,20 +1,30 @@
 [build]
-  command  = "hugo --gc --minify -b $DEPLOY_PRIME_URL"
-  publish  = "public"
+  command = "hugo --gc --minify -b $DEPLOY_PRIME_URL"
+  publish = "public"
 
-  [build.environment]              # <-- indentation is critical
-    HUGO_VERSION       = "0.122.0" # last Wowchemy-safe release
-    HUGO_ENV           = "production"
-    HUGO_ENABLEGITINFO = "true"
+[build.environment]
+  HUGO_VERSION = "0.122.0"
+  HUGO_ENV = "production"
+  HUGO_ENABLEGITINFO = "true"
+
+[context.production]
+  command = "hugo --gc --minify -b $DEPLOY_PRIME_URL"
 
 [context.production.environment]
+  HUGO_VERSION = "0.122.0"
   HUGO_ENV = "production"
 
 [context.deploy-preview]
   command = "hugo --gc --minify --buildFuture -b $DEPLOY_PRIME_URL"
 
+[context.deploy-preview.environment]
+  HUGO_VERSION = "0.122.0"
+
 [context.branch-deploy]
   command = "hugo --gc --minify -b $DEPLOY_PRIME_URL"
+
+[context.branch-deploy.environment]
+  HUGO_VERSION = "0.122.0"
 
 [[plugins]]
   package = "netlify-plugin-hugo-cache-resources"
