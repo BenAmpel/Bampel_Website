@@ -1133,141 +1133,140 @@ section#about .hb-about-avatar,
 // ===== ADVERSARIAL NOISE EFFECT FOR AVATAR =====
 // =============================================================================
 // Simulates adversarial perturbation on hover - ties into AI security research
+// Uses JavaScript-injected overlay element for better compatibility
 
 // Noise animation keyframes
 @keyframes adversarial-noise {
-  0%, 100% { transform: translate(0, 0); }
-  10% { transform: translate(-2%, -2%); }
-  20% { transform: translate(2%, 2%); }
-  30% { transform: translate(-1%, 2%); }
-  40% { transform: translate(2%, -1%); }
-  50% { transform: translate(-2%, 1%); }
-  60% { transform: translate(1%, -2%); }
-  70% { transform: translate(-1%, -1%); }
-  80% { transform: translate(2%, 1%); }
-  90% { transform: translate(-2%, 2%); }
+  0%, 100% { transform: translate(0, 0) scale(1.1); }
+  10% { transform: translate(-2%, -2%) scale(1.1); }
+  20% { transform: translate(2%, 2%) scale(1.1); }
+  30% { transform: translate(-1%, 2%) scale(1.1); }
+  40% { transform: translate(2%, -1%) scale(1.1); }
+  50% { transform: translate(-2%, 1%) scale(1.1); }
+  60% { transform: translate(1%, -2%) scale(1.1); }
+  70% { transform: translate(-1%, -1%) scale(1.1); }
+  80% { transform: translate(2%, 1%) scale(1.1); }
+  90% { transform: translate(-2%, 2%) scale(1.1); }
 }
 
-@keyframes adversarial-glitch {
-  0% { clip-path: inset(40% 0 61% 0); }
-  20% { clip-path: inset(92% 0 1% 0); }
-  40% { clip-path: inset(43% 0 1% 0); }
-  60% { clip-path: inset(25% 0 58% 0); }
-  80% { clip-path: inset(54% 0 7% 0); }
-  100% { clip-path: inset(58% 0 43% 0); }
+@keyframes adversarial-color-shift {
+  0%, 100% { filter: hue-rotate(0deg); }
+  25% { filter: hue-rotate(30deg); }
+  50% { filter: hue-rotate(-20deg); }
+  75% { filter: hue-rotate(15deg); }
 }
 
-// Apply to avatar containers
+// The noise overlay element (added via JS)
+.adversarial-noise-overlay {
+  position: absolute;
+  top: -10%;
+  left: -10%;
+  width: 120%;
+  height: 120%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 80px 80px;
+  opacity: 0;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  border-radius: 50%;
+  z-index: 100;
+}
+
+// Color shift overlay
+.adversarial-color-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 0, 100, 0.15) 0%,
+    rgba(0, 255, 100, 0.1) 50%,
+    rgba(100, 0, 255, 0.15) 100%
+  );
+  opacity: 0;
+  mix-blend-mode: color;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  border-radius: 50%;
+  z-index: 101;
+}
+
+// Avatar hover effects - apply filter to image directly
 .avatar,
 .hb-about-avatar,
 .wg-about-avatar,
-[class*="avatar"] {
-  position: relative;
-  overflow: hidden;
+section#about [class*="avatar"] {
+  cursor: pointer;
   
-  // Noise overlay
-  &::after {
-    content: "";
-    position: absolute;
-    top: -10%;
-    left: -10%;
-    width: 120%;
-    height: 120%;
-    // SVG noise pattern - creates random pixel noise effect
-    background-image: 
-      url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-    background-size: 100px 100px;
-    opacity: 0;
-    mix-blend-mode: overlay;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-    border-radius: inherit;
-    z-index: 10;
+  img {
+    transition: filter 0.3s ease, transform 0.3s ease !important;
   }
   
-  // Colored noise overlay for RGB shift effect
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: 
-      linear-gradient(45deg, 
-        rgba(255, 0, 0, 0.1) 0%, 
-        rgba(0, 255, 0, 0.1) 33%, 
-        rgba(0, 0, 255, 0.1) 66%, 
-        rgba(255, 0, 255, 0.1) 100%
-      );
-    opacity: 0;
-    mix-blend-mode: color-dodge;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-    border-radius: inherit;
-    z-index: 11;
-  }
-  
-  // Hover state - show adversarial attack
   &:hover {
-    &::after {
-      opacity: 0.5;
-      animation: adversarial-noise 0.15s infinite steps(3);
-    }
-    
-    &::before {
-      opacity: 0.3;
-    }
-    
-    // Apply perturbation filter to the image
     img {
-      filter: contrast(120%) brightness(95%) saturate(120%) hue-rotate(5deg) !important;
-      transition: filter 0.2s ease;
+      filter: contrast(125%) brightness(92%) saturate(130%) hue-rotate(8deg) !important;
+      transform: scale(1.02) !important;
+    }
+    
+    .adversarial-noise-overlay {
+      opacity: 0.6;
+      animation: adversarial-noise 0.12s infinite steps(4);
+    }
+    
+    .adversarial-color-overlay {
+      opacity: 0.5;
+      animation: adversarial-color-shift 0.5s infinite linear;
     }
   }
 }
 
-// More intense effect for dark mode (cyber theme)
+// Dark mode (cyber theme) - more intense green-tinted effect
 .dark .avatar:hover,
 .dark .hb-about-avatar:hover,
-.dark .wg-about-avatar:hover,
-.dark [class*="avatar"]:hover {
-  &::after {
-    opacity: 0.6;
-    // Green-tinted noise for matrix aesthetic
-    filter: hue-rotate(90deg) brightness(1.5);
-  }
-  
-  &::before {
-    opacity: 0.4;
-    background: 
-      linear-gradient(45deg, 
-        rgba(0, 255, 65, 0.2) 0%, 
-        rgba(0, 255, 255, 0.15) 50%, 
-        rgba(255, 0, 255, 0.15) 100%
-      );
-  }
-  
+.dark section#about [class*="avatar"]:hover {
   img {
-    filter: contrast(130%) brightness(90%) saturate(130%) hue-rotate(10deg) !important;
+    filter: contrast(140%) brightness(85%) saturate(150%) hue-rotate(15deg) !important;
+  }
+  
+  .adversarial-noise-overlay {
+    opacity: 0.7;
+    filter: hue-rotate(90deg) brightness(1.3);
+  }
+  
+  .adversarial-color-overlay {
+    background: linear-gradient(
+      135deg,
+      rgba(0, 255, 65, 0.25) 0%,
+      rgba(0, 255, 255, 0.2) 50%,
+      rgba(255, 0, 255, 0.2) 100%
+    );
+    opacity: 0.6;
   }
 }
 
-// Subtle effect for light mode (manuscript theme)
+// Light mode (manuscript) - subtle scholarly effect
 body:not(.dark) .avatar:hover,
 body:not(.dark) .hb-about-avatar:hover,
-body:not(.dark) [class*="avatar"]:hover {
-  &::after {
-    opacity: 0.25;
-    filter: grayscale(50%);
-  }
-  
-  &::before {
-    opacity: 0.15;
-  }
-  
+body:not(.dark) section#about [class*="avatar"]:hover {
   img {
-    filter: contrast(110%) brightness(98%) !important;
+    filter: contrast(115%) brightness(95%) grayscale(10%) !important;
+  }
+  
+  .adversarial-noise-overlay {
+    opacity: 0.3;
+    filter: grayscale(80%);
+  }
+  
+  .adversarial-color-overlay {
+    background: linear-gradient(
+      135deg,
+      rgba(100, 100, 100, 0.1) 0%,
+      rgba(50, 50, 50, 0.1) 100%
+    );
+    opacity: 0.2;
   }
 }
 
