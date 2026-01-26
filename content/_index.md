@@ -32,7 +32,7 @@ sections:
         
         ---
         
-        {{< spoiler text="🛠️ Skills & Expertise (8)" >}}
+        {{< spoiler text="🛠️ Skills & Expertise" >}}
         
         | Skill | Description |
         |-------|-------------|
