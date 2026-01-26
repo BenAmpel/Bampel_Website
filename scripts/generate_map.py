@@ -17,6 +17,14 @@ import matplotlib.patches as mpatches
 import numpy as np
 from pathlib import Path
 
+try:
+    import cartopy.crs as ccrs
+    import cartopy.feature as cfeature
+    HAS_CARTOPY = True
+except ImportError:
+    HAS_CARTOPY = False
+    print("Warning: cartopy not installed. Run: pip install cartopy")
+
 SCRIPT_DIR = Path(__file__).parent
 PROJECT_ROOT = SCRIPT_DIR.parent
 LOCATIONS_FILE = PROJECT_ROOT / "static" / "data" / "locations.json"
@@ -30,119 +38,135 @@ def load_locations():
 
 
 def draw_map(dark_mode=False):
-    """Generate the map visualization using basic matplotlib."""
+    """Generate the map visualization using cartopy."""
+    if not HAS_CARTOPY:
+        print("Cartopy required for map generation")
+        return None
+        
     data = load_locations()
     
     # Colors
     if dark_mode:
         bg_color = '#0d1117'
+        land_color = '#21262d'
+        ocean_color = '#0d1117'
+        border_color = '#30363d'
         text_color = '#e6edf3'
         presentation_color = '#58a6ff'
         collaborator_color = '#3fb950'
-        land_color = '#21262d'
-        border_color = '#30363d'
         muted_color = '#8b949e'
     else:
         bg_color = '#ffffff'
+        land_color = '#e8e8e8'
+        ocean_color = '#f0f7ff'
+        border_color = '#cccccc'
         text_color = '#1f2328'
         presentation_color = '#0969da'
         collaborator_color = '#1a7f37'
-        land_color = '#f0f0f0'
-        border_color = '#d0d7de'
         muted_color = '#656d76'
     
-    fig, ax = plt.subplots(figsize=(14, 8), facecolor=bg_color)
-    ax.set_facecolor(bg_color)
+    # Create figure with Robinson projection (good for world maps)
+    fig = plt.figure(figsize=(14, 7), facecolor=bg_color)
+    ax = fig.add_subplot(1, 1, 1, projection=ccrs.Robinson())
+    ax.set_facecolor(ocean_color)
     
-    # Simple world map background (rough outline)
-    # US bounding box approximate
-    ax.set_xlim(-170, 30)
-    ax.set_ylim(0, 75)
+    # Set global extent
+    ax.set_global()
     
-    # Draw a simple representation
-    ax.fill([-125, -125, -65, -65, -125], [25, 50, 50, 25, 25], 
-            color=land_color, alpha=0.5, edgecolor=border_color, linewidth=1)
-    
-    # Europe rough
-    ax.fill([-10, -10, 40, 40, -10], [35, 60, 60, 35, 35], 
-            color=land_color, alpha=0.5, edgecolor=border_color, linewidth=1)
-    
-    # Asia rough (for Thailand)
-    ax.fill([90, 90, 110, 110, 90], [5, 25, 25, 5, 5], 
-            color=land_color, alpha=0.5, edgecolor=border_color, linewidth=1)
+    # Add map features
+    ax.add_feature(cfeature.LAND, facecolor=land_color, edgecolor=border_color, linewidth=0.5)
+    ax.add_feature(cfeature.COASTLINE, linewidth=0.3, edgecolor=border_color)
+    ax.add_feature(cfeature.BORDERS, linewidth=0.2, edgecolor=border_color, linestyle=':')
     
     # Plot presentation venues
     for loc in data['presentations']:
-        ax.scatter(loc['lng'], loc['lat'], s=200, c=presentation_color, 
-                  edgecolors='white', linewidths=2, zorder=5, alpha=0.9)
+        ax.plot(loc['lng'], loc['lat'], 
+                marker='o', markersize=12, 
+                color=presentation_color, 
+                markeredgecolor='white', markeredgewidth=2,
+                transform=ccrs.PlateCarree(), zorder=5)
         
-        # Label
-        offset_x = 3 if loc['lng'] < -100 else -3
-        ha = 'left' if loc['lng'] < -100 else 'right'
-        ax.annotate(f"{loc['name']}\n({', '.join(loc['years'])})", 
-                   (loc['lng'], loc['lat']),
-                   xytext=(offset_x, 5), textcoords='offset points',
-                   fontsize=8, color=text_color, ha=ha, va='bottom',
-                   fontweight='medium')
+        # Add label with offset
+        label = loc['name'].split('(')[0].strip()  # Get short name
+        if len(label) > 10:
+            label = loc['name'].split()[0]  # Just first word for long names
+        
+        # Determine label position based on location
+        offset_x = 5
+        ha = 'left'
+        if loc['lng'] > 50:  # Asia
+            offset_x = -5
+            ha = 'right'
+            
+        ax.annotate(label, 
+                   xy=(loc['lng'], loc['lat']),
+                   xytext=(offset_x, 5),
+                   textcoords='offset points',
+                   fontsize=8, fontweight='bold',
+                   color=text_color, ha=ha,
+                   transform=ccrs.PlateCarree(),
+                   zorder=6)
     
     # Plot collaborator institutions
     for loc in data['collaborators']:
-        ax.scatter(loc['lng'], loc['lat'], s=150, c=collaborator_color,
-                  edgecolors='white', linewidths=2, zorder=5, alpha=0.9,
-                  marker='s')
-        
-        # Label
-        offset_x = 3 if loc['lng'] < -100 else -3
-        ha = 'left' if loc['lng'] < -100 else 'right'
-        ax.annotate(f"{loc['institution']}", 
-                   (loc['lng'], loc['lat']),
-                   xytext=(offset_x, -10), textcoords='offset points',
-                   fontsize=7, color=muted_color, ha=ha, va='top')
+        ax.plot(loc['lng'], loc['lat'], 
+                marker='s', markersize=10,
+                color=collaborator_color,
+                markeredgecolor='white', markeredgewidth=2,
+                transform=ccrs.PlateCarree(), zorder=5)
     
     # Title
-    ax.set_title('Research Footprint', fontsize=18, fontweight='bold',
-                color=text_color, pad=20)
+    fig.suptitle('Research Footprint', fontsize=18, fontweight='bold',
+                 color=text_color, y=0.95)
     
     # Legend
     legend_elements = [
-        plt.scatter([], [], s=100, c=presentation_color, edgecolors='white', 
-                   linewidths=1.5, label='Conference Presentations'),
-        plt.scatter([], [], s=80, c=collaborator_color, edgecolors='white',
-                   linewidths=1.5, marker='s', label='Collaborator Institutions'),
+        plt.Line2D([0], [0], marker='o', color='w', markerfacecolor=presentation_color,
+                   markersize=10, markeredgecolor='white', markeredgewidth=1.5,
+                   label='Conference Presentations'),
+        plt.Line2D([0], [0], marker='s', color='w', markerfacecolor=collaborator_color,
+                   markersize=9, markeredgecolor='white', markeredgewidth=1.5,
+                   label='Collaborator Institutions'),
     ]
+    
     legend = ax.legend(handles=legend_elements, loc='lower left', 
-                       frameon=True, fontsize=9)
-    legend.get_frame().set_facecolor(bg_color)
-    legend.get_frame().set_edgecolor(border_color)
+                       frameon=True, fontsize=9, facecolor=bg_color,
+                       edgecolor=border_color)
     for text in legend.get_texts():
         text.set_color(text_color)
     
-    ax.axis('off')
+    plt.tight_layout()
     
     return fig
 
 
 def main():
     """Generate both light and dark mode map images."""
+    if not HAS_CARTOPY:
+        print("Error: cartopy is required. Install with: pip install cartopy")
+        return
+        
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     
     # Generate light mode
     print("Generating light mode map...")
     fig_light = draw_map(dark_mode=False)
-    light_path = OUTPUT_DIR / 'research-map.png'
-    fig_light.savefig(light_path, dpi=150, bbox_inches='tight', 
-                      facecolor='white', edgecolor='none')
-    plt.close(fig_light)
-    print(f"  Saved: {light_path}")
+    if fig_light:
+        light_path = OUTPUT_DIR / 'research-map.png'
+        fig_light.savefig(light_path, dpi=150, bbox_inches='tight', 
+                          facecolor='white', edgecolor='none')
+        plt.close(fig_light)
+        print(f"  Saved: {light_path}")
     
     # Generate dark mode
     print("Generating dark mode map...")
     fig_dark = draw_map(dark_mode=True)
-    dark_path = OUTPUT_DIR / 'research-map-dark.png'
-    fig_dark.savefig(dark_path, dpi=150, bbox_inches='tight', 
-                     facecolor='#0d1117', edgecolor='none')
-    plt.close(fig_dark)
-    print(f"  Saved: {dark_path}")
+    if fig_dark:
+        dark_path = OUTPUT_DIR / 'research-map-dark.png'
+        fig_dark.savefig(dark_path, dpi=150, bbox_inches='tight', 
+                         facecolor='#0d1117', edgecolor='none')
+        plt.close(fig_dark)
+        print(f"  Saved: {dark_path}")
     
     print("\nDone! Map images generated successfully.")
 
