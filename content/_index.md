@@ -207,65 +207,6 @@ sections:
     design:
       columns: '1'
 
-  # ---------- CAREER TIMELINE ----------
-  - block: experience
-    id: timeline
-    content:
-      title: Career Journey
-      date_format: Jan 2006
-      items:
-        - title: Assistant Professor of Computer Information Systems
-          company: Georgia State University
-          company_url: 'https://robinson.gsu.edu'
-          location: Atlanta, GA
-          date_start: '2024-08-01'
-          date_end: ''
-          description: J. Mack Robinson School of Business
-        - title: Adjunct Lecturer
-          company: University of Arizona
-          company_url: 'https://eller.arizona.edu'
-          location: Tucson, AZ
-          date_start: '2021-08-01'
-          date_end: '2024-05-01'
-          description: Teaching Cyber Threat Intelligence courses
-        - title: Research Associate, AI Lab
-          company: University of Arizona
-          company_url: 'https://eller.arizona.edu'
-          location: Tucson, AZ
-          date_start: '2018-08-01'
-          date_end: '2024-05-01'
-          description: Artificial Intelligence Lab under Dr. Hsinchun Chen
-        - title: NSF CyberCorps Scholarship-for-Service Fellow
-          company: University of Arizona
-          company_url: ''
-          location: Tucson, AZ
-          date_start: '2018-08-01'
-          date_end: '2021-05-01'
-          description: National Science Foundation fellowship recipient
-        - title: Ph.D. in Management Information Systems
-          company: University of Arizona
-          company_url: ''
-          location: Tucson, AZ
-          date_start: '2019-08-01'
-          date_end: '2024-05-01'
-          description: ACM SIGMIS Doctoral Dissertation Award recipient
-        - title: M.S. in Management Information Systems
-          company: University of Arizona
-          company_url: ''
-          location: Tucson, AZ
-          date_start: '2017-08-01'
-          date_end: '2019-05-01'
-          description: ''
-        - title: B.S.B.A. in Management Information Systems
-          company: University of Arizona
-          company_url: ''
-          location: Tucson, AZ
-          date_start: '2013-08-01'
-          date_end: '2017-05-01'
-          description: Outstanding Senior Award recipient
-    design:
-      columns: '1'
-
   # ---------- INVITED TALKS ----------
   - block: markdown
     id: talks
@@ -381,6 +322,65 @@ sections:
         - **"More Older Americans Being Scammed; Is Technology a Factor?"** — The National Desk (November 19, 2024)
         
         {{< /spoiler >}}
+    design:
+      columns: '1'
+
+  # ---------- CAREER TIMELINE ----------
+  - block: experience
+    id: timeline
+    content:
+      title: Career Journey
+      date_format: Jan 2006
+      items:
+        - title: Assistant Professor of Computer Information Systems
+          company: Georgia State University
+          company_url: 'https://robinson.gsu.edu'
+          location: Atlanta, GA
+          date_start: '2024-08-01'
+          date_end: ''
+          description: J. Mack Robinson School of Business
+        - title: Adjunct Lecturer
+          company: University of Arizona
+          company_url: 'https://eller.arizona.edu'
+          location: Tucson, AZ
+          date_start: '2021-08-01'
+          date_end: '2024-05-01'
+          description: Teaching Cyber Threat Intelligence courses
+        - title: Research Associate, AI Lab
+          company: University of Arizona
+          company_url: 'https://eller.arizona.edu'
+          location: Tucson, AZ
+          date_start: '2018-08-01'
+          date_end: '2024-05-01'
+          description: Artificial Intelligence Lab under Dr. Hsinchun Chen
+        - title: NSF CyberCorps Scholarship-for-Service Fellow
+          company: University of Arizona
+          company_url: ''
+          location: Tucson, AZ
+          date_start: '2018-08-01'
+          date_end: '2021-05-01'
+          description: National Science Foundation fellowship recipient
+        - title: Ph.D. in Management Information Systems
+          company: University of Arizona
+          company_url: ''
+          location: Tucson, AZ
+          date_start: '2019-08-01'
+          date_end: '2024-05-01'
+          description: ACM SIGMIS Doctoral Dissertation Award recipient
+        - title: M.S. in Management Information Systems
+          company: University of Arizona
+          company_url: ''
+          location: Tucson, AZ
+          date_start: '2017-08-01'
+          date_end: '2019-05-01'
+          description: ''
+        - title: B.S.B.A. in Management Information Systems
+          company: University of Arizona
+          company_url: ''
+          location: Tucson, AZ
+          date_start: '2013-08-01'
+          date_end: '2017-05-01'
+          description: Outstanding Senior Award recipient
     design:
       columns: '1'
 
