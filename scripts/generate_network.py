@@ -232,9 +232,11 @@ def draw_network(dark_mode=False):
             else:
                 display_name = node
             
-            # Position label outside node
+            # Position label just slightly outside the node (much closer than before)
             angle = math.atan2(y, x)
-            label_distance = 0.25 + (size / 3000)
+            # Calculate node radius from scatter size (size is in points^2)
+            node_radius = math.sqrt(size) / 100  # Approximate radius in data units
+            label_distance = node_radius + 0.12  # Just slightly outside the node
             label_x = x + label_distance * math.cos(angle)
             label_y = y + label_distance * math.sin(angle)
             
