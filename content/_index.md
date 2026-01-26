@@ -77,27 +77,32 @@ sections:
     design:
       columns: '1'
   
-  # ---------- CO-AUTHOR NETWORK ----------
+  # ---------- VISUALIZATIONS (Network + Map) ----------
   - block: markdown
-    id: network
+    id: visualizations
     content:
-      title: Collaboration Network
+      title: Research Visualizations
       text: |
-        ![Research Collaboration Network](/images/coauthor-network.png)
-        
-        *Research collaboration network based on co-authored publications*
-    design:
-      columns: '1'
-
-  # ---------- RESEARCH MAP ----------
-  - block: markdown
-    id: map
-    content:
-      title: Research Footprint
-      text: |
-        ![Research Map](/images/research-map.png)
-        
-        *Conference presentations and collaborator institutions worldwide*
+        <div class="viz-grid">
+          <div class="viz-column">
+            <details class="viz-details">
+              <summary>🤝 Collaboration Network</summary>
+              <div class="viz-content">
+                <img src="/images/coauthor-network.png" alt="Research Collaboration Network" class="viz-image" id="network-img">
+                <p class="viz-caption">Research collaboration network based on co-authored publications</p>
+              </div>
+            </details>
+          </div>
+          <div class="viz-column">
+            <details class="viz-details">
+              <summary>🌍 Research Footprint</summary>
+              <div class="viz-content">
+                <img src="/images/research-map.png" alt="Research Map" class="viz-image" id="map-img">
+                <p class="viz-caption">Conference presentations and collaborator institutions worldwide</p>
+              </div>
+            </details>
+          </div>
+        </div>
     design:
       columns: '1'
 

@@ -475,49 +475,110 @@ section:hover h1::after {
   box-shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
 
-/* Limit visualization image display sizes */
-#network img,
-section[id="network"] img {
-  max-width: 550px;
-  width: 100%;
-  height: auto;
-  display: block;
-  margin: 0 auto;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+/* ===== TWO-COLUMN VISUALIZATION GRID ===== */
+.viz-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin: 20px 0;
 }
 
-#dashboard img,
-section[id="dashboard"] img {
-  max-width: 700px;
-  width: 100%;
-  height: auto;
-  display: block;
-  margin: 0 auto;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+@media (max-width: 900px) {
+  .viz-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
-#map img,
-section[id="map"] img {
-  max-width: 800px;
+.viz-column {
   width: 100%;
-  height: auto;
-  display: block;
-  margin: 0 auto;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
 
-.network-caption {
-  font-size: 0.9rem;
-  color: #666;
+.viz-details {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f8fafc;
+  transition: all 0.3s ease;
+}
+
+.dark .viz-details {
+  border-color: #334155;
+  background: #1e293b;
+}
+
+.viz-details summary {
+  padding: 16px 20px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  transition: all 0.3s ease;
+  list-style: none;
+}
+
+.viz-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.viz-details summary::after {
+  content: '▶';
+  margin-left: auto;
+  font-size: 0.8rem;
+  transition: transform 0.3s ease;
+  color: #64748b;
+}
+
+.viz-details[open] summary::after {
+  transform: rotate(90deg);
+}
+
+.dark .viz-details summary {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  color: #f1f5f9;
+}
+
+.viz-details summary:hover {
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+}
+
+.dark .viz-details summary:hover {
+  background: linear-gradient(135deg, #334155 0%, #475569 100%);
+}
+
+.viz-content {
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.viz-image {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.dark .viz-image {
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.viz-caption {
+  font-size: 0.85rem;
+  color: #64748b;
   margin-top: 12px;
+  text-align: center;
   font-style: italic;
 }
 
-.dark .network-caption {
-  color: #aaa;
+.dark .viz-caption {
+  color: #94a3b8;
 }
 
 /* Light/dark mode image switching */
@@ -984,19 +1045,21 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Define images that have dark/light variants
     const themeImages = [
-      { selector: 'img[src*="coauthor-network"]', light: '/images/coauthor-network.png', dark: '/images/coauthor-network-dark.png' },
+      { selector: 'img[src*="coauthor-network"], #network-img', light: '/images/coauthor-network.png', dark: '/images/coauthor-network-dark.png' },
       { selector: 'img[src*="impact-dashboard"]', light: '/images/impact-dashboard.png', dark: '/images/impact-dashboard-dark.png' },
-      { selector: 'img[src*="research-map"]', light: '/images/research-map.png', dark: '/images/research-map-dark.png' }
+      { selector: 'img[src*="research-map"], #map-img', light: '/images/research-map.png', dark: '/images/research-map-dark.png' }
     ];
     
     themeImages.forEach(({ selector, light, dark }) => {
-      const img = document.querySelector(selector);
-      if (img) {
-        const newSrc = isDark ? dark : light;
-        if (!img.src.endsWith(newSrc)) {
-          img.src = newSrc;
+      const imgs = document.querySelectorAll(selector);
+      imgs.forEach(img => {
+        if (img) {
+          const newSrc = isDark ? dark : light;
+          if (!img.src.endsWith(newSrc)) {
+            img.src = newSrc;
+          }
         }
-      }
+      });
     });
   }
   
