@@ -1725,6 +1725,28 @@ body:not(.dark) {
       color: #333 !important;
       text-align: justify;
       line-height: 1.8;
+      
+      // Links inside biography - standard underlined
+      a {
+        color: #0066cc !important;
+        text-decoration: underline !important;
+        
+        &:hover {
+          color: #004499 !important;
+        }
+      }
+      
+      // Bold text inside biography - black, not orange
+      strong, b {
+        color: #111 !important;
+        font-weight: 700;
+      }
+      
+      // Italic text - dark gray
+      em, i {
+        color: #333 !important;
+        font-style: italic;
+      }
     }
     
     // Profile name - black ink
@@ -1812,6 +1834,27 @@ body:not(.dark) {
     span, div, p {
       color: #333 !important;
       text-shadow: none !important;
+    }
+    
+    // All links in about section - override cyber blue
+    a {
+      color: #0066cc !important;
+      text-shadow: none !important;
+      
+      &:hover {
+        color: #004499 !important;
+        text-shadow: none !important;
+      }
+    }
+    
+    // All bold text in about section - override cyber orange
+    strong, b {
+      color: #111 !important;
+    }
+    
+    // All italic text in about section - override cyber cyan
+    em, i {
+      color: #333 !important;
     }
     
     // Social icons
