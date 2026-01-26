@@ -1667,6 +1667,38 @@ function runEnhancements() {
     }
   });
   
+  // ===== ADVERSARIAL NOISE OVERLAY FOR AVATAR =====
+  // Inject overlay elements for the adversarial perturbation effect
+  function initAdversarialEffect() {
+    const avatarContainers = document.querySelectorAll(
+      'section#about .avatar, .hb-about-avatar, .wg-about-avatar, section#about [class*="avatar"]'
+    );
+    
+    avatarContainers.forEach(container => {
+      // Skip if already initialized
+      if (container.querySelector('.adversarial-noise-overlay')) return;
+      
+      // Ensure container has relative positioning
+      container.style.position = 'relative';
+      container.style.overflow = 'hidden';
+      
+      // Create noise overlay
+      const noiseOverlay = document.createElement('div');
+      noiseOverlay.className = 'adversarial-noise-overlay';
+      container.appendChild(noiseOverlay);
+      
+      // Create color shift overlay
+      const colorOverlay = document.createElement('div');
+      colorOverlay.className = 'adversarial-color-overlay';
+      container.appendChild(colorOverlay);
+    });
+  }
+  
+  // Initialize adversarial effect
+  initAdversarialEffect();
+  setTimeout(initAdversarialEffect, 500);
+  setTimeout(initAdversarialEffect, 1500);
+  
   // ===== SCROLL PROGRESS BAR =====
   if (!document.querySelector('.scroll-progress')) {
     const scrollProgress = document.createElement('div');
