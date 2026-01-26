@@ -2,7 +2,7 @@
 title: 'Email Phishing Prevention: An Explainable Nudging Approach'
 
 authors:
-  - R. Mason Wagner
+  - Mason Wagner
   - admin
   - Matthew J. Hashim
   - Hsinchun Chen
