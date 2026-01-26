@@ -2062,6 +2062,116 @@ body:not(.dark) {
       background: #999 !important;
     }
   }
+  
+  // =============================================================================
+  // GLOBAL OVERRIDES - Reset ALL cyber colors in light mode
+  // =============================================================================
+  
+  // Reset ALL green borders to gray
+  * {
+    border-color: inherit;
+  }
+  
+  [style*="border-color: rgba(0, 255"],
+  [style*="border-color: #00ff"] {
+    border-color: #ddd !important;
+  }
+  
+  // Reset ALL text shadows (remove glows)
+  h1, h2, h3, h4, h5, h6,
+  p, span, div, a, li, td, th,
+  strong, b, em, i {
+    text-shadow: none !important;
+  }
+  
+  // Reset ALL box shadows (remove green glows)
+  section, article, .card, .container,
+  details, summary, .btn, button,
+  [class*="section"], [class*="widget"] {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  }
+  
+  // Ensure ALL links are standard blue
+  a:not(.btn):not(.nav-link):not(.navbar-brand) {
+    color: #0066cc !important;
+    
+    &:hover {
+      color: #004499 !important;
+    }
+  }
+  
+  // Ensure ALL bold text is black
+  strong, b {
+    color: #111 !important;
+  }
+  
+  // Ensure ALL italic text is dark gray  
+  em, i:not(.fas):not(.fab):not(.far):not(.fa) {
+    color: #444 !important;
+  }
+  
+  // Reset section containers
+  section .container,
+  .home-section .container,
+  [class*="hb-"] .container,
+  [class*="wg-"] .container {
+    background: #fff !important;
+    border: 1px solid #ddd !important;
+    border-radius: 4px !important;
+  }
+  
+  // Reset spoiler/details borders
+  details, .spoiler, [class*="spoiler"] {
+    border: 1px solid #ddd !important;
+    border-radius: 8px !important;
+    
+    summary {
+      border-bottom: 1px solid #ddd !important;
+      color: #333 !important;
+      
+      &::before, &::after {
+        color: #666 !important;
+      }
+    }
+  }
+  
+  // Reset table styling
+  table {
+    border: 1px solid #ddd !important;
+    
+    th, td {
+      border: 1px solid #ddd !important;
+      color: #333 !important;
+    }
+    
+    th {
+      background: #f5f5f5 !important;
+      color: #111 !important;
+    }
+  }
+  
+  // Reset list styling
+  ul li, ol li {
+    color: #333 !important;
+    
+    &::before {
+      color: #666 !important;
+    }
+    
+    &::marker {
+      color: #666 !important;
+    }
+  }
+  
+  // Reset all pseudo-elements that might have cyber styling
+  *::before, *::after {
+    text-shadow: none !important;
+  }
+  
+  // Visitor forensics widget - academic style
+  .visitor-forensics-widget {
+    border-color: #ddd !important;
+  }
 }
 
 // =============================================================================
