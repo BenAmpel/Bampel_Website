@@ -124,10 +124,10 @@ def create_radial_layout(G, center_node, coauthor_counts):
             pos[node] = (r * math.cos(angle), r * math.sin(angle))
     
     np.random.seed(42)  # For reproducibility
-    # Increased radii for larger nodes
-    place_ring(frequent, 2.0, start_angle=0.2)
-    place_ring(moderate, 3.8, start_angle=0.5)
-    place_ring(occasional, 5.5, start_angle=0.1)
+    # Compact radii - closer together for smaller overall image
+    place_ring(frequent, 1.5, start_angle=0.2)
+    place_ring(moderate, 2.8, start_angle=0.5)
+    place_ring(occasional, 4.0, start_angle=0.1)
     
     return pos
 
@@ -166,8 +166,8 @@ def draw_network(dark_mode=False):
         edge_color = 'rgba(9, 105, 218, 0.2)'
         glow_color = '#0969da'
     
-    # Create figure (larger to accommodate bigger nodes)
-    fig, ax = plt.subplots(figsize=(18, 16), facecolor=bg_color)
+    # Create figure (compact size)
+    fig, ax = plt.subplots(figsize=(14, 12), facecolor=bg_color)
     ax.set_facecolor(bg_color)
     
     # Get layout
@@ -251,7 +251,7 @@ def draw_network(dark_mode=False):
     
     # Add title
     title_color = text_color
-    ax.text(0, 7.2, 'Research Collaboration Network', fontsize=22, fontweight='bold',
+    ax.text(0, 5.3, 'Research Collaboration Network', fontsize=22, fontweight='bold',
             color=title_color, ha='center', va='center')
     
     # Add legend
@@ -277,12 +277,12 @@ def draw_network(dark_mode=False):
     total_collaborators = len(coauthor_counts)
     total_papers = len(publications)
     stats_text = f'{total_collaborators} Collaborators  •  {total_papers} Publications'
-    ax.text(0, -7.0, stats_text, fontsize=11, color=occasional_color, 
+    ax.text(0, -5.2, stats_text, fontsize=11, color=occasional_color, 
             ha='center', va='center', style='italic')
     
-    # Clean up axes
-    ax.set_xlim(-7.5, 7.5)
-    ax.set_ylim(-7.8, 7.8)
+    # Clean up axes - compact bounds
+    ax.set_xlim(-5.5, 5.5)
+    ax.set_ylim(-5.7, 5.7)
     ax.axis('off')
     ax.set_aspect('equal')
     
