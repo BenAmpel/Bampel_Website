@@ -15,20 +15,19 @@
 </div>
 <script>
 (function() {
-  function loadDimensionsBadge() {
-    if (typeof __dimensions_embed !== 'undefined' && __dimensions_embed.addBadges) {
-      __dimensions_embed.addBadges();
-    } else {
-      // Script not loaded yet, try again
-      setTimeout(loadDimensionsBadge, 500);
-    }
-  }
-  if (document.readyState === 'complete') {
-    setTimeout(loadDimensionsBadge, 100);
+  // Load the Dimensions script if not already loaded
+  if (typeof __dimensions_embed === 'undefined') {
+    var script = document.createElement('script');
+    script.src = 'https://badge.dimensions.ai/badge.js';
+    script.charset = 'utf-8';
+    script.onload = function() {
+      if (typeof __dimensions_embed !== 'undefined' && __dimensions_embed.addBadges) {
+        __dimensions_embed.addBadges();
+      }
+    };
+    document.head.appendChild(script);
   } else {
-    window.addEventListener('load', function() {
-      setTimeout(loadDimensionsBadge, 100);
-    });
+    __dimensions_embed.addBadges();
   }
 })();
 </script>
