@@ -2,6 +2,113 @@
 // This file overrides theme styles
 
 // ===== CYBER GLITCH EFFECT =====
+// Modern clip-path based glitch animation
+
+// Glitch Keyframes using clip-path for jagged movement
+@keyframes glitch-clip-1 {
+  0% { 
+    clip-path: polygon(0 2%, 100% 2%, 100% 5%, 0 5%);
+    transform: translate(-3px, 0);
+  }
+  10% {
+    clip-path: polygon(0 15%, 100% 15%, 100% 15%, 0 15%);
+    transform: translate(3px, 0);
+  }
+  20% { 
+    clip-path: polygon(0 10%, 100% 10%, 100% 20%, 0 20%);
+    transform: translate(-3px, 0);
+  }
+  30% {
+    clip-path: polygon(0 1%, 100% 1%, 100% 2%, 0 2%);
+    transform: translate(0, 0);
+  }
+  40% { 
+    clip-path: polygon(0 33%, 100% 33%, 100% 33%, 0 33%);
+    transform: translate(3px, 0);
+  }
+  50% {
+    clip-path: polygon(0 44%, 100% 44%, 100% 44%, 0 44%);
+    transform: translate(-3px, 0);
+  }
+  60% { 
+    clip-path: polygon(0 50%, 100% 50%, 100% 20%, 0 20%);
+    transform: translate(3px, 0);
+  }
+  70% {
+    clip-path: polygon(0 70%, 100% 70%, 100% 70%, 0 70%);
+    transform: translate(-3px, 0);
+  }
+  80% { 
+    clip-path: polygon(0 80%, 100% 80%, 100% 80%, 0 80%);
+    transform: translate(3px, 0);
+  }
+  90% {
+    clip-path: polygon(0 50%, 100% 50%, 100% 55%, 0 55%);
+    transform: translate(-3px, 0);
+  }
+  100% { 
+    clip-path: polygon(0 70%, 100% 70%, 100% 80%, 0 80%);
+    transform: translate(3px, 0);
+  }
+}
+
+@keyframes glitch-clip-2 {
+  0% { 
+    clip-path: polygon(0 25%, 100% 25%, 100% 30%, 0 30%);
+    transform: translate(3px, 0);
+  }
+  15% { 
+    clip-path: polygon(0 3%, 100% 3%, 100% 3%, 0 3%);
+    transform: translate(-3px, 0);
+  }
+  25% { 
+    clip-path: polygon(0 5%, 100% 5%, 100% 20%, 0 20%);
+    transform: translate(3px, 0);
+  }
+  35% {
+    clip-path: polygon(0 20%, 100% 20%, 100% 20%, 0 20%);
+    transform: translate(-3px, 0);
+  }
+  45% { 
+    clip-path: polygon(0 40%, 100% 40%, 100% 40%, 0 40%);
+    transform: translate(3px, 0);
+  }
+  55% {
+    clip-path: polygon(0 52%, 100% 52%, 100% 52%, 0 52%);
+    transform: translate(-3px, 0);
+  }
+  65% { 
+    clip-path: polygon(0 60%, 100% 60%, 100% 70%, 0 70%);
+    transform: translate(3px, 0);
+  }
+  75% {
+    clip-path: polygon(0 75%, 100% 75%, 100% 75%, 0 75%);
+    transform: translate(-3px, 0);
+  }
+  85% { 
+    clip-path: polygon(0 85%, 100% 85%, 100% 90%, 0 90%);
+    transform: translate(3px, 0);
+  }
+  100% { 
+    clip-path: polygon(0 95%, 100% 95%, 100% 100%, 0 100%);
+    transform: translate(-3px, 0);
+  }
+}
+
+@keyframes glitch-skew {
+  0% { transform: skew(0deg); }
+  10% { transform: skew(2deg); }
+  20% { transform: skew(-1deg); }
+  30% { transform: skew(3deg); }
+  40% { transform: skew(-2deg); }
+  50% { transform: skew(1deg); }
+  60% { transform: skew(-3deg); }
+  70% { transform: skew(2deg); }
+  80% { transform: skew(-1deg); }
+  90% { transform: skew(1deg); }
+  100% { transform: skew(0deg); }
+}
+
 // Define the Glitch Animation Mixin
 @mixin glitch($color1, $color2, $bg-color) {
   position: relative;
@@ -19,47 +126,30 @@
     pointer-events: none;
   }
   
+  &:hover {
+    animation: glitch-skew 0.5s infinite linear alternate-reverse;
+  }
+  
   &:hover::before {
     left: 2px;
     text-shadow: -2px 0 $color1;
-    clip: rect(44px, 450px, 56px, 0);
-    animation: glitch-anim-1 0.3s infinite linear alternate-reverse;
+    animation: glitch-clip-1 0.3s infinite linear alternate-reverse;
     opacity: 0.8;
   }
   
   &:hover::after {
     left: -2px;
     text-shadow: 2px 0 $color2;
-    clip: rect(44px, 450px, 56px, 0);
-    animation: glitch-anim-2 0.2s infinite linear alternate-reverse;
+    animation: glitch-clip-2 0.3s infinite linear alternate-reverse;
     opacity: 0.8;
   }
-}
-
-// Glitch Keyframes
-@keyframes glitch-anim-1 {
-  0% { clip: rect(20px, 9999px, 10px, 0); transform: skew(0.5deg); }
-  20% { clip: rect(60px, 9999px, 80px, 0); transform: skew(-0.5deg); }
-  40% { clip: rect(30px, 9999px, 10px, 0); transform: skew(0.3deg); }
-  60% { clip: rect(80px, 9999px, 50px, 0); transform: skew(-0.3deg); }
-  80% { clip: rect(10px, 9999px, 40px, 0); transform: skew(0.5deg); }
-  100% { clip: rect(50px, 9999px, 20px, 0); transform: skew(-0.5deg); }
-}
-
-@keyframes glitch-anim-2 {
-  0% { clip: rect(10px, 9999px, 80px, 0); transform: skew(-0.3deg); }
-  20% { clip: rect(80px, 9999px, 10px, 0); transform: skew(0.3deg); }
-  40% { clip: rect(40px, 9999px, 50px, 0); transform: skew(-0.5deg); }
-  60% { clip: rect(20px, 9999px, 30px, 0); transform: skew(0.5deg); }
-  80% { clip: rect(60px, 9999px, 10px, 0); transform: skew(-0.3deg); }
-  100% { clip: rect(30px, 9999px, 70px, 0); transform: skew(0.3deg); }
 }
 
 // Cyber Glitch Class - for use in HTML/Markdown
 .cyber-glitch {
   font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace;
   font-weight: bold;
-  @include glitch(#00ff00, #ff00ff, transparent);
+  @include glitch(#00ffff, #ff00ff, transparent);
   
   // Subtle always-on effect
   text-shadow: 0 0 2px rgba(0, 255, 65, 0.3);
@@ -74,6 +164,52 @@
 .dark .cyber-glitch {
   &::before, &::after {
     background: transparent;
+  }
+}
+
+// ===== APPLY GLITCH TO ALL SECTION HEADERS =====
+// This applies the cyberpunk glitch effect to every section heading
+section h1,
+section h2,
+section h3,
+.home-section h1,
+.home-section h2,
+.article-title,
+.page-title,
+[class*="title"]:not(input):not(textarea) {
+  position: relative;
+  display: inline-block;
+  
+  &::before, &::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    opacity: 0;
+    pointer-events: none;
+  }
+  
+  &:hover {
+    animation: glitch-skew 0.5s infinite linear alternate-reverse;
+  }
+  
+  &:hover::before {
+    left: 2px;
+    text-shadow: -2px 0 #00ffff;
+    color: #00ffff;
+    animation: glitch-clip-1 0.3s infinite linear alternate-reverse;
+    opacity: 0.8;
+  }
+  
+  &:hover::after {
+    left: -2px;
+    text-shadow: 2px 0 #ff00ff;
+    color: #ff00ff;
+    animation: glitch-clip-2 0.3s infinite linear alternate-reverse;
+    opacity: 0.8;
   }
 }
 

@@ -1454,6 +1454,38 @@ table tbody tr:hover {
 // Run enhancements after page is fully loaded
 function runEnhancements() {
   
+  // ===== APPLY GLITCH DATA-TEXT TO ALL HEADERS =====
+  // This sets the data-text attribute needed for the CSS glitch effect
+  function applyGlitchToHeaders() {
+    const headerSelectors = [
+      'section h1',
+      'section h2', 
+      'section h3',
+      '.home-section h1',
+      '.home-section h2',
+      '.article-title',
+      '.page-title',
+      'h1',
+      'h2',
+      'h3'
+    ];
+    
+    headerSelectors.forEach(selector => {
+      document.querySelectorAll(selector).forEach(header => {
+        if (!header.dataset.text) {
+          header.dataset.text = header.textContent.trim();
+        }
+      });
+    });
+  }
+  
+  // Apply glitch data-text immediately
+  applyGlitchToHeaders();
+  
+  // Re-apply after a delay to catch dynamically loaded content
+  setTimeout(applyGlitchToHeaders, 500);
+  setTimeout(applyGlitchToHeaders, 1500);
+  
   // ===== HERO SECTION TYPING EFFECT =====
   function initHeroTyping() {
     // Find the hero section typed-text element
