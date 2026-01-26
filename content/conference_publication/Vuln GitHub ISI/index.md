@@ -70,6 +70,5 @@ url_pdf: 'https://par.nsf.gov/servlets/purl/10258093'
 # slides: example
 ---
 
-<div class="altmetric-embed" data-badge-type="medium-donut" data-doi="10.1109/ISI49825.2020.9280544"></div>
 
 
