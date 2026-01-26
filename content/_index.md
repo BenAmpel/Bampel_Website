@@ -4,6 +4,31 @@ date: 2022-10-24
 type: landing
 
 sections:
+  # ---------- CYBER HERO ----------
+  - block: hero
+    id: hero
+    content:
+      title: |
+        <span class="cyber-glitch" data-text="Benjamin M. Ampel">Benjamin M. Ampel</span>
+      text: |
+        <div class="terminal-hero">
+          <span class="terminal-prompt">$ whoami</span><br>
+          <span class="typed-text"></span>
+        </div>
+      primary_action:
+        text: View Research
+        url: '#publications'
+        icon: book-open
+      secondary_action:
+        text: Contact Me
+        url: '#contact'
+    design:
+      background:
+        color: '#0a0a0a'
+        text_color_light: true
+      spacing:
+        padding: ['80px', '0', '80px', '0']
+
   # ---------- ABOUT / BIOGRAPHY ----------
   - block: about.biography
     id: about

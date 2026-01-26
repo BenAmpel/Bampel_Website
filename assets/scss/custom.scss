@@ -1,6 +1,228 @@
 // Custom SCSS for Hugo Blox / Wowchemy site
 // This file overrides theme styles
 
+// ===== CYBER GLITCH EFFECT =====
+// Define the Glitch Animation Mixin
+@mixin glitch($color1, $color2, $bg-color) {
+  position: relative;
+  display: inline-block;
+  
+  &::before, &::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: $bg-color;
+    opacity: 0;
+    pointer-events: none;
+  }
+  
+  &:hover::before {
+    left: 2px;
+    text-shadow: -2px 0 $color1;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim-1 0.3s infinite linear alternate-reverse;
+    opacity: 0.8;
+  }
+  
+  &:hover::after {
+    left: -2px;
+    text-shadow: 2px 0 $color2;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim-2 0.2s infinite linear alternate-reverse;
+    opacity: 0.8;
+  }
+}
+
+// Glitch Keyframes
+@keyframes glitch-anim-1 {
+  0% { clip: rect(20px, 9999px, 10px, 0); transform: skew(0.5deg); }
+  20% { clip: rect(60px, 9999px, 80px, 0); transform: skew(-0.5deg); }
+  40% { clip: rect(30px, 9999px, 10px, 0); transform: skew(0.3deg); }
+  60% { clip: rect(80px, 9999px, 50px, 0); transform: skew(-0.3deg); }
+  80% { clip: rect(10px, 9999px, 40px, 0); transform: skew(0.5deg); }
+  100% { clip: rect(50px, 9999px, 20px, 0); transform: skew(-0.5deg); }
+}
+
+@keyframes glitch-anim-2 {
+  0% { clip: rect(10px, 9999px, 80px, 0); transform: skew(-0.3deg); }
+  20% { clip: rect(80px, 9999px, 10px, 0); transform: skew(0.3deg); }
+  40% { clip: rect(40px, 9999px, 50px, 0); transform: skew(-0.5deg); }
+  60% { clip: rect(20px, 9999px, 30px, 0); transform: skew(0.5deg); }
+  80% { clip: rect(60px, 9999px, 10px, 0); transform: skew(-0.3deg); }
+  100% { clip: rect(30px, 9999px, 70px, 0); transform: skew(0.3deg); }
+}
+
+// Cyber Glitch Class - for use in HTML/Markdown
+.cyber-glitch {
+  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace;
+  font-weight: bold;
+  @include glitch(#00ff00, #ff00ff, transparent);
+  
+  // Subtle always-on effect
+  text-shadow: 0 0 2px rgba(0, 255, 65, 0.3);
+  transition: text-shadow 0.3s ease;
+  
+  &:hover {
+    text-shadow: 0 0 10px rgba(0, 255, 65, 0.8), 0 0 20px rgba(0, 255, 65, 0.4);
+  }
+}
+
+// Dark mode glitch background
+.dark .cyber-glitch {
+  &::before, &::after {
+    background: transparent;
+  }
+}
+
+// ===== TERMINAL HERO STYLING =====
+.terminal-hero {
+  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  background: linear-gradient(135deg, rgba(10, 10, 10, 0.95) 0%, rgba(20, 20, 30, 0.95) 100%);
+  border: 1px solid rgba(0, 255, 65, 0.3);
+  border-radius: 8px;
+  padding: 20px 25px;
+  margin: 20px auto;
+  max-width: 600px;
+  position: relative;
+  box-shadow: 0 0 20px rgba(0, 255, 65, 0.1), inset 0 0 60px rgba(0, 0, 0, 0.3);
+  
+  // Terminal window dots
+  &::before {
+    content: '● ● ●';
+    position: absolute;
+    top: 8px;
+    left: 15px;
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: #ff5f56;
+    text-shadow: 8px 0 0 #ffbd2e, 16px 0 0 #27c93f;
+  }
+  
+  // Scanlines effect
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.1) 2px,
+      rgba(0, 0, 0, 0.1) 4px
+    );
+    pointer-events: none;
+    border-radius: 8px;
+  }
+}
+
+.terminal-prompt {
+  color: #00ff41 !important;
+  font-weight: 600;
+  text-shadow: 0 0 5px #00ff41;
+  
+  &::before {
+    content: '';
+  }
+}
+
+// ===== TYPED TEXT STYLING =====
+.typed-text, .typed-cursor {
+  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  color: #00ff41 !important;
+  text-shadow: 0 0 5px #00ff41;
+}
+
+.typed-cursor {
+  font-weight: 900;
+  opacity: 1;
+  animation: terminal-blink 0.7s infinite;
+}
+
+@keyframes terminal-blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+// Hero title styling
+.hb-hero h1, 
+.wg-hero h1,
+section#hero h1 {
+  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+}
+
+// ===== NAVBAR GLITCH HOVER =====
+.navbar-brand {
+  transition: all 0.1s ease;
+  
+  &:hover {
+    color: #00ff00 !important;
+    text-shadow: 2px 2px #ff00ff, -2px -2px #00ffff;
+    transform: skewX(-5deg);
+  }
+}
+
+// ===== SECTION HEADER CYBER GLOW =====
+section h1, section h2 {
+  transition: text-shadow 0.3s ease;
+  
+  &:hover {
+    text-shadow: 0 0 10px rgba(0, 255, 65, 0.4), 0 0 20px rgba(0, 255, 65, 0.2);
+  }
+}
+
+.dark section h1:hover,
+.dark section h2:hover {
+  text-shadow: 0 0 15px rgba(0, 255, 65, 0.6), 0 0 30px rgba(0, 255, 65, 0.3);
+}
+
+// ===== HERO SECTION BACKGROUND =====
+section#hero,
+.hb-hero,
+.wg-hero {
+  background: linear-gradient(135deg, #0a0a0a 0%, #0d1117 50%, #161b22 100%) !important;
+  position: relative;
+  overflow: hidden;
+  
+  // Subtle grid pattern
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    pointer-events: none;
+  }
+  
+  * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+// Hero text colors
+section#hero,
+.hb-hero,
+.wg-hero {
+  h1, h2, h3, p, span, a {
+    color: #e0e0e0 !important;
+  }
+  
+  a:hover {
+    color: #00ff41 !important;
+  }
+}
+
 // ===== AVATAR POSITIONING =====
 // Move the image down within the circular crop to show more of the face
 // Using multiple selectors to catch different Wowchemy versions
