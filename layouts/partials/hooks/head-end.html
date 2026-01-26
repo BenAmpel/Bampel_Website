@@ -135,15 +135,29 @@ section#about h1.article-title,
   transition: all 0.3s ease;
 }
 
-/* Subtle cyber glow on section headers */
-section h1:hover,
-section h2:hover {
-  text-shadow: 0 0 10px rgba(21, 101, 192, 0.3), 0 0 20px rgba(21, 101, 192, 0.2);
-}
-
+/* Subtle cyber glow on section headers - dark mode only */
 .dark section h1:hover,
 .dark section h2:hover {
   text-shadow: 0 0 10px rgba(100, 181, 246, 0.4), 0 0 20px rgba(100, 181, 246, 0.2);
+}
+
+/* Light mode (manuscript) - clean headers, no glow */
+body:not(.dark) section h1:hover,
+body:not(.dark) section h2:hover {
+  text-shadow: none;
+}
+
+/* Hide cyber decorations in manuscript mode */
+body:not(.dark) .cyber-decoration,
+body:not(.dark) #tsparticles,
+body:not(.dark) .scroll-progress {
+  display: none !important;
+}
+
+/* Manuscript mode - hide glitch effects */
+body:not(.dark) .glitch-text::before,
+body:not(.dark) .glitch-text::after {
+  display: none !important;
 }
 
 /* Scanline overlay effect for terminal (subtle) */
@@ -340,28 +354,41 @@ section h1 {
   display: inline-block;
 }
 
-section h1::after {
+/* Section header underline - cyber style for dark mode */
+.dark section h1::after {
   content: '';
   display: block;
   width: 60px;
   height: 4px;
-  background: linear-gradient(90deg, #1565c0, #42a5f5);
+  background: linear-gradient(90deg, #42a5f5, #90caf9);
   margin-top: 10px;
   border-radius: 2px;
   transition: width 0.3s ease;
 }
 
-section:hover h1::after {
+.dark section:hover h1::after {
+  width: 100px;
+}
+
+/* Section header underline - academic style for light mode */
+body:not(.dark) section h1::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 3px;
+  background: #333;
+  margin-top: 10px;
+  border-radius: 0;
+  transition: width 0.3s ease;
+}
+
+body:not(.dark) section:hover h1::after {
   width: 100px;
 }
 
 .dark .scroll-progress {
   background: linear-gradient(90deg, #42a5f5, #90caf9, #bbdefb);
   box-shadow: 0 0 10px rgba(66, 165, 245, 0.5);
-}
-
-.dark section h1::after {
-  background: linear-gradient(90deg, #42a5f5, #90caf9);
 }
 
 /* ===== PARTICLE BACKGROUND ===== */
@@ -1453,6 +1480,72 @@ table tbody tr:hover {
 <script>
 // Run enhancements after page is fully loaded
 function runEnhancements() {
+  
+  // ===== THEME TOGGLE BUTTON CUSTOMIZATION =====
+  // Rename the day/night toggle to "render_pdf()" / "view_source"
+  function initThemeToggle() {
+    // Find the theme toggler button (Wowchemy uses different selectors)
+    const themeButton = document.querySelector('.js-theme-toggle') ||
+                        document.querySelector('[data-toggle="theme"]') ||
+                        document.querySelector('.nav-link[onclick*="theme"]') ||
+                        document.querySelector('button[onclick*="theme"]') ||
+                        document.querySelector('.theme-toggle');
+    
+    if (!themeButton || themeButton.dataset.customized) return;
+    themeButton.dataset.customized = 'true';
+    
+    // Hide the default icon
+    const icon = themeButton.querySelector('i') || 
+                 themeButton.querySelector('svg') ||
+                 themeButton.querySelector('.fa, .fas, .far, .fab');
+    if (icon) {
+      icon.style.display = 'none';
+    }
+    
+    // Create our custom text label
+    const label = document.createElement('span');
+    label.className = 'theme-toggle-label';
+    themeButton.appendChild(label);
+    
+    // Function to update label based on current theme
+    function updateLabel() {
+      const isDark = document.body.classList.contains('dark');
+      if (isDark) {
+        // In Terminal mode, offer to "Render PDF" (switch to manuscript/light)
+        label.innerText = 'render_pdf()';
+        label.title = 'Switch to Manuscript view';
+      } else {
+        // In Manuscript mode, offer to "View Source" (switch to terminal/dark)
+        label.innerText = 'view_source';
+        label.title = 'Switch to Terminal view';
+      }
+    }
+    
+    // Initial update
+    updateLabel();
+    
+    // Listen for clicks to update the label
+    themeButton.addEventListener('click', function() {
+      // Small timeout to allow the body class to change
+      setTimeout(updateLabel, 50);
+      setTimeout(updateLabel, 200);
+    });
+    
+    // Also observe body class changes
+    const bodyObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'class') {
+          updateLabel();
+        }
+      });
+    });
+    bodyObserver.observe(document.body, { attributes: true });
+  }
+  
+  // Initialize theme toggle customization
+  initThemeToggle();
+  setTimeout(initThemeToggle, 500);
+  setTimeout(initThemeToggle, 1000);
   
   // ===== APPLY GLITCH DATA-TEXT TO ALL HEADERS =====
   // This sets the data-text attribute needed for the CSS glitch effect
