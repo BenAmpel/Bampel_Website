@@ -77,6 +77,454 @@
   }
 }
 
+// ===== GLOBAL CYBER TERMINAL THEME =====
+// Apply dark terminal background to entire site
+html, body {
+  background: #0a0a0a !important;
+}
+
+body {
+  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  background: linear-gradient(180deg, #0a0a0a 0%, #0d1117 50%, #161b22 100%) !important;
+  background-attachment: fixed !important;
+  color: #c9d1d9 !important;
+  min-height: 100vh;
+}
+
+// Global text styling
+body, p, span, div, li, td, th {
+  color: #c9d1d9;
+}
+
+// All links - cyber blue with green hover
+a {
+  color: #58a6ff !important;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    color: #00ff41 !important;
+    text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+  }
+}
+
+// Strong/bold text - orange accent
+strong, b {
+  color: #ffa657 !important;
+}
+
+// Italic text - cyan
+em, i {
+  color: #00ffff !important;
+}
+
+// ===== NAVBAR CYBER THEME =====
+.navbar,
+nav,
+header {
+  background: linear-gradient(180deg, rgba(10, 10, 10, 0.95) 0%, rgba(13, 17, 23, 0.9) 100%) !important;
+  border-bottom: 1px solid rgba(0, 255, 65, 0.2) !important;
+  backdrop-filter: blur(10px);
+  
+  // Navbar links
+  a {
+    font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+    color: #c9d1d9 !important;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      color: #00ff41 !important;
+      text-shadow: 0 0 10px rgba(0, 255, 65, 0.6);
+    }
+    
+    &.active {
+      color: #00ff41 !important;
+    }
+  }
+}
+
+// Navbar brand with glitch
+.navbar-brand {
+  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  color: #00ff41 !important;
+  font-weight: bold;
+  text-shadow: 0 0 5px rgba(0, 255, 65, 0.3);
+  
+  &:hover {
+    color: #00ff41 !important;
+    text-shadow: 2px 2px #ff00ff, -2px -2px #00ffff, 0 0 15px rgba(0, 255, 65, 0.8);
+    transform: skewX(-3deg);
+  }
+}
+
+// ===== ALL SECTIONS CYBER THEME =====
+section,
+.home-section,
+[class*="wg-"],
+[class*="hb-"] {
+  background: linear-gradient(135deg, #0a0a0a 0%, #0d1117 50%, #161b22 100%) !important;
+  position: relative;
+  
+  // Cyber grid pattern
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      linear-gradient(rgba(0, 255, 65, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 255, 65, 0.02) 1px, transparent 1px);
+    background-size: 50px 50px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+// Section containers with terminal window effect
+section .container,
+.home-section .container {
+  background: rgba(13, 17, 23, 0.6);
+  border: 1px solid rgba(0, 255, 65, 0.15);
+  border-radius: 12px;
+  padding: 30px !important;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.4), 0 0 60px rgba(0, 255, 65, 0.05);
+}
+
+// ===== ALL HEADINGS CYBER STYLE =====
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  color: #00ff41 !important;
+  text-shadow: 0 0 5px rgba(0, 255, 65, 0.3);
+  display: inline-block;
+  position: relative;
+  
+  // Glitch effect on hover
+  @include glitch(#00ffff, #ff00ff, transparent);
+  
+  &:hover {
+    text-shadow: 0 0 15px rgba(0, 255, 65, 0.8), 0 0 25px rgba(0, 255, 255, 0.4);
+  }
+}
+
+// ===== TABLES CYBER STYLE =====
+table {
+  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  border-collapse: collapse;
+  width: 100%;
+  
+  th {
+    background: rgba(0, 255, 65, 0.1) !important;
+    color: #00ff41 !important;
+    border: 1px solid rgba(0, 255, 65, 0.3) !important;
+    padding: 12px !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.85rem;
+  }
+  
+  td {
+    background: rgba(13, 17, 23, 0.6) !important;
+    color: #c9d1d9 !important;
+    border: 1px solid rgba(0, 255, 65, 0.15) !important;
+    padding: 10px !important;
+  }
+  
+  tr:hover td {
+    background: rgba(0, 255, 65, 0.05) !important;
+    border-color: rgba(0, 255, 65, 0.3) !important;
+  }
+}
+
+// ===== LISTS CYBER STYLE =====
+ul, ol {
+  li {
+    font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+    color: #c9d1d9;
+    padding: 5px 0;
+    
+    &::marker {
+      color: #00ff41;
+    }
+  }
+}
+
+ul:not(.navbar-nav):not(.social-icons):not(.network-icon) {
+  list-style: none;
+  padding-left: 0;
+  
+  li {
+    position: relative;
+    padding-left: 20px;
+    
+    &::before {
+      content: '▸';
+      position: absolute;
+      left: 0;
+      color: #00ff41;
+      font-weight: bold;
+    }
+    
+    &:hover {
+      color: #00ff41;
+      text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+    }
+  }
+}
+
+// ===== BUTTONS CYBER STYLE =====
+.btn,
+button,
+input[type="submit"] {
+  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  background: linear-gradient(135deg, rgba(0, 255, 65, 0.1) 0%, rgba(0, 255, 65, 0.2) 100%) !important;
+  border: 1px solid rgba(0, 255, 65, 0.5) !important;
+  color: #00ff41 !important;
+  border-radius: 6px;
+  padding: 10px 20px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  
+  &:hover {
+    background: linear-gradient(135deg, rgba(0, 255, 65, 0.2) 0%, rgba(0, 255, 65, 0.3) 100%) !important;
+    border-color: #00ff41 !important;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.4), 0 0 40px rgba(0, 255, 65, 0.2);
+    transform: translateY(-2px);
+  }
+}
+
+// Primary buttons - more prominent
+.btn-primary {
+  background: linear-gradient(135deg, rgba(0, 255, 65, 0.3) 0%, rgba(0, 255, 65, 0.4) 100%) !important;
+}
+
+// ===== CARDS CYBER STYLE =====
+.card,
+.publication-card,
+article {
+  background: linear-gradient(135deg, rgba(13, 17, 23, 0.8) 0%, rgba(22, 27, 34, 0.9) 100%) !important;
+  border: 1px solid rgba(0, 255, 65, 0.2) !important;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    border-color: rgba(0, 255, 65, 0.5) !important;
+    box-shadow: 0 0 30px rgba(0, 255, 65, 0.15);
+    transform: translateY(-3px);
+  }
+}
+
+// ===== SPOILER/COLLAPSIBLE CYBER STYLE =====
+details,
+.spoiler,
+[class*="spoiler"],
+[class*="collapsible"] {
+  background: rgba(13, 17, 23, 0.8) !important;
+  border: 1px solid rgba(0, 255, 65, 0.2) !important;
+  border-radius: 8px;
+  margin: 15px 0;
+  overflow: hidden;
+  
+  summary {
+    font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+    background: linear-gradient(135deg, rgba(0, 255, 65, 0.05) 0%, rgba(0, 255, 65, 0.1) 100%) !important;
+    color: #00ff41 !important;
+    padding: 15px 20px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(0, 255, 65, 0.2);
+    transition: all 0.3s ease;
+    
+    &:hover {
+      background: rgba(0, 255, 65, 0.15) !important;
+      text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+    }
+    
+    &::marker {
+      color: #00ff41;
+    }
+  }
+  
+  &[open] summary {
+    border-bottom-color: rgba(0, 255, 65, 0.4);
+  }
+}
+
+// ===== FOOTER CYBER STYLE =====
+footer,
+.site-footer {
+  background: linear-gradient(180deg, #0d1117 0%, #0a0a0a 100%) !important;
+  border-top: 1px solid rgba(0, 255, 65, 0.2) !important;
+  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  
+  * {
+    color: #8b949e !important;
+  }
+  
+  a:hover {
+    color: #00ff41 !important;
+  }
+}
+
+// ===== EXPERIENCE/TIMELINE CYBER STYLE =====
+.experience,
+.timeline,
+[class*="timeline"],
+[class*="experience"] {
+  .experience-item,
+  .timeline-item,
+  li {
+    border-left: 2px solid rgba(0, 255, 65, 0.3) !important;
+    padding-left: 20px;
+    margin-bottom: 20px;
+    position: relative;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      left: -7px;
+      top: 5px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #00ff41;
+      box-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+    }
+    
+    &:hover {
+      border-left-color: #00ff41 !important;
+      
+      &::before {
+        box-shadow: 0 0 20px rgba(0, 255, 65, 0.8);
+      }
+    }
+  }
+}
+
+// ===== FORM INPUTS CYBER STYLE =====
+input, textarea, select {
+  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  background: rgba(13, 17, 23, 0.9) !important;
+  border: 1px solid rgba(0, 255, 65, 0.3) !important;
+  color: #c9d1d9 !important;
+  border-radius: 6px;
+  padding: 10px 15px;
+  transition: all 0.3s ease;
+  
+  &:focus {
+    border-color: #00ff41 !important;
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+    outline: none;
+  }
+  
+  &::placeholder {
+    color: #6e7681 !important;
+  }
+}
+
+// ===== SCROLLBAR CYBER STYLE =====
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(0, 255, 65, 0.3) 0%, rgba(0, 255, 65, 0.5) 100%);
+  border-radius: 5px;
+  
+  &:hover {
+    background: linear-gradient(180deg, rgba(0, 255, 65, 0.5) 0%, rgba(0, 255, 65, 0.7) 100%);
+  }
+}
+
+// ===== BLOCKQUOTE CYBER STYLE =====
+blockquote {
+  border-left: 3px solid #00ff41 !important;
+  background: rgba(0, 255, 65, 0.05) !important;
+  padding: 15px 20px;
+  margin: 20px 0;
+  font-style: italic;
+  color: #7ee787 !important;
+}
+
+// ===== CODE BLOCKS CYBER STYLE =====
+code, pre {
+  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid rgba(0, 255, 65, 0.2) !important;
+  border-radius: 4px;
+  color: #7ee787 !important;
+}
+
+pre {
+  padding: 15px;
+  overflow-x: auto;
+}
+
+code {
+  padding: 2px 6px;
+}
+
+// ===== BADGES/TAGS CYBER STYLE =====
+.badge,
+.tag,
+[class*="badge"],
+[class*="tag"] {
+  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  background: rgba(0, 255, 65, 0.1) !important;
+  border: 1px solid rgba(0, 255, 65, 0.3) !important;
+  color: #00ff41 !important;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  
+  &:hover {
+    background: rgba(0, 255, 65, 0.2) !important;
+    border-color: #00ff41 !important;
+  }
+}
+
+// ===== SEARCH BOX CYBER STYLE =====
+.search-box,
+[class*="search"] input {
+  background: rgba(13, 17, 23, 0.9) !important;
+  border: 1px solid rgba(0, 255, 65, 0.3) !important;
+  
+  &:focus {
+    border-color: #00ff41 !important;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+  }
+}
+
+// ===== PAGINATION CYBER STYLE =====
+.pagination {
+  a, span {
+    font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+    background: rgba(13, 17, 23, 0.8) !important;
+    border: 1px solid rgba(0, 255, 65, 0.2) !important;
+    color: #c9d1d9 !important;
+    
+    &:hover, &.active {
+      background: rgba(0, 255, 65, 0.1) !important;
+      border-color: #00ff41 !important;
+      color: #00ff41 !important;
+    }
+  }
+}
+
 // ===== TERMINAL HERO STYLING =====
 .terminal-hero {
   font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
