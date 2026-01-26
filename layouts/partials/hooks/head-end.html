@@ -1063,155 +1063,169 @@ table tbody tr:hover {
 
 <!-- JavaScript for Interactive Animations -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+// Run enhancements after page is fully loaded
+function runEnhancements() {
   
   // ===== SCROLL PROGRESS BAR =====
-  const scrollProgress = document.createElement('div');
-  scrollProgress.className = 'scroll-progress';
-  document.body.prepend(scrollProgress);
-  
-  function updateScrollProgress() {
-    const scrollTop = window.scrollY;
-    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-    const scrollPercent = (scrollTop / docHeight) * 100;
-    scrollProgress.style.width = scrollPercent + '%';
+  if (!document.querySelector('.scroll-progress')) {
+    const scrollProgress = document.createElement('div');
+    scrollProgress.className = 'scroll-progress';
+    document.body.prepend(scrollProgress);
+    
+    function updateScrollProgress() {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollPercent = (scrollTop / docHeight) * 100;
+      scrollProgress.style.width = scrollPercent + '%';
+    }
+    
+    window.addEventListener('scroll', updateScrollProgress);
+    updateScrollProgress();
   }
-  
-  window.addEventListener('scroll', updateScrollProgress);
-  updateScrollProgress(); // Initial call
   
   // ===== RESEARCH VISUALIZATIONS INJECTION (into Research Impact section) =====
-  let statsSection = document.getElementById('stats');
-  
-  // Try multiple ways to find the section
-  if (!statsSection) {
-    statsSection = document.querySelector('section[id*="stats"]') ||
-                   document.querySelector('[id*="stats"]');
-  }
-  
-  // Try to find by title if ID doesn't work
-  if (!statsSection) {
-    const allSections = document.querySelectorAll('section, .home-section, .wg-markdown, .hb-section, [class*="section"]');
-    allSections.forEach(sec => {
-      const title = sec.querySelector('h1, h2, h3, .section-heading, .hb-section-heading');
-      if (title && title.textContent.includes('Research Impact')) {
-        statsSection = sec;
+  // Find by searching all headings for "Research Impact"
+  if (!document.querySelector('.viz-wrapper')) {
+    let targetElement = null;
+    
+    // Find heading containing "Research Impact"
+    const allHeadings = document.querySelectorAll('h1, h2, h3');
+    allHeadings.forEach(heading => {
+      if (heading.textContent.includes('Research Impact') && !targetElement) {
+        // Found the heading, get its parent section or container
+        targetElement = heading.closest('section') || 
+                        heading.closest('.home-section') ||
+                        heading.closest('[class*="block"]') ||
+                        heading.parentElement;
       }
     });
-  }
-  
-  // Check if viz-wrapper already exists (avoid duplicates)
-  if (statsSection && !statsSection.querySelector('.viz-wrapper')) {
-    const vizHTML = `
-      <div class="viz-grid" style="margin-top: 30px;">
-        <div class="viz-column">
-          <details class="viz-details">
-            <summary>🤝 Collaboration Network</summary>
-            <div class="viz-content">
-              <img src="/images/coauthor-network.png" alt="Research Collaboration Network" class="viz-image" id="network-img">
-              <p class="viz-caption">Research collaboration network based on co-authored publications</p>
-            </div>
-          </details>
+    
+    if (targetElement) {
+      const vizHTML = `
+        <div class="viz-grid" style="margin-top: 30px;">
+          <div class="viz-column">
+            <details class="viz-details">
+              <summary>🤝 Collaboration Network</summary>
+              <div class="viz-content">
+                <img src="/images/coauthor-network.png" alt="Research Collaboration Network" class="viz-image" id="network-img">
+                <p class="viz-caption">Research collaboration network based on co-authored publications</p>
+              </div>
+            </details>
+          </div>
+          <div class="viz-column">
+            <details class="viz-details">
+              <summary>🌍 Research Footprint</summary>
+              <div class="viz-content">
+                <img src="/images/research-map.png" alt="Research Map" class="viz-image" id="map-img">
+                <p class="viz-caption">Conference presentations and collaborator institutions worldwide</p>
+              </div>
+            </details>
+          </div>
         </div>
-        <div class="viz-column">
-          <details class="viz-details">
-            <summary>🌍 Research Footprint</summary>
-            <div class="viz-content">
-              <img src="/images/research-map.png" alt="Research Map" class="viz-image" id="map-img">
-              <p class="viz-caption">Conference presentations and collaborator institutions worldwide</p>
-            </div>
-          </details>
-        </div>
-      </div>
-    `;
-    
-    const vizWrapper = document.createElement('div');
-    vizWrapper.className = 'viz-wrapper';
-    vizWrapper.innerHTML = vizHTML;
-    
-    // Find the content area of the stats section - try many selectors
-    let statsContent = statsSection.querySelector('.prose') || 
-                       statsSection.querySelector('.hb-section-content') ||
-                       statsSection.querySelector('.article-content') ||
-                       statsSection.querySelector('.container') ||
-                       statsSection.querySelector('div');
-    
-    // If no inner content found, append to the section itself
-    if (!statsContent) {
-      statsContent = statsSection;
+      `;
+      
+      const vizWrapper = document.createElement('div');
+      vizWrapper.className = 'viz-wrapper';
+      vizWrapper.innerHTML = vizHTML;
+      
+      // Append to the section
+      targetElement.appendChild(vizWrapper);
+      
+      // Update images for dark mode
+      setTimeout(() => {
+        if (typeof updateImageThemes === 'function') {
+          updateImageThemes();
+        }
+      }, 100);
     }
-    
-    // Find the last element (likely the table or text) and insert after it
-    const lastChild = statsContent.lastElementChild;
-    if (lastChild) {
-      lastChild.after(vizWrapper);
-    } else {
-      statsContent.appendChild(vizWrapper);
-    }
-    
-    // Update images for dark mode
-    setTimeout(() => {
-      if (typeof updateImageThemes === 'function') {
-        updateImageThemes();
-      }
-    }, 100);
   }
   
   // ===== COLLAPSIBLE PUBLICATION SECTIONS =====
-  const publicationTitles = ['Journal Publications', 'Conference Publications', 'Workshop Papers'];
+  const publicationTitles = [
+    { text: 'Journal Publications', icon: '📄' },
+    { text: 'Conference Publications', icon: '📋' },
+    { text: 'Workshop Papers', icon: '📝' }
+  ];
   
-  publicationTitles.forEach(titleText => {
-    // Find sections by their title
-    const allSections = document.querySelectorAll('section, .home-section, .wg-collection');
-    
-    allSections.forEach(section => {
-      const titleEl = section.querySelector('h1, h2, .section-heading');
-      if (titleEl && titleEl.textContent.trim() === titleText) {
-        // Check if already wrapped
-        if (section.querySelector('.pub-details')) return;
+  // Find headings and wrap their sections
+  const allHeadings = document.querySelectorAll('h1, h2, h3');
+  
+  publicationTitles.forEach(({ text, icon }) => {
+    allHeadings.forEach(heading => {
+      if (heading.textContent.trim() === text) {
+        // Get the parent section
+        const section = heading.closest('section') || 
+                        heading.closest('.home-section') ||
+                        heading.closest('[class*="block"]') ||
+                        heading.parentElement.parentElement;
         
-        // Get the content (everything except the title)
-        const content = section.querySelector('.hb-section-content') || 
-                        section.querySelector('.container') ||
-                        section.querySelector('.article-container');
+        if (!section || section.querySelector('.pub-details')) return;
         
-        if (content) {
-          // Find the actual publication list
-          const pubList = content.querySelector('ul, .grid, .publication-list') || 
-                          content.querySelector('div:not(.section-heading)');
-          
-          if (pubList) {
-            // Create details/summary wrapper
-            const details = document.createElement('details');
-            details.className = 'pub-details';
-            
-            const summary = document.createElement('summary');
-            summary.className = 'pub-summary';
-            
-            // Get count if available
-            const items = pubList.querySelectorAll('li, .publication-item, article');
-            const count = items.length;
-            
-            // Determine icon
-            let icon = '📄';
-            if (titleText.includes('Conference')) icon = '📋';
-            if (titleText.includes('Workshop')) icon = '📝';
-            
-            summary.innerHTML = `${icon} ${titleText} <span class="pub-count">(${count})</span>`;
-            
-            // Clone the publication list
-            const contentClone = pubList.cloneNode(true);
-            
-            // Build the details element
-            details.appendChild(summary);
-            const contentWrapper = document.createElement('div');
-            contentWrapper.className = 'pub-content';
-            contentWrapper.appendChild(contentClone);
-            details.appendChild(contentWrapper);
-            
-            // Replace original content
-            pubList.replaceWith(details);
+        // Find publication items - look for links or list items
+        const pubItems = section.querySelectorAll('a[href*="publication"], .citation, article, li');
+        const count = pubItems.length;
+        
+        if (count === 0) return;
+        
+        // Get all content after the heading
+        const contentElements = [];
+        let sibling = heading.nextElementSibling;
+        while (sibling) {
+          contentElements.push(sibling.cloneNode(true));
+          sibling = sibling.nextElementSibling;
+        }
+        
+        // Also check parent's siblings if heading is in a wrapper
+        if (contentElements.length === 0) {
+          const headingParent = heading.parentElement;
+          sibling = headingParent.nextElementSibling;
+          while (sibling) {
+            contentElements.push(sibling.cloneNode(true));
+            sibling = sibling.nextElementSibling;
           }
+        }
+        
+        if (contentElements.length === 0) return;
+        
+        // Create details/summary wrapper
+        const details = document.createElement('details');
+        details.className = 'pub-details';
+        
+        const summary = document.createElement('summary');
+        summary.className = 'pub-summary';
+        summary.innerHTML = `${icon} ${text} <span class="pub-count">(${count})</span>`;
+        
+        details.appendChild(summary);
+        
+        const contentWrapper = document.createElement('div');
+        contentWrapper.className = 'pub-content';
+        contentElements.forEach(el => contentWrapper.appendChild(el));
+        details.appendChild(contentWrapper);
+        
+        // Remove original content and add the collapsible
+        let sibling2 = heading.nextElementSibling;
+        while (sibling2) {
+          const next = sibling2.nextElementSibling;
+          sibling2.remove();
+          sibling2 = next;
+        }
+        
+        // Also try removing from heading parent
+        const headingParent = heading.parentElement;
+        if (headingParent !== section) {
+          sibling2 = headingParent.nextElementSibling;
+          while (sibling2) {
+            const next = sibling2.nextElementSibling;
+            sibling2.remove();
+            sibling2 = next;
+          }
+        }
+        
+        // Insert the details after heading/heading parent
+        if (headingParent !== section) {
+          headingParent.after(details);
+        } else {
+          heading.after(details);
         }
       }
     });
@@ -1546,5 +1560,13 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   addCiteButtons();
+}
+
+// Run on multiple events to ensure it works with Hugo Blox
+document.addEventListener('DOMContentLoaded', runEnhancements);
+window.addEventListener('load', function() {
+  setTimeout(runEnhancements, 100);
+  setTimeout(runEnhancements, 500);
+  setTimeout(runEnhancements, 1000);
 });
 </script>
