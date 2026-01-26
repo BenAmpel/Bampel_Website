@@ -1,7 +1,7 @@
 {{/* Dimensions Badge Shortcode - Usage: {{< dimensions doi="10.xxxx/xxxxx" >}} */}}
 {{ $doi := .Get "doi" }}
 {{ if $doi }}
-<div class="dimensions-badge-section" style="margin: 30px 0; padding: 20px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 12px; border: 1px solid #bae6fd;">
+<div class="dimensions-badge-section" id="dimensions-{{ $doi | urlize }}" style="margin: 30px 0; padding: 20px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 12px; border: 1px solid #bae6fd;">
   <style>
     .dark .dimensions-badge-section {
       background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
@@ -23,37 +23,69 @@
       filter: none;
       opacity: 1;
     }
+    /* Hide empty badges */
+    .dimensions-badge-section.no-data {
+      display: none !important;
+    }
   </style>
   <h4 style="margin: 0 0 15px 0; font-size: 1rem; font-weight: 600;">📈 Dimensions Citation Metrics</h4>
   <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
     <span class="__dimensions_badge_embed__" 
           data-doi="{{ $doi }}" 
           data-style="large_rectangle" 
-          data-legend="hover-right">
+          data-legend="hover-right"
+          data-hide-zero-citations="false">
     </span>
     <div style="flex: 1; min-width: 200px;">
       <p style="margin: 0; font-size: 0.9rem; color: #475569;">
         Dimensions tracks citations across scholarly literature, patents, clinical trials, and policy documents.
-        <a href="https://badge.dimensions.ai/details/doi/{{ $doi }}" target="_blank" style="color: #0284c7;">View full metrics →</a>
+        <a href="https://app.dimensions.ai/discover/publication?search_text={{ $doi }}" target="_blank" style="color: #0284c7;">View full metrics →</a>
       </p>
     </div>
   </div>
 </div>
 <script type="text/javascript">
 (function() {
+  var sectionId = 'dimensions-{{ $doi | urlize }}';
+  
   function initDimensionsBadge() {
     // Dimensions badges auto-initialize, but we can force a refresh
     if (typeof __dimensions_embed !== 'undefined' && typeof __dimensions_embed.addBadges === 'function') {
       __dimensions_embed.addBadges();
     }
   }
+  
+  function checkBadgeLoaded() {
+    var section = document.getElementById(sectionId);
+    if (!section) return;
+    
+    var badge = section.querySelector('.__dimensions_badge_embed__');
+    if (badge) {
+      // Check if badge has actual content (not just placeholder)
+      var badgeContent = badge.innerHTML.trim();
+      var hasLink = badge.querySelector('a');
+      
+      // If badge loaded with actual citation data, show it
+      if (hasLink || (badgeContent && badgeContent.length > 100)) {
+        section.classList.remove('no-data');
+      } else if (badgeContent === '' || badgeContent.length < 50) {
+        // Empty or minimal content - might be loading or no data
+        // Give it more time before hiding
+      }
+    }
+  }
+  
   if (document.readyState === 'complete') {
     initDimensionsBadge();
   } else {
     window.addEventListener('load', initDimensionsBadge);
   }
-  setTimeout(initDimensionsBadge, 1000);
-  setTimeout(initDimensionsBadge, 3000);
+  
+  // Multiple attempts to initialize and check
+  setTimeout(initDimensionsBadge, 500);
+  setTimeout(initDimensionsBadge, 1500);
+  setTimeout(checkBadgeLoaded, 3000);
+  setTimeout(checkBadgeLoaded, 5000);
 })();
 </script>
 {{ end }}
