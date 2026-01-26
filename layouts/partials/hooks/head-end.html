@@ -726,16 +726,53 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   // ===== NETWORK IMAGE WITH THEME SWITCHING =====
+  let networkContainer = null;
+  
+  function initNetworkContainer() {
+    // Find the network section by ID
+    const networkSection = document.getElementById('network');
+    if (!networkSection) return null;
+    
+    // Look for existing container or create one
+    let container = document.getElementById('network-image-container');
+    if (container) return container;
+    
+    // Find the content area within the section
+    const contentArea = networkSection.querySelector('.prose') || 
+                        networkSection.querySelector('.article-style') ||
+                        networkSection.querySelector('.container') ||
+                        networkSection.querySelector('.row');
+    
+    if (contentArea) {
+      container = document.createElement('div');
+      container.id = 'network-image-container';
+      container.style.textAlign = 'center';
+      container.style.padding = '20px 0';
+      contentArea.appendChild(container);
+      return container;
+    }
+    
+    // Fallback: append directly to section
+    container = document.createElement('div');
+    container.id = 'network-image-container';
+    container.style.textAlign = 'center';
+    container.style.padding = '20px';
+    networkSection.appendChild(container);
+    return container;
+  }
+  
   function updateNetworkImage() {
-    const container = document.getElementById('network-image-container');
-    if (!container) return;
+    if (!networkContainer) {
+      networkContainer = initNetworkContainer();
+    }
+    if (!networkContainer) return;
     
     const isDark = document.body.classList.contains('dark');
     const imgSrc = isDark ? '/images/coauthor-network-dark.png' : '/images/coauthor-network.png';
     
-    container.innerHTML = `
-      <img src="${imgSrc}" alt="Research Collaboration Network" class="network-image" style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
-      <p style="font-size: 0.9rem; color: ${isDark ? '#aaa' : '#666'}; margin-top: 12px; font-style: italic; text-align: center;">Research collaboration network based on co-authored publications</p>
+    networkContainer.innerHTML = `
+      <img src="${imgSrc}" alt="Research Collaboration Network" style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+      <p style="font-size: 0.9rem; color: ${isDark ? '#aaa' : '#666'}; margin-top: 12px; font-style: italic;">Research collaboration network based on co-authored publications</p>
     `;
   }
   
