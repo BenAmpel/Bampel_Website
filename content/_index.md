@@ -160,16 +160,12 @@ sections:
         6. B. Ampel, S. Samtani, S. Ullman, and H. Chen, "**Linking Common Vulnerabilities and Exposures to the MITRE ATT&CK Framework**," *ACM KDD AI4Cyber Workshop*, Virtual, August 2021.
         
         {{< /spoiler >}}
-    design:
-      columns: '1'
-
-  # ---------- BOOK CHAPTERS ----------
-  - block: markdown
-    id: books
-    content:
-      title: Book Chapters
-      text: |
+        
+        {{< spoiler text="📚 Book Chapters (1)" >}}
+        
         1. B. Ampel, Y. Gao, and S. Samtani, "**LLM-Enabled Phishing Generation and Defense**," *Artificial Intelligence in Cybersecurity: Unlocking the Power of Large Language Models*, CRC Press, 2026.
+        
+        {{< /spoiler >}}
     design:
       columns: '1'
 
