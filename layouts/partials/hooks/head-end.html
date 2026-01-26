@@ -398,6 +398,78 @@ section:hover h1::after {
   height: 16px;
 }
 
+/* ===== COLLAPSIBLE PUBLICATION SECTIONS ===== */
+.pub-details {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f8fafc;
+  margin: 10px 0;
+}
+
+.dark .pub-details {
+  border-color: #334155;
+  background: #1e293b;
+}
+
+.pub-summary {
+  padding: 16px 24px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  transition: all 0.3s ease;
+  list-style: none;
+  color: #1e293b;
+}
+
+.pub-summary::-webkit-details-marker {
+  display: none;
+}
+
+.pub-summary::after {
+  content: '▶';
+  margin-left: auto;
+  font-size: 0.8rem;
+  transition: transform 0.3s ease;
+  color: #64748b;
+}
+
+.pub-details[open] .pub-summary::after {
+  transform: rotate(90deg);
+}
+
+.dark .pub-summary {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  color: #f1f5f9;
+}
+
+.pub-summary:hover {
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+}
+
+.dark .pub-summary:hover {
+  background: linear-gradient(135deg, #334155 0%, #475569 100%);
+}
+
+.pub-count {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.dark .pub-count {
+  color: #94a3b8;
+}
+
+.pub-content {
+  padding: 20px 24px;
+  animation: fadeIn 0.3s ease;
+}
+
 /* ===== PUBLICATIONS TIMELINE CHART ===== */
 .pub-chart-container {
   margin: 30px 0;
@@ -1063,6 +1135,66 @@ document.addEventListener('DOMContentLoaded', function() {
       updateImageThemes();
     }, 100);
   }
+  
+  // ===== COLLAPSIBLE PUBLICATION SECTIONS =====
+  const publicationTitles = ['Journal Publications', 'Conference Publications', 'Workshop Papers'];
+  
+  publicationTitles.forEach(titleText => {
+    // Find sections by their title
+    const allSections = document.querySelectorAll('section, .home-section, .wg-collection');
+    
+    allSections.forEach(section => {
+      const titleEl = section.querySelector('h1, h2, .section-heading');
+      if (titleEl && titleEl.textContent.trim() === titleText) {
+        // Check if already wrapped
+        if (section.querySelector('.pub-details')) return;
+        
+        // Get the content (everything except the title)
+        const content = section.querySelector('.hb-section-content') || 
+                        section.querySelector('.container') ||
+                        section.querySelector('.article-container');
+        
+        if (content) {
+          // Find the actual publication list
+          const pubList = content.querySelector('ul, .grid, .publication-list') || 
+                          content.querySelector('div:not(.section-heading)');
+          
+          if (pubList) {
+            // Create details/summary wrapper
+            const details = document.createElement('details');
+            details.className = 'pub-details';
+            
+            const summary = document.createElement('summary');
+            summary.className = 'pub-summary';
+            
+            // Get count if available
+            const items = pubList.querySelectorAll('li, .publication-item, article');
+            const count = items.length;
+            
+            // Determine icon
+            let icon = '📄';
+            if (titleText.includes('Conference')) icon = '📋';
+            if (titleText.includes('Workshop')) icon = '📝';
+            
+            summary.innerHTML = `${icon} ${titleText} <span class="pub-count">(${count})</span>`;
+            
+            // Clone the publication list
+            const contentClone = pubList.cloneNode(true);
+            
+            // Build the details element
+            details.appendChild(summary);
+            const contentWrapper = document.createElement('div');
+            contentWrapper.className = 'pub-content';
+            contentWrapper.appendChild(contentClone);
+            details.appendChild(contentWrapper);
+            
+            // Replace original content
+            pubList.replaceWith(details);
+          }
+        }
+      }
+    });
+  });
   
   // ===== PUBLICATIONS TIMELINE CHART =====
   function animatePublicationBars() {
