@@ -40,9 +40,6 @@ tags:
 - GitHub
 featured: false
 
-# Custom links
-links:
-- name: DOI
   url: https://doi.org/10.1109/ISI49825.2020.9280544
 
 url_pdf: 'https://par.nsf.gov/servlets/purl/10258093'

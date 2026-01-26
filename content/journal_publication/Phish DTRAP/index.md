@@ -30,8 +30,6 @@ tags:
 - Cybersecurity
 featured: false
 
-links:
-- name: DOI
   url: https://doi.org/10.1145/3603507
 url_pdf: https://dl.acm.org/doi/pdf/10.1145/3603507
 #url_code: 'https://github.com/wowchemy/wowchemy-hugo-themes'

@@ -36,9 +36,6 @@ tags:
 - Exploit Labeling
 featured: false
 
-# Custom links
-links:
-- name: DOI
   url: https://doi.org/10.1109/ISI53945.2021.9624848
 
 url_pdf: 'https://par.nsf.gov/servlets/purl/10344545'

@@ -28,8 +28,6 @@ tags:
 
 featured: false
 
-links:
-- name: DOI
   url: https://doi.org/10.24251/HICSS.2026.063
 
 url_pdf: 'https://hdl.handle.net/10125/111453'

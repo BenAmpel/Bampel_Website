@@ -34,8 +34,6 @@ tags:
 - Exploit Labeling
 featured: false
 
-links:
-- name: DOI
   url: https://doi.org/10.25300/MISQ/2023/17316
 url_pdf: https://misq.umn.edu/creating-proactive-cyber-threat-intelligence-with-hacker-exploit-labels-a-deep-transfer-learning-approach.html
 # url_code: 'https://github.com/wowchemy/wowchemy-hugo-themes'
