@@ -2104,6 +2104,185 @@ body:not(.dark) .theme-toggle-label {
 }
 
 // =============================================================================
+// ===== REDACTED/CLASSIFIED TEXT EFFECT =====
+// =============================================================================
+// CIA-style black bars that reveal text on hover - for pending grants/research
+
+.redacted {
+  background-color: #000;
+  color: #000 !important;
+  cursor: help;
+  padding: 2px 6px;
+  margin: 0 2px;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  user-select: none;
+  display: inline;
+  position: relative;
+  
+  // Prevent text selection/copying while redacted
+  &::selection {
+    background: #000;
+    color: #000;
+  }
+  
+  // Hover state - declassify
+  &:hover {
+    background-color: transparent;
+    color: inherit !important;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-decoration-color: #ff6b6b;
+    user-select: auto;
+  }
+}
+
+// Dark mode (cyber theme) - green reveal
+.dark .redacted {
+  background-color: #00ff41;
+  color: #00ff41 !important;
+  box-shadow: 0 0 5px rgba(0, 255, 65, 0.3);
+  
+  &::selection {
+    background: #00ff41;
+    color: #00ff41;
+  }
+  
+  &:hover {
+    background-color: transparent;
+    color: #00ff41 !important;
+    text-decoration-color: #00ff41;
+    text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+  }
+}
+
+// Classified level indicators
+.redacted-top-secret {
+  @extend .redacted;
+  
+  &::before {
+    content: '[TOP SECRET] ';
+    font-size: 0.7em;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+}
+
+.redacted-classified {
+  @extend .redacted;
+  
+  &::before {
+    content: '[CLASSIFIED] ';
+    font-size: 0.7em;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+}
+
+.redacted-pending {
+  @extend .redacted;
+  background-color: #333;
+  
+  .dark & {
+    background-color: #ffa657;
+    color: #ffa657 !important;
+    box-shadow: 0 0 5px rgba(255, 166, 87, 0.3);
+    
+    &:hover {
+      color: #ffa657 !important;
+      text-decoration-color: #ffa657;
+    }
+  }
+  
+  &::before {
+    content: '[PENDING] ';
+    font-size: 0.7em;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+}
+
+// Full redacted block (for larger content)
+.redacted-block {
+  background-color: #000;
+  color: #000 !important;
+  padding: 15px 20px;
+  border-radius: 4px;
+  margin: 10px 0;
+  cursor: help;
+  transition: all 0.4s ease;
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+  
+  // Striped pattern like document redaction
+  background-image: repeating-linear-gradient(
+    0deg,
+    #000,
+    #000 3px,
+    #111 3px,
+    #111 6px
+  );
+  
+  * {
+    color: transparent !important;
+  }
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.05);
+    background-image: none;
+    
+    * {
+      color: inherit !important;
+    }
+  }
+  
+  .dark & {
+    background-color: #00ff41;
+    background-image: repeating-linear-gradient(
+      0deg,
+      rgba(0, 255, 65, 0.9),
+      rgba(0, 255, 65, 0.9) 3px,
+      rgba(0, 255, 65, 0.7) 3px,
+      rgba(0, 255, 65, 0.7) 6px
+    );
+    
+    &:hover {
+      background: rgba(0, 255, 65, 0.1);
+      background-image: none;
+      
+      * {
+        color: #00ff41 !important;
+      }
+    }
+  }
+}
+
+// Animated typing reveal effect
+.redacted-typing {
+  @extend .redacted;
+  
+  &:hover {
+    animation: typing-reveal 0.5s steps(20) forwards;
+  }
+}
+
+@keyframes typing-reveal {
+  from {
+    background-size: 100% 100%;
+  }
+  to {
+    background-size: 0% 100%;
+  }
+}
+
+// Light mode adjustments
+body:not(.dark) .redacted:hover {
+  color: #333 !important;
+  text-decoration-color: #666;
+}
+
+// =============================================================================
 // ===== VISITOR FORENSICS TERMINAL WIDGET =====
 // =============================================================================
 // Shows visitors what data their browser leaks - security awareness feature
