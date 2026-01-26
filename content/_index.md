@@ -226,22 +226,25 @@ sections:
     content:
       title: Invited Talks & Presentations
       text: |
-        1. **Foundation Models for Cybersecurity Applications**  
+        1. **Vulnerability Remediation Across International Open-Source AI: A Large Language Model-Graph Learning Approach**  
+           AI in Cybersecurity Machine Learning / Deep Learning Data Analytics at HICSS-59, Hawaii (January 2026)
+        
+        2. **Foundation Models for Cybersecurity Applications**  
            AI-Enabled Cybersecurity Workshop at HICSS-58, Hawaii (January 2025)
         
-        2. **How Has Generative AI Affected Education, Research, And Practice?**  
+        3. **How Has Generative AI Affected Education, Research, And Practice?**  
            MIS 50th Academic Conference, University of Arizona (March 2024)
         
-        3. **Large Language Models for Advanced Text Analytics**  
+        4. **Large Language Models for Advanced Text Analytics**  
            AI in Cybersecurity Workshop at HICSS-57, Hawaii (January 2024)
         
-        4. **LLM Overview & Advanced Text Analytics**  
+        5. **LLM Overview & Advanced Text Analytics**  
            Fall 2023 AI Bootcamp (October 2023)
         
-        5. **Deep Learning for The Detection of Vishing Calls**  
+        6. **Deep Learning for The Detection of Vishing Calls**  
            International Conference on Secure Knowledge Management (September 2023)
         
-        6. **Analytics and Visualizations/UI in AI for Cybersecurity**  
+        7. **Analytics and Visualizations/UI in AI for Cybersecurity**  
            AI in Cybersecurity Workshop at HICSS-56, Hawaii (January 2023)
     design:
       columns: '1'
