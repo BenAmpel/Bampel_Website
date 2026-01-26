@@ -24,27 +24,13 @@ html {
 }
 
 /* ===== GRADIENT ACCENTS FOR SECTION HEADERS ===== */
-/* Target Hugo Blox section titles with gradient underline */
-.hb-section-heading h2,
-.hb-section-heading h1,
-section[class*="wg-"] h2,
-section[class*="hb-"] h2,
-.home-section h2,
-.blox h2,
-article.hb-blox-markdown h2:first-child,
-.hb-blox-markdown > .container h2:first-of-type {
+/* Target section h1 titles with gradient underline */
+section h1 {
   position: relative;
   display: inline-block;
 }
 
-.hb-section-heading h2::after,
-.hb-section-heading h1::after,
-section[class*="wg-"] h2::after,
-section[class*="hb-"] h2::after,
-.home-section h2::after,
-.blox h2::after,
-article.hb-blox-markdown h2:first-child::after,
-.hb-blox-markdown > .container h2:first-of-type::after {
+section h1::after {
   content: '';
   display: block;
   width: 60px;
@@ -55,8 +41,7 @@ article.hb-blox-markdown h2:first-child::after,
   transition: width 0.3s ease;
 }
 
-section:hover h2::after,
-.blox:hover h2::after {
+section:hover h1::after {
   width: 100px;
 }
 
@@ -65,12 +50,7 @@ section:hover h2::after,
   box-shadow: 0 0 10px rgba(66, 165, 245, 0.5);
 }
 
-.dark .hb-section-heading h2::after,
-.dark .hb-section-heading h1::after,
-.dark section[class*="wg-"] h2::after,
-.dark section[class*="hb-"] h2::after,
-.dark .home-section h2::after,
-.dark .blox h2::after {
+.dark section h1::after {
   background: linear-gradient(90deg, #42a5f5, #90caf9);
 }
 
