@@ -13,4 +13,23 @@
     </div>
   </div>
 </div>
+<script>
+(function() {
+  function loadDimensionsBadge() {
+    if (typeof __dimensions_embed !== 'undefined' && __dimensions_embed.addBadges) {
+      __dimensions_embed.addBadges();
+    } else {
+      // Script not loaded yet, try again
+      setTimeout(loadDimensionsBadge, 500);
+    }
+  }
+  if (document.readyState === 'complete') {
+    setTimeout(loadDimensionsBadge, 100);
+  } else {
+    window.addEventListener('load', function() {
+      setTimeout(loadDimensionsBadge, 100);
+    });
+  }
+})();
+</script>
 {{ end }}
