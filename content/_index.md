@@ -82,7 +82,7 @@ sections:
     content:
       title: Collaboration Network
       text: |
-        {{< coauthor-network >}}
+        <div id="network-wrapper"></div>
     design:
       columns: '1'
 
