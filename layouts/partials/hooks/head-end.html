@@ -6,10 +6,6 @@
 <!-- tsParticles for animated background -->
 <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js"></script>
 
-<!-- Leaflet.js for interactive map -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <!-- Custom Animations & Enhancements -->
 <style>
 /* Smooth scrolling */
@@ -479,10 +475,32 @@ section:hover h1::after {
   box-shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
 
-/* Limit network image display size */
+/* Limit visualization image display sizes */
 #network img,
 section[id="network"] img {
   max-width: 550px;
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+#dashboard img,
+section[id="dashboard"] img {
+  max-width: 700px;
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+#map img,
+section[id="map"] img {
+  max-width: 800px;
   width: 100%;
   height: auto;
   display: block;
@@ -960,30 +978,36 @@ document.addEventListener('DOMContentLoaded', function() {
     pubChartObserver.observe(pubChart);
   }
   
-  // ===== NETWORK IMAGE THEME SWITCHING =====
-  function updateNetworkImageTheme() {
-    // Find the network image by its src or alt text
-    const networkImg = document.querySelector('img[src*="coauthor-network"]') ||
-                       document.querySelector('img[alt*="Collaboration Network"]');
-    
-    if (!networkImg) return;
-    
+  // ===== IMAGE THEME SWITCHING =====
+  function updateImageThemes() {
     const isDark = document.body.classList.contains('dark');
-    const newSrc = isDark ? '/images/coauthor-network-dark.png' : '/images/coauthor-network.png';
     
-    if (networkImg.src !== newSrc && !networkImg.src.endsWith(newSrc)) {
-      networkImg.src = newSrc;
-    }
+    // Define images that have dark/light variants
+    const themeImages = [
+      { selector: 'img[src*="coauthor-network"]', light: '/images/coauthor-network.png', dark: '/images/coauthor-network-dark.png' },
+      { selector: 'img[src*="impact-dashboard"]', light: '/images/impact-dashboard.png', dark: '/images/impact-dashboard-dark.png' },
+      { selector: 'img[src*="research-map"]', light: '/images/research-map.png', dark: '/images/research-map-dark.png' }
+    ];
+    
+    themeImages.forEach(({ selector, light, dark }) => {
+      const img = document.querySelector(selector);
+      if (img) {
+        const newSrc = isDark ? dark : light;
+        if (!img.src.endsWith(newSrc)) {
+          img.src = newSrc;
+        }
+      }
+    });
   }
   
   // Update on page load
-  updateNetworkImageTheme();
+  updateImageThemes();
   
   // Listen for theme changes
   const themeObserver = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
       if (mutation.attributeName === 'class') {
-        updateNetworkImageTheme();
+        updateImageThemes();
       }
     });
   });
@@ -1047,182 +1071,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
-  // ===== INTERACTIVE RESEARCH MAP =====
-  async function initResearchMap() {
-    if (typeof L === 'undefined') return;
-    
-    // Find the map section and inject the map container
-    const mapSection = document.getElementById('map');
-    if (!mapSection) return;
-    
-    const contentArea = mapSection.querySelector('.prose') || 
-                        mapSection.querySelector('.container') ||
-                        mapSection;
-    
-    // Create map container
-    const mapWrapper = document.createElement('div');
-    mapWrapper.className = 'map-container';
-    mapWrapper.innerHTML = `
-      <div id="research-map"></div>
-      <div class="map-legend">
-        <div class="legend-item"><span class="legend-marker presentation"></span> Conference Presentations</div>
-        <div class="legend-item"><span class="legend-marker collaborator"></span> Collaborator Institutions</div>
-      </div>
-    `;
-    contentArea.appendChild(mapWrapper);
-    
-    const mapContainer = document.getElementById('research-map');
-    if (!mapContainer) return;
-    
-    // Initialize map centered on US
-    const map = L.map('research-map').setView([39.8283, -98.5795], 3);
-    
-    // Add tile layer
-    const isDark = document.body.classList.contains('dark');
-    const tileUrl = isDark 
-      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-      : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-    
-    L.tileLayer(tileUrl, {
-      attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-      maxZoom: 19
-    }).addTo(map);
-    
-    // Fetch location data
-    try {
-      const response = await fetch('/data/locations.json');
-      const data = await response.json();
-      
-      // Custom icons
-      const presentationIcon = L.divIcon({
-        className: 'custom-marker',
-        html: '<div style="background:#1565c0;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);"></div>',
-        iconSize: [16, 16],
-        iconAnchor: [8, 8]
-      });
-      
-      const collaboratorIcon = L.divIcon({
-        className: 'custom-marker',
-        html: '<div style="background:#43a047;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);"></div>',
-        iconSize: [16, 16],
-        iconAnchor: [8, 8]
-      });
-      
-      // Add presentation markers
-      data.presentations.forEach(loc => {
-        L.marker([loc.lat, loc.lng], { icon: presentationIcon })
-          .bindPopup(`<strong>${loc.name}</strong><br>${loc.city}<br><em>${loc.years.join(', ')}</em>`)
-          .addTo(map);
-      });
-      
-      // Add collaborator markers
-      data.collaborators.forEach(loc => {
-        L.marker([loc.lat, loc.lng], { icon: collaboratorIcon })
-          .bindPopup(`<strong>${loc.institution}</strong><br>${loc.city}<br><em>${loc.collaborators.join(', ')}</em>`)
-          .addTo(map);
-      });
-    } catch (error) {
-      console.log('Could not load location data:', error);
-    }
-  }
-  
-  initResearchMap();
-  
-  // ===== RESEARCH IMPACT DASHBOARD =====
-  async function initImpactDashboard() {
-    // Find dashboard section
-    const dashboardSection = document.getElementById('dashboard');
-    if (!dashboardSection) return;
-    
-    const contentArea = dashboardSection.querySelector('.prose') || 
-                        dashboardSection.querySelector('.container') ||
-                        dashboardSection;
-    
-    try {
-      const response = await fetch('/data/scholar-metrics.json');
-      const data = await response.json();
-      
-      // Calculate max citations for chart scaling
-      const maxCitations = Math.max(...data.citationsByYear.map(d => d.citations));
-      
-      // Build dashboard HTML
-      const dashboardHTML = `
-        <div id="impact-dashboard">
-          <div class="impact-dashboard">
-            <div class="impact-card">
-              <div class="impact-number" data-value="${data.metrics.citations}">0</div>
-              <div class="impact-label">Citations</div>
-            </div>
-            <div class="impact-card">
-              <div class="impact-number" data-value="${data.metrics.hIndex}">0</div>
-              <div class="impact-label">h-index</div>
-            </div>
-            <div class="impact-card">
-              <div class="impact-number" data-value="${data.metrics.i10Index}">0</div>
-              <div class="impact-label">i10-index</div>
-            </div>
-            <div class="impact-card">
-              <div class="impact-number" data-value="${data.metrics.publications}">0</div>
-              <div class="impact-label">Publications</div>
-            </div>
-          </div>
-          
-          <div class="citations-chart">
-            <div class="chart-title">Citations by Year</div>
-            <div class="chart-bars">
-              ${data.citationsByYear.map(d => `
-                <div class="chart-bar-wrapper">
-                  <div class="chart-bar-value">${d.citations}</div>
-                  <div class="chart-bar" data-height="${(d.citations / maxCitations) * 120}px" style="height: 0;"></div>
-                  <div class="chart-bar-label">${d.year}</div>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-          
-          <div class="dashboard-footer">
-            Data sourced from Google Scholar • Last updated: ${data.lastUpdated}
-          </div>
-        </div>
-      `;
-      
-      contentArea.innerHTML = dashboardHTML;
-      
-      // Set up animation observer
-      const dashboard = document.getElementById('impact-dashboard');
-      
-      const impactObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting && !entry.target.dataset.animated) {
-            entry.target.dataset.animated = 'true';
-            
-            // Animate each number
-            const numbers = entry.target.querySelectorAll('.impact-number');
-            numbers.forEach(num => {
-              const target = num.dataset.value;
-              animateCounter(num, target);
-            });
-            
-            // Animate chart bars
-            const bars = entry.target.querySelectorAll('.chart-bar');
-            bars.forEach((bar, index) => {
-              setTimeout(() => {
-                bar.style.height = bar.dataset.height;
-              }, index * 100);
-            });
-          }
-        });
-      }, { threshold: 0.3 });
-      
-      if (dashboard) {
-        impactObserver.observe(dashboard);
-      }
-    } catch (error) {
-      console.log('Could not load scholar metrics:', error);
-    }
-  }
-  
-  initImpactDashboard();
+  // Map and dashboard are now static PNG images with theme switching
   
   // ===== CITE BUTTON FUNCTIONALITY =====
   window.copyBibtex = function(button) {

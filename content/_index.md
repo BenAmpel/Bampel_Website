@@ -81,7 +81,10 @@ sections:
     id: dashboard
     content:
       title: Citation Analytics
-      text: ""
+      text: |
+        ![Research Impact Dashboard](/images/impact-dashboard.png)
+        
+        *Data sourced from Google Scholar - Updated monthly via GitHub Actions*
     design:
       columns: '1'
   
@@ -102,7 +105,10 @@ sections:
     id: map
     content:
       title: Research Footprint
-      text: ""
+      text: |
+        ![Research Map](/images/research-map.png)
+        
+        *Conference presentations and collaborator institutions worldwide*
     design:
       columns: '1'
 
