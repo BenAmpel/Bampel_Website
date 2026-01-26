@@ -145,23 +145,6 @@ sections:
     design:
       columns: '1'
 
-  # ---------- PENDING RESEARCH (Redacted Demo) ----------
-  - block: markdown
-    id: pending
-    content:
-      title: Pending Research
-      text: |
-        *Some ongoing research cannot be disclosed until publication or funding decisions.*
-        
-        - <span class="redacted-pending">NSF CAREER: Adaptive Multi-Agent Systems for Autonomous Cyber Defense</span>
-        - <span class="redacted-classified">Collaboration with [REDACTED] on LLM Security Auditing</span>
-        - <span class="redacted">Journal Submission: Voice Deepfake Detection in Financial Systems</span>
-        - <span class="redacted-top-secret">Project Codename: SENTINEL — AI-Enabled Threat Hunting</span>
-        
-        *Hover over redacted text to declassify.*
-    design:
-      columns: '1'
-
   # ---------- TEACHING ----------
   - block: markdown
     id: teaching
