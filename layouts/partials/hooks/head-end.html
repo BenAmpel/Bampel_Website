@@ -1246,6 +1246,62 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
+  // ===== RESEARCH VISUALIZATIONS INJECTION (into Research Impact section) =====
+  let statsSection = document.getElementById('stats');
+  
+  // Try to find by title if ID doesn't work
+  if (!statsSection) {
+    const allSections = document.querySelectorAll('section, .home-section, .wg-markdown');
+    allSections.forEach(sec => {
+      const title = sec.querySelector('h1, h2, .section-heading');
+      if (title && title.textContent.includes('Research Impact')) {
+        statsSection = sec;
+      }
+    });
+  }
+  
+  if (statsSection) {
+    const vizHTML = `
+      <div class="viz-grid" style="margin-top: 30px;">
+        <div class="viz-column">
+          <details class="viz-details">
+            <summary>🤝 Collaboration Network</summary>
+            <div class="viz-content">
+              <img src="/images/coauthor-network.png" alt="Research Collaboration Network" class="viz-image" id="network-img">
+              <p class="viz-caption">Research collaboration network based on co-authored publications</p>
+            </div>
+          </details>
+        </div>
+        <div class="viz-column">
+          <details class="viz-details">
+            <summary>🌍 Research Footprint</summary>
+            <div class="viz-content">
+              <img src="/images/research-map.png" alt="Research Map" class="viz-image" id="map-img">
+              <p class="viz-caption">Conference presentations and collaborator institutions worldwide</p>
+            </div>
+          </details>
+        </div>
+      </div>
+    `;
+    
+    const vizWrapper = document.createElement('div');
+    vizWrapper.className = 'viz-wrapper';
+    vizWrapper.innerHTML = vizHTML;
+    
+    // Find the content area of the stats section
+    const statsContent = statsSection.querySelector('.prose') || 
+                         statsSection.querySelector('.hb-section-content') ||
+                         statsSection.querySelector('.article-content') ||
+                         statsSection;
+    
+    statsContent.appendChild(vizWrapper);
+    
+    // Update images for dark mode
+    setTimeout(() => {
+      updateImageThemes();
+    }, 100);
+  }
+  
   // ===== PUBLICATIONS TIMELINE CHART =====
   function animatePublicationBars() {
     const bars = document.querySelectorAll('.pub-chart-bar');

@@ -38,35 +38,6 @@ sections:
         **Top Venues:** MISQ • JMIS • ACM TMIS • ISF • IEEE ISI • HICSS • AMCIS • ICIS • ACM KDD
     design:
       columns: '1'
-  
-  # ---------- VISUALIZATIONS (Network + Map) ----------
-  - block: markdown
-    id: visualizations
-    content:
-      title: Research Visualizations
-      text: |
-        <div class="viz-grid">
-          <div class="viz-column">
-            <details class="viz-details">
-              <summary>🤝 Collaboration Network</summary>
-              <div class="viz-content">
-                <img src="/images/coauthor-network.png" alt="Research Collaboration Network" class="viz-image" id="network-img">
-                <p class="viz-caption">Research collaboration network based on co-authored publications</p>
-              </div>
-            </details>
-          </div>
-          <div class="viz-column">
-            <details class="viz-details">
-              <summary>🌍 Research Footprint</summary>
-              <div class="viz-content">
-                <img src="/images/research-map.png" alt="Research Map" class="viz-image" id="map-img">
-                <p class="viz-caption">Conference presentations and collaborator institutions worldwide</p>
-              </div>
-            </details>
-          </div>
-        </div>
-    design:
-      columns: '1'
 
   # ---------- PUBLICATIONS ----------
   - block: collection
