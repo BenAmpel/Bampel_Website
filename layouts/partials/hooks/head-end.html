@@ -1083,18 +1083,25 @@ document.addEventListener('DOMContentLoaded', function() {
   // ===== RESEARCH VISUALIZATIONS INJECTION (into Research Impact section) =====
   let statsSection = document.getElementById('stats');
   
+  // Try multiple ways to find the section
+  if (!statsSection) {
+    statsSection = document.querySelector('section[id*="stats"]') ||
+                   document.querySelector('[id*="stats"]');
+  }
+  
   // Try to find by title if ID doesn't work
   if (!statsSection) {
-    const allSections = document.querySelectorAll('section, .home-section, .wg-markdown');
+    const allSections = document.querySelectorAll('section, .home-section, .wg-markdown, .hb-section, [class*="section"]');
     allSections.forEach(sec => {
-      const title = sec.querySelector('h1, h2, .section-heading');
+      const title = sec.querySelector('h1, h2, h3, .section-heading, .hb-section-heading');
       if (title && title.textContent.includes('Research Impact')) {
         statsSection = sec;
       }
     });
   }
   
-  if (statsSection) {
+  // Check if viz-wrapper already exists (avoid duplicates)
+  if (statsSection && !statsSection.querySelector('.viz-wrapper')) {
     const vizHTML = `
       <div class="viz-grid" style="margin-top: 30px;">
         <div class="viz-column">
@@ -1122,17 +1129,31 @@ document.addEventListener('DOMContentLoaded', function() {
     vizWrapper.className = 'viz-wrapper';
     vizWrapper.innerHTML = vizHTML;
     
-    // Find the content area of the stats section
-    const statsContent = statsSection.querySelector('.prose') || 
-                         statsSection.querySelector('.hb-section-content') ||
-                         statsSection.querySelector('.article-content') ||
-                         statsSection;
+    // Find the content area of the stats section - try many selectors
+    let statsContent = statsSection.querySelector('.prose') || 
+                       statsSection.querySelector('.hb-section-content') ||
+                       statsSection.querySelector('.article-content') ||
+                       statsSection.querySelector('.container') ||
+                       statsSection.querySelector('div');
     
-    statsContent.appendChild(vizWrapper);
+    // If no inner content found, append to the section itself
+    if (!statsContent) {
+      statsContent = statsSection;
+    }
+    
+    // Find the last element (likely the table or text) and insert after it
+    const lastChild = statsContent.lastElementChild;
+    if (lastChild) {
+      lastChild.after(vizWrapper);
+    } else {
+      statsContent.appendChild(vizWrapper);
+    }
     
     // Update images for dark mode
     setTimeout(() => {
-      updateImageThemes();
+      if (typeof updateImageThemes === 'function') {
+        updateImageThemes();
+      }
     }, 100);
   }
   
