@@ -69,7 +69,7 @@ sections:
         | 📄 **8** Journal Articles | 📋 **16** Conference Papers | 📝 **6** Workshop Papers | 📚 **500+** Citations | 🏆 **2** Best Paper Awards |
         |:---:|:---:|:---:|:---:|:---:|
         
-        | 🌟 **4** Q1 Journal Publications | 🏛️ **2** FT50 Publications | 🎯 **3** UTD24 Publications |
+        | 🌟 **5** Q1 Journal Publications | 🏛️ **3** FT50 Publications | 🎯 **2** UTD24 Publications |
         |:---:|:---:|:---:|
         
         **Top Venues:** MISQ • JMIS • ACM TMIS • ISF • IEEE ISI • HICSS • AMCIS • ICIS • ACM KDD
