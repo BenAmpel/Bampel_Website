@@ -1,5 +1,9 @@
 [build]
-  command = "hugo --gc --minify -b $DEPLOY_PRIME_URL"
+  command = """
+    curl -L https://github.com/gohugoio/hugo/releases/download/v0.122.0/hugo_extended_0.122.0_linux-amd64.tar.gz -o hugo.tar.gz && \
+    tar -xzf hugo.tar.gz && \
+    ./hugo --gc --minify -b $DEPLOY_PRIME_URL
+  """
   publish = "public"
 
 [build.environment]
@@ -8,20 +12,32 @@
   HUGO_ENABLEGITINFO = "true"
 
 [context.production]
-  command = "hugo --gc --minify -b $DEPLOY_PRIME_URL"
+  command = """
+    curl -L https://github.com/gohugoio/hugo/releases/download/v0.122.0/hugo_extended_0.122.0_linux-amd64.tar.gz -o hugo.tar.gz && \
+    tar -xzf hugo.tar.gz && \
+    ./hugo --gc --minify -b $DEPLOY_PRIME_URL
+  """
 
 [context.production.environment]
   HUGO_VERSION = "0.122.0"
   HUGO_ENV = "production"
 
 [context.deploy-preview]
-  command = "hugo --gc --minify --buildFuture -b $DEPLOY_PRIME_URL"
+  command = """
+    curl -L https://github.com/gohugoio/hugo/releases/download/v0.122.0/hugo_extended_0.122.0_linux-amd64.tar.gz -o hugo.tar.gz && \
+    tar -xzf hugo.tar.gz && \
+    ./hugo --gc --minify --buildFuture -b $DEPLOY_PRIME_URL
+  """
 
 [context.deploy-preview.environment]
   HUGO_VERSION = "0.122.0"
 
 [context.branch-deploy]
-  command = "hugo --gc --minify -b $DEPLOY_PRIME_URL"
+  command = """
+    curl -L https://github.com/gohugoio/hugo/releases/download/v0.122.0/hugo_extended_0.122.0_linux-amd64.tar.gz -o hugo.tar.gz && \
+    tar -xzf hugo.tar.gz && \
+    ./hugo --gc --minify -b $DEPLOY_PRIME_URL
+  """
 
 [context.branch-deploy.environment]
   HUGO_VERSION = "0.122.0"
