@@ -1,6 +1,10 @@
 // Custom SCSS for Hugo Blox / Wowchemy site
 // This file overrides theme styles
 
+// ===== FONT IMPORTS =====
+// Fira Code for Cyber/Terminal mode, Merriweather for Manuscript mode
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap');
+
 // ===== HIGH-SEVERITY CYBERPUNK GLITCH SYSTEM =====
 // Violent, jerky, instant digital glitches with RGB splitting (chromatic aberration)
 // Uses SCSS loops to generate random noise patterns - no smooth transitions!
@@ -1300,4 +1304,517 @@ img[width="270"],
 img[height="270"] {
   object-fit: cover !important;
   object-position: center 25% !important;
+}
+
+// =============================================================================
+// ===== MODE 2: MANUSCRIPT / PAPER (Light Mode) =====
+// =============================================================================
+// This targets the site when 'dark' class is REMOVED from body
+// Transforms the cyber terminal into an academic manuscript style
+
+body:not(.dark) {
+  // Force Academic Serif font everywhere
+  font-family: 'Merriweather', 'Georgia', 'Times New Roman', serif !important;
+  
+  // Paper styling
+  background: #f9f9f9 !important;
+  color: #222222 !important;
+  
+  // Override Bootstrap/Wowchemy CSS variables
+  --bs-body-bg: #f9f9f9 !important;
+  --bs-body-color: #222222 !important;
+  
+  // Reset all headings to traditional serif
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Merriweather', 'Georgia', 'Times New Roman', serif !important;
+    color: #111 !important;
+    font-weight: 700;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    text-shadow: none !important;
+    
+    // Disable glitch animations
+    animation: none !important;
+    
+    &::before, &::after {
+      display: none !important;
+      animation: none !important;
+    }
+    
+    &:hover {
+      animation: none !important;
+      text-shadow: none !important;
+      transform: none !important;
+    }
+  }
+  
+  // Justify text like a real academic paper
+  p {
+    text-align: justify;
+    line-height: 1.8;
+    color: #222 !important;
+    font-family: 'Merriweather', 'Georgia', 'Times New Roman', serif !important;
+  }
+  
+  // Reset all text elements
+  span, div, li, td, th {
+    color: #333 !important;
+    font-family: 'Merriweather', 'Georgia', 'Times New Roman', serif !important;
+  }
+  
+  // Links - classic academic blue
+  a {
+    color: #0066cc !important;
+    text-decoration: underline !important;
+    text-decoration-style: solid !important;
+    
+    &:hover {
+      color: #004499 !important;
+      text-shadow: none !important;
+    }
+  }
+  
+  // Strong text - bold black
+  strong, b {
+    color: #111 !important;
+    font-weight: 700;
+  }
+  
+  // Italic text - proper italics
+  em, i {
+    color: #333 !important;
+    font-style: italic;
+  }
+  
+  // Navbar - clean academic header
+  .navbar,
+  nav,
+  header {
+    background: #ffffff !important;
+    border-bottom: 2px solid #333 !important;
+    backdrop-filter: none !important;
+    
+    a {
+      font-family: 'Merriweather', 'Georgia', serif !important;
+      color: #333 !important;
+      text-decoration: none !important;
+      
+      &:hover {
+        color: #000 !important;
+        text-shadow: none !important;
+      }
+      
+      &.active {
+        color: #000 !important;
+        font-weight: 700;
+      }
+    }
+  }
+  
+  // Navbar brand - simple and clean
+  .navbar-brand {
+    font-family: 'Merriweather', 'Georgia', serif !important;
+    color: #111 !important;
+    font-weight: 700 !important;
+    text-shadow: none !important;
+    
+    &:hover {
+      color: #000 !important;
+      text-shadow: none !important;
+      transform: none !important;
+    }
+  }
+  
+  // All sections - clean paper background
+  section,
+  .home-section,
+  [class*="wg-"],
+  [class*="hb-"] {
+    background: #f9f9f9 !important;
+    
+    // Remove cyber grid pattern
+    &::before {
+      display: none !important;
+    }
+  }
+  
+  // Section containers - paper card style
+  section .container,
+  .home-section .container {
+    background: #ffffff !important;
+    border: 1px solid #ddd !important;
+    border-radius: 4px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    padding: 40px !important;
+  }
+  
+  // Tables - academic style
+  table {
+    font-family: 'Merriweather', 'Georgia', serif !important;
+    
+    th {
+      background: #f0f0f0 !important;
+      color: #111 !important;
+      border: 1px solid #ccc !important;
+      font-weight: 700;
+      text-transform: none !important;
+    }
+    
+    td {
+      background: #fff !important;
+      color: #333 !important;
+      border: 1px solid #ddd !important;
+    }
+    
+    tr:hover td {
+      background: #f5f5f5 !important;
+      border-color: #ccc !important;
+    }
+  }
+  
+  // Lists - traditional academic style
+  ul, ol {
+    li {
+      font-family: 'Merriweather', 'Georgia', serif !important;
+      color: #333 !important;
+      
+      &::marker {
+        color: #333 !important;
+      }
+    }
+  }
+  
+  ul:not(.navbar-nav):not(.social-icons):not(.network-icon) {
+    list-style: disc !important;
+    padding-left: 2em !important;
+    
+    li {
+      padding-left: 0 !important;
+      
+      &::before {
+        display: none !important;
+      }
+      
+      &:hover {
+        color: #111 !important;
+        text-shadow: none !important;
+      }
+    }
+  }
+  
+  // Buttons - classic academic style
+  .btn,
+  button,
+  input[type="submit"] {
+    font-family: 'Merriweather', 'Georgia', serif !important;
+    background: #fff !important;
+    border: 2px solid #333 !important;
+    color: #333 !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    
+    &:hover {
+      background: #333 !important;
+      color: #fff !important;
+      border-color: #333 !important;
+      box-shadow: none !important;
+      transform: none !important;
+    }
+  }
+  
+  .btn-primary {
+    background: #0066cc !important;
+    border-color: #0066cc !important;
+    color: #fff !important;
+    
+    &:hover {
+      background: #004499 !important;
+      border-color: #004499 !important;
+    }
+  }
+  
+  // Cards - paper/document style
+  .card,
+  .publication-card,
+  article {
+    background: #ffffff !important;
+    border: 1px solid #ddd !important;
+    border-radius: 4px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    
+    &:hover {
+      border-color: #ccc !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+      transform: none !important;
+    }
+  }
+  
+  // Spoiler/Collapsible - clean academic style
+  details,
+  .spoiler,
+  [class*="spoiler"],
+  [class*="collapsible"] {
+    background: #fff !important;
+    border: 1px solid #ddd !important;
+    
+    summary {
+      font-family: 'Merriweather', 'Georgia', serif !important;
+      background: #f5f5f5 !important;
+      color: #333 !important;
+      
+      &:hover {
+        background: #eee !important;
+        color: #111 !important;
+        text-shadow: none !important;
+      }
+      
+      &::marker,
+      &::-webkit-details-marker {
+        color: #333 !important;
+      }
+    }
+  }
+  
+  // Code blocks - "Figure" style with border
+  pre, code {
+    font-family: 'Fira Code', 'Courier New', monospace !important;
+    background: #fff !important;
+    color: #333 !important;
+    border: 1px solid #ccc !important;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  code {
+    background: #f5f5f5 !important;
+    padding: 2px 6px !important;
+    border-radius: 3px !important;
+    box-shadow: none !important;
+  }
+  
+  // Blockquotes - academic citation style
+  blockquote {
+    background: #fff !important;
+    border-left: 4px solid #333 !important;
+    color: #444 !important;
+    font-style: italic;
+    padding: 1em 1.5em !important;
+    margin: 1.5em 0 !important;
+    
+    &::before {
+      color: #999 !important;
+    }
+  }
+  
+  // Footer - clean academic style
+  footer {
+    background: #fff !important;
+    border-top: 2px solid #333 !important;
+    color: #333 !important;
+    
+    a {
+      color: #0066cc !important;
+    }
+  }
+  
+  // Badges and tags
+  .badge,
+  .tag,
+  [class*="badge"],
+  [class*="tag"] {
+    background: #f0f0f0 !important;
+    color: #333 !important;
+    border: 1px solid #ccc !important;
+    
+    &:hover {
+      background: #e0e0e0 !important;
+      border-color: #999 !important;
+      box-shadow: none !important;
+    }
+  }
+  
+  // Search box
+  .search-box,
+  input[type="search"],
+  input[type="text"] {
+    background: #fff !important;
+    border: 1px solid #ccc !important;
+    color: #333 !important;
+    
+    &:focus {
+      border-color: #0066cc !important;
+      box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2) !important;
+    }
+    
+    &::placeholder {
+      color: #999 !important;
+    }
+  }
+  
+  // Pagination
+  .pagination {
+    .page-link {
+      background: #fff !important;
+      color: #333 !important;
+      border: 1px solid #ddd !important;
+      
+      &:hover {
+        background: #f5f5f5 !important;
+        border-color: #ccc !important;
+      }
+    }
+    
+    .page-item.active .page-link {
+      background: #333 !important;
+      color: #fff !important;
+      border-color: #333 !important;
+    }
+  }
+  
+  // Skills grid - clean academic style
+  .skills-grid {
+    .skill-category {
+      background: #fff !important;
+      border: 1px solid #ddd !important;
+      
+      h4 {
+        color: #111 !important;
+        border-bottom: 1px solid #ddd !important;
+      }
+    }
+    
+    .skill-item {
+      background: #f9f9f9 !important;
+      border: 1px solid #eee !important;
+      color: #333 !important;
+      
+      &:hover {
+        background: #f0f0f0 !important;
+        border-color: #ccc !important;
+        box-shadow: none !important;
+        transform: none !important;
+      }
+    }
+  }
+  
+  // Stats grid
+  .stats-grid {
+    .stat-item {
+      background: #fff !important;
+      border: 1px solid #ddd !important;
+      
+      .stat-number {
+        color: #0066cc !important;
+        text-shadow: none !important;
+      }
+      
+      .stat-label {
+        color: #666 !important;
+      }
+    }
+  }
+  
+  // Social icons
+  .social-icons,
+  .network-icon {
+    a {
+      color: #666 !important;
+      
+      &:hover {
+        color: #333 !important;
+        text-shadow: none !important;
+      }
+    }
+  }
+  
+  // Avatar - clean circular style
+  .avatar {
+    border: 3px solid #ddd !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    animation: none !important;
+  }
+  
+  // About section specifics
+  section#about,
+  .wg-about,
+  .hb-about {
+    .prose, p {
+      font-family: 'Merriweather', 'Georgia', serif !important;
+      color: #333 !important;
+      text-align: justify;
+      line-height: 1.8;
+    }
+  }
+  
+  // Publication items
+  .pub-list-item,
+  .publication-item {
+    background: #fff !important;
+    border: 1px solid #ddd !important;
+    
+    .article-title {
+      color: #111 !important;
+    }
+    
+    .pub-authors {
+      color: #666 !important;
+    }
+  }
+  
+  // Scrollbar - subtle
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #f0f0f0 !important;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #ccc !important;
+    border-radius: 4px;
+    
+    &:hover {
+      background: #999 !important;
+    }
+  }
+}
+
+// =============================================================================
+// ===== THEME TOGGLE BUTTON STYLING =====
+// =============================================================================
+// Style for the custom theme toggle label
+
+.theme-toggle-label {
+  font-family: 'Fira Code', monospace !important;
+  font-weight: bold;
+  font-size: 0.85rem;
+  border: 1px solid currentColor;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+// In dark mode, the toggle is green
+body.dark .theme-toggle-label {
+  color: #00ff41 !important;
+  border-color: #00ff41 !important;
+  
+  &:hover {
+    background: rgba(0, 255, 65, 0.1);
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+  }
+}
+
+// In light mode, the toggle is ink black
+body:not(.dark) .theme-toggle-label {
+  color: #333 !important;
+  border-color: #333 !important;
+  font-family: 'Merriweather', serif !important;
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
 }
