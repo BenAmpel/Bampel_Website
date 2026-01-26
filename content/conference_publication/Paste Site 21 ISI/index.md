@@ -70,4 +70,4 @@ url_pdf: 'https://par.nsf.gov/servlets/purl/10336827'
 
 **Altmetric Attention:**
 
-<div data-badge-type="medium-donut" data-doi="10.1109/ISI53945.2021.9624765" data-badge-popover="right" data-hide-no-mentions="true" class="altmetric-embed"></div>
+<div data-badge-type="medium-donut" data-doi="10.1109/ISI53945.2021.9624765" data-badge-popover="right" class="altmetric-embed"></div>

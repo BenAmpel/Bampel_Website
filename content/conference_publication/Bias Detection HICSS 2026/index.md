@@ -33,4 +33,4 @@ url_pdf: 'https://hdl.handle.net/10125/111610'
 
 **Altmetric Attention:**
 
-<div data-badge-type="medium-donut" data-doi="10.24251/HICSS.2026.218" data-badge-popover="right" data-hide-no-mentions="true" class="altmetric-embed"></div>
+<div data-badge-type="medium-donut" data-doi="10.24251/HICSS.2026.218" data-badge-popover="right" class="altmetric-embed"></div>

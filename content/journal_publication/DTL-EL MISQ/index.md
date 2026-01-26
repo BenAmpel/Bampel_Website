@@ -70,4 +70,4 @@ image:
 
 **Altmetric Attention:**
 
-<div data-badge-type="medium-donut" data-doi="10.25300/MISQ/2023/17316" data-badge-popover="right" data-hide-no-mentions="true" class="altmetric-embed"></div>
+<div data-badge-type="medium-donut" data-doi="10.25300/MISQ/2023/17316" data-badge-popover="right" class="altmetric-embed"></div>
