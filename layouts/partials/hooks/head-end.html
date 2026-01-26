@@ -1787,18 +1787,20 @@ function runEnhancements() {
     let doi = null;
     
     // Method 1: Look for explicit doi.org link
-    const doiLink = document.querySelector('a[href*="doi.org"]');
-    if (doiLink) {
-      const doiMatch = doiLink.href.match(/doi\.org\/(.+)$/);
-      if (doiMatch) doi = doiMatch[1];
-    }
+    const allLinks = document.querySelectorAll('a[href*="doi.org"]');
+    allLinks.forEach(link => {
+      if (!doi) {
+        const doiMatch = link.href.match(/doi\.org\/(.+?)(?:\?|$)/);
+        if (doiMatch) doi = doiMatch[1];
+      }
+    });
     
     // Method 2: Look for DOI button (Hugo Blox style)
     if (!doi) {
-      const doiButtons = document.querySelectorAll('.btn');
+      const doiButtons = document.querySelectorAll('.btn, .btn-outline-primary, [class*="btn"]');
       doiButtons.forEach(btn => {
-        if (btn.textContent.trim().toUpperCase() === 'DOI' && btn.href) {
-          const match = btn.href.match(/doi\.org\/(.+)$/);
+        if (btn.textContent && btn.textContent.trim().toUpperCase() === 'DOI' && btn.href) {
+          const match = btn.href.match(/doi\.org\/(.+?)(?:\?|$)/);
           if (match) doi = match[1];
         }
       });
@@ -1807,22 +1809,18 @@ function runEnhancements() {
     // Method 3: Look for citation_doi meta tag
     if (!doi) {
       const metaDoi = document.querySelector('meta[name="citation_doi"]');
-      if (metaDoi) doi = metaDoi.content;
-    }
-    
-    // Method 4: Look for DOI in page text (formatted as doi: 10.xxxx)
-    if (!doi) {
-      const pageText = document.body.innerText;
-      const textMatch = pageText.match(/doi[:\s]+([0-9]+\.[0-9]+\/[^\s,<]+)/i);
-      if (textMatch) doi = textMatch[1];
+      if (metaDoi && metaDoi.content) doi = metaDoi.content;
     }
     
     if (!doi) return;
     
-    // Find where to insert the badge (after abstract or at end of article)
+    // Find where to insert the badge - try multiple Hugo Blox selectors
     const articleContainer = document.querySelector('.article-container') || 
+                             document.querySelector('.pub-content') ||
+                             document.querySelector('.page-body') ||
                              document.querySelector('article') ||
-                             document.querySelector('.page-body');
+                             document.querySelector('main .container') ||
+                             document.querySelector('main');
     
     if (!articleContainer) return;
     
@@ -1852,14 +1850,21 @@ function runEnhancements() {
     // Append to article
     articleContainer.appendChild(badgeContainer);
     
-    // Re-initialize Altmetric embeds
-    if (typeof _altmetric_embed_init === 'function') {
-      _altmetric_embed_init();
+    // Re-initialize Altmetric embeds - try multiple times
+    function initAltmetric() {
+      if (typeof _altmetric_embed_init === 'function') {
+        _altmetric_embed_init();
+      }
     }
+    initAltmetric();
+    setTimeout(initAltmetric, 500);
+    setTimeout(initAltmetric, 1500);
   }
   
-  // Run Altmetric badge injection with delay to ensure DOM is ready
-  setTimeout(addAltmetricBadge, 500);
+  // Run Altmetric badge injection with multiple delays to ensure DOM is ready
+  setTimeout(addAltmetricBadge, 300);
+  setTimeout(addAltmetricBadge, 1000);
+  setTimeout(addAltmetricBadge, 2000);
 }
 
 // Run on multiple events to ensure it works with Hugo Blox
