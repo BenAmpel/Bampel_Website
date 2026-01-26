@@ -32,19 +32,6 @@ sections:
         
         ---
         
-        {{< spoiler text="📊 Altmetric Attention Scores (4 papers)" >}}
-        
-        **Track social media, news, and policy attention for research papers:**
-        
-        - [**DTL-EL: Deep Transfer Learning for Exploit Labeling**](https://www.altmetric.com/details/doi/10.25300/MISQ/2023/17316) — MISQ 2024
-        - [**ATT&CK-Link: Cybersecurity Risk Management Framework**](https://www.altmetric.com/details/doi/10.1080/07421222.2023.2301178) — JMIS 2024  
-        - [**Large Language Models for Text Analytics IS Research**](https://www.altmetric.com/details/doi/10.1145/3682069) — ACM TMIS 2025
-        - [**Evading Anti-Phishing Models: MLSEC 2022**](https://www.altmetric.com/details/doi/10.1145/3603507) — ACM DTRAP 2024
-        
-        *Click links to view detailed attention metrics on Altmetric.com*
-        
-        {{< /spoiler >}}
-        
         {{< spoiler text="🛠️ Skills & Expertise (8)" >}}
         
         | Skill | Description |
