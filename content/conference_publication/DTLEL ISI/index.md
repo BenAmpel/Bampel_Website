@@ -36,7 +36,10 @@ tags:
 - Cyber Threat Intelligence
 - Deep Learning
 - Exploit Labeling
-featured: false
+featured: true
+
+awards:
+- Best Paper Award
 
 # Custom links (uncomment lines below)
 # links:

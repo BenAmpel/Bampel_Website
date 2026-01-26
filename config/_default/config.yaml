@@ -3,8 +3,8 @@
 # Hugo Documentation: https://gohugo.io/getting-started/configuration/#all-configuration-settings
 # This file is formatted using YAML syntax - learn more at https://learnxinyminutes.com/docs/yaml/
 
-title: Academic # Website name
-baseURL: 'https://example.com/' # Website URL
+title: Benjamin M. Ampel # Website name
+baseURL: 'https://bampel.com/' # Website URL
 
 ############################
 ## LANGUAGE
@@ -32,7 +32,8 @@ module:
 
 enableGitInfo: false
 summaryLength: 30
-paginate: 10
+pagination:
+  pagerSize: 10
 enableEmoji: true
 enableRobotsTXT: true
 footnotereturnlinkcontents: <sup>^</sup>
@@ -73,3 +74,8 @@ sitemap:
   _merge: deep
 minify:
   _merge: deep
+
+# Services (Hugo 0.120+)
+services:
+  googleAnalytics:
+    id: ''
