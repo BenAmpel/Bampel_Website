@@ -167,18 +167,28 @@ section#hero h1 {
   }
 }
 
-// ===== SECTION HEADER CYBER GLOW =====
+// ===== SECTION HEADER GLITCH EFFECT =====
 section h1, section h2 {
-  transition: text-shadow 0.3s ease;
+  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  color: #00ff41 !important;
+  text-shadow: 0 0 5px rgba(0, 255, 65, 0.3);
+  display: inline-block;
+  position: relative;
+  transition: all 0.3s ease;
+  
+  // Glitch effect on hover (cyan/magenta)
+  @include glitch(#00ffff, #ff00ff, transparent);
   
   &:hover {
-    text-shadow: 0 0 10px rgba(0, 255, 65, 0.4), 0 0 20px rgba(0, 255, 65, 0.2);
+    text-shadow: 0 0 15px rgba(0, 255, 65, 0.8), 0 0 25px rgba(0, 255, 255, 0.5);
   }
 }
 
-.dark section h1:hover,
-.dark section h2:hover {
-  text-shadow: 0 0 15px rgba(0, 255, 65, 0.6), 0 0 30px rgba(0, 255, 65, 0.3);
+.dark section h1,
+.dark section h2 {
+  &:hover {
+    text-shadow: 0 0 20px rgba(0, 255, 65, 0.9), 0 0 35px rgba(0, 255, 255, 0.6);
+  }
 }
 
 // ===== HERO SECTION BACKGROUND =====
@@ -280,17 +290,21 @@ section#about,
   }
 }
 
-// Biography section title (Biography heading)
+// Biography section title (Biography heading) - with glitch effect
 section#about h1,
 .wg-about h1,
 .hb-about h1 {
   font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
   color: #00ff41 !important;
   text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+  display: inline-block;
+  position: relative;
   
-  &::before {
-    content: '> ';
-    color: #58a6ff;
+  // Glitch effect on hover
+  @include glitch(#00ffff, #ff00ff, transparent);
+  
+  &:hover {
+    text-shadow: 0 0 15px rgba(0, 255, 65, 0.8), 0 0 30px rgba(0, 255, 255, 0.4);
   }
 }
 
@@ -309,24 +323,23 @@ section#about .article-title,
   @include glitch(#00ff00, #ff00ff, transparent);
 }
 
-// Role/Position styling
+// Role/Position styling - Matrix green with subtle glitch
 section#about .hb-about-role,
 section#about .role,
 section#about [class*="role"],
 .wg-about .role {
   font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
-  color: #58a6ff !important;
+  color: #00ff41 !important;
   font-size: 1.1rem;
+  text-shadow: 0 0 5px rgba(0, 255, 65, 0.3);
+  display: inline-block;
+  position: relative;
   
-  &::before {
-    content: '$ echo "';
-    color: #7ee787;
-    font-weight: 400;
-  }
+  // Glitch effect on hover
+  @include glitch(#00ffff, #ff00ff, transparent);
   
-  &::after {
-    content: '"';
-    color: #7ee787;
+  &:hover {
+    text-shadow: 0 0 10px rgba(0, 255, 65, 0.6), 0 0 20px rgba(0, 255, 255, 0.3);
   }
 }
 
@@ -375,20 +388,11 @@ section#about .hb-about-content,
     text-shadow: 0 0 3px rgba(255, 166, 87, 0.3);
   }
   
-  // Italic text (publications, etc.)
+  // Italic text (publications, etc.) - cyan accent
   em, i {
-    color: #d2a8ff !important;
-    font-style: normal;
-    
-    &::before {
-      content: '[';
-      color: #8b949e;
-    }
-    
-    &::after {
-      content: ']';
-      color: #8b949e;
-    }
+    color: #00ffff !important;
+    font-style: italic;
+    text-shadow: 0 0 3px rgba(0, 255, 255, 0.3);
   }
   
   // Links
@@ -491,39 +495,35 @@ section#about .col-md-5,
     font-size: 0.9rem;
   }
   
-  // Year
+  // Year - Matrix green
   .year,
   time {
-    color: #8b949e !important;
+    color: #7ee787 !important;
     font-size: 0.85rem;
-    
-    &::before {
-      content: '// ';
-      color: #6e7681;
-    }
+    text-shadow: 0 0 3px rgba(0, 255, 65, 0.3);
   }
 }
 
-// Style the section titles "Interests" and "Education"
+// Style the section titles "Interests" and "Education" - glitch effect
 section#about h3,
 section#about .hb-about-interests-title,
 section#about .hb-about-education-title,
-section#about [class*="title"] {
+section#about [class*="title"]:not(.article-title) {
   font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
-  color: #58a6ff !important;
-  font-size: 0.85rem !important;
+  color: #00ff41 !important;
+  font-size: 0.9rem !important;
   text-transform: uppercase;
   letter-spacing: 2px;
   margin-bottom: 15px;
+  display: inline-block;
+  position: relative;
+  text-shadow: 0 0 5px rgba(0, 255, 65, 0.4);
   
-  &::before {
-    content: '/* ';
-    color: #6e7681;
-  }
+  // Glitch effect on hover
+  @include glitch(#00ffff, #ff00ff, transparent);
   
-  &::after {
-    content: ' */';
-    color: #6e7681;
+  &:hover {
+    text-shadow: 0 0 15px rgba(0, 255, 65, 0.8), 0 0 25px rgba(0, 255, 255, 0.4);
   }
 }
 
@@ -590,26 +590,26 @@ section#about .hb-about-avatar,
   }
 }
 
-// Section labels/headers within about
+// Section labels/headers within about - glitch effect
 section#about h2,
 section#about h3,
 section#about .section-subheading,
 .wg-about h2,
 .wg-about h3 {
   font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
-  color: #58a6ff !important;
+  color: #00ff41 !important;
   font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 2px;
+  display: inline-block;
+  position: relative;
+  text-shadow: 0 0 5px rgba(0, 255, 65, 0.4);
   
-  &::before {
-    content: '/* ';
-    color: #6e7681;
-  }
+  // Glitch effect on hover (cyan/magenta)
+  @include glitch(#00ffff, #ff00ff, transparent);
   
-  &::after {
-    content: ' */';
-    color: #6e7681;
+  &:hover {
+    text-shadow: 0 0 15px rgba(0, 255, 65, 0.8), 0 0 25px rgba(0, 255, 255, 0.4);
   }
 }
 
