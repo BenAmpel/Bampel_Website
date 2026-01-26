@@ -17,11 +17,39 @@ sections:
     content:
       title: Research Impact
       text: |
+        <div class="scholar-widget">
+          <div class="scholar-widget-inner">
+            <div class="scholar-logo">
+              <svg viewBox="0 0 24 24" fill="#4285f4"><path d="M12 24a7 7 0 110-14 7 7 0 010 14zm0-24L0 9.5l4.838 3.94A8 8 0 0112 9a8 8 0 017.162 4.44L24 9.5z"/></svg>
+              Google Scholar
+            </div>
+            <div class="scholar-metrics">
+              <div class="scholar-metric">
+                <div class="scholar-metric-value">500+</div>
+                <div class="scholar-metric-label">Citations</div>
+              </div>
+              <div class="scholar-metric">
+                <div class="scholar-metric-value">9</div>
+                <div class="scholar-metric-label">h-index</div>
+              </div>
+              <div class="scholar-metric">
+                <div class="scholar-metric-value">9</div>
+                <div class="scholar-metric-label">i10-index</div>
+              </div>
+              <div class="scholar-metric">
+                <div class="scholar-metric-value">30</div>
+                <div class="scholar-metric-label">Publications</div>
+              </div>
+            </div>
+            <a href="https://scholar.google.com/citations?user=XpfdLdkAAAAJ" target="_blank" class="scholar-link">
+              View Profile →
+            </a>
+          </div>
+        </div>
+        <p class="scholar-updated" style="text-align: center; margin-top: -10px;">Last updated: January 2026</p>
+        
         | 📄 **8** Journal Articles | 📋 **16** Conference Papers | 📝 **6** Workshop Papers | 🏆 **2** Best Paper Awards |
         |:---:|:---:|:---:|:---:|
-        
-        | 📚 **500+** Citations | 📈 **h-index: 9** | 📊 **i10-index: 9** |
-        |:---:|:---:|:---:|
         
         | 🌟 **5** Q1 Journal Publications | 🏛️ **3** FT50 Publications | 🎯 **2** UTD24 Publications |
         |:---:|:---:|:---:|
@@ -29,6 +57,43 @@ sections:
         **Top Venues:** MISQ • JMIS • ACM TMIS • ISF • IEEE ISI • HICSS • AMCIS • ICIS • ACM KDD
         
         ---
+        
+        {{< spoiler text="📊 Altmetric Attention Scores" >}}
+        
+        <div class="altmetric-grid">
+          <div class="altmetric-item">
+            <div class="altmetric-embed" data-badge-type="donut" data-doi="10.25300/MISQ/2023/17316" data-badge-popover="right"></div>
+            <div class="altmetric-info">
+              <div class="altmetric-title">Creating Proactive Cyber Threat Intelligence with Hacker Exploit Labels</div>
+              <div class="altmetric-venue">MIS Quarterly, 2024</div>
+            </div>
+          </div>
+          <div class="altmetric-item">
+            <div class="altmetric-embed" data-badge-type="donut" data-doi="10.1080/07421222.2023.2301178" data-badge-popover="right"></div>
+            <div class="altmetric-info">
+              <div class="altmetric-title">Improving Threat Mitigation Through a Cybersecurity Risk Management Framework</div>
+              <div class="altmetric-venue">JMIS, 2024</div>
+            </div>
+          </div>
+          <div class="altmetric-item">
+            <div class="altmetric-embed" data-badge-type="donut" data-doi="10.1145/3682069" data-badge-popover="right"></div>
+            <div class="altmetric-info">
+              <div class="altmetric-title">Large Language Models for Conducting Advanced Text Analytics IS Research</div>
+              <div class="altmetric-venue">ACM TMIS, 2025</div>
+            </div>
+          </div>
+          <div class="altmetric-item">
+            <div class="altmetric-embed" data-badge-type="donut" data-doi="10.1145/3603507" data-badge-popover="right"></div>
+            <div class="altmetric-info">
+              <div class="altmetric-title">Evading Anti-Phishing Models: MLSEC 2022 Field Note</div>
+              <div class="altmetric-venue">ACM DTRAP, 2024</div>
+            </div>
+          </div>
+        </div>
+        
+        *Altmetric tracks attention from news, blogs, social media, and policy documents*
+        
+        {{< /spoiler >}}
         
         {{< spoiler text="🛠️ Skills & Expertise (8)" >}}
         
