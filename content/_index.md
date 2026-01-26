@@ -24,8 +24,6 @@ sections:
         - **Phishing Detection**: Developing robust defenses against adversarial phishing attacks
         - **Deep Learning**: Transfer learning and transformer-based approaches for security applications
         - **Computational Design Science**: Building actionable security systems and frameworks
-        
-        *Google Scholar Metrics: 500+ Citations | h-index: 9 | i10-index: 9*
     design:
       columns: '1'
 
@@ -60,31 +58,22 @@ sections:
           icon_pack: fas
           description: Course development, PhD mentoring, workshop facilitation
 
-  # ---------- PUBLICATION STATS ----------
+  # ---------- RESEARCH IMPACT ----------
   - block: markdown
     id: stats
     content:
       title: Research Impact
       text: |
-        | 📄 **8** Journal Articles | 📋 **16** Conference Papers | 📝 **6** Workshop Papers | 📚 **500+** Citations | 🏆 **2** Best Paper Awards |
-        |:---:|:---:|:---:|:---:|:---:|
+        | 📄 **8** Journal Articles | 📋 **16** Conference Papers | 📝 **6** Workshop Papers | 🏆 **2** Best Paper Awards |
+        |:---:|:---:|:---:|:---:|
+        
+        | 📚 **500+** Citations | 📈 **h-index: 9** | 📊 **i10-index: 9** |
+        |:---:|:---:|:---:|
         
         | 🌟 **5** Q1 Journal Publications | 🏛️ **3** FT50 Publications | 🎯 **2** UTD24 Publications |
         |:---:|:---:|:---:|
         
         **Top Venues:** MISQ • JMIS • ACM TMIS • ISF • IEEE ISI • HICSS • AMCIS • ICIS • ACM KDD
-    design:
-      columns: '1'
-
-  # ---------- IMPACT DASHBOARD ----------
-  - block: markdown
-    id: dashboard
-    content:
-      title: Citation Analytics
-      text: |
-        ![Research Impact Dashboard](/images/impact-dashboard.png)
-        
-        *Data sourced from Google Scholar - Updated monthly via GitHub Actions*
     design:
       columns: '1'
   
