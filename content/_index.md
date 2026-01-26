@@ -272,6 +272,8 @@ sections:
     content:
       title: Invited Talks & Presentations
       text: |
+        {{< spoiler text="🎤 Invited Talks (7)" >}}
+        
         1. **Vulnerability Remediation Across International Open-Source AI: A Large Language Model-Graph Learning Approach**  
            AI in Cybersecurity Machine Learning / Deep Learning Data Analytics at HICSS-59, Hawaii (January 2026)
         
@@ -292,6 +294,8 @@ sections:
         
         7. **Analytics and Visualizations/UI in AI for Cybersecurity**  
            AI in Cybersecurity Workshop at HICSS-56, Hawaii (January 2023)
+        
+        {{< /spoiler >}}
     design:
       columns: '1'
 
@@ -301,6 +305,8 @@ sections:
     content:
       title: Honors & Awards
       text: |
+        {{< spoiler text="🏆 Awards & Honors (12)" >}}
+        
         - **Robinson College of Business IS Cybersecurity Graduate Program Top Professor** (2025)
         - **ACM SIGMIS Doctoral Dissertation Award** (2024)
         - **Best Paper Award**, IEEE Intelligence and Security Informatics (2023)
@@ -313,6 +319,8 @@ sections:
         - **Nunamaker-Chen MIS Doctoral Scholarship** (2020)
         - **NSF CyberCorps: Scholarship for Service Fellow** (2018-2021)
         - **UArizona MIS Undergraduate Outstanding Senior** (2017)
+        
+        {{< /spoiler >}}
     design:
       columns: '1'
 
@@ -322,27 +330,42 @@ sections:
     content:
       title: Professional Service
       text: |
-        ### Editorial Roles
+        {{< spoiler text="📝 Editorial Roles (3)" >}}
+        
         - **Associate Editor**, ACM Digital Threats: Research and Practice (DTRAP), 2025-Present
         - **Editorial Board**, Journal of Information Systems Education (JISE), 2025-Present
         - **Associate Editor**, ICIS Track on Digital Innovation and Entrepreneurship, 2025
         
-        ### Conference Leadership
+        {{< /spoiler >}}
+        
+        {{< spoiler text="🎯 Conference Leadership (3)" >}}
+        
         - **Co-Chair**, ECIS Ancillary Meetings (2025)
         - **Co-Chair**, HICSS Junior Faculty Consortium (2025-2027)
         - **Co-Chair**, AI4Cyber Workshop at KDD (2024)
         
-        ### Program Committees
+        {{< /spoiler >}}
+        
+        {{< spoiler text="👥 Program Committees" >}}
+        
         INFORMS WDS, SWAIB, IEEE ISI, WITS, ACM CCS AISec Workshop, ICDM Data Mining for Cybersecurity, AI4Cyber-KDD
         
-        ### Journal Reviewing
+        {{< /spoiler >}}
+        
+        {{< spoiler text="📖 Journal Reviewing" >}}
+        
         EJIS, ISJ, MISQ, IJIM, JMIS, IPM, Computers & Security, DTRAP, TRR, TDSC, TMIS
         
-        ### Research Affiliations
+        {{< /spoiler >}}
+        
+        {{< spoiler text="🔬 Research Affiliations (4)" >}}
+        
         - **Academic Mentor**, Collaborative Human-AI Center (CHAI), Georgia State University, 2025-Present
         - **Academic Mentor**, Assistive Intelligence Lab, Georgia State University, 2025-Present
         - **Academic Mentor**, Data Science & AI Lab (DSAIL), Indiana University, 2024-Present
         - **Academic Mentor**, Artificial Intelligence Lab, University of Arizona, 2020-Present
+        
+        {{< /spoiler >}}
     design:
       columns: '1'
   
@@ -352,8 +375,12 @@ sections:
     content:
       title: Public Engagement & Media Coverage
       text: |
+        {{< spoiler text="📺 Media Coverage (2)" >}}
+        
         - **"Benjamin Ampel Receives ACM SIGMIS Doctoral Dissertation Award"** — Georgia State University (January 28, 2025)
         - **"More Older Americans Being Scammed; Is Technology a Factor?"** — The National Desk (November 19, 2024)
+        
+        {{< /spoiler >}}
     design:
       columns: '1'
 
