@@ -1876,44 +1876,53 @@ window.addEventListener('load', function() {
 });
 
 // ===== STANDALONE ALTMETRIC BADGE INJECTION =====
-// Separate from runEnhancements for better reliability
 (function() {
   function injectAltmetricBadge() {
-    // Only run on publication pages
     const path = window.location.pathname;
-    if (!path.includes('/publication/') && 
-        !path.includes('/journal_publication/') && 
-        !path.includes('/conference_publication/') && 
-        !path.includes('/workshop_publication/') &&
-        !path.includes('/book_chapter/')) {
-      return;
-    }
     
-    // Don't inject twice
+    // Only run on publication pages
+    const isPublication = path.includes('/publication/') || 
+        path.includes('/journal_publication/') || 
+        path.includes('/conference_publication/') || 
+        path.includes('/workshop_publication/') ||
+        path.includes('/book_chapter/');
+    
+    if (!isPublication) return;
     if (document.querySelector('.altmetric-badge-container')) return;
     
-    // Find DOI from any link containing doi.org
+    // Find DOI
     let doi = null;
-    document.querySelectorAll('a').forEach(link => {
-      if (!doi && link.href && link.href.includes('doi.org/')) {
-        const match = link.href.match(/doi\.org\/([^?\s]+)/);
-        if (match) doi = match[1];
+    const allLinks = document.getElementsByTagName('a');
+    for (let i = 0; i < allLinks.length; i++) {
+      const href = allLinks[i].href || '';
+      if (href.indexOf('doi.org/') !== -1) {
+        const parts = href.split('doi.org/');
+        if (parts[1]) {
+          doi = parts[1].split('?')[0];
+          break;
+        }
       }
-    });
+    }
     
     if (!doi) return;
     
-    // Find container - try many selectors
-    const container = document.querySelector('.article-container, .pub-content, .page-body, article, main .container, main, .content');
-    if (!container) return;
+    // Find the share section or any suitable container
+    let insertPoint = document.querySelector('.share-box') || 
+                      document.querySelector('.article-share') ||
+                      document.querySelector('[class*="share"]') ||
+                      document.querySelector('.article-tags') ||
+                      document.querySelector('.page-footer') ||
+                      document.querySelector('footer') ||
+                      document.body;
     
     // Create badge
     const isDark = document.body.classList.contains('dark');
     const badge = document.createElement('div');
     badge.className = 'altmetric-badge-container';
-    badge.style.cssText = isDark 
-      ? 'margin: 30px 0; padding: 20px; background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border-radius: 12px; border: 1px solid #475569;'
-      : 'margin: 30px 0; padding: 20px; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 12px; border: 1px solid #e2e8f0;';
+    badge.style.cssText = 'margin: 30px auto; padding: 20px; max-width: 800px; ' + 
+      (isDark 
+        ? 'background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border-radius: 12px; border: 1px solid #475569;'
+        : 'background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 12px; border: 1px solid #e2e8f0;');
     
     badge.innerHTML = '<h4 style="margin: 0 0 15px 0; font-size: 1rem; font-weight: 600;">📊 Altmetric Attention Score</h4>' +
       '<div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">' +
@@ -1922,28 +1931,27 @@ window.addEventListener('load', function() {
       'This badge shows attention from news, blogs, Twitter, policy documents, and more. ' +
       '<a href="https://www.altmetric.com/details/doi/' + doi + '" target="_blank" style="color: #3b82f6;">View details →</a></p></div></div>';
     
-    container.appendChild(badge);
+    // Insert after share section or at end
+    if (insertPoint && insertPoint.parentNode) {
+      insertPoint.parentNode.insertBefore(badge, insertPoint.nextSibling);
+    } else {
+      document.body.appendChild(badge);
+    }
     
     // Initialize Altmetric
     if (typeof _altmetric_embed_init === 'function') {
       _altmetric_embed_init();
-      setTimeout(function() { _altmetric_embed_init(); }, 1000);
     }
+    setTimeout(function() {
+      if (typeof _altmetric_embed_init === 'function') _altmetric_embed_init();
+    }, 1500);
   }
   
-  // Run on DOMContentLoaded
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() {
-      setTimeout(injectAltmetricBadge, 500);
-    });
-  } else {
-    setTimeout(injectAltmetricBadge, 500);
-  }
-  
-  // Also run on window load
+  // Multiple attempts
   window.addEventListener('load', function() {
-    setTimeout(injectAltmetricBadge, 1000);
-    setTimeout(injectAltmetricBadge, 2500);
+    setTimeout(injectAltmetricBadge, 800);
+    setTimeout(injectAltmetricBadge, 2000);
+    setTimeout(injectAltmetricBadge, 4000);
   });
 })();
 </script>
