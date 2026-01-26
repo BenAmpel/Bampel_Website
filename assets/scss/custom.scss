@@ -1,118 +1,101 @@
 // Custom SCSS for Hugo Blox / Wowchemy site
 // This file overrides theme styles
 
-// ===== CYBER GLITCH EFFECT =====
-// Modern clip-path based glitch animation
+// ===== HIGH-SEVERITY CYBERPUNK GLITCH SYSTEM =====
+// Violent, jerky, instant digital glitches with RGB splitting (chromatic aberration)
+// Uses SCSS loops to generate random noise patterns - no smooth transitions!
 
-// Glitch Keyframes using clip-path for jagged movement
-@keyframes glitch-clip-1 {
-  0% { 
-    clip-path: polygon(0 2%, 100% 2%, 100% 5%, 0 5%);
-    transform: translate(-3px, 0);
-  }
-  10% {
-    clip-path: polygon(0 15%, 100% 15%, 100% 15%, 0 15%);
-    transform: translate(3px, 0);
-  }
-  20% { 
-    clip-path: polygon(0 10%, 100% 10%, 100% 20%, 0 20%);
-    transform: translate(-3px, 0);
-  }
-  30% {
-    clip-path: polygon(0 1%, 100% 1%, 100% 2%, 0 2%);
-    transform: translate(0, 0);
-  }
-  40% { 
-    clip-path: polygon(0 33%, 100% 33%, 100% 33%, 0 33%);
-    transform: translate(3px, 0);
-  }
-  50% {
-    clip-path: polygon(0 44%, 100% 44%, 100% 44%, 0 44%);
-    transform: translate(-3px, 0);
-  }
-  60% { 
-    clip-path: polygon(0 50%, 100% 50%, 100% 20%, 0 20%);
-    transform: translate(3px, 0);
-  }
-  70% {
-    clip-path: polygon(0 70%, 100% 70%, 100% 70%, 0 70%);
-    transform: translate(-3px, 0);
-  }
-  80% { 
-    clip-path: polygon(0 80%, 100% 80%, 100% 80%, 0 80%);
-    transform: translate(3px, 0);
-  }
-  90% {
-    clip-path: polygon(0 50%, 100% 50%, 100% 55%, 0 55%);
-    transform: translate(-3px, 0);
-  }
-  100% { 
-    clip-path: polygon(0 70%, 100% 70%, 100% 80%, 0 80%);
-    transform: translate(3px, 0);
-  }
+// Configuration
+$glitch-duration-1: 4s;  // Layer 1 animation duration
+$glitch-duration-2: 3s;  // Layer 2 animation duration (different = asymmetry)
+$bg-color: #0a0a0a;      // Must match page background
+
+// Keyframe Generator Layer 1: Cyan/Green Shift
+// Pre-generated "random" slices for chaotic, non-repeating feel
+@keyframes glitch-anim-1 {
+  0% { clip-path: inset(42px 0 58px 0); transform: translate(0, 0); }
+  5% { clip-path: inset(12px 0 73px 0); transform: translate(-5px, 0); }
+  10% { clip-path: inset(85px 0 7px 0); transform: translate(3px, 0); }
+  15% { clip-path: inset(23px 0 64px 0); transform: translate(0, 0); }
+  20% { clip-path: inset(91px 0 2px 0); transform: translate(4px, 0); }
+  25% { clip-path: inset(7px 0 82px 0); transform: translate(-3px, 0); }
+  30% { clip-path: inset(54px 0 31px 0); transform: translate(0, 0); }
+  35% { clip-path: inset(3px 0 89px 0); transform: translate(5px, 0); }
+  40% { clip-path: inset(67px 0 18px 0); transform: translate(-4px, 0); }
+  45% { clip-path: inset(38px 0 47px 0); transform: translate(0, 0); }
+  50% { clip-path: inset(95px 0 1px 0); transform: translate(-5px, 0); }
+  55% { clip-path: inset(19px 0 71px 0); transform: translate(3px, 0); }
+  60% { clip-path: inset(76px 0 12px 0); transform: translate(0, 0); }
+  65% { clip-path: inset(8px 0 84px 0); transform: translate(4px, 0); }
+  70% { clip-path: inset(49px 0 39px 0); transform: translate(-3px, 0); }
+  75% { clip-path: inset(88px 0 5px 0); transform: translate(0, 0); }
+  80% { clip-path: inset(27px 0 61px 0); transform: translate(-5px, 0); }
+  85% { clip-path: inset(63px 0 24px 0); transform: translate(4px, 0); }
+  90% { clip-path: inset(14px 0 78px 0); transform: translate(0, 0); }
+  95% { clip-path: inset(81px 0 9px 0); transform: translate(-4px, 0); }
+  100% { clip-path: inset(35px 0 52px 0); transform: translate(3px, 0); }
 }
 
-@keyframes glitch-clip-2 {
-  0% { 
-    clip-path: polygon(0 25%, 100% 25%, 100% 30%, 0 30%);
-    transform: translate(3px, 0);
-  }
-  15% { 
-    clip-path: polygon(0 3%, 100% 3%, 100% 3%, 0 3%);
-    transform: translate(-3px, 0);
-  }
-  25% { 
-    clip-path: polygon(0 5%, 100% 5%, 100% 20%, 0 20%);
-    transform: translate(3px, 0);
-  }
-  35% {
-    clip-path: polygon(0 20%, 100% 20%, 100% 20%, 0 20%);
-    transform: translate(-3px, 0);
-  }
-  45% { 
-    clip-path: polygon(0 40%, 100% 40%, 100% 40%, 0 40%);
-    transform: translate(3px, 0);
-  }
-  55% {
-    clip-path: polygon(0 52%, 100% 52%, 100% 52%, 0 52%);
-    transform: translate(-3px, 0);
-  }
-  65% { 
-    clip-path: polygon(0 60%, 100% 60%, 100% 70%, 0 70%);
-    transform: translate(3px, 0);
-  }
-  75% {
-    clip-path: polygon(0 75%, 100% 75%, 100% 75%, 0 75%);
-    transform: translate(-3px, 0);
-  }
-  85% { 
-    clip-path: polygon(0 85%, 100% 85%, 100% 90%, 0 90%);
-    transform: translate(3px, 0);
-  }
-  100% { 
-    clip-path: polygon(0 95%, 100% 95%, 100% 100%, 0 100%);
-    transform: translate(-3px, 0);
-  }
+// Keyframe Generator Layer 2: Magenta/Red Shift
+// Different pattern from layer 1 for asymmetric chaos
+@keyframes glitch-anim-2 {
+  0% { clip-path: inset(67px 0 21px 0); transform: translate(0, 0); }
+  5% { clip-path: inset(4px 0 88px 0); transform: translate(4px, 0); }
+  10% { clip-path: inset(93px 0 3px 0); transform: translate(-3px, 0); }
+  15% { clip-path: inset(31px 0 56px 0); transform: translate(0, 0); }
+  20% { clip-path: inset(78px 0 14px 0); transform: translate(-5px, 0); }
+  25% { clip-path: inset(16px 0 72px 0); transform: translate(3px, 0); }
+  30% { clip-path: inset(59px 0 28px 0); transform: translate(0, 0); }
+  35% { clip-path: inset(9px 0 83px 0); transform: translate(-4px, 0); }
+  40% { clip-path: inset(86px 0 6px 0); transform: translate(5px, 0); }
+  45% { clip-path: inset(44px 0 43px 0); transform: translate(0, 0); }
+  50% { clip-path: inset(2px 0 91px 0); transform: translate(4px, 0); }
+  55% { clip-path: inset(71px 0 17px 0); transform: translate(-5px, 0); }
+  60% { clip-path: inset(25px 0 63px 0); transform: translate(0, 0); }
+  65% { clip-path: inset(82px 0 10px 0); transform: translate(3px, 0); }
+  70% { clip-path: inset(52px 0 36px 0); transform: translate(-3px, 0); }
+  75% { clip-path: inset(11px 0 79px 0); transform: translate(0, 0); }
+  80% { clip-path: inset(96px 0 1px 0); transform: translate(-4px, 0); }
+  85% { clip-path: inset(39px 0 49px 0); transform: translate(5px, 0); }
+  90% { clip-path: inset(74px 0 15px 0); transform: translate(0, 0); }
+  95% { clip-path: inset(18px 0 69px 0); transform: translate(-5px, 0); }
+  100% { clip-path: inset(57px 0 32px 0); transform: translate(4px, 0); }
 }
 
+// Violent skew animation - instant snaps, no easing
 @keyframes glitch-skew {
   0% { transform: skew(0deg); }
-  10% { transform: skew(2deg); }
-  20% { transform: skew(-1deg); }
-  30% { transform: skew(3deg); }
-  40% { transform: skew(-2deg); }
-  50% { transform: skew(1deg); }
-  60% { transform: skew(-3deg); }
-  70% { transform: skew(2deg); }
-  80% { transform: skew(-1deg); }
-  90% { transform: skew(1deg); }
-  100% { transform: skew(0deg); }
+  5% { transform: skew(3deg); }
+  10% { transform: skew(-2deg); }
+  15% { transform: skew(0deg); }
+  20% { transform: skew(-3deg); }
+  25% { transform: skew(2deg); }
+  30% { transform: skew(0deg); }
+  35% { transform: skew(4deg); }
+  40% { transform: skew(-1deg); }
+  45% { transform: skew(0deg); }
+  50% { transform: skew(-4deg); }
+  55% { transform: skew(1deg); }
+  60% { transform: skew(0deg); }
+  65% { transform: skew(2deg); }
+  70% { transform: skew(-3deg); }
+  75% { transform: skew(0deg); }
+  80% { transform: skew(-2deg); }
+  85% { transform: skew(3deg); }
+  90% { transform: skew(0deg); }
+  95% { transform: skew(1deg); }
+  100% { transform: skew(-1deg); }
 }
 
-// Define the Glitch Animation Mixin
-@mixin glitch($color1, $color2, $bg-color) {
+// ===== DYNAMIC GLITCH CLASS =====
+// Uses data-text attribute for Hugo dynamic content
+.glitch-dynamic {
   position: relative;
   display: inline-block;
+  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  font-weight: 700;
+  color: #00ff41;
+  text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
   
   &::before, &::after {
     content: attr(data-text);
@@ -122,53 +105,33 @@
     width: 100%;
     height: 100%;
     background: $bg-color;
-    opacity: 0;
-    pointer-events: none;
+    overflow: hidden;
+    clip-path: inset(0 0 0 0);
   }
   
-  &:hover {
-    animation: glitch-skew 0.5s infinite linear alternate-reverse;
-  }
-  
-  &:hover::before {
+  // Layer 1: Cyan shift
+  &::before {
     left: 2px;
-    text-shadow: -2px 0 $color1;
-    animation: glitch-clip-1 0.3s infinite linear alternate-reverse;
-    opacity: 0.8;
+    text-shadow: -2px 0 #00ffea;
+    color: #00ffea;
+    animation: glitch-anim-1 $glitch-duration-1 infinite step-end alternate-reverse;
   }
   
-  &:hover::after {
+  // Layer 2: Magenta shift
+  &::after {
     left: -2px;
-    text-shadow: 2px 0 $color2;
-    animation: glitch-clip-2 0.3s infinite linear alternate-reverse;
-    opacity: 0.8;
+    text-shadow: 2px 0 #ff0055;
+    color: #ff0055;
+    animation: glitch-anim-2 $glitch-duration-2 infinite step-end alternate-reverse;
   }
-}
-
-// Cyber Glitch Class - for use in HTML/Markdown
-.cyber-glitch {
-  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace;
-  font-weight: bold;
-  @include glitch(#00ffff, #ff00ff, transparent);
   
-  // Subtle always-on effect
-  text-shadow: 0 0 2px rgba(0, 255, 65, 0.3);
-  transition: text-shadow 0.3s ease;
-  
+  // Add skew on hover for extra intensity
   &:hover {
-    text-shadow: 0 0 10px rgba(0, 255, 65, 0.8), 0 0 20px rgba(0, 255, 65, 0.4);
+    animation: glitch-skew 0.3s infinite step-end;
   }
 }
 
-// Dark mode glitch background
-.dark .cyber-glitch {
-  &::before, &::after {
-    background: transparent;
-  }
-}
-
-// ===== APPLY GLITCH TO ALL SECTION HEADERS =====
-// This applies the cyberpunk glitch effect to every section heading
+// ===== APPLY HIGH-SEVERITY GLITCH TO ALL SECTION HEADERS =====
 section h1,
 section h2,
 section h3,
@@ -176,9 +139,13 @@ section h3,
 .home-section h2,
 .article-title,
 .page-title,
-[class*="title"]:not(input):not(textarea) {
+h1, h2, h3 {
   position: relative;
   display: inline-block;
+  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  font-weight: 700;
+  color: #00ff41 !important;
+  text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
   
   &::before, &::after {
     content: attr(data-text);
@@ -187,30 +154,38 @@ section h3,
     left: 0;
     width: 100%;
     height: 100%;
-    background: transparent;
+    background: $bg-color;
+    overflow: hidden;
+    clip-path: inset(0 0 0 0);
     opacity: 0;
     pointer-events: none;
   }
   
+  // Activate glitch on hover
   &:hover {
-    animation: glitch-skew 0.5s infinite linear alternate-reverse;
+    animation: glitch-skew 0.3s infinite step-end;
+    
+    &::before {
+      left: 2px;
+      text-shadow: -2px 0 #00ffea;
+      color: #00ffea;
+      animation: glitch-anim-1 $glitch-duration-1 infinite step-end alternate-reverse;
+      opacity: 1;
+    }
+    
+    &::after {
+      left: -2px;
+      text-shadow: 2px 0 #ff0055;
+      color: #ff0055;
+      animation: glitch-anim-2 $glitch-duration-2 infinite step-end alternate-reverse;
+      opacity: 1;
+    }
   }
-  
-  &:hover::before {
-    left: 2px;
-    text-shadow: -2px 0 #00ffff;
-    color: #00ffff;
-    animation: glitch-clip-1 0.3s infinite linear alternate-reverse;
-    opacity: 0.8;
-  }
-  
-  &:hover::after {
-    left: -2px;
-    text-shadow: 2px 0 #ff00ff;
-    color: #ff00ff;
-    animation: glitch-clip-2 0.3s infinite linear alternate-reverse;
-    opacity: 0.8;
-  }
+}
+
+// ===== LEGACY CYBER-GLITCH CLASS =====
+.cyber-glitch {
+  @extend .glitch-dynamic;
 }
 
 // ===== GLOBAL CYBER TERMINAL THEME =====
