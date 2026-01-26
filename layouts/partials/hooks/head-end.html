@@ -243,12 +243,12 @@ html {
   background: #90caf9;
 }
 
-/* Adjust avatar/headshot position to show more of the top of the head */
+/* Adjust avatar/headshot position - lower the image to show more of face */
 .avatar img,
 .avatar-wrapper img,
 .wg-about-avatar img,
 .about-widget img.avatar {
-  object-position: center 30% !important;
+  object-position: center 15% !important;
 }
 
 /* Smooth hover effects for cards and links */
@@ -829,19 +829,28 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   // ===== INJECT NETWORK HTML =====
-  const networkWrapper = document.getElementById('network-wrapper');
-  if (networkWrapper) {
-    networkWrapper.innerHTML = `
-      <div class="network-container">
-        <div class="network-title">Research Collaborations</div>
-        <div id="coauthor-network"></div>
-        <div class="network-legend">
-          <div class="legend-item"><span class="legend-dot primary"></span> Benjamin Ampel</div>
-          <div class="legend-item"><span class="legend-dot frequent"></span> Frequent Collaborator (5+ papers)</div>
-          <div class="legend-item"><span class="legend-dot occasional"></span> Collaborator (2-4 papers)</div>
+  // Find the network section by ID and inject content into it
+  const networkSection = document.getElementById('network');
+  if (networkSection) {
+    // Find the prose/content area within the section
+    const contentArea = networkSection.querySelector('.prose') || 
+                        networkSection.querySelector('.article-container') ||
+                        networkSection.querySelector('.container');
+    if (contentArea) {
+      const networkDiv = document.createElement('div');
+      networkDiv.innerHTML = `
+        <div class="network-container">
+          <div class="network-title">Research Collaborations</div>
+          <div id="coauthor-network"></div>
+          <div class="network-legend">
+            <div class="legend-item"><span class="legend-dot primary"></span> Benjamin Ampel</div>
+            <div class="legend-item"><span class="legend-dot frequent"></span> Frequent Collaborator (5+ papers)</div>
+            <div class="legend-item"><span class="legend-dot occasional"></span> Collaborator (2-4 papers)</div>
+          </div>
         </div>
-      </div>
-    `;
+      `;
+      contentArea.appendChild(networkDiv);
+    }
   }
   
   // ===== CO-AUTHOR NETWORK OBSERVER =====

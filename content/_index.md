@@ -81,8 +81,7 @@ sections:
     id: network
     content:
       title: Collaboration Network
-      text: |
-        <div id="network-wrapper"></div>
+      text: ""
     design:
       columns: '1'
 
