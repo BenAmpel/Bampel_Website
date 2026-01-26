@@ -66,6 +66,20 @@ sections:
         |:---:|:---:|:---:|
         
         **Top Venues:** MISQ • JMIS • ACM TMIS • ISF • IEEE ISI • HICSS • AMCIS • ICIS • ACM KDD
+        
+        ---
+        
+        **Research Visualizations** *(click to expand)*
+        
+        {{< spoiler text="🤝 Collaboration Network" >}}
+        ![Collaboration Network](/images/coauthor-network.png)
+        *Research collaboration network based on co-authored publications*
+        {{< /spoiler >}}
+        
+        {{< spoiler text="🌍 Research Footprint" >}}
+        ![Research Map](/images/research-map.png)
+        *Conference presentations and collaborator institutions worldwide*
+        {{< /spoiler >}}
     design:
       columns: '1'
 
