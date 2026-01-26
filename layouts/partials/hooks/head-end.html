@@ -2290,6 +2290,142 @@ function runEnhancements() {
   setTimeout(addAltmetricBadge, 300);
   setTimeout(addAltmetricBadge, 1000);
   setTimeout(addAltmetricBadge, 2000);
+  
+  // ===== VISITOR FORENSICS WIDGET =====
+  // Shows visitors what data their browser leaks - security awareness feature
+  function initVisitorForensics() {
+    // Only show on homepage
+    if (window.location.pathname !== '/' && window.location.pathname !== '/index.html') return;
+    
+    // Check if already initialized
+    if (document.querySelector('.visitor-forensics-widget')) return;
+    
+    // Find the footer or a suitable location
+    const footer = document.querySelector('footer') || 
+                   document.querySelector('.site-footer') ||
+                   document.querySelector('#about');
+    
+    if (!footer) return;
+    
+    // Create the widget HTML
+    const widget = document.createElement('div');
+    widget.className = 'visitor-forensics-widget';
+    widget.innerHTML = `
+      <div class="forensics-header">
+        <span class="blink">●</span> VISITOR_INTEL /// ACTIVE
+      </div>
+      <div class="forensics-body">
+        <p><span class="forensics-label">STATUS:</span> <span class="forensics-value">CONNECTION_ESTABLISHED</span></p>
+        <p><span class="forensics-label">IP_ADDR:</span> <span class="forensics-value tracing" id="visitor-ip">TRACING...</span></p>
+        <p><span class="forensics-label">OS_TYPE:</span> <span class="forensics-value" id="visitor-os">DETECTING...</span></p>
+        <p><span class="forensics-label">BROWSER:</span> <span class="forensics-value" id="visitor-browser">ANALYZING...</span></p>
+        <p><span class="forensics-label">SCREEN:</span> <span class="forensics-value" id="visitor-screen">SCANNING...</span></p>
+        <p><span class="forensics-label">THREAT_LVL:</span> <span class="forensics-value threat-low" id="visitor-threat">LOW</span></p>
+      </div>
+      <div class="forensics-footer">
+        🔒 This demo shows what browsers reveal. No data is stored.
+      </div>
+    `;
+    
+    // Insert before footer or at end of about section
+    if (footer.tagName === 'FOOTER') {
+      footer.parentNode.insertBefore(widget, footer);
+    } else {
+      footer.appendChild(widget);
+    }
+    
+    // Detect OS
+    function detectOS() {
+      const ua = navigator.userAgent;
+      if (ua.indexOf('Win') !== -1) return 'WINDOWS_NT';
+      if (ua.indexOf('Mac') !== -1) {
+        if (ua.indexOf('iPhone') !== -1 || ua.indexOf('iPad') !== -1) return 'IOS';
+        return 'MACOS_DARWIN';
+      }
+      if (ua.indexOf('Linux') !== -1) {
+        if (ua.indexOf('Android') !== -1) return 'ANDROID';
+        return 'LINUX_KERNEL';
+      }
+      if (ua.indexOf('CrOS') !== -1) return 'CHROMEOS';
+      return 'UNKNOWN_OS';
+    }
+    
+    // Detect Browser
+    function detectBrowser() {
+      const ua = navigator.userAgent;
+      if (ua.indexOf('Firefox') !== -1) return 'FIREFOX';
+      if (ua.indexOf('Edg') !== -1) return 'EDGE';
+      if (ua.indexOf('Chrome') !== -1) return 'CHROME';
+      if (ua.indexOf('Safari') !== -1) return 'SAFARI';
+      if (ua.indexOf('Opera') !== -1 || ua.indexOf('OPR') !== -1) return 'OPERA';
+      return 'UNKNOWN_AGENT';
+    }
+    
+    // Get screen info
+    function getScreenInfo() {
+      return `${window.screen.width}x${window.screen.height}`;
+    }
+    
+    // Update OS immediately
+    setTimeout(() => {
+      const osEl = document.getElementById('visitor-os');
+      if (osEl) osEl.textContent = detectOS();
+    }, 500);
+    
+    // Update browser
+    setTimeout(() => {
+      const browserEl = document.getElementById('visitor-browser');
+      if (browserEl) browserEl.textContent = detectBrowser();
+    }, 800);
+    
+    // Update screen
+    setTimeout(() => {
+      const screenEl = document.getElementById('visitor-screen');
+      if (screenEl) screenEl.textContent = getScreenInfo();
+    }, 1100);
+    
+    // Get IP (using free API)
+    fetch('https://api.ipify.org?format=json')
+      .then(response => response.json())
+      .then(data => {
+        const ipEl = document.getElementById('visitor-ip');
+        if (ipEl) {
+          ipEl.textContent = data.ip;
+          ipEl.classList.remove('tracing');
+        }
+      })
+      .catch(() => {
+        const ipEl = document.getElementById('visitor-ip');
+        if (ipEl) {
+          ipEl.textContent = '[MASKED]';
+          ipEl.classList.remove('tracing');
+        }
+      });
+    
+    // Fun threat level assessment based on browser
+    setTimeout(() => {
+      const threatEl = document.getElementById('visitor-threat');
+      if (threatEl) {
+        const browser = detectBrowser();
+        const os = detectOS();
+        
+        // Easter eggs for threat levels
+        if (browser === 'FIREFOX' && os === 'LINUX_KERNEL') {
+          threatEl.textContent = 'MINIMAL 🛡️';
+          threatEl.className = 'forensics-value threat-low';
+        } else if (os === 'WINDOWS_NT') {
+          threatEl.textContent = 'MODERATE';
+          threatEl.className = 'forensics-value threat-medium';
+        } else {
+          threatEl.textContent = 'LOW';
+          threatEl.className = 'forensics-value threat-low';
+        }
+      }
+    }, 1500);
+  }
+  
+  // Initialize forensics widget with delay
+  setTimeout(initVisitorForensics, 1500);
 }
 
 // Run on multiple events to ensure it works with Hugo Blox
