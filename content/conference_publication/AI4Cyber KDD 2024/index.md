@@ -35,5 +35,7 @@ url_pdf: 'https://ai4cyber-kdd.com/'
 
 {{< altmetric doi="10.1145/3637528.3671469" >}}
 
+{{< dimensions doi="10.1145/3637528.3671469" >}}
+
 
 

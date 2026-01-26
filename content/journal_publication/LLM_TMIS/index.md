@@ -54,3 +54,5 @@ url_pdf: https://dl.acm.org/doi/10.1145/3682069
 
 {{< altmetric doi="10.1145/3682069" >}}
 
+{{< dimensions doi="10.1145/3682069" >}}
+

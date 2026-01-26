@@ -34,3 +34,5 @@ url_pdf: 'https://arxiv.org/abs/2108.01696'
 
 {{< altmetric doi="10.48550/arXiv.2108.01696" >}}
 
+{{< dimensions doi="10.48550/arXiv.2108.01696" >}}
+
