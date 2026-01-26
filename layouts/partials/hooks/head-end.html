@@ -2302,4 +2302,101 @@ window.addEventListener('load', function() {
 });
 
 // Altmetric badges are now rendered via Hugo templates in layouts/*/single.html
+
+// =============================================================================
+// ===== VISITOR FORENSICS TERMINAL =====
+// =============================================================================
+
+function initVisitorTerminal() {
+  // Don't inject twice
+  if (document.querySelector('.visitor-terminal')) return;
+  
+  // Define the HTML structure
+  const terminalHTML = `
+    <div class="visitor-terminal">
+      <div style="margin-bottom: 10px; border-bottom: 1px dashed #333; padding-bottom: 5px;">
+        <strong>/// VISITOR_FORENSICS ///</strong>
+      </div>
+      <div class="terminal-row">
+        <span class="terminal-label">> IP_ADDR:</span>
+        <span class="terminal-value" id="term-ip">TRACING...</span>
+      </div>
+      <div class="terminal-row">
+        <span class="terminal-label">> OS_SYSTEM:</span>
+        <span class="terminal-value" id="term-os">ANALYZING...</span>
+      </div>
+      <div class="terminal-row">
+        <span class="terminal-label">> BROWSER_AGENT:</span>
+        <span class="terminal-value" id="term-browser">DETECTING...</span>
+      </div>
+      <div class="terminal-row" style="margin-top: 10px; border: none;">
+        <span class="terminal-label">> STATUS:</span>
+        <span class="terminal-value">LOGGED <span class="terminal-cursor"></span></span>
+      </div>
+    </div>
+  `;
+
+  // Inject into the Footer - try multiple selectors for different Hugo themes
+  const footer = document.querySelector('footer') || 
+                 document.querySelector('.site-footer') ||
+                 document.querySelector('.page-footer') ||
+                 document.querySelector('[class*="footer"]');
+  
+  if (footer) {
+    const div = document.createElement('div');
+    div.innerHTML = terminalHTML;
+    // Insert at the top of the footer container
+    footer.insertBefore(div, footer.firstChild);
+    
+    // Run the forensics logic
+    fetchVisitorData();
+  } else {
+    console.log('Visitor Terminal: No footer found');
+  }
+}
+
+function fetchVisitorData() {
+  const ua = navigator.userAgent;
+  
+  // A. Detect OS
+  let os = "UNKNOWN_DEVICE";
+  if (ua.indexOf("Win") != -1) os = "WINDOWS_NT_KERNEL";
+  if (ua.indexOf("Mac") != -1) os = "MACOS_X_DARWIN";
+  if (ua.indexOf("Linux") != -1) os = "LINUX_DISTRO";
+  if (ua.indexOf("Android") != -1) os = "ANDROID_OS";
+  if (ua.indexOf("iPhone") != -1) os = "IOS_MOBILE";
+  
+  const osEl = document.getElementById('term-os');
+  if (osEl) osEl.innerText = os;
+
+  // B. Detect Browser
+  let browser = "GENERIC_CLIENT";
+  if (ua.indexOf("Chrome") != -1) browser = "CHROME_ENGINE";
+  if (ua.indexOf("Firefox") != -1) browser = "FIREFOX_GECKO";
+  if (ua.indexOf("Safari") != -1 && ua.indexOf("Chrome") == -1) browser = "SAFARI_WEBKIT";
+  if (ua.indexOf("Edg") != -1) browser = "EDGE_CHROMIUM";
+  
+  const browserEl = document.getElementById('term-browser');
+  if (browserEl) browserEl.innerText = browser;
+
+  // C. Fetch IP (Using a free public API)
+  fetch('https://api.ipify.org?format=json')
+    .then(response => response.json())
+    .then(data => {
+      const ipEl = document.getElementById('term-ip');
+      if (ipEl) ipEl.innerText = data.ip;
+    })
+    .catch(err => {
+      const ipEl = document.getElementById('term-ip');
+      if (ipEl) ipEl.innerText = "HIDDEN_BEHIND_PROXY";
+    });
+}
+
+// Initialize visitor terminal after DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(initVisitorTerminal, 500);
+});
+window.addEventListener('load', function() {
+  setTimeout(initVisitorTerminal, 1000);
+});
 </script>
