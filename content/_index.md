@@ -30,13 +30,35 @@ sections:
       columns: '1'
 
   # ---------- SKILLS & EXPERTISE ----------
-  - block: markdown
+  - block: features
     id: skills
     content:
       title: Skills & Expertise
-      text: '{{< skills-grid >}}'
-    design:
-      columns: '1'
+      items:
+        - name: Large Language Models
+          icon: robot
+          icon_pack: fas
+          description: GPT, BERT, transformer architectures for NLP and security applications
+        - name: Cybersecurity & CTI
+          icon: shield-halved
+          icon_pack: fas
+          description: Threat intelligence, hacker community analysis, vulnerability research
+        - name: Deep Learning / NLP
+          icon: brain
+          icon_pack: fas
+          description: Neural networks, text analytics, transfer learning approaches
+        - name: Python & ML Frameworks
+          icon: python
+          icon_pack: fab
+          description: PyTorch, TensorFlow, scikit-learn, pandas, NumPy
+        - name: Academic Research
+          icon: graduation-cap
+          icon_pack: fas
+          description: Design science, empirical research, peer-reviewed publications
+        - name: Teaching & Mentoring
+          icon: chalkboard-teacher
+          icon_pack: fas
+          description: Course development, PhD mentoring, workshop facilitation
 
   # ---------- PUBLICATION STATS ----------
   - block: markdown
@@ -44,18 +66,69 @@ sections:
     content:
       title: Research Impact
       text: |
-        {{< stats-grid >}}
+        | 📄 **8** Journal Articles | 📋 **16** Conference Papers | 📝 **6** Workshop Papers | 📚 **350+** Citations | 🏆 **2** Best Paper Awards |
+        |:---:|:---:|:---:|:---:|:---:|
         
         **Top Venues:** MISQ • JMIS • ACM TMIS • ISF • IEEE ISI • HICSS • AMCIS • ICIS • ACM KDD
     design:
       columns: '1'
 
   # ---------- CAREER TIMELINE ----------
-  - block: markdown
+  - block: experience
     id: timeline
     content:
       title: Career Journey
-      text: '{{< career-timeline >}}'
+      date_format: Jan 2006
+      items:
+        - title: Assistant Professor of Computer Information Systems
+          company: Georgia State University
+          company_url: 'https://robinson.gsu.edu'
+          location: Atlanta, GA
+          date_start: '2024-08-01'
+          date_end: ''
+          description: J. Mack Robinson School of Business
+        - title: Adjunct Lecturer
+          company: University of Arizona
+          company_url: 'https://eller.arizona.edu'
+          location: Tucson, AZ
+          date_start: '2021-08-01'
+          date_end: '2024-05-01'
+          description: Teaching Cyber Threat Intelligence courses
+        - title: Research Associate, AI Lab
+          company: University of Arizona
+          company_url: 'https://eller.arizona.edu'
+          location: Tucson, AZ
+          date_start: '2018-08-01'
+          date_end: '2024-05-01'
+          description: Artificial Intelligence Lab under Dr. Hsinchun Chen
+        - title: NSF CyberCorps Scholarship-for-Service Fellow
+          company: University of Arizona
+          company_url: ''
+          location: Tucson, AZ
+          date_start: '2018-08-01'
+          date_end: '2021-05-01'
+          description: National Science Foundation fellowship recipient
+        - title: Ph.D. in Management Information Systems
+          company: University of Arizona
+          company_url: ''
+          location: Tucson, AZ
+          date_start: '2019-08-01'
+          date_end: '2024-05-01'
+          description: ACM SIGMIS Doctoral Dissertation Award recipient
+        - title: M.S. in Management Information Systems
+          company: University of Arizona
+          company_url: ''
+          location: Tucson, AZ
+          date_start: '2017-08-01'
+          date_end: '2019-05-01'
+          description: ''
+        - title: B.S.B.A. in Management Information Systems
+          company: University of Arizona
+          company_url: ''
+          location: Tucson, AZ
+          date_start: '2013-08-01'
+          date_end: '2017-05-01'
+          description: Outstanding Senior Award recipient
     design:
       columns: '1'
 
