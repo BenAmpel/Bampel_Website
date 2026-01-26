@@ -91,73 +91,73 @@ sections:
       text: |
         {{< spoiler text="📄 Journal Publications (8)" >}}
         
-        1. B. Ampel, "**A Computational Design Framework for Targeted Disruption of Hacker Communities**," Forthcoming at *Information Systems Frontiers (ISF)*.
+        1. B. Ampel, "[**A Computational Design Framework for Targeted Disruption of Hacker Communities**](/journal_publication/hacker-communities-isf/)," Forthcoming at *Information Systems Frontiers (ISF)*.
         
-        2. B. Ampel, S. Samtani, H. Chen, "**Automatically Detecting Voice Phishing: A Large Audio Model Approach**," Forthcoming at *Management Information Systems Quarterly (MISQ)*.
+        2. B. Ampel, S. Samtani, H. Chen, "[**Automatically Detecting Voice Phishing: A Large Audio Model Approach**](/journal_publication/voice-phishing-misq/)," Forthcoming at *Management Information Systems Quarterly (MISQ)*.
         
-        3. B. Ampel, "**Seeing Is Not Believing: A Deepfake Video Call Scam at Pan-Asia Trading**," *Journal of Information Systems Education (JISE)*, 37:2, 2026.
+        3. B. Ampel, "[**Seeing Is Not Believing: A Deepfake Video Call Scam at Pan-Asia Trading**](/journal_publication/deepfake-jise/)," *Journal of Information Systems Education (JISE)*, 37:2, 2026.
         
-        4. B. Ampel, C. Yang, J. Hu, H. Chen, "**Large Language Models for Conducting Advanced Text Analytics Information Systems Research**," *ACM Transactions on Management Information Systems (TMIS)*, 16:1, 1-27, 2025.
+        4. B. Ampel, C. Yang, J. Hu, H. Chen, "[**Large Language Models for Conducting Advanced Text Analytics Information Systems Research**](/journal_publication/llm_tmis/)," *ACM Transactions on Management Information Systems (TMIS)*, 16:1, 1-27, 2025.
         
-        5. B. Ampel, S. Samtani, H. Zhu, and H. Chen, "**Creating Proactive Cyber Threat Intelligence with Hacker Exploit Labels: A Deep Transfer Learning Approach**," *Management Information Systems Quarterly (MISQ)*, 48:1, 137-166, 2024.
+        5. B. Ampel, S. Samtani, H. Zhu, and H. Chen, "[**Creating Proactive Cyber Threat Intelligence with Hacker Exploit Labels: A Deep Transfer Learning Approach**](/journal_publication/dtl-el-misq/)," *Management Information Systems Quarterly (MISQ)*, 48:1, 137-166, 2024.
         
-        6. B. Ampel, S. Samtani, H. Zhu, H. Chen, and J. F. Nunamaker, "**Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach**," *Journal of Management Information Systems (JMIS)*, 41:1, 236-265, 2024.
+        6. B. Ampel, S. Samtani, H. Zhu, H. Chen, and J. F. Nunamaker, "[**Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach**](/journal_publication/attack-link-jmis/)," *Journal of Management Information Systems (JMIS)*, 41:1, 236-265, 2024.
         
-        7. Y. Gao, B. Ampel, S. Samtani, "**Evading Anti-Phishing Models: A Field Note Documenting an Experience in the Machine Learning Security Evasion Competition 2022**," *ACM Digital Threats: Research and Practice (DTRAP)*, 5:1, Article 7, 2024.
+        7. Y. Gao, B. Ampel, S. Samtani, "[**Evading Anti-Phishing Models: A Field Note Documenting an Experience in the Machine Learning Security Evasion Competition 2022**](/journal_publication/phish-dtrap/)," *ACM Digital Threats: Research and Practice (DTRAP)*, 5:1, Article 7, 2024.
         
-        8. B. Ampel and S. Ullman, "**Why Following Friends Can Hurt You: A Replication Study**," *AIS Transactions on Replication Research (TRR)*, 9:1, Article 6, 2023.
+        8. B. Ampel and S. Ullman, "[**Why Following Friends Can Hurt You: A Replication Study**](/journal_publication/social-media-trr/)," *AIS Transactions on Replication Research (TRR)*, 9:1, Article 6, 2023.
         
         {{< /spoiler >}}
         
         {{< spoiler text="📋 Conference Publications (16)" >}}
         
-        1. C. Dacosta, B. Ampel, M. Hashim, H. Chen, "**Automatic Extraction of Protected Health Information from Multilingual Hacker Communities**," *HICSS*, Maui, Hawaii, January 2026.
+        1. C. Dacosta, B. Ampel, M. Hashim, H. Chen, "[**Automatic Extraction of Protected Health Information from Multilingual Hacker Communities**](/conference_publication/phi-hacker-hicss-2026/)," *HICSS*, Maui, Hawaii, January 2026.
         
-        2. C. Zhang, B. Ampel, S. Samtani, "**A Domain-Adaptive Soft Prompting Framework for Multi-Type Bias Detection in News**," *HICSS*, Maui, Hawaii, January 2026.
+        2. C. Zhang, B. Ampel, S. Samtani, "[**A Domain-Adaptive Soft Prompting Framework for Multi-Type Bias Detection in News**](/conference_publication/bias-detection-hicss-2026/)," *HICSS*, Maui, Hawaii, January 2026.
         
-        3. Y. Gao, B. Ampel, and S. Samtani, "**Examining the Robustness of Machine Learning-based Phishing Website Detection**," *IEEE Security and Privacy Workshops (SPW)*, San Francisco, CA, May 2025.
+        3. Y. Gao, B. Ampel, and S. Samtani, "[**Examining the Robustness of Machine Learning-based Phishing Website Detection**](/conference_publication/phishing-spw-2025/)," *IEEE Security and Privacy Workshops (SPW)*, San Francisco, CA, May 2025.
         
-        4. S. Ullman, B. Ampel, S. Samtani, S. Yang, and H. Chen, "**The 4th Workshop on Artificial Intelligence-enabled Cybersecurity Analytics**," *ACM KDD*, Barcelona, Spain, August 2024.
+        4. S. Ullman, B. Ampel, S. Samtani, S. Yang, and H. Chen, "[**The 4th Workshop on Artificial Intelligence-enabled Cybersecurity Analytics**](/conference_publication/ai4cyber-kdd-2024/)," *ACM KDD*, Barcelona, Spain, August 2024.
         
-        5. B. Ampel, T. Vahedi, S. Samtani, and H. Chen, "**Mapping Exploit Code on Paste Sites to the MITRE ATT&CK Framework**," *IEEE ISI*, North Carolina, October 2023. 🏆 **Best Paper Award**
+        5. B. Ampel, T. Vahedi, S. Samtani, and H. Chen, "[**Mapping Exploit Code on Paste Sites to the MITRE ATT&CK Framework**](/conference_publication/mitre-attck-isi-2023/)," *IEEE ISI*, North Carolina, October 2023. 🏆 **Best Paper Award**
         
-        6. B. Ampel, K. Otto, S. Samtani, H. Zhu, and H. Chen, "**Disrupting Ransomware Actors on the Bitcoin Blockchain: A Graph Embedding Approach**," *IEEE ISI*, North Carolina, October 2023.
+        6. B. Ampel, K. Otto, S. Samtani, H. Zhu, and H. Chen, "[**Disrupting Ransomware Actors on the Bitcoin Blockchain: A Graph Embedding Approach**](/conference_publication/ransomware-bitcoin-isi-2023/)," *IEEE ISI*, North Carolina, October 2023.
         
-        7. B. Ampel, Y. Gao, J. Hu, S. Samtani, and H. Chen, "**Benchmarking the Robustness of Phishing Email Detection Systems**," *AMCIS*, Panama, August 2023.
+        7. B. Ampel, Y. Gao, J. Hu, S. Samtani, and H. Chen, "[**Benchmarking the Robustness of Phishing Email Detection Systems**](/conference_publication/phishing-robustness-amcis-2023/)," *AMCIS*, Panama, August 2023.
         
-        8. B. Ampel, "**The Effect of Consensus Algorithm on Ethereum Price and Volume**," *AMCIS*, Panama, August 2023.
+        8. B. Ampel, "[**The Effect of Consensus Algorithm on Ethereum Price and Volume**](/conference_publication/ethereum-amcis-2023/)," *AMCIS*, Panama, August 2023.
         
-        9. C. Marx, B. Ampel, B. Lazarine, "**The Influence of AI Agent Recommendations on Escalation of Commitment**," *ICIS*, Austin, Texas, December 2021.
+        9. C. Marx, B. Ampel, B. Lazarine, "[**The Influence of AI Agent Recommendations on Escalation of Commitment**](/conference_publication/paper-a-thon-2021/)," *ICIS*, Austin, Texas, December 2021.
         
-        10. T. Vahedi, B. Ampel, S. Samtani, and H. Chen, "**Identifying and Categorizing Malicious Content on Paste Sites**," *IEEE ISI*, San Antonio, Texas, November 2021.
+        10. T. Vahedi, B. Ampel, S. Samtani, and H. Chen, "[**Identifying and Categorizing Malicious Content on Paste Sites**](/conference_publication/paste-site-21-isi/)," *IEEE ISI*, San Antonio, Texas, November 2021.
         
-        11. K. Otto, B. Ampel, S. Samtani, H. Zhu, and H. Chen, "**Exploring the Evolution of Exploit-Sharing Hackers**," *IEEE ISI*, San Antonio, Texas, November 2021.
+        11. K. Otto, B. Ampel, S. Samtani, H. Zhu, and H. Chen, "[**Exploring the Evolution of Exploit-Sharing Hackers**](/conference_publication/exploit-sharing-hackers-isi/)," *IEEE ISI*, San Antonio, Texas, November 2021.
         
-        12. B. Ampel and H. Chen, "**Distilling Contextual Embeddings Into A Static Word Embedding for Improving Hacker Forum Analytics**," *IEEE ISI*, San Antonio, Texas, November 2021.
+        12. B. Ampel and H. Chen, "[**Distilling Contextual Embeddings Into A Static Word Embedding for Improving Hacker Forum Analytics**](/conference_publication/hack2vec-isi-2021/)," *IEEE ISI*, San Antonio, Texas, November 2021.
         
-        13. B. Ampel, S. Samtani, H. Zhu, S. Ullman, and H. Chen, "**Labeling Hacker Exploits for Proactive Cyber Threat Intelligence**," *IEEE ISI*, Washington, D.C., November 2020. 🏆 **Best Paper Award**
+        13. B. Ampel, S. Samtani, H. Zhu, S. Ullman, and H. Chen, "[**Labeling Hacker Exploits for Proactive Cyber Threat Intelligence**](/conference_publication/dtlel-isi/)," *IEEE ISI*, Washington, D.C., November 2020. 🏆 **Best Paper Award**
         
-        14. S. Ullman, S. Samtani, B. Lazarine, H. Zhu, B. Ampel, M. Patton, and H. Chen, "**Smart Vulnerability Assessment for Scientific Cyberinfrastructure**," *IEEE ISI*, Washington, D.C., November 2020.
+        14. S. Ullman, S. Samtani, B. Lazarine, H. Zhu, B. Ampel, M. Patton, and H. Chen, "[**Smart Vulnerability Assessment for Scientific Cyberinfrastructure**](/conference_publication/vuln-ci-isi/)," *IEEE ISI*, Washington, D.C., November 2020.
         
-        15. B. Lazarine, S. Samtani, M. Patton, H. Zhu, S. Ullman, B. Ampel, and H. Chen, "**Identifying Vulnerable GitHub Repositories and Users in Scientific Cyberinfrastructure**," *IEEE ISI*, Washington, D.C., November 2020.
+        15. B. Lazarine, S. Samtani, M. Patton, H. Zhu, S. Ullman, B. Ampel, and H. Chen, "[**Identifying Vulnerable GitHub Repositories and Users in Scientific Cyberinfrastructure**](/conference_publication/vuln-github-isi/)," *IEEE ISI*, Washington, D.C., November 2020.
         
-        16. B. Ampel, M. Patton and H. Chen, "**Performance Modeling of Hyperledger Sawtooth Blockchain**," *IEEE ISI*, Shenzhen, China, July 2019.
+        16. B. Ampel, M. Patton and H. Chen, "[**Performance Modeling of Hyperledger Sawtooth Blockchain**](/conference_publication/sawtooth-19-isi/)," *IEEE ISI*, Shenzhen, China, July 2019.
         
         {{< /spoiler >}}
         
         {{< spoiler text="📝 Workshop Papers (6)" >}}
         
-        1. R. Reyes, B. Ampel, H. Chen, "**Large Language Models for Infrastructure as Code Vulnerability Remediation**," *WISP*, Nashville, Tennessee, December 2025.
+        1. R. Reyes, B. Ampel, H. Chen, "[**Large Language Models for Infrastructure as Code Vulnerability Remediation**](/workshop_publication/iac-vuln-wisp-2025/)," *WISP*, Nashville, Tennessee, December 2025.
         
-        2. M. Wagner, B. Ampel, M. Hashim, H. Chen, "**Email Phishing Prevention: An Explainable Nudging Approach**," *WISP*, Nashville, Tennessee, December 2025.
+        2. M. Wagner, B. Ampel, M. Hashim, H. Chen, "[**Email Phishing Prevention: An Explainable Nudging Approach**](/workshop_publication/phishing-nudging-wisp-2025/)," *WISP*, Nashville, Tennessee, December 2025.
         
-        3. B. Ampel, S. Ullman, "**Multi-Agent Systems for Information Systems Research: A Framework for Collaborative AI-Augmented Inquiry**," *Pre-ICIS SIG Services Workshop*, Nashville, Tennessee, December 2025.
+        3. B. Ampel, S. Ullman, "[**Multi-Agent Systems for Information Systems Research: A Framework for Collaborative AI-Augmented Inquiry**](/workshop_publication/multi-agent-sig-services-2025/)," *Pre-ICIS SIG Services Workshop*, Nashville, Tennessee, December 2025.
         
-        4. B. Ampel, S. Ullman, "**Multi-Agent Systems for Information Systems Research: Provocations for AI-Augmented Scholarship**," *ICIS TREO Talk*, Nashville, Tennessee, December 2025.
+        4. B. Ampel, S. Ullman, "[**Multi-Agent Systems for Information Systems Research: Provocations for AI-Augmented Scholarship**](/workshop_publication/multi-agent-treo-2025/)," *ICIS TREO Talk*, Nashville, Tennessee, December 2025.
         
-        5. Y. Gao, S. Samtani, H. Zhu, B. Ampel, and Y. Chai, "**Generating Adversarial Phishing Websites to Evade Machine Learning-based Anti-Phishing Detectors**," *INFORMS WDS*, Phoenix, Arizona, October 2023.
+        5. Y. Gao, S. Samtani, H. Zhu, B. Ampel, and Y. Chai, "[**Generating Adversarial Phishing Websites to Evade Machine Learning-based Anti-Phishing Detectors**](/workshop_publication/adversarial-phishing-wds-2023/)," *INFORMS WDS*, Phoenix, Arizona, October 2023.
         
-        6. B. Ampel, S. Samtani, S. Ullman, and H. Chen, "**Linking Common Vulnerabilities and Exposures to the MITRE ATT&CK Framework**," *ACM KDD AI4Cyber Workshop*, Virtual, August 2021.
+        6. B. Ampel, S. Samtani, S. Ullman, and H. Chen, "[**Linking Common Vulnerabilities and Exposures to the MITRE ATT&CK Framework**](/workshop_publication/cve-attck-kdd-2021/)," *ACM KDD AI4Cyber Workshop*, Virtual, August 2021.
         
         {{< /spoiler >}}
         
