@@ -73,6 +73,72 @@ sections:
         |:---:|:---:|:---:|
         
         **Top Venues:** MISQ • JMIS • ACM TMIS • ISF • IEEE ISI • HICSS • AMCIS • ICIS • ACM KDD
+        
+        <div class="pub-chart-container">
+          <div class="pub-chart-title">📈 Publications by Year</div>
+          <div class="pub-chart">
+            <div class="pub-chart-row">
+              <span class="pub-chart-year">2019</span>
+              <div class="pub-chart-bar-container">
+                <div class="pub-chart-bar" data-width="17%"><span class="pub-chart-count">1</span></div>
+              </div>
+            </div>
+            <div class="pub-chart-row">
+              <span class="pub-chart-year">2020</span>
+              <div class="pub-chart-bar-container">
+                <div class="pub-chart-bar" data-width="67%"><span class="pub-chart-count">4</span></div>
+              </div>
+            </div>
+            <div class="pub-chart-row">
+              <span class="pub-chart-year">2021</span>
+              <div class="pub-chart-bar-container">
+                <div class="pub-chart-bar" data-width="83%"><span class="pub-chart-count">5</span></div>
+              </div>
+            </div>
+            <div class="pub-chart-row">
+              <span class="pub-chart-year">2023</span>
+              <div class="pub-chart-bar-container">
+                <div class="pub-chart-bar" data-width="83%"><span class="pub-chart-count">5</span></div>
+              </div>
+            </div>
+            <div class="pub-chart-row">
+              <span class="pub-chart-year">2024</span>
+              <div class="pub-chart-bar-container">
+                <div class="pub-chart-bar" data-width="67%"><span class="pub-chart-count">4</span></div>
+              </div>
+            </div>
+            <div class="pub-chart-row">
+              <span class="pub-chart-year">2025</span>
+              <div class="pub-chart-bar-container">
+                <div class="pub-chart-bar" data-width="100%"><span class="pub-chart-count">6</span></div>
+              </div>
+            </div>
+            <div class="pub-chart-row">
+              <span class="pub-chart-year">2026</span>
+              <div class="pub-chart-bar-container">
+                <div class="pub-chart-bar" data-width="67%"><span class="pub-chart-count">4</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+    design:
+      columns: '1'
+  
+  # ---------- CO-AUTHOR NETWORK ----------
+  - block: markdown
+    id: network
+    content:
+      title: Collaboration Network
+      text: |
+        <div class="network-container">
+          <div class="network-title">🤝 Research Collaborations</div>
+          <div id="coauthor-network"></div>
+          <div class="network-legend">
+            <div class="legend-item"><span class="legend-dot primary"></span> Benjamin Ampel</div>
+            <div class="legend-item"><span class="legend-dot frequent"></span> Frequent Collaborator (5+ papers)</div>
+            <div class="legend-item"><span class="legend-dot occasional"></span> Collaborator (2-4 papers)</div>
+          </div>
+        </div>
     design:
       columns: '1'
 
