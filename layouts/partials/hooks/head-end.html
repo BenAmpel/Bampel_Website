@@ -1775,22 +1775,49 @@ function runEnhancements() {
     const isPublicationPage = window.location.pathname.includes('/publication/') ||
                                window.location.pathname.includes('/journal_publication/') ||
                                window.location.pathname.includes('/conference_publication/') ||
-                               window.location.pathname.includes('/workshop_publication/');
+                               window.location.pathname.includes('/workshop_publication/') ||
+                               window.location.pathname.includes('/book_chapter/');
     
     if (!isPublicationPage) return;
     
     // Check if badge already exists
     if (document.querySelector('.altmetric-badge-container')) return;
     
-    // Find DOI link on the page
+    // Try multiple methods to find DOI
+    let doi = null;
+    
+    // Method 1: Look for explicit doi.org link
     const doiLink = document.querySelector('a[href*="doi.org"]');
-    if (!doiLink) return;
+    if (doiLink) {
+      const doiMatch = doiLink.href.match(/doi\.org\/(.+)$/);
+      if (doiMatch) doi = doiMatch[1];
+    }
     
-    // Extract DOI from the link
-    const doiMatch = doiLink.href.match(/doi\.org\/(.+)$/);
-    if (!doiMatch) return;
+    // Method 2: Look for DOI button (Hugo Blox style)
+    if (!doi) {
+      const doiButtons = document.querySelectorAll('.btn');
+      doiButtons.forEach(btn => {
+        if (btn.textContent.trim().toUpperCase() === 'DOI' && btn.href) {
+          const match = btn.href.match(/doi\.org\/(.+)$/);
+          if (match) doi = match[1];
+        }
+      });
+    }
     
-    const doi = doiMatch[1];
+    // Method 3: Look for citation_doi meta tag
+    if (!doi) {
+      const metaDoi = document.querySelector('meta[name="citation_doi"]');
+      if (metaDoi) doi = metaDoi.content;
+    }
+    
+    // Method 4: Look for DOI in page text (formatted as doi: 10.xxxx)
+    if (!doi) {
+      const pageText = document.body.innerText;
+      const textMatch = pageText.match(/doi[:\s]+([0-9]+\.[0-9]+\/[^\s,<]+)/i);
+      if (textMatch) doi = textMatch[1];
+    }
+    
+    if (!doi) return;
     
     // Find where to insert the badge (after abstract or at end of article)
     const articleContainer = document.querySelector('.article-container') || 

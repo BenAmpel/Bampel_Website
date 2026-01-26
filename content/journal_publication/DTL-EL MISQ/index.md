@@ -34,9 +34,9 @@ tags:
 - Exploit Labeling
 featured: false
 
-# links:
-# - name: ""
-#   url: ""
+links:
+- name: DOI
+  url: https://doi.org/10.25300/MISQ/2023/17316
 url_pdf: https://misq.umn.edu/creating-proactive-cyber-threat-intelligence-with-hacker-exploit-labels-a-deep-transfer-learning-approach.html
 # url_code: 'https://github.com/wowchemy/wowchemy-hugo-themes'
 # url_dataset: ''
@@ -67,6 +67,3 @@ image:
 #   Otherwise, set `slides: ""`.
 # slides: example
 ---
-
-<script type="text/javascript" src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
-<div class="altmetric-embed" data-badge-type="large-donut" data-doi="10.25300/MISQ/2023/17316"></div>

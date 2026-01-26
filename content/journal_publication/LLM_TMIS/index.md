@@ -35,9 +35,9 @@ tags:
 - Deep Learning
 featured: false
 
-# links:
-# - name: ""
-#   url: ""
+links:
+- name: DOI
+  url: https://doi.org/10.1145/3682069
 url_pdf: https://dl.acm.org/doi/10.1145/3682069
 # url_code: 'https://github.com/wowchemy/wowchemy-hugo-themes'
 # url_dataset: ''

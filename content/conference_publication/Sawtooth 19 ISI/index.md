@@ -34,10 +34,10 @@ tags:
 - Benchmarking
 featured: false
 
-# Custom links (uncomment lines below)
-# links:
-# - name: Custom Link
-#   url: http://example.org
+# Custom links
+links:
+- name: DOI
+  url: https://doi.org/10.1109/ISI.2019.8823238
 
 url_pdf: 'https://par.nsf.gov/servlets/purl/10172683'
 #url_code: 'https://github.com/wowchemy/wowchemy-hugo-themes'

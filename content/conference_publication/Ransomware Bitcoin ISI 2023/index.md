@@ -29,6 +29,10 @@ tags:
 
 featured: false
 
+links:
+- name: DOI
+  url: https://doi.org/10.1109/ISI58743.2023.10297290
+
 url_pdf: 'https://ieeexplore.ieee.org/document/10297290'
 ---
 
