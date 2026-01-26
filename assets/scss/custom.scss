@@ -1,0 +1,67 @@
+// Custom SCSS for Hugo Blox / Wowchemy site
+// This file overrides theme styles
+
+// ===== AVATAR POSITIONING =====
+// Move the image down within the circular crop to show more of the face
+// Using multiple selectors to catch different Wowchemy versions
+
+// Main avatar in about/hero section
+.avatar,
+.avatar-circle,
+.about-avatar,
+.wg-about .avatar,
+.hb-about-avatar,
+#about .avatar,
+section[id="about"] .avatar {
+  img {
+    object-fit: cover !important;
+    object-position: center 25% !important;
+  }
+}
+
+// Alternative: if the avatar uses background-image
+.avatar-wrapper,
+.avatar-circle {
+  img {
+    transform: translateY(10%) scale(1.1) !important;
+  }
+}
+
+// Target the specific Wowchemy 5 about widget structure
+.wg-about-avatar {
+  img {
+    object-fit: cover !important;
+    object-position: center 25% !important;
+  }
+  
+  .avatar {
+    img {
+      object-fit: cover !important;
+      object-position: center 25% !important;
+    }
+  }
+}
+
+// Ultra-specific selector for Wowchemy avatar image
+.about-widget .col-12 img,
+.about-bio .col-12 img,
+article img.avatar,
+img.avatar-circle {
+  object-fit: cover !important;
+  object-position: center 25% !important;
+}
+
+// Catch any image inside an element with 'avatar' in its class
+[class*="avatar"] {
+  img {
+    object-fit: cover !important;
+    object-position: center 25% !important;
+  }
+}
+
+// Target by image dimensions/aspect ratio (circular avatars)
+img[width="270"],
+img[height="270"] {
+  object-fit: cover !important;
+  object-position: center 25% !important;
+}
