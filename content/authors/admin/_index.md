@@ -24,13 +24,13 @@ organizations:
 courses:
   - course: "CIS 8684 – Cyber Threat Intelligence"
     institution: "Georgia State University"
-    year: 2025
-  - course: "CIS 4680 – Intro to Security"
+    year: 2026
+  - course: "CIS 4730 – Deep Learning for Business"
     institution: "Georgia State University"
-    year: 2025
+    year: 2026
   - course: "CIS 8080 – IS Security and Privacy"
     institution: "Georgia State University"
-    year: 2024
+    year: 2025
 
 # Short bio (displayed in user profile at end of posts)
 bio: My research focuses on AI-enabled Cybersecurity, including Cyber Threat Intelligence, Large Language Models, and Phishing Detection.
@@ -81,7 +81,7 @@ highlight_name: true
 
 Dr. Benjamin M. Ampel is an Assistant Professor in Computer Information Systems at Georgia State University's J. Mack Robinson School of Business. He received his Ph.D. from the University of Arizona under Dr. Hsinchun Chen, with his dissertation *Securing Cyberspace: AI-Enabled Cyber-Adversary Defense* receiving the **ACM SIGMIS Doctoral Dissertation Award** at ICIS 2024.
 
-Dr. Ampel's research focuses on leveraging artificial intelligence and deep learning techniques to create proactive Cyber Threat Intelligence (CTI). His work involves mining hacker communities, analyzing phishing content, and developing Large Language Model applications for cybersecurity. He has published in premier venues including *MIS Quarterly*, *Journal of Management Information Systems (JMIS)*, *ACM TMIS*, and *IEEE ISI*, receiving **Best Paper Awards** at IEEE ISI 2020 and IEEE ISI 2023.
+Dr. Ampel's research focuses on leveraging artificial intelligence and deep learning techniques to create proactive Cyber Threat Intelligence (CTI). His work involves mining hacker communities, analyzing phishing content, and developing Large Language Model applications for cybersecurity. He has published in premier venues including *MIS Quarterly*, *Journal of Management Information Systems (JMIS)*, *ACM TMIS*, *Information Systems Frontiers*, and *IEEE ISI*, receiving **Best Paper Awards** at IEEE ISI 2020 and IEEE ISI 2023.
 
-From 2018-2021, Dr. Ampel served as an **NSF CyberCorps Scholarship-for-Service Fellow**. He currently serves as Associate Editor for *ACM Digital Threats: Research and Practice (DTRAP)* and has co-chaired the AI4Cyber Workshop at ACM KDD.
+From 2018-2021, Dr. Ampel served as an **NSF CyberCorps Scholarship-for-Service Fellow**. He currently serves as Associate Editor for *ACM Digital Threats: Research and Practice (DTRAP)* and on the Editorial Board of *Journal of Information Systems Education (JISE)*. He has co-chaired the AI4Cyber Workshop at ACM KDD and the HICSS Junior Faculty Consortium. In 2025, he was recognized as the Robinson College of Business **IS Cybersecurity Graduate Program Top Professor**.
 {style="text-align: justify;"}
