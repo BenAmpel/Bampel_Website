@@ -28,7 +28,6 @@ tags:
 
 featured: false
 
-  url: https://doi.org/10.48550/arXiv.2108.01696
 
 url_pdf: 'https://arxiv.org/abs/2108.01696'
 ---

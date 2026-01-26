@@ -28,7 +28,6 @@ tags:
 
 featured: false
 
-  url: https://doi.org/10.24251/HICSS.2026.218
 
 url_pdf: 'https://hdl.handle.net/10125/111610'
 ---

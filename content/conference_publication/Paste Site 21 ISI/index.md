@@ -38,7 +38,6 @@ tags:
 - Exploit Labeling
 featured: false
 
-  url: https://doi.org/10.1109/ISI53945.2021.9624765
 
 url_pdf: 'https://par.nsf.gov/servlets/purl/10336827'
 #url_code: 'https://github.com/wowchemy/wowchemy-hugo-themes'

@@ -29,7 +29,6 @@ tags:
 
 featured: false
 
-  url: https://doi.org/10.1145/3637528.3671469
 
 url_pdf: 'https://ai4cyber-kdd.com/'
 ---

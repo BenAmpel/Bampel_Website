@@ -34,7 +34,6 @@ tags:
 - Benchmarking
 featured: false
 
-  url: https://doi.org/10.1109/ISI.2019.8823238
 
 url_pdf: 'https://par.nsf.gov/servlets/purl/10172683'
 #url_code: 'https://github.com/wowchemy/wowchemy-hugo-themes'

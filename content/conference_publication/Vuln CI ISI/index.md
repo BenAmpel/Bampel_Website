@@ -40,7 +40,6 @@ tags:
 - GitHub
 featured: false
 
-  url: https://doi.org/10.1109/ISI49825.2020.9280545
 
 url_pdf: 'https://par.nsf.gov/servlets/purl/10258092'
 #url_code: 'https://github.com/wowchemy/wowchemy-hugo-themes'

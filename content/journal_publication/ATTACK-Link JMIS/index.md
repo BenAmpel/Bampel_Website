@@ -36,7 +36,6 @@ tags:
 - Risk Management Frameworks
 featured: false
 
-  url: https://doi.org/10.1080/07421222.2023.2301178
 url_pdf: https://www.tandfonline.com/doi/abs/10.1080/07421222.2023.2301178
 # url_code: 'https://github.com/wowchemy/wowchemy-hugo-themes'
 # url_dataset: ''
