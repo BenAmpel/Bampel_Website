@@ -28,7 +28,7 @@ sections:
         
         **Top Venues:** MISQ • JMIS • ACM TMIS • ISF • IEEE ISI • HICSS • AMCIS • ICIS • ACM KDD
         
-        [📖 View Google Scholar Profile →](https://scholar.google.com/citations?user=XpfdLdkAAAAJ)
+        [📖 View Google Scholar Profile →](https://scholar.google.com/citations?user=XDdwaZUAAAAJ&hl=en)
         
         ---
         
