@@ -11,22 +11,6 @@ sections:
       title: Biography
       username: admin
 
-  # ---------- RESEARCH INTERESTS ----------
-  - block: markdown
-    id: research
-    content:
-      title: Research Interests
-      text: |
-        My research focuses on **AI-enabled Cybersecurity** with emphasis on:
-        
-        - **Cyber Threat Intelligence (CTI)**: Mining hacker communities, paste sites, and dark web forums
-        - **Large Language Models**: Applying LLMs for security text analytics and threat detection
-        - **Phishing Detection**: Developing robust defenses against adversarial phishing attacks
-        - **Deep Learning**: Transfer learning and transformer-based approaches for security applications
-        - **Computational Design Science**: Building actionable security systems and frameworks
-    design:
-      columns: '1'
-
   # ---------- SKILLS & EXPERTISE ----------
   - block: markdown
     id: skills
