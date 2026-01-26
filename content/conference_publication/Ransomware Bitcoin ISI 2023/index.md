@@ -32,6 +32,4 @@ featured: false
 url_pdf: 'https://ieeexplore.ieee.org/document/10297290'
 ---
 
-**Altmetric Attention:**
 
-<div data-badge-type="medium-donut" data-doi="10.1109/ISI58743.2023.10297290" data-badge-popover="right" class="altmetric-embed"></div>

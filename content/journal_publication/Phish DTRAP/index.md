@@ -64,6 +64,4 @@ url_pdf: https://dl.acm.org/doi/pdf/10.1145/3603507
 #slides: example
 ---
 
-**Altmetric Attention:**
 
-<div data-badge-type="medium-donut" data-doi="10.1145/3603507" data-badge-popover="right" class="altmetric-embed"></div>

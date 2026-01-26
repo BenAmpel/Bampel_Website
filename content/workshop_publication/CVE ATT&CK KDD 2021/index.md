@@ -31,6 +31,4 @@ featured: false
 url_pdf: 'https://arxiv.org/abs/2108.01696'
 ---
 
-**Altmetric Attention:**
 
-<div data-badge-type="medium-donut" data-doi="10.48550/arXiv.2108.01696" data-badge-popover="right" class="altmetric-embed"></div>

@@ -1740,6 +1740,71 @@ function runEnhancements() {
   }
   
   addCiteButtons();
+  
+  // ===== ALTMETRIC BADGE INJECTION =====
+  function addAltmetricBadge() {
+    // Check if we're on a publication page
+    const isPublicationPage = window.location.pathname.includes('/publication/') ||
+                               window.location.pathname.includes('/journal_publication/') ||
+                               window.location.pathname.includes('/conference_publication/') ||
+                               window.location.pathname.includes('/workshop_publication/');
+    
+    if (!isPublicationPage) return;
+    
+    // Check if badge already exists
+    if (document.querySelector('.altmetric-badge-container')) return;
+    
+    // Find DOI link on the page
+    const doiLink = document.querySelector('a[href*="doi.org"]');
+    if (!doiLink) return;
+    
+    // Extract DOI from the link
+    const doiMatch = doiLink.href.match(/doi\.org\/(.+)$/);
+    if (!doiMatch) return;
+    
+    const doi = doiMatch[1];
+    
+    // Find where to insert the badge (after abstract or at end of article)
+    const articleContainer = document.querySelector('.article-container') || 
+                             document.querySelector('article') ||
+                             document.querySelector('.page-body');
+    
+    if (!articleContainer) return;
+    
+    // Create the badge container
+    const badgeContainer = document.createElement('div');
+    badgeContainer.className = 'altmetric-badge-container';
+    badgeContainer.style.cssText = 'margin: 30px 0; padding: 20px; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 12px; border: 1px solid #e2e8f0;';
+    
+    // Check for dark mode
+    if (document.body.classList.contains('dark')) {
+      badgeContainer.style.cssText = 'margin: 30px 0; padding: 20px; background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border-radius: 12px; border: 1px solid #475569;';
+    }
+    
+    badgeContainer.innerHTML = `
+      <h4 style="margin: 0 0 15px 0; font-size: 1rem; font-weight: 600;">📊 Altmetric Attention Score</h4>
+      <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+        <div data-badge-type="medium-donut" data-doi="${doi}" data-badge-popover="right" class="altmetric-embed"></div>
+        <div style="flex: 1; min-width: 200px;">
+          <p style="margin: 0; font-size: 0.9rem; color: #64748b;">
+            This badge shows attention from news, blogs, Twitter, policy documents, and more.
+            <a href="https://www.altmetric.com/details/doi/${doi}" target="_blank" style="color: #3b82f6;">View details →</a>
+          </p>
+        </div>
+      </div>
+    `;
+    
+    // Append to article
+    articleContainer.appendChild(badgeContainer);
+    
+    // Re-initialize Altmetric embeds
+    if (typeof _altmetric_embed_init === 'function') {
+      _altmetric_embed_init();
+    }
+  }
+  
+  // Run Altmetric badge injection with delay to ensure DOM is ready
+  setTimeout(addAltmetricBadge, 500);
 }
 
 // Run on multiple events to ensure it works with Hugo Blox

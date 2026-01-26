@@ -70,6 +70,4 @@ image:
 # slides: example
 ---
 
-**Altmetric Attention:**
 
-<div data-badge-type="medium-donut" data-doi="10.1080/07421222.2023.2301178" data-badge-popover="right" class="altmetric-embed"></div>

@@ -71,6 +71,4 @@ url_pdf: 'https://par.nsf.gov/servlets/purl/10252125'
 # slides: example
 ---
 
-**Altmetric Attention:**
 
-<div data-badge-type="medium-donut" data-doi="10.1109/ISI49825.2020.9280548" data-badge-popover="right" class="altmetric-embed"></div>
