@@ -34,8 +34,7 @@ sections:
     id: skills
     content:
       title: Skills & Expertise
-      text: |
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;"><div><div class="skill-label"><strong>🤖 Large Language Models</strong><span class="skill-percentage">95%</span></div><div class="skill-bar"><div class="skill-progress" style="width: 95%"></div></div><div class="skill-label"><strong>🔐 Cybersecurity & CTI</strong><span class="skill-percentage">95%</span></div><div class="skill-bar"><div class="skill-progress" style="width: 95%"></div></div><div class="skill-label"><strong>🧠 Deep Learning / NLP</strong><span class="skill-percentage">90%</span></div><div class="skill-bar"><div class="skill-progress" style="width: 90%"></div></div><div class="skill-label"><strong>📊 Data Science & Analytics</strong><span class="skill-percentage">90%</span></div><div class="skill-bar"><div class="skill-progress" style="width: 90%"></div></div></div><div><div class="skill-label"><strong>🐍 Python / PyTorch / TensorFlow</strong><span class="skill-percentage">90%</span></div><div class="skill-bar"><div class="skill-progress" style="width: 90%"></div></div><div class="skill-label"><strong>📝 Academic Writing</strong><span class="skill-percentage">95%</span></div><div class="skill-bar"><div class="skill-progress" style="width: 95%"></div></div><div class="skill-label"><strong>🎤 Presentations & Teaching</strong><span class="skill-percentage">90%</span></div><div class="skill-bar"><div class="skill-progress" style="width: 90%"></div></div><div class="skill-label"><strong>🔬 Design Science Research</strong><span class="skill-percentage">85%</span></div><div class="skill-bar"><div class="skill-progress" style="width: 85%"></div></div></div></div>
+      text: '{{< skills-grid >}}'
     design:
       columns: '1'
 
@@ -45,7 +44,7 @@ sections:
     content:
       title: Research Impact
       text: |
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 20px; margin: 20px 0;"><div class="stat-card"><span class="stat-number">8</span><span>Journal Articles</span></div><div class="stat-card"><span class="stat-number">16</span><span>Conference Papers</span></div><div class="stat-card"><span class="stat-number">6</span><span>Workshop Papers</span></div><div class="stat-card"><span class="stat-number">350+</span><span>Citations</span></div><div class="stat-card"><span class="stat-number">2</span><span>Best Papers</span></div></div>
+        {{< stats-grid >}}
         
         **Top Venues:** MISQ • JMIS • ACM TMIS • ISF • IEEE ISI • HICSS • AMCIS • ICIS • ACM KDD
     design:
@@ -56,8 +55,7 @@ sections:
     id: timeline
     content:
       title: Career Journey
-      text: |
-        <div style="max-width: 600px; margin: 20px auto;"><div class="timeline-item"><span class="timeline-date">2024 – Present</span><div class="timeline-title">Assistant Professor of Computer Information Systems</div><div class="timeline-org">Georgia State University, J. Mack Robinson School of Business</div></div><div class="timeline-item"><span class="timeline-date">2021 – 2024</span><div class="timeline-title">Adjunct Lecturer</div><div class="timeline-org">University of Arizona</div></div><div class="timeline-item"><span class="timeline-date">2018 – 2024</span><div class="timeline-title">Research Associate, AI Lab</div><div class="timeline-org">University of Arizona</div></div><div class="timeline-item"><span class="timeline-date">2018 – 2021</span><div class="timeline-title">NSF CyberCorps Scholarship-for-Service Fellow</div><div class="timeline-org">University of Arizona</div></div><div class="timeline-item"><span class="timeline-date">2019 – 2024</span><div class="timeline-title">Ph.D. in Management Information Systems</div><div class="timeline-org">University of Arizona • ACM SIGMIS Doctoral Dissertation Award</div></div><div class="timeline-item"><span class="timeline-date">2017 – 2019</span><div class="timeline-title">M.S. in Management Information Systems</div><div class="timeline-org">University of Arizona</div></div><div class="timeline-item"><span class="timeline-date">2013 – 2017</span><div class="timeline-title">B.S.B.A. in Management Information Systems</div><div class="timeline-org">University of Arizona • Outstanding Senior Award</div></div></div>
+      text: '{{< career-timeline >}}'
     design:
       columns: '1'
 
