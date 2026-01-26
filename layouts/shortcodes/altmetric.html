@@ -1,0 +1,22 @@
+{{/* Altmetric Badge Shortcode - Usage: {{< altmetric doi="10.xxxx/xxxxx" >}} */}}
+{{ $doi := .Get "doi" }}
+{{ if $doi }}
+<div class="altmetric-badge-section" style="margin: 30px 0; padding: 20px; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 12px; border: 1px solid #e2e8f0;">
+  <style>
+    .dark .altmetric-badge-section {
+      background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;
+      border-color: #475569 !important;
+    }
+  </style>
+  <h4 style="margin: 0 0 15px 0; font-size: 1rem; font-weight: 600;">📊 Altmetric Attention Score</h4>
+  <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+    <div data-badge-type="medium-donut" data-doi="{{ $doi }}" data-badge-popover="right" class="altmetric-embed"></div>
+    <div style="flex: 1; min-width: 200px;">
+      <p style="margin: 0; font-size: 0.9rem; color: #64748b;">
+        This badge shows attention from news, blogs, Twitter, policy documents, and more.
+        <a href="https://www.altmetric.com/details/doi/{{ $doi }}" target="_blank" style="color: #3b82f6;">View details →</a>
+      </p>
+    </div>
+  </div>
+</div>
+{{ end }}

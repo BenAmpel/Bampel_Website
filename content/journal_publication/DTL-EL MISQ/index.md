@@ -68,3 +68,4 @@ image:
 # slides: example
 ---
 
+{{< altmetric doi="10.25300/MISQ/2023/17316" >}}
