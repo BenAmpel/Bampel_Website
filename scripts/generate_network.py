@@ -124,9 +124,10 @@ def create_radial_layout(G, center_node, coauthor_counts):
             pos[node] = (r * math.cos(angle), r * math.sin(angle))
     
     np.random.seed(42)  # For reproducibility
-    place_ring(frequent, 1.2, start_angle=0.2)
-    place_ring(moderate, 2.2, start_angle=0.5)
-    place_ring(occasional, 3.2, start_angle=0.1)
+    # Increased radii for larger nodes
+    place_ring(frequent, 2.0, start_angle=0.2)
+    place_ring(moderate, 3.8, start_angle=0.5)
+    place_ring(occasional, 5.5, start_angle=0.1)
     
     return pos
 
@@ -165,8 +166,8 @@ def draw_network(dark_mode=False):
         edge_color = 'rgba(9, 105, 218, 0.2)'
         glow_color = '#0969da'
     
-    # Create figure
-    fig, ax = plt.subplots(figsize=(16, 12), facecolor=bg_color)
+    # Create figure (larger to accommodate bigger nodes)
+    fig, ax = plt.subplots(figsize=(18, 16), facecolor=bg_color)
     ax.set_facecolor(bg_color)
     
     # Get layout
@@ -191,65 +192,66 @@ def draw_network(dark_mode=False):
         
         if node == MAIN_AUTHOR:
             # Main author - large prominent node with glow
-            size = 2800
+            size = 5000
             color = primary_color
             
             # Glow effect
-            for glow_size, glow_alpha in [(4000, 0.1), (3400, 0.15), (3000, 0.2)]:
+            for glow_size, glow_alpha in [(7000, 0.1), (6000, 0.15), (5500, 0.2)]:
                 ax.scatter([x], [y], s=glow_size, c=glow_color, alpha=glow_alpha, zorder=2)
             
             ax.scatter([x], [y], s=size, c=color, edgecolors='white', 
                       linewidths=3, zorder=3)
             
-            # Name label
-            ax.annotate('Benjamin\nAmpel', (x, y), fontsize=11, fontweight='bold',
-                       color='white', ha='center', va='center', zorder=4)
+            # Name label with shadow effect (white text, black outline)
+            label_text = 'Benjamin\nAmpel'
+            # Draw black shadow/outline
+            for dx, dy in [(-1, -1), (-1, 1), (1, -1), (1, 1), (-1, 0), (1, 0), (0, -1), (0, 1)]:
+                ax.annotate(label_text, (x + dx*0.02, y + dy*0.02), fontsize=13, fontweight='bold',
+                           color='black', ha='center', va='center', zorder=4)
+            # Draw white text on top
+            ax.annotate(label_text, (x, y), fontsize=13, fontweight='bold',
+                       color='white', ha='center', va='center', zorder=5)
         else:
             count = coauthor_counts.get(node, 0)
             
-            # Determine color and size based on collaboration count
+            # Determine color and size based on collaboration count (much larger nodes)
             if count >= 5:
                 color = frequent_color
-                size = 400 + count * 80
+                size = 2500 + count * 150
                 fontsize = 9
             elif count >= 2:
                 color = moderate_color
-                size = 250 + count * 50
+                size = 1800 + count * 100
                 fontsize = 8
             else:
                 color = occasional_color
-                size = 180
+                size = 1400
                 fontsize = 7
             
             # Draw node
             ax.scatter([x], [y], s=size, c=color, edgecolors='white', 
-                      linewidths=1.5, alpha=0.9, zorder=3)
+                      linewidths=2, alpha=0.9, zorder=3)
             
-            # Format name (abbreviate first name)
+            # Use full name, split into two lines if needed
             parts = node.split()
             if len(parts) >= 2:
-                display_name = f"{parts[0][0]}. {parts[-1]}"
+                # Split into first name(s) and last name
+                display_name = ' '.join(parts[:-1]) + '\n' + parts[-1]
             else:
                 display_name = node
             
-            # Position label just slightly outside the node (much closer than before)
-            angle = math.atan2(y, x)
-            # Calculate node radius from scatter size (size is in points^2)
-            node_radius = math.sqrt(size) / 100  # Approximate radius in data units
-            label_distance = node_radius + 0.12  # Just slightly outside the node
-            label_x = x + label_distance * math.cos(angle)
-            label_y = y + label_distance * math.sin(angle)
-            
-            # Horizontal alignment based on position
-            ha = 'left' if x >= 0 else 'right'
-            
-            ax.annotate(display_name, (label_x, label_y), fontsize=fontsize,
-                       color=text_color, ha=ha, va='center', fontweight='medium',
-                       zorder=4)
+            # Draw label inside the node with shadow effect
+            # Draw black shadow/outline
+            for dx, dy in [(-1, -1), (-1, 1), (1, -1), (1, 1), (-1, 0), (1, 0), (0, -1), (0, 1)]:
+                ax.annotate(display_name, (x + dx*0.015, y + dy*0.015), fontsize=fontsize,
+                           color='black', ha='center', va='center', fontweight='bold', zorder=4)
+            # Draw white text on top
+            ax.annotate(display_name, (x, y), fontsize=fontsize,
+                       color='white', ha='center', va='center', fontweight='bold', zorder=5)
     
     # Add title
     title_color = text_color
-    ax.text(0, 4.2, 'Research Collaboration Network', fontsize=20, fontweight='bold',
+    ax.text(0, 7.2, 'Research Collaboration Network', fontsize=22, fontweight='bold',
             color=title_color, ha='center', va='center')
     
     # Add legend
@@ -275,12 +277,12 @@ def draw_network(dark_mode=False):
     total_collaborators = len(coauthor_counts)
     total_papers = len(publications)
     stats_text = f'{total_collaborators} Collaborators  •  {total_papers} Publications'
-    ax.text(0, -4.0, stats_text, fontsize=11, color=occasional_color, 
+    ax.text(0, -7.0, stats_text, fontsize=11, color=occasional_color, 
             ha='center', va='center', style='italic')
     
     # Clean up axes
-    ax.set_xlim(-4.5, 4.5)
-    ax.set_ylim(-4.5, 4.5)
+    ax.set_xlim(-7.5, 7.5)
+    ax.set_ylim(-7.8, 7.8)
     ax.axis('off')
     ax.set_aspect('equal')
     
