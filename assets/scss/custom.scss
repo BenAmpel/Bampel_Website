@@ -2168,6 +2168,86 @@ body:not(.dark) {
     text-shadow: none !important;
   }
   
+  // =============================================================================
+  // HOVER STATE OVERRIDES - Remove ALL green hover effects
+  // =============================================================================
+  
+  // Reset ALL link hover states
+  a:hover {
+    color: #004499 !important;
+    text-shadow: none !important;
+  }
+  
+  // Reset ALL heading hover states
+  h1:hover, h2:hover, h3:hover, h4:hover, h5:hover, h6:hover {
+    text-shadow: none !important;
+    animation: none !important;
+  }
+  
+  // Reset ALL list item hover states
+  li:hover {
+    color: #111 !important;
+    text-shadow: none !important;
+    background: transparent !important;
+  }
+  
+  // Reset interests hover
+  .interests li:hover,
+  [class*="interest"] li:hover,
+  .hb-about-interests li:hover,
+  section#about li:hover {
+    color: #111 !important;
+    text-shadow: none !important;
+    background: transparent !important;
+  }
+  
+  // Reset summary/details hover
+  summary:hover {
+    background: #eee !important;
+    color: #111 !important;
+    text-shadow: none !important;
+  }
+  
+  // Reset card hover
+  .card:hover, article:hover {
+    border-color: #ccc !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+  }
+  
+  // Reset button hover
+  .btn:hover, button:hover {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+  
+  // Reset navbar hover
+  .navbar a:hover, nav a:hover {
+    color: #000 !important;
+    text-shadow: none !important;
+  }
+  
+  // Reset table row hover
+  tr:hover td {
+    background: #f5f5f5 !important;
+    border-color: #ccc !important;
+  }
+  
+  // Reset social icon hover
+  .social-icons a:hover, .network-icon a:hover {
+    color: #0066cc !important;
+    text-shadow: none !important;
+    transform: scale(1.1) !important;
+  }
+  
+  // Reset education/degree hover
+  .education li:hover,
+  [class*="education"] li:hover,
+  .degree:hover {
+    color: #111 !important;
+    text-shadow: none !important;
+    border-left-color: #333 !important;
+    background: transparent !important;
+  }
 }
 
 // =============================================================================
