@@ -406,55 +406,137 @@ section#about .hb-about-content,
   }
 }
 
-// Interests list styling
+// Interests list styling - comprehensive selectors for Hugo Blox
 section#about .interests,
 section#about ul.interests,
+section#about [class*="interest"],
+section#about .col-md-7 ul,
+section#about .hb-about-interests,
 .wg-about .interests,
-.hb-about .interests {
+.hb-about .interests,
+.hb-about-interests,
+section#about ul:not(.network-icon):not(.social-icons) {
   list-style: none !important;
   padding-left: 0 !important;
+  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
   
   li {
     font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
     color: #7ee787 !important;
-    padding: 6px 0;
+    padding: 8px 0;
+    position: relative;
+    padding-left: 20px;
     
     &::before {
-      content: '▸ ';
+      content: '▸';
       color: #00ff41;
-      margin-right: 5px;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
     }
     
     &:hover {
       color: #00ff41 !important;
       text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
-      transform: translateX(5px);
+      padding-left: 25px;
       transition: all 0.2s ease;
     }
   }
 }
 
-// Education section styling
+// Education section styling - comprehensive selectors
 section#about .education,
+section#about [class*="education"],
+section#about .hb-about-education,
+section#about .col-md-5,
 .wg-about .education,
-.hb-about .education {
-  .degree {
+.hb-about .education,
+.hb-about-education {
+  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  
+  // Education items container
+  ul {
+    list-style: none !important;
+    padding-left: 0 !important;
+    
+    li {
+      font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+      color: #c9d1d9 !important;
+      padding: 10px 0;
+      border-left: 2px solid rgba(0, 255, 65, 0.3);
+      padding-left: 15px;
+      margin-bottom: 10px;
+      
+      &:hover {
+        border-left-color: #00ff41;
+        background: rgba(0, 255, 65, 0.05);
+      }
+    }
+  }
+  
+  // Degree name
+  .degree,
+  strong,
+  b {
     font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
     color: #ffa657 !important;
+    display: block;
   }
   
-  .institution {
+  // Institution name
+  .institution,
+  .text-muted,
+  small {
     color: #58a6ff !important;
+    font-size: 0.9rem;
   }
   
-  .year {
+  // Year
+  .year,
+  time {
     color: #8b949e !important;
+    font-size: 0.85rem;
     
     &::before {
       content: '// ';
       color: #6e7681;
     }
   }
+}
+
+// Style the section titles "Interests" and "Education"
+section#about h3,
+section#about .hb-about-interests-title,
+section#about .hb-about-education-title,
+section#about [class*="title"] {
+  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  color: #58a6ff !important;
+  font-size: 0.85rem !important;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 15px;
+  
+  &::before {
+    content: '/* ';
+    color: #6e7681;
+  }
+  
+  &::after {
+    content: ' */';
+    color: #6e7681;
+  }
+}
+
+// Target all text elements in the about section for consistent styling
+section#about p,
+section#about span:not(.terminal-dot),
+section#about div:not(.terminal-dots):not(.terminal-hero) {
+  color: #c9d1d9;
+}
+
+// Ensure all list items in about get cyber styling
+section#about li {
+  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
 }
 
 // Social icons styling
