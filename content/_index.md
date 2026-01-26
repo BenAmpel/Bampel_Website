@@ -25,7 +25,7 @@ sections:
         - **Deep Learning**: Transfer learning and transformer-based approaches for security applications
         - **Computational Design Science**: Building actionable security systems and frameworks
         
-        *Google Scholar Metrics: 350+ Citations | h-index: 9 | i10-index: 9*
+        *Google Scholar Metrics: 336 Citations | h-index: 8 | i10-index: 8*
     design:
       columns: '1'
 
@@ -66,7 +66,7 @@ sections:
     content:
       title: Research Impact
       text: |
-        | 📄 **8** Journal Articles | 📋 **16** Conference Papers | 📝 **6** Workshop Papers | 📚 **350+** Citations | 🏆 **2** Best Paper Awards |
+        | 📄 **8** Journal Articles | 📋 **16** Conference Papers | 📝 **6** Workshop Papers | 📚 **336** Citations | 🏆 **2** Best Paper Awards |
         |:---:|:---:|:---:|:---:|:---:|
         
         **Top Venues:** MISQ • JMIS • ACM TMIS • ISF • IEEE ISI • HICSS • AMCIS • ICIS • ACM KDD
