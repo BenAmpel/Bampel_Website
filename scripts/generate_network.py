@@ -54,17 +54,17 @@ AUTHOR_NORMALIZATION = {
     'K. Otto': 'Kaeli Otto',
     'Y Gao': 'Yang Gao',
     'Y. Gao': 'Yang Gao',
-    'J Hu': 'J. Hu',
-    'J. Hu': 'J. Hu',
+    'J Hu': 'James Hu',
+    'J. Hu': 'James Hu',
     'CH Yang': 'Chi-Heng Yang',
     'JF Nunamaker Jr': 'Jay Nunamaker',
-    'C Marx': 'C. Marx',
+    'C Marx': 'Carolin Marx',
     'C Dacosta': 'Cade Dacosta',
-    'C Zhang': 'C. Zhang',
+    'C Zhang': 'Chengjun Zhang',
     'M Hashim': 'Matthew Hashim',
     'M Wagner': 'Mason Wagner',
     'RY Reyes': 'Raul Reyes',
-    'S Yang': 'S. Yang',
+    'S Yang': 'Shanchieh Yang',
 }
 
 MAIN_AUTHOR = 'Benjamin Ampel'
