@@ -243,12 +243,75 @@ html {
   background: #90caf9;
 }
 
-/* Adjust avatar/headshot position - lower the image to show more of face */
+/* ===== NETWORK IMAGE STYLES ===== */
+.network-image-container {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.network-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.network-caption {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 12px;
+  font-style: italic;
+}
+
+.dark .network-caption {
+  color: #aaa;
+}
+
+/* Light/dark mode image switching */
+.light-mode-img {
+  display: block;
+}
+
+.dark-mode-img {
+  display: none;
+}
+
+.dark .light-mode-img {
+  display: none;
+}
+
+.dark .dark-mode-img {
+  display: block;
+}
+
+/* ===== AVATAR POSITIONING ===== */
+/* Multiple selectors to catch Hugo Blox avatar elements */
+/* Using transform to shift the image up within its container */
+.hb-about-avatar img,
+.about-avatar img,
 .avatar img,
 .avatar-wrapper img,
 .wg-about-avatar img,
-.about-widget img.avatar {
-  object-position: center 15% !important;
+.about-widget img.avatar,
+img.avatar,
+.profile .avatar img,
+[class*="avatar"] img,
+section#about img {
+  object-fit: cover !important;
+  object-position: center 20% !important;
+}
+
+/* Alternative: use negative margin to shift image position */
+.hb-about-avatar,
+.about-avatar,
+.avatar-wrapper,
+.wg-about-avatar {
+  overflow: hidden;
+}
+
+.hb-about-avatar img,
+.about-avatar img {
+  transform: scale(1.1) translateY(5%) !important;
 }
 
 /* Smooth hover effects for cards and links */
@@ -499,9 +562,6 @@ table tbody tr:hover {
 }
 </style>
 
-<!-- vis.js Network Library for Co-author Graph -->
-<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
-
 <!-- JavaScript for Interactive Animations -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -533,169 +593,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }, index * 100);
       }
     });
-  }
-  
-  // ===== CO-AUTHOR NETWORK GRAPH (DYNAMIC) =====
-  async function initCoauthorNetwork() {
-    const container = document.getElementById('coauthor-network');
-    if (!container) return;
-    
-    // Fetch publications data
-    let publications = [];
-    try {
-      const response = await fetch('/data/publications.json');
-      publications = await response.json();
-    } catch (error) {
-      console.error('Error loading publications:', error);
-      return;
-    }
-    
-    // Author name normalization map
-    const authorNormalization = {
-      'H Chen': 'Hsinchun Chen',
-      'S Samtani': 'Sagar Samtani',
-      'S Ullman': 'Steven Ullman',
-      'H Zhu': 'Hongyi Zhu',
-      'Y Gao': 'Yang Gao',
-      'B Lazarine': 'Ben Lazarine',
-      'T Vahedi': 'Tala Vahedi',
-      'K Otto': 'Kaeli Otto',
-      'J Hu': 'James Hu',
-      'CH Yang': 'Chi-Heng Yang',
-      'M Hashim': 'Matthew Hashim',
-      'JF Nunamaker Jr': 'Jay Nunamaker',
-      'M Patton': 'Mark Patton',
-      'C Marx': 'Carolin Marx',
-      'S Yang': 'Shuo Yang',
-      'C Dacosta': 'Cade Dacosta',
-      'C Zhang': 'Chengjun Zhang',
-      'RY Reyes': 'Raul Reyes',
-      'M Wagner': 'Mason Wagner'
-    };
-    
-    // Check if author is the main author (Benjamin Ampel)
-    function isMainAuthor(author) {
-      const normalized = author.trim().toLowerCase();
-      return normalized.includes('ampel') || normalized === 'b ampel' || normalized === 'bm ampel';
-    }
-    
-    // Normalize author name
-    function normalizeAuthor(author) {
-      const trimmed = author.trim();
-      return authorNormalization[trimmed] || trimmed;
-    }
-    
-    // Build co-author counts
-    const coauthorCounts = {};
-    publications.forEach(pub => {
-      pub.authors.forEach(author => {
-        if (!isMainAuthor(author)) {
-          const normalized = normalizeAuthor(author);
-          coauthorCounts[normalized] = (coauthorCounts[normalized] || 0) + 1;
-        }
-      });
-    });
-    
-    // Check if dark mode
-    const isDark = document.body.classList.contains('dark');
-    
-    // Node colors
-    const primaryColor = isDark ? '#90caf9' : '#1565c0';
-    const frequentColor = isDark ? '#64b5f6' : '#42a5f5';
-    const occasionalColor = isDark ? '#bbdefb' : '#90caf9';
-    const textColor = isDark ? '#e0e0e0' : '#333';
-    const edgeColor = isDark ? 'rgba(144, 202, 249, 0.4)' : 'rgba(21, 101, 192, 0.3)';
-    
-    // Generate nodes dynamically
-    const nodesArray = [
-      { id: 0, label: 'Benjamin\nAmpel', color: primaryColor, size: 45, font: { color: textColor, size: 14, bold: true } }
-    ];
-    
-    const edgesArray = [];
-    let nodeId = 1;
-    
-    // Sort co-authors by count (descending)
-    const sortedCoauthors = Object.entries(coauthorCounts).sort((a, b) => b[1] - a[1]);
-    
-    sortedCoauthors.forEach(([name, count]) => {
-      // Determine color and size based on collaboration count
-      let color, size, fontSize;
-      if (count >= 5) {
-        color = frequentColor;
-        size = 25 + count * 2;
-        fontSize = 12;
-      } else if (count >= 2) {
-        color = occasionalColor;
-        size = 18 + count * 2;
-        fontSize = 10;
-      } else {
-        color = occasionalColor;
-        size = 16;
-        fontSize = 9;
-      }
-      
-      // Format name for display (split into two lines if needed)
-      const nameParts = name.split(' ');
-      let displayName = name;
-      if (nameParts.length >= 2) {
-        displayName = nameParts.slice(0, -1).join(' ') + '\n' + nameParts[nameParts.length - 1];
-      }
-      
-      nodesArray.push({
-        id: nodeId,
-        label: displayName,
-        color: color,
-        size: Math.min(size, 40),
-        font: { color: textColor, size: fontSize }
-      });
-      
-      // Create edge to main author
-      edgesArray.push({
-        from: 0,
-        to: nodeId,
-        width: Math.min(count, 6),
-        color: { color: edgeColor, highlight: primaryColor }
-      });
-      
-      nodeId++;
-    });
-    
-    const nodes = new vis.DataSet(nodesArray);
-    const edges = new vis.DataSet(edgesArray);
-    
-    const data = { nodes: nodes, edges: edges };
-    
-    const options = {
-      nodes: {
-        shape: 'dot',
-        borderWidth: 2,
-        borderWidthSelected: 4,
-        shadow: true
-      },
-      edges: {
-        smooth: {
-          type: 'continuous',
-          roundness: 0.5
-        }
-      },
-      physics: {
-        stabilization: { iterations: 100 },
-        barnesHut: {
-          gravitationalConstant: -3000,
-          centralGravity: 0.3,
-          springLength: 150,
-          springConstant: 0.04
-        }
-      },
-      interaction: {
-        hover: true,
-        tooltipDelay: 200,
-        zoomView: true,
-        dragView: true
-      }
-    };
-    
-    new vis.Network(container, data, options);
   }
   
   // ===== ANIMATED COUNTERS =====
@@ -827,60 +724,5 @@ document.addEventListener('DOMContentLoaded', function() {
   if (pubChart) {
     pubChartObserver.observe(pubChart);
   }
-  
-  // ===== INJECT NETWORK HTML =====
-  // Find the network section by ID and inject content into it
-  const networkSection = document.getElementById('network');
-  if (networkSection) {
-    // Find the prose/content area within the section
-    const contentArea = networkSection.querySelector('.prose') || 
-                        networkSection.querySelector('.article-container') ||
-                        networkSection.querySelector('.container');
-    if (contentArea) {
-      const networkDiv = document.createElement('div');
-      networkDiv.innerHTML = `
-        <div class="network-container">
-          <div class="network-title">Research Collaborations</div>
-          <div id="coauthor-network"></div>
-          <div class="network-legend">
-            <div class="legend-item"><span class="legend-dot primary"></span> Benjamin Ampel</div>
-            <div class="legend-item"><span class="legend-dot frequent"></span> Frequent Collaborator (5+ papers)</div>
-            <div class="legend-item"><span class="legend-dot occasional"></span> Collaborator (2-4 papers)</div>
-          </div>
-        </div>
-      `;
-      contentArea.appendChild(networkDiv);
-    }
-  }
-  
-  // ===== CO-AUTHOR NETWORK OBSERVER =====
-  const networkObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        initCoauthorNetwork();
-        networkObserver.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.2 });
-  
-  const networkContainer = document.querySelector('.network-container');
-  if (networkContainer) {
-    networkObserver.observe(networkContainer);
-  }
-  
-  // Listen for dark mode changes to reinitialize network
-  const darkModeObserver = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.attributeName === 'class') {
-        const networkEl = document.getElementById('coauthor-network');
-        if (networkEl && networkEl.innerHTML) {
-          networkEl.innerHTML = '';
-          initCoauthorNetwork();
-        }
-      }
-    });
-  });
-  
-  darkModeObserver.observe(document.body, { attributes: true });
 });
 </script>
