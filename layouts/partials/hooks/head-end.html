@@ -2294,18 +2294,35 @@ function runEnhancements() {
   // ===== VISITOR FORENSICS WIDGET =====
   // Shows visitors what data their browser leaks - security awareness feature
   function initVisitorForensics() {
-    // Only show on homepage
-    if (window.location.pathname !== '/' && window.location.pathname !== '/index.html') return;
+    // Only show on homepage (flexible check)
+    const path = window.location.pathname;
+    const isHomepage = path === '/' || path === '/index.html' || path === '' || path.endsWith('/uqc/');
+    if (!isHomepage) return;
     
     // Check if already initialized
     if (document.querySelector('.visitor-forensics-widget')) return;
     
-    // Find the footer or a suitable location
-    const footer = document.querySelector('footer') || 
-                   document.querySelector('.site-footer') ||
-                   document.querySelector('#about');
+    // Find a suitable location - try multiple selectors
+    const targetSelectors = [
+      'section#about .container',
+      'section#about',
+      '#about .hb-section-container',
+      '.home-section:last-of-type',
+      'footer',
+      '.site-footer',
+      'main'
+    ];
     
-    if (!footer) return;
+    let target = null;
+    for (const selector of targetSelectors) {
+      target = document.querySelector(selector);
+      if (target) break;
+    }
+    
+    if (!target) {
+      console.log('Visitor Forensics: No target found');
+      return;
+    }
     
     // Create the widget HTML
     const widget = document.createElement('div');
@@ -2327,12 +2344,14 @@ function runEnhancements() {
       </div>
     `;
     
-    // Insert before footer or at end of about section
-    if (footer.tagName === 'FOOTER') {
-      footer.parentNode.insertBefore(widget, footer);
+    // Insert the widget
+    if (target.tagName === 'FOOTER' || target.tagName === 'MAIN') {
+      target.parentNode.insertBefore(widget, target);
     } else {
-      footer.appendChild(widget);
+      target.appendChild(widget);
     }
+    
+    console.log('Visitor Forensics: Widget inserted');
     
     // Detect OS
     function detectOS() {
