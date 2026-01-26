@@ -6,6 +6,9 @@
 <!-- tsParticles for animated background -->
 <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js"></script>
 
+<!-- Typed.js for terminal typing effect -->
+<script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.16/dist/typed.umd.js"></script>
+
 <!-- Altmetric Badge Script for publication pages -->
 <script type="text/javascript" src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
 
@@ -15,6 +18,426 @@
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
+}
+
+/* ===== TERMINAL TYPING EFFECT ===== */
+.terminal-bio {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
+  background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+  border-radius: 12px;
+  padding: 20px 25px;
+  margin: 20px 0;
+  position: relative;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(48, 54, 61, 0.8);
+  overflow: hidden;
+}
+
+.terminal-bio::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 32px;
+  background: linear-gradient(180deg, #21262d 0%, #161b22 100%);
+  border-bottom: 1px solid rgba(48, 54, 61, 0.8);
+  border-radius: 12px 12px 0 0;
+}
+
+.terminal-dots {
+  position: absolute;
+  top: 10px;
+  left: 15px;
+  display: flex;
+  gap: 8px;
+  z-index: 2;
+}
+
+.terminal-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  box-shadow: inset 0 -1px 2px rgba(0,0,0,0.3);
+}
+
+.terminal-dot.red { background: #ff5f56; }
+.terminal-dot.yellow { background: #ffbd2e; }
+.terminal-dot.green { background: #27c93f; }
+
+.terminal-title {
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  color: #8b949e;
+  z-index: 2;
+}
+
+.terminal-content {
+  margin-top: 25px;
+  color: #c9d1d9;
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.terminal-prompt {
+  color: #7ee787;
+  font-weight: 600;
+}
+
+.terminal-prompt::before {
+  content: '$ ';
+  color: #58a6ff;
+}
+
+.terminal-cursor {
+  display: inline-block;
+  width: 10px;
+  height: 1.2em;
+  background: #58a6ff;
+  margin-left: 2px;
+  animation: blink 1s infinite;
+  vertical-align: text-bottom;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.terminal-output {
+  color: #c9d1d9;
+  margin-top: 10px;
+}
+
+.terminal-output .highlight {
+  color: #ffa657;
+  font-weight: 500;
+}
+
+.terminal-output .link {
+  color: #58a6ff;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.terminal-output .success {
+  color: #7ee787;
+}
+
+.terminal-output .warning {
+  color: #d29922;
+}
+
+/* Light mode terminal adjustments */
+.light .terminal-bio,
+body:not(.dark) .terminal-bio {
+  background: linear-gradient(135deg, #f6f8fa 0%, #ffffff 100%);
+  border-color: #d0d7de;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.light .terminal-bio::before,
+body:not(.dark) .terminal-bio::before {
+  background: linear-gradient(180deg, #f6f8fa 0%, #ffffff 100%);
+  border-color: #d0d7de;
+}
+
+.light .terminal-content,
+body:not(.dark) .terminal-content {
+  color: #24292f;
+}
+
+.light .terminal-output,
+body:not(.dark) .terminal-output {
+  color: #24292f;
+}
+
+.light .terminal-prompt,
+body:not(.dark) .terminal-prompt {
+  color: #1a7f37;
+}
+
+.light .terminal-prompt::before,
+body:not(.dark) .terminal-prompt::before {
+  color: #0969da;
+}
+
+.light .terminal-cursor,
+body:not(.dark) .terminal-cursor {
+  background: #0969da;
+}
+
+.light .terminal-output .highlight,
+body:not(.dark) .terminal-output .highlight {
+  color: #9a6700;
+}
+
+.light .terminal-output .link,
+body:not(.dark) .terminal-output .link {
+  color: #0969da;
+}
+
+/* ===== GLITCH EFFECT ===== */
+.glitch-text {
+  position: relative;
+  display: inline-block;
+}
+
+.glitch-text:hover {
+  animation: glitch-skew 0.5s infinite linear alternate-reverse;
+}
+
+.glitch-text::before,
+.glitch-text::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.glitch-text:hover::before {
+  animation: glitch-anim-1 0.3s infinite linear alternate-reverse;
+  color: #00ffff;
+  z-index: -1;
+  opacity: 0.8;
+}
+
+.glitch-text:hover::after {
+  animation: glitch-anim-2 0.3s infinite linear alternate-reverse;
+  color: #ff00ff;
+  z-index: -2;
+  opacity: 0.8;
+}
+
+@keyframes glitch-anim-1 {
+  0% {
+    clip-path: polygon(0 2%, 100% 2%, 100% 5%, 0 5%);
+    transform: translate(-2px, 0);
+  }
+  20% {
+    clip-path: polygon(0 15%, 100% 15%, 100% 20%, 0 20%);
+    transform: translate(2px, 0);
+  }
+  40% {
+    clip-path: polygon(0 35%, 100% 35%, 100% 40%, 0 40%);
+    transform: translate(-2px, 0);
+  }
+  60% {
+    clip-path: polygon(0 55%, 100% 55%, 100% 60%, 0 60%);
+    transform: translate(2px, 0);
+  }
+  80% {
+    clip-path: polygon(0 75%, 100% 75%, 100% 80%, 0 80%);
+    transform: translate(-2px, 0);
+  }
+  100% {
+    clip-path: polygon(0 95%, 100% 95%, 100% 100%, 0 100%);
+    transform: translate(2px, 0);
+  }
+}
+
+@keyframes glitch-anim-2 {
+  0% {
+    clip-path: polygon(0 10%, 100% 10%, 100% 15%, 0 15%);
+    transform: translate(2px, 0);
+  }
+  20% {
+    clip-path: polygon(0 25%, 100% 25%, 100% 30%, 0 30%);
+    transform: translate(-2px, 0);
+  }
+  40% {
+    clip-path: polygon(0 45%, 100% 45%, 100% 50%, 0 50%);
+    transform: translate(2px, 0);
+  }
+  60% {
+    clip-path: polygon(0 65%, 100% 65%, 100% 70%, 0 70%);
+    transform: translate(-2px, 0);
+  }
+  80% {
+    clip-path: polygon(0 85%, 100% 85%, 100% 90%, 0 90%);
+    transform: translate(2px, 0);
+  }
+  100% {
+    clip-path: polygon(0 5%, 100% 5%, 100% 10%, 0 10%);
+    transform: translate(-2px, 0);
+  }
+}
+
+@keyframes glitch-skew {
+  0% { transform: skew(0deg); }
+  10% { transform: skew(-1deg); }
+  20% { transform: skew(0.5deg); }
+  30% { transform: skew(-0.5deg); }
+  40% { transform: skew(1deg); }
+  50% { transform: skew(0deg); }
+  60% { transform: skew(-0.5deg); }
+  70% { transform: skew(0.5deg); }
+  80% { transform: skew(-1deg); }
+  90% { transform: skew(0.5deg); }
+  100% { transform: skew(0deg); }
+}
+
+/* Glitch effect for profile name in hero/about section */
+.profile-header h1,
+.hb-about-avatar + div h1,
+.wg-about h1,
+section#about h1.article-title,
+.article-title.glitch-text {
+  position: relative;
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+/* Subtle cyber glow on section headers */
+section h1:hover,
+section h2:hover {
+  text-shadow: 0 0 10px rgba(21, 101, 192, 0.3), 0 0 20px rgba(21, 101, 192, 0.2);
+}
+
+.dark section h1:hover,
+.dark section h2:hover {
+  text-shadow: 0 0 10px rgba(100, 181, 246, 0.4), 0 0 20px rgba(100, 181, 246, 0.2);
+}
+
+/* Scanline overlay effect for terminal (subtle) */
+.terminal-bio .terminal-content::after {
+  content: '';
+  position: absolute;
+  top: 32px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.03) 2px,
+    rgba(0, 0, 0, 0.03) 4px
+  );
+  pointer-events: none;
+  border-radius: 0 0 12px 12px;
+}
+
+/* Matrix-style decorative characters */
+.cyber-decoration {
+  position: absolute;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  color: rgba(100, 181, 246, 0.15);
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* Code brackets decoration for about section */
+#about .hb-section-container::before {
+  content: '{ }';
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 3rem;
+  color: rgba(21, 101, 192, 0.08);
+  pointer-events: none;
+}
+
+.dark #about .hb-section-container::before {
+  color: rgba(100, 181, 246, 0.1);
+}
+
+/* Typed.js cursor styling */
+.typed-cursor {
+  font-weight: 400;
+  color: #58a6ff;
+  animation: blink 0.7s infinite;
+  font-size: 1.1em;
+}
+
+.light .typed-cursor,
+body:not(.dark) .typed-cursor {
+  color: #0969da;
+}
+
+/* Cyber badge for security emphasis */
+.cyber-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: linear-gradient(135deg, rgba(21, 101, 192, 0.1), rgba(66, 165, 245, 0.1));
+  border: 1px solid rgba(21, 101, 192, 0.3);
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #1565c0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-left: 10px;
+  vertical-align: middle;
+}
+
+.cyber-badge::before {
+  content: '🛡️';
+  font-size: 0.9em;
+}
+
+.dark .cyber-badge {
+  background: linear-gradient(135deg, rgba(100, 181, 246, 0.15), rgba(144, 202, 249, 0.1));
+  border-color: rgba(100, 181, 246, 0.3);
+  color: #90caf9;
+}
+
+/* Animated security lock icon */
+@keyframes security-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+.security-indicator {
+  display: inline-block;
+  animation: security-pulse 2s ease-in-out infinite;
+}
+
+/* Hex code decoration (subtle) */
+.hex-decoration {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  color: rgba(21, 101, 192, 0.15);
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
+  line-height: 1.4;
+  text-align: right;
+}
+
+.dark .hex-decoration {
+  color: rgba(100, 181, 246, 0.12);
+}
+
+@media (max-width: 768px) {
+  .hex-decoration {
+    display: none;
+  }
+  
+  .terminal-bio {
+    padding: 15px;
+    font-size: 0.85rem;
+  }
+  
+  .terminal-content {
+    font-size: 0.85rem;
+  }
 }
 
 /* ===== SCROLL PROGRESS BAR ===== */
@@ -1263,6 +1686,165 @@ table tbody tr:hover {
 <script>
 // Run enhancements after page is fully loaded
 function runEnhancements() {
+  
+  // ===== TERMINAL TYPING EFFECT FOR BIO =====
+  function initTerminalTyping() {
+    // Find the biography/about section text
+    const aboutSection = document.getElementById('about');
+    if (!aboutSection) return;
+    
+    // Find the biography paragraph(s) - usually in a prose or biography container
+    const bioContainer = aboutSection.querySelector('.prose') || 
+                         aboutSection.querySelector('.biography') ||
+                         aboutSection.querySelector('.hb-about-content') ||
+                         aboutSection.querySelector('.article-style');
+    
+    if (!bioContainer || bioContainer.querySelector('.terminal-bio')) return;
+    
+    // Get the first paragraph text
+    const firstPara = bioContainer.querySelector('p');
+    if (!firstPara) return;
+    
+    const bioText = firstPara.textContent.trim();
+    
+    // Extract key info for terminal display
+    const isAssistantProf = bioText.includes('Assistant Professor');
+    const isDrAmpel = bioText.includes('Dr. Benjamin M. Ampel');
+    
+    // Create terminal container
+    const terminal = document.createElement('div');
+    terminal.className = 'terminal-bio';
+    terminal.innerHTML = `
+      <div class="terminal-dots">
+        <span class="terminal-dot red"></span>
+        <span class="terminal-dot yellow"></span>
+        <span class="terminal-dot green"></span>
+      </div>
+      <span class="terminal-title">ampel@gsu ~ research</span>
+      <div class="terminal-content">
+        <div class="terminal-line">
+          <span class="terminal-prompt">whoami</span>
+        </div>
+        <div class="terminal-output" id="typed-output"></div>
+      </div>
+    `;
+    
+    // Insert before the biography paragraphs
+    bioContainer.insertBefore(terminal, firstPara);
+    
+    // Initialize Typed.js for the output
+    if (typeof Typed !== 'undefined') {
+      const outputEl = document.getElementById('typed-output');
+      
+      // Prepare the typing strings
+      const typedStrings = [
+        `<span class="highlight">Dr. Benjamin M. Ampel</span><br>` +
+        `<span class="success">→</span> Assistant Professor, <span class="link" onclick="window.open('https://robinson.gsu.edu', '_blank')">Georgia State University</span><br>` +
+        `<span class="success">→</span> J. Mack Robinson School of Business<br>` +
+        `<span class="success">→</span> Department of Computer Information Systems<br><br>` +
+        `<span class="terminal-prompt" style="display:inline">cat research_focus.txt</span><br>` +
+        `<span class="warning">▸</span> AI-enabled Cybersecurity<br>` +
+        `<span class="warning">▸</span> Cyber Threat Intelligence<br>` +
+        `<span class="warning">▸</span> Large Language Models<br>` +
+        `<span class="warning">▸</span> Phishing Detection<br><br>` +
+        `<span class="terminal-prompt" style="display:inline">ls awards/</span><br>` +
+        `🏆 ACM SIGMIS Doctoral Dissertation Award (2024)<br>` +
+        `🏆 Best Paper Awards - IEEE ISI (2020, 2023)`
+      ];
+      
+      new Typed('#typed-output', {
+        strings: typedStrings,
+        typeSpeed: 15,
+        backSpeed: 0,
+        backDelay: 5000,
+        startDelay: 500,
+        showCursor: true,
+        cursorChar: '▊',
+        contentType: 'html',
+        loop: false,
+        onComplete: function() {
+          // Add a subtle pulse to indicate completion
+          outputEl.style.animation = 'none';
+        }
+      });
+    }
+  }
+  
+  // Initialize terminal effect after a short delay
+  setTimeout(initTerminalTyping, 300);
+  
+  // ===== GLITCH EFFECT FOR NAME =====
+  function initGlitchEffect() {
+    // Find the main name/title heading
+    const nameSelectors = [
+      'section#about h1',
+      '.profile-header h1',
+      '.hb-about h1',
+      '.wg-about h1',
+      '.article-title'
+    ];
+    
+    let nameElement = null;
+    for (const selector of nameSelectors) {
+      const el = document.querySelector(selector);
+      if (el && el.textContent.includes('Benjamin')) {
+        nameElement = el;
+        break;
+      }
+    }
+    
+    if (!nameElement || nameElement.classList.contains('glitch-text')) return;
+    
+    // Store original text
+    const originalText = nameElement.textContent.trim();
+    
+    // Add glitch class and data attribute
+    nameElement.classList.add('glitch-text');
+    nameElement.setAttribute('data-text', originalText);
+    
+    // Also apply to any h1 in the header/nav that contains the name
+    const headerName = document.querySelector('.navbar-brand, header h1, .site-title');
+    if (headerName && headerName.textContent.includes('Benjamin')) {
+      headerName.classList.add('glitch-text');
+      headerName.setAttribute('data-text', headerName.textContent.trim());
+    }
+  }
+  
+  // Initialize glitch effect
+  setTimeout(initGlitchEffect, 100);
+  
+  // ===== SUBTLE HEX DECORATION =====
+  function addHexDecoration() {
+    if (document.querySelector('.hex-decoration')) return;
+    
+    const hex = document.createElement('div');
+    hex.className = 'hex-decoration';
+    hex.innerHTML = `0x43 54 49<br>0x41 49 4D 4C<br>0x47 53 55`;
+    document.body.appendChild(hex);
+  }
+  
+  // Add hex decoration on homepage only
+  if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
+    setTimeout(addHexDecoration, 1000);
+  }
+  
+  // ===== CYBER BADGE FOR ROLE =====
+  function addCyberBadge() {
+    const roleElement = document.querySelector('.hb-about-role') ||
+                        document.querySelector('.role') ||
+                        document.querySelector('[class*="role"]') ||
+                        document.querySelector('.article-metadata');
+    
+    if (roleElement && !roleElement.querySelector('.cyber-badge') && 
+        roleElement.textContent.includes('Professor')) {
+      const badge = document.createElement('span');
+      badge.className = 'cyber-badge';
+      badge.textContent = 'Cybersecurity';
+      roleElement.appendChild(badge);
+    }
+  }
+  
+  setTimeout(addCyberBadge, 500);
   
   // ===== HIGH-RES AVATAR REPLACEMENT =====
   // Replace Hugo's processed avatar with full-resolution static version
