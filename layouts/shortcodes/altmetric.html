@@ -19,4 +19,28 @@
     </div>
   </div>
 </div>
+<script type="text/javascript">
+(function() {
+  function initBadge() {
+    if (typeof _altmetric_embed_init === 'function') {
+      _altmetric_embed_init();
+    } else {
+      // Load the script if not present
+      var s = document.createElement('script');
+      s.src = 'https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js';
+      s.onload = function() {
+        if (typeof _altmetric_embed_init === 'function') _altmetric_embed_init();
+      };
+      document.head.appendChild(s);
+    }
+  }
+  if (document.readyState === 'complete') {
+    initBadge();
+  } else {
+    window.addEventListener('load', initBadge);
+  }
+  setTimeout(initBadge, 1000);
+  setTimeout(initBadge, 3000);
+})();
+</script>
 {{ end }}
