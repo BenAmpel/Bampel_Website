@@ -5,17 +5,17 @@ authors:
   - admin
   - Steven Ullman
 
-date: '2025-12-01T00:00:00Z'
+date: '2025-12-15T00:00:00Z'
 doi: ''
 
-publishDate: '2025-12-01T00:00:00Z'
+publishDate: '2025-12-15T00:00:00Z'
 
 publication_types: ['1']
 
-publication: In *ICIS Technology, Research, Education, and Opinion (TREO) Talks*
+publication: In *International Conference on Information Systems (ICIS) Technology, Research, Education, and Opinion (TREO) Talks*
 publication_short: In *ICIS TREO*
 
-abstract: This TREO talk explores provocative questions about the role of multi-agent AI systems in information systems scholarship. We examine the potential and pitfalls of AI-augmented research, discussing how multi-agent frameworks might transform academic inquiry while preserving scholarly rigor and ethical standards.
+abstract: This TREO talk explores provocative questions about the role of multi-agent AI systems in information systems scholarship. We examine the potential and pitfalls of AI-augmented research, discussing how multi-agent frameworks might transform academic inquiry while preserving scholarly rigor and ethical standards. Drawing on emerging paradigms like agentic services computing, we consider how role-differentiated AI agents can engage in collaborative problem-solving alongside human researchers.
 
 tags:
 - Multi-Agent Systems
