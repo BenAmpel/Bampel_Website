@@ -87,14 +87,16 @@
 </div>
 
 <div style="grid-column:2; grid-row:4; padding:25px; display:flex; flex-direction:column;">
-    <h4 style="font-size:0.8rem; opacity:0.7; text-transform:uppercase; margin-bottom:15px;">Audience & Engagement</h4>
+    <h4 style="font-size:0.8rem; opacity:0.7; text-transform:uppercase; margin-bottom:15px;">Audience & Reach</h4>
     <div style="display:flex; gap:20px; height:100%;">
         <div style="flex:1; position:relative;">
             <div id="dash-visit-device" style="width:100%; height:100%;"></div>
         </div>
         <div style="flex:1; overflow-y:auto; border-left:1px solid var(--card-border, #333); padding-left:15px;">
-            <div style="font-size:0.7rem; font-weight:bold; margin-bottom:8px; opacity:0.8;">Top Pages</div>
-            <div id="dash-visit-pages" style="font-size:0.75rem; line-height:1.5;"></div>
+            <div style="font-size:0.7rem; font-weight:bold; margin-bottom:8px; opacity:0.8;">Top Locations</div>
+            <div id="dash-visit-locations" style="font-size:0.75rem; line-height:1.5;">
+                <span style="opacity:0.5;">Loading...</span>
+            </div>
         </div>
     </div>
 </div>
@@ -126,7 +128,7 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
             DEVICE: 'dash-visit-device',
             TOTAL: 'dash-visit-total',
             MONTH: 'dash-visit-month',
-            PAGES: 'dash-visit-pages'
+            LOCS: 'dash-visit-locations'
         },
         METRICS: {
             FOCUS: 'dash-metric-focus', TREND: 'dash-metric-trend',
@@ -153,11 +155,9 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
             papers = Array.isArray(papersData) ? papersData : (papersData.individualPublications || []);
         }
 
-        // --- DASHBOARD METRICS ---
         processMetrics(papers, scholarData);
 
-        // --- RENDER CHARTS ---
-        renderRadar(papers); // Placeholder
+        renderRadar(papers); 
         if(scholarData && scholarData.citationsByYear) renderLine(scholarData.citationsByYear);
         renderWorkingMap(papers); 
         calculateAllMetrics(papers);
@@ -182,8 +182,7 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
             if(visitTrendChart) visitTrendChart.dispose();
             visitTrendChart = echarts.init(domTrend);
             
-            let isDark = document.body.classList.contains('dark');
-            let months = data.monthly_trend.map(d => d.month); // "202601"
+            let months = data.monthly_trend.map(d => d.month);
             let counts = data.monthly_trend.map(d => d.visitors);
             
             visitTrendChart.setOption({
@@ -220,18 +219,25 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
             });
         }
 
-        // 3. Top Pages List
-        var domPages = document.getElementById(IDS.VISIT.PAGES);
-        if(domPages && data.top_pages) {
-            let html = data.top_pages.slice(0,5).map(p => {
-                // Shorten path
-                let path = p.path === '/' ? 'Home' : p.path.replace(/\/$/,'').split('/').pop();
-                return `<div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-                    <span style="opacity:0.7; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:120px;">${path}</span>
-                    <span style="font-weight:bold; color:#e040fb;">${p.views}</span>
-                </div>`;
-            }).join('');
-            domPages.innerHTML = html;
+        // 3. Top Locations (Countries)
+        var domLocs = document.getElementById(IDS.VISIT.LOCS);
+        if(domLocs) {
+            // Check for 'countries' or fallback to 'locations' key
+            let list = data.countries || data.locations || [];
+            if(list.length > 0) {
+                // Sort by users desc
+                list.sort((a,b) => b.users - a.users);
+                let html = list.slice(0,6).map(c => {
+                    let name = c.country || c.location || "Unknown";
+                    return `<div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                        <span style="opacity:0.7; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:120px;">${name}</span>
+                        <span style="font-weight:bold; color:#e040fb;">${c.users}</span>
+                    </div>`;
+                }).join('');
+                domLocs.innerHTML = html;
+            } else {
+                domLocs.innerHTML = '<span style="opacity:0.5">No location data</span>';
+            }
         }
     }
 
