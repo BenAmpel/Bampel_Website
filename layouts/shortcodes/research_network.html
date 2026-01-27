@@ -1,5 +1,4 @@
 {{/* Interactive Research Network - Usage: {{< research_network >}} */}}
-{{/* Bulletproof version with safe color gradient calculation */}}
 
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 
@@ -13,7 +12,7 @@
     var myName = "Benjamin Ampel"; // The center node
 
     // --- 1. NAME NORMALIZATION ---
-    // Maps variations (e.g., "B. Ampel") to a single canonical name
+    // Ensures "B. Ampel" and "Benjamin Ampel" are treated as the same person
     var nameMap = {
         'B Ampel': 'Benjamin Ampel', 'BM Ampel': 'Benjamin Ampel', 'B. Ampel': 'Benjamin Ampel', 'admin': 'Benjamin Ampel',
         'H Chen': 'Hsinchun Chen', 'H. Chen': 'Hsinchun Chen',
@@ -34,22 +33,17 @@
     };
     function normalize(name) { return nameMap[name] || name; }
 
-    // --- 2. COLOR GRADIENT GENERATOR (Safe Version) ---
-    // Generates a color between Green (Low) and Red (High)
+    // --- 2. COLOR GENERATOR ---
     function getColor(value, max, isDark) {
-        // Prevent division by zero if max is 1
         var safeMax = (max <= 1) ? 2 : max;
-        var ratio = (value - 1) / (safeMax - 1); 
-        ratio = Math.min(Math.max(ratio, 0), 1); // Clamp between 0 and 1
+        var ratio = Math.min(Math.max((value - 1) / (safeMax - 1), 0), 1);
 
         if (isDark) {
-            // Dark Mode: Neon Green (120) -> Neon Red/Pink (0)
-            // Higher lightness (60%) for "glow" effect
-            var hue = (1 - ratio) * 120;
+            // Dark Mode: Neon Green -> Hot Pink
+            var hue = (1 - ratio) * 120; 
             return `hsl(${hue}, 90%, 60%)`;
         } else {
-            // Light Mode: Forest Green (120) -> Deep Red (0)
-            // Lower lightness (40%) for readability against white
+            // Light Mode: Forest Green -> Deep Red
             var hue = (1 - ratio) * 120;
             return `hsl(${hue}, 80%, 40%)`;
         }
@@ -65,7 +59,7 @@
         // Data Storage
         var globalData = { nodes: [], links: [], maxCount: 0 };
 
-        // --- 3. FETCH DATA ---
+        // --- 3. FETCH & PROCESS DATA ---
         fetch('/data/publications.json')
             .then(response => response.json())
             .then(data => {
@@ -78,67 +72,81 @@
                 dom.innerHTML = "<p style='text-align:center; padding-top:20px; color:red;'>Could not load network data.</p>";
             });
 
-        // --- 4. PROCESS DATA ---
         function processData(papers) {
             var nodeCounts = new Map();
-            var connectedPairs = new Set();
+            var linkCounts = new Map(); // Store pair counts for edge weighting
             var maxCount = 0;
 
-            // Step A: Count Co-Authorships
+            // Step A: Aggregate Counts
             papers.forEach(function(paper) {
                 if (!paper.authors) return;
-                var authors = paper.authors.map(normalize);
+                var authors = [...new Set(paper.authors.map(normalize))]; // Deduplicate authors per paper
                 
+                // Count Nodes
                 authors.forEach(auth => {
                     let count = (nodeCounts.get(auth) || 0) + 1;
                     nodeCounts.set(auth, count);
-                    // Update max count (excluding yourself to keep scale useful)
                     if (auth !== myName && count > maxCount) maxCount = count;
                 });
 
-                // Step B: Create Links
+                // Count Links
                 for (let i = 0; i < authors.length; i++) {
                     for (let j = i + 1; j < authors.length; j++) {
                         let source = authors[i], target = authors[j];
                         if (source === target) continue;
-                        let pairId = [source, target].sort().join("-");
-                        if (!connectedPairs.has(pairId)) {
-                            globalData.links.push({ source: source, target: target });
-                            connectedPairs.add(pairId);
-                        }
+                        
+                        // Sort names to ensure A-B is same as B-A
+                        let pairId = [source, target].sort().join("|");
+                        linkCounts.set(pairId, (linkCounts.get(pairId) || 0) + 1);
                     }
                 }
             });
 
+            // Step B: Build Nodes
             globalData.maxCount = maxCount;
             globalData.rawNodes = Array.from(nodeCounts.entries());
+
+            // Step C: Build Weighted Links
+            globalData.links = Array.from(linkCounts.entries()).map(([id, count]) => {
+                let [source, target] = id.split("|");
+                return {
+                    source: source,
+                    target: target,
+                    value: count,
+                    lineStyle: {
+                        // WEIGHTED EDGE LOGIC:
+                        // Width: 1.5px (1 paper) -> up to 6px (many papers)
+                        width: Math.min(1.5 + (count * 0.8), 6),
+                        // Opacity: 0.3 (faint) -> 0.9 (solid)
+                        opacity: Math.min(0.3 + (count * 0.1), 0.9)
+                    }
+                };
+            });
             
-            // Initial Render
             updateChart();
         }
 
-        // --- 5. RENDER CHART (Updates on Theme Change) ---
+        // --- 4. RENDER CHART ---
         function updateChart() {
             var isDark = document.body.classList.contains('dark');
-            var bgColor = isDark ? '#1a1a1a' : '#ffffff';
+            var bgColor = isDark ? '#000000' : '#ffffff';
             var textColor = isDark ? '#eeeeee' : '#333333';
-            var meColor = isDark ? '#ffffff' : '#000000'; // You are White(Dark) or Black(Light)
+            var meColor = isDark ? '#ffffff' : '#000000';
 
-            // Generate Styled Nodes
             var nodes = globalData.rawNodes.map(([name, count]) => {
                 let isMe = (name === myName);
                 return {
                     id: name,
                     name: name,
                     value: count,
-                    symbolSize: isMe ? 70 : Math.max(20, Math.min(60, count * 10)),
+                    symbolSize: isMe ? 75 : Math.max(25, Math.min(65, count * 10)),
                     itemStyle: {
                         color: isMe ? meColor : getColor(count, globalData.maxCount, isDark),
                         borderColor: isDark ? '#000' : '#fff',
                         borderWidth: 1.5
                     },
                     label: {
-                        show: count > 1 || isMe, // Only label frequent collaborators
+                        show: count > 1 || isMe,
                         color: textColor,
                         fontSize: isMe ? 14 : 11,
                         fontWeight: isMe ? 'bold' : 'normal'
@@ -152,8 +160,15 @@
 
             var option = {
                 backgroundColor: bgColor,
+                animationDuration: 2000,
+                animationEasingUpdate: 'quinticInOut',
                 tooltip: { 
-                    formatter: '{b}<br>Papers: {c}' 
+                    formatter: (params) => {
+                        if (params.dataType === 'edge') {
+                            return `${params.data.source} & ${params.data.target}<br><strong>${params.value} Papers</strong>`;
+                        }
+                        return `${params.marker} <strong>${params.name}</strong><br>Papers: ${params.value}`;
+                    }
                 },
                 series: [{
                     type: 'graph',
@@ -161,38 +176,33 @@
                     data: nodes,
                     links: globalData.links,
                     roam: true,
-                    zoom: 0.7, // Zoom out to see the spread
+                    zoom: 0.75,
                     label: { position: 'right' },
                     lineStyle: {
-                        color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.15)',
+                        color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.6)', // Base color, opacity handled per link
                         curveness: 0.2
                     },
                     force: {
-                        repulsion: 2500, // BIG repulsion to space them out
-                        gravity: 0.08,   // Gentle gravity to keep them centered
-                        edgeLength: [50, 300], // Allow flexible link lengths
-                        friction: 0.6
+                        initLayout: 'circular',
+                        repulsion: 2500,
+                        gravity: 0.1,
+                        edgeLength: [50, 300],
+                        friction: 0.9 // High friction prevents jerking
                     }
                 }]
             };
 
             myChart.setOption(option);
             
-            // Re-center "Me" node
-            var w = myChart.getWidth();
-            var h = myChart.getHeight();
-            nodes.forEach(n => {
-                if(n.id === myName) { n.x = w/2; n.y = h/2; }
-            });
+            // Re-center
+            var w = myChart.getWidth(), h = myChart.getHeight();
+            nodes.forEach(n => { if(n.id === myName) { n.x = w/2; n.y = h/2; } });
             myChart.setOption({ series: [{ data: nodes }] });
         }
 
-        // --- 6. WATCHERS ---
-        
-        // Resize
+        // --- 5. EVENTS ---
         new ResizeObserver(() => myChart.resize()).observe(dom);
-
-        // Accordion Toggle
+        
         var parentDetails = dom.closest('details');
         if (parentDetails) {
             parentDetails.addEventListener('toggle', () => {
@@ -200,21 +210,10 @@
             });
         }
         
-        // Theme Toggle (Wait 100ms for class change)
         const themeButton = document.querySelector('.js-theme-toggle');
         if(themeButton){
-            themeButton.addEventListener('click', () => {
-                setTimeout(updateChart, 100);
-            });
+            themeButton.addEventListener('click', () => setTimeout(updateChart, 100));
         }
-        
-        // Polling (Backup)
-        var poller = setInterval(() => {
-            if (dom.offsetParent !== null && globalData.nodes.length === 0) {
-                 // Try resizing if data loaded but graph invisible
-                 myChart.resize();
-            }
-        }, 1000);
     });
 })();
 </script>
