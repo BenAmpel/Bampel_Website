@@ -1,4 +1,4 @@
-{{/* Research Command Center - With Network Centrality Analysis */}}
+{{/* Research Command Center - Restored Manuscript Impact Network */}}
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 
 <div id="dashboard-root" style="min-height: 550px; margin: 30px 0;"></div>
@@ -6,10 +6,7 @@
 <script type="text/javascript">
 (function() {
     var root = document.getElementById('dashboard-root');
-    var radarChart, lineChart, knowledgeGraphChart;
-    var storedPublications = null; // Store for theme toggle re-rendering
-    var storedScholarData = null; // Store full scholarData for theme toggle
-    var storedHistory = null;
+    var radarChart, lineChart, graphChart;
 
     // --- 1. LAYOUT GENERATOR ---
     function renderLayout() {
@@ -20,8 +17,7 @@
         var text = isDark ? '#aaa' : '#333';
         var highlight = isDark ? '#00e5ff' : '#1a0dab';
         var shadow = isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.05)';
-
-        // Colors for metrics
+        
         var c1 = isDark ? '#00ff41' : '#d93025'; 
         var c2 = isDark ? '#00e5ff' : '#1a0dab'; 
         var c3 = isDark ? '#e040fb' : '#9c27b0'; 
@@ -47,9 +43,9 @@
                 </div>
             </div>
 
-            <div style="grid-column: 1; grid-row: 2; padding: 20px; border-right: 1px solid ${border}; display: flex; flex-direction: column;">
-                <h4 style="margin: 0 0 10px; font-size: 0.9rem; color: ${muted}; text-transform: uppercase;">Impact Map</h4>
-                <div id="knowledge-graph" style="width: 100%; flex: 1; min-height: 250px;"></div>
+            <div style="grid-column: 1; grid-row: 2; padding: 0; border-right: 1px solid ${border}; position: relative;">
+                <h4 style="position:absolute; top:20px; left:20px; margin: 0; font-size: 0.9rem; color: ${muted}; text-transform: uppercase; z-index:10; pointer-events:none;">Impact Map</h4>
+                <div id="knowledge-graph" style="width: 100%; height: 100%;"></div>
             </div>
 
             <div style="grid-column: 2; grid-row: 2; padding: 25px; display: flex; flex-direction: column;">
@@ -71,7 +67,7 @@
                 <div>
                     <div style="font-size: 0.75rem; color: ${muted}; text-transform: uppercase; margin-bottom: 8px;">Primary Research Clusters</div>
                     <div id="net-clusters" style="font-size: 0.85rem; line-height: 1.6;">
-                        <span style="opacity: 0.5;">Analyzing co-authorship communities...</span>
+                        <span style="opacity: 0.5;">Analyzing network...</span>
                     </div>
                 </div>
             </div>
@@ -81,240 +77,91 @@
     // --- 2. INIT LAYOUT ---
     root.innerHTML = renderLayout();
     
-    // Initialize charts - use requestAnimationFrame to ensure DOM is ready
-    requestAnimationFrame(() => {
-        var radarEl = document.getElementById('dash-radar');
-        var lineEl = document.getElementById('dash-line');
-        var graphEl = document.getElementById('knowledge-graph');
-        
-        if (radarEl && typeof echarts !== 'undefined') radarChart = echarts.init(radarEl);
-        if (lineEl && typeof echarts !== 'undefined') lineChart = echarts.init(lineEl);
-        if (graphEl && typeof echarts !== 'undefined') knowledgeGraphChart = echarts.init(graphEl);
-    });
+    // --- 3. DATA FETCHING ---
+    const safeFetch = (url) => fetch(url).then(r => r.ok ? r.json() : null).catch(e => null);
 
-    // --- 3. SAFE FETCH HELPER ---
-    const safeFetch = (url) => fetch(url)
-        .then(response => {
-            if (!response.ok) {
-                console.warn(`File not found (${response.status}): ${url}`);
-                return null; // Return null instead of crashing
-            }
-            return response.json().then(data => {
-                console.log(`Successfully loaded: ${url}`, data);
-                return data;
-            }).catch(err => {
-                console.warn(`JSON parse error for ${url}:`, err);
-                return null;
-            });
-        })
-        .catch(err => {
-            console.warn(`Network error loading ${url}:`, err);
-            return null;
-        });
-
-    // --- 4. FETCH DATA ---
     Promise.all([
         safeFetch('/data/publications.json'),
-        safeFetch('/data/scholar-metrics.json'),
-        safeFetch('/data/network_stats.json')
-    ]).then(([papersData, scholarData, netStats]) => {
+        safeFetch('/data/scholar-metrics.json')
+    ]).then(([papersData, scholarData]) => {
         
-        // [CRITICAL FIX] Extract the array regardless of JSON format
+        // --- DATA NORMALIZATION (THE FIX) ---
         let papers = [];
         if (papersData) {
+            // Handle both List [...] and Object {individualPublications: [...]}
             papers = Array.isArray(papersData) ? papersData : (papersData.individualPublications || []);
         }
 
-        // Render the "Live Network" in the Bottom-Left (Impact Map) slot
-        if (papers.length > 0) {
-            storedPublications = papers; // Store for theme toggle
-            setTimeout(() => {
-                renderMap(papers); 
-            }, 200);
-        } else {
-            var graphEl = document.getElementById('knowledge-graph');
-            if (graphEl) {
-                graphEl.innerHTML = '<div style="padding:20px; opacity:0.5;">No network data available</div>';
-            }
-        }
-
-        // If major data is missing, stop here
-        if (!scholarData && papers.length === 0) {
-            console.error("No data available to render dashboard.");
-            return;
-        }
-
-        // A. Get Inferred Interests from JSON (or fallback to default)
-        let inferredInterests = [];
-        if (scholarData && scholarData.metrics && scholarData.metrics.interests && scholarData.metrics.interests.length > 0) {
-            inferredInterests = scholarData.metrics.interests;
-        } else {
-            // Fallback to default categories if not available
-            inferredInterests = ['AI', 'Cybersecurity', 'Blockchain', 'Deep Learning', 'Design Science', 'Dark Web'];
-        }
-
-        // B. Calculate frequency counts for inferred interests
-        let counts = {};
-        let recentCounts = {};
-        let currentYear = new Date().getFullYear();
-        inferredInterests.forEach(interest => {
-            counts[interest] = 0;
-            recentCounts[interest] = 0;
-        });
-
-        if(Array.isArray(papers) && papers.length > 0) {
-            papers.forEach(p => {
-                let text = (p.title || "").toLowerCase();
-                inferredInterests.forEach(interest => {
-                    if(text.includes(interest.toLowerCase())) {
-                        counts[interest]++;
-                        if(p.year >= currentYear - 2) recentCounts[interest]++;
-                    }
-                });
-            });
-        }
-
-        // C. Populate Text Metrics (use first two inferred interests as fallback)
-        let topSkill = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
-        let trendSkill = Object.entries(recentCounts).sort((a,b) => b[1]-a[1])[0];
-        updateText('metric-focus', topSkill && topSkill[1] > 0 ? topSkill[0] : (inferredInterests[0] || "Cybersecurity"));
-        updateText('metric-trend', trendSkill && trendSkill[1] > 0 ? trendSkill[0] : (inferredInterests[1] || "AI"));
-
-        // D. Metrics (Top Right)
-        if (scholarData && scholarData.metrics) {
-            let rawCites = String(scholarData.metrics.citations || 0);
-            let cleanCites = parseInt(rawCites.replace(/\D/g, '')) || 0;
-            let suffix = rawCites.includes('+') ? '+' : '';
-            animateValue("metric-cites", 0, cleanCites, 2000, suffix);
-            updateText('metric-hindex', scholarData.metrics.hIndex || 0);
-            
-            // Citation Velocity
-            let velocity = 0;
-            if (scholarData.metrics.citationVelocity !== undefined && scholarData.metrics.citationVelocity !== null) {
-                velocity = scholarData.metrics.citationVelocity;
-            } else if (scholarData.citationsByYear && scholarData.citationsByYear.length > 0) {
-                // Fallback: calculate from most recent year
-                let recentYear = scholarData.citationsByYear[scholarData.citationsByYear.length - 1];
-                velocity = recentYear.citations || 0;
-            }
-            updateText('metric-velocity', velocity);
-        }
-
-        // E. Render Charts
-        storedScholarData = scholarData; // Store for theme toggle
-        storedHistory = scholarData ? scholarData.citationsByYear : null; // Store for theme toggle
+        // Render Charts
         if (scholarData) {
-            renderRadar(scholarData); // Pass full scholarData to use inferred interests
-        }
-        if (scholarData && scholarData.citationsByYear) {
-            renderLine(scholarData.citationsByYear);
+            renderRadar(scholarData, papers);
+            if (scholarData.citationsByYear) renderLine(scholarData.citationsByYear);
+            
+            updateText('metric-hindex', scholarData.metrics.hIndex || 0);
+            updateText('metric-cites', scholarData.metrics.citations || 0);
+            
+            // Inferred Interests
+            let interests = scholarData.metrics.interests || ['AI', 'Cybersecurity'];
+            updateText('metric-focus', interests[0] || "Cybersecurity");
+            updateText('metric-trend', interests[1] || "AI");
+            updateText('metric-velocity', scholarData.metrics.citationVelocity || "-");
         }
 
-        // F. Render Network Stats (Bottom Right)
-        console.log('Network stats received:', netStats, 'Type:', typeof netStats);
-        if (netStats && typeof netStats === 'object' && !Array.isArray(netStats)) {
-            // Update density and LCC
-            var densityVal = netStats.density !== undefined && netStats.density !== null 
-                ? (typeof netStats.density === 'number' ? netStats.density.toFixed(2) : String(netStats.density))
-                : "0.00";
-            updateText('net-density', densityVal);
-            
-            var lccVal = netStats.lcc_percentage !== undefined && netStats.lcc_percentage !== null
-                ? (netStats.lcc_percentage + "%")
-                : "0%";
-            updateText('net-lcc', lccVal);
-            
-            // Render clusters
-            var clustersEl = document.getElementById('net-clusters');
-            if (clustersEl) {
-                if (netStats.clusters && Array.isArray(netStats.clusters) && netStats.clusters.length > 0) {
-                    let html = '';
-                    netStats.clusters.forEach((c, i) => {
-                        let members = c.top_members && Array.isArray(c.top_members) ? c.top_members.slice(0, 3).join(", ") : "";
-                        let color = ['#00ff41', '#00e5ff', '#e040fb'][i] || '#ccc';
-                        html += `
-                        <div style="margin-bottom: 8px; padding-left: 10px; border-left: 3px solid ${color};">
-                            <strong style="color: inherit; opacity: 0.9;">Group ${String.fromCharCode(65+i)}</strong> 
-                            <span style="opacity: 0.6; font-size: 0.8em;">(${c.size || 0} people)</span><br>
-                            <span style="font-size: 0.75em; opacity: 0.7;">w/ ${members || "N/A"}</span>
-                        </div>`;
-                    });
-                    clustersEl.innerHTML = html;
-                } else {
-                    clustersEl.innerHTML = '<span style="opacity:0.5; font-size:0.8em">No clusters identified</span>';
-                }
-            }
-        } else {
-            // Fallback if file is missing or invalid
-            console.warn('Network stats not available. Value:', netStats, 'Type:', typeof netStats);
-            var clustersEl = document.getElementById('net-clusters');
-            if (clustersEl) {
-                clustersEl.innerHTML = '<span style="opacity:0.5; font-size:0.8em">Analysis pending...</span>';
-            }
-        }
-
-        // G. Calculate Centrality
+        // Render Manuscript Network (Impact Map)
         if (papers.length > 0) {
-            calculateCentrality(papers);
+            renderMap(papers);
+        } else {
+            document.getElementById('knowledge-graph').innerHTML = '<div style="padding:40px; text-align:center; opacity:0.5">No publication data found.</div>';
         }
 
-    }).catch(e => console.error("Critical Dashboard Failure:", e));
+    });
 
-    // Helper to safely update text
-    function updateText(id, val) {
-        const el = document.getElementById(id);
-        if (el) el.innerText = val;
-    }
-
-    // --- RENDER MANUSCRIPT NETWORK & LIVE STATS ---
+    // --- 4. RENDER MANUSCRIPT NETWORK (The "Impact Map") ---
     function renderMap(papers) {
         var dom = document.getElementById('knowledge-graph');
         if (!dom) return;
         
-        var existInstance = echarts.getInstanceByDom(dom);
-        if (existInstance) existInstance.dispose();
-
-        var myChart = echarts.init(dom);
+        // Initialize ECharts
+        if (graphChart) graphChart.dispose();
+        graphChart = echarts.init(dom);
         var isDark = document.body.classList.contains('dark');
-        
-        // --- 1. CONFIGURATION ---
-        const stopWords = new Set(["the", "and", "of", "in", "on", "for", "with", "a", "an", "to", "at", "by", "from", "up", "about", "into", "over", "after", "is", "are", "was", "were", "be", "been", "being", "have", "has", "had", "do", "does", "did", "can", "could", "should", "would", "will", "study", "analysis", "using", "based", "approach", "review", "case", "system", "towards"]);
 
-        // Helper: Get Clean Tokens from Title
+        // --- A. PREPARE DATA ---
+        const stopWords = new Set(["the", "and", "of", "in", "on", "for", "with", "a", "an", "to", "at", "by", "from", "up", "about", "into", "over", "after", "is", "are", "was", "were", "be", "been", "being", "have", "has", "had", "do", "does", "did", "can", "could", "should", "would", "will", "study", "analysis", "using", "based", "approach", "review", "case", "system", "towards", "via", "framework", "model", "data"]);
+
+        // Helper to extract keywords from title
         const getTokens = (str) => {
             if(!str) return [];
             return str.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(w => w.length > 3 && !stopWords.has(w));
         };
 
-        // Helper: Get Clean Authors List
+        // Helper to normalize authors
         const getAuthors = (p) => {
+            // Handle List or String
             let authStr = Array.isArray(p.authors) ? p.authors.join(',') : (p.authors || "");
-            return authStr.split(',').map(a => a.trim()).filter(a => a && !a.includes("Ampel")); // Exclude self
+            return authStr.toLowerCase().split(',').map(a => a.trim()).filter(a => a && !a.includes("ampel"));
         };
 
-        // --- 2. BUILD NODES ---
+        // Create Nodes
         var nodes = papers.map((p, idx) => ({
-            id: idx.toString(), // Use Index as ID for safety
+            id: idx.toString(),
             name: p.title,
-            value: p.citations || 0,
-            venue: p.venue || "Unknown",
             year: p.year,
-            authors: getAuthors(p),
+            venue: p.venue || "Unknown",
+            value: p.citations || 0,
             tokens: getTokens(p.title),
-            symbolSize: Math.max(5, Math.log(p.citations + 2) * 5),
+            authors: getAuthors(p),
+            symbolSize: Math.max(5, Math.log(p.citations + 2) * 6),
             itemStyle: { color: isDark ? '#00e5ff' : '#1a0dab' },
-            label: {
-                show: (p.citations > 15),
-                formatter: (params) => params.data.name.substring(0, 15) + '...'
-            }
+            label: { show: (p.citations > 10) }
         }));
 
-        // --- 3. BUILD EDGES (Multi-Criteria) ---
+        // Create Edges (Manuscript Relationships)
         var links = [];
-        var adjList = new Map(); // For LCC calculation
+        var adjList = new Map(); // For stats calculation
 
         for (let i = 0; i < nodes.length; i++) {
-            if (!adjList.has(i)) adjList.set(i, []);
+            if(!adjList.has(i)) adjList.set(i, []);
             
             for (let j = i + 1; j < nodes.length; j++) {
                 let nodeA = nodes[i];
@@ -322,27 +169,17 @@
                 let weight = 0;
                 let reasons = [];
 
-                // A. Shared Topic (Title Words)
+                // 1. Topic Match
                 let commonWords = nodeA.tokens.filter(x => nodeB.tokens.includes(x));
-                if (commonWords.length > 0) {
-                    weight += commonWords.length * 1.5;
-                    reasons.push("Topic");
-                }
+                if (commonWords.length > 0) { weight += commonWords.length * 1.5; reasons.push("Topic"); }
 
-                // B. Shared Authors
+                // 2. Co-Author Match
                 let commonAuths = nodeA.authors.filter(x => nodeB.authors.includes(x));
-                if (commonAuths.length > 0) {
-                    weight += commonAuths.length * 3.0; // Stronger link
-                    reasons.push("Co-Author");
-                }
+                if (commonAuths.length > 0) { weight += commonAuths.length * 3.0; reasons.push("Authors"); }
 
-                // C. Shared Venue
-                if (nodeA.venue && nodeB.venue && nodeA.venue === nodeB.venue) {
-                    weight += 1.0;
-                    reasons.push("Venue");
-                }
+                // 3. Venue Match
+                if (nodeA.venue !== "Unknown" && nodeA.venue === nodeB.venue) { weight += 1.0; reasons.push("Venue"); }
 
-                // Create Link if threshold met
                 if (weight > 1.0) {
                     links.push({
                         source: i.toString(),
@@ -350,89 +187,68 @@
                         value: weight,
                         desc: reasons.join(", "),
                         lineStyle: {
-                            width: Math.min(weight, 4),
+                            width: Math.min(weight, 3),
                             opacity: isDark ? 0.3 : 0.2,
                             curveness: 0.2
                         }
                     });
-                    // Update Adjacency List for Stats
+                    // Build Adjacency for Stats
                     adjList.get(i).push(j);
-                    if (!adjList.has(j)) adjList.set(j, []);
+                    if(!adjList.has(j)) adjList.set(j, []);
                     adjList.get(j).push(i);
                 }
             }
         }
 
-        // --- 4. CALCULATE LIVE NETWORK STATS ---
-        // A. Density = 2 * Edges / (Nodes * (Nodes - 1))
+        // --- B. CALCULATE NETWORK STATS (Collaboration DNA) ---
         let n = nodes.length;
         let e = links.length;
+        // Density = 2E / N(N-1)
         let density = (n > 1) ? (2 * e) / (n * (n - 1)) : 0;
-
-        // B. Largest Connected Component (BFS)
-        let visited = new Set();
-        let maxComponent = 0;
         
+        // LCC (BFS)
+        let visited = new Set();
+        let maxComp = 0;
         for(let i=0; i<n; i++) {
             if(!visited.has(i)) {
                 let size = 0;
-                let queue = [i];
+                let q = [i];
                 visited.add(i);
-                while(queue.length > 0) {
-                    let u = queue.shift();
+                while(q.length > 0) {
+                    let u = q.shift();
                     size++;
                     let neighbors = adjList.get(u) || [];
                     for(let v of neighbors) {
-                        if(!visited.has(v)) {
-                            visited.add(v);
-                            queue.push(v);
-                        }
+                        if(!visited.has(v)) { visited.add(v); q.push(v); }
                     }
                 }
-                if(size > maxComponent) maxComponent = size;
+                if(size > maxComp) maxComp = size;
             }
         }
-        let lccPct = (n > 0) ? Math.round((maxComponent / n) * 100) : 0;
+        let lccPct = (n>0) ? Math.round((maxComp/n)*100) : 0;
 
-        // --- 5. INJECT STATS INTO UI ---
-        // This overrides the values loaded from network_stats.json
-        setTimeout(() => {
-            let densityEl = document.getElementById('net-density');
-            let lccEl = document.getElementById('net-lcc');
-            let clusterEl = document.getElementById('net-clusters');
-            
-            if(densityEl) densityEl.innerText = density.toFixed(3);
-            if(lccEl) lccEl.innerText = lccPct + "%";
-            
-            // Generate a simple "Top Topics" list based on node connections
-            if(clusterEl) {
-                // Find most connected nodes (hubs)
-                let sortedNodes = [...nodes].sort((a,b) => (adjList.get(parseInt(b.id))||[]).length - (adjList.get(parseInt(a.id))||[]).length);
-                let hubs = sortedNodes.slice(0, 3);
-                
-                let html = hubs.map((h, i) => {
-                    let color = ['#00ff41', '#00e5ff', '#e040fb'][i] || '#ccc';
-                    return `
-                    <div style="margin-bottom: 8px; padding-left: 10px; border-left: 3px solid ${color};">
-                        <strong style="color: inherit; opacity: 0.9;">Cluster ${i+1}</strong> 
-                        <span style="opacity: 0.6; font-size: 0.8em;">(Central Node)</span><br>
-                        <span style="font-size: 0.75em; opacity: 0.7;">"${h.name.substring(0, 40)}..."</span>
-                    </div>`;
-                }).join('');
-                clusterEl.innerHTML = html;
-            }
-        }, 500);
+        // Update UI
+        updateText('net-density', density.toFixed(3));
+        updateText('net-lcc', lccPct + "%");
+        
+        // Identify "Clusters" (Simple approach: Most connected nodes as proxies for topics)
+        let hubs = [...nodes].sort((a,b) => (adjList.get(parseInt(b.id))||[]).length - (adjList.get(parseInt(a.id))||[]).length).slice(0,3);
+        let clusterHtml = hubs.map((h, i) => {
+            let color = ['#00ff41', '#00e5ff', '#e040fb'][i];
+            return `<div style="margin-bottom:8px; padding-left:10px; border-left:3px solid ${color};">
+                <strong style="color:inherit; opacity:0.9;">Cluster ${i+1}</strong><br>
+                <span style="font-size:0.75em; opacity:0.7;">Centered on "${h.name.substring(0,30)}..."</span>
+            </div>`;
+        }).join('');
+        document.getElementById('net-clusters').innerHTML = clusterHtml;
 
-        // --- 6. RENDER GRAPH ---
+
+        // --- C. RENDER GRAPH ---
         var option = {
             tooltip: {
-                formatter: (params) => {
-                    if (params.dataType === 'edge') return `Linked by: ${params.data.desc}`;
-                    return `<div style="max-width:200px; white-space:normal;">
-                        <strong>${params.data.name}</strong><br>
-                        ${params.data.year} • ${params.data.venue}<br>
-                        ${params.value} Citations
-                    </div>`;
+                formatter: (p) => {
+                    if (p.dataType === 'edge') return `Linked by: ${p.data.desc}`;
+                    return `<div style="max-width:200px; white-space:normal;"><strong>${p.name}</strong><br>${p.data.year} • ${p.value} Citations</div>`;
                 }
             },
             series: [{
@@ -441,230 +257,63 @@
                 data: nodes,
                 links: links,
                 roam: true,
-                zoom: 0.5,
+                zoom: 0.6,
                 label: { position: 'right', color: isDark ? '#ddd' : '#333' },
                 lineStyle: { color: isDark ? '#aaa' : '#999' },
                 force: {
-                    repulsion: 400,
+                    repulsion: 300,
                     gravity: 0.1,
-                    edgeLength: 100
+                    edgeLength: [50, 150]
                 }
             }]
         };
-
-        myChart.setOption(option);
-        
-        // Store chart instance for theme toggle
-        knowledgeGraphChart = myChart;
-        
-        window.addEventListener('resize', function() { myChart.resize(); });
+        graphChart.setOption(option);
     }
 
-    // --- 4. CENTRALITY ALGORITHM ---
-    function calculateCentrality(pubs) {
-        // Config
-        const STOP_WORDS = new Set(['the','of','and','in','to','a','for','on','with','using','an','based','via','system','analysis','approach','study','framework','model','data']);
-        
-        // 1. Build Adjacency Matrix (Graph)
-        let n = pubs.length;
-        if(n === 0) return;
-        
-        let nodes = pubs.map((p, i) => ({ 
-            id: i, 
-            title: p.title, 
-            words: new Set(p.title.toLowerCase().replace(/[^a-z0-9 ]/g, '').split(/\s+/).filter(w => w.length > 3 && !STOP_WORDS.has(w))),
-            authors: new Set((p.authors || "").split(',').map(a => a.trim().toLowerCase())),
-            venue: (p.venue || "").toLowerCase().trim(),
-            score: 1.0 // Initial score
-        }));
-
-        let adj = Array(n).fill().map(() => []); // Adjacency list
-
-        for(let i=0; i<n; i++) {
-            for(let j=i+1; j<n; j++) {
-                let weight = 0;
-                
-                // Topic Match
-                nodes[i].words.forEach(w => { if(nodes[j].words.has(w)) weight += 1; });
-                // Venue Match
-                if(nodes[i].venue && nodes[j].venue && nodes[i].venue === nodes[j].venue) weight += 2;
-                // Author Match
-                nodes[i].authors.forEach(a => { if(nodes[j].authors.has(a) && !a.includes('ampel')) weight += 3; });
-
-                if(weight > 0) {
-                    adj[i].push({ target: j, weight: weight });
-                    adj[j].push({ target: i, weight: weight });
-                }
-            }
-        }
-
-        // 2. Eigenvector Centrality (Power Iteration)
-        // Repeat 20 times (Converges quickly for small graphs)
-        for(let iter=0; iter<20; iter++) {
-            let newScores = new Float32Array(n);
-            let maxScore = 0;
-
-            for(let i=0; i<n; i++) {
-                let sum = 0;
-                // Sum of neighbors' scores weighted by connection strength
-                adj[i].forEach(edge => {
-                    sum += nodes[edge.target].score * edge.weight;
-                });
-                newScores[i] = sum;
-                if(sum > maxScore) maxScore = sum;
-            }
-
-            // Normalize to prevent overflow
-            if(maxScore > 0) {
-                for(let i=0; i<n; i++) {
-                    nodes[i].score = newScores[i] / maxScore;
-                }
-            }
-        }
-
-        // 3. Sort & Display
-        nodes.sort((a,b) => b.score - a.score);
-        
-        let html = '';
-        nodes.slice(0, 3).forEach((node, idx) => {
-            let color = document.body.classList.contains('dark') ? '#00e5ff' : '#1a0dab';
-            html += `
-            <div style="display:flex; gap:10px; margin-bottom:8px; align-items:center;">
-                <div style="font-weight:bold; color:${color}; font-size:1.1em;">#${idx+1}</div>
-                <div style="line-height:1.2; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">
-                    ${node.title}
-                </div>
-            </div>`;
-        });
-        var centralityEl = document.getElementById('centrality-list');
-        if (centralityEl) {
-            centralityEl.innerHTML = html;
-        }
+    // --- 5. HELPERS & CHART CONFIG ---
+    function updateText(id, val) {
+        const el = document.getElementById(id);
+        if (el) el.innerText = val;
     }
 
-    // --- HELPERS ---
-    function renderRadar(data) {
-        // 1. Get Inferred Interests from JSON
-        var categories = (data.metrics && data.metrics.interests && data.metrics.interests.length > 0) 
-            ? data.metrics.interests 
-            : ['AI', 'Cybersecurity', 'Blockchain', 'Deep Learning', 'Design Science', 'Dark Web'];
-
-        // 2. Calculate Frequency (Count matching papers)
-        var papers = data.individualPublications || [];
-        var seriesData = categories.map(cat => {
-            var count = papers.filter(p => p.title && p.title.toLowerCase().includes(cat.toLowerCase())).length;
-            return count > 0 ? count : 1; // Minimum 1 for visibility
+    // Initialize Radar/Line charts (Simplified placeholders)
+    // Ensure you have ApexCharts or ECharts logic for these loaded or reuse previous code
+    function renderRadar(data, papers) {
+        var dom = document.getElementById('dash-radar');
+        if(!dom) return;
+        if(radarChart) radarChart.dispose();
+        radarChart = echarts.init(dom);
+        
+        // Dynamic Categories
+        let cats = (data.metrics && data.metrics.interests) ? data.metrics.interests : ['AI', 'Cyber'];
+        let seriesData = cats.map(c => papers.filter(p => p.title.toLowerCase().includes(c.toLowerCase())).length || 1);
+        
+        let isDark = document.body.classList.contains('dark');
+        radarChart.setOption({
+            radar: { indicator: cats.map((c,i) => ({name:c, max: Math.max(...seriesData)+1})), splitArea:{show:false} },
+            series: [{ type: 'radar', data: [{value: seriesData}], itemStyle: {color: isDark?'#00ff41':'#d93025'}, areaStyle:{opacity:0.2} }]
         });
-
-        // 3. Render Chart
-        let max = Math.max(...seriesData) || 1;
-        let chartData = categories.map((cat, idx) => ({
-            name: cat, max: 100, 
-            value: Math.min(Math.round((seriesData[idx]/max)*90)+10, 100)
-        }));
-
-        function getOpt(isDark) {
-            let c = isDark ? '#00ff41' : '#d93025';
-            let txt = isDark ? '#eee' : '#333';
-            return {
-                radar: {
-                    indicator: chartData.map(d => ({ name: d.name, max: 100 })),
-                    shape: 'circle', radius: '65%',
-                    axisName: { color: txt, fontSize: 10, fontWeight: 'bold' },
-                    splitLine: { lineStyle: { color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' } },
-                    splitArea: { show: false }
-                },
-                series: [{
-                    type: 'radar',
-                    data: [{
-                        value: chartData.map(d => d.value),
-                        itemStyle: { color: c },
-                        lineStyle: { width: 2, color: c },
-                        areaStyle: { color: new echarts.graphic.RadialGradient(0.5, 0.5, 1, [{offset:0, color: c+'10'}, {offset:1, color: c+'60'}]) }
-                    }]
-                }]
-            };
-        }
-        updateChart(radarChart, getOpt);
     }
 
     function renderLine(history) {
-        if(!history || !Array.isArray(history)) return;
-        let years = history.map(d => d.year);
-        let vals = history.map(d => d.citations);
-
-        function getOpt(isDark) {
-            let c = isDark ? '#00e5ff' : '#1a0dab';
-            let txt = isDark ? '#888' : '#666';
-            return {
-                grid: { top: 10, right: 10, bottom: 20, left: 30, containLabel: true },
-                tooltip: { trigger: 'axis' },
-                xAxis: { type: 'category', data: years, axisLine: {show:false}, axisTick: {show:false}, axisLabel: {color: txt, fontSize: 9} },
-                yAxis: { type: 'value', splitLine: { show: false }, axisLabel: {color: txt, fontSize: 9} },
-                series: [{
-                    data: vals, type: 'bar', barWidth: '40%',
-                    itemStyle: { color: c, borderRadius: [2,2,0,0] },
-                    animationDuration: 2000
-                }]
-            };
-        }
-        updateChart(lineChart, getOpt);
-    }
-
-    function updateChart(chart, getOptFunc) {
+        var dom = document.getElementById('dash-line');
+        if(!dom) return;
+        if(lineChart) lineChart.dispose();
+        lineChart = echarts.init(dom);
         let isDark = document.body.classList.contains('dark');
-        chart.setOption(getOptFunc(isDark));
-        const btn = document.querySelector('.js-theme-toggle');
-        if(btn) {
-            btn.addEventListener('click', () => {
-                setTimeout(() => {
-                   let isDarkNow = document.body.classList.contains('dark');
-                   chart.setOption(getOptFunc(isDarkNow));
-                   var cites = document.getElementById('metric-cites').innerText;
-                   var hidx = document.getElementById('metric-hindex').innerText;
-                   var focus = document.getElementById('metric-focus').innerText;
-                   var trend = document.getElementById('metric-trend').innerText;
-                   var velocity = document.getElementById('metric-velocity') ? document.getElementById('metric-velocity').innerText : '-';
-                   root.innerHTML = renderLayout(); 
-                   document.getElementById('metric-cites').innerText = cites;
-                   document.getElementById('metric-hindex').innerText = hidx;
-                   document.getElementById('metric-focus').innerText = focus;
-                   document.getElementById('metric-trend').innerText = trend;
-                   if (document.getElementById('metric-velocity')) {
-                       document.getElementById('metric-velocity').innerText = velocity;
-                   }
-                   // Reinitialize charts
-                   radarChart = echarts.init(document.getElementById('dash-radar'));
-                   lineChart = echarts.init(document.getElementById('dash-line'));
-                   knowledgeGraphChart = echarts.init(document.getElementById('knowledge-graph'));
-                   // Re-render charts with new theme
-                   if(storedScholarData) {
-                       renderRadar(storedScholarData);
-                   }
-                   if(storedHistory) {
-                       renderLine(storedHistory);
-                   }
-                   if(storedPublications) {
-                       renderMap(storedPublications);
-                   } 
-                }, 100);
-            });
-        }
-        window.addEventListener('resize', () => chart.resize());
+        lineChart.setOption({
+            grid: {top:10, bottom:20, right:10, left:30},
+            xAxis: {type:'category', data: history.map(h=>h.year), axisLine:{show:false}},
+            yAxis: {type:'value', splitLine:{show:false}},
+            series: [{type:'bar', data: history.map(h=>h.citations), itemStyle:{color: isDark?'#00e5ff':'#1a0dab'}}]
+        });
     }
 
-    function animateValue(id, start, end, duration, suffix) {
-        let obj = document.getElementById(id);
-        if(!obj) return;
-        let startTimestamp = null;
-        const step = (ts) => {
-            if (!startTimestamp) startTimestamp = ts;
-            const progress = Math.min((ts - startTimestamp) / duration, 1);
-            let current = Math.floor(progress * (end - start) + start);
-            obj.innerHTML = current + (suffix || "");
-            if (progress < 1) window.requestAnimationFrame(step);
-        };
-        window.requestAnimationFrame(step);
-    }
+    window.addEventListener('resize', function() {
+        if(graphChart) graphChart.resize();
+        if(radarChart) radarChart.resize();
+        if(lineChart) lineChart.resize();
+    });
+
 })();
 </script>
