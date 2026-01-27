@@ -7,8 +7,7 @@ import os
 
 # --- CONFIGURATION ---
 SCHOLAR_ID = "XDdwaZUAAAAJ" 
-API_KEY = "b80b59b1792b1eb125b68c2b4c5c391fc8a17a3b049032a3a5e6a8367e7a3d7f" # <--- Paste your key here OR set as env variable
-
+API_KEY = SERPAPI_KEY
 # Files
 SCRIPT_DIR = Path(__file__).parent
 OUTPUT_FILE = SCRIPT_DIR.parent / "static" / "data" / "scholar-metrics.json"
