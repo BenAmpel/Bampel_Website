@@ -1,0 +1,114 @@
+{{/* Network Statistics - Usage: {{< network_stats >}} */}}
+{{/* Calculates "Moneyball" style stats from publications.json */}}
+
+<div id="network-stats-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 30px; opacity: 0; transition: opacity 1s ease;">
+    <div style="background: var(--card-bg); padding: 20px; border-radius: 8px; border: 1px solid var(--card-border); text-align: center;">
+        <h3 style="margin: 0; font-size: 3rem; font-weight: 800; color: var(--primary);">
+            <span id="stat-collaborators">0</span>
+        </h3>
+        <p style="margin: 5px 0 0; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted);">Unique Collaborators</p>
+    </div>
+
+    <div style="background: var(--card-bg); padding: 20px; border-radius: 8px; border: 1px solid var(--card-border); text-align: center;">
+        <h3 style="margin: 0; font-size: 3rem; font-weight: 800; color: var(--secondary);">
+            <span id="stat-team-size">0</span>
+        </h3>
+        <p style="margin: 5px 0 0; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted);">Avg. Authors / Paper</p>
+    </div>
+
+    <div style="background: var(--card-bg); padding: 20px; border-radius: 8px; border: 1px solid var(--card-border); text-align: center;">
+        <h3 id="stat-top-collab" style="margin: 0; font-size: 1.5rem; font-weight: 800; color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 3rem;">
+            ...
+        </h3>
+        <p style="margin: 5px 0 0; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted);">Top Collaborator</p>
+    </div>
+</div>
+
+<script>
+(function() {
+    // CSS Variables for theming (Fallback to defaults)
+    const isDark = document.body.classList.contains('dark');
+    const root = document.documentElement;
+    root.style.setProperty('--card-bg', isDark ? 'rgba(255,255,255,0.05)' : '#ffffff');
+    root.style.setProperty('--card-border', isDark ? '#333' : '#eee');
+    root.style.setProperty('--text-muted', isDark ? '#aaa' : '#666');
+    root.style.setProperty('--primary', isDark ? '#00ff41' : '#d93025');   // Cyber Green or Academic Red
+    root.style.setProperty('--secondary', isDark ? '#00e5ff' : '#1a0dab'); // Cyan or Blue
+    root.style.setProperty('--accent', isDark ? '#e040fb' : '#9c27b0');    // Purple
+
+    var myName = "Benjamin Ampel";
+    
+    // Name Normalizer (Same as Graph)
+    var nameMap = {
+        'B Ampel': 'Benjamin Ampel', 'BM Ampel': 'Benjamin Ampel', 'B. Ampel': 'Benjamin Ampel', 'admin': 'Benjamin Ampel',
+        'H Chen': 'Hsinchun Chen', 'H. Chen': 'Hsinchun Chen',
+        'S Samtani': 'Sagar Samtani', 'S. Samtani': 'Sagar Samtani',
+        'S Ullman': 'Steven Ullman', 'S. Ullman': 'Steven Ullman',
+        'H Zhu': 'Hongyi Zhu', 'H. Zhu': 'Hongyi Zhu',
+        'M Patton': 'Mark Patton', 'M. Patton': 'Mark Patton'
+    };
+    function normalize(name) { return nameMap[name] || name; }
+
+    fetch('/data/publications.json')
+        .then(response => response.json())
+        .then(data => {
+            calculateStats(data);
+        })
+        .catch(err => console.error("Stats Error:", err));
+
+    function calculateStats(papers) {
+        let uniqueCollaborators = new Set();
+        let authorCounts = {};
+        let totalAuthors = 0;
+        let paperCount = 0;
+
+        papers.forEach(paper => {
+            if (!paper.authors) return;
+            paperCount++;
+            
+            // Filter out yourself for the "Unique Collaborators" count
+            let coAuthors = paper.authors.map(normalize).filter(a => a !== myName);
+            let uniquePaperAuthors = [...new Set(coAuthors)]; // Dedup per paper
+            
+            // Update Totals
+            totalAuthors += (uniquePaperAuthors.length + 1); // +1 includes you for team size
+            uniquePaperAuthors.forEach(a => {
+                uniqueCollaborators.add(a);
+                authorCounts[a] = (authorCounts[a] || 0) + 1;
+            });
+        });
+
+        // 1. Total Unique Collaborators
+        animateValue("stat-collaborators", 0, uniqueCollaborators.size, 2000);
+
+        // 2. Avg Team Size
+        let avgTeam = (totalAuthors / paperCount).toFixed(1);
+        animateValue("stat-team-size", 0, avgTeam, 2000, true);
+
+        // 3. Top Collaborator
+        let topCollab = Object.entries(authorCounts).reduce((a, b) => a[1] > b[1] ? a : b)[0];
+        document.getElementById('stat-top-collab').innerText = topCollab;
+
+        // Reveal
+        document.getElementById('network-stats-container').style.opacity = '1';
+    }
+
+    // Number counting animation
+    function animateValue(id, start, end, duration, isFloat) {
+        let obj = document.getElementById(id);
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            
+            let val = progress * (end - start) + start;
+            obj.innerHTML = isFloat ? val.toFixed(1) : Math.floor(val);
+            
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            }
+        };
+        window.requestAnimationFrame(step);
+    }
+})();
+</script>

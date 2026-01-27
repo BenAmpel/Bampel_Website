@@ -49,6 +49,7 @@ sections:
         
         {{< spoiler text="🤝 Collaboration Network" >}}
         {{< research_network >}}
+        {{< network_stats >}}
         {{< /spoiler >}}
         
         {{< spoiler text="🌍 Research Footprint" >}}
