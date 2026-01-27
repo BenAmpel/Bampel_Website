@@ -33,18 +33,7 @@ sections:
         ---
         
         {{< spoiler text="🛠️ Skills & Expertise" >}}
-        
-        | Skill | Description |
-        |-------|-------------|
-        | 🤖 **Large Language Models** | GPT, BERT, LLaMA, transformers — MISQ, TMIS, JMIS |
-        | 🧠 **Deep Learning & NLP** | Neural networks, transfer learning — MISQ, IEEE ISI |
-        | 🛡️ **Cyber Threat Intelligence** | Hacker communities, dark web — ISF, JMIS, HICSS |
-        | 🎣 **Phishing Detection** | Adversarial attacks, robustness — DTRAP, SPW |
-        | 🐍 **Python & ML Stack** | PyTorch, TensorFlow, Hugging Face, scikit-learn |
-        | 📊 **Graph Analytics** | NetworkX, embeddings — IEEE ISI |
-        | 🧪 **Design Science** | Computational artifacts — JMIS, ACM SIGMIS |
-        | 👨‍🏫 **Teaching & Mentoring** | 10 PhD mentees, 14 courses, 4.7+ rating |
-        
+        {{< skills_radar >}}
         {{< /spoiler >}}
         
         {{< spoiler text="🤝 Collaboration Network" >}}
