@@ -13,6 +13,7 @@ import numpy as np
 from collections import defaultdict
 from pathlib import Path
 from networkx.algorithms import community
+from networkx.readwrite import json_graph
 
 # --- CONFIGURATION ---
 SCRIPT_DIR = Path(__file__).parent
@@ -247,14 +248,22 @@ def main():
 
     G, coauthor_counts = build_network_data(publications)
 
-    # 2. Calculate & Save Stats (JSON)
+    # 2. Calculate & Save Stats (JSON) - Used for "Collaboration DNA"
     print("Calculating network statistics...")
     stats = calculate_stats(G, coauthor_counts)
     with open(OUTPUT_DATA_FILE, 'w') as f:
         json.dump(stats, f, indent=2)
     print(f"  Saved stats to: {OUTPUT_DATA_FILE}")
 
-    # 3. Generate Images (Light/Dark)
+    # 3. [FIX] Save Graph Topology (JSON) - Used for the Interactive D3 Graph
+    graph_data = json_graph.node_link_data(G)
+    graph_output = PROJECT_ROOT / "static" / "data" / "network.json"
+    with open(graph_output, 'w') as f:
+        json.dump(graph_data, f)
+    print(f"  Saved D3 graph structure to: {graph_output}")
+
+    # 4. Generate Images (Light/Dark) - Used for static fallback
+    print("Generating static images...")
     fig_light = draw_network_plot(G, coauthor_counts, dark_mode=False)
     fig_light.savefig(OUTPUT_IMG_DIR / 'coauthor-network.png', dpi=150, bbox_inches='tight', facecolor='white')
     plt.close(fig_light)
