@@ -32,16 +32,6 @@ jobs:
           python update_scholar_metrics.py
         continue-on-error: true  # Don't fail if Scholar is rate-limited
       
-      - name: Generate dashboard images
-        run: |
-          cd scripts
-          python generate_dashboard.py
-      
-      - name: Generate network images
-        run: |
-          cd scripts
-          python generate_network.py
-      
       - name: Commit and push changes
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
