@@ -131,8 +131,15 @@
             var isDark = document.body.classList.contains('dark');
             var bgColor = isDark ? '#000000' : '#ffffff';
             var textColor = isDark ? '#eeeeee' : '#333333';
+            
+            // Text Outline Logic (The "Shadow Border")
+            // Dark Mode: White Text with Black Border
+            // Light Mode: Black Text with White Border
+            var textBorder = isDark ? '#000000' : '#ffffff'; 
+
             var meColor = isDark ? '#ffffff' : '#000000';
 
+            // 1. Map Nodes (With Text Border)
             var nodes = globalData.rawNodes.map(([name, count]) => {
                 let isMe = (name === myName);
                 return {
@@ -148,8 +155,12 @@
                     label: {
                         show: count > 1 || isMe,
                         color: textColor,
+                        // --- HIGH CONTRAST TEXT BORDER ---
+                        textBorderColor: textBorder,
+                        textBorderWidth: 3, 
+                        // ----------------------------------------
                         fontSize: isMe ? 14 : 11,
-                        fontWeight: isMe ? 'bold' : 'normal'
+                        fontWeight: 'bold'
                     },
                     fixed: isMe,
                     x: isMe ? dom.clientWidth / 2 : null,
@@ -157,6 +168,22 @@
                     z: isMe ? 10 : 1
                 };
             });
+
+            // 2. Map Links (With Gradient Coloring)
+            // We reconstruct links here to apply the correct Theme color
+            var links = globalData.links.map(link => ({
+                source: link.source,
+                target: link.target,
+                value: link.value,
+                lineStyle: {
+                    // --- COLOR EDGES BY WEIGHT ---
+                    // Uses the same Green->Red gradient as the nodes
+                    color: getColor(link.value, globalData.maxCount, isDark),
+                    // ------------------------------------
+                    width: Math.min(1.5 + (link.value * 0.8), 6),
+                    opacity: 0.8 // Slightly higher opacity to make colors visible
+                }
+            }));
 
             var option = {
                 backgroundColor: bgColor,
@@ -174,12 +201,11 @@
                     type: 'graph',
                     layout: 'force',
                     data: nodes,
-                    links: globalData.links,
+                    links: links, // Use our new colored links
                     roam: true,
                     zoom: 0.75,
                     label: { position: 'right' },
                     lineStyle: {
-                        color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.6)', // Base color, opacity handled per link
                         curveness: 0.2
                     },
                     force: {
@@ -187,7 +213,7 @@
                         repulsion: 2500,
                         gravity: 0.1,
                         edgeLength: [50, 300],
-                        friction: 0.9 // High friction prevents jerking
+                        friction: 0.9
                     }
                 }]
             };
