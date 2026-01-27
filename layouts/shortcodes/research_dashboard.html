@@ -1,4 +1,4 @@
-{{/* Research Command Center - Usage: {{< research_dashboard >}} */}}
+{{/* Research Command Center - Live Data via OpenAlex */}}
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 
 <div id="dashboard-root" style="min-height: 500px; margin: 30px 0;"></div>
@@ -8,7 +8,7 @@
     var root = document.getElementById('dashboard-root');
     var radarChart, lineChart;
 
-    // --- 1. LAYOUT GENERATOR (Safe Injection) ---
+    // --- 1. LAYOUT (Same Visuals, New Data Source) ---
     function renderLayout() {
         var isDark = document.body.classList.contains('dark');
         var bg = isDark ? 'rgba(255,255,255,0.02)' : '#ffffff';
@@ -16,8 +16,6 @@
         var muted = isDark ? '#888' : '#666';
         var text = isDark ? '#aaa' : '#333';
         var shadow = isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.05)';
-
-        // Metric Colors
         var c1 = isDark ? '#00ff41' : '#d93025'; // Focus
         var c2 = isDark ? '#00e5ff' : '#1a0dab'; // Trend
         var c3 = isDark ? '#e040fb' : '#9c27b0'; // Cites
@@ -44,6 +42,7 @@
                     <div>
                         <div style="font-size: 0.8rem; color: ${muted};">Total Citations</div>
                         <div style="font-size: 1.5rem; font-weight: 800; color: ${c3};" id="metric-cites">0</div>
+                        <div style="font-size: 0.6rem; color: ${muted};">Live via OpenAlex</div>
                     </div>
                     <div>
                         <div style="font-size: 0.8rem; color: ${muted};">h-index</div>
@@ -59,18 +58,43 @@
         </div>`;
     }
 
-    // --- 2. INJECT LAYOUT ---
+    // --- 2. INIT ---
     root.innerHTML = renderLayout();
     radarChart = echarts.init(document.getElementById('dash-radar'));
     lineChart = echarts.init(document.getElementById('dash-line'));
 
-    // --- 3. FETCH DATA (Parallel) ---
+    // --- 3. FETCH LIVE DATA ---
     Promise.all([
+        // A. Local Publications (For Keywords/Radar)
         fetch('/data/publications.json').then(r => r.json()),
-        fetch('/data/scholar-metrics.json').then(r => r.json())
-    ]).then(([papers, metrics]) => {
         
-        // A. Process Publications (Radar)
+        // B. LIVE OpenAlex Data (For Citations/Velocity)
+        // Searching for "Benjamin Ampel"
+        fetch('https://api.openalex.org/authors?search=Benjamin+Ampel')
+            .then(r => r.json())
+    ]).then(([papers, openAlexData]) => {
+        
+        // --- PROCESS 1: OpenAlex Metrics ---
+        // Find the correct "Benjamin Ampel" (Usually the first/most cited one)
+        if (openAlexData.results && openAlexData.results.length > 0) {
+            // Sort results by citation count to ensure we get the main profile
+            let author = openAlexData.results.sort((a,b) => b.cited_by_count - a.cited_by_count)[0];
+            
+            // 1. Update Text Metrics
+            animateValue("metric-cites", 0, author.cited_by_count, 2000);
+            document.getElementById('metric-hindex').innerText = author.summary_stats.h_index;
+
+            // 2. Prepare Velocity Chart Data
+            // OpenAlex returns [{year: 2023, cited_by_count: 50}, ...]
+            // We need to sort it by year and extract arrays
+            let history = author.counts_by_year.sort((a,b) => a.year - b.year);
+            // Filter to last 10 years to keep chart clean
+            history = history.filter(h => h.year >= new Date().getFullYear() - 8);
+            
+            renderLine(history);
+        }
+
+        // --- PROCESS 2: Radar Chart (Local Keywords) ---
         const taxonomy = {
             'AI / Deep Learning': ['Deep Learning', 'Neural', 'Transfer Learning', 'Embedding', 'Machine Learning', 'Artificial Intelligence', 'Adversarial'],
             'Cybersecurity':      ['Cyber', 'Vulnerability', 'Exploit', 'Attack', 'Threat', 'Security', 'Malicious', 'Ransomware', 'Phishing'],
@@ -83,36 +107,54 @@
         let counts = {};
         let recentCounts = {};
         let currentYear = new Date().getFullYear();
-
         Object.keys(taxonomy).forEach(k => { counts[k] = 0; recentCounts[k] = 0; });
 
-        papers.forEach(p => {
-            let text = (p.title || "").toLowerCase();
-            Object.keys(taxonomy).forEach(cat => {
-                if(taxonomy[cat].some(k => text.includes(k.toLowerCase()))) {
-                    counts[cat]++;
-                    if(p.year >= currentYear - 2) recentCounts[cat]++;
-                }
+        if(Array.isArray(papers)) {
+            papers.forEach(p => {
+                let text = (p.title || "").toLowerCase();
+                Object.keys(taxonomy).forEach(cat => {
+                    if(taxonomy[cat].some(k => text.includes(k.toLowerCase()))) {
+                        counts[cat]++;
+                        if(p.year >= currentYear - 2) recentCounts[cat]++;
+                    }
+                });
             });
-        });
+        }
 
-        // B. Populate Text Metrics
-        let topSkill = Object.entries(counts).sort((a,b) => b[1]-a[1])[0][0];
-        let trendSkill = Object.entries(recentCounts).sort((a,b) => b[1]-a[1])[0][0];
-        document.getElementById('metric-focus').innerText = topSkill;
-        document.getElementById('metric-trend').innerText = trendSkill;
+        // Populate Text
+        let topSkill = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
+        let trendSkill = Object.entries(recentCounts).sort((a,b) => b[1]-a[1])[0];
+        document.getElementById('metric-focus').innerText = topSkill ? topSkill[0] : "-";
+        document.getElementById('metric-trend').innerText = trendSkill ? trendSkill[0] : "-";
 
-        if(metrics.total_citations) animateValue("metric-cites", 0, metrics.total_citations, 2000);
-        if(metrics.h_index) document.getElementById('metric-hindex').innerText = metrics.h_index;
-
-        // C. Render Charts
         renderRadar(counts);
-        renderLine(metrics.citationsByYear);
 
     }).catch(err => console.error("Dashboard Error:", err));
 
 
-    // --- 4. CHART RENDERERS ---
+    // --- CHART RENDERERS ---
+
+    function renderLine(history) {
+        let years = history.map(d => d.year);
+        let vals = history.map(d => d.cited_by_count);
+
+        function getOpt(isDark) {
+            let c = isDark ? '#00e5ff' : '#1a0dab';
+            let txt = isDark ? '#888' : '#666';
+            return {
+                grid: { top: 10, right: 10, bottom: 20, left: 30, containLabel: true },
+                tooltip: { trigger: 'axis', formatter: '{b}: {c} Citations' },
+                xAxis: { type: 'category', data: years, axisLine: {show:false}, axisTick: {show:false}, axisLabel: {color: txt, fontSize: 9} },
+                yAxis: { type: 'value', splitLine: { show: false }, axisLabel: {color: txt, fontSize: 9} },
+                series: [{
+                    data: vals, type: 'bar', barWidth: '40%',
+                    itemStyle: { color: c, borderRadius: [2,2,0,0] },
+                    animationDuration: 2000
+                }]
+            };
+        }
+        updateChart(lineChart, getOpt);
+    }
 
     function renderRadar(counts) {
         let max = Math.max(...Object.values(counts)) || 1;
@@ -146,48 +188,18 @@
         updateChart(radarChart, getOpt);
     }
 
-    function renderLine(history) {
-        if(!history) return;
-        let years = history.map(d => d.year);
-        let vals = history.map(d => d.citations);
-
-        function getOpt(isDark) {
-            let c = isDark ? '#00e5ff' : '#1a0dab';
-            let txt = isDark ? '#888' : '#666';
-            return {
-                grid: { top: 10, right: 10, bottom: 20, left: 30, containLabel: true },
-                tooltip: { trigger: 'axis' },
-                xAxis: { type: 'category', data: years, axisLine: {show:false}, axisTick: {show:false}, axisLabel: {color: txt, fontSize: 9} },
-                yAxis: { type: 'value', splitLine: { show: false }, axisLabel: {color: txt, fontSize: 9} },
-                series: [{
-                    data: vals, type: 'bar', barWidth: '40%',
-                    itemStyle: { color: c, borderRadius: [2,2,0,0] },
-                    animationDuration: 2000
-                }]
-            };
-        }
-        updateChart(lineChart, getOpt);
-    }
-
-    // --- 5. HELPERS ---
-
     function updateChart(chart, getOptFunc) {
         let isDark = document.body.classList.contains('dark');
         chart.setOption(getOptFunc(isDark));
-        
-        // Theme Listener
         const btn = document.querySelector('.js-theme-toggle');
         if(btn) {
             btn.addEventListener('click', () => {
                 setTimeout(() => {
                    let isDarkNow = document.body.classList.contains('dark');
                    chart.setOption(getOptFunc(isDarkNow));
-                   
-                   // Re-inject HTML to catch CSS variables if needed
                    var cites = document.getElementById('metric-cites').innerText;
-                   root.innerHTML = renderLayout(); // Reset HTML
+                   root.innerHTML = renderLayout(); // Quick re-inject to update CSS vars
                    document.getElementById('metric-cites').innerText = cites; 
-                   // Note: Re-render charts fully in real production, but this is okay for colors
                 }, 100);
             });
         }
@@ -206,6 +218,5 @@
         };
         window.requestAnimationFrame(step);
     }
-
 })();
 </script>
