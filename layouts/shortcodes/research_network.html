@@ -1,6 +1,4 @@
 {{/* Interactive Research Network - Usage: {{< research_network >}} */}}
-{{/* Fetches publications.json and builds co-authorship network client-side */}}
-{{/* Color Gradient: Green (1 paper) → Red (many papers), "You" = Black/White */}}
 
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 
@@ -11,200 +9,160 @@
 <script type="text/javascript">
 (function() {
     var domID = "network-{{ $uniqueID }}";
-    var myName = "Benjamin Ampel"; // The center node
-
-    // Name Normalization
-    var nameMap = {
-        'B Ampel': 'Benjamin Ampel', 'BM Ampel': 'Benjamin Ampel', 'B. Ampel': 'Benjamin Ampel', 'admin': 'Benjamin Ampel',
-        'H Chen': 'Hsinchun Chen', 'H. Chen': 'Hsinchun Chen',
-        'S Samtani': 'Sagar Samtani', 'S. Samtani': 'Sagar Samtani',
-        'S Ullman': 'Steven Ullman', 'S. Ullman': 'Steven Ullman',
-        'H Zhu': 'Hongyi Zhu', 'H. Zhu': 'Hongyi Zhu',
-        'M Patton': 'Mark Patton', 'M. Patton': 'Mark Patton',
-        'B Lazarine': 'Ben Lazarine', 'B. Lazarine': 'Ben Lazarine',
-        'T Vahedi': 'Tala Vahedi', 'T. Vahedi': 'Tala Vahedi',
-        'K Otto': 'Kaeli Otto', 'K. Otto': 'Kaeli Otto',
-        'Y Gao': 'Yang Gao', 'Y. Gao': 'Yang Gao',
-        'J Hu': 'James Hu', 'J. Hu': 'James Hu',
-        'CH Yang': 'Chi-Heng Yang', 'JF Nunamaker Jr': 'Jay Nunamaker',
-        'C Marx': 'Carolin Marx', 'C Dacosta': 'Cade Dacosta',
-        'C Zhang': 'Chengjun Zhang', 'M Hashim': 'Matthew Hashim',
-        'M Wagner': 'Mason Wagner', 'RY Reyes': 'Raul Reyes',
-        'S Yang': 'Shanchieh Yang', 'Y Li': 'Yidong Li', 'Y. Li': 'Yidong Li'
-    };
-
-    function normalize(name) { return nameMap[name] || name; }
-
-    // --- COLOR GRADIENT FUNCTION ---
-    // Returns an HSL color from Green (low) to Red (high) based on value ratio.
-    function getGradientColor(value, max, isDark) {
-        if (value === 1) return isDark ? '#00ff41' : '#188038'; // Base Green for 1 paper
-        
-        // Normalize ratio (0.0 -> 1.0)
-        // We use max*0.8 to make the transition to red happen faster
-        var ratio = Math.min(1, (value - 1) / (max * 0.8 - 1 || 1));
-        
-        // Interpolate Hue: Green (120deg) -> Red (0deg)
-        var hue = (1 - ratio) * 120;
-        var saturation = isDark ? '90%' : '80%';
-        var lightness = isDark ? '45%' : '40%';
-        
-        return `hsl(${hue}, ${saturation}, ${lightness})`;
-    }
-
+    // Ingest Data from Hugo
+    var rawNodes = {{ .Site.Data.network.nodes | jsonify }};
+    var rawLinks = {{ .Site.Data.network.links | jsonify }};
+    
     document.addEventListener('DOMContentLoaded', function() {
         var dom = document.getElementById(domID);
         if (!dom) return;
 
+        // 1. SETUP ECHARTS
         var myChart = echarts.init(dom);
-        myChart.showLoading();
+        var hasRendered = false;
+        
+        // Prepare Data (convert category string to index)
+        var nodes = rawNodes.map(node => ({
+            id: node.id,
+            name: node.name,
+            symbolSize: node.size,
+            category: catMap[node.group] !== undefined ? catMap[node.group] : 3, // Default to collaborator
+            group: node.group, // Keep original for logic checks
+            fixed: node.group === 'self' ? true : false,
+            x: node.group === 'self' ? 500 : null,
+            y: node.group === 'self' ? 300 : null
+        }));
 
-        // Globals for theme switching
-        var globalNodes = [], globalLinks = [], globalMaxCount = 0;
+        // 2. DEFINE CATEGORIES & BUILD LOOKUP MAP
+        var categories = [
+            { name: 'self' },        // 0
+            { name: 'advisor' },     // 1
+            { name: 'professor' },   // 2
+            { name: 'collaborator' }, // 3
+            { name: 'student' }      // 4
+        ];
+        
+        // Map category names to indices (ECharts requires numeric category)
+        var catMap = {};
+        categories.forEach(function(cat, index) {
+            catMap[cat.name] = index;
+        });
 
-        // 1. FETCH DATA
-        fetch('/data/publications.json')
-            .then(response => response.json())
-            .then(data => {
-                myChart.hideLoading();
-                processData(data);
-            })
-            .catch(err => {
-                console.error("Failed to load publications:", err);
-                myChart.hideLoading();
-                dom.innerHTML = "<p style='text-align:center; color:red;'>Could not load network data.</p>";
-            });
+        // 3. COLOR PALETTES (Optimized for Contrast)
+        
+        // Light Mode: Deep, professional tones (Readable on White)
+        // Red (Self), Deep Purple, Navy Blue, Burnt Orange, Forest Green
+        const lightColors = ['#c62828', '#6a1b9a', '#1565c0', '#ef6c00', '#2e7d32'];
 
-        function processData(papers) {
-            var nodeCounts = new Map();
-            var connectedPairs = new Set();
-            globalLinks = [];
-            globalMaxCount = 0;
+        // Dark Mode: Neon, glowing tones (Readable on Black)
+        // Neon Green (Self), Neon Purple, Electric Cyan, Bright Gold, Hot Orange
+        const darkColors =  ['#00ff41', '#e040fb', '#00e5ff', '#ffd600', '#ff3d00'];
 
-            // A. Process Authors & Find Max Paper Count
-            papers.forEach(function(paper) {
-                if (!paper.authors) return;
-                var authors = paper.authors.map(normalize);
-                
-                authors.forEach(auth => {
-                    let count = (nodeCounts.get(auth) || 0) + 1;
-                    nodeCounts.set(auth, count);
-                    if (auth !== myName && count > globalMaxCount) globalMaxCount = count;
-                });
+        function getOption(isDark) {
+            let colors = isDark ? darkColors : lightColors;
+            let bgColor = isDark ? '#000000' : '#ffffff';
+            let textColor = isDark ? '#eeeeee' : '#333333';
+            let edgeColor = isDark ? '#555555' : '#cccccc';
 
-                // Add Links
-                for (let i = 0; i < authors.length; i++) {
-                    for (let j = i + 1; j < authors.length; j++) {
-                        let source = authors[i], target = authors[j];
-                        if (source === target) continue;
-                        let pairId = [source, target].sort().join("-");
-                        if (!connectedPairs.has(pairId)) {
-                            globalLinks.push({ source: source, target: target });
-                            connectedPairs.add(pairId);
-                        }
-                    }
-                }
-            });
-
-            // B. Build Nodes with Initial Colors
-            let isDark = document.body.classList.contains('dark');
-            globalNodes = Array.from(nodeCounts.entries()).map(([name, count]) => {
-                let isMe = (name === myName);
-                // "You" are Black/White to stand out from the gradient
-                let meColor = isDark ? '#ffffff' : '#333333'; 
-                
-                return {
-                    id: name, name: name, value: count,
-                    symbolSize: isMe ? 65 : Math.max(20, Math.min(60, count * 12)),
-                    itemStyle: { 
-                        color: isMe ? meColor : getGradientColor(count, globalMaxCount, isDark),
-                        borderColor: isDark ? '#000' : '#fff',
-                        borderWidth: 1,
-                        shadowBlur: 5, shadowColor: 'rgba(0,0,0,0.2)'
-                    },
-                    fixed: isMe,
-                    x: isMe ? dom.clientWidth / 2 : null,
-                    y: isMe ? dom.clientHeight / 2 : null,
-                    label: { 
-                        show: count > 1 || isMe, 
-                        color: isDark ? '#eee' : '#333',
-                        fontSize: isMe ? 14 : 12,
-                        fontWeight: isMe ? 'bold' : 'normal'
-                    },
-                    z: isMe ? 10 : 1 // Ensure "You" are on top
-                };
-            });
-
-            renderChart();
-        }
-
-        function renderChart() {
-            let isDark = document.body.classList.contains('dark');
-            let bgColor = isDark ? '#111' : '#fdfdfd';
-            let textColor = isDark ? '#eee' : '#333';
-
-            var option = {
+            return {
                 backgroundColor: bgColor,
-                tooltip: { 
-                    formatter: (params) => {
-                        if (params.dataType === 'node') return `<strong>${params.name}</strong><br>Co-authored ${params.value} papers`;
-                    },
+                tooltip: {
+                    trigger: 'item',
                     backgroundColor: isDark ? 'rgba(50,50,50,0.9)' : 'rgba(255,255,255,0.9)',
                     textStyle: { color: textColor }
                 },
+                color: colors,
+                legend: [{
+                    data: ['self', 'advisor', 'professor', 'collaborator', 'student'],
+                    textStyle: { color: textColor, fontWeight: 'bold' },
+                    bottom: 20,
+                    selectedMode: 'multiple'
+                }],
                 series: [{
                     type: 'graph',
                     layout: 'force',
-                    data: globalNodes,
-                    links: globalLinks,
+                    data: nodes,
+                    links: rawLinks,
+                    categories: categories,
                     roam: true,
-                    zoom: 0.8, // Start slightly zoomed out
-                    lineStyle: { 
-                        color: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)',
-                        curveness: 0.2, 
-                        width: 1.5
+                    draggable: true,
+                    label: { 
+                        show: true, 
+                        position: 'right', 
+                        formatter: '{b}', 
+                        color: textColor,
+                        fontSize: 12,
+                        fontWeight: 'bold'
                     },
-                    // --- SPACED OUT PHYSICS ---
+                    lineStyle: { 
+                        color: 'source', 
+                        curveness: 0.3,
+                        width: 1.5,
+                        opacity: 0.7
+                    },
+                    emphasis: {
+                        focus: 'adjacency',
+                        lineStyle: { width: 4, opacity: 1 },
+                        label: { show: true }
+                    },
+                    // Physics Engine Settings (Spaced Out)
                     force: { 
-                        repulsion: 2000, // Strongly push apart (was 400)
-                        gravity: 0.05,   // Weak pull to center (was 0.1)
-                        edgeLength: [100, 300], // Longer links
-                        friction: 0.8    // More stable movement
+                        repulsion: 2500,  // Increased from 1000 to push nodes apart
+                        gravity: 0.1,    // Keeps them from flying off screen
+                        edgeLength: 150,  // Longer links
+                        friction: 0.6 
                     }
                 }]
             };
-
-            myChart.setOption(option);
-            
-            // Re-center "Me"
-            var w = myChart.getWidth(), h = myChart.getHeight();
-            globalNodes.forEach(n => { if (n.name === myName) { n.x = w / 2; n.y = h / 2; } });
-            myChart.setOption({ series: [{ data: globalNodes }] });
         }
 
-        // Standard Events
-        new ResizeObserver(() => myChart.resize()).observe(dom);
+        // 4. RENDER FUNCTION
+        function safeRender() {
+            if (dom.clientWidth > 0 && dom.clientHeight > 0) {
+                let isDark = document.body.classList.contains('dark');
+                myChart.setOption(getOption(isDark));
+                myChart.resize();
+                
+                // Re-center 'self' node
+                var w = myChart.getWidth();
+                var h = myChart.getHeight();
+                nodes.forEach(n => {
+                    if (n.id === 'self') { n.x = w / 2; n.y = h / 2; }
+                });
+                myChart.setOption({ series: [{ data: nodes }] });
+                
+                hasRendered = true;
+            }
+        }
+
+        // 5. EVENT LISTENERS
+        safeRender();
+
+        var poller = setInterval(function() {
+            if (dom.offsetParent !== null && !hasRendered) {
+                safeRender();
+            }
+        }, 200);
+
         var parentDetails = dom.closest('details');
-        if (parentDetails) parentDetails.addEventListener('toggle', () => { if(parentDetails.open) setTimeout(() => myChart.resize(), 50); });
-        
-        // Theme Toggle Listener - Re-calculates Colors
+        if (parentDetails) {
+            parentDetails.addEventListener('toggle', function() {
+                if (parentDetails.open) {
+                    setTimeout(safeRender, 50);
+                }
+            });
+        }
+
+        new ResizeObserver(() => {
+            if (hasRendered) myChart.resize();
+        }).observe(dom);
+
         const themeButton = document.querySelector('.js-theme-toggle');
         if(themeButton){
-            themeButton.addEventListener('click', () => {
-                setTimeout(() => {
+            themeButton.addEventListener('click', function(){
+                setTimeout(function(){
                     let isDarkNow = document.body.classList.contains('dark');
-                    let meColor = isDarkNow ? '#ffffff' : '#333333';
-                    
-                    // Update all node colors based on new theme
-                    globalNodes.forEach(n => {
-                        n.itemStyle.color = (n.name === myName) 
-                            ? meColor 
-                            : getGradientColor(n.value, globalMaxCount, isDarkNow);
-                        n.label.color = isDarkNow ? '#eee' : '#333';
-                        n.itemStyle.borderColor = isDarkNow ? '#000' : '#fff';
-                    });
-                    
-                    renderChart(); // Re-render with new colors and background
+                    myChart.setOption(getOption(isDarkNow));
                 }, 100);
             });
         }
