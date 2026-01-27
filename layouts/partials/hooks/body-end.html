@@ -7,40 +7,76 @@
   fetch('/data/visitor_stats.json')
     .then(response => response.json())
     .then(data => {
-      // 1. Visitors Count
-      const lastMonth = data.monthly_trend[data.monthly_trend.length - 1];
+      // Ensure data exists and has expected structure
+      data = data || {};
+      data.monthly_trend = data.monthly_trend || [];
+      data.top_locations = data.top_locations || [];
+      data.top_pages = data.top_pages || [];
+      data.devices = data.devices || [];
+      data.lifetime_total = data.lifetime_total || 0;
+
+      // 1. Visitors Count (with fallback for null/empty)
+      const lastMonth = data.monthly_trend.length > 0 ? data.monthly_trend[data.monthly_trend.length - 1] : null;
       const monthName = lastMonth ? (lastMonth.month.substring(4,6) + "/" + lastMonth.month.substring(0,4)) : "this month";
       const visitorCount = lastMonth ? lastMonth.visitors : 0;
       
-      document.getElementById('visitor-count').innerHTML = 
-        `User Impact: <strong>${visitorCount}</strong> unique visitors in ${monthName}`;
-
-      // 2. Locations
-      const cities = data.top_locations.slice(0, 3).map(l => l.city).filter(c => c !== '(not set)').join(", ");
+      let countHtml = "";
+      if (visitorCount === 0 || !lastMonth) {
+        countHtml = `User Impact: <strong>No unique visitors this month :(</strong>`;
+      } else {
+        countHtml = `User Impact: <strong>${visitorCount}</strong> unique visitors in ${monthName}`;
+      }
       
-      // 3. Top Page
-      // Clean up path (remove leading slash)
-      let topPage = data.top_pages.length > 0 ? data.top_pages[0].path : "";
+      // Add lifetime total
+      if (data.lifetime_total > 0) {
+        countHtml += ` | <strong>${data.lifetime_total.toLocaleString()}</strong> lifetime visits`;
+      }
+      
+      document.getElementById('visitor-count').innerHTML = countHtml;
+
+      // 2. Locations (with null check)
+      const cities = data.top_locations && data.top_locations.length > 0 
+        ? data.top_locations.slice(0, 3).map(l => l.city).filter(c => c && c !== '(not set)').join(", ")
+        : "";
+      
+      // 3. Top Page (with null check)
+      let topPage = data.top_pages && data.top_pages.length > 0 ? data.top_pages[0].path : "";
       if (topPage === "/") topPage = "Home Page";
 
-      // 4. Device (calculate percentage of mobile/desktop)
+      // 4. Device (calculate percentage of mobile/desktop with null check)
       let mobileUsers = 0;
       let totalUsers = 0;
-      if (data.devices) {
+      if (data.devices && data.devices.length > 0) {
         data.devices.forEach(d => {
-            totalUsers += d.users;
-            if (d.device === 'mobile') mobileUsers += d.users;
+            totalUsers += d.users || 0;
+            if (d.device === 'mobile') mobileUsers += d.users || 0;
         });
       }
       let deviceText = totalUsers > 0 && (mobileUsers/totalUsers > 0.5) ? "mostly on Mobile" : "mostly on Desktop";
 
-      // Build the string
+      // Build the string (only show details if we have data)
       let detailsHtml = "";
-      if (cities) detailsHtml += `Visiting from: <strong>${cities}</strong>... <br>`;
-      if (topPage) detailsHtml += `Top read: <code>${topPage}</code> <br>`;
-      detailsHtml += `<span style="font-size: 0.75rem">(${deviceText})</span>`;
+      if (cities) {
+        detailsHtml += `Visiting from: <strong>${cities}</strong>... <br>`;
+      }
+      if (topPage) {
+        detailsHtml += `Top read: <code>${topPage}</code> <br>`;
+      }
+      if (totalUsers > 0) {
+        detailsHtml += `<span style="font-size: 0.75rem">(${deviceText})</span>`;
+      }
+      
+      // If no details, show a friendly message
+      if (!detailsHtml && visitorCount === 0) {
+        detailsHtml = `<span style="font-size: 0.75rem; opacity: 0.6;">Check back soon for visitor insights!</span>`;
+      }
 
-      document.getElementById('visitor-details').innerHTML = detailsHtml;
+      document.getElementById('visitor-details').innerHTML = detailsHtml || "";
     })
-    .catch(err => { console.log('Stats waiting for next build cycle'); });
+    .catch(err => { 
+      console.log('Stats waiting for next build cycle');
+      // Show fallback message on error
+      document.getElementById('visitor-count').innerHTML = 'User Impact: <strong>Stats loading...</strong>';
+      document.getElementById('visitor-details').innerHTML = '<span style="font-size: 0.75rem; opacity: 0.6;">Check back soon for visitor insights!</span>';
+    });
 </script>

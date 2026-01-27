@@ -72,12 +72,24 @@ def fetch_analytics():
     device_resp = client.run_report(device_req)
     device_data = [{"device": r.dimension_values[0].value, "users": int(r.metric_values[0].value)} for r in device_resp.rows]
 
+    # 5. Lifetime Total Visitors (All-time)
+    lifetime_req = RunReportRequest(
+        property=f"properties/{PROPERTY_ID}",
+        metrics=[Metric(name="totalUsers")],
+        date_ranges=[DateRange(start_date="2020-01-01", end_date="today")]
+    )
+    lifetime_resp = client.run_report(lifetime_req)
+    lifetime_total = 0
+    if lifetime_resp.rows:
+        lifetime_total = int(lifetime_resp.rows[0].metric_values[0].value)
+
     return {
         "monthly_trend": monthly_data,
         "top_locations": location_data,
         "top_pages": page_data,
         "devices": device_data,
-        "total_last_30_days": sum(d['visitors'] for d in location_data) # Approximation
+        "total_last_30_days": sum(d['visitors'] for d in location_data), # Approximation
+        "lifetime_total": lifetime_total
     }
 
 if __name__ == "__main__":
