@@ -1,4 +1,4 @@
-{{/* Research Command Center - Live Data via OpenAlex */}}
+{{/* Research Command Center - Google Scholar Data (Local JSON) */}}
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 
 <div id="dashboard-root" style="min-height: 500px; margin: 30px 0;"></div>
@@ -8,7 +8,7 @@
     var root = document.getElementById('dashboard-root');
     var radarChart, lineChart;
 
-    // --- 1. LAYOUT (Same Visuals, New Data Source) ---
+    // --- 1. LAYOUT GENERATOR ---
     function renderLayout() {
         var isDark = document.body.classList.contains('dark');
         var bg = isDark ? 'rgba(255,255,255,0.02)' : '#ffffff';
@@ -42,7 +42,7 @@
                     <div>
                         <div style="font-size: 0.8rem; color: ${muted};">Total Citations</div>
                         <div style="font-size: 1.5rem; font-weight: 800; color: ${c3};" id="metric-cites">0</div>
-                        <div style="font-size: 0.6rem; color: ${muted};">Live via OpenAlex</div>
+                        <div style="font-size: 0.6rem; color: ${muted};" id="last-updated">Updated: -</div>
                     </div>
                     <div>
                         <div style="font-size: 0.8rem; color: ${muted};">h-index</div>
@@ -58,43 +58,18 @@
         </div>`;
     }
 
-    // --- 2. INIT ---
+    // --- 2. INIT LAYOUT ---
     root.innerHTML = renderLayout();
     radarChart = echarts.init(document.getElementById('dash-radar'));
     lineChart = echarts.init(document.getElementById('dash-line'));
 
-    // --- 3. FETCH LIVE DATA ---
+    // --- 3. FETCH DATA (Parallel) ---
     Promise.all([
-        // A. Local Publications (For Keywords/Radar)
         fetch('/data/publications.json').then(r => r.json()),
+        fetch('/data/scholar-metrics.json').then(r => r.json())
+    ]).then(([papers, scholarData]) => {
         
-        // B. LIVE OpenAlex Data (For Citations/Velocity)
-        // Searching for "Benjamin Ampel"
-        fetch('https://api.openalex.org/authors?search=Benjamin+Ampel')
-            .then(r => r.json())
-    ]).then(([papers, openAlexData]) => {
-        
-        // --- PROCESS 1: OpenAlex Metrics ---
-        // Find the correct "Benjamin Ampel" (Usually the first/most cited one)
-        if (openAlexData.results && openAlexData.results.length > 0) {
-            // Sort results by citation count to ensure we get the main profile
-            let author = openAlexData.results.sort((a,b) => b.cited_by_count - a.cited_by_count)[0];
-            
-            // 1. Update Text Metrics
-            animateValue("metric-cites", 0, author.cited_by_count, 2000);
-            document.getElementById('metric-hindex').innerText = author.summary_stats.h_index;
-
-            // 2. Prepare Velocity Chart Data
-            // OpenAlex returns [{year: 2023, cited_by_count: 50}, ...]
-            // We need to sort it by year and extract arrays
-            let history = author.counts_by_year.sort((a,b) => a.year - b.year);
-            // Filter to last 10 years to keep chart clean
-            history = history.filter(h => h.year >= new Date().getFullYear() - 8);
-            
-            renderLine(history);
-        }
-
-        // --- PROCESS 2: Radar Chart (Local Keywords) ---
+        // --- A. Process Publications (Radar Chart) ---
         const taxonomy = {
             'AI / Deep Learning': ['Deep Learning', 'Neural', 'Transfer Learning', 'Embedding', 'Machine Learning', 'Artificial Intelligence', 'Adversarial'],
             'Cybersecurity':      ['Cyber', 'Vulnerability', 'Exploit', 'Attack', 'Threat', 'Security', 'Malicious', 'Ransomware', 'Phishing'],
@@ -121,13 +96,33 @@
             });
         }
 
-        // Populate Text
+        // --- B. Update Text Metrics ---
         let topSkill = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
         let trendSkill = Object.entries(recentCounts).sort((a,b) => b[1]-a[1])[0];
         document.getElementById('metric-focus').innerText = topSkill ? topSkill[0] : "-";
         document.getElementById('metric-trend').innerText = trendSkill ? trendSkill[0] : "-";
 
+        // --- C. Update Scholar Metrics (Fixed Parsing) ---
+        if(scholarData && scholarData.metrics) {
+            // 1. Citations
+            let rawCites = String(scholarData.metrics.citations); // e.g. "500+"
+            let cleanCites = parseInt(rawCites.replace(/\D/g, '')) || 0; // 500
+            let suffix = rawCites.includes('+') ? '+' : '';
+            
+            animateValue("metric-cites", 0, cleanCites, 2000, suffix);
+            
+            // 2. h-index
+            document.getElementById('metric-hindex').innerText = scholarData.metrics.hIndex || 0;
+            
+            // 3. Update Date
+            if(scholarData.lastUpdated) {
+                document.getElementById('last-updated').innerText = "Updated: " + scholarData.lastUpdated;
+            }
+        }
+
+        // --- D. Render Charts ---
         renderRadar(counts);
+        renderLine(scholarData.citationsByYear);
 
     }).catch(err => console.error("Dashboard Error:", err));
 
@@ -135,8 +130,10 @@
     // --- CHART RENDERERS ---
 
     function renderLine(history) {
+        if(!history || !Array.isArray(history)) return;
+        
         let years = history.map(d => d.year);
-        let vals = history.map(d => d.cited_by_count);
+        let vals = history.map(d => d.citations);
 
         function getOpt(isDark) {
             let c = isDark ? '#00e5ff' : '#1a0dab';
@@ -197,23 +194,28 @@
                 setTimeout(() => {
                    let isDarkNow = document.body.classList.contains('dark');
                    chart.setOption(getOptFunc(isDarkNow));
+                   
+                   // Re-inject HTML to update CSS variables (Quick Refresh)
                    var cites = document.getElementById('metric-cites').innerText;
-                   root.innerHTML = renderLayout(); // Quick re-inject to update CSS vars
+                   var hidx = document.getElementById('metric-hindex').innerText;
+                   root.innerHTML = renderLayout(); 
                    document.getElementById('metric-cites').innerText = cites; 
+                   document.getElementById('metric-hindex').innerText = hidx;
                 }, 100);
             });
         }
         window.addEventListener('resize', () => chart.resize());
     }
 
-    function animateValue(id, start, end, duration) {
+    function animateValue(id, start, end, duration, suffix) {
         let obj = document.getElementById(id);
         if(!obj) return;
         let startTimestamp = null;
         const step = (ts) => {
             if (!startTimestamp) startTimestamp = ts;
             const progress = Math.min((ts - startTimestamp) / duration, 1);
-            obj.innerHTML = Math.floor(progress * (end - start) + start);
+            let current = Math.floor(progress * (end - start) + start);
+            obj.innerHTML = current + (suffix || "");
             if (progress < 1) window.requestAnimationFrame(step);
         };
         window.requestAnimationFrame(step);
