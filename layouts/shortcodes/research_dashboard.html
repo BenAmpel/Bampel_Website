@@ -358,12 +358,18 @@
             return;
         }
         
+        var graphEl = document.getElementById('knowledge-graph');
+        if (!graphEl) {
+            console.error('renderKnowledgeGraph: Chart element not found');
+            return;
+        }
+        
+        // Reinitialize chart if needed
         if (!knowledgeGraphChart) {
-            var graphEl = document.getElementById('knowledge-graph');
-            if (graphEl) {
+            if (typeof echarts !== 'undefined') {
                 knowledgeGraphChart = echarts.init(graphEl);
             } else {
-                console.error('renderKnowledgeGraph: Chart element not found');
+                console.error('ECharts library not loaded');
                 return;
             }
         }
@@ -387,9 +393,15 @@
 
             p._authors = new Set();
             if(p.authors) {
-                p.authors.split(',').forEach(a => {
+                var authorList = [];
+                if (Array.isArray(p.authors)) {
+                    authorList = p.authors;
+                } else if (typeof p.authors === 'string') {
+                    authorList = p.authors.split(',').map(a => a.trim());
+                }
+                authorList.forEach(a => {
                     let clean = a.trim().toLowerCase();
-                    if(!clean.includes('ampel')) p._authors.add(clean);
+                    if(clean && !clean.includes('ampel')) p._authors.add(clean);
                 });
             }
 
@@ -397,18 +409,20 @@
 
             nodes.push({
                 id: index,
-                name: p.title,
+                name: p.title || 'Untitled',
                 value: p.citations || 0,
-                year: p.year,
-                authors: p.authors,
-                venue: p.venue,
-                symbolSize: Math.max(10, Math.min(65, Math.log((p.citations || 0) + 2) * 9)),
+                year: p.year || 'N/A',
+                authors: p.authors || '',
+                venue: p.venue || '',
+                symbolSize: Math.max(15, Math.min(60, Math.log((p.citations || 0) + 2) * 8)),
                 itemStyle: { color: getColorByYear(p.year) },
                 label: {
-                    show: (p.citations || 0) > 15,
+                    show: (p.citations || 0) > 10,
                     formatter: function(params) {
-                        return params.name.length > 15 ? params.name.substring(0, 15) + '...' : params.name;
-                    }
+                        var name = params.name || '';
+                        return name.length > 20 ? name.substring(0, 20) + '...' : name;
+                    },
+                    fontSize: 10
                 }
             });
         });
@@ -422,7 +436,9 @@
                 let reasons = [];
 
                 let commonWords = 0;
-                p1._words.forEach(w => { if (p2._words.has(w)) commonWords++; });
+                if (p1._words && p2._words) {
+                    p1._words.forEach(w => { if (p2._words.has(w)) commonWords++; });
+                }
                 if (commonWords > 0) {
                     score += (commonWords * WEIGHT_TOPIC);
                     reasons.push(`${commonWords} Keywords`);
@@ -434,7 +450,9 @@
                 }
 
                 let commonAuthors = 0;
-                p1._authors.forEach(a => { if (p2._authors.has(a)) commonAuthors++; });
+                if (p1._authors && p2._authors) {
+                    p1._authors.forEach(a => { if (p2._authors.has(a)) commonAuthors++; });
+                }
                 if (commonAuthors > 0) {
                     score += (commonAuthors * WEIGHT_AUTHOR);
                     reasons.push(`${commonAuthors} Co-Authors`);
@@ -450,9 +468,9 @@
                         value: score + impactBonus,
                         reason: reasons.join(", "),
                         lineStyle: {
-                            width: Math.min((score * 0.5) + impactBonus, 5),
-                            opacity: Math.min(0.15 + (score * 0.1), 0.7),
-                            curveness: 0.2
+                            width: Math.min((score * 0.4) + (impactBonus * 0.3), 4),
+                            opacity: Math.min(0.2 + (score * 0.08), 0.6),
+                            curveness: 0.15
                         }
                     });
                 }
@@ -460,16 +478,21 @@
         }
 
         let isDark = document.body.classList.contains('dark');
+        let bgColor = isDark ? 'transparent' : 'transparent';
+        let textColor = isDark ? '#eee' : '#333';
+        
         let option = {
-            backgroundColor: 'transparent',
+            backgroundColor: bgColor,
+            animationDuration: 1500,
+            animationEasingUpdate: 'quinticInOut',
             tooltip: {
                 formatter: (params) => {
                     if (params.dataType === 'edge') {
-                        return `<strong>Connection Strength:</strong> ${Math.floor(params.value)}<br>Link: ${params.data.reason}`;
+                        return `<strong>Connection:</strong> ${Math.floor(params.value)}<br>${params.data.reason || 'Linked'}`;
                     }
                     return `<strong>${params.name}</strong><br>
-                            Year: ${params.data.year}<br>
-                            Citations: ${params.value}<br>
+                            Year: ${params.data.year || 'N/A'}<br>
+                            Citations: ${params.value || 0}<br>
                             <span style="font-size:0.8em; opacity:0.8">${params.data.venue || ''}</span>`;
                 }
             },
@@ -479,41 +502,69 @@
                 data: nodes,
                 links: links,
                 roam: true,
-                zoom: 0.75,
-                label: { position: 'right', color: 'inherit' },
-                lineStyle: { color: isDark ? '#aaa' : '#666' },
+                zoom: 0.8,
+                label: { 
+                    show: true,
+                    position: 'right', 
+                    color: textColor,
+                    fontSize: 9,
+                    formatter: function(params) {
+                        var name = params.name || '';
+                        return name.length > 25 ? name.substring(0, 25) + '...' : name;
+                    }
+                },
+                lineStyle: { 
+                    color: isDark ? 'rgba(170, 170, 170, 0.4)' : 'rgba(102, 102, 102, 0.4)',
+                    curveness: 0.15
+                },
+                emphasis: {
+                    focus: 'adjacency',
+                    lineStyle: {
+                        width: 6
+                    }
+                },
                 force: {
                     initLayout: 'circular',
-                    repulsion: 500,
-                    gravity: 0.1,
-                    edgeLength: [50, 300],
-                    friction: 0.9
+                    repulsion: 800,
+                    gravity: 0.15,
+                    edgeLength: [80, 250],
+                    friction: 0.85,
+                    layoutAnimation: true
                 }
             }]
         };
 
         try {
-            knowledgeGraphChart.setOption(option);
+            knowledgeGraphChart.setOption(option, true); // true = notMerge, replace all
             console.log('Knowledge graph rendered with', nodes.length, 'nodes and', links.length, 'links');
+            
+            // Handle resize
+            window.addEventListener('resize', function() {
+                if (knowledgeGraphChart) knowledgeGraphChart.resize();
+            });
+            
+            // Handle theme toggle
+            const btn = document.querySelector('.js-theme-toggle');
+            if(btn) {
+                btn.addEventListener('click', () => {
+                    setTimeout(() => {
+                        let isDarkNow = document.body.classList.contains('dark');
+                        let newTextColor = isDarkNow ? '#eee' : '#333';
+                        let newLineColor = isDarkNow ? 'rgba(170, 170, 170, 0.4)' : 'rgba(102, 102, 102, 0.4)';
+                        if (knowledgeGraphChart) {
+                            knowledgeGraphChart.setOption({
+                                tooltip: { backgroundColor: isDarkNow ? '#1a1a1a' : '#fff' },
+                                series: [{ 
+                                    label: { color: newTextColor },
+                                    lineStyle: { color: newLineColor }
+                                }]
+                            });
+                        }
+                    }, 100);
+                });
+            }
         } catch (e) {
             console.error('Error rendering knowledge graph:', e);
-        }
-        
-        const btn = document.querySelector('.js-theme-toggle');
-        if(btn) {
-            btn.addEventListener('click', () => {
-                setTimeout(() => {
-                    let isDarkNow = document.body.classList.contains('dark');
-                    if (knowledgeGraphChart) {
-                        knowledgeGraphChart.setOption({
-                            series: [{ lineStyle: { color: isDarkNow ? '#aaa' : '#666' } }]
-                        });
-                    }
-                }, 100);
-            });
-        }
-        if (knowledgeGraphChart) {
-            window.addEventListener('resize', () => knowledgeGraphChart.resize());
         }
     }
 
