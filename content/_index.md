@@ -31,7 +31,7 @@ sections:
         
         {{< spoiler text="📊 Research Dashboard" >}}
         {{< research_dashboard >}}
-        {{< /spoiler >}}
+        
         
         {{< spoiler text="🤝 Collaboration Network" >}}
         {{< research_network >}}
