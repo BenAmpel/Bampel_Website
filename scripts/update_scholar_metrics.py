@@ -1,129 +1,96 @@
-#!/usr/bin/env python3
-"""
-Fetch Google Scholar metrics and update scholar-metrics.json.
-Now includes individual publication citation counts.
-"""
-
 import json
-import time
+import urllib.request
+import urllib.parse
 from datetime import datetime
 from pathlib import Path
+import os
 
-try:
-    from scholarly import scholarly
-    HAS_SCHOLARLY = True
-except ImportError:
-    HAS_SCHOLARLY = False
-    print("Warning: scholarly library not installed. Run: pip install scholarly")
-
+# --- CONFIGURATION ---
+SCHOLAR_ID = "XDdwaZUAAAAJ" 
+API_KEY = SERPAPI_KEY
+# Files
 SCRIPT_DIR = Path(__file__).parent
-PROJECT_ROOT = SCRIPT_DIR.parent
-METRICS_FILE = PROJECT_ROOT / "static" / "data" / "scholar-metrics.json"
+OUTPUT_FILE = SCRIPT_DIR.parent / "static" / "data" / "scholar-metrics.json"
 
-SCHOLAR_ID = "XDdwaZUAAAAJ"  # Benjamin Ampel
-
-
-def fetch_scholar_data():
-    """Fetch data from Google Scholar."""
-    if not HAS_SCHOLARLY:
-        return None
+def fetch_data():
+    # If using GitHub Actions, set the key as a secret named SERPAPI_KEY
+    key = os.environ.get("SERPAPI_KEY", API_KEY)
     
-    print(f"Fetching Google Scholar data for ID: {SCHOLAR_ID}")
-    
-    try:
-        # Search for author by ID
-        author = scholarly.search_author_id(SCHOLAR_ID)
-        # Fetch indices and publications list (metadata only to save time/requests)
-        author = scholarly.fill(author, sections=['basics', 'indices', 'publications'])
-        
-        # 1. Extract Overall Metrics
-        citations = author.get('citedby', 0)
-        h_index = author.get('hindex', 0)
-        i10_index = author.get('i10index', 0)
-        pub_count = len(author.get('publications', []))
-        
-        # 2. Extract History (Last 10 Years)
-        cites_per_year = author.get('cites_per_year', {})
-        current_year = datetime.now().year
-        history = []
-        for year in range(current_year - 9, current_year + 1):
-            history.append({
-                "year": str(year),
-                "citations": cites_per_year.get(year, 0)
-            })
-
-        # 3. Extract Individual Publications (NEW)
-        # We grab the title and citation count from the list we already have.
-        individual_pubs = []
-        for pub in author.get('publications', []):
-            if 'bib' in pub:
-                individual_pubs.append({
-                    "title": pub['bib'].get('title', 'Unknown Title'),
-                    "citations": pub.get('num_citations', 0),
-                    "year": pub['bib'].get('pub_year', 'N/A')
-                })
-        
-        # Sort by citations (highest first)
-        individual_pubs.sort(key=lambda x: x['citations'], reverse=True)
-
-        return {
-            "citations": citations,
-            "hIndex": h_index,
-            "i10Index": i10_index,
-            "publications": pub_count,
-            "citationsByYear": history,
-            "individualPublications": individual_pubs
-        }
-        
-    except Exception as e:
-        print(f"Error fetching Scholar data: {e}")
+    if key == "YOUR_SERPAPI_KEY_HERE":
+        print("Error: You must add your SerpApi Key to the script.")
         return None
 
-
-def update_metrics_file(data):
-    """Update the scholar-metrics.json file."""
-    if data is None:
-        return False
-    
-    # Structure the final JSON
-    updated = {
-        "lastUpdated": datetime.now().strftime("%B %Y"),
-        "metrics": {
-            "citations": f"{data['citations']}+" if data['citations'] >= 500 else str(data['citations']),
-            "hIndex": data["hIndex"],
-            "i10Index": data["i10Index"],
-            "publications": data["publications"]
-        },
-        "citationsByYear": data["citationsByYear"],
-        "individualPublications": data["individualPublications"]
+    params = {
+        "engine": "google_scholar_author",
+        "author_id": SCHOLAR_ID,
+        "api_key": key,
+        "num": "100" # Fetch top 100 papers
     }
     
-    # Write to file
-    with open(METRICS_FILE, 'w') as f:
-        json.dump(updated, f, indent=2)
+    url = "https://serpapi.com/search.json?" + urllib.parse.urlencode(params)
     
-    print(f"Updated {METRICS_FILE}")
-    return True
+    print(f"Fetching data from SerpApi...")
+    try:
+        with urllib.request.urlopen(url) as response:
+            data = json.loads(response.read().decode())
+            
+        if "error" in data:
+            print(f"API Error: {data['error']}")
+            return None
+            
+        return data
+    except Exception as e:
+        print(f"Network Error: {e}")
+        return None
 
+def process_and_save(data):
+    if not data: return
 
-def main():
-    print("=" * 50)
-    print("Google Scholar Metrics Updater")
-    print("=" * 50)
+    author = data.get("author", {})
+    articles = data.get("articles", [])
+
+    # 1. Parse Citations Graph (cited_by.graph)
+    # SerpApi returns graph as [{"year": 2018, "citations": 5}, ...]
+    history = []
+    graph_data = author.get("cited_by", {}).get("graph", [])
     
-    if not HAS_SCHOLARLY:
-        print("Error: scholarly library required (pip install scholarly)")
-        return
-    
-    data = fetch_scholar_data()
-    
-    if data:
-        print(f"\nSuccess! Fetched {len(data['individualPublications'])} papers.")
-        print(f"Total Citations: {data['citations']}")
-        update_metrics_file(data)
-    else:
-        print("\nFailed to fetch data.")
+    # Sort and format
+    graph_data.sort(key=lambda x: x['year'])
+    for point in graph_data:
+        history.append({
+            "year": str(point['year']),
+            "citations": point['citations']
+        })
 
+    # 2. Parse Top Publications
+    individual_pubs = []
+    for art in articles:
+        individual_pubs.append({
+            "title": art.get("title", ""),
+            "citations": art.get("cited_by", {}).get("value", 0),
+            "year": art.get("year", "N/A"),
+            "link": art.get("link", "")
+        })
 
-if __name__ == '__main__':
-    main()
+    # 3. Construct Final JSON
+    output = {
+        "lastUpdated": datetime.now().strftime("%B %Y"),
+        "metrics": {
+            "citations": author.get("cited_by", {}).get("table", [{}])[0].get("all", 0),
+            "hIndex": author.get("cited_by", {}).get("table", [{}])[1].get("all", 0),
+            "i10Index": author.get("cited_by", {}).get("table", [{}])[2].get("all", 0),
+            "publications": len(articles)
+        },
+        "citationsByYear": history,
+        "individualPublications": individual_pubs
+    }
+
+    with open(OUTPUT_FILE, 'w') as f:
+        json.dump(output, f, indent=2)
+    
+    print(f"Success! Saved to {OUTPUT_FILE}")
+    print(f"Citations: {output['metrics']['citations']}")
+
+if __name__ == "__main__":
+    json_data = fetch_data()
+    process_and_save(json_data)
