@@ -2,16 +2,14 @@
 
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 
-<div id="research-network-container" style="width: 100%; height: 550px; border-radius: 8px; overflow: hidden;"></div>
+<div id="research-network-container" style="width: 100%; height: 600px; border-radius: 8px; overflow: hidden;"></div>
 
 <script type="text/javascript">
 document.addEventListener('DOMContentLoaded', function() {
     var dom = document.getElementById('research-network-container');
     if (!dom) return;
-    
-    var myChart = echarts.init(dom);
 
-    // Data from Hugo YAML
+    // 1. DATA INGESTION FROM HUGO
     var rawNodes = {{ .Site.Data.network.nodes | jsonify }};
     var rawLinks = {{ .Site.Data.network.links | jsonify }};
 
@@ -22,13 +20,14 @@ document.addEventListener('DOMContentLoaded', function() {
             name: node.name,
             symbolSize: node.size,
             category: node.group,
-            // Keep self node more central
-            x: node.group === 'self' ? 400 : null,
-            y: node.group === 'self' ? 275 : null
+            // Fix 'self' position in center
+            fixed: node.group === 'self' ? true : false,
+            x: node.group === 'self' ? 500 : null,
+            y: node.group === 'self' ? 300 : null
         };
     });
 
-    // Define categories with names for legend
+    // Define categories
     var categories = [
         { name: 'self' },
         { name: 'advisor' },
@@ -40,6 +39,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Color palettes
     var lightColors = ['#d93025', '#1a0dab', '#007b83', '#f9ab00', '#34a853'];
     var darkColors = ['#00ff41', '#ff00ff', '#00ffff', '#ffff00', '#ff6b35'];
+
+    // 2. INITIALIZE CHART
+    var myChart = echarts.init(dom);
 
     function getOption(isDark) {
         var colors = isDark ? darkColors : lightColors;
@@ -90,9 +92,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     fontSize: 11,
                     fontFamily: isDark ? "'Fira Code', monospace" : "'Merriweather', serif"
                 },
-                edgeLabel: {
-                    show: false
-                },
                 lineStyle: {
                     color: lineColor,
                     curveness: 0.2,
@@ -123,8 +122,28 @@ document.addEventListener('DOMContentLoaded', function() {
     var isDark = document.body.classList.contains('dark');
     myChart.setOption(getOption(isDark));
 
-    // Theme switcher - using MutationObserver for reliability
-    var observer = new MutationObserver(function(mutations) {
+    // 3. THE MAGIC FIX: RESIZE OBSERVER
+    // Watches the container - when accordion opens, this triggers
+    var resizeObserver = new ResizeObserver(function(entries) {
+        for (var i = 0; i < entries.length; i++) {
+            var entry = entries[i];
+            if (entry.contentRect.width > 0 && entry.contentRect.height > 0) {
+                myChart.resize();
+                // Re-center the 'self' node based on new dimensions
+                nodes.forEach(function(n) {
+                    if (n.id === 'self') {
+                        n.x = myChart.getWidth() / 2;
+                        n.y = myChart.getHeight() / 2;
+                    }
+                });
+                myChart.setOption({ series: [{ data: nodes }] });
+            }
+        }
+    });
+    resizeObserver.observe(dom);
+
+    // 4. THEME SWITCHER - using MutationObserver
+    var themeObserver = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             if (mutation.attributeName === 'class') {
                 var isDarkNow = document.body.classList.contains('dark');
@@ -132,7 +151,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    observer.observe(document.body, { attributes: true });
+    themeObserver.observe(document.body, { attributes: true });
 
     // Handle window resize
     window.addEventListener('resize', function() {

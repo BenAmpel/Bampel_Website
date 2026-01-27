@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // 6. Dynamic Theme Switching Listener
-    var observer = new MutationObserver(function(mutations) {
+    var themeObserver = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             if (mutation.attributeName === 'class') {
                 if (document.body.classList.contains('dark')) {
@@ -121,8 +121,20 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
-    observer.observe(document.body, { attributes: true });
+    themeObserver.observe(document.body, { attributes: true });
+
+    // 7. RESIZE OBSERVER - Fix for accordion/spoiler containers
+    // When the spoiler opens, the map needs to recalculate its size
+    var mapContainer = document.getElementById('impact-map-container');
+    var resizeObserver = new ResizeObserver(function(entries) {
+        for (var i = 0; i < entries.length; i++) {
+            var entry = entries[i];
+            if (entry.contentRect.width > 0 && entry.contentRect.height > 0) {
+                map.invalidateSize();
+            }
+        }
+    });
+    resizeObserver.observe(mapContainer);
 });
 </script>
 
