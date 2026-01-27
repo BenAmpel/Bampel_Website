@@ -1,0 +1,145 @@
+{{/* Dynamic Research Skills Radar - Scans titles for keywords */}}
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+<div id="skills-radar" style="width: 100%; height: 450px; margin: 20px auto;"></div>
+
+<script type="text/javascript">
+(function() {
+    var dom = document.getElementById('skills-radar');
+    var myChart = echarts.init(dom);
+
+    // --- 1. THE SKILL TAXONOMY ---
+    // Define the 6 axes and the keywords that trigger them.
+    // The script will scan your titles for these words (case-insensitive).
+    const taxonomy = {
+        'AI & Deep Learning': ['Deep Learning', 'Neural', 'Transfer Learning', 'Embedding', 'Machine Learning', 'Artificial Intelligence', 'Clustering', 'Classification'],
+        'Cybersecurity':      ['Cyber', 'Vulnerability', 'Exploit', 'Attack', 'Threat', 'Security', 'Malicious', 'Ransomware', 'Scam', 'Fraud'],
+        'LLMs & NLP':         ['Large Language Model', 'LLM', 'Text Analytics', 'NLP', 'Transformer', 'Bert', 'GPT', 'Language Models'],
+        'Hacker Communities': ['Hacker', 'Forum', 'Dark Web', 'Paste', 'Community', 'Marketplace', 'Underground'],
+        'Design Science':     ['Design Science', 'Framework', 'Artifact', 'System', 'Implementation', 'Prototyping'],
+        'Behavioral':         ['Nudging', 'Bias', 'Social', 'Human', 'Behavior', 'Psychology', 'Decision', 'Trust']
+    };
+
+    // --- 2. FETCH DATA & ANALYZE ---
+    fetch('/data/publications.json')
+        .then(res => res.json())
+        .then(papers => {
+            var scores = calculateScores(papers);
+            renderChart(scores);
+        })
+        .catch(err => {
+            console.error("Radar Error:", err);
+            // Fallback data if fetch fails
+            renderChart([80, 80, 80, 80, 80, 80]); 
+        });
+
+    function calculateScores(papers) {
+        // Initialize counts
+        let counts = {};
+        Object.keys(taxonomy).forEach(k => counts[k] = 0);
+
+        // Scan Titles
+        papers.forEach(p => {
+            let text = (p.title || "").toLowerCase();
+            
+            Object.keys(taxonomy).forEach(category => {
+                let keywords = taxonomy[category];
+                // If any keyword matches the title, increment that category
+                let hit = keywords.some(k => text.includes(k.toLowerCase()));
+                if (hit) counts[category]++;
+            });
+        });
+
+        // Normalize to 0-100 Scale
+        // We find the category with the MOST papers and set that to 95/100.
+        // Everything else is scaled relative to it.
+        let maxVal = Math.max(...Object.values(counts));
+        if (maxVal === 0) maxVal = 1; // Prevent div/0
+
+        let dataset = Object.keys(taxonomy).map(key => {
+            let raw = counts[key];
+            // Scale formula: (Count / Max) * 100
+            // We add a small baseline (20) so categories with 0 papers don't look broken
+            return {
+                name: key,
+                max: 100,
+                value: Math.min(Math.round((raw / maxVal) * 80) + 20, 100)
+            };
+        });
+
+        return dataset;
+    }
+
+    function renderChart(data) {
+        function getOption(isDark) {
+            var mainColor = isDark ? '#00ff41' : '#d93025'; // Cyber Green vs Academic Red
+            var fillColor = isDark ? 'rgba(0, 255, 65, 0.2)' : 'rgba(217, 48, 37, 0.2)';
+            var textColor = isDark ? '#eee' : '#333';
+            var splitColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+
+            return {
+                backgroundColor: 'transparent',
+                tooltip: {
+                    trigger: 'item',
+                    formatter: function() {
+                        // Custom tooltip showing the actual values
+                        let html = `<div style="font-weight:bold; margin-bottom:5px;">Relative Expertise</div>`;
+                        data.forEach(d => {
+                            html += `${d.name}: ${d.value}%<br>`;
+                        });
+                        return html;
+                    },
+                    backgroundColor: isDark ? 'rgba(50,50,50,0.9)' : 'rgba(255,255,255,0.9)',
+                    textStyle: { color: textColor }
+                },
+                radar: {
+                    indicator: data.map(d => ({ name: d.name, max: 100 })),
+                    shape: 'circle',
+                    splitNumber: 4,
+                    radius: '65%',
+                    axisName: {
+                        color: textColor,
+                        fontWeight: 'bold',
+                        fontSize: 11
+                    },
+                    splitLine: {
+                        lineStyle: { color: splitColor }
+                    },
+                    splitArea: { show: false },
+                    axisLine: { lineStyle: { color: splitColor } }
+                },
+                series: [{
+                    type: 'radar',
+                    data: [{
+                        value: data.map(d => d.value),
+                        name: 'Research Profile',
+                        symbol: 'circle',
+                        symbolSize: 6,
+                        itemStyle: { color: mainColor },
+                        lineStyle: { width: 3, color: mainColor },
+                        areaStyle: { color: fillColor }
+                    }]
+                }],
+                animationDuration: 1500,
+                animationEasing: 'cubicOut'
+            };
+        }
+
+        // Render & Listeners
+        let isDark = document.body.classList.contains('dark');
+        myChart.setOption(getOption(isDark));
+
+        window.addEventListener('resize', () => myChart.resize());
+
+        const themeButton = document.querySelector('.js-theme-toggle');
+        if(themeButton){
+            themeButton.addEventListener('click', () => {
+                setTimeout(() => {
+                    let isDarkNow = document.body.classList.contains('dark');
+                    myChart.setOption(getOption(isDarkNow));
+                }, 100);
+            });
+        }
+    }
+})();
+</script>
