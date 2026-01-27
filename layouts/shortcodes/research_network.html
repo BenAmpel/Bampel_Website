@@ -4,13 +4,11 @@
 
 {{ $seed := "abcdefghijklmnopqrstuvwxyz" }}
 {{ $uniqueID := delimit (shuffle (split $seed "")) "" }}
-<div id="network-{{ $uniqueID }}" style="width: 100%; height: 600px; border-radius: 8px; overflow: hidden; position: relative;"></div>
+<div id="network-{{ $uniqueID }}" style="width: 100%; min-height: 600px; height: 600px; border: 1px solid #eee; border-radius: 8px; overflow: hidden; position: relative;"></div>
 
 <script type="text/javascript">
 (function() {
     var domID = "network-{{ $uniqueID }}";
-    
-    // 1. DATA INGESTION
     var rawNodes = {{ .Site.Data.network.nodes | jsonify }};
     var rawLinks = {{ .Site.Data.network.links | jsonify }};
     
@@ -20,6 +18,7 @@
 
         // 2. SETUP ECHARTS
         var myChart = echarts.init(dom);
+        var hasRendered = false; // Track if we have successfully drawn it
         
         // Prepare Data
         var nodes = rawNodes.map(node => ({
@@ -65,33 +64,43 @@
             };
         }
 
-        // Set Initial Option
+        // Initial Render Attempt
         let isDark = document.body.classList.contains('dark');
         myChart.setOption(getOption(isDark));
 
-        // 3. ACCORDION FIX
-        var parentDetails = dom.closest('details');
-        if (parentDetails) {
-            parentDetails.addEventListener('toggle', function() {
-                if (parentDetails.open) {
-                    setTimeout(function() {
-                        myChart.resize();
-                        // Re-center 'self'
-                        var w = myChart.getWidth();
-                        var h = myChart.getHeight();
-                        nodes.forEach(n => {
-                            if (n.id === 'self') { n.x = w / 2; n.y = h / 2; }
-                        });
-                        myChart.setOption({ series: [{ data: nodes }] });
-                    }, 50);
-                }
-            });
-        }
+        // 3. THE "POLLING" FIX
+        // Check every 500ms if the box is visible. If it is, and we haven't resized recently, force it.
+        // This catches the accordion opening event even if the browser suppresses the event trigger.
+        setInterval(function() {
+            if (dom.offsetParent !== null && !hasRendered) {
+               // Element is now visible!
+               myChart.resize();
+               
+               // Re-center self
+               var w = myChart.getWidth();
+               var h = myChart.getHeight();
+               if(w > 0 && h > 0) {
+                   nodes.forEach(n => {
+                       if (n.id === 'self') { n.x = w / 2; n.y = h / 2; }
+                   });
+                   myChart.setOption({ series: [{ data: nodes }] });
+                   hasRendered = true; // Stop trying to force it
+               }
+            }
+        }, 500);
 
-        // 4. Resize Observer
-        new ResizeObserver(() => myChart.resize()).observe(dom);
+        // 4. Force Resize on Click (Backup)
+        // If the user clicks anywhere in the box, we force a redraw
+        dom.addEventListener('click', function() {
+            myChart.resize();
+        });
 
-        // 5. Theme Listener
+        // 5. Standard Resize Observer
+        new ResizeObserver(() => {
+            myChart.resize();
+        }).observe(dom);
+
+        // Theme Listener
         const themeButton = document.querySelector('.js-theme-toggle');
         if(themeButton){
             themeButton.addEventListener('click', function(){
