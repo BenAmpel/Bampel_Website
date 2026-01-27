@@ -1,4 +1,5 @@
 {{/* Interactive Research Network - Usage: {{< research_network >}} */}}
+{{/* Bulletproof version with safe color gradient calculation */}}
 
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 
@@ -9,163 +10,211 @@
 <script type="text/javascript">
 (function() {
     var domID = "network-{{ $uniqueID }}";
-    // Ingest Data from Hugo
-    var rawNodes = {{ .Site.Data.network.nodes | jsonify }};
-    var rawLinks = {{ .Site.Data.network.links | jsonify }};
-    
+    var myName = "Benjamin Ampel"; // The center node
+
+    // --- 1. NAME NORMALIZATION ---
+    // Maps variations (e.g., "B. Ampel") to a single canonical name
+    var nameMap = {
+        'B Ampel': 'Benjamin Ampel', 'BM Ampel': 'Benjamin Ampel', 'B. Ampel': 'Benjamin Ampel', 'admin': 'Benjamin Ampel',
+        'H Chen': 'Hsinchun Chen', 'H. Chen': 'Hsinchun Chen',
+        'S Samtani': 'Sagar Samtani', 'S. Samtani': 'Sagar Samtani',
+        'S Ullman': 'Steven Ullman', 'S. Ullman': 'Steven Ullman',
+        'H Zhu': 'Hongyi Zhu', 'H. Zhu': 'Hongyi Zhu',
+        'M Patton': 'Mark Patton', 'M. Patton': 'Mark Patton',
+        'B Lazarine': 'Ben Lazarine', 'B. Lazarine': 'Ben Lazarine',
+        'T Vahedi': 'Tala Vahedi', 'T. Vahedi': 'Tala Vahedi',
+        'K Otto': 'Kaeli Otto', 'K. Otto': 'Kaeli Otto',
+        'Y Gao': 'Yang Gao', 'Y. Gao': 'Yang Gao',
+        'J Hu': 'James Hu', 'J. Hu': 'James Hu',
+        'CH Yang': 'Chi-Heng Yang', 'JF Nunamaker Jr': 'Jay Nunamaker',
+        'C Marx': 'Carolin Marx', 'C Dacosta': 'Cade Dacosta',
+        'C Zhang': 'Chengjun Zhang', 'M Hashim': 'Matthew Hashim',
+        'M Wagner': 'Mason Wagner', 'RY Reyes': 'Raul Reyes',
+        'S Yang': 'Shanchieh Yang', 'Y Li': 'Yidong Li', 'Y. Li': 'Yidong Li'
+    };
+    function normalize(name) { return nameMap[name] || name; }
+
+    // --- 2. COLOR GRADIENT GENERATOR (Safe Version) ---
+    // Generates a color between Green (Low) and Red (High)
+    function getColor(value, max, isDark) {
+        // Prevent division by zero if max is 1
+        var safeMax = (max <= 1) ? 2 : max;
+        var ratio = (value - 1) / (safeMax - 1); 
+        ratio = Math.min(Math.max(ratio, 0), 1); // Clamp between 0 and 1
+
+        if (isDark) {
+            // Dark Mode: Neon Green (120) -> Neon Red/Pink (0)
+            // Higher lightness (60%) for "glow" effect
+            var hue = (1 - ratio) * 120;
+            return `hsl(${hue}, 90%, 60%)`;
+        } else {
+            // Light Mode: Forest Green (120) -> Deep Red (0)
+            // Lower lightness (40%) for readability against white
+            var hue = (1 - ratio) * 120;
+            return `hsl(${hue}, 80%, 40%)`;
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         var dom = document.getElementById(domID);
         if (!dom) return;
 
-        // 1. SETUP ECHARTS
         var myChart = echarts.init(dom);
-        var hasRendered = false;
-        
-        // Prepare Data (convert category string to index)
-        var nodes = rawNodes.map(node => ({
-            id: node.id,
-            name: node.name,
-            symbolSize: node.size,
-            category: catMap[node.group] !== undefined ? catMap[node.group] : 3, // Default to collaborator
-            group: node.group, // Keep original for logic checks
-            fixed: node.group === 'self' ? true : false,
-            x: node.group === 'self' ? 500 : null,
-            y: node.group === 'self' ? 300 : null
-        }));
+        myChart.showLoading();
 
-        // 2. DEFINE CATEGORIES & BUILD LOOKUP MAP
-        var categories = [
-            { name: 'self' },        // 0
-            { name: 'advisor' },     // 1
-            { name: 'professor' },   // 2
-            { name: 'collaborator' }, // 3
-            { name: 'student' }      // 4
-        ];
-        
-        // Map category names to indices (ECharts requires numeric category)
-        var catMap = {};
-        categories.forEach(function(cat, index) {
-            catMap[cat.name] = index;
-        });
+        // Data Storage
+        var globalData = { nodes: [], links: [], maxCount: 0 };
 
-        // 3. COLOR PALETTES (Optimized for Contrast)
-        
-        // Light Mode: Deep, professional tones (Readable on White)
-        // Red (Self), Deep Purple, Navy Blue, Burnt Orange, Forest Green
-        const lightColors = ['#c62828', '#6a1b9a', '#1565c0', '#ef6c00', '#2e7d32'];
+        // --- 3. FETCH DATA ---
+        fetch('/data/publications.json')
+            .then(response => response.json())
+            .then(data => {
+                myChart.hideLoading();
+                processData(data);
+            })
+            .catch(err => {
+                console.error("Network Error:", err);
+                myChart.hideLoading();
+                dom.innerHTML = "<p style='text-align:center; padding-top:20px; color:red;'>Could not load network data.</p>";
+            });
 
-        // Dark Mode: Neon, glowing tones (Readable on Black)
-        // Neon Green (Self), Neon Purple, Electric Cyan, Bright Gold, Hot Orange
-        const darkColors =  ['#00ff41', '#e040fb', '#00e5ff', '#ffd600', '#ff3d00'];
+        // --- 4. PROCESS DATA ---
+        function processData(papers) {
+            var nodeCounts = new Map();
+            var connectedPairs = new Set();
+            var maxCount = 0;
 
-        function getOption(isDark) {
-            let colors = isDark ? darkColors : lightColors;
-            let bgColor = isDark ? '#000000' : '#ffffff';
-            let textColor = isDark ? '#eeeeee' : '#333333';
-            let edgeColor = isDark ? '#555555' : '#cccccc';
+            // Step A: Count Co-Authorships
+            papers.forEach(function(paper) {
+                if (!paper.authors) return;
+                var authors = paper.authors.map(normalize);
+                
+                authors.forEach(auth => {
+                    let count = (nodeCounts.get(auth) || 0) + 1;
+                    nodeCounts.set(auth, count);
+                    // Update max count (excluding yourself to keep scale useful)
+                    if (auth !== myName && count > maxCount) maxCount = count;
+                });
 
-            return {
+                // Step B: Create Links
+                for (let i = 0; i < authors.length; i++) {
+                    for (let j = i + 1; j < authors.length; j++) {
+                        let source = authors[i], target = authors[j];
+                        if (source === target) continue;
+                        let pairId = [source, target].sort().join("-");
+                        if (!connectedPairs.has(pairId)) {
+                            globalData.links.push({ source: source, target: target });
+                            connectedPairs.add(pairId);
+                        }
+                    }
+                }
+            });
+
+            globalData.maxCount = maxCount;
+            globalData.rawNodes = Array.from(nodeCounts.entries());
+            
+            // Initial Render
+            updateChart();
+        }
+
+        // --- 5. RENDER CHART (Updates on Theme Change) ---
+        function updateChart() {
+            var isDark = document.body.classList.contains('dark');
+            var bgColor = isDark ? '#1a1a1a' : '#ffffff';
+            var textColor = isDark ? '#eeeeee' : '#333333';
+            var meColor = isDark ? '#ffffff' : '#000000'; // You are White(Dark) or Black(Light)
+
+            // Generate Styled Nodes
+            var nodes = globalData.rawNodes.map(([name, count]) => {
+                let isMe = (name === myName);
+                return {
+                    id: name,
+                    name: name,
+                    value: count,
+                    symbolSize: isMe ? 70 : Math.max(20, Math.min(60, count * 10)),
+                    itemStyle: {
+                        color: isMe ? meColor : getColor(count, globalData.maxCount, isDark),
+                        borderColor: isDark ? '#000' : '#fff',
+                        borderWidth: 1.5
+                    },
+                    label: {
+                        show: count > 1 || isMe, // Only label frequent collaborators
+                        color: textColor,
+                        fontSize: isMe ? 14 : 11,
+                        fontWeight: isMe ? 'bold' : 'normal'
+                    },
+                    fixed: isMe,
+                    x: isMe ? dom.clientWidth / 2 : null,
+                    y: isMe ? dom.clientHeight / 2 : null,
+                    z: isMe ? 10 : 1
+                };
+            });
+
+            var option = {
                 backgroundColor: bgColor,
-                tooltip: {
-                    trigger: 'item',
-                    backgroundColor: isDark ? 'rgba(50,50,50,0.9)' : 'rgba(255,255,255,0.9)',
-                    textStyle: { color: textColor }
+                tooltip: { 
+                    formatter: '{b}<br>Papers: {c}' 
                 },
-                color: colors,
-                legend: [{
-                    data: ['self', 'advisor', 'professor', 'collaborator', 'student'],
-                    textStyle: { color: textColor, fontWeight: 'bold' },
-                    bottom: 20,
-                    selectedMode: 'multiple'
-                }],
                 series: [{
                     type: 'graph',
                     layout: 'force',
                     data: nodes,
-                    links: rawLinks,
-                    categories: categories,
+                    links: globalData.links,
                     roam: true,
-                    draggable: true,
-                    label: { 
-                        show: true, 
-                        position: 'right', 
-                        formatter: '{b}', 
-                        color: textColor,
-                        fontSize: 12,
-                        fontWeight: 'bold'
+                    zoom: 0.7, // Zoom out to see the spread
+                    label: { position: 'right' },
+                    lineStyle: {
+                        color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.15)',
+                        curveness: 0.2
                     },
-                    lineStyle: { 
-                        color: 'source', 
-                        curveness: 0.3,
-                        width: 1.5,
-                        opacity: 0.7
-                    },
-                    emphasis: {
-                        focus: 'adjacency',
-                        lineStyle: { width: 4, opacity: 1 },
-                        label: { show: true }
-                    },
-                    // Physics Engine Settings (Spaced Out)
-                    force: { 
-                        repulsion: 2500,  // Increased from 1000 to push nodes apart
-                        gravity: 0.1,    // Keeps them from flying off screen
-                        edgeLength: 150,  // Longer links
-                        friction: 0.6 
+                    force: {
+                        repulsion: 2500, // BIG repulsion to space them out
+                        gravity: 0.08,   // Gentle gravity to keep them centered
+                        edgeLength: [50, 300], // Allow flexible link lengths
+                        friction: 0.6
                     }
                 }]
             };
+
+            myChart.setOption(option);
+            
+            // Re-center "Me" node
+            var w = myChart.getWidth();
+            var h = myChart.getHeight();
+            nodes.forEach(n => {
+                if(n.id === myName) { n.x = w/2; n.y = h/2; }
+            });
+            myChart.setOption({ series: [{ data: nodes }] });
         }
 
-        // 4. RENDER FUNCTION
-        function safeRender() {
-            if (dom.clientWidth > 0 && dom.clientHeight > 0) {
-                let isDark = document.body.classList.contains('dark');
-                myChart.setOption(getOption(isDark));
-                myChart.resize();
-                
-                // Re-center 'self' node
-                var w = myChart.getWidth();
-                var h = myChart.getHeight();
-                nodes.forEach(n => {
-                    if (n.id === 'self') { n.x = w / 2; n.y = h / 2; }
-                });
-                myChart.setOption({ series: [{ data: nodes }] });
-                
-                hasRendered = true;
-            }
-        }
+        // --- 6. WATCHERS ---
+        
+        // Resize
+        new ResizeObserver(() => myChart.resize()).observe(dom);
 
-        // 5. EVENT LISTENERS
-        safeRender();
-
-        var poller = setInterval(function() {
-            if (dom.offsetParent !== null && !hasRendered) {
-                safeRender();
-            }
-        }, 200);
-
+        // Accordion Toggle
         var parentDetails = dom.closest('details');
         if (parentDetails) {
-            parentDetails.addEventListener('toggle', function() {
-                if (parentDetails.open) {
-                    setTimeout(safeRender, 50);
-                }
+            parentDetails.addEventListener('toggle', () => {
+                if(parentDetails.open) setTimeout(() => myChart.resize(), 50);
             });
         }
-
-        new ResizeObserver(() => {
-            if (hasRendered) myChart.resize();
-        }).observe(dom);
-
+        
+        // Theme Toggle (Wait 100ms for class change)
         const themeButton = document.querySelector('.js-theme-toggle');
         if(themeButton){
-            themeButton.addEventListener('click', function(){
-                setTimeout(function(){
-                    let isDarkNow = document.body.classList.contains('dark');
-                    myChart.setOption(getOption(isDarkNow));
-                }, 100);
+            themeButton.addEventListener('click', () => {
+                setTimeout(updateChart, 100);
             });
         }
+        
+        // Polling (Backup)
+        var poller = setInterval(() => {
+            if (dom.offsetParent !== null && globalData.nodes.length === 0) {
+                 // Try resizing if data loaded but graph invisible
+                 myChart.resize();
+            }
+        }, 1000);
     });
 })();
 </script>
