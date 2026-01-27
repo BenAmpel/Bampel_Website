@@ -72,8 +72,9 @@ def process_and_save(data):
     if not data:
         return
 
+    # [FIX] 'cited_by' is a sibling of 'author', not a child.
     author = data.get("author", {})
-    cited_by = author.get("cited_by", {})
+    cited_by = data.get("cited_by", {}) 
     articles = data.get("articles", [])
 
     # 1. Standard Metrics (Total, H-Index, i10)
@@ -106,8 +107,10 @@ def process_and_save(data):
             if isinstance(item, dict) and 'year' in item:
                 citations_by_year.append({
                     "year": str(item.get('year', '')),
-                    "citations": item.get('citations', 0)
+                    # [FIX] Ensure citations are integers (API sometimes returns strings)
+                    "citations": int(item.get('citations', 0))
                 })
+        print(f"Successfully extracted {len(citations_by_year)} years of citation history from graph.")
 
     # 3. Individual Publications -> Mapped to specific keys
     individual_publications = []
@@ -127,7 +130,9 @@ def process_and_save(data):
         total_citations_from_pubs += citations
 
     # Fallback: Calculate citationsByYear from individual publications if graph data is missing
+    # (This will only run if the API fails to return the graph, grouping by Pub Year as a last resort)
     if not citations_by_year and individual_publications:
+        print("Warning: Graph data missing. Falling back to grouping by publication year.")
         year_citations = defaultdict(int)
         
         for pub in individual_publications:
