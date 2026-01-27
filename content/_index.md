@@ -20,9 +20,6 @@ sections:
         | 📄 **8** Journal Articles | 📋 **16** Conference Papers | 📝 **6** Workshop Papers | 🏆 **2** Best Paper Awards |
         |:---:|:---:|:---:|:---:|
         
-        | 📚 **500+** Citations | 📈 **h-index: 9** | 📊 **i10-index: 9** |
-        |:---:|:---:|:---:|
-        
         | 🌟 **5** Q1 Journal Publications | 🏛️ **3** FT50 Publications | 🎯 **2** UTD24 Publications |
         |:---:|:---:|:---:|
         
