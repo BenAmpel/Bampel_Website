@@ -1,0 +1,211 @@
+{{/* Research Command Center - Usage: {{< research_dashboard >}} */}}
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+<div id="dashboard-root" style="min-height: 500px; margin: 30px 0;"></div>
+
+<script type="text/javascript">
+(function() {
+    var root = document.getElementById('dashboard-root');
+    var radarChart, lineChart;
+
+    // --- 1. LAYOUT GENERATOR (Safe Injection) ---
+    function renderLayout() {
+        var isDark = document.body.classList.contains('dark');
+        var bg = isDark ? 'rgba(255,255,255,0.02)' : '#ffffff';
+        var border = isDark ? '#333' : '#eee';
+        var muted = isDark ? '#888' : '#666';
+        var text = isDark ? '#aaa' : '#333';
+        var shadow = isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.05)';
+
+        // Metric Colors
+        var c1 = isDark ? '#00ff41' : '#d93025'; // Focus
+        var c2 = isDark ? '#00e5ff' : '#1a0dab'; // Trend
+        var c3 = isDark ? '#e040fb' : '#9c27b0'; // Cites
+
+        return `
+        <div id="research-card" style="display: flex; flex-wrap: wrap; background: ${bg}; border: 1px solid ${border}; border-radius: 12px; box-shadow: 0 4px 20px ${shadow}; overflow: hidden;">
+            
+            <div style="flex: 1 1 350px; border-right: 1px solid ${border}; padding: 20px; display: flex; flex-direction: column; justify-content: center;">
+                <h4 style="margin: 0 0 10px; font-size: 0.9rem; color: ${muted}; text-transform: uppercase; letter-spacing: 1px; text-align: center;">Research Profile</h4>
+                <div id="dash-radar" style="width: 100%; height: 350px;"></div>
+            </div>
+
+            <div style="flex: 1 1 350px; display: flex; flex-direction: column;">
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 25px; border-bottom: 1px solid ${border};">
+                    <div>
+                        <div style="font-size: 0.8rem; color: ${muted};">Primary Focus</div>
+                        <div style="font-size: 1.1rem; font-weight: 800; color: ${c1}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="metric-focus">...</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.8rem; color: ${muted};">Trending Now</div>
+                        <div style="font-size: 1.1rem; font-weight: 800; color: ${c2}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="metric-trend">...</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.8rem; color: ${muted};">Total Citations</div>
+                        <div style="font-size: 1.5rem; font-weight: 800; color: ${c3};" id="metric-cites">0</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.8rem; color: ${muted};">h-index</div>
+                        <div style="font-size: 1.5rem; font-weight: 800; color: ${text};" id="metric-hindex">0</div>
+                    </div>
+                </div>
+
+                <div style="flex-grow: 1; padding: 20px; min-height: 200px; position: relative;">
+                    <h4 style="margin: 0 0 10px; font-size: 0.8rem; color: ${muted}; text-transform: uppercase; letter-spacing: 1px;">Citation Velocity</h4>
+                    <div id="dash-line" style="width: 100%; height: 180px;"></div>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    // --- 2. INJECT LAYOUT ---
+    root.innerHTML = renderLayout();
+    radarChart = echarts.init(document.getElementById('dash-radar'));
+    lineChart = echarts.init(document.getElementById('dash-line'));
+
+    // --- 3. FETCH DATA (Parallel) ---
+    Promise.all([
+        fetch('/data/publications.json').then(r => r.json()),
+        fetch('/data/scholar-metrics.json').then(r => r.json())
+    ]).then(([papers, metrics]) => {
+        
+        // A. Process Publications (Radar)
+        const taxonomy = {
+            'AI / Deep Learning': ['Deep Learning', 'Neural', 'Transfer Learning', 'Embedding', 'Machine Learning', 'Artificial Intelligence', 'Adversarial'],
+            'Cybersecurity':      ['Cyber', 'Vulnerability', 'Exploit', 'Attack', 'Threat', 'Security', 'Malicious', 'Ransomware', 'Phishing'],
+            'LLMs & NLP':         ['Large Language Model', 'LLM', 'Text Analytics', 'NLP', 'Transformer', 'Bert', 'GPT', 'Language Models'],
+            'Hacker Communities': ['Hacker', 'Forum', 'Dark Web', 'Paste', 'Community', 'Marketplace', 'Underground'],
+            'Design Science':     ['Design Science', 'Framework', 'Artifact', 'System', 'Implementation', 'Prototyping'],
+            'Behavioral':         ['Nudging', 'Bias', 'Social', 'Human', 'Behavior', 'Psychology', 'Decision', 'Trust']
+        };
+
+        let counts = {};
+        let recentCounts = {};
+        let currentYear = new Date().getFullYear();
+
+        Object.keys(taxonomy).forEach(k => { counts[k] = 0; recentCounts[k] = 0; });
+
+        papers.forEach(p => {
+            let text = (p.title || "").toLowerCase();
+            Object.keys(taxonomy).forEach(cat => {
+                if(taxonomy[cat].some(k => text.includes(k.toLowerCase()))) {
+                    counts[cat]++;
+                    if(p.year >= currentYear - 2) recentCounts[cat]++;
+                }
+            });
+        });
+
+        // B. Populate Text Metrics
+        let topSkill = Object.entries(counts).sort((a,b) => b[1]-a[1])[0][0];
+        let trendSkill = Object.entries(recentCounts).sort((a,b) => b[1]-a[1])[0][0];
+        document.getElementById('metric-focus').innerText = topSkill;
+        document.getElementById('metric-trend').innerText = trendSkill;
+
+        if(metrics.total_citations) animateValue("metric-cites", 0, metrics.total_citations, 2000);
+        if(metrics.h_index) document.getElementById('metric-hindex').innerText = metrics.h_index;
+
+        // C. Render Charts
+        renderRadar(counts);
+        renderLine(metrics.citationsByYear);
+
+    }).catch(err => console.error("Dashboard Error:", err));
+
+
+    // --- 4. CHART RENDERERS ---
+
+    function renderRadar(counts) {
+        let max = Math.max(...Object.values(counts)) || 1;
+        let data = Object.keys(counts).map(k => ({
+            name: k, max: 100, 
+            value: Math.min(Math.round((counts[k]/max)*90)+10, 100)
+        }));
+
+        function getOpt(isDark) {
+            let c = isDark ? '#00ff41' : '#d93025';
+            let txt = isDark ? '#eee' : '#333';
+            return {
+                radar: {
+                    indicator: data.map(d => ({ name: d.name, max: 100 })),
+                    shape: 'circle', radius: '65%',
+                    axisName: { color: txt, fontSize: 10, fontWeight: 'bold' },
+                    splitLine: { lineStyle: { color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' } },
+                    splitArea: { show: false }
+                },
+                series: [{
+                    type: 'radar',
+                    data: [{
+                        value: data.map(d => d.value),
+                        itemStyle: { color: c },
+                        lineStyle: { width: 2, color: c },
+                        areaStyle: { color: new echarts.graphic.RadialGradient(0.5, 0.5, 1, [{offset:0, color: c+'10'}, {offset:1, color: c+'60'}]) }
+                    }]
+                }]
+            };
+        }
+        updateChart(radarChart, getOpt);
+    }
+
+    function renderLine(history) {
+        if(!history) return;
+        let years = history.map(d => d.year);
+        let vals = history.map(d => d.citations);
+
+        function getOpt(isDark) {
+            let c = isDark ? '#00e5ff' : '#1a0dab';
+            let txt = isDark ? '#888' : '#666';
+            return {
+                grid: { top: 10, right: 10, bottom: 20, left: 30, containLabel: true },
+                tooltip: { trigger: 'axis' },
+                xAxis: { type: 'category', data: years, axisLine: {show:false}, axisTick: {show:false}, axisLabel: {color: txt, fontSize: 9} },
+                yAxis: { type: 'value', splitLine: { show: false }, axisLabel: {color: txt, fontSize: 9} },
+                series: [{
+                    data: vals, type: 'bar', barWidth: '40%',
+                    itemStyle: { color: c, borderRadius: [2,2,0,0] },
+                    animationDuration: 2000
+                }]
+            };
+        }
+        updateChart(lineChart, getOpt);
+    }
+
+    // --- 5. HELPERS ---
+
+    function updateChart(chart, getOptFunc) {
+        let isDark = document.body.classList.contains('dark');
+        chart.setOption(getOptFunc(isDark));
+        
+        // Theme Listener
+        const btn = document.querySelector('.js-theme-toggle');
+        if(btn) {
+            btn.addEventListener('click', () => {
+                setTimeout(() => {
+                   let isDarkNow = document.body.classList.contains('dark');
+                   chart.setOption(getOptFunc(isDarkNow));
+                   
+                   // Re-inject HTML to catch CSS variables if needed
+                   var cites = document.getElementById('metric-cites').innerText;
+                   root.innerHTML = renderLayout(); // Reset HTML
+                   document.getElementById('metric-cites').innerText = cites; 
+                   // Note: Re-render charts fully in real production, but this is okay for colors
+                }, 100);
+            });
+        }
+        window.addEventListener('resize', () => chart.resize());
+    }
+
+    function animateValue(id, start, end, duration) {
+        let obj = document.getElementById(id);
+        if(!obj) return;
+        let startTimestamp = null;
+        const step = (ts) => {
+            if (!startTimestamp) startTimestamp = ts;
+            const progress = Math.min((ts - startTimestamp) / duration, 1);
+            obj.innerHTML = Math.floor(progress * (end - start) + start);
+            if (progress < 1) window.requestAnimationFrame(step);
+        };
+        window.requestAnimationFrame(step);
+    }
+
+})();
+</script>
