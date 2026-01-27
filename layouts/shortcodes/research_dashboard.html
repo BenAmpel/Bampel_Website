@@ -88,13 +88,16 @@
     const safeFetch = (url) => fetch(url)
         .then(response => {
             if (!response.ok) {
-                console.warn(`File not found: ${url}`);
+                console.warn(`File not found (${response.status}): ${url}`);
                 return null; // Return null instead of crashing
             }
-            return response.json();
+            return response.json().catch(err => {
+                console.warn(`JSON parse error for ${url}:`, err);
+                return null;
+            });
         })
         .catch(err => {
-            console.warn(`Error loading ${url}:`, err);
+            console.warn(`Network error loading ${url}:`, err);
             return null;
         });
 
@@ -184,32 +187,37 @@
         }
 
         // F. Render Network Stats (Bottom Right)
-        if (netStats) {
-            updateText('net-density', netStats.density || "0.00");
-            updateText('net-lcc', (netStats.lcc_percentage || 0) + "%");
+        if (netStats && typeof netStats === 'object' && !Array.isArray(netStats)) {
+            // Update density and LCC
+            updateText('net-density', netStats.density !== undefined ? netStats.density.toFixed(2) : "0.00");
+            updateText('net-lcc', (netStats.lcc_percentage !== undefined ? netStats.lcc_percentage : 0) + "%");
             
-            if (netStats.clusters && netStats.clusters.length > 0) {
-                let html = '';
-                netStats.clusters.forEach((c, i) => {
-                    let members = c.top_members ? c.top_members.slice(0, 3).join(", ") : "";
-                    let color = ['#00ff41', '#00e5ff', '#e040fb'][i] || '#ccc';
-                    html += `
-                    <div style="margin-bottom: 8px; padding-left: 10px; border-left: 3px solid ${color};">
-                        <strong style="color: inherit; opacity: 0.9;">Group ${String.fromCharCode(65+i)}</strong> 
-                        <span style="opacity: 0.6; font-size: 0.8em;">(${c.size} people)</span><br>
-                        <span style="font-size: 0.75em; opacity: 0.7;">w/ ${members}</span>
-                    </div>`;
-                });
-                var clustersEl = document.getElementById('net-clusters');
-                if (clustersEl) clustersEl.innerHTML = html;
-            } else {
-                var clustersEl = document.getElementById('net-clusters');
-                if (clustersEl) clustersEl.innerHTML = '<span style="opacity:0.5; font-size:0.8em">No clusters identified</span>';
+            // Render clusters
+            var clustersEl = document.getElementById('net-clusters');
+            if (clustersEl) {
+                if (netStats.clusters && Array.isArray(netStats.clusters) && netStats.clusters.length > 0) {
+                    let html = '';
+                    netStats.clusters.forEach((c, i) => {
+                        let members = c.top_members && Array.isArray(c.top_members) ? c.top_members.slice(0, 3).join(", ") : "";
+                        let color = ['#00ff41', '#00e5ff', '#e040fb'][i] || '#ccc';
+                        html += `
+                        <div style="margin-bottom: 8px; padding-left: 10px; border-left: 3px solid ${color};">
+                            <strong style="color: inherit; opacity: 0.9;">Group ${String.fromCharCode(65+i)}</strong> 
+                            <span style="opacity: 0.6; font-size: 0.8em;">(${c.size || 0} people)</span><br>
+                            <span style="font-size: 0.75em; opacity: 0.7;">w/ ${members || "N/A"}</span>
+                        </div>`;
+                    });
+                    clustersEl.innerHTML = html;
+                } else {
+                    clustersEl.innerHTML = '<span style="opacity:0.5; font-size:0.8em">No clusters identified</span>';
+                }
             }
         } else {
-            // Fallback if file is missing
+            // Fallback if file is missing or invalid
             var clustersEl = document.getElementById('net-clusters');
-            if (clustersEl) clustersEl.innerHTML = '<span style="opacity:0.5; font-size:0.8em">Analysis pending...</span>';
+            if (clustersEl) {
+                clustersEl.innerHTML = '<span style="opacity:0.5; font-size:0.8em">Analysis pending...</span>';
+            }
         }
 
         // G. CALCULATE CENTRALITY & KNOWLEDGE GRAPH
