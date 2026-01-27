@@ -1,0 +1,152 @@
+{{/* The Knowledge Graph - Usage: {{< knowledge_graph >}} */}}
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+<div id="knowledge-graph" style="width: 100%; height: 600px; border: 1px solid var(--card-border, #333); border-radius: 8px; background: var(--card-bg, #000);"></div>
+
+<script type="text/javascript">
+(function() {
+    var dom = document.getElementById('knowledge-graph');
+    var myChart = echarts.init(dom);
+    
+    // Config: Words to ignore when finding connections
+    const STOP_WORDS = new Set(['the','of','and','in','to','a','for','on','with','using','an','based','via','system','analysis','approach','study','framework','model','data','from','by','detection','paper','research','towards']);
+    const MIN_SHARED_WORDS = 1; 
+    
+    fetch('/data/scholar-metrics.json')
+        .then(r => r.json())
+        .then(data => {
+            if(!data.individualPublications) return;
+            buildGraph(data.individualPublications);
+        });
+
+    function buildGraph(papers) {
+        let nodes = [];
+        let links = [];
+
+        // 1. Process Nodes
+        papers.forEach((p, index) => {
+            // Clean title for NLP
+            let words = p.title.toLowerCase()
+                .replace(/[^a-z0-9 ]/g, '') 
+                .split(/\s+/)
+                .filter(w => w.length > 3 && !STOP_WORDS.has(w)); 
+            
+            p._words = new Set(words);
+            
+            nodes.push({
+                id: index,
+                name: p.title,
+                value: p.citations || 0,
+                year: p.year,
+                // Size nodes by Citations (Log scale so they don't get too huge)
+                symbolSize: Math.max(10, Math.min(60, Math.log((p.citations || 0) + 2) * 8)),
+                itemStyle: {
+                    color: getColorByYear(p.year)
+                },
+                label: {
+                    show: (p.citations || 0) > 20, // Only label the hits
+                    formatter: function(params) {
+                        return params.name.length > 20 ? params.name.substring(0, 20) + '...' : params.name;
+                    }
+                }
+            });
+        });
+
+        // 2. Process Links (Impact Weighted)
+        for (let i = 0; i < papers.length; i++) {
+            for (let j = i + 1; j < papers.length; j++) {
+                let p1 = papers[i];
+                let p2 = papers[j];
+                
+                // A. Check for Topic Connection
+                let intersection = 0;
+                p1._words.forEach(w => {
+                    if (p2._words.has(w)) intersection++;
+                });
+
+                if (intersection >= MIN_SHARED_WORDS) {
+                    // B. Calculate Impact Weight
+                    // Average citations of the two papers
+                    let avgCites = ((p1.citations || 0) + (p2.citations || 0)) / 2;
+                    
+                    // Logarithmic scale: Reduces the gap between 10 cites and 1000 cites
+                    // so the graph remains readable.
+                    let impactBonus = Math.log(avgCites + 1) * 1.5;
+
+                    links.push({
+                        source: i,
+                        target: j,
+                        // 'value' determines how close the physics engine pulls them
+                        value: intersection + impactBonus, 
+                        lineStyle: {
+                            // Width: Base topic overlap + Impact bonus
+                            width: (intersection * 0.5) + impactBonus,
+                            // Opacity: Higher impact = More solid lines
+                            opacity: Math.min(0.2 + (avgCites / 50), 0.8), 
+                            curveness: 0.2
+                        }
+                    });
+                }
+            }
+        }
+
+        renderChart(nodes, links);
+    }
+
+    function getColorByYear(year) {
+        // Gradient: Past (Purple) -> Present (Cyber Green)
+        let y = parseInt(year) || 2020;
+        if (y < 2020) return '#e040fb'; // Purple
+        if (y < 2022) return '#1a0dab'; // Blue
+        if (y < 2024) return '#00e5ff'; // Cyan
+        return '#00ff41';               // Green
+    }
+
+    function renderChart(nodes, links) {
+        let isDark = document.body.classList.contains('dark');
+        
+        let option = {
+            backgroundColor: 'transparent',
+            tooltip: {
+                formatter: (params) => {
+                    if (params.dataType === 'edge') return `Shared Keywords: ${Math.floor(params.value)}`;
+                    return `<strong>${params.name}</strong><br>Year: ${params.data.year}<br>Citations: ${params.value}`;
+                }
+            },
+            series: [{
+                type: 'graph',
+                layout: 'force',
+                data: nodes,
+                links: links,
+                roam: true,
+                zoom: 0.8,
+                label: { position: 'right', color: 'inherit' },
+                lineStyle: { color: isDark ? '#aaa' : '#666' },
+                force: {
+                    initLayout: 'circular',
+                    repulsion: 400,
+                    gravity: 0.1,
+                    edgeLength: [50, 250], // Allows highly cited clusters to bunch tighter
+                    friction: 0.9
+                }
+            }]
+        };
+
+        myChart.setOption(option);
+
+        // Theme Listener
+        const btn = document.querySelector('.js-theme-toggle');
+        if(btn) {
+            btn.addEventListener('click', () => {
+                setTimeout(() => {
+                    let isDarkNow = document.body.classList.contains('dark');
+                    myChart.setOption({
+                        series: [{ lineStyle: { color: isDarkNow ? '#aaa' : '#666' } }]
+                    });
+                }, 100);
+            });
+        }
+        window.addEventListener('resize', () => myChart.resize());
+    }
+})();
+</script>
