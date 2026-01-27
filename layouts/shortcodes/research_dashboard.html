@@ -33,8 +33,9 @@
                 <div id="dash-radar" style="width: 100%; height: 100%; min-height: 300px;"></div>
             </div>
 
-            <div style="grid-column: 2; grid-row: 1; padding: 25px; border-bottom: 1px solid ${border};">
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+            <div style="grid-column: 2; grid-row: 1; padding: 25px; border-bottom: 1px solid ${border}; display: flex; flex-direction: column;">
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                     <div>
                         <div style="font-size: 0.8rem; color: ${muted};">Primary Focus</div>
                         <div style="font-size: 1.1rem; font-weight: 800; color: ${c1}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="metric-focus">...</div>
@@ -56,6 +57,11 @@
                         <div style="font-size: 1.5rem; font-weight: 800; color: ${text};" id="metric-hindex">0</div>
                     </div>
                 </div>
+
+                <div style="flex-grow: 1; position: relative; border-top: 1px solid ${border}; padding-top: 15px;">
+                    <h4 style="margin: 0 0 5px; font-size: 0.8rem; color: ${muted}; text-transform: uppercase; letter-spacing: 1px;">Citations by Year</h4>
+                    <div id="dash-line" style="width: 100%; height: 180px;"></div>
+                </div>
             </div>
 
             <div style="grid-column: 1; grid-row: 2; padding: 20px; border-right: 1px solid ${border};">
@@ -65,16 +71,9 @@
             </div>
 
             <div style="grid-column: 2; grid-row: 2; padding: 20px; display: flex; flex-direction: column;">
-                <div style="flex-grow: 1; min-height: 200px; position: relative;">
-                    <h4 style="margin: 0 0 10px; font-size: 0.8rem; color: ${muted}; text-transform: uppercase; letter-spacing: 1px;">Citations by Year</h4>
-                    <div id="dash-line" style="width: 100%; height: calc(100% - 40px); min-height: 180px;"></div>
-                </div>
-                
-                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid ${border};">
-                    <h4 style="font-size: 0.8rem; color: ${muted}; text-transform: uppercase; margin: 0 0 10px;">Most Central Papers (Eigenvector)</h4>
-                    <div id="centrality-list" style="font-size: 0.85rem; color: ${text};">
-                        <div style="padding: 5px 0;">Computing...</div>
-                    </div>
+                <h4 style="font-size: 0.8rem; color: ${muted}; text-transform: uppercase; margin: 0 0 10px;">Most Central Papers (Eigenvector)</h4>
+                <div id="centrality-list" style="font-size: 0.85rem; color: ${text};">
+                    <div style="padding: 5px 0;">Computing...</div>
                 </div>
             </div>
         </div>`;
