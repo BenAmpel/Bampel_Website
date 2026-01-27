@@ -32,8 +32,8 @@ sections:
         
         ---
         
-        {{< spoiler text="🛠️ Skills & Expertise" >}}
-        {{< skills_radar >}}
+        {{< spoiler text="📊 Research Dashboard" >}}
+        {{< research_dashboard >}}
         {{< /spoiler >}}
         
         {{< spoiler text="🤝 Collaboration Network" >}}
