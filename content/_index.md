@@ -23,7 +23,7 @@ sections:
         | 🌟 **5** Q1 Journal Publications | 🏛️ **3** FT50 Publications | 🎯 **2** UTD24 Publications |
         |:---:|:---:|:---:|
         
-        **Top Venues:** MISQ • JMIS • ACM TMIS • ISF • IEEE ISI • HICSS • AMCIS • ICIS • ACM KDD
+        **Selected Venues:** MISQ • JMIS • ACM TMIS • ISF • IEEE ISI • HICSS • AMCIS • ICIS • ACM KDD
         
         [📖 View Google Scholar Profile →](https://scholar.google.com/citations?user=XDdwaZUAAAAJ&hl=en)
         
@@ -33,18 +33,6 @@ sections:
         {{< research_dashboard >}}
         {{< /spoiler >}}   
 
-        {{< spoiler text="🤝 Collaboration Network" >}}
-        {{< research_network >}}
-        {{< network_stats >}}
-        {{< /spoiler >}}
-        
-        {{< spoiler text="🌍 Research Footprint" >}}
-        {{< impact_map >}}
-        
-        **Legend:** 🟢 Conference | 🔵 Collaboration | 🟠 Institution
-        
-        *Interactive map of conference presentations and collaborator institutions worldwide*
-        {{< /spoiler >}}
     design:
       columns: '1'
 
