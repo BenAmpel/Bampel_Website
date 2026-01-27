@@ -1,140 +1,183 @@
-{{/* Dynamic Research Skills Radar - Scans titles for keywords */}}
+{{/* Research Intelligence Dashboard - Usage: {{< skills_radar >}} */}}
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 
-<div id="skills-radar" style="width: 100%; height: 450px; margin: 20px auto;"></div>
+<div id="research-dashboard" style="display: flex; flex-wrap: wrap; align-items: center; gap: 20px; background: var(--card-bg, rgba(255,255,255,0.02)); border: 1px solid var(--card-border, #eee); border-radius: 12px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
+    
+    <div id="skills-radar" style="flex: 1 1 400px; height: 400px; min-width: 300px;"></div>
+
+    <div id="skills-insights" style="flex: 1 1 250px; padding: 10px;">
+        <h4 style="margin-top: 0; font-size: 1.1rem; color: var(--text-muted, #888); text-transform: uppercase; letter-spacing: 1px;">Research Insights</h4>
+        
+        <div style="margin-bottom: 25px;">
+            <div style="font-size: 2rem; font-weight: 800; color: var(--primary, #d93025);" id="insight-focus">...</div>
+            <div style="font-size: 0.9rem; color: var(--text-muted, #666);">All-Time Primary Focus</div>
+        </div>
+
+        <div style="margin-bottom: 25px;">
+            <div style="font-size: 2rem; font-weight: 800; color: var(--secondary, #1a0dab);" id="insight-trend">...</div>
+            <div style="font-size: 0.9rem; color: var(--text-muted, #666);">Trending (2024-2026)</div>
+        </div>
+
+        <div>
+            <div style="font-size: 2rem; font-weight: 800; color: var(--accent, #9c27b0);" id="insight-velocity">0</div>
+            <div style="font-size: 0.9rem; color: var(--text-muted, #666);">Papers in Last 3 Years</div>
+        </div>
+    </div>
+</div>
 
 <script type="text/javascript">
 (function() {
     var dom = document.getElementById('skills-radar');
     var myChart = echarts.init(dom);
 
-    // --- 1. THE SKILL TAXONOMY ---
-    // Define the 6 axes and the keywords that trigger them.
-    // The script will scan your titles for these words (case-insensitive).
+    // --- 1. TAXONOMY (Keywords to Skills) ---
     const taxonomy = {
-        'AI & Deep Learning': ['Deep Learning', 'Neural', 'Transfer Learning', 'Embedding', 'Machine Learning', 'Artificial Intelligence', 'Clustering', 'Classification'],
-        'Cybersecurity':      ['Cyber', 'Vulnerability', 'Exploit', 'Attack', 'Threat', 'Security', 'Malicious', 'Ransomware', 'Scam', 'Fraud'],
+        'AI & Deep Learning': ['Deep Learning', 'Neural', 'Transfer Learning', 'Embedding', 'Machine Learning', 'Artificial Intelligence'],
+        'Cybersecurity':      ['Cyber', 'Vulnerability', 'Exploit', 'Attack', 'Threat', 'Security', 'Malicious', 'Ransomware', 'Phishing'],
         'LLMs & NLP':         ['Large Language Model', 'LLM', 'Text Analytics', 'NLP', 'Transformer', 'Bert', 'GPT', 'Language Models'],
         'Hacker Communities': ['Hacker', 'Forum', 'Dark Web', 'Paste', 'Community', 'Marketplace', 'Underground'],
         'Design Science':     ['Design Science', 'Framework', 'Artifact', 'System', 'Implementation', 'Prototyping'],
         'Behavioral':         ['Nudging', 'Bias', 'Social', 'Human', 'Behavior', 'Psychology', 'Decision', 'Trust']
     };
 
-    // --- 2. FETCH DATA & ANALYZE ---
+    // Theme Variables
+    function getThemeVars() {
+        const isDark = document.body.classList.contains('dark');
+        return {
+            primary: isDark ? '#00ff41' : '#d93025',
+            secondary: isDark ? '#00e5ff' : '#1a0dab',
+            accent: isDark ? '#e040fb' : '#9c27b0',
+            text: isDark ? '#eee' : '#333',
+            muted: isDark ? '#aaa' : '#666',
+            bg: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
+            border: isDark ? '#333' : '#eee'
+        };
+    }
+
+    // Update CSS Variables dynamically
+    function updateCSS() {
+        const t = getThemeVars();
+        const root = document.getElementById('research-dashboard');
+        if(root){
+            root.style.setProperty('--primary', t.primary);
+            root.style.setProperty('--secondary', t.secondary);
+            root.style.setProperty('--accent', t.accent);
+            root.style.setProperty('--text-muted', t.muted);
+            root.style.setProperty('--card-bg', t.bg);
+            root.style.setProperty('--card-border', t.border);
+        }
+    }
+
+    // --- 2. FETCH & ANALYZE ---
     fetch('/data/publications.json')
         .then(res => res.json())
         .then(papers => {
-            var scores = calculateScores(papers);
-            renderChart(scores);
+            if(!Array.isArray(papers)) return;
+            
+            // A. Calculate All-Time Scores
+            let allTimeCounts = countKeywords(papers);
+            let dataset = normalizeScores(allTimeCounts);
+            
+            // B. Calculate "Trending" (Recent Papers Only)
+            let currentYear = new Date().getFullYear();
+            let recentPapers = papers.filter(p => p.year >= (currentYear - 2)); // Last 3 years
+            let recentCounts = countKeywords(recentPapers);
+            
+            // C. Populate Insights Panel
+            populateInsights(allTimeCounts, recentCounts, recentPapers.length);
+            
+            // D. Render Chart
+            renderChart(dataset);
         })
-        .catch(err => {
-            console.error("Radar Error:", err);
-            // Fallback data if fetch fails
-            renderChart([80, 80, 80, 80, 80, 80]); 
-        });
+        .catch(err => console.error("Radar Error:", err));
 
-    function calculateScores(papers) {
-        // Initialize counts
+    // --- HELPER: Count Keywords ---
+    function countKeywords(paperList) {
         let counts = {};
         Object.keys(taxonomy).forEach(k => counts[k] = 0);
 
-        // Scan Titles
-        papers.forEach(p => {
+        paperList.forEach(p => {
             let text = (p.title || "").toLowerCase();
-            
             Object.keys(taxonomy).forEach(category => {
-                let keywords = taxonomy[category];
-                // If any keyword matches the title, increment that category
-                let hit = keywords.some(k => text.includes(k.toLowerCase()));
+                let hit = taxonomy[category].some(k => text.includes(k.toLowerCase()));
                 if (hit) counts[category]++;
             });
         });
-
-        // Normalize to 0-100 Scale
-        // We find the category with the MOST papers and set that to 95/100.
-        // Everything else is scaled relative to it.
-        let maxVal = Math.max(...Object.values(counts));
-        if (maxVal === 0) maxVal = 1; // Prevent div/0
-
-        let dataset = Object.keys(taxonomy).map(key => {
-            let raw = counts[key];
-            // Scale formula: (Count / Max) * 100
-            // We add a small baseline (20) so categories with 0 papers don't look broken
-            return {
-                name: key,
-                max: 100,
-                value: Math.min(Math.round((raw / maxVal) * 80) + 20, 100)
-            };
-        });
-
-        return dataset;
+        return counts;
     }
 
+    // --- HELPER: Normalize for Chart ---
+    function normalizeScores(counts) {
+        let maxVal = Math.max(...Object.values(counts)) || 1;
+        return Object.keys(taxonomy).map(key => ({
+            name: key,
+            max: 100,
+            value: Math.min(Math.round((counts[key] / maxVal) * 90) + 10, 100)
+        }));
+    }
+
+    // --- HELPER: Populate HTML Text ---
+    function populateInsights(allTime, recent, recentCount) {
+        // 1. Primary Focus (Highest All-Time)
+        let topSkill = Object.entries(allTime).reduce((a, b) => a[1] > b[1] ? a : b)[0];
+        document.getElementById('insight-focus').innerText = topSkill;
+
+        // 2. Trending (Highest Recent)
+        let trendSkill = Object.entries(recent).reduce((a, b) => a[1] > b[1] ? a : b)[0];
+        document.getElementById('insight-trend').innerText = trendSkill;
+
+        // 3. Velocity
+        document.getElementById('insight-velocity').innerText = recentCount;
+    }
+
+    // --- 3. RENDER CHART ---
     function renderChart(data) {
         function getOption(isDark) {
-            var mainColor = isDark ? '#00ff41' : '#d93025'; // Cyber Green vs Academic Red
-            var fillColor = isDark ? 'rgba(0, 255, 65, 0.2)' : 'rgba(217, 48, 37, 0.2)';
-            var textColor = isDark ? '#eee' : '#333';
-            var splitColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
-
+            let t = getThemeVars();
             return {
                 backgroundColor: 'transparent',
-                tooltip: {
-                    trigger: 'item',
-                    formatter: function() {
-                        // Custom tooltip showing the actual values
-                        let html = `<div style="font-weight:bold; margin-bottom:5px;">Relative Expertise</div>`;
-                        data.forEach(d => {
-                            html += `${d.name}: ${d.value}%<br>`;
-                        });
-                        return html;
-                    },
-                    backgroundColor: isDark ? 'rgba(50,50,50,0.9)' : 'rgba(255,255,255,0.9)',
-                    textStyle: { color: textColor }
-                },
                 radar: {
                     indicator: data.map(d => ({ name: d.name, max: 100 })),
                     shape: 'circle',
                     splitNumber: 4,
                     radius: '65%',
-                    axisName: {
-                        color: textColor,
-                        fontWeight: 'bold',
-                        fontSize: 11
-                    },
-                    splitLine: {
-                        lineStyle: { color: splitColor }
-                    },
+                    axisName: { color: t.text, fontWeight: 'bold', fontSize: 11 },
+                    splitLine: { lineStyle: { color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' } },
                     splitArea: { show: false },
-                    axisLine: { lineStyle: { color: splitColor } }
+                    axisLine: { lineStyle: { color: isDark ? '#444' : '#ccc' } }
                 },
                 series: [{
                     type: 'radar',
                     data: [{
                         value: data.map(d => d.value),
-                        name: 'Research Profile',
+                        name: 'Expertise',
                         symbol: 'circle',
                         symbolSize: 6,
-                        itemStyle: { color: mainColor },
-                        lineStyle: { width: 3, color: mainColor },
-                        areaStyle: { color: fillColor }
+                        itemStyle: { color: t.primary },
+                        lineStyle: { width: 3, color: t.primary },
+                        areaStyle: { 
+                            color: new echarts.graphic.RadialGradient(0.5, 0.5, 1, [
+                                { offset: 0, color: t.primary + '10' }, // Transparent center
+                                { offset: 1, color: t.primary + '60' }  // Opaque edge
+                            ])
+                        }
                     }]
-                }],
-                animationDuration: 1500,
-                animationEasing: 'cubicOut'
+                }]
             };
         }
 
-        // Render & Listeners
+        // Initialize
+        updateCSS();
         let isDark = document.body.classList.contains('dark');
         myChart.setOption(getOption(isDark));
 
+        // Listeners
         window.addEventListener('resize', () => myChart.resize());
-
-        const themeButton = document.querySelector('.js-theme-toggle');
-        if(themeButton){
-            themeButton.addEventListener('click', () => {
+        const btn = document.querySelector('.js-theme-toggle');
+        if(btn){
+            btn.addEventListener('click', () => {
                 setTimeout(() => {
+                    updateCSS(); // Update text colors
                     let isDarkNow = document.body.classList.contains('dark');
                     myChart.setOption(getOption(isDarkNow));
                 }, 100);
