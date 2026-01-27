@@ -50,14 +50,19 @@ def fetch_analytics():
     geo_resp = client.run_report(geo_req)
     location_data = [{"city": r.dimension_values[0].value, "country": r.dimension_values[1].value, "visitors": int(r.metric_values[0].value)} for r in geo_resp.rows]
 
-    # 3. Top Pages (NEW: What are they reading?)
+    # 3. Top Pages (FIXED: Moved desc=True to OrderBy parent)
     page_req = RunReportRequest(
         property=f"properties/{PROPERTY_ID}",
         dimensions=[Dimension(name="pagePath")],
         metrics=[Metric(name="screenPageViews")],
         date_ranges=[DateRange(start_date="30daysAgo", end_date="today")],
         limit=10,
-        order_bys=[OrderBy(metric=OrderBy.MetricOrderBy(metric_name="screenPageViews", desc=True))]
+        order_bys=[
+            OrderBy(
+                metric=OrderBy.MetricOrderBy(metric_name="screenPageViews"),
+                desc=True
+            )
+        ]
     )
     page_resp = client.run_report(page_req)
     page_data = [{"path": r.dimension_values[0].value, "views": int(r.metric_values[0].value)} for r in page_resp.rows]
