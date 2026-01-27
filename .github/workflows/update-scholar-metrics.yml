@@ -9,6 +9,8 @@ on:
 jobs:
   update-metrics:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Critical: Grants permission to push back to the repo
     
     steps:
       - name: Checkout repository
@@ -30,9 +32,14 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git stash -u
-          git pull --no-rebase origin main
-          git stash pop
-          git add -A
-          git diff --staged --quiet || git commit -m "chore: Update Scholar metrics and regenerate images [skip ci]"
-          git push origin main
+          
+          # Simplified Workflow: Add file, check for changes, commit, push.
+          git add static/data/scholar-metrics.json
+          
+          # Only commit if there are changes (prevents empty commit errors)
+          if git diff --staged --quiet; then
+            print("No changes to commit.")
+          else
+            git commit -m "chore: Update Scholar metrics [skip ci]"
+            git push
+          fi
