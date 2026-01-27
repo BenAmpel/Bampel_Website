@@ -48,8 +48,11 @@ sections:
         {{< /spoiler >}}
         
         {{< spoiler text="🤝 Collaboration Network" >}}
-        ![Collaboration Network](/images/coauthor-network.png)
-        *Research collaboration network based on co-authored publications*
+        {{< research_network >}}
+        
+        **Legend:** 🔴 Self | 🟣 Advisor | 🔵 Professor | 🟡 Collaborator | 🟢 Student
+        
+        *Interactive co-authorship network - drag nodes, zoom, and hover for details*
         {{< /spoiler >}}
         
         {{< spoiler text="🌍 Research Footprint" >}}

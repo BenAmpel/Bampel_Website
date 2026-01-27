@@ -1,0 +1,208 @@
+# Research Collaboration Network Data
+# Based on co-authored publications
+
+# NODES: The people/institutions
+# id: Unique identifier (must match in links)
+# name: Display name
+# group: Category for coloring (self, advisor, professor, student, collaborator)
+# size: Node size (importance/frequency)
+
+nodes:
+  # Self - Center node
+  - id: "self"
+    name: "Benjamin Ampel"
+    group: "self"
+    size: 80
+
+  # Primary Advisor
+  - id: "hchen"
+    name: "Hsinchun Chen"
+    group: "advisor"
+    size: 65
+
+  # Frequent Collaborators (Professors)
+  - id: "samtani"
+    name: "Sagar Samtani"
+    group: "professor"
+    size: 60
+
+  - id: "nunamaker"
+    name: "Jay Nunamaker Jr"
+    group: "professor"
+    size: 50
+
+  - id: "syang"
+    name: "Shanchieh Yang"
+    group: "professor"
+    size: 45
+
+  # Research Collaborators
+  - id: "sullman"
+    name: "Steven Ullman"
+    group: "collaborator"
+    size: 50
+
+  - id: "hzhu"
+    name: "Hongyi Zhu"
+    group: "collaborator"
+    size: 48
+
+  - id: "mpatton"
+    name: "Mark Patton"
+    group: "collaborator"
+    size: 45
+
+  - id: "blazarine"
+    name: "Ben Lazarine"
+    group: "collaborator"
+    size: 42
+
+  - id: "ygao"
+    name: "Yang Gao"
+    group: "collaborator"
+    size: 45
+
+  - id: "tvahedi"
+    name: "Tabish Vahedi"
+    group: "collaborator"
+    size: 40
+
+  - id: "chyang"
+    name: "Chi-Heng Yang"
+    group: "collaborator"
+    size: 38
+
+  - id: "jhu"
+    name: "James Hu"
+    group: "collaborator"
+    size: 38
+
+  - id: "mhashim"
+    name: "Mujtaba Hashim"
+    group: "collaborator"
+    size: 38
+
+  # Ph.D. Students/Mentees
+  - id: "kotto"
+    name: "Kevin Otto"
+    group: "student"
+    size: 35
+
+  - id: "cmarx"
+    name: "Carlos Marx"
+    group: "student"
+    size: 35
+
+  - id: "cdacosta"
+    name: "Christian Dacosta"
+    group: "student"
+    size: 35
+
+  - id: "czhang"
+    name: "Chenkai Zhang"
+    group: "student"
+    size: 35
+
+  - id: "rreyes"
+    name: "Rodrigo Reyes"
+    group: "student"
+    size: 35
+
+  - id: "mwagner"
+    name: "Max Wagner"
+    group: "student"
+    size: 35
+
+# LINKS: The connections (based on co-authorship)
+links:
+  # Benjamin Ampel connections
+  - source: "self"
+    target: "hchen"
+  - source: "self"
+    target: "samtani"
+  - source: "self"
+    target: "sullman"
+  - source: "self"
+    target: "hzhu"
+  - source: "self"
+    target: "mpatton"
+  - source: "self"
+    target: "blazarine"
+  - source: "self"
+    target: "ygao"
+  - source: "self"
+    target: "tvahedi"
+  - source: "self"
+    target: "nunamaker"
+  - source: "self"
+    target: "chyang"
+  - source: "self"
+    target: "jhu"
+  - source: "self"
+    target: "syang"
+  - source: "self"
+    target: "kotto"
+  - source: "self"
+    target: "cmarx"
+  - source: "self"
+    target: "cdacosta"
+  - source: "self"
+    target: "czhang"
+  - source: "self"
+    target: "rreyes"
+  - source: "self"
+    target: "mwagner"
+  - source: "self"
+    target: "mhashim"
+
+  # Hsinchun Chen's network (UA Lab)
+  - source: "hchen"
+    target: "samtani"
+  - source: "hchen"
+    target: "mpatton"
+  - source: "hchen"
+    target: "hzhu"
+  - source: "hchen"
+    target: "nunamaker"
+  - source: "hchen"
+    target: "sullman"
+  - source: "hchen"
+    target: "tvahedi"
+  - source: "hchen"
+    target: "cdacosta"
+  - source: "hchen"
+    target: "rreyes"
+  - source: "hchen"
+    target: "mwagner"
+  - source: "hchen"
+    target: "mhashim"
+
+  # Sagar Samtani's network (IU)
+  - source: "samtani"
+    target: "blazarine"
+  - source: "samtani"
+    target: "ygao"
+  - source: "samtani"
+    target: "hzhu"
+  - source: "samtani"
+    target: "sullman"
+  - source: "samtani"
+    target: "syang"
+  - source: "samtani"
+    target: "czhang"
+
+  # Student collaborations
+  - source: "blazarine"
+    target: "cmarx"
+  - source: "kotto"
+    target: "hzhu"
+  - source: "ygao"
+    target: "hzhu"
+  - source: "sullman"
+    target: "blazarine"
+  - source: "sullman"
+    target: "syang"
+  - source: "mhashim"
+    target: "cdacosta"
+  - source: "mhashim"
+    target: "mwagner"

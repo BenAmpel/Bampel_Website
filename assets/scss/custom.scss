@@ -2915,3 +2915,61 @@ body.dark .leaflet-popup-close-button {
 .map-legend-dot.collaboration { background: #00bfff; }
 .map-legend-dot.institution { background: #ff6b35; }
 
+// =============================================================================
+// ===== INTERACTIVE RESEARCH NETWORK STYLING =====
+// =============================================================================
+
+#research-network-container {
+  margin: 1rem 0;
+  border: 1px solid #333;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+// Cyber mode network container
+body.dark #research-network-container {
+  border: 1px solid #00ff41;
+  box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+}
+
+// Manuscript mode network container  
+body:not(.dark) #research-network-container {
+  border: 1px solid #ccc;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+// Network legend styling
+.network-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 10px;
+  font-size: 0.85rem;
+}
+
+.network-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.network-legend-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+}
+
+// Legend colors matching ECharts
+body.dark .network-legend-dot.self { background: #00ff41; }
+body.dark .network-legend-dot.advisor { background: #ff00ff; }
+body.dark .network-legend-dot.professor { background: #00ffff; }
+body.dark .network-legend-dot.collaborator { background: #ffff00; }
+body.dark .network-legend-dot.student { background: #ff6b35; }
+
+body:not(.dark) .network-legend-dot.self { background: #d93025; }
+body:not(.dark) .network-legend-dot.advisor { background: #1a0dab; }
+body:not(.dark) .network-legend-dot.professor { background: #007b83; }
+body:not(.dark) .network-legend-dot.collaborator { background: #f9ab00; }
+body:not(.dark) .network-legend-dot.student { background: #34a853; }
+
