@@ -80,9 +80,17 @@
 
     // --- 2. INIT LAYOUT ---
     root.innerHTML = renderLayout();
-    radarChart = echarts.init(document.getElementById('dash-radar'));
-    lineChart = echarts.init(document.getElementById('dash-line'));
-    knowledgeGraphChart = echarts.init(document.getElementById('knowledge-graph'));
+    
+    // Initialize charts - use requestAnimationFrame to ensure DOM is ready
+    requestAnimationFrame(() => {
+        var radarEl = document.getElementById('dash-radar');
+        var lineEl = document.getElementById('dash-line');
+        var graphEl = document.getElementById('knowledge-graph');
+        
+        if (radarEl && typeof echarts !== 'undefined') radarChart = echarts.init(radarEl);
+        if (lineEl && typeof echarts !== 'undefined') lineChart = echarts.init(lineEl);
+        if (graphEl && typeof echarts !== 'undefined') knowledgeGraphChart = echarts.init(graphEl);
+    });
 
     // --- 3. SAFE FETCH HELPER ---
     const safeFetch = (url) => fetch(url)
@@ -233,15 +241,27 @@
         }
 
         // G. CALCULATE CENTRALITY & KNOWLEDGE GRAPH
-        if(scholarData && scholarData.individualPublications) {
-            storedPublications = scholarData.individualPublications; // Store for theme toggle
-            calculateCentrality(scholarData.individualPublications);
-            renderKnowledgeGraph(scholarData.individualPublications);
-        } else if (papers.length > 0) {
-            // Fallback: use papers from publications.json if available
-            storedPublications = papers;
-            renderKnowledgeGraph(papers);
-        }
+        // Ensure chart is initialized before rendering (with a small delay to ensure DOM is ready)
+        setTimeout(() => {
+            if (!knowledgeGraphChart) {
+                var graphEl = document.getElementById('knowledge-graph');
+                if (graphEl && typeof echarts !== 'undefined') {
+                    knowledgeGraphChart = echarts.init(graphEl);
+                }
+            }
+            
+            if(scholarData && scholarData.individualPublications && scholarData.individualPublications.length > 0) {
+                storedPublications = scholarData.individualPublications; // Store for theme toggle
+                calculateCentrality(scholarData.individualPublications);
+                renderKnowledgeGraph(scholarData.individualPublications);
+            } else if (papers.length > 0) {
+                // Fallback: use papers from publications.json if available
+                storedPublications = papers;
+                renderKnowledgeGraph(papers);
+            } else {
+                console.warn('No publication data available for knowledge graph');
+            }
+        }, 200);
 
     }).catch(e => console.error("Critical Dashboard Failure:", e));
 
@@ -333,6 +353,21 @@
 
     // --- 5. KNOWLEDGE GRAPH RENDERER ---
     function renderKnowledgeGraph(papers) {
+        if (!papers || !Array.isArray(papers) || papers.length === 0) {
+            console.warn('renderKnowledgeGraph: No papers data provided');
+            return;
+        }
+        
+        if (!knowledgeGraphChart) {
+            var graphEl = document.getElementById('knowledge-graph');
+            if (graphEl) {
+                knowledgeGraphChart = echarts.init(graphEl);
+            } else {
+                console.error('renderKnowledgeGraph: Chart element not found');
+                return;
+            }
+        }
+        
         const STOP_WORDS = new Set(['the','of','and','in','to','a','for','on','with','using','an','based','via','system','analysis','approach','study','framework','model','data','from','by','detection','paper','research','towards']);
         
         // Weight Tuning
@@ -457,20 +492,29 @@
             }]
         };
 
-        knowledgeGraphChart.setOption(option);
+        try {
+            knowledgeGraphChart.setOption(option);
+            console.log('Knowledge graph rendered with', nodes.length, 'nodes and', links.length, 'links');
+        } catch (e) {
+            console.error('Error rendering knowledge graph:', e);
+        }
         
         const btn = document.querySelector('.js-theme-toggle');
         if(btn) {
             btn.addEventListener('click', () => {
                 setTimeout(() => {
                     let isDarkNow = document.body.classList.contains('dark');
-                    knowledgeGraphChart.setOption({
-                        series: [{ lineStyle: { color: isDarkNow ? '#aaa' : '#666' } }]
-                    });
+                    if (knowledgeGraphChart) {
+                        knowledgeGraphChart.setOption({
+                            series: [{ lineStyle: { color: isDarkNow ? '#aaa' : '#666' } }]
+                        });
+                    }
                 }, 100);
             });
         }
-        window.addEventListener('resize', () => knowledgeGraphChart.resize());
+        if (knowledgeGraphChart) {
+            window.addEventListener('resize', () => knowledgeGraphChart.resize());
+        }
     }
 
     function getColorByYear(year) {
