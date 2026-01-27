@@ -29,16 +29,9 @@ sections:
         
         ---
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; gap: 20px; margin: 30px 0;">
-          <div style="grid-column: 1 / 3; grid-row: 1;">
-            {{< research_dashboard >}}
-          </div>
-          <div style="grid-column: 1; grid-row: 2;">
-            <h4 style="margin: 0 0 15px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7;">Impact Map</h4>
-            <p style="font-size: 0.85rem; opacity: 0.6; margin-bottom: 15px;">Visual representation of research connections where highly cited publications dominate, while newer projects appear lighter in the background.</p>
-            {{< knowledge_graph >}}
-          </div>
-        </div>
+        {{< spoiler text="📊 Research Dashboard" >}}
+        {{< research_dashboard >}}
+        {{< /spoiler >}}
         
         {{< spoiler text="🤝 Collaboration Network" >}}
         {{< research_network >}}
