@@ -27,6 +27,9 @@ jobs:
         run: |
           pip install google-search-results google-analytics-data google-auth
       
+      - name: Generate Network Analysis
+        run: python scripts/generate_network.py
+      
       - name: Update Scholar metrics
         env:
           SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
