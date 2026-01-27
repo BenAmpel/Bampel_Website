@@ -1,16 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate a visually appealing co-author network graph for the website.
-
-Usage:
-    python3 -m venv venv
-    source venv/bin/activate
-    pip install networkx matplotlib numpy
-    python generate_network.py
-
-Output:
-    - ../static/images/coauthor-network.png (light mode)
-    - ../static/images/coauthor-network-dark.png (dark mode)
+Generate co-author network graph AND export network statistics.
 """
 
 import json
@@ -19,85 +9,129 @@ import os
 import networkx as nx
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
-from matplotlib.colors import LinearSegmentedColormap
 import numpy as np
 from collections import defaultdict
 from pathlib import Path
+from networkx.algorithms import community
 
-# Get the script's directory to find relative paths
+# --- CONFIGURATION ---
 SCRIPT_DIR = Path(__file__).parent
 PROJECT_ROOT = SCRIPT_DIR.parent
 PUBLICATIONS_FILE = PROJECT_ROOT / "static" / "data" / "publications.json"
-OUTPUT_DIR = PROJECT_ROOT / "static" / "images"
+OUTPUT_IMG_DIR = PROJECT_ROOT / "static" / "images"
+OUTPUT_DATA_FILE = PROJECT_ROOT / "static" / "data" / "network_stats.json"
 
-# Author name normalization map
 AUTHOR_NORMALIZATION = {
-    'B Ampel': 'Benjamin Ampel',
-    'BM Ampel': 'Benjamin Ampel',
-    'B. Ampel': 'Benjamin Ampel',
-    'Benjamin Ampel': 'Benjamin Ampel',
-    'H Chen': 'Hsinchun Chen',
-    'H. Chen': 'Hsinchun Chen',
-    'S Samtani': 'Sagar Samtani',
-    'S. Samtani': 'Sagar Samtani',
-    'S Ullman': 'Steven Ullman',
-    'S. Ullman': 'Steven Ullman',
-    'H Zhu': 'Hongyi Zhu',
-    'H. Zhu': 'Hongyi Zhu',
-    'M Patton': 'Mark Patton',
-    'M. Patton': 'Mark Patton',
-    'B Lazarine': 'Ben Lazarine',
-    'B. Lazarine': 'Ben Lazarine',
-    'T Vahedi': 'Tala Vahedi',
-    'T. Vahedi': 'Tala Vahedi',
-    'K Otto': 'Kaeli Otto',
-    'K. Otto': 'Kaeli Otto',
-    'Y Gao': 'Yang Gao',
-    'Y. Gao': 'Yang Gao',
-    'J Hu': 'James Hu',
-    'J. Hu': 'James Hu',
-    'CH Yang': 'Chi-Heng Yang',
-    'JF Nunamaker Jr': 'Jay Nunamaker',
-    'C Marx': 'Carolin Marx',
-    'C Dacosta': 'Cade Dacosta',
-    'C Zhang': 'Chengjun Zhang',
-    'M Hashim': 'Matthew Hashim',
-    'M Wagner': 'Mason Wagner',
-    'RY Reyes': 'Raul Reyes',
-    'S Yang': 'Shanchieh Yang',
+    'B Ampel': 'Benjamin Ampel', 'Benjamin Ampel': 'Benjamin Ampel',
+    'H Chen': 'Hsinchun Chen', 'H. Chen': 'Hsinchun Chen',
+    'S Samtani': 'Sagar Samtani', 'S. Samtani': 'Sagar Samtani',
+    'S Ullman': 'Steven Ullman', 'S. Ullman': 'Steven Ullman',
+    'H Zhu': 'Hongyi Zhu', 'H. Zhu': 'Hongyi Zhu',
+    'M Patton': 'Mark Patton', 'M. Patton': 'Mark Patton',
+    'B Lazarine': 'Ben Lazarine', 'B. Lazarine': 'Ben Lazarine',
+    'T Vahedi': 'Tala Vahedi', 'T. Vahedi': 'Tala Vahedi',
+    'K Otto': 'Kaeli Otto', 'K. Otto': 'Kaeli Otto',
+    'Y Gao': 'Yang Gao', 'Y. Gao': 'Yang Gao',
+    'J Hu': 'James Hu', 'J. Hu': 'James Hu',
+    'CH Yang': 'Chi-Heng Yang', 'JF Nunamaker Jr': 'Jay Nunamaker',
+    'C Marx': 'Carolin Marx', 'C Dacosta': 'Cade Dacosta',
+    'C Zhang': 'Chengjun Zhang', 'M Hashim': 'Matthew Hashim',
+    'M Wagner': 'Mason Wagner', 'RY Reyes': 'Raul Reyes',
+    'S Yang': 'Shanchieh Yang'
 }
 
 MAIN_AUTHOR = 'Benjamin Ampel'
 
-
 def normalize_name(name):
-    """Normalize author name to canonical form."""
     name = name.strip()
     return AUTHOR_NORMALIZATION.get(name, name)
 
-
 def is_main_author(name):
-    """Check if this is the main author (Benjamin Ampel)."""
     normalized = normalize_name(name)
     return normalized == MAIN_AUTHOR or 'ampel' in name.lower()
 
-
 def load_publications():
-    """Load publications from JSON file."""
     with open(PUBLICATIONS_FILE, 'r') as f:
         return json.load(f)
 
+def build_network_data(publications):
+    """Build graph and count data."""
+    G = nx.Graph()
+    G.add_node(MAIN_AUTHOR)
+    coauthor_counts = defaultdict(int)
 
-def build_coauthor_counts(publications):
-    """Build a dictionary of co-author collaboration counts."""
-    counts = defaultdict(int)
     for pub in publications:
-        authors = [normalize_name(a) for a in pub['authors']]
-        for author in authors:
-            if not is_main_author(author):
-                counts[author] += 1
-    return dict(counts)
+        authors = [normalize_name(a) for a in pub.get('authors', '').split(',')]
+        # Filter empty strings and whitespace
+        authors = [a for a in authors if a and a.strip()]
+        
+        # Add edges between all co-authors (Clique)
+        for i in range(len(authors)):
+            for j in range(i + 1, len(authors)):
+                u, v = authors[i], authors[j]
+                if u == v: continue
+                
+                # Update counts relative to Main Author
+                if is_main_author(u) and not is_main_author(v):
+                    coauthor_counts[v] += 1
+                elif is_main_author(v) and not is_main_author(u):
+                    coauthor_counts[u] += 1
+                
+                # Add edge to graph (weighted)
+                if G.has_edge(u, v):
+                    G[u][v]['weight'] += 1
+                else:
+                    G.add_edge(u, v, weight=1)
+    
+    return G, dict(coauthor_counts)
 
+def calculate_stats(G, coauthor_counts):
+    """Calculate interesting network metrics for the dashboard."""
+    
+    # 1. Basic Metrics
+    density = nx.density(G)
+    clustering = nx.average_clustering(G)
+    
+    # 2. LCC (Largest Connected Component)
+    if len(G) > 0:
+        lcc = max(nx.connected_components(G), key=len)
+        lcc_pct = len(lcc) / len(G)
+    else:
+        lcc_pct = 0
+
+    # 3. Community Detection (Sub-groups)
+    # Remove main author temporarily to find distinct sub-groups
+    G_sub = G.copy()
+    if MAIN_AUTHOR in G_sub:
+        G_sub.remove_node(MAIN_AUTHOR)
+    
+    try:
+        communities = community.greedy_modularity_communities(G_sub)
+        clusters = []
+        for i, c in enumerate(communities):
+            if i >= 3: break # Take top 3 clusters
+            # Find top 3 most connected people in this cluster
+            members = list(c)
+            # Sort by collaboration count with Main Author
+            members.sort(key=lambda x: coauthor_counts.get(x, 0), reverse=True)
+            top_members = members[:3]
+            clusters.append({
+                "id": i + 1,
+                "size": len(c),
+                "top_members": top_members
+            })
+    except Exception as e:
+        print(f"Community detection warning: {e}")
+        clusters = []
+
+    return {
+        "density": round(density, 3),
+        "clustering_coeff": round(clustering, 3),
+        "lcc_percentage": round(lcc_pct * 100, 1),
+        "total_nodes": len(G.nodes),
+        "total_edges": len(G.edges),
+        "clusters": clusters
+    }
 
 def create_radial_layout(G, center_node, coauthor_counts):
     """Create a custom radial layout with the main author at center."""
@@ -119,203 +153,97 @@ def create_radial_layout(G, center_node, coauthor_counts):
         angle_step = 2 * math.pi / len(nodes)
         for i, node in enumerate(nodes):
             angle = start_angle + i * angle_step
-            # Add slight randomness for organic feel
             r = radius + np.random.uniform(-0.1, 0.1)
             pos[node] = (r * math.cos(angle), r * math.sin(angle))
     
-    np.random.seed(42)  # For reproducibility
-    # Compact radii - closer together for smaller overall image
+    np.random.seed(42)
     place_ring(frequent, 1.5, start_angle=0.2)
     place_ring(moderate, 2.8, start_angle=0.5)
     place_ring(occasional, 4.0, start_angle=0.1)
-    
     return pos
 
-
-def draw_network(dark_mode=False):
+def draw_network_plot(G, coauthor_counts, dark_mode=False):
     """Generate the network visualization."""
-    # Load data
-    publications = load_publications()
-    coauthor_counts = build_coauthor_counts(publications)
-    
-    # Create graph
-    G = nx.Graph()
-    G.add_node(MAIN_AUTHOR)
-    
-    for author, count in coauthor_counts.items():
-        G.add_node(author)
-        G.add_edge(MAIN_AUTHOR, author, weight=count)
-    
-    # Color schemes
     if dark_mode:
-        bg_color = '#0d1117'
-        text_color = '#e6edf3'
-        primary_color = '#58a6ff'
-        frequent_color = '#7ee787'
-        moderate_color = '#d29922'
-        occasional_color = '#8b949e'
-        edge_color = 'rgba(88, 166, 255, 0.3)'
+        bg_color, text_color, primary_color = '#0d1117', '#e6edf3', '#58a6ff'
+        frequent_color, moderate_color, occasional_color = '#7ee787', '#d29922', '#8b949e'
         glow_color = '#58a6ff'
     else:
-        bg_color = '#ffffff'
-        text_color = '#1f2328'
-        primary_color = '#0969da'
-        frequent_color = '#1a7f37'
-        moderate_color = '#9a6700'
-        occasional_color = '#656d76'
-        edge_color = 'rgba(9, 105, 218, 0.2)'
+        bg_color, text_color, primary_color = '#ffffff', '#1f2328', '#0969da'
+        frequent_color, moderate_color, occasional_color = '#1a7f37', '#9a6700', '#656d76'
         glow_color = '#0969da'
-    
-    # Create figure (compact size)
+
     fig, ax = plt.subplots(figsize=(14, 12), facecolor=bg_color)
     ax.set_facecolor(bg_color)
-    
-    # Get layout
     pos = create_radial_layout(G, MAIN_AUTHOR, coauthor_counts)
     
-    # Draw edges with varying thickness and alpha
     for u, v, data in G.edges(data=True):
         weight = data['weight']
         alpha = min(0.2 + weight * 0.1, 0.7)
         width = 0.5 + weight * 0.8
-        
         x = [pos[u][0], pos[v][0]]
         y = [pos[u][1], pos[v][1]]
-        
-        # Draw edge with gradient effect
-        ax.plot(x, y, color=primary_color, alpha=alpha, linewidth=width, 
-                solid_capstyle='round', zorder=1)
+        ax.plot(x, y, color=primary_color, alpha=alpha, linewidth=width, solid_capstyle='round', zorder=1)
     
-    # Draw nodes
     for node in G.nodes():
         x, y = pos[node]
-        
         if node == MAIN_AUTHOR:
-            # Main author - large prominent node with glow
             size = 5000
-            color = primary_color
-            
-            # Glow effect
-            for glow_size, glow_alpha in [(7000, 0.1), (6000, 0.15), (5500, 0.2)]:
-                ax.scatter([x], [y], s=glow_size, c=glow_color, alpha=glow_alpha, zorder=2)
-            
-            ax.scatter([x], [y], s=size, c=color, edgecolors='white', 
-                      linewidths=3, zorder=3)
-            
-            # Name label with shadow effect (white text, black outline)
-            label_text = 'Benjamin\nAmpel'
-            # Draw black shadow/outline
-            for dx, dy in [(-1, -1), (-1, 1), (1, -1), (1, 1), (-1, 0), (1, 0), (0, -1), (0, 1)]:
-                ax.annotate(label_text, (x + dx*0.02, y + dy*0.02), fontsize=13, fontweight='bold',
-                           color='black', ha='center', va='center', zorder=4)
-            # Draw white text on top
-            ax.annotate(label_text, (x, y), fontsize=13, fontweight='bold',
-                       color='white', ha='center', va='center', zorder=5)
+            for gs, ga in [(7000, 0.1), (6000, 0.15), (5500, 0.2)]:
+                ax.scatter([x], [y], s=gs, c=glow_color, alpha=ga, zorder=2)
+            ax.scatter([x], [y], s=size, c=primary_color, edgecolors='white', linewidths=3, zorder=3)
+            ax.annotate('Benjamin\nAmpel', (x, y), fontsize=13, fontweight='bold', color='white', ha='center', va='center', zorder=5)
         else:
             count = coauthor_counts.get(node, 0)
+            if count >= 5: c, s, fs = frequent_color, 2500 + count * 150, 9
+            elif count >= 2: c, s, fs = moderate_color, 1800 + count * 100, 8
+            else: c, s, fs = occasional_color, 1400, 7
             
-            # Determine color and size based on collaboration count (much larger nodes)
-            if count >= 5:
-                color = frequent_color
-                size = 2500 + count * 150
-                fontsize = 9
-            elif count >= 2:
-                color = moderate_color
-                size = 1800 + count * 100
-                fontsize = 8
-            else:
-                color = occasional_color
-                size = 1400
-                fontsize = 7
+            ax.scatter([x], [y], s=s, c=c, edgecolors='white', linewidths=2, alpha=0.9, zorder=3)
+            display_name = node.replace(' ', '\n', 1) if ' ' in node else node
             
-            # Draw node
-            ax.scatter([x], [y], s=size, c=color, edgecolors='white', 
-                      linewidths=2, alpha=0.9, zorder=3)
+            # Shadow
+            for dx, dy in [(-1,-1), (-1,1), (1,-1), (1,1)]:
+                 ax.annotate(display_name, (x+dx*0.015, y+dy*0.015), fontsize=fs, color='black', ha='center', va='center', fontweight='bold', zorder=4)
+            ax.annotate(display_name, (x, y), fontsize=fs, color='white', ha='center', va='center', fontweight='bold', zorder=5)
             
-            # Use full name, split into two lines if needed
-            parts = node.split()
-            if len(parts) >= 2:
-                # Split into first name(s) and last name
-                display_name = ' '.join(parts[:-1]) + '\n' + parts[-1]
-            else:
-                display_name = node
-            
-            # Draw label inside the node with shadow effect
-            # Draw black shadow/outline
-            for dx, dy in [(-1, -1), (-1, 1), (1, -1), (1, 1), (-1, 0), (1, 0), (0, -1), (0, 1)]:
-                ax.annotate(display_name, (x + dx*0.015, y + dy*0.015), fontsize=fontsize,
-                           color='black', ha='center', va='center', fontweight='bold', zorder=4)
-            # Draw white text on top
-            ax.annotate(display_name, (x, y), fontsize=fontsize,
-                       color='white', ha='center', va='center', fontweight='bold', zorder=5)
-    
-    # Add title
-    title_color = text_color
-    ax.text(0, 5.3, 'Research Collaboration Network', fontsize=22, fontweight='bold',
-            color=title_color, ha='center', va='center')
-    
-    # Add legend
-    legend_elements = [
-        mpatches.Patch(facecolor=primary_color, edgecolor='white', label='Benjamin Ampel'),
-        mpatches.Patch(facecolor=frequent_color, edgecolor='white', label='Frequent (5+ papers)'),
-        mpatches.Patch(facecolor=moderate_color, edgecolor='white', label='Moderate (2-4 papers)'),
-        mpatches.Patch(facecolor=occasional_color, edgecolor='white', label='Occasional (1 paper)'),
-    ]
-    
-    legend = ax.legend(handles=legend_elements, loc='upper left', 
-                       frameon=True, fancybox=True, shadow=False,
-                       fontsize=10, title='Collaboration Frequency',
-                       title_fontsize=11)
-    legend.get_frame().set_facecolor(bg_color)
-    legend.get_frame().set_edgecolor(occasional_color)
-    legend.get_frame().set_alpha(0.9)
-    for text in legend.get_texts():
-        text.set_color(text_color)
-    legend.get_title().set_color(text_color)
-    
-    # Add stats
-    total_collaborators = len(coauthor_counts)
-    total_papers = len(publications)
-    stats_text = f'{total_collaborators} Collaborators  •  {total_papers} Publications'
-    ax.text(0, -5.2, stats_text, fontsize=11, color=occasional_color, 
-            ha='center', va='center', style='italic')
-    
-    # Clean up axes - compact bounds
-    ax.set_xlim(-5.5, 5.5)
-    ax.set_ylim(-5.7, 5.7)
-    ax.axis('off')
-    ax.set_aspect('equal')
-    
-    plt.tight_layout()
-    
+    ax.set_xlim(-5.5, 5.5); ax.set_ylim(-5.7, 5.7); ax.axis('off')
     return fig
 
-
 def main():
-    """Generate both light and dark mode network images."""
-    # Ensure output directory exists
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    
-    # Generate light mode
-    print("Generating light mode network...")
-    fig_light = draw_network(dark_mode=False)
-    light_path = OUTPUT_DIR / 'coauthor-network.png'
-    fig_light.savefig(light_path, dpi=150, bbox_inches='tight', 
-                      facecolor='white', edgecolor='none')
-    plt.close(fig_light)
-    print(f"  Saved: {light_path}")
-    
-    # Generate dark mode
-    print("Generating dark mode network...")
-    fig_dark = draw_network(dark_mode=True)
-    dark_path = OUTPUT_DIR / 'coauthor-network-dark.png'
-    fig_dark.savefig(dark_path, dpi=150, bbox_inches='tight', 
-                     facecolor='#0d1117', edgecolor='none')
-    plt.close(fig_dark)
-    print(f"  Saved: {dark_path}")
-    
-    print("\nDone! Network images generated successfully.")
+    OUTPUT_IMG_DIR.mkdir(parents=True, exist_ok=True)
+    OUTPUT_DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
 
+    # 1. Load Data & Build Graph
+    publications = load_publications()
+    G, coauthor_counts = build_network_data(publications)
+
+    # 2. Calculate & Save Stats (JSON)
+    print("Calculating network statistics...")
+    stats = calculate_stats(G, coauthor_counts)
+    with open(OUTPUT_DATA_FILE, 'w') as f:
+        json.dump(stats, f, indent=2)
+    print(f"  Saved stats to: {OUTPUT_DATA_FILE}")
+
+    # 3. Generate Images (Light/Dark)
+    # Re-build simple star graph for visualization consistency with your design
+    VisG = nx.Graph()
+    VisG.add_node(MAIN_AUTHOR)
+    for author, count in coauthor_counts.items():
+        VisG.add_node(author)
+        VisG.add_edge(MAIN_AUTHOR, author, weight=count)
+    
+    # Draw Light
+    fig_light = draw_network_plot(VisG, coauthor_counts, dark_mode=False)
+    fig_light.savefig(OUTPUT_IMG_DIR / 'coauthor-network.png', dpi=150, bbox_inches='tight', facecolor='white')
+    plt.close(fig_light)
+    
+    # Draw Dark
+    fig_dark = draw_network_plot(VisG, coauthor_counts, dark_mode=True)
+    fig_dark.savefig(OUTPUT_IMG_DIR / 'coauthor-network-dark.png', dpi=150, bbox_inches='tight', facecolor='#0d1117')
+    plt.close(fig_dark)
+    
+    print("Done!")
 
 if __name__ == '__main__':
     main()
