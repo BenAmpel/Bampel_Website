@@ -2,160 +2,175 @@
 
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 
-<div id="research-network-container" style="width: 100%; height: 600px; border-radius: 8px; overflow: hidden;"></div>
+{{ $uniqueID := delimit (shuffle (split "abcdefghijklmnopqrstuvwxyz" "")) "" | substr 0 8 }}
+<div id="network-{{ $uniqueID }}" style="width: 100%; height: 600px; border-radius: 8px; overflow: hidden; position: relative;"></div>
 
 <script type="text/javascript">
-document.addEventListener('DOMContentLoaded', function() {
-    var dom = document.getElementById('research-network-container');
-    if (!dom) return;
-
-    // 1. DATA INGESTION FROM HUGO
+(function() {
+    // 1. DATA INGESTION
     var rawNodes = {{ .Site.Data.network.nodes | jsonify }};
     var rawLinks = {{ .Site.Data.network.links | jsonify }};
+    var domID = "network-{{ $uniqueID }}";
+    
+    // Wait for DOM
+    document.addEventListener('DOMContentLoaded', function() {
+        var dom = document.getElementById(domID);
+        if (!dom) return;
 
-    // Format nodes for ECharts
-    var nodes = rawNodes.map(function(node) {
-        return {
-            id: node.id,
-            name: node.name,
-            symbolSize: node.size,
-            category: node.group,
-            // Fix 'self' position in center
-            fixed: node.group === 'self' ? true : false,
-            x: node.group === 'self' ? 500 : null,
-            y: node.group === 'self' ? 300 : null
-        };
-    });
+        // 2. SETUP ECHARTS
+        var myChart = echarts.init(dom);
+        
+        // Prepare nodes with categories
+        var nodes = rawNodes.map(function(node) {
+            return {
+                id: node.id,
+                name: node.name,
+                symbolSize: node.size,
+                category: node.group,
+                fixed: node.group === 'self' ? true : false,
+                x: node.group === 'self' ? 500 : null,
+                y: node.group === 'self' ? 300 : null
+            };
+        });
 
-    // Define categories
-    var categories = [
-        { name: 'self' },
-        { name: 'advisor' },
-        { name: 'professor' },
-        { name: 'collaborator' },
-        { name: 'student' }
-    ];
+        // Define categories
+        var categories = [
+            { name: 'self' },
+            { name: 'advisor' },
+            { name: 'professor' },
+            { name: 'collaborator' },
+            { name: 'student' }
+        ];
 
-    // Color palettes
-    var lightColors = ['#d93025', '#1a0dab', '#007b83', '#f9ab00', '#34a853'];
-    var darkColors = ['#00ff41', '#ff00ff', '#00ffff', '#ffff00', '#ff6b35'];
+        // Color palettes
+        var lightColors = ['#d93025', '#1a0dab', '#007b83', '#f9ab00', '#34a853'];
+        var darkColors = ['#00ff41', '#ff00ff', '#00ffff', '#ffff00', '#ff6b35'];
 
-    // 2. INITIALIZE CHART
-    var myChart = echarts.init(dom);
+        function getOption(isDark) {
+            var colors = isDark ? darkColors : lightColors;
+            var bgColor = isDark ? '#0a0a0a' : '#fdfdfd';
+            var textColor = isDark ? '#00ff41' : '#333333';
+            var lineColor = isDark ? 'rgba(0, 255, 65, 0.3)' : 'rgba(0, 0, 0, 0.15)';
 
-    function getOption(isDark) {
-        var colors = isDark ? darkColors : lightColors;
-        var bgColor = isDark ? '#0a0a0a' : '#fdfdfd';
-        var textColor = isDark ? '#00ff41' : '#333333';
-        var lineColor = isDark ? 'rgba(0, 255, 65, 0.3)' : 'rgba(0, 0, 0, 0.15)';
-
-        return {
-            backgroundColor: bgColor,
-            tooltip: {
-                trigger: 'item',
-                formatter: function(params) {
-                    if (params.dataType === 'node') {
-                        return '<strong>' + params.data.name + '</strong><br/>' +
-                               '<em>' + params.data.category + '</em>';
-                    }
-                    return params.data.source + ' ↔ ' + params.data.target;
-                },
-                backgroundColor: isDark ? '#1a1a1a' : '#fff',
-                borderColor: isDark ? '#00ff41' : '#ccc',
-                textStyle: { color: isDark ? '#00ff41' : '#333' }
-            },
-            legend: {
-                data: ['self', 'advisor', 'professor', 'collaborator', 'student'],
-                textStyle: { 
-                    color: textColor,
-                    fontFamily: isDark ? "'Fira Code', monospace" : "'Merriweather', serif"
-                },
-                bottom: 10,
-                itemGap: 20
-            },
-            animationDurationUpdate: 1500,
-            animationEasingUpdate: 'quinticInOut',
-            color: colors,
-            series: [{
-                type: 'graph',
-                layout: 'force',
-                data: nodes,
-                links: rawLinks,
-                categories: categories,
-                roam: true,
-                draggable: true,
-                label: {
-                    show: true,
-                    position: 'right',
-                    formatter: '{b}',
-                    color: textColor,
-                    fontSize: 11,
-                    fontFamily: isDark ? "'Fira Code', monospace" : "'Merriweather', serif"
-                },
-                lineStyle: {
-                    color: lineColor,
-                    curveness: 0.2,
-                    width: 1.5
-                },
-                emphasis: {
-                    focus: 'adjacency',
-                    lineStyle: {
-                        width: 4,
-                        color: isDark ? '#00ff41' : '#d93025'
+            return {
+                backgroundColor: bgColor,
+                tooltip: {
+                    trigger: 'item',
+                    formatter: function(params) {
+                        if (params.dataType === 'node') {
+                            return '<strong>' + params.data.name + '</strong><br/>' +
+                                   '<em>' + params.data.category + '</em>';
+                        }
+                        return params.data.source + ' ↔ ' + params.data.target;
                     },
-                    label: {
-                        fontSize: 14,
-                        fontWeight: 'bold'
-                    }
+                    backgroundColor: isDark ? '#1a1a1a' : '#fff',
+                    borderColor: isDark ? '#00ff41' : '#ccc',
+                    textStyle: { color: isDark ? '#00ff41' : '#333' }
                 },
-                force: {
-                    repulsion: 800,
-                    gravity: 0.1,
-                    edgeLength: [80, 200],
-                    friction: 0.6
-                }
-            }]
-        };
-    }
-
-    // Initial render
-    var isDark = document.body.classList.contains('dark');
-    myChart.setOption(getOption(isDark));
-
-    // 3. THE MAGIC FIX: RESIZE OBSERVER
-    // Watches the container - when accordion opens, this triggers
-    var resizeObserver = new ResizeObserver(function(entries) {
-        for (var i = 0; i < entries.length; i++) {
-            var entry = entries[i];
-            if (entry.contentRect.width > 0 && entry.contentRect.height > 0) {
-                myChart.resize();
-                // Re-center the 'self' node based on new dimensions
-                nodes.forEach(function(n) {
-                    if (n.id === 'self') {
-                        n.x = myChart.getWidth() / 2;
-                        n.y = myChart.getHeight() / 2;
+                legend: {
+                    data: ['self', 'advisor', 'professor', 'collaborator', 'student'],
+                    textStyle: { 
+                        color: textColor,
+                        fontFamily: isDark ? "'Fira Code', monospace" : "'Merriweather', serif"
+                    },
+                    bottom: 10,
+                    itemGap: 20
+                },
+                animationDurationUpdate: 1500,
+                animationEasingUpdate: 'quinticInOut',
+                color: colors,
+                series: [{
+                    type: 'graph',
+                    layout: 'force',
+                    data: nodes,
+                    links: rawLinks,
+                    categories: categories,
+                    roam: true,
+                    draggable: true,
+                    label: {
+                        show: true,
+                        position: 'right',
+                        formatter: '{b}',
+                        color: textColor,
+                        fontSize: 11,
+                        fontFamily: isDark ? "'Fira Code', monospace" : "'Merriweather', serif"
+                    },
+                    lineStyle: {
+                        color: lineColor,
+                        curveness: 0.2,
+                        width: 1.5
+                    },
+                    emphasis: {
+                        focus: 'adjacency',
+                        lineStyle: {
+                            width: 4,
+                            color: isDark ? '#00ff41' : '#d93025'
+                        },
+                        label: {
+                            fontSize: 14,
+                            fontWeight: 'bold'
+                        }
+                    },
+                    force: {
+                        repulsion: 1000,
+                        gravity: 0.1,
+                        edgeLength: 100,
+                        friction: 0.6
                     }
-                });
-                myChart.setOption({ series: [{ data: nodes }] });
-            }
+                }]
+            };
         }
-    });
-    resizeObserver.observe(dom);
 
-    // 4. THEME SWITCHER - using MutationObserver
-    var themeObserver = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-            if (mutation.attributeName === 'class') {
-                var isDarkNow = document.body.classList.contains('dark');
-                myChart.setOption(getOption(isDarkNow));
-            }
+        // Set Initial Option
+        var isDark = document.body.classList.contains('dark');
+        myChart.setOption(getOption(isDark));
+
+        // 3. THE FIX: Find Parent <details> and Listen for Toggle
+        var parentDetails = dom.closest('details');
+        
+        if (parentDetails) {
+            parentDetails.addEventListener('toggle', function() {
+                if (parentDetails.open) {
+                    // Delay to allow browser to paint the open box
+                    setTimeout(function() {
+                        myChart.resize();
+                        
+                        // Re-center 'self' node with real dimensions
+                        var w = myChart.getWidth();
+                        var h = myChart.getHeight();
+                        nodes.forEach(function(n) {
+                            if (n.id === 'self') { 
+                                n.x = w / 2; 
+                                n.y = h / 2; 
+                            }
+                        });
+                        myChart.setOption({ series: [{ data: nodes }] });
+                        
+                    }, 50);
+                }
+            });
+        }
+
+        // 4. Resize Observer (Backup for window resizing)
+        new ResizeObserver(function() { 
+            myChart.resize(); 
+        }).observe(dom);
+
+        // 5. Theme Listener using MutationObserver
+        var themeObserver = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.attributeName === 'class') {
+                    var isDarkNow = document.body.classList.contains('dark');
+                    myChart.setOption(getOption(isDarkNow));
+                }
+            });
+        });
+        themeObserver.observe(document.body, { attributes: true });
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            myChart.resize();
         });
     });
-    themeObserver.observe(document.body, { attributes: true });
-
-    // Handle window resize
-    window.addEventListener('resize', function() {
-        myChart.resize();
-    });
-});
+})();
 </script>
