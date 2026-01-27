@@ -91,7 +91,10 @@
                 console.warn(`File not found (${response.status}): ${url}`);
                 return null; // Return null instead of crashing
             }
-            return response.json().catch(err => {
+            return response.json().then(data => {
+                console.log(`Successfully loaded: ${url}`, data);
+                return data;
+            }).catch(err => {
                 console.warn(`JSON parse error for ${url}:`, err);
                 return null;
             });
@@ -187,10 +190,18 @@
         }
 
         // F. Render Network Stats (Bottom Right)
+        console.log('Network stats received:', netStats, 'Type:', typeof netStats);
         if (netStats && typeof netStats === 'object' && !Array.isArray(netStats)) {
             // Update density and LCC
-            updateText('net-density', netStats.density !== undefined ? netStats.density.toFixed(2) : "0.00");
-            updateText('net-lcc', (netStats.lcc_percentage !== undefined ? netStats.lcc_percentage : 0) + "%");
+            var densityVal = netStats.density !== undefined && netStats.density !== null 
+                ? (typeof netStats.density === 'number' ? netStats.density.toFixed(2) : String(netStats.density))
+                : "0.00";
+            updateText('net-density', densityVal);
+            
+            var lccVal = netStats.lcc_percentage !== undefined && netStats.lcc_percentage !== null
+                ? (netStats.lcc_percentage + "%")
+                : "0%";
+            updateText('net-lcc', lccVal);
             
             // Render clusters
             var clustersEl = document.getElementById('net-clusters');
@@ -214,6 +225,7 @@
             }
         } else {
             // Fallback if file is missing or invalid
+            console.warn('Network stats not available. Value:', netStats, 'Type:', typeof netStats);
             var clustersEl = document.getElementById('net-clusters');
             if (clustersEl) {
                 clustersEl.innerHTML = '<span style="opacity:0.5; font-size:0.8em">Analysis pending...</span>';
