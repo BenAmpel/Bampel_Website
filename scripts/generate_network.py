@@ -17,6 +17,7 @@ from networkx.algorithms import community
 # --- CONFIGURATION ---
 SCRIPT_DIR = Path(__file__).parent
 PROJECT_ROOT = SCRIPT_DIR.parent
+# Ensure this points to the correct file (some setups use scholar-metrics.json)
 PUBLICATIONS_FILE = PROJECT_ROOT / "static" / "data" / "publications.json"
 OUTPUT_IMG_DIR = PROJECT_ROOT / "static" / "images"
 OUTPUT_DATA_FILE = PROJECT_ROOT / "static" / "data" / "network_stats.json"
@@ -43,6 +44,8 @@ AUTHOR_NORMALIZATION = {
 MAIN_AUTHOR = 'Benjamin Ampel'
 
 def normalize_name(name):
+    if not isinstance(name, str):
+        return ""
     name = name.strip()
     return AUTHOR_NORMALIZATION.get(name, name)
 
@@ -52,7 +55,11 @@ def is_main_author(name):
 
 def load_publications():
     with open(PUBLICATIONS_FILE, 'r') as f:
-        return json.load(f)
+        data = json.load(f)
+    # Support both list-of-pubs or dict-wrapper formats
+    if isinstance(data, dict) and "individualPublications" in data:
+        return data["individualPublications"]
+    return data
 
 def build_network_data(publications):
     """Build graph and count data."""
@@ -61,8 +68,18 @@ def build_network_data(publications):
     coauthor_counts = defaultdict(int)
 
     for pub in publications:
-        authors = [normalize_name(a) for a in pub.get('authors', '').split(',')]
-        # Filter empty strings and whitespace
+        # [FIX] Handle both String ("A, B") and List (["A", "B"]) formats
+        raw_authors = pub.get('authors', '')
+        
+        if isinstance(raw_authors, list):
+            author_list = raw_authors
+        elif isinstance(raw_authors, str):
+            author_list = raw_authors.split(',')
+        else:
+            continue # Skip invalid formats
+
+        # Normalize and filter
+        authors = [normalize_name(a) for a in author_list]
         authors = [a for a in authors if a and a.strip()]
         
         # Add edges between all co-authors (Clique)
@@ -105,23 +122,25 @@ def calculate_stats(G, coauthor_counts):
     if MAIN_AUTHOR in G_sub:
         G_sub.remove_node(MAIN_AUTHOR)
     
+    clusters = []
     try:
+        # Using Greedy Modularity
         communities = community.greedy_modularity_communities(G_sub)
-        clusters = []
         for i, c in enumerate(communities):
             if i >= 3: break # Take top 3 clusters
-            # Find top 3 most connected people in this cluster
+            
+            # Identify top members in this cluster
             members = list(c)
-            # Sort by collaboration count with Main Author
             members.sort(key=lambda x: coauthor_counts.get(x, 0), reverse=True)
             top_members = members[:3]
+            
             clusters.append({
                 "id": i + 1,
                 "size": len(c),
                 "top_members": top_members
             })
     except Exception as e:
-        print(f"Community detection warning: {e}")
+        print(f"Community detection info: {e}")
         clusters = []
 
     return {
@@ -134,22 +153,16 @@ def calculate_stats(G, coauthor_counts):
     }
 
 def create_radial_layout(G, center_node, coauthor_counts):
-    """Create a custom radial layout with the main author at center."""
     pos = {}
     pos[center_node] = (0, 0)
-    
-    # Sort co-authors by collaboration count (most frequent closest to center)
     other_nodes = [n for n in G.nodes() if n != center_node]
     other_nodes.sort(key=lambda x: coauthor_counts.get(x, 0), reverse=True)
-    
-    # Place nodes in concentric rings based on collaboration frequency
     frequent = [n for n in other_nodes if coauthor_counts.get(n, 0) >= 5]
     moderate = [n for n in other_nodes if 2 <= coauthor_counts.get(n, 0) < 5]
     occasional = [n for n in other_nodes if coauthor_counts.get(n, 0) < 2]
     
     def place_ring(nodes, radius, start_angle=0):
-        if not nodes:
-            return
+        if not nodes: return
         angle_step = 2 * math.pi / len(nodes)
         for i, node in enumerate(nodes):
             angle = start_angle + i * angle_step
@@ -163,7 +176,6 @@ def create_radial_layout(G, center_node, coauthor_counts):
     return pos
 
 def draw_network_plot(G, coauthor_counts, dark_mode=False):
-    """Generate the network visualization."""
     if dark_mode:
         bg_color, text_color, primary_color = '#0d1117', '#e6edf3', '#58a6ff'
         frequent_color, moderate_color, occasional_color = '#7ee787', '#d29922', '#8b949e'
@@ -175,18 +187,31 @@ def draw_network_plot(G, coauthor_counts, dark_mode=False):
 
     fig, ax = plt.subplots(figsize=(14, 12), facecolor=bg_color)
     ax.set_facecolor(bg_color)
-    pos = create_radial_layout(G, MAIN_AUTHOR, coauthor_counts)
     
-    for u, v, data in G.edges(data=True):
+    # We use a simplified star-graph for visualization layout
+    VisG = nx.Graph()
+    VisG.add_node(MAIN_AUTHOR)
+    for author, count in coauthor_counts.items():
+        VisG.add_node(author)
+        VisG.add_edge(MAIN_AUTHOR, author, weight=count)
+        
+    pos = create_radial_layout(VisG, MAIN_AUTHOR, coauthor_counts)
+    
+    # Draw Edges
+    for u, v, data in VisG.edges(data=True):
         weight = data['weight']
         alpha = min(0.2 + weight * 0.1, 0.7)
         width = 0.5 + weight * 0.8
-        x = [pos[u][0], pos[v][0]]
-        y = [pos[u][1], pos[v][1]]
-        ax.plot(x, y, color=primary_color, alpha=alpha, linewidth=width, solid_capstyle='round', zorder=1)
+        if u in pos and v in pos:
+            x = [pos[u][0], pos[v][0]]
+            y = [pos[u][1], pos[v][1]]
+            ax.plot(x, y, color=primary_color, alpha=alpha, linewidth=width, solid_capstyle='round', zorder=1)
     
-    for node in G.nodes():
+    # Draw Nodes
+    for node in VisG.nodes():
+        if node not in pos: continue
         x, y = pos[node]
+        
         if node == MAIN_AUTHOR:
             size = 5000
             for gs, ga in [(7000, 0.1), (6000, 0.15), (5500, 0.2)]:
@@ -202,7 +227,7 @@ def draw_network_plot(G, coauthor_counts, dark_mode=False):
             ax.scatter([x], [y], s=s, c=c, edgecolors='white', linewidths=2, alpha=0.9, zorder=3)
             display_name = node.replace(' ', '\n', 1) if ' ' in node else node
             
-            # Shadow
+            # Text Shadow
             for dx, dy in [(-1,-1), (-1,1), (1,-1), (1,1)]:
                  ax.annotate(display_name, (x+dx*0.015, y+dy*0.015), fontsize=fs, color='black', ha='center', va='center', fontweight='bold', zorder=4)
             ax.annotate(display_name, (x, y), fontsize=fs, color='white', ha='center', va='center', fontweight='bold', zorder=5)
@@ -216,6 +241,10 @@ def main():
 
     # 1. Load Data & Build Graph
     publications = load_publications()
+    if not publications:
+        print("No publications found. Exiting.")
+        return
+
     G, coauthor_counts = build_network_data(publications)
 
     # 2. Calculate & Save Stats (JSON)
@@ -226,20 +255,11 @@ def main():
     print(f"  Saved stats to: {OUTPUT_DATA_FILE}")
 
     # 3. Generate Images (Light/Dark)
-    # Re-build simple star graph for visualization consistency with your design
-    VisG = nx.Graph()
-    VisG.add_node(MAIN_AUTHOR)
-    for author, count in coauthor_counts.items():
-        VisG.add_node(author)
-        VisG.add_edge(MAIN_AUTHOR, author, weight=count)
-    
-    # Draw Light
-    fig_light = draw_network_plot(VisG, coauthor_counts, dark_mode=False)
+    fig_light = draw_network_plot(G, coauthor_counts, dark_mode=False)
     fig_light.savefig(OUTPUT_IMG_DIR / 'coauthor-network.png', dpi=150, bbox_inches='tight', facecolor='white')
     plt.close(fig_light)
     
-    # Draw Dark
-    fig_dark = draw_network_plot(VisG, coauthor_counts, dark_mode=True)
+    fig_dark = draw_network_plot(G, coauthor_counts, dark_mode=True)
     fig_dark.savefig(OUTPUT_IMG_DIR / 'coauthor-network-dark.png', dpi=150, bbox_inches='tight', facecolor='#0d1117')
     plt.close(fig_dark)
     
