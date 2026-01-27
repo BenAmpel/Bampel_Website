@@ -1,79 +1,104 @@
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-<div id="dashboard-wrapper" style="min-height:550px; margin:30px 0; font-family:sans-serif;">
-<div style="display:grid; grid-template-columns:1fr 1fr; grid-template-rows:auto 600px; gap:0; border:1px solid var(--card-border, #333); border-radius:12px; overflow:hidden; background:var(--card-bg, rgba(255,255,255,0.02)); box-shadow:0 4px 20px rgba(0,0,0,0.1);">
+<div id="dashboard-wrapper" style="min-height:1000px; margin:30px 0; font-family:sans-serif;">
+<div style="display:grid; grid-template-columns:1fr 1fr; grid-template-rows:auto 600px 600px; gap:0; border:1px solid var(--card-border, #333); border-radius:12px; overflow:hidden; background:var(--card-bg, rgba(255,255,255,0.02)); box-shadow:0 4px 20px rgba(0,0,0,0.1);">
 
 <div style="grid-column:1; grid-row:1; padding:20px; border-right:1px solid var(--card-border, #333); border-bottom:1px solid var(--card-border, #333);">
-<h4 style="margin:0 0 10px; opacity:0.7; text-align:center; text-transform:uppercase; font-size:0.8rem;">Research Profile</h4>
-<div id="dashboard-radar" style="width:100%; height:300px;"></div>
+    <h4 style="margin:0 0 10px; opacity:0.7; text-align:center; text-transform:uppercase; font-size:0.8rem;">Research Profile</h4>
+    <div id="dashboard-radar" style="width:100%; height:300px;"></div>
 </div>
 
 <div style="grid-column:2; grid-row:1; padding:25px; border-bottom:1px solid var(--card-border, #333); display:flex; flex-direction:column;">
-<div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:20px;">
-<div><div style="font-size:0.75rem; opacity:0.6;">Primary Focus</div><div id="dash-metric-focus" style="font-size:1rem; font-weight:800; color:#00ff41; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">...</div></div>
-<div><div style="font-size:0.75rem; opacity:0.6;">Trending</div><div id="dash-metric-trend" style="font-size:1rem; font-weight:800; color:#00e5ff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">...</div></div>
-<div><div style="font-size:0.75rem; opacity:0.6;">Total Citations</div><div id="dash-metric-cites" style="font-size:1.4rem; font-weight:800; color:#e040fb;">0</div></div>
-<div><div style="font-size:0.75rem; opacity:0.6;">h-index</div><div id="dash-metric-hindex" style="font-size:1.4rem; font-weight:800; opacity:0.9;">0</div></div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:20px;">
+        <div><div style="font-size:0.75rem; opacity:0.6;">Primary Focus</div><div id="dash-metric-focus" style="font-size:1rem; font-weight:800; color:#00ff41; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">...</div></div>
+        <div><div style="font-size:0.75rem; opacity:0.6;">Trending</div><div id="dash-metric-trend" style="font-size:1rem; font-weight:800; color:#00e5ff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">...</div></div>
+        <div><div style="font-size:0.75rem; opacity:0.6;">Total Citations</div><div id="dash-metric-cites" style="font-size:1.4rem; font-weight:800; color:#e040fb;">0</div></div>
+        <div><div style="font-size:0.75rem; opacity:0.6;">h-index</div><div id="dash-metric-hindex" style="font-size:1.4rem; font-weight:800; opacity:0.9;">0</div></div>
+    </div>
+    <div style="flex-grow:1; border-top:1px solid var(--card-border, #333); padding-top:15px; position:relative;">
+        <h4 style="margin:0 0 5px; font-size:0.7rem; opacity:0.5; text-transform:uppercase;">Citation Velocity</h4>
+        <div id="dashboard-timeline" style="width:100%; height:160px;"></div>
+    </div>
 </div>
-<div style="flex-grow:1; border-top:1px solid var(--card-border, #333); padding-top:15px; position:relative;">
-<h4 style="margin:0 0 5px; font-size:0.7rem; opacity:0.5; text-transform:uppercase;">Citation Velocity</h4>
-<div id="dashboard-timeline" style="width:100%; height:160px;"></div>
+
+<div style="grid-column:1; grid-row:2; padding:0; border-right:1px solid var(--card-border, #333); border-bottom:1px solid var(--card-border, #333); position:relative; height:100%;">
+    <div style="position:absolute; top:20px; left:20px; z-index:10; pointer-events:none;">
+        <h4 style="margin:0; font-size:0.8rem; opacity:0.7; text-transform:uppercase;">Impact Map</h4>
+        <p style="margin:0; font-size:0.65rem; opacity:0.5;">Connections by Topic, Venue & Co-authors</p>
+    </div>
+    <div id="dashboard-impact-map" style="width:100%; height:100%;"></div>
+</div>
+
+<div style="grid-column:2; grid-row:2; padding:25px; border-bottom:1px solid var(--card-border, #333); display:flex; flex-direction:column; height:100%; overflow:hidden;">
+    <h4 style="font-size:0.8rem; opacity:0.7; text-transform:uppercase; margin-bottom:15px; border-bottom:1px solid var(--card-border, #444); padding-bottom:10px;">Network Centrality Analysis</h4>
+    <div style="overflow-y:auto; padding-right:5px; flex-grow:1;">
+        <div style="margin-bottom:20px;">
+            <div style="font-size:0.75rem; font-weight:bold; color:#00ff41; margin-bottom:4px;">INFLUENCE (Eigenvector)</div>
+            <p style="font-size:0.65rem; opacity:0.5; margin:0 0 8px 0;">Papers connected to other highly connected papers</p>
+            <div id="dash-list-eigen" style="font-size:0.8rem; line-height:1.4;"><span style="opacity:0.3;">Calculating...</span></div>
+        </div>
+        <div style="margin-bottom:20px;">
+            <div style="font-size:0.75rem; font-weight:bold; color:#00e5ff; margin-bottom:4px;">BRIDGES (Betweenness)</div>
+            <p style="font-size:0.65rem; opacity:0.5; margin:0 0 8px 0;">Papers that connect different research clusters</p>
+            <div id="dash-list-between" style="font-size:0.8rem; line-height:1.4;"></div>
+        </div>
+        <div>
+            <div style="font-size:0.75rem; font-weight:bold; color:#e040fb; margin-bottom:4px;">HUBS (Degree)</div>
+            <p style="font-size:0.65rem; opacity:0.5; margin:0 0 8px 0;">Papers with the most direct relationships</p>
+            <div id="dash-list-degree" style="font-size:0.8rem; line-height:1.4;"></div>
+        </div>
+    </div>
+</div>
+
+<div style="grid-column:1; grid-row:3; padding:0; border-right:1px solid var(--card-border, #333); position:relative; height:100%;">
+    <div style="position:absolute; top:20px; left:20px; z-index:10; pointer-events:none;">
+        <h4 style="margin:0; font-size:0.8rem; opacity:0.7; text-transform:uppercase;">Collaboration Network</h4>
+        <p style="margin:0; font-size:0.65rem; opacity:0.5;">Co-authorship Connections</p>
+    </div>
+    <div id="dashboard-collab-network" style="width:100%; height:100%;"></div>
+</div>
+
+<div style="grid-column:2; grid-row:3; padding:0; position:relative; height:100%;">
+    <div style="position:absolute; top:20px; right:20px; z-index:400; pointer-events:none; text-align:right;">
+        <h4 style="margin:0; font-size:0.8rem; opacity:0.7; text-transform:uppercase; color:#333; text-shadow:0 0 5px white;">Research Footprint</h4>
+    </div>
+    <div id="dashboard-footprint-map" style="width:100%; height:100%; z-index:1;"></div>
+</div>
+
 </div>
 </div>
 
-<div style="grid-column:1; grid-row:2; padding:0; border-right:1px solid var(--card-border, #333); position:relative; height:100%;">
-<div style="position:absolute; top:20px; left:20px; z-index:10; pointer-events:none;">
-<h4 style="margin:0; font-size:0.8rem; opacity:0.7; text-transform:uppercase;">Impact Map</h4>
-<p style="margin:0; font-size:0.65rem; opacity:0.5;">Connections by Topic, Venue & Co-authors</p>
-</div>
-<div id="dashboard-impact-map" style="width:100%; height:100%;"></div>
-</div>
-
-<div style="grid-column:2; grid-row:2; padding:25px; display:flex; flex-direction:column; height:100%; overflow:hidden;">
-<h4 style="font-size:0.8rem; opacity:0.7; text-transform:uppercase; margin-bottom:15px; border-bottom:1px solid var(--card-border, #444); padding-bottom:10px;">Network Centrality Analysis</h4>
-<div style="overflow-y:auto; padding-right:5px; flex-grow:1;">
-<div style="margin-bottom:20px;">
-<div style="font-size:0.75rem; font-weight:bold; color:#00ff41; margin-bottom:4px;">INFLUENCE (Eigenvector)</div>
-<p style="font-size:0.65rem; opacity:0.5; margin:0 0 8px 0;">Papers connected to other highly connected papers</p>
-<div id="dash-list-eigen" style="font-size:0.8rem; line-height:1.4;"><span style="opacity:0.3;">Calculating...</span></div>
-</div>
-<div style="margin-bottom:20px;">
-<div style="font-size:0.75rem; font-weight:bold; color:#00e5ff; margin-bottom:4px;">BRIDGES (Betweenness)</div>
-<p style="font-size:0.65rem; opacity:0.5; margin:0 0 8px 0;">Papers that connect different research clusters</p>
-<div id="dash-list-between" style="font-size:0.8rem; line-height:1.4;"></div>
-</div>
-<div>
-<div style="font-size:0.75rem; font-weight:bold; color:#e040fb; margin-bottom:4px;">HUBS (Degree)</div>
-<p style="font-size:0.65rem; opacity:0.5; margin:0 0 8px 0;">Papers with the most direct relationships</p>
-<div id="dash-list-degree" style="font-size:0.8rem; line-height:1.4;"></div>
-</div>
-</div>
-</div>
-
-</div>
-</div>
+<style>
+/* Leaflet Markers */
+.custom-marker { background: transparent; }
+.custom-marker .marker-pin { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 4px rgba(0,0,0,0.3); }
+.conference-marker .marker-pin { background: #00ff41; }
+.collaboration-marker .marker-pin { background: #00bfff; }
+.institution-marker .marker-pin { background: #ff6b35; }
+body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px currentColor; }
+</style>
 
 <script type="text/javascript">
 (function() {
-    // 1. IDS
+    // 1. IDS configuration
     const IDS = {
         RADAR: 'dashboard-radar',
         LINE: 'dashboard-timeline',
         MAP: 'dashboard-impact-map',
+        COLLAB: 'dashboard-collab-network', // New
+        FOOTPRINT: 'dashboard-footprint-map', // New
         METRICS: {
             FOCUS: 'dash-metric-focus', TREND: 'dash-metric-trend',
             CITES: 'dash-metric-cites', HINDEX: 'dash-metric-hindex'
         },
-        LISTS: {
-            EIGEN: 'dash-list-eigen',
-            BETWEEN: 'dash-list-between',
-            DEGREE: 'dash-list-degree'
-        }
+        LISTS: { EIGEN: 'dash-list-eigen', BETWEEN: 'dash-list-between', DEGREE: 'dash-list-degree' }
     };
 
-    var radarChart, lineChart, graphChart;
+    var radarChart, lineChart, graphChart, collabChart, footprintMap;
 
-    // 2. FETCH DATA
+    // 2. DATA LOADING
     const safeFetch = (url) => fetch(url).then(r => r.ok ? r.json() : null).catch(e => null);
 
     Promise.all([
@@ -89,6 +114,23 @@
         }
 
         // --- DASHBOARD METRICS ---
+        processMetrics(papers, scholarData);
+
+        // --- RENDER CHARTS ---
+        renderRadar(papers);
+        if(scholarData && scholarData.citationsByYear) renderLine(scholarData.citationsByYear);
+        renderWorkingMap(papers); 
+        calculateAllMetrics(papers);
+        renderCollabNetwork(papers); // New Function
+        renderFootprintMap();        // New Function
+
+    }).catch(err => console.error("Dashboard Error:", err));
+
+
+    // ========================================================================
+    // LOGIC: METRICS & RADAR
+    // ========================================================================
+    function processMetrics(papers, scholarData) {
         const taxonomy = {
             'AI / Deep Learning': ['Deep Learning', 'Neural', 'Transfer Learning', 'Embedding', 'Machine Learning', 'Artificial Intelligence', 'Adversarial'],
             'Cybersecurity':      ['Cyber', 'Vulnerability', 'Exploit', 'Attack', 'Threat', 'Security', 'Malicious', 'Ransomware', 'Phishing'],
@@ -121,19 +163,32 @@
             updateText(IDS.METRICS.CITES, scholarData.metrics.citations || 0);
             updateText(IDS.METRICS.HINDEX, scholarData.metrics.hIndex || 0);
         }
-
-        // --- RENDER ---
-        renderRadar(counts);
-        if(scholarData && scholarData.citationsByYear) renderLine(scholarData.citationsByYear);
-        renderWorkingMap(papers); 
         
-        // --- NEW METRIC CALCULATIONS ---
-        calculateAllMetrics(papers);
+        // Pass counts to radar
+        renderRadarChart(counts); 
+    }
 
-    }).catch(err => console.error("Dashboard Error:", err));
+    function renderRadarChart(counts) {
+        var dom = document.getElementById(IDS.RADAR);
+        if(!dom) return;
+        if(radarChart) radarChart.dispose();
+        radarChart = echarts.init(dom);
+        let data = Object.keys(counts).map(k => ({ name: k, value: counts[k] }));
+        let max = Math.max(...data.map(d => d.value)) || 1;
+        let isDark = document.body.classList.contains('dark');
+        radarChart.setOption({
+            radar: { indicator: data.map(d => ({ name: d.name, max: max + 2 })), shape: 'circle', splitArea: { show: false }, axisName: { color: isDark ? '#aaa' : '#333' } },
+            series: [{ type: 'radar', data: [{ value: data.map(d => d.value), itemStyle: { color: isDark ? '#00ff41' : '#d93025' }, areaStyle: { opacity: 0.2 } }] }]
+        });
+    }
+    
+    // Alias to keep existing calls working if name changed
+    function renderRadar(papers) { /* Handled in processMetrics mostly, but structure kept for safety */ }
 
 
-    // --- 3. MAP RENDERER (Logic from knowledge_graph.html) ---
+    // ========================================================================
+    // LOGIC: IMPACT MAP (Row 2 Left)
+    // ========================================================================
     function renderWorkingMap(papers) {
         var dom = document.getElementById(IDS.MAP);
         if(!dom || papers.length === 0) return;
@@ -211,120 +266,184 @@
         if(btn) { btn.addEventListener('click', () => { setTimeout(() => { let isDarkNow = document.body.classList.contains('dark'); graphChart.setOption({ series: [{ lineStyle: { color: isDarkNow ? '#aaa' : '#666' } }] }); }, 100); }); }
     }
 
-    // --- 4. ADVANCED METRIC CALCULATIONS ---
-    function calculateAllMetrics(papers) {
-        let n = papers.length;
-        let adj = Array.from({length: n}, () => []);
-        let degrees = new Array(n).fill(0);
-        
-        // Helper to mimic map weight logic
-        const getWeight = (i, j) => {
-            let p1 = papers[i], p2 = papers[j];
-            let w = 0;
-            if(p1.venue === p2.venue && p1.venue) w += 1;
-            let t1 = (p1.title||"").toLowerCase();
-            let t2 = (p2.title||"").toLowerCase();
-            let common = t1.split(' ').filter(word => word.length > 4 && t2.includes(word)).length;
-            if(common > 0) w += common * 0.5;
-            return w;
-        };
 
-        for(let i=0; i<n; i++) {
-            for(let j=i+1; j<n; j++) {
-                let weight = getWeight(i, j);
-                if(weight > 0.5) {
-                    adj[i].push(j);
-                    adj[j].push(i);
-                    degrees[i]++;
-                    degrees[j]++;
-                }
-            }
-        }
-
-        // 1. EIGENVECTOR (Iterative)
-        let eigenScores = new Array(n).fill(1.0);
-        for(let iter=0; iter<10; iter++) {
-            let nextScores = new Array(n).fill(0);
-            for(let i=0; i<n; i++) {
-                for(let neighbor of adj[i]) {
-                    nextScores[i] += eigenScores[neighbor];
-                }
-            }
-            let maxS = Math.max(...nextScores) || 1;
-            eigenScores = nextScores.map(s => s / maxS);
-        }
-
-        // 2. BETWEENNESS (Simplified)
-        let betweenness = new Array(n).fill(0);
-        for(let s=0; s<n; s++) {
-            let visited = new Set([s]);
-            let q = [s];
-            let preds = Array.from({length: n}, () => []);
-            let levels = new Array(n).fill(-1);
-            levels[s] = 0;
-
-            while(q.length > 0) {
-                let v = q.shift();
-                for(let w of adj[v]) {
-                    if(levels[w] === -1) {
-                        levels[w] = levels[v] + 1;
-                        q.push(w);
-                    }
-                    if(levels[w] === levels[v] + 1) {
-                        preds[w].push(v);
-                    }
-                }
-            }
-            for(let i=0; i<n; i++) {
-                if(i !== s && levels[i] > 0) {
-                    for(let p of preds[i]) betweenness[p] += 1;
-                }
-            }
-        }
-
-        // RENDER LISTS
-        const renderList = (id, scores, color) => {
-            let ranked = papers.map((p, i) => ({ title: p.title, val: scores[i] }))
-                               .sort((a,b) => b.val - a.val)
-                               .slice(0, 3);
-            
-            let html = ranked.map((r, i) => `
-                <div style="display:flex; gap:8px; margin-bottom:6px; align-items:start;">
-                    <div style="font-weight:bold; color:${color}; font-size:0.9em; min-width:15px;">${i+1}.</div>
-                    <div style="font-size:0.8em; line-height:1.2; opacity:0.9;">${r.title}</div>
-                </div>`).join('');
-            
-            let el = document.getElementById(id);
-            if(el) el.innerHTML = html;
-        };
-
-        renderList(IDS.LISTS.EIGEN, eigenScores, '#00ff41');
-        renderList(IDS.LISTS.BETWEEN, betweenness, '#00e5ff');
-        renderList(IDS.LISTS.DEGREE, degrees, '#e040fb');
-    }
-
-    // --- HELPERS ---
-    function getColorByYear(year) {
-        let y = parseInt(year) || 2022;
-        if (y < 2020) return '#e040fb';
-        if (y < 2023) return '#00e5ff';
-        return '#00ff41';
-    }
-
-    function renderRadar(counts) {
-        var dom = document.getElementById(IDS.RADAR);
+    // ========================================================================
+    // LOGIC: COLLABORATION NETWORK (Row 3 Left) - Ported from research_network.html
+    // ========================================================================
+    function renderCollabNetwork(papers) {
+        var dom = document.getElementById(IDS.COLLAB);
         if(!dom) return;
-        if(radarChart) radarChart.dispose();
-        radarChart = echarts.init(dom);
-        let data = Object.keys(counts).map(k => ({ name: k, value: counts[k] }));
-        let max = Math.max(...data.map(d => d.value)) || 1;
-        let isDark = document.body.classList.contains('dark');
-        radarChart.setOption({
-            radar: { indicator: data.map(d => ({ name: d.name, max: max + 2 })), shape: 'circle', splitArea: { show: false }, axisName: { color: isDark ? '#aaa' : '#333' } },
-            series: [{ type: 'radar', data: [{ value: data.map(d => d.value), itemStyle: { color: isDark ? '#00ff41' : '#d93025' }, areaStyle: { opacity: 0.2 } }] }]
+        if(collabChart) collabChart.dispose();
+        collabChart = echarts.init(dom);
+
+        var myName = "Benjamin Ampel";
+        var nameMap = {
+            'B Ampel': 'Benjamin Ampel', 'BM Ampel': 'Benjamin Ampel', 'B. Ampel': 'Benjamin Ampel', 'admin': 'Benjamin Ampel',
+            'H Chen': 'Hsinchun Chen', 'H. Chen': 'Hsinchun Chen',
+            'S Samtani': 'Sagar Samtani', 'S. Samtani': 'Sagar Samtani',
+            'S Ullman': 'Steven Ullman', 'S. Ullman': 'Steven Ullman',
+            'H Zhu': 'Hongyi Zhu', 'H. Zhu': 'Hongyi Zhu',
+            'M Patton': 'Mark Patton', 'M. Patton': 'Mark Patton',
+            'B Lazarine': 'Ben Lazarine', 'B. Lazarine': 'Ben Lazarine',
+            'T Vahedi': 'Tala Vahedi', 'T. Vahedi': 'Tala Vahedi',
+            'K Otto': 'Kaeli Otto', 'K. Otto': 'Kaeli Otto',
+            'Y Gao': 'Yang Gao', 'Y. Gao': 'Yang Gao',
+            'J Hu': 'James Hu', 'J. Hu': 'James Hu',
+            'CH Yang': 'Chi-Heng Yang', 'JF Nunamaker Jr': 'Jay Nunamaker',
+            'C Marx': 'Carolin Marx', 'C Dacosta': 'Cade Dacosta',
+            'C Zhang': 'Chengjun Zhang', 'M Hashim': 'Matthew Hashim',
+            'M Wagner': 'Mason Wagner', 'RY Reyes': 'Raul Reyes',
+            'S Yang': 'Shanchieh Yang', 'Y Li': 'Yidong Li', 'Y. Li': 'Yidong Li'
+        };
+        function normalize(name) { return nameMap[name] || name; }
+
+        var nodeCounts = new Map();
+        var linkCounts = new Map();
+        var maxCount = 0;
+
+        papers.forEach(function(paper) {
+            var rawAuthors = paper.authors;
+            if (!rawAuthors) return;
+            var authorList = Array.isArray(rawAuthors) ? rawAuthors : rawAuthors.split(',');
+            var authors = [...new Set(authorList.map(a => normalize(a.trim())).filter(a => a))]; 
+            
+            authors.forEach(auth => {
+                let count = (nodeCounts.get(auth) || 0) + 1;
+                nodeCounts.set(auth, count);
+                if (auth !== myName && count > maxCount) maxCount = count;
+            });
+
+            for (let i = 0; i < authors.length; i++) {
+                for (let j = i + 1; j < authors.length; j++) {
+                    let source = authors[i], target = authors[j];
+                    if (source === target) continue;
+                    let pairId = [source, target].sort().join("|");
+                    linkCounts.set(pairId, (linkCounts.get(pairId) || 0) + 1);
+                }
+            }
         });
+
+        var nodes = Array.from(nodeCounts.entries()).map(([name, count]) => {
+            let isMe = (name === myName);
+            return {
+                id: name,
+                name: name,
+                value: count,
+                symbolSize: isMe ? 60 : Math.max(20, Math.min(50, count * 8)),
+                itemStyle: { color: isMe ? '#ffffff' : null }, // Color set dynamically later
+                // Pin "Me"
+                fixed: isMe,
+                x: isMe ? dom.clientWidth / 2 : null,
+                y: isMe ? dom.clientHeight / 2 : null
+            };
+        });
+
+        var links = Array.from(linkCounts.entries()).map(([id, count]) => {
+            let [source, target] = id.split("|");
+            return {
+                source: source, target: target, value: count,
+                lineStyle: { width: Math.min(1.5 + (count * 0.8), 6), opacity: 0.6 }
+            };
+        });
+
+        // Color Helper
+        function getCollabColor(val, max, isDark) {
+            var ratio = Math.min(Math.max((val - 1) / (max - 1 || 1), 0), 1);
+            var hue = (1 - ratio) * 120;
+            return isDark ? `hsl(${hue}, 90%, 60%)` : `hsl(${hue}, 80%, 40%)`;
+        }
+
+        let isDark = document.body.classList.contains('dark');
+        
+        // Apply Colors
+        nodes.forEach(n => {
+            if(n.id === myName) {
+                n.itemStyle = { color: isDark ? '#fff' : '#000', borderColor: isDark?'#000':'#fff', borderWidth: 2 };
+            } else {
+                n.itemStyle = { color: getCollabColor(n.value, maxCount, isDark) };
+            }
+            n.label = { show: n.value > 1 || n.id === myName, color: isDark?'#eee':'#333' };
+        });
+        links.forEach(l => {
+            l.lineStyle.color = getCollabColor(l.value, maxCount, isDark);
+        });
+
+        collabChart.setOption({
+            backgroundColor: 'transparent',
+            tooltip: { formatter: p => p.dataType==='edge' ? `${p.data.source} & ${p.data.target}<br>${p.value} Papers` : `${p.name}: ${p.value} Papers` },
+            series: [{
+                type: 'graph', layout: 'force', data: nodes, links: links, roam: true, zoom: 0.6,
+                label: { position: 'right' },
+                lineStyle: { curveness: 0.2 },
+                force: { repulsion: 800, gravity: 0.1, edgeLength: [30, 150] }
+            }]
+        });
+        
+        const btn = document.querySelector('.js-theme-toggle');
+        if(btn) { btn.addEventListener('click', () => { setTimeout(() => { renderCollabNetwork(papers); }, 100); }); }
     }
 
+
+    // ========================================================================
+    // LOGIC: RESEARCH FOOTPRINT MAP (Row 3 Right) - Ported from impact_map.html
+    // ========================================================================
+    function renderFootprintMap() {
+        var container = document.getElementById(IDS.FOOTPRINT);
+        if(!container) return;
+        
+        // Initialize Map
+        var map = L.map(IDS.FOOTPRINT).setView([30, -20], 2);
+
+        var lightTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; OpenStreetMap &copy; CARTO', subdomains: 'abcd', maxZoom: 18 });
+        var darkTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; OpenStreetMap &copy; CARTO', subdomains: 'abcd', maxZoom: 18 });
+
+        if (document.body.classList.contains('dark')) { darkTiles.addTo(map); } else { lightTiles.addTo(map); }
+
+        // Icons
+        var createIcon = (color) => L.divIcon({
+            className: 'custom-marker',
+            html: `<div style="width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 4px rgba(0,0,0,0.3);background:${color};"></div>`,
+            iconSize: [20, 20], iconAnchor: [10, 10]
+        });
+        
+        var confIcon = createIcon('#00ff41');
+        var collabIcon = createIcon('#00bfff');
+        var instIcon = createIcon('#ff6b35');
+
+        // Hugo Data Injection (This string replacement happens server-side by Hugo)
+        var points = [
+            {{ range $.Site.Data.impact_map }}
+            { "title": "{{ .title }}", "lat": {{ .lat }}, "lng": {{ .lng }}, "location": "{{ .location }}", "desc": "{{ .description }}", "cat": "{{ .category }}" },
+            {{ end }}
+        ];
+
+        points.forEach(function(point) {
+            var icon = confIcon;
+            if(point.cat === 'Collaboration') icon = collabIcon;
+            if(point.cat === 'Institution') icon = instIcon;
+            
+            var popup = `<div><strong>${point.title}</strong><br><span style="font-size:0.8em">${point.location}</span><br><span style="font-size:0.8em;opacity:0.7">${point.cat}</span></div>`;
+            L.marker([point.lat, point.lng], {icon: icon}).addTo(map).bindPopup(popup);
+        });
+
+        // Theme Listener
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((m) => {
+                if (m.attributeName === 'class') {
+                    if (document.body.classList.contains('dark')) { map.removeLayer(lightTiles); if(!map.hasLayer(darkTiles)) darkTiles.addTo(map); }
+                    else { map.removeLayer(darkTiles); if(!map.hasLayer(lightTiles)) lightTiles.addTo(map); }
+                }
+            });
+        });
+        observer.observe(document.body, { attributes: true });
+        
+        // Fix Leaflet sizing inside Grid
+        setTimeout(() => map.invalidateSize(), 500);
+        window.addEventListener('resize', () => map.invalidateSize());
+    }
+
+
+    // --- HELPERS (Line, Radar, Text) ---
     function renderLine(history) {
         var dom = document.getElementById(IDS.LINE);
         if(!dom || !history) return;
@@ -339,12 +458,68 @@
         });
     }
 
+    function calculateAllMetrics(papers) {
+        let n = papers.length;
+        let adj = Array.from({length: n}, () => []);
+        let degrees = new Array(n).fill(0);
+        const getWeight = (i, j) => {
+            let p1 = papers[i], p2 = papers[j];
+            let w = 0;
+            if(p1.venue === p2.venue && p1.venue) w += 1;
+            let t1 = (p1.title||"").toLowerCase(); let t2 = (p2.title||"").toLowerCase();
+            let common = t1.split(' ').filter(word => word.length > 4 && t2.includes(word)).length;
+            if(common > 0) w += common * 0.5;
+            return w;
+        };
+        for(let i=0; i<n; i++) {
+            for(let j=i+1; j<n; j++) {
+                let weight = getWeight(i, j);
+                if(weight > 0.5) { adj[i].push(j); adj[j].push(i); degrees[i]++; degrees[j]++; }
+            }
+        }
+        let eigenScores = new Array(n).fill(1.0);
+        for(let iter=0; iter<10; iter++) {
+            let nextScores = new Array(n).fill(0);
+            for(let i=0; i<n; i++) { for(let neighbor of adj[i]) { nextScores[i] += eigenScores[neighbor]; } }
+            let maxS = Math.max(...nextScores) || 1;
+            eigenScores = nextScores.map(s => s / maxS);
+        }
+        let betweenness = new Array(n).fill(0);
+        for(let s=0; s<n; s++) {
+            let q = [s], preds = Array.from({length: n}, () => []), levels = new Array(n).fill(-1); levels[s] = 0;
+            while(q.length > 0) {
+                let v = q.shift();
+                for(let w of adj[v]) {
+                    if(levels[w] === -1) { levels[w] = levels[v] + 1; q.push(w); }
+                    if(levels[w] === levels[v] + 1) { preds[w].push(v); }
+                }
+            }
+            for(let i=0; i<n; i++) { if(i !== s && levels[i] > 0) { for(let p of preds[i]) betweenness[p] += 1; } }
+        }
+        const renderList = (id, scores, color) => {
+            let ranked = papers.map((p, i) => ({ title: p.title, val: scores[i] })).sort((a,b) => b.val - a.val).slice(0, 3);
+            let html = ranked.map((r, i) => `<div style="display:flex; gap:8px; margin-bottom:6px; align-items:start;"><div style="font-weight:bold; color:${color}; font-size:0.9em; min-width:15px;">${i+1}.</div><div style="font-size:0.8em; line-height:1.2; opacity:0.9;">${r.title}</div></div>`).join('');
+            let el = document.getElementById(id); if(el) el.innerHTML = html;
+        };
+        renderList(IDS.LISTS.EIGEN, eigenScores, '#00ff41');
+        renderList(IDS.LISTS.BETWEEN, betweenness, '#00e5ff');
+        renderList(IDS.LISTS.DEGREE, degrees, '#e040fb');
+    }
+
+    function getColorByYear(year) {
+        let y = parseInt(year) || 2022;
+        if (y < 2020) return '#e040fb';
+        if (y < 2023) return '#00e5ff';
+        return '#00ff41';
+    }
+
     function updateText(id, val) { var el = document.getElementById(id); if(el) el.innerText = val; }
 
     window.addEventListener('resize', function() {
         if(radarChart) radarChart.resize();
         if(lineChart) lineChart.resize();
         if(graphChart) graphChart.resize();
+        if(collabChart) collabChart.resize();
     });
 
 })();
