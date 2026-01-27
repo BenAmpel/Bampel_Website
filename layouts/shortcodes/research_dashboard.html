@@ -34,7 +34,7 @@
             </div>
 
             <div style="grid-column: 2; grid-row: 1; padding: 25px; border-bottom: 1px solid ${border};">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
                     <div>
                         <div style="font-size: 0.8rem; color: ${muted};">Primary Focus</div>
                         <div style="font-size: 1.1rem; font-weight: 800; color: ${c1}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="metric-focus">...</div>
@@ -42,6 +42,10 @@
                     <div>
                         <div style="font-size: 0.8rem; color: ${muted};">Trending Now</div>
                         <div style="font-size: 1.1rem; font-weight: 800; color: ${c2}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="metric-trend">...</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.8rem; color: ${muted};">Citation Velocity</div>
+                        <div style="font-size: 1.1rem; font-weight: 800; color: ${c2};" id="metric-velocity">-</div>
                     </div>
                     <div>
                         <div style="font-size: 0.8rem; color: ${muted};">Total Citations</div>
@@ -62,7 +66,7 @@
 
             <div style="grid-column: 2; grid-row: 2; padding: 20px; display: flex; flex-direction: column;">
                 <div style="flex-grow: 1; min-height: 200px; position: relative;">
-                    <h4 style="margin: 0 0 10px; font-size: 0.8rem; color: ${muted}; text-transform: uppercase; letter-spacing: 1px;">Citation Velocity</h4>
+                    <h4 style="margin: 0 0 10px; font-size: 0.8rem; color: ${muted}; text-transform: uppercase; letter-spacing: 1px;">Citations by Year</h4>
                     <div id="dash-line" style="width: 100%; height: calc(100% - 40px); min-height: 180px;"></div>
                 </div>
                 
@@ -127,6 +131,17 @@
             let suffix = rawCites.includes('+') ? '+' : '';
             animateValue("metric-cites", 0, cleanCites, 2000, suffix);
             document.getElementById('metric-hindex').innerText = scholarData.metrics.hIndex || 0;
+            
+            // Citation Velocity
+            let velocity = 0;
+            if (scholarData.metrics.citationVelocity !== undefined && scholarData.metrics.citationVelocity !== null) {
+                velocity = scholarData.metrics.citationVelocity;
+            } else if (scholarData.citationsByYear && scholarData.citationsByYear.length > 0) {
+                // Fallback: calculate from most recent year
+                let recentYear = scholarData.citationsByYear[scholarData.citationsByYear.length - 1];
+                velocity = recentYear.citations || 0;
+            }
+            document.getElementById('metric-velocity').innerText = velocity;
         }
 
         // C. Render Charts
@@ -442,11 +457,15 @@
                    var hidx = document.getElementById('metric-hindex').innerText;
                    var focus = document.getElementById('metric-focus').innerText;
                    var trend = document.getElementById('metric-trend').innerText;
+                   var velocity = document.getElementById('metric-velocity') ? document.getElementById('metric-velocity').innerText : '-';
                    root.innerHTML = renderLayout(); 
                    document.getElementById('metric-cites').innerText = cites;
                    document.getElementById('metric-hindex').innerText = hidx;
                    document.getElementById('metric-focus').innerText = focus;
                    document.getElementById('metric-trend').innerText = trend;
+                   if (document.getElementById('metric-velocity')) {
+                       document.getElementById('metric-velocity').innerText = velocity;
+                   }
                    // Reinitialize charts
                    radarChart = echarts.init(document.getElementById('dash-radar'));
                    lineChart = echarts.init(document.getElementById('dash-line'));
