@@ -30,31 +30,24 @@
 </div>
 
 <div style="grid-column:2; grid-row:2; padding:25px; display:flex; flex-direction:column; height:100%; overflow:hidden;">
-    <h4 style="font-size:0.8rem; opacity:0.7; text-transform:uppercase; margin-bottom:15px; border-bottom:1px solid var(--card-border, #444); padding-bottom:10px;">Network Centrality Analysis</h4>
-    
-    <div style="overflow-y:auto; padding-right:5px; flex-grow:1;">
-        
-        <div style="margin-bottom:20px;">
-            <div style="font-size:0.75rem; font-weight:bold; color:#00ff41; margin-bottom:4px;">INFLUENCE (Eigenvector)</div>
-            <p style="font-size:0.65rem; opacity:0.5; margin:0 0 8px 0;">Papers connected to other highly connected papers</p>
-            <div id="dash-list-eigen" style="font-size:0.8rem; line-height:1.4;">
-                <span style="opacity:0.3;">Calculating...</span>
-            </div>
-        </div>
-
-        <div style="margin-bottom:20px;">
-            <div style="font-size:0.75rem; font-weight:bold; color:#00e5ff; margin-bottom:4px;">BRIDGES (Betweenness)</div>
-            <p style="font-size:0.65rem; opacity:0.5; margin:0 0 8px 0;">Papers that connect different research clusters</p>
-            <div id="dash-list-between" style="font-size:0.8rem; line-height:1.4;"></div>
-        </div>
-
-        <div>
-            <div style="font-size:0.75rem; font-weight:bold; color:#e040fb; margin-bottom:4px;">HUBS (Degree)</div>
-            <p style="font-size:0.65rem; opacity:0.5; margin:0 0 8px 0;">Papers with the most direct relationships</p>
-            <div id="dash-list-degree" style="font-size:0.8rem; line-height:1.4;"></div>
-        </div>
-
-    </div>
+<h4 style="font-size:0.8rem; opacity:0.7; text-transform:uppercase; margin-bottom:15px; border-bottom:1px solid var(--card-border, #444); padding-bottom:10px;">Network Centrality Analysis</h4>
+<div style="overflow-y:auto; padding-right:5px; flex-grow:1;">
+<div style="margin-bottom:20px;">
+<div style="font-size:0.75rem; font-weight:bold; color:#00ff41; margin-bottom:4px;">INFLUENCE (Eigenvector)</div>
+<p style="font-size:0.65rem; opacity:0.5; margin:0 0 8px 0;">Papers connected to other highly connected papers</p>
+<div id="dash-list-eigen" style="font-size:0.8rem; line-height:1.4;"><span style="opacity:0.3;">Calculating...</span></div>
+</div>
+<div style="margin-bottom:20px;">
+<div style="font-size:0.75rem; font-weight:bold; color:#00e5ff; margin-bottom:4px;">BRIDGES (Betweenness)</div>
+<p style="font-size:0.65rem; opacity:0.5; margin:0 0 8px 0;">Papers that connect different research clusters</p>
+<div id="dash-list-between" style="font-size:0.8rem; line-height:1.4;"></div>
+</div>
+<div>
+<div style="font-size:0.75rem; font-weight:bold; color:#e040fb; margin-bottom:4px;">HUBS (Degree)</div>
+<p style="font-size:0.65rem; opacity:0.5; margin:0 0 8px 0;">Papers with the most direct relationships</p>
+<div id="dash-list-degree" style="font-size:0.8rem; line-height:1.4;"></div>
+</div>
+</div>
 </div>
 
 </div>
@@ -80,7 +73,7 @@
 
     var radarChart, lineChart, graphChart;
 
-    // 2. DATA
+    // 2. FETCH DATA
     const safeFetch = (url) => fetch(url).then(r => r.ok ? r.json() : null).catch(e => null);
 
     Promise.all([
@@ -140,7 +133,7 @@
     }).catch(err => console.error("Dashboard Error:", err));
 
 
-    // --- 3. MAP RENDERER (Original Logic) ---
+    // --- 3. MAP RENDERER (Logic from knowledge_graph.html) ---
     function renderWorkingMap(papers) {
         var dom = document.getElementById(IDS.MAP);
         if(!dom || papers.length === 0) return;
@@ -220,7 +213,6 @@
 
     // --- 4. ADVANCED METRIC CALCULATIONS ---
     function calculateAllMetrics(papers) {
-        // Re-generate adjacency list to ensure we match the map's logic perfectly
         let n = papers.length;
         let adj = Array.from({length: n}, () => []);
         let degrees = new Array(n).fill(0);
@@ -229,9 +221,7 @@
         const getWeight = (i, j) => {
             let p1 = papers[i], p2 = papers[j];
             let w = 0;
-            if(p1.venue === p2.venue && p1.venue) w += 1; // Venue
-            // Simplified for performance: we assume Venue + a base connection exists if they are in the graph
-            // Since we don't have the pre-processed sets here, we do a basic topic check
+            if(p1.venue === p2.venue && p1.venue) w += 1;
             let t1 = (p1.title||"").toLowerCase();
             let t2 = (p2.title||"").toLowerCase();
             let common = t1.split(' ').filter(word => word.length > 4 && t2.includes(word)).length;
@@ -260,15 +250,13 @@
                     nextScores[i] += eigenScores[neighbor];
                 }
             }
-            // Normalize
             let maxS = Math.max(...nextScores) || 1;
             eigenScores = nextScores.map(s => s / maxS);
         }
 
-        // 2. BETWEENNESS (Brandes-ish BFS)
+        // 2. BETWEENNESS (Simplified)
         let betweenness = new Array(n).fill(0);
         for(let s=0; s<n; s++) {
-            // BFS from s
             let visited = new Set([s]);
             let q = [s];
             let preds = Array.from({length: n}, () => []);
@@ -287,11 +275,8 @@
                     }
                 }
             }
-            // Accumulate (Simplified for unweighted paths)
             for(let i=0; i<n; i++) {
                 if(i !== s && levels[i] > 0) {
-                    // This node is on a shortest path from s
-                    // Very rough approximation for visualization speed
                     for(let p of preds[i]) betweenness[p] += 1;
                 }
             }
