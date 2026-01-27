@@ -38,7 +38,7 @@ jobs:
           
           # Only commit if there are changes (prevents empty commit errors)
           if git diff --staged --quiet; then
-            print("No changes to commit.")
+            echo "No changes to commit."
           else
             git commit -m "chore: Update Scholar metrics [skip ci]"
             git push

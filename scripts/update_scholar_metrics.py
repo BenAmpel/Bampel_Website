@@ -1,23 +1,23 @@
 import json
 import urllib.request
 import urllib.parse
+import socket
 from datetime import datetime
 from pathlib import Path
 import os
 
 # --- CONFIGURATION ---
 SCHOLAR_ID = "XDdwaZUAAAAJ" 
-API_KEY = SERPAPI_KEY
 # Files
 SCRIPT_DIR = Path(__file__).parent
 OUTPUT_FILE = SCRIPT_DIR.parent / "static" / "data" / "scholar-metrics.json"
 
 def fetch_data():
     # If using GitHub Actions, set the key as a secret named SERPAPI_KEY
-    key = os.environ.get("SERPAPI_KEY", API_KEY)
+    key = os.environ.get("SERPAPI_KEY")
     
-    if key == "YOUR_SERPAPI_KEY_HERE":
-        print("Error: You must add your SerpApi Key to the script.")
+    if not key or key == "YOUR_SERPAPI_KEY_HERE":
+        print("Error: SERPAPI_KEY environment variable must be set.")
         return None
 
     params = {
@@ -30,17 +30,32 @@ def fetch_data():
     url = "https://serpapi.com/search.json?" + urllib.parse.urlencode(params)
     
     print(f"Fetching data from SerpApi...")
+    print(f"URL: {url[:80]}...")  # Log partial URL for debugging
     try:
-        with urllib.request.urlopen(url) as response:
+        # Set socket timeout to prevent hanging (15 seconds)
+        socket.setdefaulttimeout(15)
+        
+        # Add timeout to prevent hanging (15 seconds)
+        request = urllib.request.Request(url)
+        print("Making request to SerpAPI...")
+        with urllib.request.urlopen(request, timeout=15) as response:
+            print("Received response, reading data...")
             data = json.loads(response.read().decode())
+            print("Data parsed successfully")
             
         if "error" in data:
             print(f"API Error: {data['error']}")
             return None
             
         return data
-    except Exception as e:
+    except socket.timeout:
+        print("Error: Request timed out after 15 seconds")
+        return None
+    except urllib.error.URLError as e:
         print(f"Network Error: {e}")
+        return None
+    except Exception as e:
+        print(f"Error: {e}")
         return None
 
 def process_and_save(data):
