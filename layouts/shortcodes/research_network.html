@@ -12,7 +12,6 @@
     var myName = "Benjamin Ampel"; // The center node
 
     // --- 1. NAME NORMALIZATION ---
-    // Ensures "B. Ampel" and "Benjamin Ampel" are treated as the same person
     var nameMap = {
         'B Ampel': 'Benjamin Ampel', 'BM Ampel': 'Benjamin Ampel', 'B. Ampel': 'Benjamin Ampel', 'admin': 'Benjamin Ampel',
         'H Chen': 'Hsinchun Chen', 'H. Chen': 'Hsinchun Chen',
@@ -37,13 +36,10 @@
     function getColor(value, max, isDark) {
         var safeMax = (max <= 1) ? 2 : max;
         var ratio = Math.min(Math.max((value - 1) / (safeMax - 1), 0), 1);
-
         if (isDark) {
-            // Dark Mode: Neon Green -> Hot Pink
             var hue = (1 - ratio) * 120; 
             return `hsl(${hue}, 90%, 60%)`;
         } else {
-            // Light Mode: Forest Green -> Deep Red
             var hue = (1 - ratio) * 120;
             return `hsl(${hue}, 80%, 40%)`;
         }
@@ -56,7 +52,6 @@
         var myChart = echarts.init(dom);
         myChart.showLoading();
 
-        // Data Storage
         var globalData = { nodes: [], links: [], maxCount: 0 };
 
         // --- 3. FETCH & PROCESS DATA ---
@@ -64,23 +59,33 @@
             .then(response => response.json())
             .then(data => {
                 myChart.hideLoading();
-                processData(data);
+                // [FIX 1] Handle Object wrapper vs Direct List
+                let papers = Array.isArray(data) ? data : (data.individualPublications || []);
+                processData(papers);
             })
             .catch(err => {
                 console.error("Network Error:", err);
                 myChart.hideLoading();
-                dom.innerHTML = "<p style='text-align:center; padding-top:20px; color:red;'>Could not load network data.</p>";
+                dom.innerHTML = "<p style='text-align:center; padding-top:20px; opacity:0.6;'>Network data unavailable.</p>";
             });
 
         function processData(papers) {
             var nodeCounts = new Map();
-            var linkCounts = new Map(); // Store pair counts for edge weighting
+            var linkCounts = new Map(); 
             var maxCount = 0;
 
             // Step A: Aggregate Counts
+            if (!papers || papers.length === 0) return;
+
             papers.forEach(function(paper) {
-                if (!paper.authors) return;
-                var authors = [...new Set(paper.authors.map(normalize))]; // Deduplicate authors per paper
+                var rawAuthors = paper.authors;
+                if (!rawAuthors) return;
+
+                // [FIX 2] Handle String ("A, B") vs Array (["A", "B"])
+                var authorList = Array.isArray(rawAuthors) ? rawAuthors : rawAuthors.split(',');
+                
+                // Clean and Normalize
+                var authors = [...new Set(authorList.map(a => normalize(a.trim())).filter(a => a))]; 
                 
                 // Count Nodes
                 authors.forEach(auth => {
@@ -94,8 +99,6 @@
                     for (let j = i + 1; j < authors.length; j++) {
                         let source = authors[i], target = authors[j];
                         if (source === target) continue;
-                        
-                        // Sort names to ensure A-B is same as B-A
                         let pairId = [source, target].sort().join("|");
                         linkCounts.set(pairId, (linkCounts.get(pairId) || 0) + 1);
                     }
@@ -114,10 +117,7 @@
                     target: target,
                     value: count,
                     lineStyle: {
-                        // WEIGHTED EDGE LOGIC:
-                        // Width: 1.5px (1 paper) -> up to 6px (many papers)
                         width: Math.min(1.5 + (count * 0.8), 6),
-                        // Opacity: 0.3 (faint) -> 0.9 (solid)
                         opacity: Math.min(0.3 + (count * 0.1), 0.9)
                     }
                 };
@@ -129,17 +129,11 @@
         // --- 4. RENDER CHART ---
         function updateChart() {
             var isDark = document.body.classList.contains('dark');
-            var bgColor = isDark ? '#000000' : '#ffffff';
+            var bgColor = isDark ? 'transparent' : 'transparent'; // Transparent to blend with card
             var textColor = isDark ? '#eeeeee' : '#333333';
-            
-            // Text Outline Logic (The "Shadow Border")
-            // Dark Mode: White Text with Black Border
-            // Light Mode: Black Text with White Border
             var textBorder = isDark ? '#000000' : '#ffffff'; 
-
             var meColor = isDark ? '#ffffff' : '#000000';
 
-            // 1. Map Nodes (With Text Border)
             var nodes = globalData.rawNodes.map(([name, count]) => {
                 let isMe = (name === myName);
                 return {
@@ -155,13 +149,12 @@
                     label: {
                         show: count > 1 || isMe,
                         color: textColor,
-                        // --- HIGH CONTRAST TEXT BORDER ---
                         textBorderColor: textBorder,
                         textBorderWidth: 3, 
-                        // ----------------------------------------
                         fontSize: isMe ? 14 : 11,
                         fontWeight: 'bold'
                     },
+                    // Pin "Me" to center
                     fixed: isMe,
                     x: isMe ? dom.clientWidth / 2 : null,
                     y: isMe ? dom.clientHeight / 2 : null,
@@ -169,31 +162,24 @@
                 };
             });
 
-            // 2. Map Links (With Gradient Coloring)
-            // We reconstruct links here to apply the correct Theme color
             var links = globalData.links.map(link => ({
                 source: link.source,
                 target: link.target,
                 value: link.value,
                 lineStyle: {
-                    // --- COLOR EDGES BY WEIGHT ---
-                    // Uses the same Green->Red gradient as the nodes
                     color: getColor(link.value, globalData.maxCount, isDark),
-                    // ------------------------------------
                     width: Math.min(1.5 + (link.value * 0.8), 6),
-                    opacity: 0.8 // Slightly higher opacity to make colors visible
+                    opacity: 0.8 
                 }
             }));
 
             var option = {
                 backgroundColor: bgColor,
-                animationDuration: 2000,
+                animationDuration: 1500,
                 animationEasingUpdate: 'quinticInOut',
                 tooltip: { 
                     formatter: (params) => {
-                        if (params.dataType === 'edge') {
-                            return `${params.data.source} & ${params.data.target}<br><strong>${params.value} Papers</strong>`;
-                        }
+                        if (params.dataType === 'edge') return `${params.data.source} & ${params.data.target}<br><strong>${params.value} Papers</strong>`;
                         return `${params.marker} <strong>${params.name}</strong><br>Papers: ${params.value}`;
                     }
                 },
@@ -201,18 +187,16 @@
                     type: 'graph',
                     layout: 'force',
                     data: nodes,
-                    links: links, // Use our new colored links
+                    links: links,
                     roam: true,
                     zoom: 0.75,
                     label: { position: 'right' },
-                    lineStyle: {
-                        curveness: 0.2
-                    },
+                    lineStyle: { curveness: 0.2 },
                     force: {
                         initLayout: 'circular',
-                        repulsion: 2500,
+                        repulsion: 2000,
                         gravity: 0.1,
-                        edgeLength: [50, 300],
+                        edgeLength: [50, 200],
                         friction: 0.9
                     }
                 }]
@@ -220,7 +204,7 @@
 
             myChart.setOption(option);
             
-            // Re-center
+            // Force re-center of Main Node
             var w = myChart.getWidth(), h = myChart.getHeight();
             nodes.forEach(n => { if(n.id === myName) { n.x = w/2; n.y = h/2; } });
             myChart.setOption({ series: [{ data: nodes }] });
@@ -228,13 +212,6 @@
 
         // --- 5. EVENTS ---
         new ResizeObserver(() => myChart.resize()).observe(dom);
-        
-        var parentDetails = dom.closest('details');
-        if (parentDetails) {
-            parentDetails.addEventListener('toggle', () => {
-                if(parentDetails.open) setTimeout(() => myChart.resize(), 50);
-            });
-        }
         
         const themeButton = document.querySelector('.js-theme-toggle');
         if(themeButton){
