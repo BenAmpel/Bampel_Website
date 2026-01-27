@@ -63,11 +63,18 @@ def process_and_save(data):
 
     author = data.get("author", {})
     articles = data.get("articles", [])
+    cited_by = author.get("cited_by", {})
+
+    # Debug: Print structure to understand API response
+    print(f"Author keys: {list(author.keys())}")
+    print(f"Cited_by keys: {list(cited_by.keys())}")
+    print(f"Table structure: {cited_by.get('table', [])}")
+    print(f"Graph structure: {cited_by.get('graph', [])}")
 
     # 1. Parse Citations Graph (cited_by.graph)
     # SerpApi returns graph as [{"year": 2018, "citations": 5}, ...]
     history = []
-    graph_data = author.get("cited_by", {}).get("graph", [])
+    graph_data = cited_by.get("graph", [])
     
     # Sort and format (safely handle missing year field)
     if graph_data:
@@ -85,22 +92,56 @@ def process_and_save(data):
 
     # 2. Parse Top Publications
     individual_pubs = []
+    total_citations_from_pubs = 0
     for art in articles:
+        pub_citations = art.get("cited_by", {}).get("value", 0) or 0
         individual_pubs.append({
             "title": art.get("title", ""),
-            "citations": art.get("cited_by", {}).get("value", 0),
+            "citations": pub_citations,
             "year": art.get("year", "N/A"),
             "link": art.get("link", "")
         })
+        total_citations_from_pubs += pub_citations
 
     # 3. Construct Final JSON
     # Safely extract metrics from table array
-    table = author.get("cited_by", {}).get("table", [])
+    table = cited_by.get("table", [])
     
     # Safely access table indices with defaults
-    citations = table[0].get("all", 0) if len(table) > 0 else 0
-    h_index = table[1].get("all", 0) if len(table) > 1 else 0
-    i10_index = table[2].get("all", 0) if len(table) > 2 else 0
+    # Table structure: [{"citations": {...}, "h_index": {...}, "i10_index": {...}}]
+    # OR: [{"all": X}, {"all": Y}, {"all": Z}] for citations, h-index, i10-index
+    citations = 0
+    h_index = 0
+    i10_index = 0
+    
+    if table and len(table) > 0:
+        # Try different table structures
+        if isinstance(table[0], dict):
+            # Structure 1: [{"citations": {"all": X}, "h_index": {"all": Y}, ...}]
+            if "citations" in table[0]:
+                citations = table[0].get("citations", {}).get("all", 0)
+            elif "all" in table[0]:
+                citations = table[0].get("all", 0)
+            
+            if len(table) > 1:
+                if "h_index" in table[1]:
+                    h_index = table[1].get("h_index", {}).get("all", 0)
+                elif "all" in table[1]:
+                    h_index = table[1].get("all", 0)
+            
+            if len(table) > 2:
+                if "i10_index" in table[2]:
+                    i10_index = table[2].get("i10_index", {}).get("all", 0)
+                elif "all" in table[2]:
+                    i10_index = table[2].get("all", 0)
+    
+    # Fallback: Try direct access from cited_by
+    if citations == 0:
+        citations = cited_by.get("total", 0) or cited_by.get("value", 0) or 0
+    if h_index == 0:
+        h_index = cited_by.get("h_index", {}).get("all", 0) if isinstance(cited_by.get("h_index"), dict) else cited_by.get("h_index", 0)
+    if i10_index == 0:
+        i10_index = cited_by.get("i10_index", {}).get("all", 0) if isinstance(cited_by.get("i10_index"), dict) else cited_by.get("i10_index", 0)
     
     # Calculate Citation Velocity (citations in the most recent year)
     citation_velocity = 0
@@ -108,12 +149,21 @@ def process_and_save(data):
         # Get the most recent year's citations
         current_year = datetime.now().year
         # Find the most recent year in history
-        most_recent_year = max([int(h.get('year', 0)) for h in history if h.get('year', '').isdigit()], default=current_year)
-        # Get citations for that year
-        for h in history:
-            if str(h.get('year', '')) == str(most_recent_year):
-                citation_velocity = h.get('citations', 0)
-                break
+        valid_years = [int(h.get('year', 0)) for h in history if str(h.get('year', '')).isdigit()]
+        if valid_years:
+            most_recent_year = max(valid_years)
+            # Get citations for that year
+            for h in history:
+                if str(h.get('year', '')) == str(most_recent_year):
+                    citation_velocity = h.get('citations', 0)
+                    break
+    
+    # Final fallback: if still no data, use sum from individual publications
+    if citations == 0 and total_citations_from_pubs > 0:
+        print(f"Warning: Using fallback citations from individual publications: {total_citations_from_pubs}")
+        citations = total_citations_from_pubs
+    
+    print(f"Extracted metrics - Citations: {citations}, h-index: {h_index}, i10-index: {i10_index}, Citation Velocity: {citation_velocity}")
     
     output = {
         "lastUpdated": datetime.now().strftime("%B %Y"),

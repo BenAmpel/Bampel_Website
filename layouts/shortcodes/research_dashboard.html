@@ -123,13 +123,15 @@
             document.getElementById('metric-hindex').innerText = scholarData.metrics.hIndex || 0;
             
             // 3. Citation Velocity
-            if (scholarData.metrics.citationVelocity !== undefined) {
-                document.getElementById('metric-velocity').innerText = scholarData.metrics.citationVelocity;
+            let velocity = 0;
+            if (scholarData.metrics.citationVelocity !== undefined && scholarData.metrics.citationVelocity !== null) {
+                velocity = scholarData.metrics.citationVelocity;
             } else if (scholarData.citationsByYear && scholarData.citationsByYear.length > 0) {
                 // Fallback: calculate from most recent year
                 let recentYear = scholarData.citationsByYear[scholarData.citationsByYear.length - 1];
-                document.getElementById('metric-velocity').innerText = recentYear.citations || 0;
+                velocity = recentYear.citations || 0;
             }
+            document.getElementById('metric-velocity').innerText = velocity;
             
             // 4. Update Date
             if(scholarData.lastUpdated) {
