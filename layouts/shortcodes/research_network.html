@@ -9,6 +9,7 @@
 <script type="text/javascript">
 (function() {
     var domID = "network-{{ $uniqueID }}";
+    // Ingest Data from Hugo
     var rawNodes = {{ .Site.Data.network.nodes | jsonify }};
     var rawLinks = {{ .Site.Data.network.links | jsonify }};
     
@@ -16,23 +17,36 @@
         var dom = document.getElementById(domID);
         if (!dom) return;
 
-        // 2. SETUP ECHARTS
+        // 1. SETUP ECHARTS
+        // We do NOT init immediately if hidden, to prevent 0x0 size issues.
         var myChart = echarts.init(dom);
-        var hasRendered = false; // Track if we have successfully drawn it
+        var hasRendered = false;
         
         // Prepare Data
         var nodes = rawNodes.map(node => ({
             id: node.id,
             name: node.name,
             symbolSize: node.size,
-            category: node.group,
+            category: node.group, // Matches YAML: self, advisor, professor, collaborator, student
+            // Fix Self to Center
             fixed: node.group === 'self' ? true : false,
             x: node.group === 'self' ? 500 : null,
             y: node.group === 'self' ? 300 : null
         }));
 
-        const lightColors = ['#d93025', '#1a0dab', '#f9ab00', '#007b83', '#666666'];
-        const darkColors = ['#00ff41', '#00ffff', '#ffff00', '#ff00ff', '#ffffff'];
+        // 2. DEFINE CATEGORIES (MUST MATCH YAML EXACTLY)
+        var categories = [
+            { name: 'self' }, 
+            { name: 'advisor' }, 
+            { name: 'professor' }, 
+            { name: 'collaborator' }, 
+            { name: 'student' }
+        ];
+
+        // 3. COLOR PALETTES (Matched to Categories)
+        // self=Red, advisor=Purple, professor=Blue, collaborator=Yellow/Orange, student=Green
+        const lightColors = ['#d93025', '#9c27b0', '#1a0dab', '#f9ab00', '#188038'];
+        const darkColors =  ['#00ff41', '#ff00ff', '#00ffff', '#ffff00', '#ff6b35'];
 
         function getOption(isDark) {
             let colors = isDark ? darkColors : lightColors;
@@ -44,63 +58,92 @@
                 tooltip: {},
                 color: colors,
                 legend: [{
-                    data: ['self', 'professor', 'student', 'external', 'industry'],
+                    data: ['self', 'advisor', 'professor', 'collaborator', 'student'],
                     textStyle: { color: textColor },
-                    bottom: 10
+                    bottom: 10,
+                    selectedMode: 'multiple'
                 }],
                 series: [{
                     type: 'graph',
                     layout: 'force',
                     data: nodes,
                     links: rawLinks,
-                    categories: [
-                        { name: 'self' }, { name: 'professor' }, { name: 'student' }, { name: 'external' }, { name: 'industry' }
-                    ],
+                    categories: categories, // <--- This was the missing link
                     roam: true,
-                    label: { show: true, position: 'right', formatter: '{b}', color: textColor },
-                    lineStyle: { color: 'source', curveness: 0.3 },
-                    force: { repulsion: 1000, gravity: 0.1, edgeLength: 100, friction: 0.6 }
+                    label: { 
+                        show: true, 
+                        position: 'right', 
+                        formatter: '{b}', 
+                        color: textColor 
+                    },
+                    lineStyle: { 
+                        color: 'source', 
+                        curveness: 0.3,
+                        width: 2 
+                    },
+                    emphasis: {
+                        focus: 'adjacency',
+                        lineStyle: { width: 4 }
+                    },
+                    force: { 
+                        repulsion: 1000, 
+                        gravity: 0.1, 
+                        edgeLength: 100, 
+                        friction: 0.6 
+                    }
                 }]
             };
         }
 
-        // Initial Render Attempt
-        let isDark = document.body.classList.contains('dark');
-        myChart.setOption(getOption(isDark));
-
-        // 3. THE "POLLING" FIX
-        // Check every 500ms if the box is visible. If it is, and we haven't resized recently, force it.
-        // This catches the accordion opening event even if the browser suppresses the event trigger.
-        setInterval(function() {
-            if (dom.offsetParent !== null && !hasRendered) {
-               // Element is now visible!
-               myChart.resize();
-               
-               // Re-center self
-               var w = myChart.getWidth();
-               var h = myChart.getHeight();
-               if(w > 0 && h > 0) {
-                   nodes.forEach(n => {
-                       if (n.id === 'self') { n.x = w / 2; n.y = h / 2; }
-                   });
-                   myChart.setOption({ series: [{ data: nodes }] });
-                   hasRendered = true; // Stop trying to force it
-               }
+        // 4. RENDER FUNCTION (Safe for multiple calls)
+        function safeRender() {
+            // Only render if visible
+            if (dom.clientWidth > 0 && dom.clientHeight > 0) {
+                let isDark = document.body.classList.contains('dark');
+                myChart.setOption(getOption(isDark));
+                myChart.resize();
+                
+                // Re-center 'self' node
+                var w = myChart.getWidth();
+                var h = myChart.getHeight();
+                nodes.forEach(n => {
+                    if (n.id === 'self') { n.x = w / 2; n.y = h / 2; }
+                });
+                myChart.setOption({ series: [{ data: nodes }] });
+                
+                hasRendered = true;
             }
-        }, 500);
+        }
 
-        // 4. Force Resize on Click (Backup)
-        // If the user clicks anywhere in the box, we force a redraw
-        dom.addEventListener('click', function() {
-            myChart.resize();
-        });
+        // 5. EVENT LISTENERS
+        
+        // A. Initial Try
+        safeRender();
 
-        // 5. Standard Resize Observer
+        // B. Polling for Visibility (Fixes the Spoiler/Details issue)
+        // Checks every 200ms if the box appeared, then renders.
+        var poller = setInterval(function() {
+            if (dom.offsetParent !== null && !hasRendered) {
+                safeRender();
+            }
+        }, 200);
+
+        // C. Explicit Toggle Listener (If inside details)
+        var parentDetails = dom.closest('details');
+        if (parentDetails) {
+            parentDetails.addEventListener('toggle', function() {
+                if (parentDetails.open) {
+                    setTimeout(safeRender, 50);
+                }
+            });
+        }
+
+        // D. Resize Observer
         new ResizeObserver(() => {
-            myChart.resize();
+            if (hasRendered) myChart.resize();
         }).observe(dom);
 
-        // Theme Listener
+        // E. Theme Toggle
         const themeButton = document.querySelector('.js-theme-toggle');
         if(themeButton){
             themeButton.addEventListener('click', function(){
