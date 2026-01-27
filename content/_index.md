@@ -51,8 +51,6 @@ sections:
         {{< research_network >}}
         
         **Legend:** 🔴 Self | 🟣 Advisor | 🔵 Professor | 🟡 Collaborator | 🟢 Student
-        
-        *Interactive co-authorship network - drag nodes, zoom, and hover for details*
         {{< /spoiler >}}
         
         {{< spoiler text="🌍 Research Footprint" >}}
