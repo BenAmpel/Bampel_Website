@@ -20,50 +20,30 @@
         var text = isDark ? '#aaa' : '#333';
         var shadow = isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.05)';
         
-        // Colors
-        var c1 = isDark ? '#00ff41' : '#d93025'; // Focus
-        var c2 = isDark ? '#00e5ff' : '#1a0dab'; // Trend
-        var c3 = isDark ? '#e040fb' : '#9c27b0'; // Cites
+        var c1 = isDark ? '#00ff41' : '#d93025';
+        var c2 = isDark ? '#00e5ff' : '#1a0dab'; 
+        var c3 = isDark ? '#e040fb' : '#9c27b0'; 
 
         return `
-        <div id="research-card" style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 0; background: ${bg}; border: 1px solid ${border}; border-radius: 12px; box-shadow: 0 4px 20px ${shadow}; overflow: hidden;">
+        <div id="research-card" style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 0; background: ${bg}; border: 1px solid ${border}; border-radius: 12px; box-shadow: 0 4px 20px ${shadow}; overflow: hidden; min-height: 600px;">
             
             <div style="grid-column: 1; grid-row: 1; padding: 20px; display: flex; flex-direction: column; border-right: 1px solid ${border}; border-bottom: 1px solid ${border};">
                 <h4 style="margin: 0 0 10px; font-size: 0.9rem; color: ${muted}; text-transform: uppercase; letter-spacing: 1px; text-align: center;">Research Profile</h4>
-                
                 <div style="font-size: 0.8rem; color: ${text}; margin-bottom: 10px; padding: 10px; background: ${isDark ? 'rgba(255,255,255,0.05)' : '#f9f9f9'}; border-radius: 8px; text-align: center; line-height: 1.4;">
                     <strong>Inferred Focus:</strong> <br>
                     Top research themes dynamically extracted from recent publication titles.
                 </div>
-
                 <div id="dash-radar" style="width: 100%; height: 100%; min-height: 250px;"></div>
             </div>
 
             <div style="grid-column: 2; grid-row: 1; padding: 25px; border-bottom: 1px solid ${border}; display: flex; flex-direction: column;">
-                
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                    <div>
-                        <div style="font-size: 0.8rem; color: ${muted};">Primary Focus</div>
-                        <div style="font-size: 1.1rem; font-weight: 800; color: ${c1};" id="metric-focus">Cybersecurity</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.8rem; color: ${muted};">Trending</div>
-                        <div style="font-size: 1.1rem; font-weight: 800; color: ${c2};" id="metric-trend">AI</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.8rem; color: ${muted};">Citation Velocity</div>
-                        <div style="font-size: 1.1rem; font-weight: 800; color: ${c2};" id="metric-velocity">-</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.8rem; color: ${muted};">Total Citations</div>
-                        <div style="font-size: 1.5rem; font-weight: 800; color: ${c3};" id="metric-cites">0</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.8rem; color: ${muted};">h-index</div>
-                        <div style="font-size: 1.5rem; font-weight: 800; color: ${text};" id="metric-hindex">0</div>
-                    </div>
+                    <div><div style="font-size: 0.8rem; color: ${muted};">Primary Focus</div><div style="font-size: 1.1rem; font-weight: 800; color: ${c1};" id="metric-focus">Cybersecurity</div></div>
+                    <div><div style="font-size: 0.8rem; color: ${muted};">Trending</div><div style="font-size: 1.1rem; font-weight: 800; color: ${c2};" id="metric-trend">AI</div></div>
+                    <div><div style="font-size: 0.8rem; color: ${muted};">Velocity</div><div style="font-size: 1.1rem; font-weight: 800; color: ${c2};" id="metric-velocity">-</div></div>
+                    <div><div style="font-size: 0.8rem; color: ${muted};">Total Citations</div><div style="font-size: 1.5rem; font-weight: 800; color: ${c3};" id="metric-cites">0</div></div>
+                    <div><div style="font-size: 0.8rem; color: ${muted};">h-index</div><div style="font-size: 1.5rem; font-weight: 800; color: ${text};" id="metric-hindex">0</div></div>
                 </div>
-
                 <div style="flex-grow: 1; position: relative; border-top: 1px solid ${border}; padding-top: 15px;">
                     <h4 style="margin: 0 0 5px; font-size: 0.8rem; color: ${muted}; text-transform: uppercase; letter-spacing: 1px;">Citations by Year</h4>
                     <div id="dash-line" style="width: 100%; height: 180px;"></div>
@@ -71,14 +51,22 @@
             </div>
 
             <div style="grid-column: 1; grid-row: 2; padding: 20px; border-right: 1px solid ${border};">
-                <h4 style="margin: 0 0 10px; font-size: 0.9rem; color: ${muted}; text-transform: uppercase; letter-spacing: 1px;">Impact Map</h4>
-                <p style="font-size: 0.75rem; color: ${muted}; margin: 0 0 10px; opacity: 0.7;">Research connections where highly cited publications dominate</p>
-                <div id="knowledge-graph" style="width: 100%; height: calc(100% - 60px); min-height: 300px;"></div>
+                <h4 style="margin: 0 0 10px; font-size: 0.9rem; color: ${muted}; text-transform: uppercase;">Impact Map</h4>
+                <div id="knowledge-graph" style="width: 100%; height: 90%;"></div>
             </div>
 
-            <div style="grid-column: 2; grid-row: 2; padding: 20px;">
-                <h4 style="font-size: 0.8rem; color: ${muted}; text-transform: uppercase;">Most Central Papers</h4>
-                <div id="centrality-list">Loading...</div>
+            <div style="grid-column: 2; grid-row: 2; padding: 25px; display: flex; flex-direction: column; justify-content: space-between;">
+                
+                <div style="flex-grow: 1;">
+                    <h4 style="font-size: 0.8rem; color: ${muted}; text-transform: uppercase;">Most Central Papers</h4>
+                    <div id="centrality-list" style="font-size: 0.85rem; color: ${text}; margin-top: 10px;">Loading...</div>
+                </div>
+
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid ${border};">
+                    <h4 style="font-size: 0.8rem; color: ${muted}; text-transform: uppercase; margin-bottom: 10px;">Keyword Cloud</h4>
+                    <div id="topic-cloud" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                        </div>
+                </div>
             </div>
         </div>`;
     }
@@ -156,7 +144,33 @@
         renderRadar(scholarData); // Pass full scholarData to use inferred interests
         renderLine(scholarData.citationsByYear);
 
-        // --- D. CALCULATE CENTRALITY (New Feature) ---
+        // --- RENDER TOPIC CLOUD ---
+        var topics = (scholarData.metrics && scholarData.metrics.interests) ? scholarData.metrics.interests : [];
+        var topicContainer = document.getElementById('topic-cloud');
+        
+        if (topicContainer && topics.length > 0) {
+            var isDark = document.body.classList.contains('dark');
+            var tagBg = isDark ? 'rgba(255,255,255,0.1)' : '#f0f2f5';
+            var tagColor = isDark ? '#eee' : '#333';
+            var tagBorder = isDark ? 'rgba(255,255,255,0.1)' : '#e1e4e8';
+
+            topicContainer.innerHTML = topics.slice(0, 10).map(t => 
+                `<span style="
+                    background: ${tagBg}; 
+                    color: ${tagColor}; 
+                    padding: 4px 10px; 
+                    border-radius: 12px; 
+                    font-size: 0.75rem; 
+                    font-weight: 500;
+                    border: 1px solid ${tagBorder};
+                    white-space: nowrap;
+                ">#${t}</span>`
+            ).join('');
+        } else if (topicContainer) {
+            topicContainer.innerHTML = '<span style="font-size: 0.75rem; opacity: 0.6;">No keywords detected</span>';
+        }
+
+        // --- E. CALCULATE CENTRALITY (New Feature) ---
         if(scholarData.individualPublications) {
             storedPublications = scholarData.individualPublications; // Store for theme toggle
             calculateCentrality(scholarData.individualPublications);
