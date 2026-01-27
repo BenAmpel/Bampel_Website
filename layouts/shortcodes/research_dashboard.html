@@ -119,10 +119,23 @@
         safeFetch('/data/network_stats.json')
     ]).then(([papersData, scholarData, netStats]) => {
         
-        // Handle "Publications" which might be a list or an object
+        // [CRITICAL FIX] Extract the array regardless of JSON format
         let papers = [];
         if (papersData) {
             papers = Array.isArray(papersData) ? papersData : (papersData.individualPublications || []);
+        }
+
+        // Render the "Live Network" in the Bottom-Left (Impact Map) slot
+        if (papers.length > 0) {
+            storedPublications = papers; // Store for theme toggle
+            setTimeout(() => {
+                renderMap(papers); 
+            }, 200);
+        } else {
+            var graphEl = document.getElementById('knowledge-graph');
+            if (graphEl) {
+                graphEl.innerHTML = '<div style="padding:20px; opacity:0.5;">No network data available</div>';
+            }
         }
 
         // If major data is missing, stop here
@@ -240,28 +253,10 @@
             }
         }
 
-        // G. CALCULATE CENTRALITY & KNOWLEDGE GRAPH
-        // Ensure chart is initialized before rendering (with a small delay to ensure DOM is ready)
-        setTimeout(() => {
-            if (!knowledgeGraphChart) {
-                var graphEl = document.getElementById('knowledge-graph');
-                if (graphEl && typeof echarts !== 'undefined') {
-                    knowledgeGraphChart = echarts.init(graphEl);
-                }
-            }
-            
-            if(scholarData && scholarData.individualPublications && scholarData.individualPublications.length > 0) {
-                storedPublications = scholarData.individualPublications; // Store for theme toggle
-                calculateCentrality(scholarData.individualPublications);
-                renderKnowledgeGraph(scholarData.individualPublications);
-            } else if (papers.length > 0) {
-                // Fallback: use papers from publications.json if available
-                storedPublications = papers;
-                renderKnowledgeGraph(papers);
-            } else {
-                console.warn('No publication data available for knowledge graph');
-            }
-        }, 200);
+        // G. Calculate Centrality
+        if (papers.length > 0) {
+            calculateCentrality(papers);
+        }
 
     }).catch(e => console.error("Critical Dashboard Failure:", e));
 
@@ -271,6 +266,94 @@
         if (el) el.innerText = val;
     }
 
+    // --- RENDER LIVE NETWORK (Bottom Left) ---
+    function renderMap(papers) {
+        var dom = document.getElementById('knowledge-graph');
+        if (!dom) return;
+        
+        var myChart = echarts.init(dom);
+        var isDark = document.body.classList.contains('dark');
+        
+        // 1. Process Data (Extract Nodes & Links)
+        var nodes = [];
+        var links = [];
+        var authorCounts = {};
+        var myName = "Benjamin Ampel"; 
+
+        // Helper to normalize names
+        const cleanName = (n) => {
+            n = n.trim();
+            if(n.includes("Ampel")) return myName; // Normalize self
+            return n;
+        };
+
+        papers.forEach(p => {
+            // Handle authors as String or List
+            let auths = Array.isArray(p.authors) ? p.authors : (p.authors || "").split(',');
+            auths = auths.map(cleanName).filter(n => n.length > 2);
+
+            // Count Authors
+            auths.forEach(a => { authorCounts[a] = (authorCounts[a] || 0) + 1; });
+
+            // Create Links (Clique expansion)
+            for(let i=0; i<auths.length; i++) {
+                for(let j=i+1; j<auths.length; j++) {
+                    links.push({ source: auths[i], target: auths[j] });
+                }
+            }
+        });
+
+        // Convert to ECharts Format
+        var maxCount = 0;
+        Object.keys(authorCounts).forEach(k => {
+            if (authorCounts[k] > maxCount && k !== myName) maxCount = authorCounts[k];
+        });
+
+        nodes = Object.keys(authorCounts).map(k => ({
+            id: k,
+            name: k,
+            value: authorCounts[k],
+            symbolSize: k === myName ? 40 : Math.max(10, Math.min(30, authorCounts[k] * 5)),
+            itemStyle: {
+                color: k === myName ? (isDark ? '#fff' : '#000') : (isDark ? '#00e5ff' : '#1a0dab')
+            },
+            label: { show: authorCounts[k] > 2 || k === myName }
+        }));
+
+        // 2. Render Graph
+        var option = {
+            tooltip: {},
+            series: [{
+                type: 'graph',
+                layout: 'force',
+                data: nodes,
+                links: links,
+                roam: true,
+                zoom: 0.8,
+                label: {
+                    position: 'right',
+                    formatter: '{b}'
+                },
+                lineStyle: {
+                    color: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)',
+                    curveness: 0.3
+                },
+                force: {
+                    repulsion: 150,
+                    gravity: 0.05,
+                    edgeLength: 50
+                }
+            }]
+        };
+
+        myChart.setOption(option);
+        
+        // Store chart instance for theme toggle
+        knowledgeGraphChart = myChart;
+        
+        // Resize handler
+        window.addEventListener('resize', function() { myChart.resize(); });
+    }
 
     // --- 4. CENTRALITY ALGORITHM ---
     function calculateCentrality(pubs) {
@@ -348,231 +431,10 @@
                 </div>
             </div>`;
         });
-        document.getElementById('centrality-list').innerHTML = html;
-    }
-
-    // --- 5. KNOWLEDGE GRAPH RENDERER ---
-    function renderKnowledgeGraph(papers) {
-        if (!papers || !Array.isArray(papers) || papers.length === 0) {
-            console.warn('renderKnowledgeGraph: No papers data provided');
-            return;
+        var centralityEl = document.getElementById('centrality-list');
+        if (centralityEl) {
+            centralityEl.innerHTML = html;
         }
-        
-        var graphEl = document.getElementById('knowledge-graph');
-        if (!graphEl) {
-            console.error('renderKnowledgeGraph: Chart element not found');
-            return;
-        }
-        
-        // Reinitialize chart if needed
-        if (!knowledgeGraphChart) {
-            if (typeof echarts !== 'undefined') {
-                knowledgeGraphChart = echarts.init(graphEl);
-            } else {
-                console.error('ECharts library not loaded');
-                return;
-            }
-        }
-        
-        const STOP_WORDS = new Set(['the','of','and','in','to','a','for','on','with','using','an','based','via','system','analysis','approach','study','framework','model','data','from','by','detection','paper','research','towards']);
-        
-        // Weight Tuning
-        const WEIGHT_TOPIC = 1.0;
-        const WEIGHT_VENUE = 2.0;
-        const WEIGHT_AUTHOR = 3.0;
-        const LINK_THRESHOLD = 1.5;
-        
-        let nodes = [];
-        let links = [];
-
-        // 1. Pre-process Nodes
-        papers.forEach((p, index) => {
-            let words = (p.title || "").toLowerCase().replace(/[^a-z0-9 ]/g, '').split(/\s+/)
-                .filter(w => w.length > 3 && !STOP_WORDS.has(w));
-            p._words = new Set(words);
-
-            p._authors = new Set();
-            if(p.authors) {
-                var authorList = [];
-                if (Array.isArray(p.authors)) {
-                    authorList = p.authors;
-                } else if (typeof p.authors === 'string') {
-                    authorList = p.authors.split(',').map(a => a.trim());
-                }
-                authorList.forEach(a => {
-                    let clean = a.trim().toLowerCase();
-                    if(clean && !clean.includes('ampel')) p._authors.add(clean);
-                });
-            }
-
-            p._venue = p.venue ? p.venue.toLowerCase().trim() : "";
-
-            nodes.push({
-                id: index,
-                name: p.title || 'Untitled',
-                value: p.citations || 0,
-                year: p.year || 'N/A',
-                authors: p.authors || '',
-                venue: p.venue || '',
-                symbolSize: Math.max(15, Math.min(60, Math.log((p.citations || 0) + 2) * 8)),
-                itemStyle: { color: getColorByYear(p.year) },
-                label: {
-                    show: (p.citations || 0) > 10,
-                    formatter: function(params) {
-                        var name = params.name || '';
-                        return name.length > 20 ? name.substring(0, 20) + '...' : name;
-                    },
-                    fontSize: 10
-                }
-            });
-        });
-
-        // 2. Generate Links
-        for (let i = 0; i < papers.length; i++) {
-            for (let j = i + 1; j < papers.length; j++) {
-                let p1 = papers[i];
-                let p2 = papers[j];
-                let score = 0;
-                let reasons = [];
-
-                let commonWords = 0;
-                if (p1._words && p2._words) {
-                    p1._words.forEach(w => { if (p2._words.has(w)) commonWords++; });
-                }
-                if (commonWords > 0) {
-                    score += (commonWords * WEIGHT_TOPIC);
-                    reasons.push(`${commonWords} Keywords`);
-                }
-
-                if (p1._venue && p2._venue && p1._venue === p2._venue) {
-                    score += WEIGHT_VENUE;
-                    reasons.push("Same Venue");
-                }
-
-                let commonAuthors = 0;
-                if (p1._authors && p2._authors) {
-                    p1._authors.forEach(a => { if (p2._authors.has(a)) commonAuthors++; });
-                }
-                if (commonAuthors > 0) {
-                    score += (commonAuthors * WEIGHT_AUTHOR);
-                    reasons.push(`${commonAuthors} Co-Authors`);
-                }
-
-                if (score >= LINK_THRESHOLD) {
-                    let avgCites = ((p1.citations || 0) + (p2.citations || 0)) / 2;
-                    let impactBonus = Math.log(avgCites + 1) * 1.5;
-
-                    links.push({
-                        source: i,
-                        target: j,
-                        value: score + impactBonus,
-                        reason: reasons.join(", "),
-                        lineStyle: {
-                            width: Math.min((score * 0.4) + (impactBonus * 0.3), 4),
-                            opacity: Math.min(0.2 + (score * 0.08), 0.6),
-                            curveness: 0.15
-                        }
-                    });
-                }
-            }
-        }
-
-        let isDark = document.body.classList.contains('dark');
-        let bgColor = isDark ? 'transparent' : 'transparent';
-        let textColor = isDark ? '#eee' : '#333';
-        
-        let option = {
-            backgroundColor: bgColor,
-            animationDuration: 1500,
-            animationEasingUpdate: 'quinticInOut',
-            tooltip: {
-                formatter: (params) => {
-                    if (params.dataType === 'edge') {
-                        return `<strong>Connection:</strong> ${Math.floor(params.value)}<br>${params.data.reason || 'Linked'}`;
-                    }
-                    return `<strong>${params.name}</strong><br>
-                            Year: ${params.data.year || 'N/A'}<br>
-                            Citations: ${params.value || 0}<br>
-                            <span style="font-size:0.8em; opacity:0.8">${params.data.venue || ''}</span>`;
-                }
-            },
-            series: [{
-                type: 'graph',
-                layout: 'force',
-                data: nodes,
-                links: links,
-                roam: true,
-                zoom: 0.8,
-                label: { 
-                    show: true,
-                    position: 'right', 
-                    color: textColor,
-                    fontSize: 9,
-                    formatter: function(params) {
-                        var name = params.name || '';
-                        return name.length > 25 ? name.substring(0, 25) + '...' : name;
-                    }
-                },
-                lineStyle: { 
-                    color: isDark ? 'rgba(170, 170, 170, 0.4)' : 'rgba(102, 102, 102, 0.4)',
-                    curveness: 0.15
-                },
-                emphasis: {
-                    focus: 'adjacency',
-                    lineStyle: {
-                        width: 6
-                    }
-                },
-                force: {
-                    initLayout: 'circular',
-                    repulsion: 800,
-                    gravity: 0.15,
-                    edgeLength: [80, 250],
-                    friction: 0.85,
-                    layoutAnimation: true
-                }
-            }]
-        };
-
-        try {
-            knowledgeGraphChart.setOption(option, true); // true = notMerge, replace all
-            console.log('Knowledge graph rendered with', nodes.length, 'nodes and', links.length, 'links');
-            
-            // Handle resize
-            window.addEventListener('resize', function() {
-                if (knowledgeGraphChart) knowledgeGraphChart.resize();
-            });
-            
-            // Handle theme toggle
-            const btn = document.querySelector('.js-theme-toggle');
-            if(btn) {
-                btn.addEventListener('click', () => {
-                    setTimeout(() => {
-                        let isDarkNow = document.body.classList.contains('dark');
-                        let newTextColor = isDarkNow ? '#eee' : '#333';
-                        let newLineColor = isDarkNow ? 'rgba(170, 170, 170, 0.4)' : 'rgba(102, 102, 102, 0.4)';
-                        if (knowledgeGraphChart) {
-                            knowledgeGraphChart.setOption({
-                                tooltip: { backgroundColor: isDarkNow ? '#1a1a1a' : '#fff' },
-                                series: [{ 
-                                    label: { color: newTextColor },
-                                    lineStyle: { color: newLineColor }
-                                }]
-                            });
-                        }
-                    }, 100);
-                });
-            }
-        } catch (e) {
-            console.error('Error rendering knowledge graph:', e);
-        }
-    }
-
-    function getColorByYear(year) {
-        let y = parseInt(year) || 2022;
-        if (y < 2020) return '#e040fb';
-        if (y < 2023) return '#00e5ff';
-        return '#00ff41';
     }
 
     // --- HELPERS ---
@@ -671,17 +533,14 @@
                    lineChart = echarts.init(document.getElementById('dash-line'));
                    knowledgeGraphChart = echarts.init(document.getElementById('knowledge-graph'));
                    // Re-render charts with new theme
-                   if(storedCounts) {
-                       if (storedScholarData) {
-                           renderRadar(storedScholarData);
-                       }
+                   if(storedScholarData) {
+                       renderRadar(storedScholarData);
                    }
                    if(storedHistory) {
                        renderLine(storedHistory);
                    }
                    if(storedPublications) {
-                       calculateCentrality(storedPublications);
-                       renderKnowledgeGraph(storedPublications);
+                       renderMap(storedPublications);
                    } 
                 }, 100);
             });
