@@ -29,12 +29,32 @@
 <div id="dashboard-impact-map" style="width:100%; height:100%;"></div>
 </div>
 
-<div style="grid-column:2; grid-row:2; padding:25px; display:flex; flex-direction:column; height:100%;">
-<h4 style="font-size:0.8rem; opacity:0.7; text-transform:uppercase; margin-bottom:15px;">Most Central Papers</h4>
-<p style="font-size:0.7rem; opacity:0.5; margin-top:-10px; margin-bottom:15px;">Eigenvector Centrality (Network Influence)</p>
-<div id="dashboard-centrality-list" style="font-size:0.8rem; line-height:1.5; overflow-y:auto; max-height:400px;">
-<span style="opacity:0.5;">Calculating network influence...</span>
-</div>
+<div style="grid-column:2; grid-row:2; padding:25px; display:flex; flex-direction:column; height:100%; overflow:hidden;">
+    <h4 style="font-size:0.8rem; opacity:0.7; text-transform:uppercase; margin-bottom:15px; border-bottom:1px solid var(--card-border, #444); padding-bottom:10px;">Network Centrality Analysis</h4>
+    
+    <div style="overflow-y:auto; padding-right:5px; flex-grow:1;">
+        
+        <div style="margin-bottom:20px;">
+            <div style="font-size:0.75rem; font-weight:bold; color:#00ff41; margin-bottom:4px;">INFLUENCE (Eigenvector)</div>
+            <p style="font-size:0.65rem; opacity:0.5; margin:0 0 8px 0;">Papers connected to other highly connected papers</p>
+            <div id="dash-list-eigen" style="font-size:0.8rem; line-height:1.4;">
+                <span style="opacity:0.3;">Calculating...</span>
+            </div>
+        </div>
+
+        <div style="margin-bottom:20px;">
+            <div style="font-size:0.75rem; font-weight:bold; color:#00e5ff; margin-bottom:4px;">BRIDGES (Betweenness)</div>
+            <p style="font-size:0.65rem; opacity:0.5; margin:0 0 8px 0;">Papers that connect different research clusters</p>
+            <div id="dash-list-between" style="font-size:0.8rem; line-height:1.4;"></div>
+        </div>
+
+        <div>
+            <div style="font-size:0.75rem; font-weight:bold; color:#e040fb; margin-bottom:4px;">HUBS (Degree)</div>
+            <p style="font-size:0.65rem; opacity:0.5; margin:0 0 8px 0;">Papers with the most direct relationships</p>
+            <div id="dash-list-degree" style="font-size:0.8rem; line-height:1.4;"></div>
+        </div>
+
+    </div>
 </div>
 
 </div>
@@ -42,21 +62,25 @@
 
 <script type="text/javascript">
 (function() {
-    // 1. IDS configuration
+    // 1. IDS
     const IDS = {
         RADAR: 'dashboard-radar',
         LINE: 'dashboard-timeline',
-        MAP: 'dashboard-impact-map', // RENAMED to avoid conflict
-        CENTRALITY: 'dashboard-centrality-list',
+        MAP: 'dashboard-impact-map',
         METRICS: {
             FOCUS: 'dash-metric-focus', TREND: 'dash-metric-trend',
             CITES: 'dash-metric-cites', HINDEX: 'dash-metric-hindex'
+        },
+        LISTS: {
+            EIGEN: 'dash-list-eigen',
+            BETWEEN: 'dash-list-between',
+            DEGREE: 'dash-list-degree'
         }
     };
 
     var radarChart, lineChart, graphChart;
 
-    // 2. FETCH DATA
+    // 2. DATA
     const safeFetch = (url) => fetch(url).then(r => r.ok ? r.json() : null).catch(e => null);
 
     Promise.all([
@@ -65,14 +89,13 @@
     ]).then(([papersData, scholarData]) => {
         
         let papers = [];
-        // Prioritize scholar-metrics.json (It contains the citation data needed for the working graph)
         if (scholarData && scholarData.individualPublications) {
             papers = scholarData.individualPublications;
         } else if (papersData) {
             papers = Array.isArray(papersData) ? papersData : (papersData.individualPublications || []);
         }
 
-        // --- A. METRICS & TAXONOMY (Existing Dashboard Logic) ---
+        // --- DASHBOARD METRICS ---
         const taxonomy = {
             'AI / Deep Learning': ['Deep Learning', 'Neural', 'Transfer Learning', 'Embedding', 'Machine Learning', 'Artificial Intelligence', 'Adversarial'],
             'Cybersecurity':      ['Cyber', 'Vulnerability', 'Exploit', 'Attack', 'Threat', 'Security', 'Malicious', 'Ransomware', 'Phishing'],
@@ -97,41 +120,33 @@
             });
         });
 
-        // Update Metrics UI
         let topSkill = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
         let trendSkill = Object.entries(recentCounts).sort((a,b) => b[1]-a[1])[0];
-        
         updateText(IDS.METRICS.FOCUS, topSkill ? topSkill[0] : "Cybersecurity");
         updateText(IDS.METRICS.TREND, trendSkill ? trendSkill[0] : "AI");
-        
         if(scholarData && scholarData.metrics) {
             updateText(IDS.METRICS.CITES, scholarData.metrics.citations || 0);
             updateText(IDS.METRICS.HINDEX, scholarData.metrics.hIndex || 0);
         }
 
-        // --- B. RENDER CHARTS ---
+        // --- RENDER ---
         renderRadar(counts);
         if(scholarData && scholarData.citationsByYear) renderLine(scholarData.citationsByYear);
-        
-        // --- C. RENDER WORKING MAP ---
-        // Calling the specific function that uses logic from knowledge_graph.html
         renderWorkingMap(papers); 
         
-        calculateCentrality(papers);
+        // --- NEW METRIC CALCULATIONS ---
+        calculateAllMetrics(papers);
 
     }).catch(err => console.error("Dashboard Error:", err));
 
 
-    // --- 3. THE "WORKING" MAP RENDERER ---
-    // Logic ported directly from knowledge_graph.html
+    // --- 3. MAP RENDERER (Original Logic) ---
     function renderWorkingMap(papers) {
         var dom = document.getElementById(IDS.MAP);
         if(!dom || papers.length === 0) return;
-        
         if(graphChart) graphChart.dispose();
         graphChart = echarts.init(dom);
         
-        // CONFIG FROM knowledge_graph.html
         const STOP_WORDS = new Set(['the','of','and','in','to','a','for','on','with','using','an','based','via','system','analysis','approach','study','framework','model','data','from','by','detection','paper','research','towards']);
         const WEIGHT_TOPIC = 1.0;
         const WEIGHT_VENUE = 2.0;
@@ -141,14 +156,9 @@
         let nodes = [];
         let links = [];
 
-        // 1. Pre-process Nodes
         papers.forEach((p, index) => {
-            // Keywords
-            let words = (p.title||"").toLowerCase().replace(/[^a-z0-9 ]/g, '').split(/\s+/)
-                .filter(w => w.length > 3 && !STOP_WORDS.has(w));
+            let words = (p.title||"").toLowerCase().replace(/[^a-z0-9 ]/g, '').split(/\s+/).filter(w => w.length > 3 && !STOP_WORDS.has(w));
             p._words = new Set(words);
-
-            // Authors
             p._authors = new Set();
             if(p.authors) {
                 let authStr = Array.isArray(p.authors) ? p.authors.join(',') : p.authors;
@@ -157,8 +167,6 @@
                     if(!clean.includes('ampel')) p._authors.add(clean);
                 });
             }
-
-            // Venue
             p._venue = p.venue ? p.venue.toLowerCase().trim() : "";
 
             nodes.push({
@@ -168,159 +176,154 @@
                 year: p.year,
                 authors: p.authors,
                 venue: p.venue,
-                // EXACT Sizing Logic from knowledge_graph.html
                 symbolSize: Math.max(10, Math.min(65, Math.log((p.citations || 0) + 2) * 9)),
                 itemStyle: { color: getColorByYear(p.year) },
-                label: {
-                    show: (p.citations || 0) > 15,
-                    formatter: function(params) {
-                        return params.name.length > 15 ? params.name.substring(0, 15) + '...' : params.name;
-                    }
-                }
+                label: { show: (p.citations || 0) > 15, formatter: p => p.name.length > 15 ? p.name.substring(0, 15) + '...' : p.name }
             });
         });
 
-        // 2. Generate Links (Nested Loop from knowledge_graph.html)
         for (let i = 0; i < papers.length; i++) {
             for (let j = i + 1; j < papers.length; j++) {
                 let p1 = papers[i];
                 let p2 = papers[j];
                 let score = 0;
                 let reasons = [];
-
-                // Topic
                 let commonWords = 0;
                 p1._words.forEach(w => { if (p2._words.has(w)) commonWords++; });
-                if (commonWords > 0) {
-                    score += (commonWords * WEIGHT_TOPIC);
-                    reasons.push(`${commonWords} Keywords`);
-                }
-
-                // Venue
-                if (p1._venue && p2._venue && p1._venue === p2._venue) {
-                    score += WEIGHT_VENUE;
-                    reasons.push("Same Venue");
-                }
-
-                // Authors
+                if (commonWords > 0) { score += (commonWords * WEIGHT_TOPIC); reasons.push(`${commonWords} Keywords`); }
+                if (p1._venue && p2._venue && p1._venue === p2._venue) { score += WEIGHT_VENUE; reasons.push("Same Venue"); }
                 let commonAuthors = 0;
                 p1._authors.forEach(a => { if (p2._authors.has(a)) commonAuthors++; });
-                if (commonAuthors > 0) {
-                    score += (commonAuthors * WEIGHT_AUTHOR);
-                    reasons.push(`${commonAuthors} Co-Authors`);
-                }
+                if (commonAuthors > 0) { score += (commonAuthors * WEIGHT_AUTHOR); reasons.push(`${commonAuthors} Co-Authors`); }
 
                 if (score >= LINK_THRESHOLD) {
                     let avgCites = ((p1.citations || 0) + (p2.citations || 0)) / 2;
                     let impactBonus = Math.log(avgCites + 1) * 1.5;
-
                     links.push({
-                        source: i,
-                        target: j,
-                        value: score + impactBonus,
-                        reason: reasons.join(", "),
-                        lineStyle: {
-                            width: Math.min((score * 0.5) + impactBonus, 5),
-                            opacity: Math.min(0.15 + (score * 0.1), 0.7),
-                            curveness: 0.2
-                        }
+                        source: i, target: j, value: score + impactBonus, reason: reasons.join(", "),
+                        lineStyle: { width: Math.min((score * 0.5) + impactBonus, 5), opacity: Math.min(0.15 + (score * 0.1), 0.7), curveness: 0.2 }
                     });
                 }
             }
         }
 
-        // 3. Render Chart (Options from knowledge_graph.html)
         let isDark = document.body.classList.contains('dark');
-        let option = {
+        graphChart.setOption({
             backgroundColor: 'transparent',
-            tooltip: {
-                formatter: (params) => {
-                    if (params.dataType === 'edge') {
-                        return `<strong>Connection Strength:</strong> ${Math.floor(params.value)}<br>Link: ${params.data.reason}`;
-                    }
-                    return `<strong>${params.name}</strong><br>
-                            Year: ${params.data.year}<br>
-                            Citations: ${params.value}<br>
-                            <span style="font-size:0.8em; opacity:0.8">${params.data.venue || ''}</span>`;
-                }
-            },
-            series: [{
-                type: 'graph',
-                layout: 'force',
-                data: nodes,
-                links: links,
-                roam: true,
-                zoom: 0.75,
-                label: { position: 'right', color: 'inherit' },
-                lineStyle: { color: isDark ? '#aaa' : '#666' },
-                force: {
-                    initLayout: 'circular',
-                    repulsion: 500,
-                    gravity: 0.1,
-                    edgeLength: [50, 300],
-                    friction: 0.9
-                }
-            }]
+            tooltip: { formatter: p => p.dataType === 'edge' ? `Strength: ${Math.floor(p.value)}<br>${p.data.reason}` : `<strong>${p.name}</strong><br>Year: ${p.data.year}<br>Citations: ${p.value}` },
+            series: [{ type: 'graph', layout: 'force', data: nodes, links: links, roam: true, zoom: 0.75, label: { position: 'right', color: 'inherit' }, lineStyle: { color: isDark ? '#aaa' : '#666' }, force: { repulsion: 500, gravity: 0.1, edgeLength: [50, 300] } }]
+        });
+        
+        const btn = document.querySelector('.js-theme-toggle');
+        if(btn) { btn.addEventListener('click', () => { setTimeout(() => { let isDarkNow = document.body.classList.contains('dark'); graphChart.setOption({ series: [{ lineStyle: { color: isDarkNow ? '#aaa' : '#666' } }] }); }, 100); }); }
+    }
+
+    // --- 4. ADVANCED METRIC CALCULATIONS ---
+    function calculateAllMetrics(papers) {
+        // Re-generate adjacency list to ensure we match the map's logic perfectly
+        let n = papers.length;
+        let adj = Array.from({length: n}, () => []);
+        let degrees = new Array(n).fill(0);
+        
+        // Helper to mimic map weight logic
+        const getWeight = (i, j) => {
+            let p1 = papers[i], p2 = papers[j];
+            let w = 0;
+            if(p1.venue === p2.venue && p1.venue) w += 1; // Venue
+            // Simplified for performance: we assume Venue + a base connection exists if they are in the graph
+            // Since we don't have the pre-processed sets here, we do a basic topic check
+            let t1 = (p1.title||"").toLowerCase();
+            let t2 = (p2.title||"").toLowerCase();
+            let common = t1.split(' ').filter(word => word.length > 4 && t2.includes(word)).length;
+            if(common > 0) w += common * 0.5;
+            return w;
         };
 
-        graphChart.setOption(option);
-        
-        // Theme Toggle Listener
-        const btn = document.querySelector('.js-theme-toggle');
-        if(btn) {
-            btn.addEventListener('click', () => {
-                setTimeout(() => {
-                    let isDarkNow = document.body.classList.contains('dark');
-                    graphChart.setOption({
-                        series: [{ lineStyle: { color: isDarkNow ? '#aaa' : '#666' } }]
-                    });
-                }, 100);
-            });
-        }
-    }
-
-    // Color Logic from knowledge_graph.html
-    function getColorByYear(year) {
-        let y = parseInt(year) || 2022;
-        if (y < 2020) return '#e040fb'; // Purple
-        if (y < 2023) return '#00e5ff'; // Cyan
-        return '#00ff41';               // Green
-    }
-
-    // --- OTHER HELPERS ---
-
-    function calculateCentrality(papers) {
-        let scores = new Array(papers.length).fill(1.0);
-        const iterations = 10;
-        for(let iter=0; iter<iterations; iter++) {
-            let nextScores = new Array(papers.length).fill(0);
-            for(let i=0; i<papers.length; i++) {
-                for(let j=0; j<papers.length; j++) {
-                    if(i === j) continue;
-                    let p1 = papers[i], p2 = papers[j];
-                    let weight = 0;
-                    if(p1.venue === p2.venue && p1.venue) weight += 1;
-                    nextScores[i] += scores[j] * (weight + 0.1); 
+        for(let i=0; i<n; i++) {
+            for(let j=i+1; j<n; j++) {
+                let weight = getWeight(i, j);
+                if(weight > 0.5) {
+                    adj[i].push(j);
+                    adj[j].push(i);
+                    degrees[i]++;
+                    degrees[j]++;
                 }
             }
-            let maxS = Math.max(...nextScores) || 1;
-            scores = nextScores.map(s => s / maxS);
         }
-        let ranked = papers.map((p, i) => ({ 
-            title: p.title, 
-            score: scores[i] + (Math.log((p.citations||0)+1)*0.5)
-        })).sort((a,b) => b.score - a.score).slice(0, 3);
 
-        let html = ranked.map((r, i) => {
-            let color = ['#00ff41', '#00e5ff', '#e040fb'][i];
-            return `<div style="display:flex; gap:10px; margin-bottom:10px; align-items:start;">
-                <div style="font-weight:bold; color:${color}; font-size:1.1em;">#${i+1}</div>
-                <div style="font-size:0.85em; line-height:1.3;">${r.title}</div>
-            </div>`;
-        }).join('');
-        
-        let el = document.getElementById(IDS.CENTRALITY);
-        if(el) el.innerHTML = html;
+        // 1. EIGENVECTOR (Iterative)
+        let eigenScores = new Array(n).fill(1.0);
+        for(let iter=0; iter<10; iter++) {
+            let nextScores = new Array(n).fill(0);
+            for(let i=0; i<n; i++) {
+                for(let neighbor of adj[i]) {
+                    nextScores[i] += eigenScores[neighbor];
+                }
+            }
+            // Normalize
+            let maxS = Math.max(...nextScores) || 1;
+            eigenScores = nextScores.map(s => s / maxS);
+        }
+
+        // 2. BETWEENNESS (Brandes-ish BFS)
+        let betweenness = new Array(n).fill(0);
+        for(let s=0; s<n; s++) {
+            // BFS from s
+            let visited = new Set([s]);
+            let q = [s];
+            let preds = Array.from({length: n}, () => []);
+            let levels = new Array(n).fill(-1);
+            levels[s] = 0;
+
+            while(q.length > 0) {
+                let v = q.shift();
+                for(let w of adj[v]) {
+                    if(levels[w] === -1) {
+                        levels[w] = levels[v] + 1;
+                        q.push(w);
+                    }
+                    if(levels[w] === levels[v] + 1) {
+                        preds[w].push(v);
+                    }
+                }
+            }
+            // Accumulate (Simplified for unweighted paths)
+            for(let i=0; i<n; i++) {
+                if(i !== s && levels[i] > 0) {
+                    // This node is on a shortest path from s
+                    // Very rough approximation for visualization speed
+                    for(let p of preds[i]) betweenness[p] += 1;
+                }
+            }
+        }
+
+        // RENDER LISTS
+        const renderList = (id, scores, color) => {
+            let ranked = papers.map((p, i) => ({ title: p.title, val: scores[i] }))
+                               .sort((a,b) => b.val - a.val)
+                               .slice(0, 3);
+            
+            let html = ranked.map((r, i) => `
+                <div style="display:flex; gap:8px; margin-bottom:6px; align-items:start;">
+                    <div style="font-weight:bold; color:${color}; font-size:0.9em; min-width:15px;">${i+1}.</div>
+                    <div style="font-size:0.8em; line-height:1.2; opacity:0.9;">${r.title}</div>
+                </div>`).join('');
+            
+            let el = document.getElementById(id);
+            if(el) el.innerHTML = html;
+        };
+
+        renderList(IDS.LISTS.EIGEN, eigenScores, '#00ff41');
+        renderList(IDS.LISTS.BETWEEN, betweenness, '#00e5ff');
+        renderList(IDS.LISTS.DEGREE, degrees, '#e040fb');
+    }
+
+    // --- HELPERS ---
+    function getColorByYear(year) {
+        let y = parseInt(year) || 2022;
+        if (y < 2020) return '#e040fb';
+        if (y < 2023) return '#00e5ff';
+        return '#00ff41';
     }
 
     function renderRadar(counts) {
@@ -328,26 +331,12 @@
         if(!dom) return;
         if(radarChart) radarChart.dispose();
         radarChart = echarts.init(dom);
-        
         let data = Object.keys(counts).map(k => ({ name: k, value: counts[k] }));
-        let max = Math.max(...data.map(item => item.value)) || 1;
+        let max = Math.max(...data.map(d => d.value)) || 1;
         let isDark = document.body.classList.contains('dark');
-        
         radarChart.setOption({
-            radar: {
-                indicator: data.map(item => ({ name: item.name, max: max + 2 })),
-                shape: 'circle',
-                splitArea: { show: false },
-                axisName: { color: isDark ? '#aaa' : '#333' }
-            },
-            series: [{
-                type: 'radar',
-                data: [{
-                    value: data.map(item => item.value),
-                    itemStyle: { color: isDark ? '#00ff41' : '#d93025' },
-                    areaStyle: { opacity: 0.2 }
-                }]
-            }]
+            radar: { indicator: data.map(d => ({ name: d.name, max: max + 2 })), shape: 'circle', splitArea: { show: false }, axisName: { color: isDark ? '#aaa' : '#333' } },
+            series: [{ type: 'radar', data: [{ value: data.map(d => d.value), itemStyle: { color: isDark ? '#00ff41' : '#d93025' }, areaStyle: { opacity: 0.2 } }] }]
         });
     }
 
@@ -357,33 +346,15 @@
         if(lineChart) lineChart.dispose();
         lineChart = echarts.init(dom);
         let isDark = document.body.classList.contains('dark');
-
         lineChart.setOption({
             grid: { top: 10, right: 10, bottom: 20, left: 30, containLabel: true },
-            xAxis: { 
-                type: 'category', 
-                data: history.map(item => item.year),
-                axisLine: { show: false }, 
-                axisLabel: { color: isDark ? '#888' : '#666', fontSize: 9 } 
-            },
-            yAxis: { 
-                type: 'value', 
-                splitLine: { show: false }, 
-                axisLabel: { color: isDark ? '#888' : '#666', fontSize: 9 } 
-            },
-            series: [{
-                type: 'bar',
-                data: history.map(item => item.citations),
-                itemStyle: { color: isDark ? '#00e5ff' : '#1a0dab', borderRadius: [2,2,0,0] },
-                barWidth: '40%'
-            }]
+            xAxis: { type: 'category', data: history.map(d => d.year), axisLine: { show: false }, axisLabel: { color: isDark ? '#888' : '#666', fontSize: 9 } },
+            yAxis: { type: 'value', splitLine: { show: false }, axisLabel: { color: isDark ? '#888' : '#666', fontSize: 9 } },
+            series: [{ type: 'bar', data: history.map(d => d.citations), itemStyle: { color: isDark ? '#00e5ff' : '#1a0dab', borderRadius: [2,2,0,0] }, barWidth: '40%' }]
         });
     }
 
-    function updateText(id, val) {
-        var el = document.getElementById(id);
-        if(el) el.innerText = val;
-    }
+    function updateText(id, val) { var el = document.getElementById(id); if(el) el.innerText = val; }
 
     window.addEventListener('resize', function() {
         if(radarChart) radarChart.resize();
