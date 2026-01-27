@@ -4,6 +4,7 @@ import urllib.parse
 import socket
 from datetime import datetime
 from pathlib import Path
+from collections import defaultdict
 import os
 
 # --- CONFIGURATION ---
@@ -156,6 +157,29 @@ def process_and_save(data):
                 if str(h.get('year', '')) == str(most_recent_year):
                     citation_velocity = h.get('citations', 0)
                     break
+    
+    # Fallback: Calculate citationsByYear from individual publications if graph data is missing
+    if not history and individual_pubs:
+        year_citations = defaultdict(int)
+        
+        # Group publications by year and sum citations
+        for pub in individual_pubs:
+            year = pub.get('year', '')
+            citations = pub.get('citations', 0) or 0
+            if year and year != 'N/A' and isinstance(citations, (int, float)) and citations > 0:
+                year_citations[str(year)] += int(citations)
+        
+        # Convert to list format and sort by year
+        if year_citations:
+            history = [{"year": year, "citations": citations} 
+                       for year, citations in sorted(year_citations.items(), key=lambda x: int(x[0]) if x[0].isdigit() else 0)]
+            print(f"Calculated citationsByYear from individual publications: {len(history)} years")
+            
+            # Calculate Citation Velocity from most recent year
+            if history:
+                most_recent_year_data = history[-1]
+                citation_velocity = most_recent_year_data.get('citations', 0)
+                print(f"Calculated Citation Velocity from most recent year ({most_recent_year_data.get('year')}): {citation_velocity}")
     
     # Final fallback: if still no data, calculate from individual publications
     if citations == 0 and total_citations_from_pubs > 0:
