@@ -84,13 +84,39 @@
     lineChart = echarts.init(document.getElementById('dash-line'));
     knowledgeGraphChart = echarts.init(document.getElementById('knowledge-graph'));
 
-    // --- 3. FETCH DATA ---
+    // --- 3. SAFE FETCH HELPER ---
+    const safeFetch = (url) => fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                console.warn(`File not found: ${url}`);
+                return null; // Return null instead of crashing
+            }
+            return response.json();
+        })
+        .catch(err => {
+            console.warn(`Error loading ${url}:`, err);
+            return null;
+        });
+
+    // --- 4. FETCH DATA ---
     Promise.all([
-        fetch('/data/publications.json').then(r => r.json()),
-        fetch('/data/scholar-metrics.json').then(r => r.json()),
-        fetch('/data/network_stats.json').then(r => r.json().catch(e => null)) // New Fetch
-    ]).then(([papers, scholarData, netStats]) => {
+        safeFetch('/data/publications.json'),
+        safeFetch('/data/scholar-metrics.json'),
+        safeFetch('/data/network_stats.json')
+    ]).then(([papersData, scholarData, netStats]) => {
         
+        // Handle "Publications" which might be a list or an object
+        let papers = [];
+        if (papersData) {
+            papers = Array.isArray(papersData) ? papersData : (papersData.individualPublications || []);
+        }
+
+        // If major data is missing, stop here
+        if (!scholarData && papers.length === 0) {
+            console.error("No data available to render dashboard.");
+            return;
+        }
+
         // A. Get Inferred Interests from JSON (or fallback to default)
         let inferredInterests = [];
         if (scholarData && scholarData.metrics && scholarData.metrics.interests && scholarData.metrics.interests.length > 0) {
@@ -109,7 +135,7 @@
             recentCounts[interest] = 0;
         });
 
-        if(Array.isArray(papers)) {
+        if(Array.isArray(papers) && papers.length > 0) {
             papers.forEach(p => {
                 let text = (p.title || "").toLowerCase();
                 inferredInterests.forEach(interest => {
@@ -124,15 +150,16 @@
         // C. Populate Text Metrics (use first two inferred interests as fallback)
         let topSkill = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
         let trendSkill = Object.entries(recentCounts).sort((a,b) => b[1]-a[1])[0];
-        document.getElementById('metric-focus').innerText = topSkill && topSkill[1] > 0 ? topSkill[0] : (inferredInterests[0] || "Cybersecurity");
-        document.getElementById('metric-trend').innerText = trendSkill && trendSkill[1] > 0 ? trendSkill[0] : (inferredInterests[1] || "AI");
+        updateText('metric-focus', topSkill && topSkill[1] > 0 ? topSkill[0] : (inferredInterests[0] || "Cybersecurity"));
+        updateText('metric-trend', trendSkill && trendSkill[1] > 0 ? trendSkill[0] : (inferredInterests[1] || "AI"));
 
-        if(scholarData && scholarData.metrics) {
-            let rawCites = String(scholarData.metrics.citations);
+        // D. Metrics (Top Right)
+        if (scholarData && scholarData.metrics) {
+            let rawCites = String(scholarData.metrics.citations || 0);
             let cleanCites = parseInt(rawCites.replace(/\D/g, '')) || 0;
             let suffix = rawCites.includes('+') ? '+' : '';
             animateValue("metric-cites", 0, cleanCites, 2000, suffix);
-            document.getElementById('metric-hindex').innerText = scholarData.metrics.hIndex || 0;
+            updateText('metric-hindex', scholarData.metrics.hIndex || 0);
             
             // Citation Velocity
             let velocity = 0;
@@ -143,43 +170,66 @@
                 let recentYear = scholarData.citationsByYear[scholarData.citationsByYear.length - 1];
                 velocity = recentYear.citations || 0;
             }
-            document.getElementById('metric-velocity').innerText = velocity;
+            updateText('metric-velocity', velocity);
         }
 
-        // D. Render Charts
+        // E. Render Charts
         storedScholarData = scholarData; // Store for theme toggle
-        storedHistory = scholarData.citationsByYear; // Store for theme toggle
-        renderRadar(scholarData); // Pass full scholarData to use inferred interests
-        renderLine(scholarData.citationsByYear);
+        storedHistory = scholarData ? scholarData.citationsByYear : null; // Store for theme toggle
+        if (scholarData) {
+            renderRadar(scholarData); // Pass full scholarData to use inferred interests
+        }
+        if (scholarData && scholarData.citationsByYear) {
+            renderLine(scholarData.citationsByYear);
+        }
 
-        // --- D. Render Network Stats (NEW) ---
+        // F. Render Network Stats (Bottom Right)
         if (netStats) {
-            document.getElementById('net-density').innerText = netStats.density || "0.00";
-            document.getElementById('net-lcc').innerText = (netStats.lcc_percentage || 0) + "%";
+            updateText('net-density', netStats.density || "0.00");
+            updateText('net-lcc', (netStats.lcc_percentage || 0) + "%");
             
             if (netStats.clusters && netStats.clusters.length > 0) {
                 let html = '';
                 netStats.clusters.forEach((c, i) => {
-                    let members = c.top_members.slice(0, 3).join(", ");
+                    let members = c.top_members ? c.top_members.slice(0, 3).join(", ") : "";
+                    let color = ['#00ff41', '#00e5ff', '#e040fb'][i] || '#ccc';
                     html += `
-                    <div style="margin-bottom: 8px; padding-left: 10px; border-left: 2px solid ${['#00ff41', '#00e5ff', '#e040fb'][i] || '#ccc'};">
-                        <strong style="color: ${document.body.classList.contains('dark') ? '#eee' : '#333'}">Group ${String.fromCharCode(65+i)}</strong> 
-                        <span style="opacity: 0.7;">(${c.size} members)</span><br>
-                        <span style="font-size: 0.8em; opacity: 0.8;">w/ ${members}</span>
+                    <div style="margin-bottom: 8px; padding-left: 10px; border-left: 3px solid ${color};">
+                        <strong style="color: inherit; opacity: 0.9;">Group ${String.fromCharCode(65+i)}</strong> 
+                        <span style="opacity: 0.6; font-size: 0.8em;">(${c.size} people)</span><br>
+                        <span style="font-size: 0.75em; opacity: 0.7;">w/ ${members}</span>
                     </div>`;
                 });
-                document.getElementById('net-clusters').innerHTML = html;
+                var clustersEl = document.getElementById('net-clusters');
+                if (clustersEl) clustersEl.innerHTML = html;
+            } else {
+                var clustersEl = document.getElementById('net-clusters');
+                if (clustersEl) clustersEl.innerHTML = '<span style="opacity:0.5; font-size:0.8em">No clusters identified</span>';
             }
+        } else {
+            // Fallback if file is missing
+            var clustersEl = document.getElementById('net-clusters');
+            if (clustersEl) clustersEl.innerHTML = '<span style="opacity:0.5; font-size:0.8em">Analysis pending...</span>';
         }
 
-        // --- E. CALCULATE CENTRALITY (New Feature) ---
-        if(scholarData.individualPublications) {
+        // G. CALCULATE CENTRALITY & KNOWLEDGE GRAPH
+        if(scholarData && scholarData.individualPublications) {
             storedPublications = scholarData.individualPublications; // Store for theme toggle
             calculateCentrality(scholarData.individualPublications);
             renderKnowledgeGraph(scholarData.individualPublications);
+        } else if (papers.length > 0) {
+            // Fallback: use papers from publications.json if available
+            storedPublications = papers;
+            renderKnowledgeGraph(papers);
         }
 
-    }).catch(err => console.error("Dashboard Error:", err));
+    }).catch(e => console.error("Critical Dashboard Failure:", e));
+
+    // Helper to safely update text
+    function updateText(id, val) {
+        const el = document.getElementById(id);
+        if (el) el.innerText = val;
+    }
 
 
     // --- 4. CENTRALITY ALGORITHM ---
