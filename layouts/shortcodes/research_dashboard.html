@@ -2,8 +2,8 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-<div id="dashboard-wrapper" style="min-height:1000px; margin:30px 0; font-family:sans-serif;">
-<div style="display:grid; grid-template-columns:1fr 1fr; grid-template-rows:auto 600px 600px; gap:0; border:1px solid var(--card-border, #333); border-radius:12px; overflow:hidden; background:var(--card-bg, rgba(255,255,255,0.02)); box-shadow:0 4px 20px rgba(0,0,0,0.1);">
+<div id="dashboard-wrapper" style="min-height:1300px; margin:30px 0; font-family:sans-serif;">
+<div style="display:grid; grid-template-columns:1fr 1fr; grid-template-rows:auto 600px 600px 300px; gap:0; border:1px solid var(--card-border, #333); border-radius:12px; overflow:hidden; background:var(--card-bg, rgba(255,255,255,0.02)); box-shadow:0 4px 20px rgba(0,0,0,0.1);">
 
 <div style="grid-column:1; grid-row:1; padding:20px; border-right:1px solid var(--card-border, #333); border-bottom:1px solid var(--card-border, #333);">
     <h4 style="margin:0 0 10px; opacity:0.7; text-align:center; text-transform:uppercase; font-size:0.8rem;">Research Profile</h4>
@@ -52,7 +52,7 @@
     </div>
 </div>
 
-<div style="grid-column:1; grid-row:3; padding:0; border-right:1px solid var(--card-border, #333); position:relative; height:100%;">
+<div style="grid-column:1; grid-row:3; padding:0; border-right:1px solid var(--card-border, #333); border-bottom:1px solid var(--card-border, #333); position:relative; height:100%;">
     <div style="position:absolute; top:20px; left:20px; z-index:10; pointer-events:none;">
         <h4 style="margin:0; font-size:0.8rem; opacity:0.7; text-transform:uppercase;">Collaboration Network</h4>
         <p style="margin:0; font-size:0.65rem; opacity:0.5;">Co-authorship Connections</p>
@@ -60,11 +60,43 @@
     <div id="dashboard-collab-network" style="width:100%; height:100%;"></div>
 </div>
 
-<div style="grid-column:2; grid-row:3; padding:0; position:relative; height:100%;">
+<div style="grid-column:2; grid-row:3; padding:0; border-bottom:1px solid var(--card-border, #333); position:relative; height:100%;">
     <div style="position:absolute; top:20px; right:20px; z-index:400; pointer-events:none; text-align:right;">
         <h4 style="margin:0; font-size:0.8rem; opacity:0.7; text-transform:uppercase; color:#333; text-shadow:0 0 5px white;">Research Footprint</h4>
     </div>
     <div id="dashboard-footprint-map" style="width:100%; height:100%; z-index:1;"></div>
+</div>
+
+<div style="grid-column:1; grid-row:4; padding:25px; border-right:1px solid var(--card-border, #333); display:flex; flex-direction:column;">
+    <h4 style="font-size:0.8rem; opacity:0.7; text-transform:uppercase; margin-bottom:15px;">Traffic Overview</h4>
+    <div style="display:flex; gap:20px; height:100%;">
+        <div style="flex:0 0 100px; display:flex; flex-direction:column; justify-content:center;">
+            <div style="margin-bottom:15px;">
+                <div style="font-size:0.7rem; opacity:0.6;">Total Visitors</div>
+                <div id="dash-visit-total" style="font-size:1.4rem; font-weight:800; color:#00ff41;">0</div>
+            </div>
+            <div>
+                <div style="font-size:0.7rem; opacity:0.6;">Last 30 Days</div>
+                <div id="dash-visit-month" style="font-size:1.4rem; font-weight:800; color:#00e5ff;">0</div>
+            </div>
+        </div>
+        <div style="flex-grow:1; position:relative;">
+            <div id="dash-visit-trend" style="width:100%; height:100%;"></div>
+        </div>
+    </div>
+</div>
+
+<div style="grid-column:2; grid-row:4; padding:25px; display:flex; flex-direction:column;">
+    <h4 style="font-size:0.8rem; opacity:0.7; text-transform:uppercase; margin-bottom:15px;">Audience & Engagement</h4>
+    <div style="display:flex; gap:20px; height:100%;">
+        <div style="flex:1; position:relative;">
+            <div id="dash-visit-device" style="width:100%; height:100%;"></div>
+        </div>
+        <div style="flex:1; overflow-y:auto; border-left:1px solid var(--card-border, #333); padding-left:15px;">
+            <div style="font-size:0.7rem; font-weight:bold; margin-bottom:8px; opacity:0.8;">Top Pages</div>
+            <div id="dash-visit-pages" style="font-size:0.75rem; line-height:1.5;"></div>
+        </div>
+    </div>
 </div>
 
 </div>
@@ -89,6 +121,13 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
         MAP: 'dashboard-impact-map',
         COLLAB: 'dashboard-collab-network',
         FOOTPRINT: 'dashboard-footprint-map',
+        VISIT: {
+            TREND: 'dash-visit-trend',
+            DEVICE: 'dash-visit-device',
+            TOTAL: 'dash-visit-total',
+            MONTH: 'dash-visit-month',
+            PAGES: 'dash-visit-pages'
+        },
         METRICS: {
             FOCUS: 'dash-metric-focus', TREND: 'dash-metric-trend',
             CITES: 'dash-metric-cites', HINDEX: 'dash-metric-hindex'
@@ -96,15 +135,16 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
         LISTS: { EIGEN: 'dash-list-eigen', BETWEEN: 'dash-list-between', DEGREE: 'dash-list-degree' }
     };
 
-    var radarChart, lineChart, graphChart, collabChart;
+    var radarChart, lineChart, graphChart, collabChart, visitTrendChart, visitDeviceChart;
 
     // 2. DATA LOADING
     const safeFetch = (url) => fetch(url).then(r => r.ok ? r.json() : null).catch(e => null);
 
     Promise.all([
         safeFetch('/data/publications.json'),
-        safeFetch('/data/scholar-metrics.json')
-    ]).then(([papersData, scholarData]) => {
+        safeFetch('/data/scholar-metrics.json'),
+        safeFetch('/data/visitor_stats.json')
+    ]).then(([papersData, scholarData, visitorData]) => {
         
         let papers = [];
         if (scholarData && scholarData.individualPublications) {
@@ -113,16 +153,87 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
             papers = Array.isArray(papersData) ? papersData : (papersData.individualPublications || []);
         }
 
+        // --- DASHBOARD METRICS ---
         processMetrics(papers, scholarData);
 
-        renderRadar(papers); // Placeholder call
+        // --- RENDER CHARTS ---
+        renderRadar(papers); // Placeholder
         if(scholarData && scholarData.citationsByYear) renderLine(scholarData.citationsByYear);
         renderWorkingMap(papers); 
         calculateAllMetrics(papers);
         renderCollabNetwork(papers);
         renderFootprintMap();
+        
+        if(visitorData) renderVisitorStats(visitorData);
 
     }).catch(err => console.error("Dashboard Error:", err));
+
+
+    // ========================================================================
+    // LOGIC: VISITOR STATS (Row 4)
+    // ========================================================================
+    function renderVisitorStats(data) {
+        updateText(IDS.VISIT.TOTAL, data.lifetime_total || 0);
+        updateText(IDS.VISIT.MONTH, data.total_last_30_days || 0);
+
+        // 1. Trend Chart
+        var domTrend = document.getElementById(IDS.VISIT.TREND);
+        if(domTrend && data.monthly_trend) {
+            if(visitTrendChart) visitTrendChart.dispose();
+            visitTrendChart = echarts.init(domTrend);
+            
+            let isDark = document.body.classList.contains('dark');
+            let months = data.monthly_trend.map(d => d.month); // "202601"
+            let counts = data.monthly_trend.map(d => d.visitors);
+            
+            visitTrendChart.setOption({
+                tooltip: { trigger: 'axis' },
+                grid: { top: 10, right: 10, bottom: 20, left: 10, containLabel: false },
+                xAxis: { show: false, data: months },
+                yAxis: { show: false, type: 'value' },
+                series: [{
+                    type: 'bar',
+                    data: counts,
+                    itemStyle: { color: '#00ff41', borderRadius: [2,2,0,0] },
+                    barWidth: '60%'
+                }]
+            });
+        }
+
+        // 2. Device Chart
+        var domDevice = document.getElementById(IDS.VISIT.DEVICE);
+        if(domDevice && data.devices) {
+            if(visitDeviceChart) visitDeviceChart.dispose();
+            visitDeviceChart = echarts.init(domDevice);
+            let isDark = document.body.classList.contains('dark');
+            
+            visitDeviceChart.setOption({
+                tooltip: { trigger: 'item' },
+                series: [{
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    center: ['50%', '50%'],
+                    itemStyle: { borderRadius: 4, borderColor: isDark?'#111':'#fff', borderWidth: 2 },
+                    label: { show: false },
+                    data: data.devices.map(d => ({ name: d.device, value: d.users }))
+                }]
+            });
+        }
+
+        // 3. Top Pages List
+        var domPages = document.getElementById(IDS.VISIT.PAGES);
+        if(domPages && data.top_pages) {
+            let html = data.top_pages.slice(0,5).map(p => {
+                // Shorten path
+                let path = p.path === '/' ? 'Home' : p.path.replace(/\/$/,'').split('/').pop();
+                return `<div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                    <span style="opacity:0.7; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:120px;">${path}</span>
+                    <span style="font-weight:bold; color:#e040fb;">${p.views}</span>
+                </div>`;
+            }).join('');
+            domPages.innerHTML = html;
+        }
+    }
 
 
     // ========================================================================
@@ -508,6 +619,8 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
         if(lineChart) lineChart.resize();
         if(graphChart) graphChart.resize();
         if(collabChart) collabChart.resize();
+        if(visitTrendChart) visitTrendChart.resize();
+        if(visitDeviceChart) visitDeviceChart.resize();
     });
 
 })();
