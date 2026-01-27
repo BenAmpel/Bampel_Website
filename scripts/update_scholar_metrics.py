@@ -1,8 +1,9 @@
 import json
 import os
+import re
+from collections import Counter
 from datetime import datetime
 from pathlib import Path
-from collections import defaultdict
 
 # Try to use serpapi package if available, otherwise fall back to urllib
 try:
@@ -19,6 +20,43 @@ SCHOLAR_ID = "XDdwaZUAAAAJ"
 SCRIPT_DIR = Path(__file__).parent
 OUTPUT_FILE = SCRIPT_DIR.parent / "static" / "data" / "scholar-metrics.json"
 
+# List of common words to ignore in titles
+STOP_WORDS = {
+    "a", "an", "the", "and", "or", "but", "of", "in", "on", "at", "to", "for", 
+    "with", "by", "from", "up", "about", "into", "over", "after", "is", "are", 
+    "was", "were", "be", "been", "being", "have", "has", "had", "do", "does", 
+    "did", "can", "could", "should", "would", "may", "might", "must", "will", 
+    "shall", "study", "analysis", "using", "based", "approach", "review", 
+    "case", "towards", "via", "system", "systems", "data", "model", "models",
+    "detection", "identification", "understanding", "exploring", "evaluating"
+}
+
+def get_top_keywords(articles, top_n=6):
+    """
+    Extracts the most frequent non-stop words from paper titles.
+    """
+    word_counter = Counter()
+
+    for article in articles:
+        title = article.get("title", "")
+        if not title:
+            continue
+        
+        # 1. Lowercase and remove punctuation (keep only alphanumeric and spaces)
+        clean_title = re.sub(r'[^a-zA-Z0-9\s]', '', title.lower())
+        
+        # 2. Tokenize and filter
+        words = [w for w in clean_title.split() if w not in STOP_WORDS and len(w) > 2]
+        
+        # 3. specific bigram handling (optional hack for common terms)
+        # If you want "Deep Learning" to count as one, you'd handle it here.
+        # For now, we stick to single high-frequency words.
+        word_counter.update(words)
+
+    # Return the top N words, Capitalized
+    most_common = word_counter.most_common(top_n)
+    return [word.capitalize() for word, count in most_common]
+
 def fetch_data():
     key = os.environ.get("SERPAPI_KEY")
     if not key:
@@ -29,7 +67,7 @@ def fetch_data():
         "engine": "google_scholar_author",
         "author_id": SCHOLAR_ID,
         "num": 100,
-        "sort": "pubdate",  # Sorts by newest first
+        "sort": "pubdate",
         "api_key": key
     }
 
@@ -37,32 +75,25 @@ def fetch_data():
         try:
             search = GoogleSearch(params)
             results = search.get_dict()
-            
             if "error" in results:
                 print(f"API Error: {results['error']}")
                 return None
-                
             return results
         except Exception as e:
             print(f"SerpAPI Package Error: {e}")
             return None
     else:
-        # Fallback to urllib method
         url = "https://serpapi.com/search.json?" + urllib.parse.urlencode(params)
         print(f"Fetching data from SerpApi (using urllib)...")
-        
         try:
             ctx = ssl.create_default_context()
             ctx.check_hostname = False
             ctx.verify_mode = ssl.CERT_NONE
-            
             with urllib.request.urlopen(url, timeout=30, context=ctx) as response:
                 data = json.loads(response.read().decode())
-                
             if "error" in data:
                 print(f"API Error: {data['error']}")
                 return None
-                
             return data
         except Exception as e:
             print(f"Network Error: {e}")
@@ -72,18 +103,16 @@ def process_and_save(data):
     if not data:
         return
 
-    # [FIX] 'cited_by' is a sibling of 'author', not a child.
-    author = data.get("author", {})
     cited_by = data.get("cited_by", {}) 
     articles = data.get("articles", [])
+    author = data.get("author", {})
 
-    # 1. Standard Metrics (Total, H-Index, i10)
+    # 1. Standard Metrics
     table = cited_by.get("table", [])
     citations_all = 0
     h_index_all = 0
     i10_index_all = 0
 
-    # Extract metrics from table array
     for metric in table:
         if isinstance(metric, dict):
             if "citations" in metric:
@@ -93,93 +122,34 @@ def process_and_save(data):
             elif "i10_index" in metric:
                 i10_index_all = metric["i10_index"].get("all", 0) if isinstance(metric["i10_index"], dict) else 0
 
-    # 2. Yearly Citations Graph -> Convert to array format for dashboard compatibility
+    # 2. Yearly Citations Graph
     raw_graph = cited_by.get("graph", [])
     citations_by_year = []
-    
     if raw_graph:
-        try:
-            raw_graph.sort(key=lambda x: x.get('year', 0))
-        except (TypeError, KeyError):
-            pass
-        
-        for item in raw_graph:
-            if isinstance(item, dict) and 'year' in item:
-                citations_by_year.append({
-                    "year": str(item.get('year', '')),
-                    # [FIX] Ensure citations are integers (API sometimes returns strings)
-                    "citations": int(item.get('citations', 0))
-                })
-        print(f"Successfully extracted {len(citations_by_year)} years of citation history from graph.")
+        citations_by_year = [{"year": str(item.get('year')), "citations": int(item.get('citations', 0))} for item in raw_graph]
 
-    # 3. Individual Publications -> Mapped to specific keys
+    # 3. Individual Publications
     individual_publications = []
-    total_citations_from_pubs = 0
-
     for article in articles:
-        citations = article.get("cited_by", {}).get("value", 0) or 0
-        pub_entry = {
+        individual_publications.append({
             "title": article.get("title", ""),
-            "citations": citations,
+            "citations": article.get("cited_by", {}).get("value", 0) or 0,
             "year": article.get("year", "N/A"),
             "link": article.get("link", ""),
             "authors": article.get("authors", ""), 
             "venue": article.get("publication", "") 
-        }
-        individual_publications.append(pub_entry)
-        total_citations_from_pubs += citations
+        })
 
-    # Fallback: Calculate citationsByYear from individual publications if graph data is missing
-    # (This will only run if the API fails to return the graph, grouping by Pub Year as a last resort)
-    if not citations_by_year and individual_publications:
-        print("Warning: Graph data missing. Falling back to grouping by publication year.")
-        year_citations = defaultdict(int)
-        
-        for pub in individual_publications:
-            year = pub.get('year', '')
-            citations = pub.get('citations', 0) or 0
-            if year and year != 'N/A' and isinstance(citations, (int, float)) and citations > 0:
-                year_citations[str(year)] += int(citations)
-        
-        if year_citations:
-            citations_by_year = [{"year": year, "citations": citations} 
-                               for year, citations in sorted(year_citations.items(), key=lambda x: int(x[0]) if x[0].isdigit() else 0)]
-            print(f"Calculated citationsByYear from individual publications: {len(citations_by_year)} years")
+    # 4. Infer Interests from Titles (NEW)
+    inferred_interests = get_top_keywords(articles, top_n=6)
+    print(f"Inferred Interests: {inferred_interests}")
 
-    # Calculate Citation Velocity (citations in the most recent year)
+    # 5. Citation Velocity
     citation_velocity = 0
     if citations_by_year:
-        most_recent_year_data = citations_by_year[-1]
-        citation_velocity = most_recent_year_data.get('citations', 0)
+        citation_velocity = citations_by_year[-1].get('citations', 0)
 
-    # Fallback: Use sum from individual publications if citations is 0
-    if citations_all == 0 and total_citations_from_pubs > 0:
-        print(f"Warning: Using fallback citations from individual publications: {total_citations_from_pubs}")
-        citations_all = total_citations_from_pubs
-
-    # Calculate h-index from individual publications if not available
-    if h_index_all == 0 and individual_publications:
-        sorted_pubs = sorted([p for p in individual_publications 
-                              if p.get('citations') and isinstance(p.get('citations'), (int, float)) and p.get('citations', 0) > 0], 
-                             key=lambda x: x.get('citations', 0), reverse=True)
-        for i, pub in enumerate(sorted_pubs, 1):
-            if pub.get('citations', 0) >= i:
-                h_index_all = i
-            else:
-                break
-        if h_index_all > 0:
-            print(f"Calculated h-index from individual publications: {h_index_all}")
-
-    # Calculate i10-index from individual publications if not available
-    if i10_index_all == 0 and individual_publications:
-        i10_count = sum(1 for p in individual_publications 
-                       if p.get('citations') and isinstance(p.get('citations'), (int, float))
-                       and p.get('citations', 0) >= 10)
-        if i10_count > 0:
-            i10_index_all = i10_count
-            print(f"Calculated i10-index from individual publications: {i10_index_all}")
-
-    # Construct the final JSON (matching dashboard structure)
+    # Construct the final JSON
     output = {
         "lastUpdated": datetime.now().strftime("%B %Y"),
         "metrics": {
@@ -187,9 +157,10 @@ def process_and_save(data):
             "hIndex": h_index_all,
             "i10Index": i10_index_all,
             "publications": len(articles),
-            "citationVelocity": citation_velocity
+            "citationVelocity": citation_velocity,
+            "interests": inferred_interests  # <--- Now uses inferred data
         },
-        "citationsByYear": citations_by_year,  # Array format for dashboard compatibility
+        "citationsByYear": citations_by_year,
         "individualPublications": individual_publications
     }
 
@@ -197,8 +168,7 @@ def process_and_save(data):
     with open(OUTPUT_FILE, 'w') as f:
         json.dump(output, f, indent=2)
     
-    print(f"Success! Saved {len(individual_publications)} papers to {OUTPUT_FILE}")
-    print(f"Citations: {citations_all}, h-index: {h_index_all}, i10-index: {i10_index_all}, Citation Velocity: {citation_velocity}")
+    print(f"Success! Saved metrics to {OUTPUT_FILE}")
 
 if __name__ == "__main__":
     json_data = fetch_data()

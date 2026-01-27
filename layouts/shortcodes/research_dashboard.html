@@ -8,7 +8,7 @@
     var root = document.getElementById('dashboard-root');
     var radarChart, lineChart, knowledgeGraphChart;
     var storedPublications = null; // Store for theme toggle re-rendering
-    var storedCounts = null;
+    var storedScholarData = null; // Store full scholarData for theme toggle
     var storedHistory = null;
 
     // --- 1. LAYOUT GENERATOR ---
@@ -28,9 +28,15 @@
         return `
         <div id="research-card" style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 0; background: ${bg}; border: 1px solid ${border}; border-radius: 12px; box-shadow: 0 4px 20px ${shadow}; overflow: hidden;">
             
-            <div style="grid-column: 1; grid-row: 1; padding: 20px; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid ${border}; border-bottom: 1px solid ${border};">
+            <div style="grid-column: 1; grid-row: 1; padding: 20px; display: flex; flex-direction: column; border-right: 1px solid ${border}; border-bottom: 1px solid ${border};">
                 <h4 style="margin: 0 0 10px; font-size: 0.9rem; color: ${muted}; text-transform: uppercase; letter-spacing: 1px; text-align: center;">Research Profile</h4>
-                <div id="dash-radar" style="width: 100%; height: 100%; min-height: 300px;"></div>
+                
+                <div style="font-size: 0.8rem; color: ${text}; margin-bottom: 10px; padding: 10px; background: ${isDark ? 'rgba(255,255,255,0.05)' : '#f9f9f9'}; border-radius: 8px; text-align: center; line-height: 1.4;">
+                    <strong>Inferred Focus:</strong> <br>
+                    Top research themes dynamically extracted from recent publication titles.
+                </div>
+
+                <div id="dash-radar" style="width: 100%; height: 100%; min-height: 250px;"></div>
             </div>
 
             <div style="grid-column: 2; grid-row: 1; padding: 25px; border-bottom: 1px solid ${border}; display: flex; flex-direction: column;">
@@ -38,11 +44,11 @@
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                     <div>
                         <div style="font-size: 0.8rem; color: ${muted};">Primary Focus</div>
-                        <div style="font-size: 1.1rem; font-weight: 800; color: ${c1}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="metric-focus">...</div>
+                        <div style="font-size: 1.1rem; font-weight: 800; color: ${c1};" id="metric-focus">Cybersecurity</div>
                     </div>
                     <div>
-                        <div style="font-size: 0.8rem; color: ${muted};">Trending Now</div>
-                        <div style="font-size: 1.1rem; font-weight: 800; color: ${c2}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="metric-trend">...</div>
+                        <div style="font-size: 0.8rem; color: ${muted};">Trending</div>
+                        <div style="font-size: 1.1rem; font-weight: 800; color: ${c2};" id="metric-trend">AI</div>
                     </div>
                     <div>
                         <div style="font-size: 0.8rem; color: ${muted};">Citation Velocity</div>
@@ -70,11 +76,9 @@
                 <div id="knowledge-graph" style="width: 100%; height: calc(100% - 60px); min-height: 300px;"></div>
             </div>
 
-            <div style="grid-column: 2; grid-row: 2; padding: 20px; display: flex; flex-direction: column;">
-                <h4 style="font-size: 0.8rem; color: ${muted}; text-transform: uppercase; margin: 0 0 10px;">Most Central Papers (Eigenvector)</h4>
-                <div id="centrality-list" style="font-size: 0.85rem; color: ${text};">
-                    <div style="padding: 5px 0;">Computing...</div>
-                </div>
+            <div style="grid-column: 2; grid-row: 2; padding: 20px;">
+                <h4 style="font-size: 0.8rem; color: ${muted}; text-transform: uppercase;">Most Central Papers</h4>
+                <div id="centrality-list">Loading...</div>
             </div>
         </div>`;
     }
@@ -91,38 +95,41 @@
         fetch('/data/scholar-metrics.json').then(r => r.json())
     ]).then(([papers, scholarData]) => {
         
-        // A. Taxonomy Logic (Keywords)
-        const taxonomy = {
-            'AI / Deep Learning': ['Deep Learning', 'Neural', 'Transfer Learning', 'Embedding', 'Machine Learning', 'Artificial Intelligence', 'Adversarial'],
-            'Cybersecurity':      ['Cyber', 'Vulnerability', 'Exploit', 'Attack', 'Threat', 'Security', 'Malicious', 'Ransomware', 'Phishing'],
-            'LLMs & NLP':         ['Large Language Model', 'LLM', 'Text Analytics', 'NLP', 'Transformer', 'Bert', 'GPT', 'Language Models'],
-            'Hacker Communities': ['Hacker', 'Forum', 'Dark Web', 'Paste', 'Community', 'Marketplace', 'Underground'],
-            'Design Science':     ['Design Science', 'Framework', 'Artifact', 'System', 'Implementation', 'Prototyping'],
-            'Behavioral':         ['Nudging', 'Bias', 'Social', 'Human', 'Behavior', 'Psychology', 'Decision', 'Trust']
-        };
+        // A. Get Inferred Interests from JSON (or fallback to default)
+        let inferredInterests = [];
+        if (scholarData && scholarData.metrics && scholarData.metrics.interests && scholarData.metrics.interests.length > 0) {
+            inferredInterests = scholarData.metrics.interests;
+        } else {
+            // Fallback to default categories if not available
+            inferredInterests = ['AI', 'Cybersecurity', 'Blockchain', 'Deep Learning', 'Design Science', 'Dark Web'];
+        }
 
+        // B. Calculate frequency counts for inferred interests
         let counts = {};
         let recentCounts = {};
         let currentYear = new Date().getFullYear();
-        Object.keys(taxonomy).forEach(k => { counts[k] = 0; recentCounts[k] = 0; });
+        inferredInterests.forEach(interest => {
+            counts[interest] = 0;
+            recentCounts[interest] = 0;
+        });
 
         if(Array.isArray(papers)) {
             papers.forEach(p => {
                 let text = (p.title || "").toLowerCase();
-                Object.keys(taxonomy).forEach(cat => {
-                    if(taxonomy[cat].some(k => text.includes(k.toLowerCase()))) {
-                        counts[cat]++;
-                        if(p.year >= currentYear - 2) recentCounts[cat]++;
+                inferredInterests.forEach(interest => {
+                    if(text.includes(interest.toLowerCase())) {
+                        counts[interest]++;
+                        if(p.year >= currentYear - 2) recentCounts[interest]++;
                     }
                 });
             });
         }
 
-        // B. Populate Text Metrics
+        // C. Populate Text Metrics (use first two inferred interests as fallback)
         let topSkill = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
         let trendSkill = Object.entries(recentCounts).sort((a,b) => b[1]-a[1])[0];
-        document.getElementById('metric-focus').innerText = topSkill ? topSkill[0] : "-";
-        document.getElementById('metric-trend').innerText = trendSkill ? trendSkill[0] : "-";
+        document.getElementById('metric-focus').innerText = topSkill && topSkill[1] > 0 ? topSkill[0] : (inferredInterests[0] || "Cybersecurity");
+        document.getElementById('metric-trend').innerText = trendSkill && trendSkill[1] > 0 ? trendSkill[0] : (inferredInterests[1] || "AI");
 
         if(scholarData && scholarData.metrics) {
             let rawCites = String(scholarData.metrics.citations);
@@ -143,10 +150,10 @@
             document.getElementById('metric-velocity').innerText = velocity;
         }
 
-        // C. Render Charts
-        storedCounts = counts; // Store for theme toggle
+        // D. Render Charts
+        storedScholarData = scholarData; // Store for theme toggle
         storedHistory = scholarData.citationsByYear; // Store for theme toggle
-        renderRadar(counts);
+        renderRadar(scholarData); // Pass full scholarData to use inferred interests
         renderLine(scholarData.citationsByYear);
 
         // --- D. CALCULATE CENTRALITY (New Feature) ---
@@ -388,11 +395,24 @@
     }
 
     // --- HELPERS ---
-    function renderRadar(counts) {
-        let max = Math.max(...Object.values(counts)) || 1;
-        let data = Object.keys(counts).map(k => ({
-            name: k, max: 100, 
-            value: Math.min(Math.round((counts[k]/max)*90)+10, 100)
+    function renderRadar(data) {
+        // 1. Get Inferred Interests from JSON
+        var categories = (data.metrics && data.metrics.interests && data.metrics.interests.length > 0) 
+            ? data.metrics.interests 
+            : ['AI', 'Cybersecurity', 'Blockchain', 'Deep Learning', 'Design Science', 'Dark Web'];
+
+        // 2. Calculate Frequency (Count matching papers)
+        var papers = data.individualPublications || [];
+        var seriesData = categories.map(cat => {
+            var count = papers.filter(p => p.title && p.title.toLowerCase().includes(cat.toLowerCase())).length;
+            return count > 0 ? count : 1; // Minimum 1 for visibility
+        });
+
+        // 3. Render Chart
+        let max = Math.max(...seriesData) || 1;
+        let chartData = categories.map((cat, idx) => ({
+            name: cat, max: 100, 
+            value: Math.min(Math.round((seriesData[idx]/max)*90)+10, 100)
         }));
 
         function getOpt(isDark) {
@@ -400,7 +420,7 @@
             let txt = isDark ? '#eee' : '#333';
             return {
                 radar: {
-                    indicator: data.map(d => ({ name: d.name, max: 100 })),
+                    indicator: chartData.map(d => ({ name: d.name, max: 100 })),
                     shape: 'circle', radius: '65%',
                     axisName: { color: txt, fontSize: 10, fontWeight: 'bold' },
                     splitLine: { lineStyle: { color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' } },
@@ -409,7 +429,7 @@
                 series: [{
                     type: 'radar',
                     data: [{
-                        value: data.map(d => d.value),
+                        value: chartData.map(d => d.value),
                         itemStyle: { color: c },
                         lineStyle: { width: 2, color: c },
                         areaStyle: { color: new echarts.graphic.RadialGradient(0.5, 0.5, 1, [{offset:0, color: c+'10'}, {offset:1, color: c+'60'}]) }
@@ -471,7 +491,9 @@
                    knowledgeGraphChart = echarts.init(document.getElementById('knowledge-graph'));
                    // Re-render charts with new theme
                    if(storedCounts) {
-                       renderRadar(storedCounts);
+                       if (storedScholarData) {
+                           renderRadar(storedScholarData);
+                       }
                    }
                    if(storedHistory) {
                        renderLine(storedHistory);
