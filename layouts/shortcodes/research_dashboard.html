@@ -266,82 +266,188 @@
         if (el) el.innerText = val;
     }
 
-    // --- RENDER LIVE NETWORK (Bottom Left) ---
+    // --- RENDER MANUSCRIPT NETWORK & LIVE STATS ---
     function renderMap(papers) {
         var dom = document.getElementById('knowledge-graph');
         if (!dom) return;
         
+        var existInstance = echarts.getInstanceByDom(dom);
+        if (existInstance) existInstance.dispose();
+
         var myChart = echarts.init(dom);
         var isDark = document.body.classList.contains('dark');
         
-        // 1. Process Data (Extract Nodes & Links)
-        var nodes = [];
-        var links = [];
-        var authorCounts = {};
-        var myName = "Benjamin Ampel"; 
+        // --- 1. CONFIGURATION ---
+        const stopWords = new Set(["the", "and", "of", "in", "on", "for", "with", "a", "an", "to", "at", "by", "from", "up", "about", "into", "over", "after", "is", "are", "was", "were", "be", "been", "being", "have", "has", "had", "do", "does", "did", "can", "could", "should", "would", "will", "study", "analysis", "using", "based", "approach", "review", "case", "system", "towards"]);
 
-        // Helper to normalize names
-        const cleanName = (n) => {
-            n = n.trim();
-            if(n.includes("Ampel")) return myName; // Normalize self
-            return n;
+        // Helper: Get Clean Tokens from Title
+        const getTokens = (str) => {
+            if(!str) return [];
+            return str.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(w => w.length > 3 && !stopWords.has(w));
         };
 
-        papers.forEach(p => {
-            // Handle authors as String or List
-            let auths = Array.isArray(p.authors) ? p.authors : (p.authors || "").split(',');
-            auths = auths.map(cleanName).filter(n => n.length > 2);
+        // Helper: Get Clean Authors List
+        const getAuthors = (p) => {
+            let authStr = Array.isArray(p.authors) ? p.authors.join(',') : (p.authors || "");
+            return authStr.split(',').map(a => a.trim()).filter(a => a && !a.includes("Ampel")); // Exclude self
+        };
 
-            // Count Authors
-            auths.forEach(a => { authorCounts[a] = (authorCounts[a] || 0) + 1; });
-
-            // Create Links (Clique expansion)
-            for(let i=0; i<auths.length; i++) {
-                for(let j=i+1; j<auths.length; j++) {
-                    links.push({ source: auths[i], target: auths[j] });
-                }
+        // --- 2. BUILD NODES ---
+        var nodes = papers.map((p, idx) => ({
+            id: idx.toString(), // Use Index as ID for safety
+            name: p.title,
+            value: p.citations || 0,
+            venue: p.venue || "Unknown",
+            year: p.year,
+            authors: getAuthors(p),
+            tokens: getTokens(p.title),
+            symbolSize: Math.max(5, Math.log(p.citations + 2) * 5),
+            itemStyle: { color: isDark ? '#00e5ff' : '#1a0dab' },
+            label: {
+                show: (p.citations > 15),
+                formatter: (params) => params.data.name.substring(0, 15) + '...'
             }
-        });
-
-        // Convert to ECharts Format
-        var maxCount = 0;
-        Object.keys(authorCounts).forEach(k => {
-            if (authorCounts[k] > maxCount && k !== myName) maxCount = authorCounts[k];
-        });
-
-        nodes = Object.keys(authorCounts).map(k => ({
-            id: k,
-            name: k,
-            value: authorCounts[k],
-            symbolSize: k === myName ? 40 : Math.max(10, Math.min(30, authorCounts[k] * 5)),
-            itemStyle: {
-                color: k === myName ? (isDark ? '#fff' : '#000') : (isDark ? '#00e5ff' : '#1a0dab')
-            },
-            label: { show: authorCounts[k] > 2 || k === myName }
         }));
 
-        // 2. Render Graph
+        // --- 3. BUILD EDGES (Multi-Criteria) ---
+        var links = [];
+        var adjList = new Map(); // For LCC calculation
+
+        for (let i = 0; i < nodes.length; i++) {
+            if (!adjList.has(i)) adjList.set(i, []);
+            
+            for (let j = i + 1; j < nodes.length; j++) {
+                let nodeA = nodes[i];
+                let nodeB = nodes[j];
+                let weight = 0;
+                let reasons = [];
+
+                // A. Shared Topic (Title Words)
+                let commonWords = nodeA.tokens.filter(x => nodeB.tokens.includes(x));
+                if (commonWords.length > 0) {
+                    weight += commonWords.length * 1.5;
+                    reasons.push("Topic");
+                }
+
+                // B. Shared Authors
+                let commonAuths = nodeA.authors.filter(x => nodeB.authors.includes(x));
+                if (commonAuths.length > 0) {
+                    weight += commonAuths.length * 3.0; // Stronger link
+                    reasons.push("Co-Author");
+                }
+
+                // C. Shared Venue
+                if (nodeA.venue && nodeB.venue && nodeA.venue === nodeB.venue) {
+                    weight += 1.0;
+                    reasons.push("Venue");
+                }
+
+                // Create Link if threshold met
+                if (weight > 1.0) {
+                    links.push({
+                        source: i.toString(),
+                        target: j.toString(),
+                        value: weight,
+                        desc: reasons.join(", "),
+                        lineStyle: {
+                            width: Math.min(weight, 4),
+                            opacity: isDark ? 0.3 : 0.2,
+                            curveness: 0.2
+                        }
+                    });
+                    // Update Adjacency List for Stats
+                    adjList.get(i).push(j);
+                    if (!adjList.has(j)) adjList.set(j, []);
+                    adjList.get(j).push(i);
+                }
+            }
+        }
+
+        // --- 4. CALCULATE LIVE NETWORK STATS ---
+        // A. Density = 2 * Edges / (Nodes * (Nodes - 1))
+        let n = nodes.length;
+        let e = links.length;
+        let density = (n > 1) ? (2 * e) / (n * (n - 1)) : 0;
+
+        // B. Largest Connected Component (BFS)
+        let visited = new Set();
+        let maxComponent = 0;
+        
+        for(let i=0; i<n; i++) {
+            if(!visited.has(i)) {
+                let size = 0;
+                let queue = [i];
+                visited.add(i);
+                while(queue.length > 0) {
+                    let u = queue.shift();
+                    size++;
+                    let neighbors = adjList.get(u) || [];
+                    for(let v of neighbors) {
+                        if(!visited.has(v)) {
+                            visited.add(v);
+                            queue.push(v);
+                        }
+                    }
+                }
+                if(size > maxComponent) maxComponent = size;
+            }
+        }
+        let lccPct = (n > 0) ? Math.round((maxComponent / n) * 100) : 0;
+
+        // --- 5. INJECT STATS INTO UI ---
+        // This overrides the values loaded from network_stats.json
+        setTimeout(() => {
+            let densityEl = document.getElementById('net-density');
+            let lccEl = document.getElementById('net-lcc');
+            let clusterEl = document.getElementById('net-clusters');
+            
+            if(densityEl) densityEl.innerText = density.toFixed(3);
+            if(lccEl) lccEl.innerText = lccPct + "%";
+            
+            // Generate a simple "Top Topics" list based on node connections
+            if(clusterEl) {
+                // Find most connected nodes (hubs)
+                let sortedNodes = [...nodes].sort((a,b) => (adjList.get(parseInt(b.id))||[]).length - (adjList.get(parseInt(a.id))||[]).length);
+                let hubs = sortedNodes.slice(0, 3);
+                
+                let html = hubs.map((h, i) => {
+                    let color = ['#00ff41', '#00e5ff', '#e040fb'][i] || '#ccc';
+                    return `
+                    <div style="margin-bottom: 8px; padding-left: 10px; border-left: 3px solid ${color};">
+                        <strong style="color: inherit; opacity: 0.9;">Cluster ${i+1}</strong> 
+                        <span style="opacity: 0.6; font-size: 0.8em;">(Central Node)</span><br>
+                        <span style="font-size: 0.75em; opacity: 0.7;">"${h.name.substring(0, 40)}..."</span>
+                    </div>`;
+                }).join('');
+                clusterEl.innerHTML = html;
+            }
+        }, 500);
+
+        // --- 6. RENDER GRAPH ---
         var option = {
-            tooltip: {},
+            tooltip: {
+                formatter: (params) => {
+                    if (params.dataType === 'edge') return `Linked by: ${params.data.desc}`;
+                    return `<div style="max-width:200px; white-space:normal;">
+                        <strong>${params.data.name}</strong><br>
+                        ${params.data.year} • ${params.data.venue}<br>
+                        ${params.value} Citations
+                    </div>`;
+                }
+            },
             series: [{
                 type: 'graph',
                 layout: 'force',
                 data: nodes,
                 links: links,
                 roam: true,
-                zoom: 0.8,
-                label: {
-                    position: 'right',
-                    formatter: '{b}'
-                },
-                lineStyle: {
-                    color: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)',
-                    curveness: 0.3
-                },
+                zoom: 0.5,
+                label: { position: 'right', color: isDark ? '#ddd' : '#333' },
+                lineStyle: { color: isDark ? '#aaa' : '#999' },
                 force: {
-                    repulsion: 150,
-                    gravity: 0.05,
-                    edgeLength: 50
+                    repulsion: 400,
+                    gravity: 0.1,
+                    edgeLength: 100
                 }
             }]
         };
@@ -351,7 +457,6 @@
         // Store chart instance for theme toggle
         knowledgeGraphChart = myChart;
         
-        // Resize handler
         window.addEventListener('resize', function() { myChart.resize(); });
     }
 
