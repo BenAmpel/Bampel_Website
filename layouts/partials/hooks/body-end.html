@@ -1,22 +1,46 @@
-<div class="visitor-stats" style="text-align: center; margin-top: 20px; font-size: 0.85rem; opacity: 0.8;">
-  <span id="visitor-count">Loading stats...</span>
-  <div id="visitor-locations" style="font-size: 0.75rem; margin-top: 5px;"></div>
+<div class="visitor-stats" style="text-align: center; margin: 40px auto; font-size: 0.8rem; opacity: 0.7; max-width: 600px; line-height: 1.6;">
+  <div id="visitor-count" style="font-weight: bold; margin-bottom: 5px;">Loading stats...</div>
+  <div id="visitor-details"></div>
 </div>
 
 <script>
   fetch('/data/visitor_stats.json')
     .then(response => response.json())
     .then(data => {
-      // 1. Show Monthly Count
+      // 1. Visitors Count
       const lastMonth = data.monthly_trend[data.monthly_trend.length - 1];
-      const monthName = lastMonth.month.substring(4,6) + "/" + lastMonth.month.substring(0,4);
+      const monthName = lastMonth ? (lastMonth.month.substring(4,6) + "/" + lastMonth.month.substring(0,4)) : "this month";
+      const visitorCount = lastMonth ? lastMonth.visitors : 0;
+      
       document.getElementById('visitor-count').innerHTML = 
-        `<strong>${lastMonth.visitors}</strong> unique visitors in ${monthName}`;
+        `User Impact: <strong>${visitorCount}</strong> unique visitors in ${monthName}`;
 
-      // 2. Show Top Locations (e.g., "From: Atlanta, London, Berlin...")
-      const top3 = data.top_locations.slice(0, 3).map(l => l.city).join(", ");
-      document.getElementById('visitor-locations').innerText = 
-        `Top visits from: ${top3}, and more.`;
+      // 2. Locations
+      const cities = data.top_locations.slice(0, 3).map(l => l.city).filter(c => c !== '(not set)').join(", ");
+      
+      // 3. Top Page
+      // Clean up path (remove leading slash)
+      let topPage = data.top_pages.length > 0 ? data.top_pages[0].path : "";
+      if (topPage === "/") topPage = "Home Page";
+
+      // 4. Device (calculate percentage of mobile/desktop)
+      let mobileUsers = 0;
+      let totalUsers = 0;
+      if (data.devices) {
+        data.devices.forEach(d => {
+            totalUsers += d.users;
+            if (d.device === 'mobile') mobileUsers += d.users;
+        });
+      }
+      let deviceText = totalUsers > 0 && (mobileUsers/totalUsers > 0.5) ? "mostly on Mobile" : "mostly on Desktop";
+
+      // Build the string
+      let detailsHtml = "";
+      if (cities) detailsHtml += `Visiting from: <strong>${cities}</strong>... <br>`;
+      if (topPage) detailsHtml += `Top read: <code>${topPage}</code> <br>`;
+      detailsHtml += `<span style="font-size: 0.75rem">(${deviceText})</span>`;
+
+      document.getElementById('visitor-details').innerHTML = detailsHtml;
     })
-    .catch(err => { console.log('Stats not loaded yet'); });
+    .catch(err => { console.log('Stats waiting for next build cycle'); });
 </script>
