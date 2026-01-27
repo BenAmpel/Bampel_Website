@@ -41,5 +41,11 @@ jobs:
             echo "No changes to commit."
           else
             git commit -m "chore: Update Scholar metrics [skip ci]"
-            git push
+            
+            # Pull latest changes before pushing to avoid conflicts
+            # Use rebase to keep history clean, fallback to merge if rebase fails
+            git pull --rebase origin main || git pull origin main
+            
+            # Push changes
+            git push origin main
           fi
