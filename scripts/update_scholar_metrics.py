@@ -105,37 +105,36 @@ def process_and_save(data):
 
     # 3. Construct Final JSON
     # Safely extract metrics from table array
+    # SerpAPI structure: table[0] = {"citations": {"all": X}}, table[1] = {"h_index": {"all": Y}}, table[2] = {"i10_index": {"all": Z}}
     table = cited_by.get("table", [])
     
-    # Safely access table indices with defaults
-    # Table structure: [{"citations": {...}, "h_index": {...}, "i10_index": {...}}]
-    # OR: [{"all": X}, {"all": Y}, {"all": Z}] for citations, h-index, i10-index
     citations = 0
     h_index = 0
     i10_index = 0
     
     if table and len(table) > 0:
-        # Try different table structures
+        # Extract citations (first element)
         if isinstance(table[0], dict):
-            # Structure 1: [{"citations": {"all": X}, "h_index": {"all": Y}, ...}]
             if "citations" in table[0]:
-                citations = table[0].get("citations", {}).get("all", 0)
+                citations = table[0]["citations"].get("all", 0) if isinstance(table[0]["citations"], dict) else 0
             elif "all" in table[0]:
                 citations = table[0].get("all", 0)
-            
-            if len(table) > 1:
-                if "h_index" in table[1]:
-                    h_index = table[1].get("h_index", {}).get("all", 0)
-                elif "all" in table[1]:
-                    h_index = table[1].get("all", 0)
-            
-            if len(table) > 2:
-                if "i10_index" in table[2]:
-                    i10_index = table[2].get("i10_index", {}).get("all", 0)
-                elif "all" in table[2]:
-                    i10_index = table[2].get("all", 0)
+        
+        # Extract h-index (second element)
+        if len(table) > 1 and isinstance(table[1], dict):
+            if "h_index" in table[1]:
+                h_index = table[1]["h_index"].get("all", 0) if isinstance(table[1]["h_index"], dict) else 0
+            elif "all" in table[1]:
+                h_index = table[1].get("all", 0)
+        
+        # Extract i10-index (third element)
+        if len(table) > 2 and isinstance(table[2], dict):
+            if "i10_index" in table[2]:
+                i10_index = table[2]["i10_index"].get("all", 0) if isinstance(table[2]["i10_index"], dict) else 0
+            elif "all" in table[2]:
+                i10_index = table[2].get("all", 0)
     
-    # Fallback: Try direct access from cited_by
+    # Fallback: Try direct access from cited_by (alternative API response format)
     if citations == 0:
         citations = cited_by.get("total", 0) or cited_by.get("value", 0) or 0
     if h_index == 0:
@@ -158,10 +157,31 @@ def process_and_save(data):
                     citation_velocity = h.get('citations', 0)
                     break
     
-    # Final fallback: if still no data, use sum from individual publications
+    # Final fallback: if still no data, calculate from individual publications
     if citations == 0 and total_citations_from_pubs > 0:
         print(f"Warning: Using fallback citations from individual publications: {total_citations_from_pubs}")
         citations = total_citations_from_pubs
+    
+    # Calculate h-index from individual publications if not available
+    if h_index == 0 and individual_pubs:
+        # Sort publications by citations (descending)
+        sorted_pubs = sorted([p for p in individual_pubs if p.get('citations', 0) and isinstance(p.get('citations'), (int, float))], 
+                             key=lambda x: x.get('citations', 0), reverse=True)
+        # Find h-index: largest h where h publications have at least h citations
+        for i, pub in enumerate(sorted_pubs, 1):
+            if pub.get('citations', 0) >= i:
+                h_index = i
+            else:
+                break
+        if h_index > 0:
+            print(f"Calculated h-index from individual publications: {h_index}")
+    
+    # Calculate i10-index from individual publications if not available
+    if i10_index == 0 and individual_pubs:
+        i10_count = sum(1 for p in individual_pubs if p.get('citations', 0) and p.get('citations', 0) >= 10)
+        if i10_count > 0:
+            i10_index = i10_count
+            print(f"Calculated i10-index from individual publications: {i10_index}")
     
     print(f"Extracted metrics - Citations: {citations}, h-index: {h_index}, i10-index: {i10_index}, Citation Velocity: {citation_velocity}")
     
