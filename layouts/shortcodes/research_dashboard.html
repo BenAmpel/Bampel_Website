@@ -51,7 +51,10 @@
                 </div>
 
                 <div style="flex-grow: 1; padding: 20px; min-height: 200px; position: relative;">
-                    <h4 style="margin: 0 0 10px; font-size: 0.8rem; color: ${muted}; text-transform: uppercase; letter-spacing: 1px;">Citation Velocity</h4>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h4 style="margin: 0; font-size: 0.8rem; color: ${muted}; text-transform: uppercase; letter-spacing: 1px;">Citation Velocity</h4>
+                        <div style="font-size: 1.2rem; font-weight: 800; color: ${c2};" id="metric-velocity">-</div>
+                    </div>
                     <div id="dash-line" style="width: 100%; height: 180px;"></div>
                 </div>
             </div>
@@ -104,17 +107,31 @@
 
         // --- C. Update Scholar Metrics (Fixed Parsing) ---
         if(scholarData && scholarData.metrics) {
-            // 1. Citations
-            let rawCites = String(scholarData.metrics.citations); // e.g. "500+"
-            let cleanCites = parseInt(rawCites.replace(/\D/g, '')) || 0; // 500
-            let suffix = rawCites.includes('+') ? '+' : '';
-            
+            // 1. Citations (handle both number and string formats)
+            let citations = scholarData.metrics.citations;
+            let cleanCites = 0;
+            let suffix = '';
+            if (typeof citations === 'string') {
+                cleanCites = parseInt(citations.replace(/\D/g, '')) || 0;
+                suffix = citations.includes('+') ? '+' : '';
+            } else {
+                cleanCites = citations || 0;
+            }
             animateValue("metric-cites", 0, cleanCites, 2000, suffix);
             
             // 2. h-index
             document.getElementById('metric-hindex').innerText = scholarData.metrics.hIndex || 0;
             
-            // 3. Update Date
+            // 3. Citation Velocity
+            if (scholarData.metrics.citationVelocity !== undefined) {
+                document.getElementById('metric-velocity').innerText = scholarData.metrics.citationVelocity;
+            } else if (scholarData.citationsByYear && scholarData.citationsByYear.length > 0) {
+                // Fallback: calculate from most recent year
+                let recentYear = scholarData.citationsByYear[scholarData.citationsByYear.length - 1];
+                document.getElementById('metric-velocity').innerText = recentYear.citations || 0;
+            }
+            
+            // 4. Update Date
             if(scholarData.lastUpdated) {
                 document.getElementById('last-updated').innerText = "Updated: " + scholarData.lastUpdated;
             }
@@ -198,9 +215,13 @@
                    // Re-inject HTML to update CSS variables (Quick Refresh)
                    var cites = document.getElementById('metric-cites').innerText;
                    var hidx = document.getElementById('metric-hindex').innerText;
+                   var velocity = document.getElementById('metric-velocity') ? document.getElementById('metric-velocity').innerText : '-';
                    root.innerHTML = renderLayout(); 
                    document.getElementById('metric-cites').innerText = cites; 
                    document.getElementById('metric-hindex').innerText = hidx;
+                   if (document.getElementById('metric-velocity')) {
+                       document.getElementById('metric-velocity').innerText = velocity;
+                   }
                 }, 100);
             });
         }

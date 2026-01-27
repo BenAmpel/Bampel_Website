@@ -102,13 +102,27 @@ def process_and_save(data):
     h_index = table[1].get("all", 0) if len(table) > 1 else 0
     i10_index = table[2].get("all", 0) if len(table) > 2 else 0
     
+    # Calculate Citation Velocity (citations in the most recent year)
+    citation_velocity = 0
+    if history:
+        # Get the most recent year's citations
+        current_year = datetime.now().year
+        # Find the most recent year in history
+        most_recent_year = max([int(h.get('year', 0)) for h in history if h.get('year', '').isdigit()], default=current_year)
+        # Get citations for that year
+        for h in history:
+            if str(h.get('year', '')) == str(most_recent_year):
+                citation_velocity = h.get('citations', 0)
+                break
+    
     output = {
         "lastUpdated": datetime.now().strftime("%B %Y"),
         "metrics": {
             "citations": citations,
             "hIndex": h_index,
             "i10Index": i10_index,
-            "publications": len(articles)
+            "publications": len(articles),
+            "citationVelocity": citation_velocity
         },
         "citationsByYear": history,
         "individualPublications": individual_pubs
