@@ -87,8 +87,8 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
         RADAR: 'dashboard-radar',
         LINE: 'dashboard-timeline',
         MAP: 'dashboard-impact-map',
-        COLLAB: 'dashboard-collab-network', // New
-        FOOTPRINT: 'dashboard-footprint-map', // New
+        COLLAB: 'dashboard-collab-network',
+        FOOTPRINT: 'dashboard-footprint-map',
         METRICS: {
             FOCUS: 'dash-metric-focus', TREND: 'dash-metric-trend',
             CITES: 'dash-metric-cites', HINDEX: 'dash-metric-hindex'
@@ -96,7 +96,7 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
         LISTS: { EIGEN: 'dash-list-eigen', BETWEEN: 'dash-list-between', DEGREE: 'dash-list-degree' }
     };
 
-    var radarChart, lineChart, graphChart, collabChart, footprintMap;
+    var radarChart, lineChart, graphChart, collabChart;
 
     // 2. DATA LOADING
     const safeFetch = (url) => fetch(url).then(r => r.ok ? r.json() : null).catch(e => null);
@@ -113,16 +113,14 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
             papers = Array.isArray(papersData) ? papersData : (papersData.individualPublications || []);
         }
 
-        // --- DASHBOARD METRICS ---
         processMetrics(papers, scholarData);
 
-        // --- RENDER CHARTS ---
-        renderRadar(papers);
+        renderRadar(papers); // Placeholder call
         if(scholarData && scholarData.citationsByYear) renderLine(scholarData.citationsByYear);
         renderWorkingMap(papers); 
         calculateAllMetrics(papers);
-        renderCollabNetwork(papers); // New Function
-        renderFootprintMap();        // New Function
+        renderCollabNetwork(papers);
+        renderFootprintMap();
 
     }).catch(err => console.error("Dashboard Error:", err));
 
@@ -164,7 +162,6 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
             updateText(IDS.METRICS.HINDEX, scholarData.metrics.hIndex || 0);
         }
         
-        // Pass counts to radar
         renderRadarChart(counts); 
     }
 
@@ -177,17 +174,17 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
         let max = Math.max(...data.map(d => d.value)) || 1;
         let isDark = document.body.classList.contains('dark');
         radarChart.setOption({
+            tooltip: { trigger: 'item' },
             radar: { indicator: data.map(d => ({ name: d.name, max: max + 2 })), shape: 'circle', splitArea: { show: false }, axisName: { color: isDark ? '#aaa' : '#333' } },
             series: [{ type: 'radar', data: [{ value: data.map(d => d.value), itemStyle: { color: isDark ? '#00ff41' : '#d93025' }, areaStyle: { opacity: 0.2 } }] }]
         });
     }
     
-    // Alias to keep existing calls working if name changed
-    function renderRadar(papers) { /* Handled in processMetrics mostly, but structure kept for safety */ }
+    function renderRadar(papers) { }
 
 
     // ========================================================================
-    // LOGIC: IMPACT MAP (Row 2 Left)
+    // LOGIC: IMPACT MAP
     // ========================================================================
     function renderWorkingMap(papers) {
         var dom = document.getElementById(IDS.MAP);
@@ -268,7 +265,7 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
 
 
     // ========================================================================
-    // LOGIC: COLLABORATION NETWORK (Row 3 Left) - Ported from research_network.html
+    // LOGIC: COLLABORATION NETWORK
     // ========================================================================
     function renderCollabNetwork(papers) {
         var dom = document.getElementById(IDS.COLLAB);
@@ -330,8 +327,7 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
                 name: name,
                 value: count,
                 symbolSize: isMe ? 60 : Math.max(20, Math.min(50, count * 8)),
-                itemStyle: { color: isMe ? '#ffffff' : null }, // Color set dynamically later
-                // Pin "Me"
+                itemStyle: { color: isMe ? '#ffffff' : null },
                 fixed: isMe,
                 x: isMe ? dom.clientWidth / 2 : null,
                 y: isMe ? dom.clientHeight / 2 : null
@@ -346,7 +342,6 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
             };
         });
 
-        // Color Helper
         function getCollabColor(val, max, isDark) {
             var ratio = Math.min(Math.max((val - 1) / (max - 1 || 1), 0), 1);
             var hue = (1 - ratio) * 120;
@@ -354,8 +349,6 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
         }
 
         let isDark = document.body.classList.contains('dark');
-        
-        // Apply Colors
         nodes.forEach(n => {
             if(n.id === myName) {
                 n.itemStyle = { color: isDark ? '#fff' : '#000', borderColor: isDark?'#000':'#fff', borderWidth: 2 };
@@ -385,13 +378,12 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
 
 
     // ========================================================================
-    // LOGIC: RESEARCH FOOTPRINT MAP (Row 3 Right) - Ported from impact_map.html
+    // LOGIC: FOOTPRINT MAP
     // ========================================================================
     function renderFootprintMap() {
         var container = document.getElementById(IDS.FOOTPRINT);
         if(!container) return;
         
-        // Initialize Map
         var map = L.map(IDS.FOOTPRINT).setView([30, -20], 2);
 
         var lightTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; OpenStreetMap &copy; CARTO', subdomains: 'abcd', maxZoom: 18 });
@@ -399,7 +391,6 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
 
         if (document.body.classList.contains('dark')) { darkTiles.addTo(map); } else { lightTiles.addTo(map); }
 
-        // Icons
         var createIcon = (color) => L.divIcon({
             className: 'custom-marker',
             html: `<div style="width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 4px rgba(0,0,0,0.3);background:${color};"></div>`,
@@ -410,7 +401,6 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
         var collabIcon = createIcon('#00bfff');
         var instIcon = createIcon('#ff6b35');
 
-        // Hugo Data Injection (This string replacement happens server-side by Hugo)
         var points = [
             {{ range $.Site.Data.impact_map }}
             { "title": "{{ .title }}", "lat": {{ .lat }}, "lng": {{ .lng }}, "location": "{{ .location }}", "desc": "{{ .description }}", "cat": "{{ .category }}" },
@@ -421,12 +411,10 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
             var icon = confIcon;
             if(point.cat === 'Collaboration') icon = collabIcon;
             if(point.cat === 'Institution') icon = instIcon;
-            
             var popup = `<div><strong>${point.title}</strong><br><span style="font-size:0.8em">${point.location}</span><br><span style="font-size:0.8em;opacity:0.7">${point.cat}</span></div>`;
             L.marker([point.lat, point.lng], {icon: icon}).addTo(map).bindPopup(popup);
         });
 
-        // Theme Listener
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((m) => {
                 if (m.attributeName === 'class') {
@@ -437,13 +425,12 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
         });
         observer.observe(document.body, { attributes: true });
         
-        // Fix Leaflet sizing inside Grid
         setTimeout(() => map.invalidateSize(), 500);
         window.addEventListener('resize', () => map.invalidateSize());
     }
 
 
-    // --- HELPERS (Line, Radar, Text) ---
+    // --- HELPERS (Line, Text) ---
     function renderLine(history) {
         var dom = document.getElementById(IDS.LINE);
         if(!dom || !history) return;
@@ -451,6 +438,7 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
         lineChart = echarts.init(dom);
         let isDark = document.body.classList.contains('dark');
         lineChart.setOption({
+            tooltip: { trigger: 'axis', formatter: '{b}: {c} Citations' },
             grid: { top: 10, right: 10, bottom: 20, left: 30, containLabel: true },
             xAxis: { type: 'category', data: history.map(d => d.year), axisLine: { show: false }, axisLabel: { color: isDark ? '#888' : '#666', fontSize: 9 } },
             yAxis: { type: 'value', splitLine: { show: false }, axisLabel: { color: isDark ? '#888' : '#666', fontSize: 9 } },
