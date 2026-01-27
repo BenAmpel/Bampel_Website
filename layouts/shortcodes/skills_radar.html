@@ -1,38 +1,63 @@
-{{/* Research Intelligence Dashboard - Usage: {{< skills_radar >}} */}}
+{{/* Research Intelligence Dashboard - Safe Injection Method */}}
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 
-<div id="research-dashboard" style="display: flex; flex-wrap: wrap; align-items: center; gap: 20px; background: var(--card-bg, rgba(255,255,255,0.02)); border: 1px solid var(--card-border, #eee); border-radius: 12px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
-    
-    <div id="skills-radar" style="flex: 1 1 400px; height: 400px; min-width: 300px;"></div>
-
-    <div id="skills-insights" style="flex: 1 1 250px; padding: 10px;">
-        <h4 style="margin-top: 0; font-size: 1.1rem; color: var(--text-muted, #888); text-transform: uppercase; letter-spacing: 1px;">Research Insights</h4>
-        
-        <div style="margin-bottom: 25px;">
-            <div style="font-size: 2rem; font-weight: 800; color: var(--primary, #d93025);" id="insight-focus">...</div>
-            <div style="font-size: 0.9rem; color: var(--text-muted, #666);">All-Time Primary Focus</div>
-        </div>
-
-        <div style="margin-bottom: 25px;">
-            <div style="font-size: 2rem; font-weight: 800; color: var(--secondary, #1a0dab);" id="insight-trend">...</div>
-            <div style="font-size: 0.9rem; color: var(--text-muted, #666);">Trending (2024-2026)</div>
-        </div>
-
-        <div>
-            <div style="font-size: 2rem; font-weight: 800; color: var(--accent, #9c27b0);" id="insight-velocity">0</div>
-            <div style="font-size: 0.9rem; color: var(--text-muted, #666);">Papers in Last 3 Years</div>
-        </div>
-    </div>
-</div>
+<div id="dashboard-root" style="min-height: 450px;"></div>
 
 <script type="text/javascript">
 (function() {
+    var root = document.getElementById('dashboard-root');
+
+    // --- 1. CONSTRUCT HTML (Bypasses Hugo) ---
+    function renderLayout() {
+        var isDark = document.body.classList.contains('dark');
+        // Theme Colors
+        var bg = isDark ? 'rgba(255,255,255,0.02)' : '#ffffff';
+        var border = isDark ? '#333' : '#eee';
+        var muted = isDark ? '#888' : '#888';
+        var text = isDark ? '#aaa' : '#666';
+        var shadow = isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.05)';
+
+        // Highlight Colors
+        var cFocus = isDark ? '#00ff41' : '#d93025'; // Green/Red
+        var cTrend = isDark ? '#00e5ff' : '#1a0dab'; // Cyan/Blue
+        var cVel = isDark ? '#e040fb' : '#9c27b0';   // Purple
+
+        return `
+        <div id="research-dashboard" style="display: flex; flex-wrap: wrap; align-items: center; gap: 20px; background: ${bg}; border: 1px solid ${border}; border-radius: 12px; padding: 20px; box-shadow: 0 4px 20px ${shadow}; margin: 20px 0;">
+            
+            <div id="skills-radar" style="flex: 1 1 400px; height: 400px; min-width: 300px;"></div>
+
+            <div id="skills-insights" style="flex: 1 1 250px; padding: 10px;">
+                <h4 style="margin-top: 0; font-size: 1.1rem; color: ${muted}; text-transform: uppercase; letter-spacing: 1px;">Research Insights</h4>
+                
+                <div style="margin-bottom: 25px;">
+                    <div style="font-size: 2rem; font-weight: 800; color: ${cFocus};" id="insight-focus">...</div>
+                    <div style="font-size: 0.9rem; color: ${text};">Primary Focus</div>
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                    <div style="font-size: 2rem; font-weight: 800; color: ${cTrend};" id="insight-trend">...</div>
+                    <div style="font-size: 0.9rem; color: ${text};">Trending Now</div>
+                </div>
+
+                <div>
+                    <div style="font-size: 2rem; font-weight: 800; color: ${cVel};" id="insight-velocity">0</div>
+                    <div style="font-size: 0.9rem; color: ${text};">Recent Papers (3 Yrs)</div>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    // --- 2. INJECT LAYOUT ---
+    root.innerHTML = renderLayout();
+    
+    // --- 3. INIT ECHARTS ---
     var dom = document.getElementById('skills-radar');
     var myChart = echarts.init(dom);
 
-    // --- 1. TAXONOMY (Keywords to Skills) ---
+    // --- 4. TAXONOMY ---
     const taxonomy = {
-        'AI & Deep Learning': ['Deep Learning', 'Neural', 'Transfer Learning', 'Embedding', 'Machine Learning', 'Artificial Intelligence'],
+        'AI / Deep Learning': ['Deep Learning', 'Neural', 'Transfer Learning', 'Embedding', 'Machine Learning', 'Artificial Intelligence', 'Adversarial'],
         'Cybersecurity':      ['Cyber', 'Vulnerability', 'Exploit', 'Attack', 'Threat', 'Security', 'Malicious', 'Ransomware', 'Phishing'],
         'LLMs & NLP':         ['Large Language Model', 'LLM', 'Text Analytics', 'NLP', 'Transformer', 'Bert', 'GPT', 'Language Models'],
         'Hacker Communities': ['Hacker', 'Forum', 'Dark Web', 'Paste', 'Community', 'Marketplace', 'Underground'],
@@ -40,62 +65,30 @@
         'Behavioral':         ['Nudging', 'Bias', 'Social', 'Human', 'Behavior', 'Psychology', 'Decision', 'Trust']
     };
 
-    // Theme Variables
-    function getThemeVars() {
-        const isDark = document.body.classList.contains('dark');
-        return {
-            primary: isDark ? '#00ff41' : '#d93025',
-            secondary: isDark ? '#00e5ff' : '#1a0dab',
-            accent: isDark ? '#e040fb' : '#9c27b0',
-            text: isDark ? '#eee' : '#333',
-            muted: isDark ? '#aaa' : '#666',
-            bg: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
-            border: isDark ? '#333' : '#eee'
-        };
-    }
-
-    // Update CSS Variables dynamically
-    function updateCSS() {
-        const t = getThemeVars();
-        const root = document.getElementById('research-dashboard');
-        if(root){
-            root.style.setProperty('--primary', t.primary);
-            root.style.setProperty('--secondary', t.secondary);
-            root.style.setProperty('--accent', t.accent);
-            root.style.setProperty('--text-muted', t.muted);
-            root.style.setProperty('--card-bg', t.bg);
-            root.style.setProperty('--card-border', t.border);
-        }
-    }
-
-    // --- 2. FETCH & ANALYZE ---
+    // --- 5. FETCH & PROCESS ---
     fetch('/data/publications.json')
         .then(res => res.json())
         .then(papers => {
             if(!Array.isArray(papers)) return;
-            
-            // A. Calculate All-Time Scores
+
+            // A. All-Time Scores
             let allTimeCounts = countKeywords(papers);
             let dataset = normalizeScores(allTimeCounts);
             
-            // B. Calculate "Trending" (Recent Papers Only)
+            // B. Trending (Recent)
             let currentYear = new Date().getFullYear();
-            let recentPapers = papers.filter(p => p.year >= (currentYear - 2)); // Last 3 years
+            let recentPapers = papers.filter(p => p.year >= (currentYear - 2)); 
             let recentCounts = countKeywords(recentPapers);
             
-            // C. Populate Insights Panel
+            // C. Populate UI
             populateInsights(allTimeCounts, recentCounts, recentPapers.length);
-            
-            // D. Render Chart
             renderChart(dataset);
         })
         .catch(err => console.error("Radar Error:", err));
 
-    // --- HELPER: Count Keywords ---
     function countKeywords(paperList) {
         let counts = {};
         Object.keys(taxonomy).forEach(k => counts[k] = 0);
-
         paperList.forEach(p => {
             let text = (p.title || "").toLowerCase();
             Object.keys(taxonomy).forEach(category => {
@@ -106,7 +99,6 @@
         return counts;
     }
 
-    // --- HELPER: Normalize for Chart ---
     function normalizeScores(counts) {
         let maxVal = Math.max(...Object.values(counts)) || 1;
         return Object.keys(taxonomy).map(key => ({
@@ -116,24 +108,22 @@
         }));
     }
 
-    // --- HELPER: Populate HTML Text ---
     function populateInsights(allTime, recent, recentCount) {
-        // 1. Primary Focus (Highest All-Time)
-        let topSkill = Object.entries(allTime).reduce((a, b) => a[1] > b[1] ? a : b)[0];
+        // Find best category (sort descending)
+        let topSkill = Object.entries(allTime).sort((a,b) => b[1] - a[1])[0][0];
+        let trendSkill = Object.entries(recent).sort((a,b) => b[1] - a[1])[0][0];
+        
         document.getElementById('insight-focus').innerText = topSkill;
-
-        // 2. Trending (Highest Recent)
-        let trendSkill = Object.entries(recent).reduce((a, b) => a[1] > b[1] ? a : b)[0];
         document.getElementById('insight-trend').innerText = trendSkill;
-
-        // 3. Velocity
         document.getElementById('insight-velocity').innerText = recentCount;
     }
 
-    // --- 3. RENDER CHART ---
     function renderChart(data) {
         function getOption(isDark) {
-            let t = getThemeVars();
+            var primary = isDark ? '#00ff41' : '#d93025';
+            var text = isDark ? '#eee' : '#333';
+            var split = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+            
             return {
                 backgroundColor: 'transparent',
                 radar: {
@@ -141,8 +131,8 @@
                     shape: 'circle',
                     splitNumber: 4,
                     radius: '65%',
-                    axisName: { color: t.text, fontWeight: 'bold', fontSize: 11 },
-                    splitLine: { lineStyle: { color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' } },
+                    axisName: { color: text, fontWeight: 'bold', fontSize: 11 },
+                    splitLine: { lineStyle: { color: split } },
                     splitArea: { show: false },
                     axisLine: { lineStyle: { color: isDark ? '#444' : '#ccc' } }
                 },
@@ -150,15 +140,15 @@
                     type: 'radar',
                     data: [{
                         value: data.map(d => d.value),
-                        name: 'Expertise',
+                        name: 'Profile',
                         symbol: 'circle',
                         symbolSize: 6,
-                        itemStyle: { color: t.primary },
-                        lineStyle: { width: 3, color: t.primary },
+                        itemStyle: { color: primary },
+                        lineStyle: { width: 3, color: primary },
                         areaStyle: { 
                             color: new echarts.graphic.RadialGradient(0.5, 0.5, 1, [
-                                { offset: 0, color: t.primary + '10' }, // Transparent center
-                                { offset: 1, color: t.primary + '60' }  // Opaque edge
+                                { offset: 0, color: primary + '10' }, 
+                                { offset: 1, color: primary + '60' }
                             ])
                         }
                     }]
@@ -166,18 +156,30 @@
             };
         }
 
-        // Initialize
-        updateCSS();
         let isDark = document.body.classList.contains('dark');
         myChart.setOption(getOption(isDark));
-
-        // Listeners
         window.addEventListener('resize', () => myChart.resize());
+
+        // Theme Toggle Listener
         const btn = document.querySelector('.js-theme-toggle');
         if(btn){
             btn.addEventListener('click', () => {
                 setTimeout(() => {
-                    updateCSS(); // Update text colors
+                    // Re-inject HTML to update CSS variables/colors
+                    var oldFocus = document.getElementById('insight-focus').innerText;
+                    var oldTrend = document.getElementById('insight-trend').innerText;
+                    var oldVel = document.getElementById('insight-velocity').innerText;
+
+                    root.innerHTML = renderLayout(); // Re-render HTML container
+                    
+                    // Restore values
+                    document.getElementById('insight-focus').innerText = oldFocus;
+                    document.getElementById('insight-trend').innerText = oldTrend;
+                    document.getElementById('insight-velocity').innerText = oldVel;
+
+                    // Re-init chart in new container
+                    dom = document.getElementById('skills-radar');
+                    myChart = echarts.init(dom);
                     let isDarkNow = document.body.classList.contains('dark');
                     myChart.setOption(getOption(isDarkNow));
                 }, 100);
