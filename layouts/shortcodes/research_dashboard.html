@@ -1,14 +1,34 @@
-{{/* Research Command Center - Restored Manuscript Impact Network */}}
+{{/* Research Command Center - ID Collision Fixed */}}
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 
 <div id="dashboard-root" style="min-height: 550px; margin: 30px 0;"></div>
 
 <script type="text/javascript">
 (function() {
-    var root = document.getElementById('dashboard-root');
+    // Unique namespaces to prevent conflicts with other charts
+    const IDS = {
+        ROOT: 'dashboard-root',
+        RADAR: 'dash-radar-chart',
+        LINE: 'dash-line-chart',
+        MAP: 'dash-impact-map', // Renamed from 'knowledge-graph' to avoid conflicts
+        METRICS: {
+            FOCUS: 'dash-metric-focus',
+            TREND: 'dash-metric-trend',
+            VELOCITY: 'dash-metric-velocity',
+            CITES: 'dash-metric-cites',
+            HINDEX: 'dash-metric-hindex'
+        },
+        NET: {
+            DENSITY: 'dash-net-density',
+            LCC: 'dash-net-lcc',
+            CLUSTERS: 'dash-net-clusters'
+        }
+    };
+
+    var root = document.getElementById(IDS.ROOT);
     var radarChart, lineChart, graphChart;
 
-    // --- 1. LAYOUT GENERATOR (Fixed Height Logic) ---
+    // --- 1. LAYOUT GENERATOR ---
     function renderLayout() {
         var isDark = document.body.classList.contains('dark');
         var bg = isDark ? 'rgba(255,255,255,0.02)' : '#ffffff';
@@ -22,31 +42,31 @@
         var c2 = isDark ? '#00e5ff' : '#1a0dab'; 
         var c3 = isDark ? '#e040fb' : '#9c27b0'; 
 
-        // FIX 1: Changed grid-template-rows to 'auto 500px' to guarantee map height
+        // Row 2 is forced to 500px height to prevent collapse
         return `
         <div id="research-card" style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto 500px; gap: 0; background: ${bg}; border: 1px solid ${border}; border-radius: 12px; box-shadow: 0 4px 20px ${shadow}; overflow: hidden; margin-bottom: 30px;">
             
             <div style="grid-column: 1; grid-row: 1; padding: 20px; display: flex; flex-direction: column; border-right: 1px solid ${border}; border-bottom: 1px solid ${border};">
                 <h4 style="margin: 0 0 10px; font-size: 0.9rem; color: ${muted}; text-transform: uppercase; letter-spacing: 1px; text-align: center;">Research Profile</h4>
-                <div id="dash-radar" style="width: 100%; height: 300px;"></div>
+                <div id="${IDS.RADAR}" style="width: 100%; height: 300px;"></div>
             </div>
 
             <div style="grid-column: 2; grid-row: 1; padding: 25px; border-bottom: 1px solid ${border}; display: flex; flex-direction: column;">
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                    <div><div style="font-size: 0.8rem; color: ${muted};">Primary Focus</div><div style="font-size: 1.1rem; font-weight: 800; color: ${c1};" id="metric-focus">...</div></div>
-                    <div><div style="font-size: 0.8rem; color: ${muted};">Trending</div><div style="font-size: 1.1rem; font-weight: 800; color: ${c2};" id="metric-trend">...</div></div>
-                    <div><div style="font-size: 0.8rem; color: ${muted};">Velocity</div><div style="font-size: 1.1rem; font-weight: 800; color: ${c2};" id="metric-velocity">-</div></div>
-                    <div><div style="font-size: 0.8rem; color: ${muted};">Total Citations</div><div style="font-size: 1.5rem; font-weight: 800; color: ${c3};" id="metric-cites">0</div></div>
-                    <div><div style="font-size: 0.8rem; color: ${muted};">h-index</div><div style="font-size: 1.5rem; font-weight: 800; color: ${text};" id="metric-hindex">0</div></div>
+                    <div><div style="font-size: 0.8rem; color: ${muted};">Primary Focus</div><div style="font-size: 1.1rem; font-weight: 800; color: ${c1};" id="${IDS.METRICS.FOCUS}">...</div></div>
+                    <div><div style="font-size: 0.8rem; color: ${muted};">Trending</div><div style="font-size: 1.1rem; font-weight: 800; color: ${c2};" id="${IDS.METRICS.TREND}">...</div></div>
+                    <div><div style="font-size: 0.8rem; color: ${muted};">Velocity</div><div style="font-size: 1.1rem; font-weight: 800; color: ${c2};" id="${IDS.METRICS.VELOCITY}">-</div></div>
+                    <div><div style="font-size: 0.8rem; color: ${muted};">Total Citations</div><div style="font-size: 1.5rem; font-weight: 800; color: ${c3};" id="${IDS.METRICS.CITES}">0</div></div>
+                    <div><div style="font-size: 0.8rem; color: ${muted};">h-index</div><div style="font-size: 1.5rem; font-weight: 800; color: ${text};" id="${IDS.METRICS.HINDEX}">0</div></div>
                 </div>
                 <div style="flex-grow: 1; border-top: 1px solid ${border}; padding-top: 15px;">
-                    <div id="dash-line" style="width: 100%; height: 180px;"></div>
+                    <div id="${IDS.LINE}" style="width: 100%; height: 180px;"></div>
                 </div>
             </div>
 
             <div style="grid-column: 1; grid-row: 2; padding: 0; border-right: 1px solid ${border}; position: relative; height: 100%;">
                 <h4 style="position:absolute; top:20px; left:20px; margin: 0; font-size: 0.9rem; color: ${muted}; text-transform: uppercase; z-index:10; pointer-events:none;">Impact Map</h4>
-                <div id="knowledge-graph" style="width: 100%; height: 100%;"></div>
+                <div id="${IDS.MAP}" style="width: 100%; height: 100%;"></div>
             </div>
 
             <div style="grid-column: 2; grid-row: 2; padding: 25px; display: flex; flex-direction: column; height: 100%;">
@@ -55,19 +75,19 @@
                 <div style="display: flex; gap: 20px; margin-bottom: 20px;">
                     <div style="flex: 1; background: ${isDark ? 'rgba(255,255,255,0.05)' : '#f8f9fa'}; padding: 15px; border-radius: 8px;">
                         <div style="font-size: 0.75rem; color: ${muted}; text-transform: uppercase;">Density</div>
-                        <div style="font-size: 1.4rem; font-weight: 800; color: ${text};" id="net-density">0.00</div>
+                        <div style="font-size: 1.4rem; font-weight: 800; color: ${text};" id="${IDS.NET.DENSITY}">0.00</div>
                         <div style="font-size: 0.7rem; opacity: 0.7; margin-top: 5px;">Network interconnection</div>
                     </div>
                     <div style="flex: 1; background: ${isDark ? 'rgba(255,255,255,0.05)' : '#f8f9fa'}; padding: 15px; border-radius: 8px;">
                         <div style="font-size: 0.75rem; color: ${muted}; text-transform: uppercase;">Network Cohesion</div>
-                        <div style="font-size: 1.4rem; font-weight: 800; color: ${highlight};" id="net-lcc">0%</div>
+                        <div style="font-size: 1.4rem; font-weight: 800; color: ${highlight};" id="${IDS.NET.LCC}">0%</div>
                         <div style="font-size: 0.7rem; opacity: 0.7; margin-top: 5px;">Largest component size</div>
                     </div>
                 </div>
 
                 <div>
                     <div style="font-size: 0.75rem; color: ${muted}; text-transform: uppercase; margin-bottom: 8px;">Primary Research Clusters</div>
-                    <div id="net-clusters" style="font-size: 0.85rem; line-height: 1.6;">
+                    <div id="${IDS.NET.CLUSTERS}" style="font-size: 0.85rem; line-height: 1.6;">
                         <span style="opacity: 0.5;">Analyzing network...</span>
                     </div>
                 </div>
@@ -75,63 +95,58 @@
         </div>`;
     }
 
-    // --- 2. INIT LAYOUT ---
-    root.innerHTML = renderLayout();
-    
-    // --- 3. DATA FETCHING ---
-    const safeFetch = (url) => fetch(url).then(r => r.ok ? r.json() : null).catch(e => null);
-
-    Promise.all([
-        safeFetch('/data/publications.json'),
-        safeFetch('/data/scholar-metrics.json')
-    ]).then(([papersData, scholarData]) => {
+    // --- 2. INIT & FETCH ---
+    if(root) {
+        root.innerHTML = renderLayout();
         
-        // --- DATA NORMALIZATION (FIX 3: Prioritize Scholar Data) ---
-        let papers = [];
+        const safeFetch = (url) => fetch(url).then(r => r.ok ? r.json() : null).catch(e => null);
 
-        // We PREFER scholarData.individualPublications because it contains 'citations'
-        // publications.json is cleaner but lacks metrics needed for node sizing
-        if (scholarData && scholarData.individualPublications) {
-            papers = scholarData.individualPublications;
-        } 
-        else if (papersData) {
-            // Fallback (nodes will be small/equal size)
-            papers = Array.isArray(papersData) ? papersData : (papersData.individualPublications || []);
-        }
-
-        // Render Charts
-        if (scholarData) {
-            renderRadar(scholarData, papers);
-            if (scholarData.citationsByYear) renderLine(scholarData.citationsByYear);
+        Promise.all([
+            safeFetch('/data/publications.json'),
+            safeFetch('/data/scholar-metrics.json')
+        ]).then(([papersData, scholarData]) => {
             
-            updateText('metric-hindex', scholarData.metrics.hIndex || 0);
-            updateText('metric-cites', scholarData.metrics.citations || 0);
-            
-            let interests = scholarData.metrics.interests || ['AI', 'Cybersecurity'];
-            updateText('metric-focus', interests[0] || "Cybersecurity");
-            updateText('metric-trend', interests[1] || "AI");
-            updateText('metric-velocity', scholarData.metrics.citationVelocity || "-");
-        }
+            // Priority: Use Scholar Data (has citations), fallback to manual list
+            let papers = [];
+            if (scholarData && scholarData.individualPublications) {
+                papers = scholarData.individualPublications;
+            } else if (papersData) {
+                papers = Array.isArray(papersData) ? papersData : (papersData.individualPublications || []);
+            }
 
-        // Render Manuscript Network (Impact Map)
-        if (papers.length > 0) {
+            if (scholarData) {
+                renderRadar(scholarData, papers);
+                if (scholarData.citationsByYear) renderLine(scholarData.citationsByYear);
+                
+                updateText(IDS.METRICS.HINDEX, scholarData.metrics.hIndex || 0);
+                updateText(IDS.METRICS.CITES, scholarData.metrics.citations || 0);
+                
+                let interests = scholarData.metrics.interests || ['AI', 'Cybersecurity'];
+                updateText(IDS.METRICS.FOCUS, interests[0] || "Cybersecurity");
+                updateText(IDS.METRICS.TREND, interests[1] || "AI");
+                updateText(IDS.METRICS.VELOCITY, scholarData.metrics.citationVelocity || "-");
+            }
+
+            // Always attempt to render map, even if empty
             renderMap(papers);
-        } else {
-            document.getElementById('knowledge-graph').innerHTML = '<div style="padding:40px; text-align:center; opacity:0.5">No publication data found.</div>';
-        }
+        });
+    }
 
-    });
-
-    // --- 4. RENDER MANUSCRIPT NETWORK ---
+    // --- 3. RENDER MAP (IMPACT NETWORK) ---
     function renderMap(papers) {
-        var dom = document.getElementById('knowledge-graph');
-        if (!dom) return;
+        var dom = document.getElementById(IDS.MAP);
+        if (!dom) { console.error("Map container not found:", IDS.MAP); return; }
         
         if (graphChart) graphChart.dispose();
         graphChart = echarts.init(dom);
         var isDark = document.body.classList.contains('dark');
 
-        // --- A. PREPARE DATA ---
+        if (!papers || papers.length === 0) {
+            // Show placeholder if no data
+            dom.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100%;opacity:0.5;">No network data available</div>';
+            return;
+        }
+
         const stopWords = new Set(["the", "and", "of", "in", "on", "for", "with", "a", "an", "to", "at", "by", "from", "up", "about", "into", "over", "after", "is", "are", "was", "were", "be", "been", "being", "have", "has", "had", "do", "does", "did", "can", "could", "should", "would", "will", "study", "analysis", "using", "based", "approach", "review", "case", "system", "towards", "via", "framework", "model", "data", "detection"]);
 
         const getTokens = (str) => {
@@ -144,9 +159,8 @@
             return authStr.toLowerCase().split(',').map(a => a.trim()).filter(a => a && !a.includes("ampel"));
         };
 
-        // Create Nodes
         var nodes = papers.map((p, idx) => {
-            let val = p.citations || 0; // FIX 4: Safety default
+            let val = p.citations || 0;
             return {
                 id: idx.toString(),
                 name: p.title,
@@ -155,20 +169,18 @@
                 value: val,
                 tokens: getTokens(p.title),
                 authors: getAuthors(p),
-                // FIX 5: Safer Math.log to prevent NaN if citations are missing
+                // Safe log calculation
                 symbolSize: Math.max(5, Math.log(val + 2) * 8),
                 itemStyle: { color: isDark ? '#00e5ff' : '#1a0dab' },
                 label: { show: (val > 10) }
             };
         });
 
-        // Create Edges
         var links = [];
         var adjList = new Map();
 
         for (let i = 0; i < nodes.length; i++) {
             if(!adjList.has(i)) adjList.set(i, []);
-            
             for (let j = i + 1; j < nodes.length; j++) {
                 let nodeA = nodes[i];
                 let nodeB = nodes[j];
@@ -202,7 +214,7 @@
             }
         }
 
-        // --- B. NETWORK STATS ---
+        // --- Stats ---
         let n = nodes.length;
         let e = links.length;
         let density = (n > 1) ? (2 * e) / (n * (n - 1)) : 0;
@@ -227,8 +239,8 @@
         }
         let lccPct = (n>0) ? Math.round((maxComp/n)*100) : 0;
 
-        updateText('net-density', density.toFixed(3));
-        updateText('net-lcc', lccPct + "%");
+        updateText(IDS.NET.DENSITY, density.toFixed(3));
+        updateText(IDS.NET.LCC, lccPct + "%");
         
         let hubs = [...nodes].sort((a,b) => (adjList.get(parseInt(b.id))||[]).length - (adjList.get(parseInt(a.id))||[]).length).slice(0,3);
         let clusterHtml = hubs.map((h, i) => {
@@ -239,10 +251,10 @@
                 <span style="font-size:0.75em; opacity:0.7;">Centered on "${safeName}"</span>
             </div>`;
         }).join('');
-        document.getElementById('net-clusters').innerHTML = clusterHtml;
+        
+        let clustEl = document.getElementById(IDS.NET.CLUSTERS);
+        if(clustEl) clustEl.innerHTML = clusterHtml;
 
-
-        // --- C. RENDER GRAPH ---
         var option = {
             tooltip: {
                 formatter: (p) => {
@@ -269,26 +281,23 @@
         graphChart.setOption(option);
     }
 
-    // --- 5. HELPERS ---
+    // --- Helpers ---
     function updateText(id, val) {
         const el = document.getElementById(id);
         if (el) el.innerText = val;
     }
 
     function renderRadar(data, papers) {
-        var dom = document.getElementById('dash-radar');
+        var dom = document.getElementById(IDS.RADAR);
         if(!dom) return;
         if(radarChart) radarChart.dispose();
         radarChart = echarts.init(dom);
         
         let cats = (data.metrics && data.metrics.interests) ? data.metrics.interests : ['AI', 'Cyber'];
-        // Fix: Case insensitive match
         let seriesData = cats.map(c => papers.filter(p => (p.title||"").toLowerCase().includes(c.toLowerCase())).length || 0);
-        
-        // Normalize for visual balance
         let maxVal = Math.max(...seriesData) || 1;
-        
         let isDark = document.body.classList.contains('dark');
+        
         radarChart.setOption({
             radar: { 
                 indicator: cats.map((c,i) => ({name:c, max: maxVal + 1})), 
@@ -300,11 +309,12 @@
     }
 
     function renderLine(history) {
-        var dom = document.getElementById('dash-line');
+        var dom = document.getElementById(IDS.LINE);
         if(!dom) return;
         if(lineChart) lineChart.dispose();
         lineChart = echarts.init(dom);
         let isDark = document.body.classList.contains('dark');
+        
         lineChart.setOption({
             grid: {top:10, bottom:20, right:10, left:30},
             xAxis: {type:'category', data: history.map(h=>h.year), axisLine:{show:false}, axisLabel:{color: isDark ? '#aaa' : '#666'}},
