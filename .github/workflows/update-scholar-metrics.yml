@@ -25,7 +25,7 @@ jobs:
       
       - name: Install dependencies
         run: |
-          pip install google-search-results google-analytics-data google-auth networkx
+          pip install google-search-results google-analytics-data google-auth networkx matplotlib
       
       - name: Generate Network Analysis
         run: python scripts/generate_network.py
