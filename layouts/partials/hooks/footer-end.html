@@ -1,0 +1,22 @@
+<div class="visitor-stats" style="text-align: center; margin-top: 20px; font-size: 0.85rem; opacity: 0.8;">
+  <span id="visitor-count">Loading stats...</span>
+  <div id="visitor-locations" style="font-size: 0.75rem; margin-top: 5px;"></div>
+</div>
+
+<script>
+  fetch('/data/visitor_stats.json')
+    .then(response => response.json())
+    .then(data => {
+      // 1. Show Monthly Count
+      const lastMonth = data.monthly_trend[data.monthly_trend.length - 1];
+      const monthName = lastMonth.month.substring(4,6) + "/" + lastMonth.month.substring(0,4);
+      document.getElementById('visitor-count').innerHTML = 
+        `<strong>${lastMonth.visitors}</strong> unique visitors in ${monthName}`;
+
+      // 2. Show Top Locations (e.g., "From: Atlanta, London, Berlin...")
+      const top3 = data.top_locations.slice(0, 3).map(l => l.city).join(", ");
+      document.getElementById('visitor-locations').innerText = 
+        `Top visits from: ${top3}, and more.`;
+    })
+    .catch(err => { console.log('Stats not loaded yet'); });
+</script>
