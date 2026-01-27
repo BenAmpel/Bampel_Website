@@ -69,13 +69,19 @@ def process_and_save(data):
     history = []
     graph_data = author.get("cited_by", {}).get("graph", [])
     
-    # Sort and format
-    graph_data.sort(key=lambda x: x['year'])
+    # Sort and format (safely handle missing year field)
+    if graph_data:
+        try:
+            graph_data.sort(key=lambda x: x.get('year', 0))
+        except (TypeError, KeyError):
+            pass  # If sorting fails, just use the data as-is
+    
     for point in graph_data:
-        history.append({
-            "year": str(point['year']),
-            "citations": point['citations']
-        })
+        if isinstance(point, dict) and 'year' in point:
+            history.append({
+                "year": str(point.get('year', '')),
+                "citations": point.get('citations', 0)
+            })
 
     # 2. Parse Top Publications
     individual_pubs = []
@@ -88,12 +94,20 @@ def process_and_save(data):
         })
 
     # 3. Construct Final JSON
+    # Safely extract metrics from table array
+    table = author.get("cited_by", {}).get("table", [])
+    
+    # Safely access table indices with defaults
+    citations = table[0].get("all", 0) if len(table) > 0 else 0
+    h_index = table[1].get("all", 0) if len(table) > 1 else 0
+    i10_index = table[2].get("all", 0) if len(table) > 2 else 0
+    
     output = {
         "lastUpdated": datetime.now().strftime("%B %Y"),
         "metrics": {
-            "citations": author.get("cited_by", {}).get("table", [{}])[0].get("all", 0),
-            "hIndex": author.get("cited_by", {}).get("table", [{}])[1].get("all", 0),
-            "i10Index": author.get("cited_by", {}).get("table", [{}])[2].get("all", 0),
+            "citations": citations,
+            "hIndex": h_index,
+            "i10Index": i10_index,
             "publications": len(articles)
         },
         "citationsByYear": history,
