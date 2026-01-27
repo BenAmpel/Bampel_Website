@@ -1,5 +1,5 @@
 {{/* Interactive Research Network - Usage: {{< research_network >}} */}}
-{{/* Automatically builds co-authorship network from all publications */}}
+{{/* Fetches publications.json and builds co-authorship network client-side */}}
 
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 
@@ -10,193 +10,167 @@
 <script type="text/javascript">
 (function() {
     var domID = "network-{{ $uniqueID }}";
-    
-    // -----------------------------------------------------------
-    // 1. AUTOMATICALLY SCRAPE DATA FROM YOUR SITE
-    // -----------------------------------------------------------
-    // We loop through ALL pages that have an 'authors' field.
-    // This creates a raw JSON list of every paper you have written.
-    var rawPapers = [
-        {{ range where .Site.RegularPages "Params.authors" "!=" nil }}
-        {
-            title: "{{ .Title | safeJS }}",
-            authors: {{ .Params.authors | jsonify }}
-        },
-        {{ end }}
-    ];
-    
-    // Your specific internal username to replace with your real name
-    var myInternalUsername = "admin"; 
-    var myRealName = "Benjamin Ampel";
+    var myName = "Benjamin Ampel"; // The center node
+
+    // Name Normalization (Ported from your Python script)
+    var nameMap = {
+        'B Ampel': 'Benjamin Ampel', 'BM Ampel': 'Benjamin Ampel', 'B. Ampel': 'Benjamin Ampel', 'admin': 'Benjamin Ampel',
+        'H Chen': 'Hsinchun Chen', 'H. Chen': 'Hsinchun Chen',
+        'S Samtani': 'Sagar Samtani', 'S. Samtani': 'Sagar Samtani',
+        'S Ullman': 'Steven Ullman', 'S. Ullman': 'Steven Ullman',
+        'H Zhu': 'Hongyi Zhu', 'H. Zhu': 'Hongyi Zhu',
+        'M Patton': 'Mark Patton', 'M. Patton': 'Mark Patton',
+        'B Lazarine': 'Ben Lazarine', 'B. Lazarine': 'Ben Lazarine',
+        'T Vahedi': 'Tala Vahedi', 'T. Vahedi': 'Tala Vahedi',
+        'K Otto': 'Kaeli Otto', 'K. Otto': 'Kaeli Otto',
+        'Y Gao': 'Yang Gao', 'Y. Gao': 'Yang Gao',
+        'J Hu': 'James Hu', 'J. Hu': 'James Hu',
+        'CH Yang': 'Chi-Heng Yang', 'JF Nunamaker Jr': 'Jay Nunamaker',
+        'C Marx': 'Carolin Marx', 'C Dacosta': 'Cade Dacosta',
+        'C Zhang': 'Chengjun Zhang', 'M Hashim': 'Matthew Hashim',
+        'M Wagner': 'Mason Wagner', 'RY Reyes': 'Raul Reyes',
+        'S Yang': 'Shanchieh Yang'
+    };
+
+    function normalize(name) {
+        return nameMap[name] || name;
+    }
 
     document.addEventListener('DOMContentLoaded', function() {
         var dom = document.getElementById(domID);
         if (!dom) return;
 
-        // -----------------------------------------------------------
-        // 2. PROCESS DATA (JavaScript)
-        // -----------------------------------------------------------
-        var nodeMap = new Map(); // Stores unique authors
-        var links = [];
-        
-        // Helper to normalize names (e.g., "admin" -> "Benjamin Ampel")
-        function getName(rawName) {
-            if (rawName === myInternalUsername) return myRealName;
-            return rawName;
-        }
+        var myChart = echarts.init(dom);
+        myChart.showLoading(); // Show loading spinner while fetching JSON
 
-        // A. Build Nodes and Links
-        rawPapers.forEach(function(paper) {
-            var authors = paper.authors.map(getName);
-            
-            // Register Nodes (Authors)
-            authors.forEach(function(author) {
-                if (!nodeMap.has(author)) {
-                    nodeMap.set(author, { 
-                        id: author, 
-                        name: author, 
-                        value: 1, // Number of papers (weight)
-                        category: author === myRealName ? 0 : 1 // 0=Me, 1=Others
-                    });
-                } else {
-                    // Increment paper count
-                    nodeMap.get(author).value++;
+        // 1. FETCH DATA DIRECTLY (Bypasses Hugo Templating)
+        fetch('/data/publications.json')
+            .then(response => response.json())
+            .then(data => {
+                myChart.hideLoading();
+                processData(data);
+            })
+            .catch(err => {
+                console.error("Failed to load publications:", err);
+                myChart.hideLoading();
+                dom.innerHTML = "<p style='text-align:center; padding-top:20px; color:red;'>Could not load network data.</p>";
+            });
+
+        function processData(papers) {
+            var nodeCounts = new Map();
+            var links = [];
+            var connectedPairs = new Set();
+
+            // A. Process Authors
+            papers.forEach(function(paper) {
+                if (!paper.authors) return;
+                
+                // Get normalized list of authors for this paper
+                var authors = paper.authors.map(normalize);
+                
+                // Add nodes
+                authors.forEach(auth => {
+                    nodeCounts.set(auth, (nodeCounts.get(auth) || 0) + 1);
+                });
+
+                // Add links (All-to-All within the paper)
+                for (let i = 0; i < authors.length; i++) {
+                    for (let j = i + 1; j < authors.length; j++) {
+                        let source = authors[i];
+                        let target = authors[j];
+                        
+                        // Avoid self-loops
+                        if (source === target) continue;
+
+                        // Ensure unique link ID (A-B is same as B-A)
+                        let pairId = [source, target].sort().join("-");
+                        if (!connectedPairs.has(pairId)) {
+                            links.push({ source: source, target: target });
+                            connectedPairs.add(pairId);
+                        }
+                    }
                 }
             });
 
-            // Register Links (Co-authorship)
-            // Connect every author to every other author in this paper
-            for (var i = 0; i < authors.length; i++) {
-                for (var j = i + 1; j < authors.length; j++) {
-                    links.push({
-                        source: authors[i],
-                        target: authors[j]
-                    });
-                }
-            }
-        });
+            // B. Format for ECharts
+            var nodes = Array.from(nodeCounts.entries()).map(([name, count]) => {
+                let isMe = (name === myName);
+                return {
+                    id: name,
+                    name: name,
+                    symbolSize: isMe ? 60 : Math.max(15, count * 8), // Size by frequency
+                    itemStyle: { color: isMe ? '#d93025' : '#1a0dab' }, // Red for you, Blue for others
+                    category: isMe ? 0 : 1,
+                    fixed: isMe,
+                    x: isMe ? dom.clientWidth / 2 : null,
+                    y: isMe ? dom.clientHeight / 2 : null,
+                    value: count,
+                    label: { show: count > 1 || isMe } // Only show labels for frequent collaborators
+                };
+            });
 
-        // Convert Map to Array for ECharts
-        var nodes = Array.from(nodeMap.values()).map(function(node) {
-            return {
-                id: node.id,
-                name: node.name,
-                // Size bubble based on number of papers (Min size 20, Max size 80)
-                symbolSize: Math.max(20, Math.min(80, node.value * 10)),
-                value: node.value,
-                category: node.category,
-                // Lock "You" to the center
-                fixed: node.id === myRealName,
-                x: node.id === myRealName ? dom.clientWidth / 2 : null,
-                y: node.id === myRealName ? dom.clientHeight / 2 : null,
-                label: {
-                    show: node.value > 1 || node.id === myRealName // Only label frequent collaborators
-                }
-            };
-        });
+            renderChart(nodes, links);
+        }
 
-        // -----------------------------------------------------------
-        // 3. SETUP ECHARTS
-        // -----------------------------------------------------------
-        var myChart = echarts.init(dom);
-        
-        // Simple Categories: Just "Me" and "Network"
-        var categories = [{ name: 'Me' }, { name: 'Network' }];
-        
-        function getOption(isDark) {
-            let bgColor = isDark ? '#000000' : '#fdfdfd';
-            let textColor = isDark ? '#00ff41' : '#333333';
-            let meColor = isDark ? '#00ff41' : '#d93025';     // Green (Cyber) or Red (Paper)
-            let otherColor = isDark ? '#00ffff' : '#1a0dab';  // Cyan (Cyber) or Blue (Paper)
-
-            return {
-                backgroundColor: bgColor,
-                tooltip: {
-                    formatter: function(params) {
-                        if (params.dataType === 'node') {
-                            return '<strong>' + params.name + '</strong><br>Co-authored ' + params.value + ' papers';
-                        }
-                    }
-                },
+        function renderChart(nodes, links) {
+            var option = {
+                tooltip: { formatter: '{b}: {c} Papers' },
                 series: [{
                     type: 'graph',
                     layout: 'force',
                     data: nodes,
                     links: links,
-                    categories: categories,
                     roam: true,
-                    label: { 
-                        position: 'right', 
-                        color: textColor 
-                    },
-                    // Define colors manually for simplicity
-                    itemStyle: {
-                        color: function(params) {
-                            return params.data.category === 0 ? meColor : otherColor;
-                        }
-                    },
-                    lineStyle: { 
-                        color: 'source', 
-                        curveness: 0.3, 
-                        opacity: 0.5 
-                    },
-                    force: { 
-                        repulsion: 300, 
-                        gravity: 0.1, 
-                        edgeLength: 80 
-                    }
+                    label: { position: 'right', color: 'inherit' },
+                    lineStyle: { curveness: 0.3, opacity: 0.4 },
+                    force: { repulsion: 400, gravity: 0.1, edgeLength: 100 }
                 }]
             };
-        }
-
-        // -----------------------------------------------------------
-        // 4. RENDER & EVENTS
-        // -----------------------------------------------------------
-        function safeRender() {
-            if (dom.clientWidth > 0 && dom.clientHeight > 0) {
-                let isDark = document.body.classList.contains('dark');
-                myChart.setOption(getOption(isDark));
-                myChart.resize();
-                
-                // Re-center "Me"
-                var w = myChart.getWidth();
-                var h = myChart.getHeight();
-                nodes.forEach(n => {
-                    if (n.id === myRealName) { n.x = w / 2; n.y = h / 2; }
+            
+            // Check Theme
+            let isDark = document.body.classList.contains('dark');
+            if(isDark) {
+                option.series[0].data.forEach(n => {
+                    n.itemStyle.color = (n.name === myName) ? '#00ff41' : '#00ffff';
                 });
-                myChart.setOption({ series: [{ data: nodes }] });
             }
+
+            myChart.setOption(option);
+            
+            // Re-center "Me"
+            var w = myChart.getWidth();
+            var h = myChart.getHeight();
+            nodes.forEach(n => {
+                if (n.name === myName) { n.x = w / 2; n.y = h / 2; }
+            });
+            myChart.setOption({ series: [{ data: nodes }] });
         }
 
-        // Initial Render
-        safeRender();
-
-        // Polling Check (For the accordion issue)
-        var poller = setInterval(function() {
-            if (dom.offsetParent !== null) {
-                safeRender();
-                clearInterval(poller); // Stop polling once rendered
-            }
-        }, 500);
-
-        // Toggle Listener
+        // Standard Resizing & Theme Logic
+        new ResizeObserver(() => myChart.resize()).observe(dom);
+        
         var parentDetails = dom.closest('details');
         if (parentDetails) {
-            parentDetails.addEventListener('toggle', function() {
-                if (parentDetails.open) setTimeout(safeRender, 50);
+            parentDetails.addEventListener('toggle', () => {
+                if(parentDetails.open) setTimeout(() => myChart.resize(), 50);
             });
         }
-
-        // Resize Observer
-        new ResizeObserver(() => myChart.resize()).observe(dom);
-
-        // Theme Toggle Listener
+        
         const themeButton = document.querySelector('.js-theme-toggle');
         if(themeButton){
-            themeButton.addEventListener('click', function(){
-                setTimeout(function(){
-                    let isDarkNow = document.body.classList.contains('dark');
-                    myChart.setOption(getOption(isDarkNow));
+            themeButton.addEventListener('click', () => {
+                setTimeout(() => {
+                    // Simple reload to catch new colors
+                    let isDark = document.body.classList.contains('dark');
+                    var currentOpt = myChart.getOption();
+                    if(currentOpt && currentOpt.series) {
+                        currentOpt.series[0].data.forEach(n => {
+                            n.itemStyle.color = (n.name === myName) 
+                                ? (isDark ? '#00ff41' : '#d93025') 
+                                : (isDark ? '#00ffff' : '#1a0dab');
+                        });
+                        myChart.setOption(currentOpt);
+                    }
                 }, 100);
             });
         }
