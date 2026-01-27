@@ -49,8 +49,6 @@ sections:
         
         {{< spoiler text="🤝 Collaboration Network" >}}
         {{< research_network >}}
-        
-        **Legend:** 🔴 Self | 🟣 Advisor | 🔵 Professor | 🟡 Collaborator | 🟢 Student
         {{< /spoiler >}}
         
         {{< spoiler text="🌍 Research Footprint" >}}
