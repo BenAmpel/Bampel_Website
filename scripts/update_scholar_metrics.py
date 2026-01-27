@@ -1,14 +1,7 @@
 #!/usr/bin/env python3
 """
 Fetch Google Scholar metrics and update scholar-metrics.json.
-
-This script uses the scholarly library to fetch citation data from Google Scholar.
-
-Usage:
-    pip install scholarly
-    python update_scholar_metrics.py
-
-Note: Google Scholar has rate limits. This script includes delays to avoid being blocked.
+Now includes individual publication citation counts.
 """
 
 import json
@@ -27,8 +20,7 @@ SCRIPT_DIR = Path(__file__).parent
 PROJECT_ROOT = SCRIPT_DIR.parent
 METRICS_FILE = PROJECT_ROOT / "static" / "data" / "scholar-metrics.json"
 
-# Your Google Scholar profile ID
-SCHOLAR_ID = "XDdwaZUAAAAJ"  # Benjamin Ampel's Google Scholar ID
+SCHOLAR_ID = "XDdwaZUAAAAJ"  # Benjamin Ampel
 
 
 def fetch_scholar_data():
@@ -41,36 +33,46 @@ def fetch_scholar_data():
     try:
         # Search for author by ID
         author = scholarly.search_author_id(SCHOLAR_ID)
+        # Fetch indices and publications list (metadata only to save time/requests)
         author = scholarly.fill(author, sections=['basics', 'indices', 'publications'])
         
-        # Extract metrics
+        # 1. Extract Overall Metrics
         citations = author.get('citedby', 0)
         h_index = author.get('hindex', 0)
         i10_index = author.get('i10index', 0)
+        pub_count = len(author.get('publications', []))
         
-        # Count publications
-        publications = len(author.get('publications', []))
-        
-        # Get citations by year (from cites_per_year if available)
+        # 2. Extract History (Last 10 Years)
         cites_per_year = author.get('cites_per_year', {})
-        
-        # Build citations by year data
         current_year = datetime.now().year
-        citations_by_year = []
-        for year in range(2019, current_year + 1):
-            year_str = str(year)
-            cites = cites_per_year.get(year, 0)
-            citations_by_year.append({
-                "year": year_str,
-                "citations": cites
+        history = []
+        for year in range(current_year - 9, current_year + 1):
+            history.append({
+                "year": str(year),
+                "citations": cites_per_year.get(year, 0)
             })
+
+        # 3. Extract Individual Publications (NEW)
+        # We grab the title and citation count from the list we already have.
+        individual_pubs = []
+        for pub in author.get('publications', []):
+            if 'bib' in pub:
+                individual_pubs.append({
+                    "title": pub['bib'].get('title', 'Unknown Title'),
+                    "citations": pub.get('num_citations', 0),
+                    "year": pub['bib'].get('pub_year', 'N/A')
+                })
         
+        # Sort by citations (highest first)
+        individual_pubs.sort(key=lambda x: x['citations'], reverse=True)
+
         return {
-            "citations": f"{citations}+" if citations >= 500 else str(citations),
+            "citations": citations,
             "hIndex": h_index,
             "i10Index": i10_index,
-            "publications": publications,
-            "citationsByYear": citations_by_year
+            "publications": pub_count,
+            "citationsByYear": history,
+            "individualPublications": individual_pubs
         }
         
     except Exception as e:
@@ -81,29 +83,22 @@ def fetch_scholar_data():
 def update_metrics_file(data):
     """Update the scholar-metrics.json file."""
     if data is None:
-        print("No data to update.")
         return False
     
-    # Load existing file to preserve structure
-    try:
-        with open(METRICS_FILE, 'r') as f:
-            existing = json.load(f)
-    except FileNotFoundError:
-        existing = {}
-    
-    # Update with new data
+    # Structure the final JSON
     updated = {
         "lastUpdated": datetime.now().strftime("%B %Y"),
         "metrics": {
-            "citations": data["citations"],
+            "citations": f"{data['citations']}+" if data['citations'] >= 500 else str(data['citations']),
             "hIndex": data["hIndex"],
             "i10Index": data["i10Index"],
             "publications": data["publications"]
         },
-        "citationsByYear": data["citationsByYear"]
+        "citationsByYear": data["citationsByYear"],
+        "individualPublications": data["individualPublications"]
     }
     
-    # Write updated file
+    # Write to file
     with open(METRICS_FILE, 'w') as f:
         json.dump(updated, f, indent=2)
     
@@ -112,37 +107,22 @@ def update_metrics_file(data):
 
 
 def main():
-    """Main function to fetch and update metrics."""
     print("=" * 50)
     print("Google Scholar Metrics Updater")
     print("=" * 50)
     
     if not HAS_SCHOLARLY:
-        print("\nError: scholarly library required.")
-        print("Install with: pip install scholarly")
+        print("Error: scholarly library required (pip install scholarly)")
         return
-    
-    # Add delay to be respectful to Google Scholar
-    print("\nFetching data (this may take a moment)...")
-    time.sleep(2)
     
     data = fetch_scholar_data()
     
     if data:
-        print("\nFetched metrics:")
-        print(f"  Citations: {data['citations']}")
-        print(f"  h-index: {data['hIndex']}")
-        print(f"  i10-index: {data['i10Index']}")
-        print(f"  Publications: {data['publications']}")
-        print(f"  Years tracked: {len(data['citationsByYear'])}")
-        
-        print("\nUpdating metrics file...")
+        print(f"\nSuccess! Fetched {len(data['individualPublications'])} papers.")
+        print(f"Total Citations: {data['citations']}")
         update_metrics_file(data)
-        
-        print("\nDone! Remember to regenerate the dashboard image:")
-        print("  python generate_dashboard.py")
     else:
-        print("\nFailed to fetch data. Metrics file not updated.")
+        print("\nFailed to fetch data.")
 
 
 if __name__ == '__main__':
