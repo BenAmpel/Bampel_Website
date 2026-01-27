@@ -1,8 +1,38 @@
 {
-  "monthly_trend": [],
-  "top_locations": [],
-  "top_pages": [],
-  "devices": [],
-  "total_last_30_days": 0,
-  "lifetime_total": 0
+  "monthly_trend": [
+    {
+      "month": "202601",
+      "visitors": 3
+    }
+  ],
+  "top_locations": [
+    {
+      "city": "",
+      "country": "",
+      "visitors": 2
+    },
+    {
+      "city": "College Park",
+      "country": "United States",
+      "visitors": 1
+    }
+  ],
+  "top_pages": [
+    {
+      "path": "/",
+      "views": 8
+    }
+  ],
+  "devices": [
+    {
+      "device": "mobile",
+      "users": 2
+    },
+    {
+      "device": "desktop",
+      "users": 1
+    }
+  ],
+  "total_last_30_days": 3,
+  "lifetime_total": 3
 }
