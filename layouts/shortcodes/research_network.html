@@ -9,7 +9,6 @@
 <script type="text/javascript">
 (function() {
     var domID = "network-{{ $uniqueID }}";
-    // Ingest Data from Hugo
     var rawNodes = {{ .Site.Data.network.nodes | jsonify }};
     var rawLinks = {{ .Site.Data.network.links | jsonify }};
     
@@ -17,34 +16,38 @@
         var dom = document.getElementById(domID);
         if (!dom) return;
 
-        // 1. SETUP ECHARTS
-        // We do NOT init immediately if hidden, to prevent 0x0 size issues.
-        var myChart = echarts.init(dom);
-        var hasRendered = false;
-        
-        // Prepare Data
+        // 1. DEFINE CATEGORIES FIRST (Order Matters!)
+        var categories = [
+            { name: 'self' },          // Index 0
+            { name: 'advisor' },       // Index 1
+            { name: 'professor' },     // Index 2
+            { name: 'collaborator' },  // Index 3
+            { name: 'student' }        // Index 4
+        ];
+
+        // 2. BUILD LOOKUP MAP (The Missing Piece)
+        // Converts "advisor" -> 1, "student" -> 4
+        var catMap = {};
+        categories.forEach(function(cat, index) {
+            catMap[cat.name] = index;
+        });
+
+        // 3. PREPARE DATA
         var nodes = rawNodes.map(node => ({
             id: node.id,
             name: node.name,
             symbolSize: node.size,
-            category: node.group, // Matches YAML: self, advisor, professor, collaborator, student
-            // Fix Self to Center
+            // FIX: Use the map to get the Integer Index. Default to 0 if not found.
+            category: catMap[node.group] !== undefined ? catMap[node.group] : 0,
             fixed: node.group === 'self' ? true : false,
             x: node.group === 'self' ? 500 : null,
             y: node.group === 'self' ? 300 : null
         }));
 
-        // 2. DEFINE CATEGORIES (MUST MATCH YAML EXACTLY)
-        var categories = [
-            { name: 'self' }, 
-            { name: 'advisor' }, 
-            { name: 'professor' }, 
-            { name: 'collaborator' }, 
-            { name: 'student' }
-        ];
+        // 4. SETUP ECHARTS
+        var myChart = echarts.init(dom);
+        var hasRendered = false;
 
-        // 3. COLOR PALETTES (Matched to Categories)
-        // self=Red, advisor=Purple, professor=Blue, collaborator=Yellow/Orange, student=Green
         const lightColors = ['#d93025', '#9c27b0', '#1a0dab', '#f9ab00', '#188038'];
         const darkColors =  ['#00ff41', '#ff00ff', '#00ffff', '#ffff00', '#ff6b35'];
 
@@ -68,7 +71,7 @@
                     layout: 'force',
                     data: nodes,
                     links: rawLinks,
-                    categories: categories, // <--- This was the missing link
+                    categories: categories, 
                     roam: true,
                     label: { 
                         show: true, 
@@ -95,9 +98,8 @@
             };
         }
 
-        // 4. RENDER FUNCTION (Safe for multiple calls)
+        // 5. RENDER LOGIC
         function safeRender() {
-            // Only render if visible
             if (dom.clientWidth > 0 && dom.clientHeight > 0) {
                 let isDark = document.body.classList.contains('dark');
                 myChart.setOption(getOption(isDark));
@@ -110,25 +112,21 @@
                     if (n.id === 'self') { n.x = w / 2; n.y = h / 2; }
                 });
                 myChart.setOption({ series: [{ data: nodes }] });
-                
                 hasRendered = true;
             }
         }
 
-        // 5. EVENT LISTENERS
-        
         // A. Initial Try
         safeRender();
 
-        // B. Polling for Visibility (Fixes the Spoiler/Details issue)
-        // Checks every 200ms if the box appeared, then renders.
+        // B. Polling (Backup for visibility issues)
         var poller = setInterval(function() {
             if (dom.offsetParent !== null && !hasRendered) {
                 safeRender();
             }
         }, 200);
 
-        // C. Explicit Toggle Listener (If inside details)
+        // C. Toggle Listener
         var parentDetails = dom.closest('details');
         if (parentDetails) {
             parentDetails.addEventListener('toggle', function() {
