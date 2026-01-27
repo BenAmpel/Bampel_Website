@@ -1,4 +1,5 @@
 {{/* Interactive Research Network - Usage: {{< research_network >}} */}}
+{{/* Automatically builds co-authorship network from all publications */}}
 
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 
@@ -9,139 +10,187 @@
 <script type="text/javascript">
 (function() {
     var domID = "network-{{ $uniqueID }}";
-    var rawNodes = {{ .Site.Data.network.nodes | jsonify }};
-    var rawLinks = {{ .Site.Data.network.links | jsonify }};
     
+    // -----------------------------------------------------------
+    // 1. AUTOMATICALLY SCRAPE DATA FROM YOUR SITE
+    // -----------------------------------------------------------
+    // We loop through ALL pages that have an 'authors' field.
+    // This creates a raw JSON list of every paper you have written.
+    var rawPapers = [
+        {{ range where .Site.RegularPages "Params.authors" "!=" nil }}
+        {
+            title: "{{ .Title | safeJS }}",
+            authors: {{ .Params.authors | jsonify }}
+        },
+        {{ end }}
+    ];
+    
+    // Your specific internal username to replace with your real name
+    var myInternalUsername = "admin"; 
+    var myRealName = "Benjamin Ampel";
+
     document.addEventListener('DOMContentLoaded', function() {
         var dom = document.getElementById(domID);
         if (!dom) return;
 
-        // 1. DEFINE CATEGORIES FIRST (Order Matters!)
-        var categories = [
-            { name: 'self' },          // Index 0
-            { name: 'advisor' },       // Index 1
-            { name: 'professor' },     // Index 2
-            { name: 'collaborator' },  // Index 3
-            { name: 'student' }        // Index 4
-        ];
+        // -----------------------------------------------------------
+        // 2. PROCESS DATA (JavaScript)
+        // -----------------------------------------------------------
+        var nodeMap = new Map(); // Stores unique authors
+        var links = [];
+        
+        // Helper to normalize names (e.g., "admin" -> "Benjamin Ampel")
+        function getName(rawName) {
+            if (rawName === myInternalUsername) return myRealName;
+            return rawName;
+        }
 
-        // 2. BUILD LOOKUP MAP (The Missing Piece)
-        // Converts "advisor" -> 1, "student" -> 4
-        var catMap = {};
-        categories.forEach(function(cat, index) {
-            catMap[cat.name] = index;
+        // A. Build Nodes and Links
+        rawPapers.forEach(function(paper) {
+            var authors = paper.authors.map(getName);
+            
+            // Register Nodes (Authors)
+            authors.forEach(function(author) {
+                if (!nodeMap.has(author)) {
+                    nodeMap.set(author, { 
+                        id: author, 
+                        name: author, 
+                        value: 1, // Number of papers (weight)
+                        category: author === myRealName ? 0 : 1 // 0=Me, 1=Others
+                    });
+                } else {
+                    // Increment paper count
+                    nodeMap.get(author).value++;
+                }
+            });
+
+            // Register Links (Co-authorship)
+            // Connect every author to every other author in this paper
+            for (var i = 0; i < authors.length; i++) {
+                for (var j = i + 1; j < authors.length; j++) {
+                    links.push({
+                        source: authors[i],
+                        target: authors[j]
+                    });
+                }
+            }
         });
 
-        // 3. PREPARE DATA
-        var nodes = rawNodes.map(node => ({
-            id: node.id,
-            name: node.name,
-            symbolSize: node.size,
-            // FIX: Use the map to get the Integer Index. Default to 0 if not found.
-            category: catMap[node.group] !== undefined ? catMap[node.group] : 0,
-            fixed: node.group === 'self' ? true : false,
-            x: node.group === 'self' ? 500 : null,
-            y: node.group === 'self' ? 300 : null
-        }));
+        // Convert Map to Array for ECharts
+        var nodes = Array.from(nodeMap.values()).map(function(node) {
+            return {
+                id: node.id,
+                name: node.name,
+                // Size bubble based on number of papers (Min size 20, Max size 80)
+                symbolSize: Math.max(20, Math.min(80, node.value * 10)),
+                value: node.value,
+                category: node.category,
+                // Lock "You" to the center
+                fixed: node.id === myRealName,
+                x: node.id === myRealName ? dom.clientWidth / 2 : null,
+                y: node.id === myRealName ? dom.clientHeight / 2 : null,
+                label: {
+                    show: node.value > 1 || node.id === myRealName // Only label frequent collaborators
+                }
+            };
+        });
 
-        // 4. SETUP ECHARTS
+        // -----------------------------------------------------------
+        // 3. SETUP ECHARTS
+        // -----------------------------------------------------------
         var myChart = echarts.init(dom);
-        var hasRendered = false;
-
-        const lightColors = ['#d93025', '#9c27b0', '#1a0dab', '#f9ab00', '#188038'];
-        const darkColors =  ['#00ff41', '#ff00ff', '#00ffff', '#ffff00', '#ff6b35'];
-
+        
+        // Simple Categories: Just "Me" and "Network"
+        var categories = [{ name: 'Me' }, { name: 'Network' }];
+        
         function getOption(isDark) {
-            let colors = isDark ? darkColors : lightColors;
             let bgColor = isDark ? '#000000' : '#fdfdfd';
             let textColor = isDark ? '#00ff41' : '#333333';
+            let meColor = isDark ? '#00ff41' : '#d93025';     // Green (Cyber) or Red (Paper)
+            let otherColor = isDark ? '#00ffff' : '#1a0dab';  // Cyan (Cyber) or Blue (Paper)
 
             return {
                 backgroundColor: bgColor,
-                tooltip: {},
-                color: colors,
-                legend: [{
-                    data: ['self', 'advisor', 'professor', 'collaborator', 'student'],
-                    textStyle: { color: textColor },
-                    bottom: 10,
-                    selectedMode: 'multiple'
-                }],
+                tooltip: {
+                    formatter: function(params) {
+                        if (params.dataType === 'node') {
+                            return '<strong>' + params.name + '</strong><br>Co-authored ' + params.value + ' papers';
+                        }
+                    }
+                },
                 series: [{
                     type: 'graph',
                     layout: 'force',
                     data: nodes,
-                    links: rawLinks,
-                    categories: categories, 
+                    links: links,
+                    categories: categories,
                     roam: true,
                     label: { 
-                        show: true, 
                         position: 'right', 
-                        formatter: '{b}', 
                         color: textColor 
+                    },
+                    // Define colors manually for simplicity
+                    itemStyle: {
+                        color: function(params) {
+                            return params.data.category === 0 ? meColor : otherColor;
+                        }
                     },
                     lineStyle: { 
                         color: 'source', 
-                        curveness: 0.3,
-                        width: 2 
-                    },
-                    emphasis: {
-                        focus: 'adjacency',
-                        lineStyle: { width: 4 }
+                        curveness: 0.3, 
+                        opacity: 0.5 
                     },
                     force: { 
-                        repulsion: 1000, 
+                        repulsion: 300, 
                         gravity: 0.1, 
-                        edgeLength: 100, 
-                        friction: 0.6 
+                        edgeLength: 80 
                     }
                 }]
             };
         }
 
-        // 5. RENDER LOGIC
+        // -----------------------------------------------------------
+        // 4. RENDER & EVENTS
+        // -----------------------------------------------------------
         function safeRender() {
             if (dom.clientWidth > 0 && dom.clientHeight > 0) {
                 let isDark = document.body.classList.contains('dark');
                 myChart.setOption(getOption(isDark));
                 myChart.resize();
                 
-                // Re-center 'self' node
+                // Re-center "Me"
                 var w = myChart.getWidth();
                 var h = myChart.getHeight();
                 nodes.forEach(n => {
-                    if (n.id === 'self') { n.x = w / 2; n.y = h / 2; }
+                    if (n.id === myRealName) { n.x = w / 2; n.y = h / 2; }
                 });
                 myChart.setOption({ series: [{ data: nodes }] });
-                hasRendered = true;
             }
         }
 
-        // A. Initial Try
+        // Initial Render
         safeRender();
 
-        // B. Polling (Backup for visibility issues)
+        // Polling Check (For the accordion issue)
         var poller = setInterval(function() {
-            if (dom.offsetParent !== null && !hasRendered) {
+            if (dom.offsetParent !== null) {
                 safeRender();
+                clearInterval(poller); // Stop polling once rendered
             }
-        }, 200);
+        }, 500);
 
-        // C. Toggle Listener
+        // Toggle Listener
         var parentDetails = dom.closest('details');
         if (parentDetails) {
             parentDetails.addEventListener('toggle', function() {
-                if (parentDetails.open) {
-                    setTimeout(safeRender, 50);
-                }
+                if (parentDetails.open) setTimeout(safeRender, 50);
             });
         }
 
-        // D. Resize Observer
-        new ResizeObserver(() => {
-            if (hasRendered) myChart.resize();
-        }).observe(dom);
+        // Resize Observer
+        new ResizeObserver(() => myChart.resize()).observe(dom);
 
-        // E. Theme Toggle
+        // Theme Toggle Listener
         const themeButton = document.querySelector('.js-theme-toggle');
         if(themeButton){
             themeButton.addEventListener('click', function(){
