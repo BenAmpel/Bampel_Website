@@ -23,9 +23,8 @@ tags:
 featured: false
 
 url_pdf: ''
+---
 
 {{< altmetric doi="10.1007/s10796-025-10645-8" >}}
 
 {{< dimensions doi="10.1007/s10796-025-10645-8" >}}
-
----
