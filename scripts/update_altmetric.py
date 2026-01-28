@@ -6,7 +6,6 @@ import requests
 from pathlib import Path
 
 # --- CONFIGURATION ---
-# If you have a key, put it here. If not, the script will auto-fallback to scraping.
 API_KEY = os.environ.get("ALTMETRIC_API_KEY")
 
 CONTENT_DIRS = [
@@ -16,13 +15,13 @@ CONTENT_DIRS = [
 ]
 OUTPUT_FILE = "static/data/altmetric.json"
 
-# Headers to look like a real browser (prevents blocking)
+# Headers to look like a real browser
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
 }
 
 def extract_dois():
-    """Scans Hugo content files to find all DOIs."""
+    print("--- 1. Scanning Content Files for DOIs ---")
     dois = []
     doi_pattern = re.compile(r'^doi\s*[:=]\s*["\']?(10\.[^\s"\']+)["\']?', re.MULTILINE | re.IGNORECASE)
     base_path = Path(__file__).parent.parent
@@ -31,64 +30,98 @@ def extract_dois():
         dir_path = base_path / dir_name
         if not dir_path.exists():
             continue
+            
+        print(f"Scanning {dir_name}...")
         for file_path in dir_path.rglob("index.md"):
             try:
                 content = file_path.read_text(encoding="utf-8")
                 match = doi_pattern.search(content)
                 if match:
                     dois.append(match.group(1))
-            except Exception:
-                pass
-    return list(set(dois))
+            except Exception as e:
+                print(f"  Error reading {file_path}: {e}")
+    
+    unique_dois = list(set(dois))
+    print(f"Total Unique DOIs Found: {len(unique_dois)}")
+    return unique_dois
 
 def scrape_public_page(doi):
     """
-    Fallback: Visits the public HTML page and extracts data using Regex.
+    Fallback: Scrapes the public page using robust regex patterns matching your HTML file.
     """
     url = f"https://www.altmetric.com/details/doi/{doi}"
-    data = {"score": 0, "news": 0, "policy": 0, "twitter": 0}
+    data = {"score": 0, "news": 0, "policy": 0, "twitter": 0, "patents": 0}
+    
+    print(f"  [Scraper] Visiting: {url}")
     
     try:
         response = requests.get(url, headers=HEADERS, timeout=10)
         
-        if response.status_code == 404:
-            return data # Paper has no Altmetric record yet
+        if response.history:
+            print(f"  [Scraper] Redirected to: {response.url}")
             
+        if response.status_code == 404:
+            print(f"  [Scraper] 404 Not Found (No public record)")
+            return data 
+            
+        if response.status_code != 200:
+            print(f"  [Scraper] HTTP Error: {response.status_code}")
+            return data
+
         html = response.text
         
-        # 1. Extract Score (Reliable)
-        # Looks for <img src="..." alt="Article has an altmetric score of 123">
-        score_match = re.search(r'alt="Article has an altmetric score of (\d+)', html)
+        # --- STRATEGY 1: Find Score in Badge URLs ---
+        # Matches: badges.altmetric.com/?...score=3...
+        # We use a broad match because the URL contains &amp; characters
+        score_match = re.search(r'badges\.altmetric\.com.*?(?:score)=([0-9.]+)', html)
+        
         if score_match:
             data["score"] = float(score_match.group(1))
+            print(f"  [Scraper] Found Score: {data['score']}")
+        elif 'citation_altmetric_score' in html:
+            # Fallback to metadata tag
+            meta_score = re.search(r'<meta\s+(?:name|property)="citation_altmetric_score"\s+content="([\d\.]+)"', html)
+            if meta_score:
+                data["score"] = float(meta_score.group(1))
+                print(f"  [Scraper] Found Metadata Score: {data['score']}")
+        
+        # --- STRATEGY 2: Extract "Mentioned by" Counts ---
+        # Matches: <strong>1</strong> patent</a>
+        # Matches: <strong>5</strong> news outlets</a>
+        # The HTML provided uses comma separators for thousands (e.g. 1,234)
+        count_matches = re.findall(r'<strong>([\d,]+)</strong>\s+([a-zA-Z\s]+)(?:</a>|</dd>)', html)
+        
+        for count_str, label in count_matches:
+            count = int(count_str.replace(',', ''))
+            label_clean = label.lower().strip()
             
-        # 2. Extract Counts (Approximation from HTML text)
-        # Looks for "Mentioned by X news outlets"
-        news_match = re.search(r'(\d+)\s+news\s+outlets?', html, re.IGNORECASE)
-        if news_match:
-            data["news"] = int(news_match.group(1))
+            if 'news' in label_clean:
+                data["news"] = count
+                print(f"  [Scraper] Found News: {count}")
+            elif 'policy' in label_clean:
+                data["policy"] = count
+                print(f"  [Scraper] Found Policy: {count}")
+            elif 'patent' in label_clean:
+                data["patents"] = count
+                print(f"  [Scraper] Found Patents: {count}")
+            # Catch "X user", "Twitter", "Tweeters", "X post"
+            elif any(x in label_clean for x in ['tweet', 'twitter', 'x user', 'x post', 'x repost']):
+                data["twitter"] = count
+                print(f"  [Scraper] Found Twitter/X: {count}")
             
-        policy_match = re.search(r'(\d+)\s+policy\s+sources?', html, re.IGNORECASE)
-        if policy_match:
-            data["policy"] = int(policy_match.group(1))
-            
-        twitter_match = re.search(r'(\d+)\s+tweeters?', html, re.IGNORECASE)
-        if twitter_match:
-            data["twitter"] = int(twitter_match.group(1))
-            
-        print(f"  [Scraped] {doi}: Score {data['score']}")
         return data
 
     except Exception as e:
-        print(f"  [Error] Scraping {doi}: {e}")
+        print(f"  [Scraper] Error: {e}")
         return data
 
 def fetch_metrics(dois):
-    stats = {"score": 0, "news": 0, "policy": 0, "twitter": 0}
+    print("\n--- 2. Fetching Metrics ---")
+    stats = {"score": 0, "news": 0, "policy": 0, "twitter": 0, "patents": 0}
     
-    print(f"Processing {len(dois)} papers...")
-    
-    for doi in dois:
+    for i, doi in enumerate(dois):
+        print(f"\nProcessing {i+1}/{len(dois)}: {doi}")
+        
         # METHOD A: API (If Key Exists)
         if API_KEY:
             try:
@@ -99,19 +132,22 @@ def fetch_metrics(dois):
                     stats["score"] += d.get("score", 0)
                     stats["news"] += d.get("cited_by_msm_count", 0)
                     stats["policy"] += d.get("cited_by_policies_count", 0)
+                    stats["patents"] += d.get("cited_by_patents_count", 0)
                     stats["twitter"] += d.get("cited_by_tweeters_count", 0)
-                    print(f"  [API] {doi}: Success")
-                    continue # Skip to next DOI
+                    print(f"  [API] Success! Score: {d.get('score', 0)}")
+                    continue 
             except Exception:
-                pass # Fall through to scraper if API fails
+                pass 
 
         # METHOD B: SCRAPER (Fallback)
-        # We add a delay to be polite to their servers
-        time.sleep(1.0) 
+        time.sleep(1.5) # Polite delay
         d = scrape_public_page(doi)
+        
+        # Aggregate
         stats["score"] += d["score"]
         stats["news"] += d["news"]
         stats["policy"] += d["policy"]
+        stats["patents"] += d["patents"]
         stats["twitter"] += d["twitter"]
 
     return stats
@@ -124,13 +160,15 @@ def main():
 
     metrics = fetch_metrics(dois)
     
+    print("\n--- 3. Saving Results ---")
     output_path = Path(__file__).parent.parent / OUTPUT_FILE
     output_path.parent.mkdir(parents=True, exist_ok=True)
     
     with open(output_path, "w") as f:
         json.dump(metrics, f, indent=2)
         
-    print(f"Saved metrics: {metrics}")
+    print(f"Success! Saved metrics to {output_path}")
+    print(f"Final Data: {metrics}")
 
 if __name__ == "__main__":
     main()
