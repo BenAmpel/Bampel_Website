@@ -47,10 +47,10 @@ def extract_dois():
 
 def scrape_public_page(doi):
     """
-    Fallback: Scrapes the public page using robust regex patterns matching your HTML file.
+    Fallback: Scrapes the public page for Score, News, Policy, Patents, Twitter, and Mendeley.
     """
     url = f"https://www.altmetric.com/details/doi/{doi}"
-    data = {"score": 0, "news": 0, "policy": 0, "twitter": 0, "patents": 0}
+    data = {"score": 0, "news": 0, "policy": 0, "twitter": 0, "patents": 0, "mendeley": 0}
     
     print(f"  [Scraper] Visiting: {url}")
     
@@ -70,25 +70,20 @@ def scrape_public_page(doi):
 
         html = response.text
         
-        # --- STRATEGY 1: Find Score in Badge URLs ---
-        # Matches: badges.altmetric.com/?...score=3...
-        # We use a broad match because the URL contains &amp; characters
-        score_match = re.search(r'badges\.altmetric\.com.*?(?:score)=([0-9.]+)', html)
-        
+        # --- STRATEGY 1: Catch-All Score Finder ---
+        score_match = re.search(r'badges\.altmetric\.com.*?[?&amp;]score=(\d+)', html)
         if score_match:
             data["score"] = float(score_match.group(1))
             print(f"  [Scraper] Found Score: {data['score']}")
         elif 'citation_altmetric_score' in html:
-            # Fallback to metadata tag
             meta_score = re.search(r'<meta\s+(?:name|property)="citation_altmetric_score"\s+content="([\d\.]+)"', html)
             if meta_score:
                 data["score"] = float(meta_score.group(1))
                 print(f"  [Scraper] Found Metadata Score: {data['score']}")
         
-        # --- STRATEGY 2: Extract "Mentioned by" Counts ---
+        # --- STRATEGY 2: Extract "Mentioned by" & "Readers" Counts ---
         # Matches: <strong>1</strong> patent</a>
-        # Matches: <strong>5</strong> news outlets</a>
-        # The HTML provided uses comma separators for thousands (e.g. 1,234)
+        # Matches: <strong>10</strong> Mendeley</a>
         count_matches = re.findall(r'<strong>([\d,]+)</strong>\s+([a-zA-Z\s]+)(?:</a>|</dd>)', html)
         
         for count_str, label in count_matches:
@@ -104,7 +99,9 @@ def scrape_public_page(doi):
             elif 'patent' in label_clean:
                 data["patents"] = count
                 print(f"  [Scraper] Found Patents: {count}")
-            # Catch "X user", "Twitter", "Tweeters", "X post"
+            elif 'mendeley' in label_clean:
+                data["mendeley"] = count
+                print(f"  [Scraper] Found Mendeley: {count}")
             elif any(x in label_clean for x in ['tweet', 'twitter', 'x user', 'x post', 'x repost']):
                 data["twitter"] = count
                 print(f"  [Scraper] Found Twitter/X: {count}")
@@ -117,7 +114,7 @@ def scrape_public_page(doi):
 
 def fetch_metrics(dois):
     print("\n--- 2. Fetching Metrics ---")
-    stats = {"score": 0, "news": 0, "policy": 0, "twitter": 0, "patents": 0}
+    stats = {"score": 0, "news": 0, "policy": 0, "twitter": 0, "patents": 0, "mendeley": 0}
     
     for i, doi in enumerate(dois):
         print(f"\nProcessing {i+1}/{len(dois)}: {doi}")
@@ -134,6 +131,11 @@ def fetch_metrics(dois):
                     stats["policy"] += d.get("cited_by_policies_count", 0)
                     stats["patents"] += d.get("cited_by_patents_count", 0)
                     stats["twitter"] += d.get("cited_by_tweeters_count", 0)
+                    
+                    # Readers are nested in the API
+                    readers = d.get("readers", {})
+                    stats["mendeley"] += int(readers.get("mendeley", 0))
+                    
                     print(f"  [API] Success! Score: {d.get('score', 0)}")
                     continue 
             except Exception:
@@ -149,6 +151,7 @@ def fetch_metrics(dois):
         stats["policy"] += d["policy"]
         stats["patents"] += d["patents"]
         stats["twitter"] += d["twitter"]
+        stats["mendeley"] += d["mendeley"]
 
     return stats
 
