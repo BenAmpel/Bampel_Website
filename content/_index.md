@@ -263,12 +263,14 @@ sections:
     design:
       columns: '1'
   
-  # ---------- MEDIA ----------
+ # ---------- MEDIA ----------
   - block: markdown
     id: media
     content:
       title: Public Engagement & Media Coverage
       text: |
+        {{< altmetric_summary >}}
+
         {{< spoiler text="📺 Media Coverage (2)" >}}
         
         - **"Benjamin Ampel Receives ACM SIGMIS Doctoral Dissertation Award"** — Georgia State University (January 28, 2025)
