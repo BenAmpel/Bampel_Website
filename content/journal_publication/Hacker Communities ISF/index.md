@@ -5,6 +5,7 @@ authors:
 date: 2026-01-01
 publication: "Information Systems Frontiers"
 publication_types: ["2"]
+doi: "10.1007/s10796-025-10645-8"
 draft: false
 
 publishDate: "2026-01-01T00:00:00Z"
@@ -22,4 +23,9 @@ tags:
 featured: false
 
 url_pdf: ''
+
+{{< altmetric doi="10.1007/s10796-025-10645-8" >}}
+
+{{< dimensions doi="10.1007/s10796-025-10645-8" >}}
+
 ---
