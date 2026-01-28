@@ -219,13 +219,11 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
             });
         }
 
-        // 3. Top Locations (Countries)
+        // 3. Top Locations
         var domLocs = document.getElementById(IDS.VISIT.LOCS);
         if(domLocs) {
-            // Check for 'countries' or fallback to 'locations' key
             let list = data.countries || data.locations || [];
             if(list.length > 0) {
-                // Sort by users desc
                 list.sort((a,b) => b.users - a.users);
                 let html = list.slice(0,6).map(c => {
                     let name = c.country || c.location || "Unknown";
@@ -301,7 +299,7 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
 
 
     // ========================================================================
-    // LOGIC: IMPACT MAP
+    // LOGIC: IMPACT MAP (UPDATED TOOLTIP)
     // ========================================================================
     function renderWorkingMap(papers) {
         var dom = document.getElementById(IDS.MAP);
@@ -372,7 +370,26 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
         let isDark = document.body.classList.contains('dark');
         graphChart.setOption({
             backgroundColor: 'transparent',
-            tooltip: { formatter: p => p.dataType === 'edge' ? `Strength: ${Math.floor(p.value)}<br>${p.data.reason}` : `<strong>${p.name}</strong><br>Year: ${p.data.year}<br>Citations: ${p.value}` },
+            // --- FIX APPLIED HERE ---
+            tooltip: {
+                trigger: 'item',
+                confine: true, // Prevent going off-screen
+                // Custom position: Center above mouse
+                position: function (point, params, dom, rect, size) {
+                    return [point[0] - (size.contentSize[0] / 2), point[1] - size.contentSize[1] - 20];
+                },
+                formatter: (p) => {
+                    // Wrapped Text
+                    if (p.dataType === 'edge') {
+                        return `<div style="max-width:200px; white-space:normal;"><strong>Connection</strong><br>Strength: ${Math.floor(p.value)}<br>${p.data.reason}</div>`;
+                    }
+                    return `<div style="max-width:250px; white-space:normal; word-wrap:break-word;">
+                                <strong>${p.name}</strong><br>
+                                <span style="opacity:0.8">Year: ${p.data.year}</span><br>
+                                <span style="opacity:0.8">Citations: ${p.value}</span>
+                            </div>`;
+                }
+            },
             series: [{ type: 'graph', layout: 'force', data: nodes, links: links, roam: true, zoom: 0.75, label: { position: 'right', color: 'inherit' }, lineStyle: { color: isDark ? '#aaa' : '#666' }, force: { repulsion: 500, gravity: 0.1, edgeLength: [50, 300] } }]
         });
         
