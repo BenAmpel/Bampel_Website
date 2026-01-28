@@ -39,11 +39,13 @@
 <script type="text/javascript">
 (function() {
     const DOIS = {{ $dois | jsonify }};
-    const CACHE_KEY = 'altmetric_aggregate_cache';
+    const CACHE_KEY = 'altmetric_aggregate_cache_v2'; // Changed key to force refresh
     const CACHE_DURATION = 1000 * 60 * 60 * 24; // 24 Hours
 
+    console.log("Altmetric Aggregator found DOIs:", DOIS); // Debug log
+
     function updateUI(stats) {
-        // Reveal the box
+        // Always reveal the box, even if stats are zero
         const box = document.getElementById('altmetric-summary-box');
         if (box) box.style.display = 'block';
 
@@ -67,6 +69,8 @@
     }
 
     async function fetchAll() {
+        let stats = { score: 0, news: 0, policy: 0, twitter: 0 };
+
         // 1. Check Cache
         const cached = localStorage.getItem(CACHE_KEY);
         if (cached) {
@@ -80,9 +84,7 @@
             } catch (e) { localStorage.removeItem(CACHE_KEY); }
         }
 
-        let stats = { score: 0, news: 0, policy: 0, twitter: 0 };
-        
-        // 2. Fetch sequentially with delay (Polite Mode)
+        // 2. Fetch sequentially
         for (const doi of DOIS) {
             try {
                 const res = await fetch(`https://api.altmetric.com/v1/doi/${doi}`);
@@ -95,8 +97,7 @@
                 }
             } catch (e) { console.warn('Altmetric skip:', doi); }
             
-            // 50ms pause between requests to be polite
-            await new Promise(r => setTimeout(r, 50)); 
+            await new Promise(r => setTimeout(r, 50)); // Polite delay
         }
 
         // 3. Save & Render
@@ -104,12 +105,12 @@
         updateUI(stats);
     }
 
-    // Force display if DOIS exist, even if fetch fails or returns 0
     if(DOIS && DOIS.length > 0) {
         fetchAll();
     } else {
-        // Optional: Show box with 0s if no DOIs found in site
-        // document.getElementById('altmetric-summary-box').style.display = 'block';
+        // Force show zero state if no DOIs found
+        console.warn("No DOIs found by Hugo shortcode.");
+        updateUI({ score: 0, news: 0, policy: 0, twitter: 0 });
     }
 })();
 </script>
