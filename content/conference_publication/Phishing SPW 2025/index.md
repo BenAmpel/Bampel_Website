@@ -7,7 +7,7 @@ authors:
   - Sagar Samtani
 
 date: '2025-05-01T00:00:00Z'
-doi: ''
+doi: '10.1109/SPW67851.2025.00041'
 
 publishDate: '2025-05-01T00:00:00Z'
 
@@ -28,4 +28,9 @@ tags:
 featured: false
 
 url_pdf: ''
+
+{{< altmetric doi="10.1109/SPW67851.2025.00041" >}}
+
+{{< dimensions doi="10.1109/SPW67851.2025.00041" >}}
+
 ---
