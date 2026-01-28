@@ -5,7 +5,6 @@ authors:
   - "Sagar Samtani"
   - "Hsinchun Chen"
 date: 2026-01-01
-publication: "Management Information Systems Quarterly"
 publication_types: ["2"]
 doi: "10.25300/MISQ/2025/19532"
 draft: false
@@ -26,9 +25,8 @@ tags:
 featured: true
 
 url_pdf: ''
+---
 
 {{< altmetric doi="10.25300/MISQ/2025/19532" >}}
 
 {{< dimensions doi="10.25300/MISQ/2025/19532" >}}
-
----
