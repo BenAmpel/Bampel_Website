@@ -1,0 +1,88 @@
+{{/* Altmetric Aggregator - Usage: {{< altmetric_summary >}} */}}
+{{ $dois := slice }}
+{{ range where .Site.RegularPages "Section" "in" (slice "journal_publication" "conference_publication" "workshop_publication") }}
+  {{ if .Params.doi }}
+    {{ $dois = $dois | append .Params.doi }}
+  {{ end }}
+{{ end }}
+
+<div id="altmetric-summary-box" style="display:none; margin: 30px 0; padding: 25px; background: var(--card-bg, rgba(255,255,255,0.02)); border: 1px solid var(--card-border, #333); border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
+    <div style="display:flex; align-items:center; gap:15px; margin-bottom:20px; border-bottom:1px solid var(--card-border, #444); padding-bottom:15px;">
+        <img src="https://d1bxh8uas1mnw7.cloudfront.net/assets/altmetric_badges/donut-small.png" style="width:32px; height:32px; opacity:0.9;" alt="Altmetric Logo">
+        <div>
+            <h4 style="margin:0; font-size:1.1rem; font-weight:700; color:inherit;">Cumulative Research Attention</h4>
+            <span style="font-size:0.8rem; opacity:0.7;">Aggregated impact across news, policy, and social media</span>
+        </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap:20px; text-align:center;">
+        <div>
+            <div id="am-total-score" style="font-size:2rem; font-weight:800; color:#00e5ff;">0</div>
+            <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:1px; opacity:0.7; margin-top:5px;">Total Score</div>
+        </div>
+        <div>
+            <div id="am-news" style="font-size:1.5rem; font-weight:700; color:inherit;">0</div>
+            <div style="font-size:0.75rem; opacity:0.6; margin-top:5px;">News Stories</div>
+        </div>
+        <div>
+            <div id="am-policy" style="font-size:1.5rem; font-weight:700; color:inherit;">0</div>
+            <div style="font-size:0.75rem; opacity:0.6; margin-top:5px;">Policy Docs</div>
+        </div>
+        <div>
+            <div id="am-twitter" style="font-size:1.5rem; font-weight:700; color:inherit;">0</div>
+            <div style="font-size:0.75rem; opacity:0.6; margin-top:5px;">Social Mentions</div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+(function() {
+    const DOIS = {{ $dois | jsonify }};
+    const CACHE_KEY = 'altmetric_aggregate_cache';
+    const CACHE_DURATION = 1000 * 60 * 60 * 24; // 24 Hours
+
+    function updateUI(stats) {
+        document.getElementById('am-total-score').innerText = Math.round(stats.score);
+        document.getElementById('am-news').innerText = stats.news;
+        document.getElementById('am-policy').innerText = stats.policy;
+        document.getElementById('am-twitter').innerText = stats.twitter;
+        document.getElementById('altmetric-summary-box').style.display = 'block';
+    }
+
+    async function fetchAll() {
+        // Check Cache
+        const cached = localStorage.getItem(CACHE_KEY);
+        if (cached) {
+            const data = JSON.parse(cached);
+            if (Date.now() - data.timestamp < CACHE_DURATION) {
+                updateUI(data.stats);
+                return;
+            }
+        }
+
+        let stats = { score: 0, news: 0, policy: 0, twitter: 0 };
+        
+        // Fetch in batches to be polite to the API
+        const fetchMetric = async (doi) => {
+            try {
+                const res = await fetch(`https://api.altmetric.com/v1/doi/${doi}`);
+                if (!res.ok) return;
+                const d = await res.json();
+                stats.score += (d.score || 0);
+                stats.news += (d.cited_by_msm_count || 0);
+                stats.policy += (d.cited_by_policies_count || 0);
+                stats.twitter += (d.cited_by_tweeters_count || 0);
+            } catch (e) { console.warn('Altmetric fetch failed for', doi); }
+        };
+
+        // Execute all requests
+        await Promise.all(DOIS.map(fetchMetric));
+
+        // Save & Render
+        localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), stats: stats }));
+        updateUI(stats);
+    }
+
+    if(DOIS && DOIS.length > 0) fetchAll();
+})();
+</script>
