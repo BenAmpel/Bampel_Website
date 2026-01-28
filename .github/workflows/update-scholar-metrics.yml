@@ -26,6 +26,11 @@ jobs:
       - name: Install dependencies
         run: |
           pip install google-search-results google-analytics-data google-auth networkx matplotlib
+
+      - name: Update Altmetric Stats
+        env:
+          ALTMETRIC_API_KEY: ${{ secrets.ALTMETRIC_API_KEY }}
+        run: python scripts/update_altmetric.py
       
       - name: Generate Network Analysis
         run: python scripts/generate_network.py
@@ -46,19 +51,13 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           
-          # Simplified Workflow: Add files, check for changes, commit, push.
-          git add static/data/scholar-metrics.json static/data/visitor_stats.json
+          # Add the new file
+          git add static/data/scholar-metrics.json static/data/visitor_stats.json static/data/altmetric.json
           
-          # Only commit if there are changes (prevents empty commit errors)
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else
-            git commit -m "chore: Update Scholar metrics and visitor stats [skip ci]"
-            
-            # Pull latest changes before pushing to avoid conflicts
-            # Use rebase to keep history clean, fallback to merge if rebase fails
+            git commit -m "chore: Update metrics (Scholar, Visitor, Altmetric) [skip ci]"
             git pull --rebase origin main || git pull origin main
-            
-            # Push changes
             git push origin main
           fi
