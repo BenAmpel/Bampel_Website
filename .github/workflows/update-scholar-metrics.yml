@@ -3,7 +3,7 @@ name: Update Scholar Metrics
 on:
   schedule:
     # Run on the 1st of every month at 9:00 AM UTC
-    - cron: '0 9 1 * *'
+    - cron: '0 9 * * 1'
   workflow_dispatch:  # Allow manual trigger
 
 jobs:
