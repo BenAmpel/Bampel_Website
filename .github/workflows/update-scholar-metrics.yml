@@ -60,8 +60,7 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else
-            git commit -m "chore: Update metrics (Scholar, Visitor, Altmetric) [skip ci]"
-            
+            git commit -m "chore: Update metrics (Scholar, Visitor, Altmetric)"
             # Use --autostash to safely handle any last-second file changes during the pull
             git pull --rebase --autostash origin main
             
