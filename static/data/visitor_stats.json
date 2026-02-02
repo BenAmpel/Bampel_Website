@@ -2,14 +2,28 @@
   "monthly_trend": [
     {
       "month": "202601",
-      "visitors": 28
+      "visitors": 31
+    },
+    {
+      "month": "202602",
+      "visitors": 26
     }
   ],
   "top_locations": [
     {
+      "city": "Lanzhou",
+      "country": "China",
+      "visitors": 29
+    },
+    {
       "city": "(not set)",
       "country": "United States",
       "visitors": 4
+    },
+    {
+      "city": "(not set)",
+      "country": "China",
+      "visitors": 3
     },
     {
       "city": "Arlington",
@@ -22,29 +36,19 @@
       "visitors": 3
     },
     {
-      "city": "Lanzhou",
-      "country": "China",
-      "visitors": 3
-    },
-    {
       "city": "(not set)",
       "country": "(not set)",
       "visitors": 2
     },
     {
-      "city": "(not set)",
-      "country": "China",
+      "city": "Hanoi",
+      "country": "Vietnam",
       "visitors": 2
     },
     {
       "city": "Sulaymaniyah",
       "country": "Iraq",
       "visitors": 2
-    },
-    {
-      "city": "",
-      "country": "China",
-      "visitors": 1
     },
     {
       "city": "(not set)",
@@ -67,7 +71,7 @@
       "visitors": 1
     },
     {
-      "city": "Hanoi",
+      "city": "Ha Long",
       "country": "Vietnam",
       "visitors": 1
     },
@@ -97,27 +101,35 @@
       "visitors": 1
     },
     {
-      "city": "Quito",
-      "country": "Ecuador",
+      "city": "Phoenix",
+      "country": "United States",
       "visitors": 1
     },
     {
-      "city": "Rishon LeZion",
-      "country": "Israel",
+      "city": "Quito",
+      "country": "Ecuador",
       "visitors": 1
     }
   ],
   "top_pages": [
     {
       "path": "/",
-      "views": 109
+      "views": 113
     },
     {
       "path": "/event/",
-      "views": 3
+      "views": 4
+    },
+    {
+      "path": "/experience/",
+      "views": 4
     },
     {
       "path": "/publication_types/2/",
+      "views": 4
+    },
+    {
+      "path": "/tags/ai-security/",
       "views": 3
     },
     {
@@ -125,40 +137,32 @@
       "views": 3
     },
     {
+      "path": "/journal_publication/voice-phishing-misq/",
+      "views": 2
+    },
+    {
       "path": "/publication/ampel-2025-voice-phishing/",
       "views": 2
     },
     {
-      "path": "/tags/ai-security/",
+      "path": "/publication/page/2/",
       "views": 2
     },
     {
-      "path": "/conference_publication/phi-hacker-hicss-2026/",
-      "views": 1
-    },
-    {
-      "path": "/conference_publication/sawtooth-19-isi/",
-      "views": 1
-    },
-    {
-      "path": "/journal_publication/voice-phishing-misq/",
-      "views": 1
-    },
-    {
-      "path": "/publication/ampel-2024-creating/",
+      "path": "/conference_publication/ai4cyber-kdd-2024/",
       "views": 1
     }
   ],
   "devices": [
     {
       "device": "desktop",
-      "users": 23
+      "users": 52
     },
     {
       "device": "mobile",
       "users": 5
     }
   ],
-  "total_last_30_days": 32,
-  "lifetime_total": 28
+  "total_last_30_days": 60,
+  "lifetime_total": 57
 }
