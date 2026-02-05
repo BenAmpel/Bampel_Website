@@ -34,6 +34,8 @@ courses:
 
 bio_tagline: "AI-enabled cybersecurity researcher building LLM and threat-intelligence systems that make defense proactive."
 
+bio_tldr: "Builds AI-enabled cyber threat intelligence that turns adversary chatter into action, with LLM pipelines for phishing detection and early warning signals from hacker communities."
+
 bio_badges:
   - ACM SIGMIS Doctoral Dissertation Award (ICIS 2024)
   - IEEE ISI Best Paper Awards (2020, 2023)

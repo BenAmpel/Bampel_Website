@@ -1517,6 +1517,119 @@ body:not(.dark) .hb-about .bio-quicklink {
   color: #1a0dab !important;
 }
 
+// Bio story mode
+section#about .bio-story-mode,
+.wg-about .bio-story-mode,
+.hb-about .bio-story-mode {
+  margin: 6px 0 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  background: rgba(0, 0, 0, 0.35);
+  display: grid;
+  gap: 10px;
+}
+
+section#about .bio-story-header,
+.wg-about .bio-story-header,
+.hb-about .bio-story-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+section#about .bio-story-title,
+.wg-about .bio-story-title,
+.hb-about .bio-story-title {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #00e5ff;
+  font-weight: 700;
+}
+
+section#about .bio-story-toggle,
+.wg-about .bio-story-toggle,
+.hb-about .bio-story-toggle {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+section#about .bio-story-btn,
+.wg-about .bio-story-btn,
+.hb-about .bio-story-btn {
+  border: 1px solid rgba(0, 255, 65, 0.3);
+  background: rgba(0, 0, 0, 0.4);
+  color: #c9d1d9;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+section#about .bio-story-btn.is-active,
+.wg-about .bio-story-btn.is-active,
+.hb-about .bio-story-btn.is-active {
+  background: rgba(0, 255, 65, 0.18);
+  color: #00ff41;
+  border-color: rgba(0, 255, 65, 0.6);
+  box-shadow: 0 0 10px rgba(0, 255, 65, 0.25);
+}
+
+section#about .bio-story-tldr,
+.wg-about .bio-story-tldr,
+.hb-about .bio-story-tldr {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #c9d1d9;
+}
+
+section#about .bio-story-full,
+.wg-about .bio-story-full,
+.hb-about .bio-story-full {
+  display: none;
+}
+
+section#about .bio-story-full.is-visible,
+.wg-about .bio-story-full.is-visible,
+.hb-about .bio-story-full.is-visible {
+  display: block;
+}
+
+body:not(.dark) section#about .bio-story-mode,
+body:not(.dark) .wg-about .bio-story-mode,
+body:not(.dark) .hb-about .bio-story-mode {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+body:not(.dark) section#about .bio-story-title,
+body:not(.dark) .wg-about .bio-story-title,
+body:not(.dark) .hb-about .bio-story-title {
+  color: #0b7a3e;
+}
+
+body:not(.dark) section#about .bio-story-btn,
+body:not(.dark) .wg-about .bio-story-btn,
+body:not(.dark) .hb-about .bio-story-btn {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #333;
+}
+
+body:not(.dark) section#about .bio-story-btn.is-active,
+body:not(.dark) .wg-about .bio-story-btn.is-active,
+body:not(.dark) .hb-about .bio-story-btn.is-active {
+  background: rgba(11, 122, 62, 0.12);
+  color: #0b7a3e;
+  border-color: rgba(11, 122, 62, 0.4);
+}
+
 // Interests list styling - comprehensive selectors for Hugo Blox
 section#about .interests,
 section#about ul.interests,
