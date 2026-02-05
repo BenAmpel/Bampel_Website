@@ -123,7 +123,10 @@
 </div>
 
 <div style="grid-column:1; grid-row:4; padding:25px; border-right:1px solid var(--card-border, #333); display:flex; flex-direction:column;">
-    <h4 style="font-size:0.8rem; opacity:0.7; text-transform:uppercase; margin-bottom:15px;">Traffic Overview</h4>
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
+        <h4 style="font-size:0.8rem; opacity:0.7; text-transform:uppercase; margin:0;">Traffic Overview</h4>
+        <div id="dash-visit-momentum" class="dash-momentum">--</div>
+    </div>
     <div style="display:flex; gap:20px; height:100%;">
         <div style="flex:0 0 100px; display:flex; flex-direction:column; justify-content:center;">
             <div style="margin-bottom:15px;">
@@ -144,12 +147,19 @@
 <div style="grid-column:2; grid-row:4; padding:25px; display:flex; flex-direction:column;">
     <h4 style="font-size:0.8rem; opacity:0.7; text-transform:uppercase; margin-bottom:15px;">Audience & Reach</h4>
     <div style="display:flex; gap:20px; height:100%;">
-        <div style="flex:1; position:relative;">
-            <div id="dash-visit-device" style="width:100%; height:100%;"></div>
+        <div style="flex:1; display:flex; flex-direction:column; gap:12px;">
+            <div style="flex:1; position:relative;">
+                <div id="dash-visit-device" style="width:100%; height:100%;"></div>
+            </div>
+            <div id="dash-visit-geo" class="dash-geo-mix"></div>
+            <div id="dash-visit-minimap" class="dash-mini-map"></div>
         </div>
-        <div style="flex:1; overflow-y:auto; border-left:1px solid var(--card-border, #333); padding-left:15px;">
-            <div style="font-size:0.7rem; font-weight:bold; margin-bottom:8px; opacity:0.8;">Top 5 Locations</div>
-            <div id="dash-visit-locations" style="font-size:0.75rem; line-height:1.5;">
+        <div style="flex:1; overflow-y:auto; border-left:1px solid var(--card-border, #333); padding-left:15px; display:flex; flex-direction:column; gap:10px;">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+                <div style="font-size:0.7rem; font-weight:bold; opacity:0.8;">Top 5 Locations</div>
+                <div id="dash-visit-region" class="dash-region-badge">Top Region: —</div>
+            </div>
+            <div id="dash-visit-locations" class="dash-location-list">
                 <span style="opacity:0.5;">Loading...</span>
             </div>
         </div>
@@ -268,6 +278,35 @@ body:not(.dark) .footprint-year-label { color:#0b4f6c; }
     .footprint-legend { bottom:12px; right:12px; }
     .footprint-timeline input[type="range"] { width:160px; }
 }
+
+/* Traffic Overview + Audience styling */
+.dash-momentum { font-size:0.6rem; text-transform:uppercase; letter-spacing:0.08em; padding:4px 10px; border-radius:999px; border:1px solid rgba(0,255,65,0.25); color:#b9f6ca; background:rgba(0,255,65,0.08); display:flex; align-items:center; gap:6px; }
+.dash-momentum.is-up { border-color:#00ff41; color:#00ff41; }
+.dash-momentum.is-down { border-color:#ff6b35; color:#ff6b35; }
+.dash-momentum.is-flat { border-color:#bdbdbd; color:#bdbdbd; }
+.dash-momentum span { font-weight:700; }
+
+.dash-geo-mix { display:flex; flex-direction:column; gap:6px; padding:8px 10px; border-radius:12px; border:1px solid var(--card-border, #333); background:rgba(0,0,0,0.3); font-size:0.62rem; color:#d6dde2; }
+.dash-geo-bar { width:100%; height:8px; border-radius:999px; background:rgba(255,255,255,0.08); overflow:hidden; display:flex; }
+.dash-geo-bar span { height:100%; display:block; }
+.dash-geo-us { background:#00ff41; }
+.dash-geo-intl { background:#00e5ff; }
+.dash-geo-labels { display:flex; justify-content:space-between; gap:8px; font-size:0.6rem; text-transform:uppercase; letter-spacing:0.05em; }
+
+.dash-mini-map { height:110px; border-radius:12px; border:1px solid var(--card-border, #333); overflow:hidden; background:rgba(0,0,0,0.25); }
+
+.dash-region-badge { font-size:0.58rem; text-transform:uppercase; letter-spacing:0.06em; color:#00e5ff; padding:4px 8px; border-radius:999px; border:1px solid rgba(0,229,255,0.35); background:rgba(0,229,255,0.12); }
+
+.dash-location-list { display:flex; flex-direction:column; gap:8px; }
+.dash-location-row { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.dash-location-bar { flex:1; height:6px; border-radius:999px; background:rgba(255,255,255,0.08); overflow:hidden; }
+.dash-location-bar span { display:block; height:100%; background:#e040fb; }
+.dash-location-name { font-size:0.72rem; opacity:0.8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:140px; }
+.dash-location-count { font-weight:700; color:#e040fb; font-size:0.72rem; }
+
+body:not(.dark) .dash-geo-mix { background:rgba(255,255,255,0.85); color:#333; border-color:#e0e0e0; }
+body:not(.dark) .dash-momentum { background:rgba(11,122,47,0.1); color:#0b7a2f; border-color:#0b7a2f; }
+body:not(.dark) .dash-region-badge { color:#0077b6; border-color:#0077b6; background:rgba(0,119,182,0.12); }
 </style>
 
 <script type="text/javascript">
@@ -359,19 +398,77 @@ body:not(.dark) .footprint-year-label { color:#0b4f6c; }
             
             let months = data.monthly_trend.map(d => d.month);
             let counts = data.monthly_trend.map(d => d.visitors);
+            let maxVal = Math.max(...counts, 0);
+
+            const formatMonth = (val) => {
+                if (!val) return '';
+                const str = String(val);
+                if (str.length === 6) {
+                    const year = str.slice(0, 4);
+                    const month = str.slice(4);
+                    const date = new Date(Number(year), Number(month) - 1, 1);
+                    return date.toLocaleString('en-US', { month: 'short', year: '2-digit' });
+                }
+                return val;
+            };
+            let labels = months.map(formatMonth);
+            let barData = counts.map(v => ({
+                value: v,
+                itemStyle: { color: v === maxVal ? '#00ff41' : '#00c853' }
+            }));
             
             visitTrendChart.setOption({
-                tooltip: { trigger: 'axis' },
+                tooltip: { trigger: 'axis', formatter: params => {
+                    const barPoint = params.find(p => p.seriesType === 'bar') || params[0];
+                    const val = (barPoint.data && barPoint.data.value !== undefined) ? barPoint.data.value : barPoint.data;
+                    return `${barPoint.axisValueLabel}: ${val} visitors`;
+                }},
                 grid: { top: 10, right: 10, bottom: 20, left: 10, containLabel: false },
-                xAxis: { show: false, data: months },
+                xAxis: { show: false, data: labels },
                 yAxis: { show: false, type: 'value' },
                 series: [{
                     type: 'bar',
-                    data: counts,
-                    itemStyle: { color: '#00ff41', borderRadius: [2,2,0,0] },
+                    data: barData,
+                    itemStyle: { borderRadius: [2,2,0,0] },
                     barWidth: '60%'
+                },
+                {
+                    type: 'line',
+                    data: counts,
+                    smooth: true,
+                    symbol: 'circle',
+                    symbolSize: 4,
+                    lineStyle: { color: '#00e5ff', width: 2 },
+                    itemStyle: { color: '#00e5ff' },
+                    areaStyle: { color: 'rgba(0,229,255,0.15)' }
                 }]
             });
+
+            const momentumEl = document.getElementById('dash-visit-momentum');
+            if (momentumEl) {
+                const sorted = data.monthly_trend.slice().sort((a,b) => String(a.month).localeCompare(String(b.month)));
+                let label = 'vs last month';
+                let valueText = '—';
+                let cls = 'dash-momentum is-flat';
+                if (sorted.length >= 2) {
+                    const last = sorted[sorted.length - 1].visitors || 0;
+                    const prev = sorted[sorted.length - 2].visitors || 0;
+                    if (prev === 0 && last > 0) {
+                        valueText = '+100%';
+                        cls = 'dash-momentum is-up';
+                    } else if (prev === 0 && last === 0) {
+                        valueText = '0%';
+                        cls = 'dash-momentum is-flat';
+                    } else {
+                        const change = ((last - prev) / prev) * 100;
+                        const sign = change > 0 ? '+' : '';
+                        valueText = `${sign}${change.toFixed(0)}%`;
+                        cls = change > 1 ? 'dash-momentum is-up' : (change < -1 ? 'dash-momentum is-down' : 'dash-momentum is-flat');
+                    }
+                }
+                momentumEl.className = cls;
+                momentumEl.innerHTML = `<span>${valueText}</span><span>${label}</span>`;
+            }
         }
 
         // 2. Device Chart
@@ -382,13 +479,14 @@ body:not(.dark) .footprint-year-label { color:#0b4f6c; }
             let isDark = document.body.classList.contains('dark');
             
             visitDeviceChart.setOption({
-                tooltip: { trigger: 'item' },
+                tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
                 series: [{
                     type: 'pie',
                     radius: ['40%', '70%'],
                     center: ['50%', '50%'],
                     itemStyle: { borderRadius: 4, borderColor: isDark?'#111':'#fff', borderWidth: 2 },
-                    label: { show: false },
+                    label: { show: true, position: 'inside', formatter: '{d}%', color: isDark ? '#fff' : '#111', fontSize: 11 },
+                    labelLine: { show: false },
                     data: data.devices.map(d => ({ name: d.device, value: d.users }))
                 }]
             });
@@ -432,6 +530,7 @@ body:not(.dark) .footprint-year-label { color:#0b4f6c; }
                     return region;
                 };
 
+                let maxCount = Math.max(...top5.map(c => c.visitors || c.users || 0), 1);
                 let html = top5.map(c => {
                     const city = c.city;
                     const country = normalizeCountry(c.country);
@@ -439,15 +538,105 @@ body:not(.dark) .footprint-year-label { color:#0b4f6c; }
                     const parts = [city, region, country].filter(Boolean);
                     const fullName = parts.join(", ");
                     const count = c.visitors || c.users || 0;
-                    
-                    return `<div style="display:flex; justify-content:space-between; margin-bottom:4px;" title="${fullName}">
-                        <span style="opacity:0.7; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">${fullName}</span>
-                        <span style="font-weight:bold; color:#e040fb;">${count}</span>
+
+                    const width = Math.max(8, Math.round((count / maxCount) * 100));
+                    return `<div class="dash-location-row" title="${fullName}">
+                        <span class="dash-location-name">${fullName}</span>
+                        <div class="dash-location-bar"><span style="width:${width}%;"></span></div>
+                        <span class="dash-location-count">${count}</span>
                     </div>`;
                 }).join('');
                 domLocs.innerHTML = html;
             } else {
                 domLocs.innerHTML = '<span style="opacity:0.5">No location data</span>';
+            }
+
+            // Geo mix (US vs International)
+            const geoEl = document.getElementById('dash-visit-geo');
+            const regionEl = document.getElementById('dash-visit-region');
+            if (geoEl) {
+                const total = list.reduce((sum, c) => sum + (c.visitors || c.users || 0), 0) || 1;
+                const usCount = list.filter(c => c.country === 'United States').reduce((sum, c) => sum + (c.visitors || c.users || 0), 0);
+                const intlCount = Math.max(0, total - usCount);
+                const usPct = Math.round((usCount / total) * 100);
+                const intlPct = Math.max(0, 100 - usPct);
+                geoEl.innerHTML = `
+                    <div class="dash-geo-labels"><span>US ${usPct}%</span><span>International ${intlPct}%</span></div>
+                    <div class="dash-geo-bar">
+                        <span class="dash-geo-us" style="width:${usPct}%;"></span>
+                        <span class="dash-geo-intl" style="width:${intlPct}%;"></span>
+                    </div>
+                `;
+            }
+            if (regionEl) {
+                const countryCounts = {};
+                list.forEach(c => {
+                    const country = normalizeCountry(c.country);
+                    const count = c.visitors || c.users || 0;
+                    countryCounts[country] = (countryCounts[country] || 0) + count;
+                });
+                const topCountry = Object.entries(countryCounts).sort((a,b) => b[1]-a[1])[0];
+                if (topCountry) {
+                    regionEl.textContent = `Top Region: ${topCountry[0]}`;
+                }
+            }
+
+            // Mini map (top 3 locations if coordinates available)
+            const mapEl = document.getElementById('dash-visit-minimap');
+            if (mapEl) {
+                const CITY_COORDS = {
+                    'Lanzhou|China': [36.0611, 103.8343],
+                    'Arlington|United States': [38.8816, -77.0910],
+                    'Boardman|United States': [45.8399, -119.7011],
+                    'Hanoi|Vietnam': [21.0278, 105.8342],
+                    'Sulaymaniyah|Iraq': [35.5650, 45.4329],
+                    'Ashburn|United States': [39.0438, -77.4874],
+                    'Atlanta|United States': [33.7490, -84.3880],
+                    'College Park|United States': [33.6534, -84.4494],
+                    'Ha Long|Vietnam': [20.9712, 107.0448],
+                    'Johns Creek|United States': [34.0289, -84.1986],
+                    'Jupiter|United States': [26.9342, -80.0942],
+                    'Kanawha|United States': [38.3362, -81.4807],
+                    'Madrid|Spain': [40.4168, -3.7038],
+                    'Manama|Bahrain': [26.2235, 50.5876],
+                    'Phoenix|United States': [33.4484, -112.0740],
+                    'Quito|Ecuador': [-0.1807, -78.4678]
+                };
+
+                const top3 = top5.slice(0, 3).map(c => {
+                    if (typeof c.lat === 'number' && typeof c.lng === 'number') return [c.lat, c.lng, c];
+                    const key = `${c.city}|${c.country}`;
+                    if (CITY_COORDS[key]) return [CITY_COORDS[key][0], CITY_COORDS[key][1], c];
+                    return null;
+                }).filter(Boolean);
+
+                if (top3.length === 0) {
+                    mapEl.innerHTML = '<div style="padding:12px; font-size:0.6rem; opacity:0.6;">Map data unavailable</div>';
+                } else {
+                    if (!mapEl.dataset.inited) {
+                        mapEl.dataset.inited = 'true';
+                        const miniMap = L.map(mapEl, { zoomControl: false, attributionControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false, boxZoom: false, keyboard: false, tap: false });
+                        const tiles = document.body.classList.contains('dark')
+                            ? L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { subdomains: 'abcd' })
+                            : L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { subdomains: 'abcd' });
+                        tiles.addTo(miniMap);
+                        mapEl._miniMap = miniMap;
+                        setTimeout(() => miniMap.invalidateSize(), 200);
+                    }
+                    const miniMap = mapEl._miniMap;
+                    if (miniMap) {
+                        if (mapEl._miniMarkers) {
+                            miniMap.removeLayer(mapEl._miniMarkers);
+                        }
+                        const group = L.featureGroup();
+                        top3.forEach(([lat, lng, c]) => {
+                            L.circleMarker([lat, lng], { radius: 5, color: '#e040fb', fillColor: '#e040fb', fillOpacity: 0.85, weight: 0 }).addTo(group);
+                        });
+                        group.addTo(miniMap);
+                        mapEl._miniMarkers = group;
+                        miniMap.fitBounds(group.getBounds().pad(0.4));
+                    }
+                }
             }
         }
     }
