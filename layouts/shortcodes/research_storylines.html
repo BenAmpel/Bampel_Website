@@ -18,17 +18,15 @@
     <div class="storylines-progress" data-storylines-progress>1 / 1</div>
   </div>
 
-  <div class="storylines-tabs" role="tablist">
-    {{ range $index, $track := $storylines }}
+  <div class="storylines-tabs" role="tablist">{{- range $index, $track := $storylines }}
       <button class="storylines-tab{{ if eq $index 0 }} is-active{{ end }}" type="button" role="tab" data-track="{{ $track.id }}" aria-selected="{{ if eq $index 0 }}true{{ else }}false{{ end }}">
         {{ $track.title }}
       </button>
-    {{ end }}
+    {{- end }}
   </div>
 
   <div class="storylines-body">
-    <div class="storylines-steps" data-storylines-steps>
-      {{ range $tindex, $track := $storylines }}
+    <div class="storylines-steps" data-storylines-steps>{{- range $tindex, $track := $storylines }}
         <div class="storylines-track{{ if eq $tindex 0 }} is-active{{ end }}" data-track="{{ $track.id }}" role="tabpanel">
           <div class="storylines-track-head">
             <div>
@@ -41,20 +39,18 @@
             </div>
           </div>
           <div class="storylines-track-content">
-            <div class="storylines-step-list" role="list">
-              {{ range $sindex, $step := $track.steps }}
-                {{ $pub := index $pubMap $step.url }}
+            <div class="storylines-step-list" role="list">{{- range $sindex, $step := $track.steps -}}
+                {{- $pub := index $pubMap $step.url -}}
                 <button type="button" class="storylines-step{{ if eq $sindex 0 }} is-active{{ end }}" data-step="{{ $sindex }}" role="listitem">
                   <span class="storylines-step-index">{{ add $sindex 1 }}</span>
                   <span class="storylines-step-title">{{ $pub.title }}</span>
                   <span class="storylines-step-meta">{{ $pub.year }} · {{ $pub.venue }}</span>
                 </button>
-              {{ end }}
+              {{- end -}}
             </div>
-            <div class="storylines-step-card" data-storylines-card>
-              {{ range $sindex, $step := $track.steps }}
-                {{ $pub := index $pubMap $step.url }}
-                {{ if $pub }}
+            <div class="storylines-step-card" data-storylines-card>{{- range $sindex, $step := $track.steps -}}
+                {{- $pub := index $pubMap $step.url -}}
+                {{- if $pub }}
                 <article class="storylines-card{{ if eq $sindex 0 }} is-active{{ end }}" data-step="{{ $sindex }}">
                   <div class="storylines-card-top">
                     <div>
@@ -65,12 +61,12 @@
                   </div>
                   <p>{{ $pub.abstract }}</p>
                 </article>
-                {{ end }}
-              {{ end }}
+                {{- end -}}
+              {{- end -}}
             </div>
           </div>
         </div>
-      {{ end }}
+      {{- end }}
     </div>
   </div>
 </div>
