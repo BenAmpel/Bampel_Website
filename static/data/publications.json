@@ -1,170 +1,381 @@
 [
   {
     "title": "Performance Modeling of Hyperledger Sawtooth Blockchain",
-    "authors": ["B Ampel", "M Patton", "H Chen"],
+    "authors": [
+      "Benjamin M. Ampel",
+      "Mark Patton",
+      "Hsinchun Chen"
+    ],
     "year": 2019,
-    "doi": "10.1109/ISI.2019.8823238"
-  },
-  {
-    "title": "Linking Common Vulnerabilities and Exposures to the MITRE ATT&CK Framework: A Self-Distillation Approach",
-    "authors": ["B Ampel", "S Samtani", "S Ullman", "H Chen"],
-    "year": 2021
-  },
-  {
-    "title": "Labeling Hacker Exploits for Proactive Cyber Threat Intelligence: A Deep Transfer Learning Approach",
-    "authors": ["B Ampel", "S Samtani", "H Zhu", "S Ullman", "H Chen"],
-    "year": 2020,
-    "doi": "10.1109/ISI49825.2020.9280548"
-  },
-  {
-    "title": "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach",
-    "authors": ["BM Ampel", "S Samtani", "H Zhu", "H Chen", "JF Nunamaker Jr"],
-    "year": 2024,
-    "doi": "10.1080/07421222.2023.2301178"
-  },
-  {
-    "title": "Large Language Models for Conducting Advanced Text Analytics Information Systems Research",
-    "authors": ["BM Ampel", "CH Yang", "J Hu", "H Chen"],
-    "year": 2025,
-    "doi": "10.1145/3682069"
+    "type": "conference",
+    "venue": "IEEE ISI",
+    "url": "/conference_publication/sawtooth-19-isi/"
   },
   {
     "title": "Identifying Vulnerable GitHub Repositories and Users in Scientific Cyberinfrastructure: An Unsupervised Graph Embedding Approach",
-    "authors": ["B Lazarine", "S Samtani", "M Patton", "H Zhu", "S Ullman", "B Ampel", "H Chen"],
+    "authors": [
+      "Ben Lazarine",
+      "Sagar Samtani",
+      "Mark Patton",
+      "Hongyi Zhu",
+      "Steven Ullman",
+      "Benjamin M. Ampel",
+      "Hsinchun Chen"
+    ],
     "year": 2020,
-    "doi": "10.1109/ISI49825.2020.9280544"
+    "type": "conference",
+    "venue": "IEEE ISI",
+    "url": "/conference_publication/vuln-github-isi/"
   },
   {
-    "title": "Creating Proactive Cyber Threat Intelligence with Hacker Exploit Labels: A Deep Transfer Learning Approach",
-    "authors": ["BM Ampel", "S Samtani", "H Zhu", "H Chen"],
-    "year": 2024,
-    "doi": "10.25300/MISQ/2023/17316"
-  },
-  {
-    "title": "Identifying and Categorizing Malicious Content on Paste Sites: A Neural Topic Modeling Approach",
-    "authors": ["T Vahedi", "B Ampel", "S Samtani", "H Chen"],
-    "year": 2021,
-    "doi": "10.1109/ISI53945.2021.9624765"
+    "title": "Labeling Hacker Exploits for Proactive Cyber Threat Intelligence: A Deep Transfer Learning Approach",
+    "authors": [
+      "Benjamin M. Ampel",
+      "Sagar Samtani",
+      "Hongyi Zhu",
+      "Steven Ullman",
+      "Hsinchun Chen"
+    ],
+    "year": 2020,
+    "type": "conference",
+    "venue": "IEEE ISI",
+    "url": "/conference_publication/dtlel-isi/"
   },
   {
     "title": "Smart Vulnerability Assessment for Scientific Cyberinfrastructure: An Unsupervised Graph Embedding Approach",
-    "authors": ["S Ullman", "S Samtani", "B Lazarine", "H Zhu", "B Ampel", "M Patton", "H Chen"],
+    "authors": [
+      "Steven Ullman",
+      "Sagar Samtani",
+      "Ben Lazarine",
+      "Hongyi Zhu",
+      "Benjamin M. Ampel",
+      "Mark Patton",
+      "Hsinchun Chen"
+    ],
     "year": 2020,
-    "doi": "10.1109/ISI49825.2020.9280545"
+    "type": "conference",
+    "venue": "IEEE ISI",
+    "url": "/conference_publication/vuln-ci-isi/"
   },
   {
-    "title": "Distilling Contextual Embeddings into a Static Word Embedding for Improving Hacker Forum Analytics",
-    "authors": ["B Ampel", "H Chen"],
+    "title": "Distilling Contextual Embeddings Into A Static Word Embedding For Improving Hacker Forum Analytics",
+    "authors": [
+      "Benjamin M. Ampel",
+      "Hsinchun Chen"
+    ],
     "year": 2021,
-    "doi": "10.1109/ISI53945.2021.9624848"
+    "type": "conference",
+    "venue": "IEEE ISI",
+    "url": "/conference_publication/hack2vec-isi-2021/"
   },
   {
-    "title": "Mapping Exploit Code on Paste Sites to the MITRE ATT&CK Framework: A Multi-label Transformer Approach",
-    "authors": ["B Ampel", "T Vahedi", "S Samtani", "H Chen"],
-    "year": 2023,
-    "doi": "10.1109/ISI58743.2023.10297272"
-  },
-  {
-    "title": "Benchmarking the Robustness of Phishing Email Detection Systems",
-    "authors": ["BM Ampel", "Y Gao", "J Hu", "S Samtani", "H Chen"],
-    "year": 2023
-  },
-  {
-    "title": "Disrupting Ransomware Actors on the Bitcoin Blockchain: A Graph Embedding Approach",
-    "authors": ["B Ampel", "K Otto", "S Samtani", "H Chen"],
-    "year": 2023,
-    "doi": "10.1109/ISI58743.2023.10297290"
-  },
-  {
-    "title": "The Effect of Consensus Algorithm on Ethereum Price and Volume",
-    "authors": ["BM Ampel"],
-    "year": 2023
-  },
-  {
-    "title": "Exploring the Evolution of Exploit-sharing Hackers: An Unsupervised Graph Embedding Approach",
-    "authors": ["K Otto", "B Ampel", "S Samtani", "H Zhu", "H Chen"],
+    "title": "Exploring the Evolution of Exploit-Sharing Hackers:  An Unsupervised Graph Embedding Approach",
+    "authors": [
+      "Kaeli Otto",
+      "Benjamin M. Ampel",
+      "Sagar Samtani",
+      "Hongyi Zhu",
+      "Hsinchun Chen"
+    ],
     "year": 2021,
-    "doi": "10.1109/ISI53945.2021.9624846"
+    "type": "conference",
+    "venue": "IEEE ISI",
+    "url": "/conference_publication/exploit-sharing-hackers-isi/"
   },
   {
-    "title": "Evading Anti-Phishing Models: A Field Note Documenting an Experience in the Machine Learning Security Evasion Competition 2022",
-    "authors": ["Y Gao", "BM Ampel", "S Samtani"],
-    "year": 2024,
-    "doi": "10.1145/3603507"
+    "title": "Identifying and Categorizing Malicious Content on Paste Sites: A Neural Topic Modeling Approach",
+    "authors": [
+      "Tala Vahedi",
+      "Benjamin M. Ampel",
+      "Sagar Samtani",
+      "Hsinchun Chen"
+    ],
+    "year": 2021,
+    "type": "conference",
+    "venue": "IEEE ISI",
+    "url": "/conference_publication/paste-site-21-isi/"
+  },
+  {
+    "title": "Linking Common Vulnerabilities and Exposures to the MITRE ATT&CK Framework: A Self-Distillation Approach",
+    "authors": [
+      "Benjamin M. Ampel",
+      "Sagar Samtani",
+      "Steven Ullman",
+      "Hsinchun Chen"
+    ],
+    "year": 2021,
+    "type": "workshop",
+    "venue": "AI4Cyber-KDD",
+    "url": "/workshop_publication/cve-attandck-kdd-2021/"
   },
   {
     "title": "The Role of AI Agents for De-Escalating Commitment in Digital Innovation Projects",
-    "authors": ["C Marx", "B Ampel", "B Lazarine"],
-    "year": 2021
+    "authors": [
+      "Carolin Marx",
+      "Benjamin M. Ampel",
+      "Ben Lazarine"
+    ],
+    "year": 2021,
+    "type": "conference",
+    "venue": "ICIS 2021",
+    "url": "/conference_publication/paper-a-thon-2021/"
   },
   {
-    "title": "Predicting Organizational Cybersecurity Risk: A Deep Learning Approach",
-    "authors": ["BM Ampel"],
-    "year": 2020
+    "title": "Benchmarking the Robustness of Phishing Email Detection Systems",
+    "authors": [
+      "Benjamin M. Ampel",
+      "Yang Gao",
+      "James Hu",
+      "Sagar Samtani",
+      "Hsinchun Chen"
+    ],
+    "year": 2023,
+    "type": "conference",
+    "venue": "AMCIS",
+    "url": "/conference_publication/phishing-robustness-amcis-2023/"
   },
   {
-    "title": "Automatically Detecting Voice Phishing: A Large Audio Model Approach",
-    "authors": ["BM Ampel", "S Samtani", "H Chen"],
-    "year": 2026,
-    "doi": "10.25300/MISQ/2025/19532"
+    "title": "Disrupting Ransomware Actors on the Bitcoin Blockchain: A Graph Embedding Approach",
+    "authors": [
+      "Benjamin M. Ampel",
+      "Kaeli Otto",
+      "Sagar Samtani",
+      "Hongyi Zhu",
+      "Hsinchun Chen"
+    ],
+    "year": 2023,
+    "type": "conference",
+    "venue": "IEEE ISI",
+    "url": "/conference_publication/ransomware-bitcoin-isi-2023/"
   },
   {
-    "title": "Examining the Robustness of Machine Learning-Based Phishing Website Detection: Action-Masked Reinforcement Learning for Automated Red Teaming",
-    "authors": ["Y Gao", "B Ampel", "S Samtani"],
-    "year": 2025,
-    "doi": "10.1109/SPW67851.2025.00041"
+    "title": "Evading Anti-Phishing Models: A Field Note Documenting an Experience in the Machine Learning Security Evasion Competition 2022",
+    "authors": [
+      "Yang Gao",
+      "Benjamin M. Ampel",
+      "Sagar Samtani"
+    ],
+    "year": 2023,
+    "type": "journal",
+    "venue": "Digital Threats: Research and Practice, 5:1, Article 7",
+    "url": "/journal_publication/phish-dtrap/"
   },
   {
-    "title": "The 4th Workshop on Artificial Intelligence-enabled Cybersecurity Analytics",
-    "authors": ["S Ullman", "BM Ampel", "S Samtani", "S Yang", "H Chen"],
-    "year": 2024,
-    "doi": "10.1145/3637528.3671494"
+    "title": "Generating Adversarial Phishing Websites to Evade Machine Learning-based Anti-Phishing Detectors: A Reinforcement Learning Approach",
+    "authors": [
+      "Yang Gao",
+      "Sagar Samtani",
+      "Hongyi Zhu",
+      "Benjamin M. Ampel",
+      "Yidong Chai"
+    ],
+    "year": 2023,
+    "type": "workshop",
+    "venue": "WDS",
+    "url": "/workshop_publication/adversarial-phishing-wds-2023/"
   },
   {
-    "title": "Teaching Case Seeing Is Not Believing: A Deepfake Video Call Scam at Pan-Asia Trading",
-    "authors": ["BM Ampel"],
-    "year": 2026
+    "title": "Mapping Exploit Code on Paste Sites to the MITRE ATT&CK Framework: A Multi-label Transformer Approach",
+    "authors": [
+      "Benjamin M. Ampel",
+      "Tala Vahedi",
+      "Sagar Samtani",
+      "Hsinchun Chen"
+    ],
+    "year": 2023,
+    "type": "conference",
+    "venue": "IEEE ISI",
+    "url": "/conference_publication/mitre-attandck-isi-2023/"
   },
   {
-    "title": "Automatic Extraction of Protected Health Information from Multilingual Hacker Communities",
-    "authors": ["C Dacosta", "BM Ampel", "M Hashim", "H Chen"],
-    "year": 2026
-  },
-  {
-    "title": "A Domain-Adaptive Soft Prompting Framework for Multi-Type Bias Detection in News",
-    "authors": ["C Zhang", "BM Ampel", "S Samtani"],
-    "year": 2026
-  },
-  {
-    "title": "Large Language Models for Infrastructure as Code Vulnerability Remediation",
-    "authors": ["RY Reyes", "BM Ampel", "H Chen"],
-    "year": 2025
-  },
-  {
-    "title": "Email Phishing Prevention: An Explainable Nudging Approach",
-    "authors": ["M Wagner", "BM Ampel", "M Hashim", "H Chen"],
-    "year": 2025
-  },
-  {
-    "title": "A Computational Design Framework for Targeted Disruption of Hacker Communities",
-    "authors": ["B Ampel"],
-    "year": 2025,
-    "doi": "10.1007/s10796-025-10645-8"
-  },
-  {
-    "title": "Multi-Agent Systems for Information Systems Research: Provocations for AI-Augmented Scholarship",
-    "authors": ["B Ampel", "S Ullman"],
-    "year": 2025
-  },
-  {
-    "title": "Multi-Agent Systems for Information Systems Research: A Framework for Collaborative AI-Augmented Inquiry",
-    "authors": ["BM Ampel", "S Ullman"],
-    "year": 2025
+    "title": "The Effect of Consensus Algorithm on Ethereum Price and Volume",
+    "authors": [
+      "Benjamin M. Ampel"
+    ],
+    "year": 2023,
+    "type": "conference",
+    "venue": "AMCIS",
+    "url": "/conference_publication/ethereum-amcis-2023/"
   },
   {
     "title": "Why Following Friends Can Hurt You: A Replication Study",
-    "authors": ["BM Ampel", "S Ullman"],
+    "authors": [
+      "Benjamin M. Ampel",
+      "Steven Ullman"
+    ],
     "year": 2023,
-    "doi": "10.17705/1atrr.00078"
+    "type": "journal",
+    "venue": "Transactions on Replication Research, 9(1)",
+    "url": "/journal_publication/social-media-trr/"
+  },
+  {
+    "title": "Creating Proactive Cyber Threat Intelligence with Hacker Exploit Labels: A Deep Transfer Learning Approach",
+    "authors": [
+      "Benjamin M. Ampel",
+      "Sagar Samtani",
+      "Hongyi Zhu",
+      "Hsinchun Chen"
+    ],
+    "year": 2024,
+    "type": "journal",
+    "venue": "MIS Quarterly, 48:1, 137-166",
+    "url": "/journal_publication/dtl-el-misq/"
+  },
+  {
+    "title": "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach",
+    "authors": [
+      "Benjamin M. Ampel",
+      "Sagar Samtani",
+      "Hongyi Zhu",
+      "Hsinchun Chen",
+      "Jay F. Nunamaker Jr."
+    ],
+    "year": 2024,
+    "type": "journal",
+    "venue": "Journal of Management Information Systems, 41:1, 236-265",
+    "url": "/journal_publication/attack-link-jmis/"
+  },
+  {
+    "title": "The 4th Workshop on Artificial Intelligence-enabled Cybersecurity Analytics",
+    "authors": [
+      "Steven Ullman",
+      "Benjamin M. Ampel",
+      "Sagar Samtani",
+      "Shanchieh Yang",
+      "Hsinchun Chen"
+    ],
+    "year": 2024,
+    "type": "conference",
+    "venue": "ACM KDD",
+    "url": "/conference_publication/ai4cyber-kdd-2024/"
+  },
+  {
+    "title": "Email Phishing Prevention: An Explainable Nudging Approach",
+    "authors": [
+      "Mason Wagner",
+      "Benjamin M. Ampel",
+      "Matthew J. Hashim",
+      "Hsinchun Chen"
+    ],
+    "year": 2025,
+    "type": "workshop",
+    "venue": "WISP",
+    "url": "/workshop_publication/phishing-nudging-wisp-2025/"
+  },
+  {
+    "title": "Examining the Robustness of Machine Learning-based Phishing Website Detection: Action-Masked Reinforcement Learning for Automated Red Teaming",
+    "authors": [
+      "Yang Gao",
+      "Benjamin M. Ampel",
+      "Sagar Samtani"
+    ],
+    "year": 2025,
+    "type": "conference",
+    "venue": "IEEE SPW",
+    "url": "/conference_publication/phishing-spw-2025/"
+  },
+  {
+    "title": "Large Language Models for Conducting Advanced Text Analytics Information Systems Research",
+    "authors": [
+      "Benjamin M. Ampel",
+      "Chi-Heng Yang",
+      "James Hu",
+      "Hsinchun Chen"
+    ],
+    "year": 2025,
+    "type": "journal",
+    "venue": "ACM Transactions on Management Information Systems, 16:1, 1-27",
+    "url": "/journal_publication/llm_tmis/"
+  },
+  {
+    "title": "Large Language Models for Infrastructure as Code Vulnerability Remediation",
+    "authors": [
+      "Raul Reyes",
+      "Benjamin M. Ampel",
+      "Hsinchun Chen"
+    ],
+    "year": 2025,
+    "type": "workshop",
+    "venue": "WISP",
+    "url": "/workshop_publication/iac-vuln-wisp-2025/"
+  },
+  {
+    "title": "Multi-Agent Systems for Information Systems Research: A Framework for Collaborative AI-Augmented Inquiry",
+    "authors": [
+      "Benjamin M. Ampel",
+      "Steven Ullman"
+    ],
+    "year": 2025,
+    "type": "workshop",
+    "venue": "SIG Services",
+    "url": "/workshop_publication/multi-agent-sig-services-2025/"
+  },
+  {
+    "title": "Multi-Agent Systems for Information Systems Research: Provocations for AI-Augmented Scholarship",
+    "authors": [
+      "Benjamin M. Ampel",
+      "Steven Ullman"
+    ],
+    "year": 2025,
+    "type": "workshop",
+    "venue": "ICIS TREO",
+    "url": "/workshop_publication/multi-agent-treo-2025/"
+  },
+  {
+    "title": "A Computational Design Framework for Targeted Disruption of Hacker Communities",
+    "authors": [
+      "Benjamin M. Ampel"
+    ],
+    "year": 2026,
+    "type": "journal",
+    "venue": "Information Systems Frontiers (ISF), Forthcoming",
+    "url": "/journal_publication/hacker-communities-isf/"
+  },
+  {
+    "title": "A Domain-Adaptive Soft Prompting Framework for Multi-Type Bias Detection in News",
+    "authors": [
+      "Chengjun Zhang",
+      "Benjamin M. Ampel",
+      "Sagar Samtani"
+    ],
+    "year": 2026,
+    "type": "conference",
+    "venue": "HICSS",
+    "url": "/conference_publication/bias-detection-hicss-2026/"
+  },
+  {
+    "title": "Automatic Extraction of Protected Health Information from Multilingual Hacker Communities",
+    "authors": [
+      "Cade Dacosta",
+      "Benjamin M. Ampel",
+      "Matthew Hashim",
+      "Hsinchun Chen"
+    ],
+    "year": 2026,
+    "type": "conference",
+    "venue": "HICSS",
+    "url": "/conference_publication/phi-hacker-hicss-2026/"
+  },
+  {
+    "title": "Automatically Detecting Voice Phishing: A Large Audio Model Approach",
+    "authors": [
+      "Benjamin M. Ampel",
+      "Sagar Samtani",
+      "Hsinchun Chen"
+    ],
+    "year": 2026,
+    "type": "journal",
+    "venue": "Management Information Systems Quarterly (MISQ), Forthcoming",
+    "url": "/journal_publication/voice-phishing-misq/"
+  },
+  {
+    "title": "Seeing Is Not Believing: A Deepfake Video Call Scam at Pan-Asia Trading",
+    "authors": [
+      "Benjamin M. Ampel"
+    ],
+    "year": 2026,
+    "type": "journal",
+    "venue": "Journal of Information Systems Education (JISE), 37:2",
+    "url": "/journal_publication/deepfake-jise/"
   }
 ]
