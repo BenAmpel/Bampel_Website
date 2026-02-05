@@ -11,6 +11,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 CV_PATH = pathlib.Path("static/uploads/cv.pdf")
 OUTPUT_PATH = pathlib.Path("static/data/cv_topics.json")
+PUBLICATIONS_PATH = pathlib.Path("static/data/publications.json")
 
 
 def load_cv_text(path: pathlib.Path) -> str:
@@ -25,6 +26,23 @@ def load_cv_text(path: pathlib.Path) -> str:
     raw = re.sub(r"\b(19|20)\d{2}\b", " ", raw)
     raw = re.sub(r"\b\d+\b", " ", raw)
     return raw
+
+
+def extract_title_vocab_from_publications() -> set[str]:
+    if not PUBLICATIONS_PATH.exists():
+        return set()
+    data = json.loads(PUBLICATIONS_PATH.read_text())
+    if isinstance(data, dict):
+        papers = data.get("individualPublications", [])
+    else:
+        papers = data
+    titles = [p.get("title", "") for p in papers if isinstance(p, dict)]
+    title_text = " ".join(titles)
+    title_text = re.sub(r"\b(19|20)\d{2}\b", " ", title_text)
+    title_text = re.sub(r"[^a-zA-Z ]+", " ", title_text)
+    title_text = re.sub(r"\s+", " ", title_text).strip()
+    tokens = re.findall(r"[a-zA-Z][a-zA-Z]+", title_text.lower())
+    return set(tokens)
 
 
 def split_documents(raw: str) -> list[str]:
@@ -60,7 +78,7 @@ def split_documents(raw: str) -> list[str]:
     return docs
 
 
-def build_topics(docs: list[str]) -> dict:
+def build_topics(docs: list[str], title_vocab: set[str]) -> dict:
     custom_stop = {
         "university",
         "college",
@@ -221,15 +239,21 @@ def build_topics(docs: list[str]) -> dict:
         "national",
         "conferences",
         "digital",
+        "doctoral",
+        "consortium",
     }
     stop_words = set(sklearn_text.ENGLISH_STOP_WORDS).union(custom_stop)
+    title_vocab = {t for t in title_vocab if t not in stop_words and len(t) > 2}
+    if not title_vocab:
+        raise ValueError("No title vocabulary available to constrain topics.")
 
     vectorizer = TfidfVectorizer(
         stop_words=list(stop_words),
         max_df=0.9,
-        min_df=2,
-        ngram_range=(1, 2),
+        min_df=1,
+        ngram_range=(1, 1),
         token_pattern=r"(?u)\b[a-zA-Z][a-zA-Z]+\b",
+        vocabulary=sorted(title_vocab),
     )
     X = vectorizer.fit_transform(docs)
     terms = vectorizer.get_feature_names_out()
@@ -289,7 +313,8 @@ def build_topics(docs: list[str]) -> dict:
 def main() -> None:
     raw = load_cv_text(CV_PATH)
     docs = split_documents(raw)
-    data = build_topics(docs)
+    title_vocab = extract_title_vocab_from_publications()
+    data = build_topics(docs, title_vocab)
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT_PATH.write_text(json.dumps(data, indent=2))
     print(f"Wrote {OUTPUT_PATH}")
