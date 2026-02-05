@@ -69,7 +69,6 @@
         <div class="centrality-metric"><span>Density</span><strong id="centrality-density">--</strong></div>
         <div class="centrality-metric"><span>Avg Path</span><strong id="centrality-path">--</strong></div>
         <div class="centrality-metric"><span>Clustering</span><strong id="centrality-cluster">--</strong></div>
-        <div class="centrality-metric"><span>Top Mover (2 yrs)</span><strong id="centrality-mover">--</strong></div>
     </div>
     <div class="centrality-body">
         <div class="centrality-list" id="centrality-list">
@@ -158,7 +157,10 @@
                 <div id="dash-visit-device" style="width:100%; height:100%;"></div>
             </div>
             <div id="dash-visit-geo" class="dash-geo-mix"></div>
-            <div id="dash-visit-minimap" class="dash-mini-map"></div>
+            <div id="dash-visit-minimap" class="dash-mini-map">
+                <div class="dash-mini-map-inner"></div>
+                <div class="dash-mini-map-fallback">Global footprint preview</div>
+            </div>
         </div>
         <div style="flex:1; overflow-y:auto; border-left:1px solid var(--card-border, #333); padding-left:15px; display:flex; flex-direction:column; gap:10px;">
             <div style="display:flex; align-items:center; justify-content:space-between;">
@@ -301,6 +303,9 @@ body:not(.dark) .footprint-year-label { color:#0b4f6c; }
 
 .dash-mini-map { height:110px; border-radius:12px; border:1px solid var(--card-border, #333); overflow:hidden; background:rgba(0,0,0,0.25); }
 .dash-mini-map { min-height:110px; flex:0 0 110px; position:relative; }
+.dash-mini-map-inner { position:absolute; inset:0; }
+.dash-mini-map-fallback { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:0.6rem; letter-spacing:0.08em; text-transform:uppercase; color:rgba(255,255,255,0.55); background:radial-gradient(circle at top, rgba(0,229,255,0.1), transparent 70%); }
+.dash-mini-map.is-ready .dash-mini-map-fallback { opacity:0; pointer-events:none; }
 .dash-mini-map .leaflet-container { width:100%; height:100%; }
 
 .dash-region-badge { font-size:0.58rem; text-transform:uppercase; letter-spacing:0.06em; color:#00e5ff; padding:4px 8px; border-radius:999px; border:1px solid rgba(0,229,255,0.35); background:rgba(0,229,255,0.12); }
@@ -322,12 +327,11 @@ body:not(.dark) .dash-region-badge { color:#0077b6; border-color:#0077b6; backgr
 .centrality-tab { border:1px solid rgba(0,229,255,0.35); background:transparent; color:#bde8ff; font-size:0.6rem; letter-spacing:0.06em; text-transform:uppercase; padding:4px 8px; border-radius:999px; cursor:pointer; }
 .centrality-tab.is-active { background:rgba(0,229,255,0.18); border-color:#00e5ff; color:#00e5ff; }
 
-.centrality-metrics { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:8px; margin-bottom:10px; }
+.centrality-metrics { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px; margin-bottom:10px; }
 .centrality-metric { border:1px solid var(--card-border, #333); border-radius:10px; padding:8px; background:rgba(0,0,0,0.25); display:flex; flex-direction:column; gap:4px; font-size:0.6rem; text-transform:uppercase; letter-spacing:0.04em; color:#cfead2; }
 .centrality-metric strong { font-size:0.9rem; color:#00ff41; text-transform:none; letter-spacing:0; }
 .centrality-metric:nth-child(2) strong { color:#00e5ff; }
 .centrality-metric:nth-child(3) strong { color:#e040fb; }
-.centrality-metric:nth-child(4) strong { color:#ffd166; }
 
 .centrality-body { display:grid; grid-template-columns:1.1fr 0.9fr; gap:12px; flex-grow:1; min-height:0; }
 .centrality-list { overflow-y:auto; padding-right:6px; display:flex; flex-direction:column; gap:10px; }
@@ -442,6 +446,8 @@ body:not(.dark) .centrality-tab.is-active { background:rgba(0,119,182,0.15); }
     function renderVisitorStats(data) {
         updateText(IDS.VISIT.TOTAL, data.lifetime_total || 0);
         updateText(IDS.VISIT.MONTH, data.total_last_30_days || 0);
+        const regionEl = document.getElementById('dash-visit-region');
+        if (regionEl) regionEl.textContent = 'Top Region: Global';
 
         // 1. Trend Chart
         var domTrend = document.getElementById(IDS.VISIT.TREND);
@@ -606,7 +612,6 @@ body:not(.dark) .centrality-tab.is-active { background:rgba(0,119,182,0.15); }
 
             // Geo mix (US vs International)
             const geoEl = document.getElementById('dash-visit-geo');
-            const regionEl = document.getElementById('dash-visit-region');
             if (geoEl) {
                 const total = list.reduce((sum, c) => sum + (c.visitors || c.users || 0), 0) || 1;
                 const usCount = list.filter(c => c.country === 'United States').reduce((sum, c) => sum + (c.visitors || c.users || 0), 0);
@@ -661,12 +666,13 @@ body:not(.dark) .centrality-tab.is-active { background:rgba(0,119,182,0.15); }
                     return null;
                 }).filter(Boolean);
 
-                if (top3.length === 0) {
-                    mapEl.innerHTML = '<div style="padding:12px; font-size:0.6rem; opacity:0.6;">Map data unavailable</div>';
+                if (top3.length === 0 || typeof L === 'undefined') {
+                    mapEl.classList.remove('is-ready');
                 } else {
+                    const mapInner = mapEl.querySelector('.dash-mini-map-inner') || mapEl;
                     if (!mapEl.dataset.inited) {
                         mapEl.dataset.inited = 'true';
-                        const miniMap = L.map(mapEl, { zoomControl: false, attributionControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false, boxZoom: false, keyboard: false, tap: false });
+                        const miniMap = L.map(mapInner, { zoomControl: false, attributionControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false, boxZoom: false, keyboard: false, tap: false });
                         const tiles = document.body.classList.contains('dark')
                             ? L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { subdomains: 'abcd' })
                             : L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { subdomains: 'abcd' });
@@ -686,6 +692,7 @@ body:not(.dark) .centrality-tab.is-active { background:rgba(0,119,182,0.15); }
                         group.addTo(miniMap);
                         mapEl._miniMarkers = group;
                         miniMap.fitBounds(group.getBounds().pad(0.4));
+                        mapEl.classList.add('is-ready');
                     }
                 }
             }
@@ -1696,16 +1703,6 @@ body:not(.dark) .centrality-tab.is-active { background:rgba(0,119,182,0.15); }
             return count ? total / count : 0;
         })();
 
-        const currentYear = new Date().getFullYear();
-        const recentIndices = papers.map((p, i) => (p.year && p.year >= currentYear - 1) ? i : null).filter(v => v !== null);
-        const recentEigen = recentIndices.length ? computeEigen(recentIndices) : new Array(n).fill(0);
-
-        const movers = papers.map((p, i) => {
-            return { index: i, delta: (recentEigen[i] || 0) - (eigenScores[i] || 0) };
-        }).sort((a,b) => b.delta - a.delta);
-
-        const mover = movers.length ? movers[0] : null;
-
         const centralityInfo = papers.map((p, i) => ({
             index: i,
             title: p.title,
@@ -1819,10 +1816,6 @@ body:not(.dark) .centrality-tab.is-active { background:rgba(0,119,182,0.15); }
         updateMetricCard('centrality-density', density.toFixed(2));
         updateMetricCard('centrality-path', pathStats.avgPath ? pathStats.avgPath.toFixed(2) : '—');
         updateMetricCard('centrality-cluster', clusteringCoeff ? clusteringCoeff.toFixed(2) : '—');
-        if (mover) {
-            const moverPaper = papers[mover.index];
-            updateMetricCard('centrality-mover', moverPaper ? moverPaper.title.split(':')[0] : '—');
-        }
 
         const radarEl = document.getElementById('centrality-radar');
         if (radarEl) {
