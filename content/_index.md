@@ -21,8 +21,6 @@ sections:
         
         **Selected Venues:** MISQ • JMIS • ACM TMIS • ISF • IEEE ISI • HICSS • AMCIS • ICIS • ACM KDD
         
-        {{< publication_metrics >}}
-        
         [📄 Download Research Summary (PDF) →](/uploads/research-summary.pdf)
         
         [📖 View Google Scholar Profile →](https://scholar.google.com/citations?user=XDdwaZUAAAAJ&hl=en)
