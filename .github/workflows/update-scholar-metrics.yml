@@ -3,7 +3,7 @@ name: Update Scholar Metrics
 on:
   schedule:
     # Run on the 1st of every month at 9:00 AM UTC
-    - cron: '0 9 1 * *'
+    - cron: '0 9 * * 1'
   workflow_dispatch:  # Allow manual trigger
 
 jobs:
@@ -25,7 +25,12 @@ jobs:
       
       - name: Install dependencies
         run: |
-          pip install google-search-results google-analytics-data google-auth networkx matplotlib
+          pip install google-search-results google-analytics-data google-auth networkx matplotlib requests
+
+      - name: Update Altmetric Stats
+        env:
+          ALTMETRIC_API_KEY: ${{ secrets.ALTMETRIC_API_KEY }}
+        run: python scripts/update_altmetric.py
       
       - name: Generate Network Analysis
         run: python scripts/generate_network.py
@@ -46,19 +51,18 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           
-          # Simplified Workflow: Add files, check for changes, commit, push.
-          git add static/data/scholar-metrics.json static/data/visitor_stats.json
+          # Stage the specific metric files
+          git add static/data/scholar-metrics.json static/data/visitor_stats.json static/data/altmetric.json
           
-          # Only commit if there are changes (prevents empty commit errors)
+          # Also stage any other modifications (like network graphs) to ensure a clean state
+          git add -u
+          
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else
-            git commit -m "chore: Update Scholar metrics and visitor stats [skip ci]"
+            git commit -m "chore: Update metrics (Scholar, Visitor, Altmetric)"
+            # Use --autostash to safely handle any last-second file changes during the pull
+            git pull --rebase --autostash origin main
             
-            # Pull latest changes before pushing to avoid conflicts
-            # Use rebase to keep history clean, fallback to merge if rebase fails
-            git pull --rebase origin main || git pull origin main
-            
-            # Push changes
             git push origin main
           fi

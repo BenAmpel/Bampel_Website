@@ -1,318 +1,659 @@
-{{/* Research Command Center - Restored Manuscript Impact Network */}}
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-<div id="dashboard-root" style="min-height: 550px; margin: 30px 0;"></div>
+<div id="dashboard-wrapper" style="min-height:1300px; margin:30px 0; font-family:sans-serif;">
+<div style="display:grid; grid-template-columns:1fr 1fr; grid-template-rows:auto 600px 600px 300px; gap:0; border:1px solid var(--card-border, #333); border-radius:12px; overflow:hidden; background:var(--card-bg, rgba(255,255,255,0.02)); box-shadow:0 4px 20px rgba(0,0,0,0.1);">
+
+<div style="grid-column:1; grid-row:1; padding:20px; border-right:1px solid var(--card-border, #333); border-bottom:1px solid var(--card-border, #333);">
+    <h4 style="margin:0 0 10px; opacity:0.7; text-align:center; text-transform:uppercase; font-size:0.8rem;">Research Profile</h4>
+    <div id="dashboard-radar" style="width:100%; height:300px;"></div>
+</div>
+
+<div style="grid-column:2; grid-row:1; padding:25px; border-bottom:1px solid var(--card-border, #333); display:flex; flex-direction:column;">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:20px;">
+        <div><div style="font-size:0.75rem; opacity:0.6;">Primary Focus</div><div id="dash-metric-focus" style="font-size:1rem; font-weight:800; color:#00ff41; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">...</div></div>
+        <div><div style="font-size:0.75rem; opacity:0.6;">Trending</div><div id="dash-metric-trend" style="font-size:1rem; font-weight:800; color:#00e5ff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">...</div></div>
+        <div><div style="font-size:0.75rem; opacity:0.6;">Total Citations</div><div id="dash-metric-cites" style="font-size:1.4rem; font-weight:800; color:#e040fb;">0</div></div>
+        <div><div style="font-size:0.75rem; opacity:0.6;">h-index</div><div id="dash-metric-hindex" style="font-size:1.4rem; font-weight:800; opacity:0.9;">0</div></div>
+    </div>
+    <div style="flex-grow:1; border-top:1px solid var(--card-border, #333); padding-top:15px; position:relative;">
+        <h4 style="margin:0 0 5px; font-size:0.7rem; opacity:0.5; text-transform:uppercase;">Citation Velocity</h4>
+        <div id="dashboard-timeline" style="width:100%; height:160px;"></div>
+    </div>
+</div>
+
+<div style="grid-column:1; grid-row:2; padding:0; border-right:1px solid var(--card-border, #333); border-bottom:1px solid var(--card-border, #333); position:relative; height:100%;">
+    <div style="position:absolute; top:20px; left:20px; z-index:10; pointer-events:none;">
+        <h4 style="margin:0; font-size:0.8rem; opacity:0.7; text-transform:uppercase;">Impact Map</h4>
+        <p style="margin:0; font-size:0.65rem; opacity:0.5;">Connections by Topic, Venue & Co-authors</p>
+    </div>
+    <div id="dashboard-impact-map" style="width:100%; height:100%;"></div>
+</div>
+
+<div style="grid-column:2; grid-row:2; padding:25px; border-bottom:1px solid var(--card-border, #333); display:flex; flex-direction:column; height:100%; overflow:hidden;">
+    <h4 style="font-size:0.8rem; opacity:0.7; text-transform:uppercase; margin-bottom:15px; border-bottom:1px solid var(--card-border, #444); padding-bottom:10px;">Network Centrality Analysis</h4>
+    <div style="overflow-y:auto; padding-right:5px; flex-grow:1;">
+        <div style="margin-bottom:20px;">
+            <div style="font-size:0.75rem; font-weight:bold; color:#00ff41; margin-bottom:4px;">INFLUENCE (Eigenvector)</div>
+            <p style="font-size:0.65rem; opacity:0.5; margin:0 0 8px 0;">Papers connected to other highly connected papers</p>
+            <div id="dash-list-eigen" style="font-size:0.8rem; line-height:1.4;"><span style="opacity:0.3;">Calculating...</span></div>
+        </div>
+        <div style="margin-bottom:20px;">
+            <div style="font-size:0.75rem; font-weight:bold; color:#00e5ff; margin-bottom:4px;">BRIDGES (Betweenness)</div>
+            <p style="font-size:0.65rem; opacity:0.5; margin:0 0 8px 0;">Papers that connect different research clusters</p>
+            <div id="dash-list-between" style="font-size:0.8rem; line-height:1.4;"></div>
+        </div>
+        <div>
+            <div style="font-size:0.75rem; font-weight:bold; color:#e040fb; margin-bottom:4px;">HUBS (Degree)</div>
+            <p style="font-size:0.65rem; opacity:0.5; margin:0 0 8px 0;">Papers with the most direct relationships</p>
+            <div id="dash-list-degree" style="font-size:0.8rem; line-height:1.4;"></div>
+        </div>
+    </div>
+</div>
+
+<div style="grid-column:1; grid-row:3; padding:0; border-right:1px solid var(--card-border, #333); border-bottom:1px solid var(--card-border, #333); position:relative; height:100%;">
+    <div style="position:absolute; top:20px; left:20px; z-index:10; pointer-events:none;">
+        <h4 style="margin:0; font-size:0.8rem; opacity:0.7; text-transform:uppercase;">Collaboration Network</h4>
+        <p style="margin:0; font-size:0.65rem; opacity:0.5;">Co-authorship Connections</p>
+    </div>
+    <div id="dashboard-collab-network" style="width:100%; height:100%;"></div>
+</div>
+
+<div style="grid-column:2; grid-row:3; padding:0; border-bottom:1px solid var(--card-border, #333); position:relative; height:100%;">
+    <div style="position:absolute; top:20px; right:20px; z-index:400; pointer-events:none; text-align:right;">
+        <h4 style="margin:0; font-size:0.8rem; opacity:0.7; text-transform:uppercase; color:#333; text-shadow:0 0 5px white;">Research Footprint</h4>
+    </div>
+    <div id="dashboard-footprint-map" style="width:100%; height:100%; z-index:1;"></div>
+</div>
+
+<div style="grid-column:1; grid-row:4; padding:25px; border-right:1px solid var(--card-border, #333); display:flex; flex-direction:column;">
+    <h4 style="font-size:0.8rem; opacity:0.7; text-transform:uppercase; margin-bottom:15px;">Traffic Overview</h4>
+    <div style="display:flex; gap:20px; height:100%;">
+        <div style="flex:0 0 100px; display:flex; flex-direction:column; justify-content:center;">
+            <div style="margin-bottom:15px;">
+                <div style="font-size:0.7rem; opacity:0.6;">Total Visitors</div>
+                <div id="dash-visit-total" style="font-size:1.4rem; font-weight:800; color:#00ff41;">0</div>
+            </div>
+            <div>
+                <div style="font-size:0.7rem; opacity:0.6;">Last 30 Days</div>
+                <div id="dash-visit-month" style="font-size:1.4rem; font-weight:800; color:#00e5ff;">0</div>
+            </div>
+        </div>
+        <div style="flex-grow:1; position:relative;">
+            <div id="dash-visit-trend" style="width:100%; height:100%;"></div>
+        </div>
+    </div>
+</div>
+
+<div style="grid-column:2; grid-row:4; padding:25px; display:flex; flex-direction:column;">
+    <h4 style="font-size:0.8rem; opacity:0.7; text-transform:uppercase; margin-bottom:15px;">Audience & Reach</h4>
+    <div style="display:flex; gap:20px; height:100%;">
+        <div style="flex:1; position:relative;">
+            <div id="dash-visit-device" style="width:100%; height:100%;"></div>
+        </div>
+        <div style="flex:1; overflow-y:auto; border-left:1px solid var(--card-border, #333); padding-left:15px;">
+            <div style="font-size:0.7rem; font-weight:bold; margin-bottom:8px; opacity:0.8;">Top 5 Locations</div>
+            <div id="dash-visit-locations" style="font-size:0.75rem; line-height:1.5;">
+                <span style="opacity:0.5;">Loading...</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+</div>
+
+<style>
+/* Leaflet Markers */
+.custom-marker { background: transparent; }
+.custom-marker .marker-pin { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 4px rgba(0,0,0,0.3); }
+.conference-marker .marker-pin { background: #00ff41; }
+.collaboration-marker .marker-pin { background: #00bfff; }
+.institution-marker .marker-pin { background: #ff6b35; }
+body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px currentColor; }
+</style>
 
 <script type="text/javascript">
 (function() {
-    var root = document.getElementById('dashboard-root');
-    var radarChart, lineChart, graphChart;
+    // 1. IDS configuration
+    const IDS = {
+        RADAR: 'dashboard-radar',
+        LINE: 'dashboard-timeline',
+        MAP: 'dashboard-impact-map',
+        COLLAB: 'dashboard-collab-network',
+        FOOTPRINT: 'dashboard-footprint-map',
+        VISIT: {
+            TREND: 'dash-visit-trend',
+            DEVICE: 'dash-visit-device',
+            TOTAL: 'dash-visit-total',
+            MONTH: 'dash-visit-month',
+            LOCS: 'dash-visit-locations'
+        },
+        METRICS: {
+            FOCUS: 'dash-metric-focus', TREND: 'dash-metric-trend',
+            CITES: 'dash-metric-cites', HINDEX: 'dash-metric-hindex'
+        },
+        LISTS: { EIGEN: 'dash-list-eigen', BETWEEN: 'dash-list-between', DEGREE: 'dash-list-degree' }
+    };
 
-    // --- 1. LAYOUT GENERATOR ---
-    function renderLayout() {
-        var isDark = document.body.classList.contains('dark');
-        var bg = isDark ? 'rgba(255,255,255,0.02)' : '#ffffff';
-        var border = isDark ? '#333' : '#eee';
-        var muted = isDark ? '#888' : '#666';
-        var text = isDark ? '#aaa' : '#333';
-        var highlight = isDark ? '#00e5ff' : '#1a0dab';
-        var shadow = isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.05)';
-        
-        var c1 = isDark ? '#00ff41' : '#d93025'; 
-        var c2 = isDark ? '#00e5ff' : '#1a0dab'; 
-        var c3 = isDark ? '#e040fb' : '#9c27b0'; 
+    var radarChart, lineChart, graphChart, collabChart, visitTrendChart, visitDeviceChart;
 
-        return `
-        <div id="research-card" style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 0; background: ${bg}; border: 1px solid ${border}; border-radius: 12px; box-shadow: 0 4px 20px ${shadow}; overflow: hidden; min-height: 600px;">
-            
-            <div style="grid-column: 1; grid-row: 1; padding: 20px; display: flex; flex-direction: column; border-right: 1px solid ${border}; border-bottom: 1px solid ${border};">
-                <h4 style="margin: 0 0 10px; font-size: 0.9rem; color: ${muted}; text-transform: uppercase; letter-spacing: 1px; text-align: center;">Research Profile</h4>
-                <div id="dash-radar" style="width: 100%; height: 100%; min-height: 250px;"></div>
-            </div>
-
-            <div style="grid-column: 2; grid-row: 1; padding: 25px; border-bottom: 1px solid ${border}; display: flex; flex-direction: column;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                    <div><div style="font-size: 0.8rem; color: ${muted};">Primary Focus</div><div style="font-size: 1.1rem; font-weight: 800; color: ${c1};" id="metric-focus">...</div></div>
-                    <div><div style="font-size: 0.8rem; color: ${muted};">Trending</div><div style="font-size: 1.1rem; font-weight: 800; color: ${c2};" id="metric-trend">...</div></div>
-                    <div><div style="font-size: 0.8rem; color: ${muted};">Velocity</div><div style="font-size: 1.1rem; font-weight: 800; color: ${c2};" id="metric-velocity">-</div></div>
-                    <div><div style="font-size: 0.8rem; color: ${muted};">Total Citations</div><div style="font-size: 1.5rem; font-weight: 800; color: ${c3};" id="metric-cites">0</div></div>
-                    <div><div style="font-size: 0.8rem; color: ${muted};">h-index</div><div style="font-size: 1.5rem; font-weight: 800; color: ${text};" id="metric-hindex">0</div></div>
-                </div>
-                <div style="flex-grow: 1; border-top: 1px solid ${border}; padding-top: 15px;">
-                    <div id="dash-line" style="width: 100%; height: 180px;"></div>
-                </div>
-            </div>
-
-            <div style="grid-column: 1; grid-row: 2; padding: 0; border-right: 1px solid ${border}; position: relative;">
-                <h4 style="position:absolute; top:20px; left:20px; margin: 0; font-size: 0.9rem; color: ${muted}; text-transform: uppercase; z-index:10; pointer-events:none;">Impact Map</h4>
-                <div id="knowledge-graph" style="width: 100%; height: 100%;"></div>
-            </div>
-
-            <div style="grid-column: 2; grid-row: 2; padding: 25px; display: flex; flex-direction: column;">
-                <h4 style="font-size: 0.8rem; color: ${muted}; text-transform: uppercase; margin-bottom: 15px;">Collaboration DNA</h4>
-                
-                <div style="display: flex; gap: 20px; margin-bottom: 20px;">
-                    <div style="flex: 1; background: ${isDark ? 'rgba(255,255,255,0.05)' : '#f8f9fa'}; padding: 15px; border-radius: 8px;">
-                        <div style="font-size: 0.75rem; color: ${muted}; text-transform: uppercase;">Density</div>
-                        <div style="font-size: 1.4rem; font-weight: 800; color: ${text};" id="net-density">0.00</div>
-                        <div style="font-size: 0.7rem; opacity: 0.7; margin-top: 5px;">Network interconnection</div>
-                    </div>
-                    <div style="flex: 1; background: ${isDark ? 'rgba(255,255,255,0.05)' : '#f8f9fa'}; padding: 15px; border-radius: 8px;">
-                        <div style="font-size: 0.75rem; color: ${muted}; text-transform: uppercase;">Network Cohesion</div>
-                        <div style="font-size: 1.4rem; font-weight: 800; color: ${highlight};" id="net-lcc">0%</div>
-                        <div style="font-size: 0.7rem; opacity: 0.7; margin-top: 5px;">Largest component size</div>
-                    </div>
-                </div>
-
-                <div>
-                    <div style="font-size: 0.75rem; color: ${muted}; text-transform: uppercase; margin-bottom: 8px;">Primary Research Clusters</div>
-                    <div id="net-clusters" style="font-size: 0.85rem; line-height: 1.6;">
-                        <span style="opacity: 0.5;">Analyzing network...</span>
-                    </div>
-                </div>
-            </div>
-        </div>`;
-    }
-
-    // --- 2. INIT LAYOUT ---
-    root.innerHTML = renderLayout();
-    
-    // --- 3. DATA FETCHING ---
+    // 2. DATA LOADING
     const safeFetch = (url) => fetch(url).then(r => r.ok ? r.json() : null).catch(e => null);
 
     Promise.all([
         safeFetch('/data/publications.json'),
-        safeFetch('/data/scholar-metrics.json')
-    ]).then(([papersData, scholarData]) => {
+        safeFetch('/data/scholar-metrics.json'),
+        safeFetch('/data/visitor_stats.json')
+    ]).then(([papersData, scholarData, visitorData]) => {
         
-        // --- DATA NORMALIZATION (THE FIX) ---
         let papers = [];
-        if (papersData) {
-            // Handle both List [...] and Object {individualPublications: [...]}
+        if (scholarData && scholarData.individualPublications) {
+            papers = scholarData.individualPublications;
+        } else if (papersData) {
             papers = Array.isArray(papersData) ? papersData : (papersData.individualPublications || []);
         }
 
-        // Render Charts
-        if (scholarData) {
-            renderRadar(scholarData, papers);
-            if (scholarData.citationsByYear) renderLine(scholarData.citationsByYear);
-            
-            updateText('metric-hindex', scholarData.metrics.hIndex || 0);
-            updateText('metric-cites', scholarData.metrics.citations || 0);
-            
-            // Inferred Interests
-            let interests = scholarData.metrics.interests || ['AI', 'Cybersecurity'];
-            updateText('metric-focus', interests[0] || "Cybersecurity");
-            updateText('metric-trend', interests[1] || "AI");
-            updateText('metric-velocity', scholarData.metrics.citationVelocity || "-");
-        }
+        processMetrics(papers, scholarData);
 
-        // Render Manuscript Network (Impact Map)
-        if (papers.length > 0) {
-            renderMap(papers);
-        } else {
-            document.getElementById('knowledge-graph').innerHTML = '<div style="padding:40px; text-align:center; opacity:0.5">No publication data found.</div>';
-        }
-
-    });
-
-    // --- 4. RENDER MANUSCRIPT NETWORK (The "Impact Map") ---
-    function renderMap(papers) {
-        var dom = document.getElementById('knowledge-graph');
-        if (!dom) return;
+        renderRadar(papers); 
+        if(scholarData && scholarData.citationsByYear) renderLine(scholarData.citationsByYear);
+        renderWorkingMap(papers); 
+        calculateAllMetrics(papers);
+        renderCollabNetwork(papers);
+        renderFootprintMap();
         
-        // Initialize ECharts
-        if (graphChart) graphChart.dispose();
-        graphChart = echarts.init(dom);
-        var isDark = document.body.classList.contains('dark');
+        if(visitorData) renderVisitorStats(visitorData);
 
-        // --- A. PREPARE DATA ---
-        const stopWords = new Set(["the", "and", "of", "in", "on", "for", "with", "a", "an", "to", "at", "by", "from", "up", "about", "into", "over", "after", "is", "are", "was", "were", "be", "been", "being", "have", "has", "had", "do", "does", "did", "can", "could", "should", "would", "will", "study", "analysis", "using", "based", "approach", "review", "case", "system", "towards", "via", "framework", "model", "data"]);
+    }).catch(err => console.error("Dashboard Error:", err));
 
-        // Helper to extract keywords from title
-        const getTokens = (str) => {
-            if(!str) return [];
-            return str.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(w => w.length > 3 && !stopWords.has(w));
-        };
 
-        // Helper to normalize authors
-        const getAuthors = (p) => {
-            // Handle List or String
-            let authStr = Array.isArray(p.authors) ? p.authors.join(',') : (p.authors || "");
-            return authStr.toLowerCase().split(',').map(a => a.trim()).filter(a => a && !a.includes("ampel"));
-        };
+    // ========================================================================
+    // LOGIC: VISITOR STATS (Row 4)
+    // ========================================================================
+    function renderVisitorStats(data) {
+        updateText(IDS.VISIT.TOTAL, data.lifetime_total || 0);
+        updateText(IDS.VISIT.MONTH, data.total_last_30_days || 0);
 
-        // Create Nodes
-        var nodes = papers.map((p, idx) => ({
-            id: idx.toString(),
-            name: p.title,
-            year: p.year,
-            venue: p.venue || "Unknown",
-            value: p.citations || 0,
-            tokens: getTokens(p.title),
-            authors: getAuthors(p),
-            symbolSize: Math.max(5, Math.log(p.citations + 2) * 6),
-            itemStyle: { color: isDark ? '#00e5ff' : '#1a0dab' },
-            label: { show: (p.citations > 10) }
-        }));
-
-        // Create Edges (Manuscript Relationships)
-        var links = [];
-        var adjList = new Map(); // For stats calculation
-
-        for (let i = 0; i < nodes.length; i++) {
-            if(!adjList.has(i)) adjList.set(i, []);
+        // 1. Trend Chart
+        var domTrend = document.getElementById(IDS.VISIT.TREND);
+        if(domTrend && data.monthly_trend) {
+            if(visitTrendChart) visitTrendChart.dispose();
+            visitTrendChart = echarts.init(domTrend);
             
-            for (let j = i + 1; j < nodes.length; j++) {
-                let nodeA = nodes[i];
-                let nodeB = nodes[j];
-                let weight = 0;
-                let reasons = [];
+            let months = data.monthly_trend.map(d => d.month);
+            let counts = data.monthly_trend.map(d => d.visitors);
+            
+            visitTrendChart.setOption({
+                tooltip: { trigger: 'axis' },
+                grid: { top: 10, right: 10, bottom: 20, left: 10, containLabel: false },
+                xAxis: { show: false, data: months },
+                yAxis: { show: false, type: 'value' },
+                series: [{
+                    type: 'bar',
+                    data: counts,
+                    itemStyle: { color: '#00ff41', borderRadius: [2,2,0,0] },
+                    barWidth: '60%'
+                }]
+            });
+        }
 
-                // 1. Topic Match
-                let commonWords = nodeA.tokens.filter(x => nodeB.tokens.includes(x));
-                if (commonWords.length > 0) { weight += commonWords.length * 1.5; reasons.push("Topic"); }
+        // 2. Device Chart
+        var domDevice = document.getElementById(IDS.VISIT.DEVICE);
+        if(domDevice && data.devices) {
+            if(visitDeviceChart) visitDeviceChart.dispose();
+            visitDeviceChart = echarts.init(domDevice);
+            let isDark = document.body.classList.contains('dark');
+            
+            visitDeviceChart.setOption({
+                tooltip: { trigger: 'item' },
+                series: [{
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    center: ['50%', '50%'],
+                    itemStyle: { borderRadius: 4, borderColor: isDark?'#111':'#fff', borderWidth: 2 },
+                    label: { show: false },
+                    data: data.devices.map(d => ({ name: d.device, value: d.users }))
+                }]
+            });
+        }
 
-                // 2. Co-Author Match
-                let commonAuths = nodeA.authors.filter(x => nodeB.authors.includes(x));
-                if (commonAuths.length > 0) { weight += commonAuths.length * 3.0; reasons.push("Authors"); }
+        // 3. Top Locations (Filtered Logic)
+        var domLocs = document.getElementById(IDS.VISIT.LOCS);
+        if(domLocs) {
+            // Prioritize 'top_locations' which contains city/country
+            let rawList = data.top_locations || data.countries || data.locations || [];
+            
+            // FIX: Filter empty city names
+            let list = rawList.filter(d => d.city && d.city.trim() !== "");
+            
+            // Sort by visitors or users
+            list.sort((a,b) => (b.visitors || b.users || 0) - (a.visitors || a.users || 0));
+            
+            // Top 5
+            let top5 = list.slice(0, 5);
 
-                // 3. Venue Match
-                if (nodeA.venue !== "Unknown" && nodeA.venue === nodeB.venue) { weight += 1.0; reasons.push("Venue"); }
-
-                if (weight > 1.0) {
-                    links.push({
-                        source: i.toString(),
-                        target: j.toString(),
-                        value: weight,
-                        desc: reasons.join(", "),
-                        lineStyle: {
-                            width: Math.min(weight, 3),
-                            opacity: isDark ? 0.3 : 0.2,
-                            curveness: 0.2
-                        }
-                    });
-                    // Build Adjacency for Stats
-                    adjList.get(i).push(j);
-                    if(!adjList.has(j)) adjList.set(j, []);
-                    adjList.get(j).push(i);
-                }
+            if(top5.length > 0) {
+                let html = top5.map(c => {
+                    let name = c.city; 
+                    let fullName = c.country ? `${c.city}, ${c.country}` : c.city;
+                    let count = c.visitors || c.users || 0;
+                    
+                    return `<div style="display:flex; justify-content:space-between; margin-bottom:4px;" title="${fullName}">
+                        <span style="opacity:0.7; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:140px;">${name}</span>
+                        <span style="font-weight:bold; color:#e040fb;">${count}</span>
+                    </div>`;
+                }).join('');
+                domLocs.innerHTML = html;
+            } else {
+                domLocs.innerHTML = '<span style="opacity:0.5">No location data</span>';
             }
         }
-
-        // --- B. CALCULATE NETWORK STATS (Collaboration DNA) ---
-        let n = nodes.length;
-        let e = links.length;
-        // Density = 2E / N(N-1)
-        let density = (n > 1) ? (2 * e) / (n * (n - 1)) : 0;
-        
-        // LCC (BFS)
-        let visited = new Set();
-        let maxComp = 0;
-        for(let i=0; i<n; i++) {
-            if(!visited.has(i)) {
-                let size = 0;
-                let q = [i];
-                visited.add(i);
-                while(q.length > 0) {
-                    let u = q.shift();
-                    size++;
-                    let neighbors = adjList.get(u) || [];
-                    for(let v of neighbors) {
-                        if(!visited.has(v)) { visited.add(v); q.push(v); }
-                    }
-                }
-                if(size > maxComp) maxComp = size;
-            }
-        }
-        let lccPct = (n>0) ? Math.round((maxComp/n)*100) : 0;
-
-        // Update UI
-        updateText('net-density', density.toFixed(3));
-        updateText('net-lcc', lccPct + "%");
-        
-        // Identify "Clusters" (Simple approach: Most connected nodes as proxies for topics)
-        let hubs = [...nodes].sort((a,b) => (adjList.get(parseInt(b.id))||[]).length - (adjList.get(parseInt(a.id))||[]).length).slice(0,3);
-        let clusterHtml = hubs.map((h, i) => {
-            let color = ['#00ff41', '#00e5ff', '#e040fb'][i];
-            return `<div style="margin-bottom:8px; padding-left:10px; border-left:3px solid ${color};">
-                <strong style="color:inherit; opacity:0.9;">Cluster ${i+1}</strong><br>
-                <span style="font-size:0.75em; opacity:0.7;">Centered on "${h.name.substring(0,30)}..."</span>
-            </div>`;
-        }).join('');
-        document.getElementById('net-clusters').innerHTML = clusterHtml;
+    }
 
 
-        // --- C. RENDER GRAPH ---
-        var option = {
-            tooltip: {
-                formatter: (p) => {
-                    if (p.dataType === 'edge') return `Linked by: ${p.data.desc}`;
-                    return `<div style="max-width:200px; white-space:normal;"><strong>${p.name}</strong><br>${p.data.year} • ${p.value} Citations</div>`;
-                }
-            },
-            series: [{
-                type: 'graph',
-                layout: 'force',
-                data: nodes,
-                links: links,
-                roam: true,
-                zoom: 0.6,
-                label: { position: 'right', color: isDark ? '#ddd' : '#333' },
-                lineStyle: { color: isDark ? '#aaa' : '#999' },
-                force: {
-                    repulsion: 300,
-                    gravity: 0.1,
-                    edgeLength: [50, 150]
-                }
-            }]
+    // ========================================================================
+    // LOGIC: METRICS & RADAR
+    // ========================================================================
+    function processMetrics(papers, scholarData) {
+        const taxonomy = {
+            'AI / Deep Learning': ['Deep Learning', 'Neural', 'Transfer Learning', 'Embedding', 'Machine Learning', 'Artificial Intelligence', 'Adversarial'],
+            'Cybersecurity':      ['Cyber', 'Vulnerability', 'Exploit', 'Attack', 'Threat', 'Security', 'Malicious', 'Ransomware', 'Phishing'],
+            'LLMs & NLP':         ['Large Language Model', 'LLM', 'Text Analytics', 'NLP', 'Transformer', 'Bert', 'GPT', 'Language Models'],
+            'Hacker Communities': ['Hacker', 'Forum', 'Dark Web', 'Paste', 'Community', 'Marketplace', 'Underground'],
+            'Design Science':     ['Design Science', 'Framework', 'Artifact', 'System', 'Implementation', 'Prototyping'],
+            'Behavioral':         ['Nudging', 'Bias', 'Social', 'Human', 'Behavior', 'Psychology', 'Decision', 'Trust']
         };
-        graphChart.setOption(option);
+
+        let counts = {};
+        let recentCounts = {};
+        let currentYear = new Date().getFullYear();
+        Object.keys(taxonomy).forEach(k => { counts[k] = 0; recentCounts[k] = 0; });
+
+        papers.forEach(p => {
+            let text = (p.title || "").toLowerCase();
+            Object.keys(taxonomy).forEach(cat => {
+                if(taxonomy[cat].some(k => text.includes(k.toLowerCase()))) {
+                    counts[cat]++;
+                    if(p.year >= currentYear - 2) recentCounts[cat]++;
+                }
+            });
+        });
+
+        let topSkill = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
+        let trendSkill = Object.entries(recentCounts).sort((a,b) => b[1]-a[1])[0];
+        updateText(IDS.METRICS.FOCUS, topSkill ? topSkill[0] : "Cybersecurity");
+        updateText(IDS.METRICS.TREND, trendSkill ? trendSkill[0] : "AI");
+        if(scholarData && scholarData.metrics) {
+            updateText(IDS.METRICS.CITES, scholarData.metrics.citations || 0);
+            updateText(IDS.METRICS.HINDEX, scholarData.metrics.hIndex || 0);
+        }
+        
+        renderRadarChart(counts); 
     }
 
-    // --- 5. HELPERS & CHART CONFIG ---
-    function updateText(id, val) {
-        const el = document.getElementById(id);
-        if (el) el.innerText = val;
-    }
-
-    // Initialize Radar/Line charts (Simplified placeholders)
-    // Ensure you have ApexCharts or ECharts logic for these loaded or reuse previous code
-    function renderRadar(data, papers) {
-        var dom = document.getElementById('dash-radar');
+    function renderRadarChart(counts) {
+        var dom = document.getElementById(IDS.RADAR);
         if(!dom) return;
         if(radarChart) radarChart.dispose();
         radarChart = echarts.init(dom);
-        
-        // Dynamic Categories
-        let cats = (data.metrics && data.metrics.interests) ? data.metrics.interests : ['AI', 'Cyber'];
-        let seriesData = cats.map(c => papers.filter(p => p.title.toLowerCase().includes(c.toLowerCase())).length || 1);
-        
+        let data = Object.keys(counts).map(k => ({ name: k, value: counts[k] }));
+        let max = Math.max(...data.map(d => d.value)) || 1;
         let isDark = document.body.classList.contains('dark');
         radarChart.setOption({
-            radar: { indicator: cats.map((c,i) => ({name:c, max: Math.max(...seriesData)+1})), splitArea:{show:false} },
-            series: [{ type: 'radar', data: [{value: seriesData}], itemStyle: {color: isDark?'#00ff41':'#d93025'}, areaStyle:{opacity:0.2} }]
+            tooltip: { trigger: 'item' },
+            radar: { indicator: data.map(d => ({ name: d.name, max: max + 2 })), shape: 'circle', splitArea: { show: false }, axisName: { color: isDark ? '#aaa' : '#333' } },
+            series: [{ type: 'radar', data: [{ value: data.map(d => d.value), itemStyle: { color: isDark ? '#00ff41' : '#d93025' }, areaStyle: { opacity: 0.2 } }] }]
         });
     }
+    
+    function renderRadar(papers) { }
 
-    function renderLine(history) {
-        var dom = document.getElementById('dash-line');
+
+    // ========================================================================
+    // LOGIC: IMPACT MAP (UPDATED TOOLTIP)
+    // ========================================================================
+    function renderWorkingMap(papers) {
+        var dom = document.getElementById(IDS.MAP);
+        if(!dom || papers.length === 0) return;
+        if(graphChart) graphChart.dispose();
+        graphChart = echarts.init(dom);
+        
+        const STOP_WORDS = new Set(['the','of','and','in','to','a','for','on','with','using','an','based','via','system','analysis','approach','study','framework','model','data','from','by','detection','paper','research','towards']);
+        const WEIGHT_TOPIC = 1.0;
+        const WEIGHT_VENUE = 2.0;
+        const WEIGHT_AUTHOR = 3.0;
+        const LINK_THRESHOLD = 1.5;
+
+        let nodes = [];
+        let links = [];
+
+        papers.forEach((p, index) => {
+            let words = (p.title||"").toLowerCase().replace(/[^a-z0-9 ]/g, '').split(/\s+/).filter(w => w.length > 3 && !STOP_WORDS.has(w));
+            p._words = new Set(words);
+            p._authors = new Set();
+            if(p.authors) {
+                let authStr = Array.isArray(p.authors) ? p.authors.join(',') : p.authors;
+                authStr.split(',').forEach(a => {
+                    let clean = a.trim().toLowerCase();
+                    if(!clean.includes('ampel')) p._authors.add(clean);
+                });
+            }
+            p._venue = p.venue ? p.venue.toLowerCase().trim() : "";
+
+            nodes.push({
+                id: index,
+                name: p.title,
+                value: p.citations || 0,
+                year: p.year,
+                authors: p.authors,
+                venue: p.venue,
+                symbolSize: Math.max(10, Math.min(65, Math.log((p.citations || 0) + 2) * 9)),
+                itemStyle: { color: getColorByYear(p.year) },
+                label: { show: (p.citations || 0) > 15, formatter: p => p.name.length > 15 ? p.name.substring(0, 15) + '...' : p.name }
+            });
+        });
+
+        for (let i = 0; i < papers.length; i++) {
+            for (let j = i + 1; j < papers.length; j++) {
+                let p1 = papers[i];
+                let p2 = papers[j];
+                let score = 0;
+                let reasons = [];
+                let commonWords = 0;
+                p1._words.forEach(w => { if (p2._words.has(w)) commonWords++; });
+                if (commonWords > 0) { score += (commonWords * WEIGHT_TOPIC); reasons.push(`${commonWords} Keywords`); }
+                if (p1._venue && p2._venue && p1._venue === p2._venue) { score += WEIGHT_VENUE; reasons.push("Same Venue"); }
+                let commonAuthors = 0;
+                p1._authors.forEach(a => { if (p2._authors.has(a)) commonAuthors++; });
+                if (commonAuthors > 0) { score += (commonAuthors * WEIGHT_AUTHOR); reasons.push(`${commonAuthors} Co-Authors`); }
+
+                if (score >= LINK_THRESHOLD) {
+                    let avgCites = ((p1.citations || 0) + (p2.citations || 0)) / 2;
+                    let impactBonus = Math.log(avgCites + 1) * 1.5;
+                    links.push({
+                        source: i, target: j, value: score + impactBonus, reason: reasons.join(", "),
+                        lineStyle: { width: Math.min((score * 0.5) + impactBonus, 5), opacity: Math.min(0.15 + (score * 0.1), 0.7), curveness: 0.2 }
+                    });
+                }
+            }
+        }
+
+        let isDark = document.body.classList.contains('dark');
+        graphChart.setOption({
+            backgroundColor: 'transparent',
+            tooltip: {
+                trigger: 'item',
+                confine: true, 
+                position: function (point, params, dom, rect, size) {
+                    return [point[0] - (size.contentSize[0] / 2), point[1] - size.contentSize[1] - 20];
+                },
+                formatter: (p) => {
+                    if (p.dataType === 'edge') {
+                        return `<div style="max-width:200px; white-space:normal;"><strong>Connection</strong><br>Strength: ${Math.floor(p.value)}<br>${p.data.reason}</div>`;
+                    }
+                    return `<div style="max-width:250px; white-space:normal; word-wrap:break-word;">
+                                <strong>${p.name}</strong><br>
+                                <span style="opacity:0.8">Year: ${p.data.year}</span><br>
+                                <span style="opacity:0.8">Citations: ${p.value}</span>
+                            </div>`;
+                }
+            },
+            series: [{ type: 'graph', layout: 'force', data: nodes, links: links, roam: true, zoom: 0.75, label: { position: 'right', color: 'inherit' }, lineStyle: { color: isDark ? '#aaa' : '#666' }, force: { repulsion: 500, gravity: 0.1, edgeLength: [50, 300] } }]
+        });
+        
+        const btn = document.querySelector('.js-theme-toggle');
+        if(btn) { btn.addEventListener('click', () => { setTimeout(() => { let isDarkNow = document.body.classList.contains('dark'); graphChart.setOption({ series: [{ lineStyle: { color: isDarkNow ? '#aaa' : '#666' } }] }); }, 100); }); }
+    }
+
+
+    // ========================================================================
+    // LOGIC: COLLABORATION NETWORK
+    // ========================================================================
+    function renderCollabNetwork(papers) {
+        var dom = document.getElementById(IDS.COLLAB);
         if(!dom) return;
+        if(collabChart) collabChart.dispose();
+        collabChart = echarts.init(dom);
+
+        var myName = "Benjamin Ampel";
+        var nameMap = {
+            'B Ampel': 'Benjamin Ampel', 'BM Ampel': 'Benjamin Ampel', 'B. Ampel': 'Benjamin Ampel', 'admin': 'Benjamin Ampel',
+            'H Chen': 'Hsinchun Chen', 'H. Chen': 'Hsinchun Chen',
+            'S Samtani': 'Sagar Samtani', 'S. Samtani': 'Sagar Samtani',
+            'S Ullman': 'Steven Ullman', 'S. Ullman': 'Steven Ullman',
+            'H Zhu': 'Hongyi Zhu', 'H. Zhu': 'Hongyi Zhu',
+            'M Patton': 'Mark Patton', 'M. Patton': 'Mark Patton',
+            'B Lazarine': 'Ben Lazarine', 'B. Lazarine': 'Ben Lazarine',
+            'T Vahedi': 'Tala Vahedi', 'T. Vahedi': 'Tala Vahedi',
+            'K Otto': 'Kaeli Otto', 'K. Otto': 'Kaeli Otto',
+            'Y Gao': 'Yang Gao', 'Y. Gao': 'Yang Gao',
+            'J Hu': 'James Hu', 'J. Hu': 'James Hu',
+            'CH Yang': 'Chi-Heng Yang', 'JF Nunamaker Jr': 'Jay Nunamaker',
+            'C Marx': 'Carolin Marx', 'C Dacosta': 'Cade Dacosta',
+            'C Zhang': 'Chengjun Zhang', 'M Hashim': 'Matthew Hashim',
+            'M Wagner': 'Mason Wagner', 'RY Reyes': 'Raul Reyes',
+            'S Yang': 'Shanchieh Yang', 'Y Li': 'Yidong Li', 'Y. Li': 'Yidong Li'
+        };
+        function normalize(name) { return nameMap[name] || name; }
+
+        var nodeCounts = new Map();
+        var linkCounts = new Map();
+        var maxCount = 0;
+
+        papers.forEach(function(paper) {
+            var rawAuthors = paper.authors;
+            if (!rawAuthors) return;
+            var authorList = Array.isArray(rawAuthors) ? rawAuthors : rawAuthors.split(',');
+            var authors = [...new Set(authorList.map(a => normalize(a.trim())).filter(a => a))]; 
+            
+            authors.forEach(auth => {
+                let count = (nodeCounts.get(auth) || 0) + 1;
+                nodeCounts.set(auth, count);
+                if (auth !== myName && count > maxCount) maxCount = count;
+            });
+
+            for (let i = 0; i < authors.length; i++) {
+                for (let j = i + 1; j < authors.length; j++) {
+                    let source = authors[i], target = authors[j];
+                    if (source === target) continue;
+                    let pairId = [source, target].sort().join("|");
+                    linkCounts.set(pairId, (linkCounts.get(pairId) || 0) + 1);
+                }
+            }
+        });
+
+        var nodes = Array.from(nodeCounts.entries()).map(([name, count]) => {
+            let isMe = (name === myName);
+            return {
+                id: name,
+                name: name,
+                value: count,
+                symbolSize: isMe ? 60 : Math.max(20, Math.min(50, count * 8)),
+                itemStyle: { color: isMe ? '#ffffff' : null },
+                fixed: isMe,
+                x: isMe ? dom.clientWidth / 2 : null,
+                y: isMe ? dom.clientHeight / 2 : null
+            };
+        });
+
+        var links = Array.from(linkCounts.entries()).map(([id, count]) => {
+            let [source, target] = id.split("|");
+            return {
+                source: source, target: target, value: count,
+                lineStyle: { width: Math.min(1.5 + (count * 0.8), 6), opacity: 0.6 }
+            };
+        });
+
+        function getCollabColor(val, max, isDark) {
+            var ratio = Math.min(Math.max((val - 1) / (max - 1 || 1), 0), 1);
+            var hue = (1 - ratio) * 120;
+            return isDark ? `hsl(${hue}, 90%, 60%)` : `hsl(${hue}, 80%, 40%)`;
+        }
+
+        let isDark = document.body.classList.contains('dark');
+        nodes.forEach(n => {
+            if(n.id === myName) {
+                n.itemStyle = { color: isDark ? '#fff' : '#000', borderColor: isDark?'#000':'#fff', borderWidth: 2 };
+            } else {
+                n.itemStyle = { color: getCollabColor(n.value, maxCount, isDark) };
+            }
+            n.label = { show: n.value > 1 || n.id === myName, color: isDark?'#eee':'#333' };
+        });
+        links.forEach(l => {
+            l.lineStyle.color = getCollabColor(l.value, maxCount, isDark);
+        });
+
+        collabChart.setOption({
+            backgroundColor: 'transparent',
+            tooltip: { formatter: p => p.dataType==='edge' ? `${p.data.source} & ${p.data.target}<br>${p.value} Papers` : `${p.name}: ${p.value} Papers` },
+            series: [{
+                type: 'graph', layout: 'force', data: nodes, links: links, roam: true, zoom: 0.6,
+                label: { position: 'right' },
+                lineStyle: { curveness: 0.2 },
+                force: { repulsion: 800, gravity: 0.1, edgeLength: [30, 150] }
+            }]
+        });
+        
+        const btn = document.querySelector('.js-theme-toggle');
+        if(btn) { btn.addEventListener('click', () => { setTimeout(() => { renderCollabNetwork(papers); }, 100); }); }
+    }
+
+
+    // ========================================================================
+    // LOGIC: FOOTPRINT MAP
+    // ========================================================================
+    function renderFootprintMap() {
+        var container = document.getElementById(IDS.FOOTPRINT);
+        if(!container) return;
+        
+        var map = L.map(IDS.FOOTPRINT).setView([30, -20], 2);
+
+        var lightTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; OpenStreetMap &copy; CARTO', subdomains: 'abcd', maxZoom: 18 });
+        var darkTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; OpenStreetMap &copy; CARTO', subdomains: 'abcd', maxZoom: 18 });
+
+        if (document.body.classList.contains('dark')) { darkTiles.addTo(map); } else { lightTiles.addTo(map); }
+
+        var createIcon = (color) => L.divIcon({
+            className: 'custom-marker',
+            html: `<div style="width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 4px rgba(0,0,0,0.3);background:${color};"></div>`,
+            iconSize: [20, 20], iconAnchor: [10, 10]
+        });
+        
+        var confIcon = createIcon('#00ff41');
+        var collabIcon = createIcon('#00bfff');
+        var instIcon = createIcon('#ff6b35');
+
+        var points = [
+            {{ range $.Site.Data.impact_map }}
+            { "title": "{{ .title }}", "lat": {{ .lat }}, "lng": {{ .lng }}, "location": "{{ .location }}", "desc": "{{ .description }}", "cat": "{{ .category }}" },
+            {{ end }}
+        ];
+
+        points.forEach(function(point) {
+            var icon = confIcon;
+            if(point.cat === 'Collaboration') icon = collabIcon;
+            if(point.cat === 'Institution') icon = instIcon;
+            var popup = `<div><strong>${point.title}</strong><br><span style="font-size:0.8em">${point.location}</span><br><span style="font-size:0.8em;opacity:0.7">${point.cat}</span></div>`;
+            L.marker([point.lat, point.lng], {icon: icon}).addTo(map).bindPopup(popup);
+        });
+
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((m) => {
+                if (m.attributeName === 'class') {
+                    if (document.body.classList.contains('dark')) { map.removeLayer(lightTiles); if(!map.hasLayer(darkTiles)) darkTiles.addTo(map); }
+                    else { map.removeLayer(darkTiles); if(!map.hasLayer(lightTiles)) lightTiles.addTo(map); }
+                }
+            });
+        });
+        observer.observe(document.body, { attributes: true });
+        
+        setTimeout(() => map.invalidateSize(), 500);
+        window.addEventListener('resize', () => map.invalidateSize());
+    }
+
+
+    // --- HELPERS (Line, Text) ---
+    function renderLine(history) {
+        var dom = document.getElementById(IDS.LINE);
+        if(!dom || !history) return;
         if(lineChart) lineChart.dispose();
         lineChart = echarts.init(dom);
         let isDark = document.body.classList.contains('dark');
         lineChart.setOption({
-            grid: {top:10, bottom:20, right:10, left:30},
-            xAxis: {type:'category', data: history.map(h=>h.year), axisLine:{show:false}},
-            yAxis: {type:'value', splitLine:{show:false}},
-            series: [{type:'bar', data: history.map(h=>h.citations), itemStyle:{color: isDark?'#00e5ff':'#1a0dab'}}]
+            tooltip: { trigger: 'axis', formatter: '{b}: {c} Citations' },
+            grid: { top: 10, right: 10, bottom: 20, left: 30, containLabel: true },
+            xAxis: { type: 'category', data: history.map(d => d.year), axisLine: { show: false }, axisLabel: { color: isDark ? '#888' : '#666', fontSize: 9 } },
+            yAxis: { type: 'value', splitLine: { show: false }, axisLabel: { color: isDark ? '#888' : '#666', fontSize: 9 } },
+            series: [{ type: 'bar', data: history.map(d => d.citations), itemStyle: { color: isDark ? '#00e5ff' : '#1a0dab', borderRadius: [2,2,0,0] }, barWidth: '40%' }]
         });
     }
 
+    function calculateAllMetrics(papers) {
+        let n = papers.length;
+        let adj = Array.from({length: n}, () => []);
+        let degrees = new Array(n).fill(0);
+        const getWeight = (i, j) => {
+            let p1 = papers[i], p2 = papers[j];
+            let w = 0;
+            if(p1.venue === p2.venue && p1.venue) w += 1;
+            let t1 = (p1.title||"").toLowerCase(); let t2 = (p2.title||"").toLowerCase();
+            let common = t1.split(' ').filter(word => word.length > 4 && t2.includes(word)).length;
+            if(common > 0) w += common * 0.5;
+            return w;
+        };
+        for(let i=0; i<n; i++) {
+            for(let j=i+1; j<n; j++) {
+                let weight = getWeight(i, j);
+                if(weight > 0.5) { adj[i].push(j); adj[j].push(i); degrees[i]++; degrees[j]++; }
+            }
+        }
+        let eigenScores = new Array(n).fill(1.0);
+        for(let iter=0; iter<10; iter++) {
+            let nextScores = new Array(n).fill(0);
+            for(let i=0; i<n; i++) { for(let neighbor of adj[i]) { nextScores[i] += eigenScores[neighbor]; } }
+            let maxS = Math.max(...nextScores) || 1;
+            eigenScores = nextScores.map(s => s / maxS);
+        }
+        let betweenness = new Array(n).fill(0);
+        for(let s=0; s<n; s++) {
+            let q = [s], preds = Array.from({length: n}, () => []), levels = new Array(n).fill(-1); levels[s] = 0;
+            while(q.length > 0) {
+                let v = q.shift();
+                for(let w of adj[v]) {
+                    if(levels[w] === -1) { levels[w] = levels[v] + 1; q.push(w); }
+                    if(levels[w] === levels[v] + 1) { preds[w].push(v); }
+                }
+            }
+            for(let i=0; i<n; i++) { if(i !== s && levels[i] > 0) { for(let p of preds[i]) betweenness[p] += 1; } }
+        }
+        const renderList = (id, scores, color) => {
+            let ranked = papers.map((p, i) => ({ title: p.title, val: scores[i] })).sort((a,b) => b.val - a.val).slice(0, 3);
+            let html = ranked.map((r, i) => `<div style="display:flex; gap:8px; margin-bottom:6px; align-items:start;"><div style="font-weight:bold; color:${color}; font-size:0.9em; min-width:15px;">${i+1}.</div><div style="font-size:0.8em; line-height:1.2; opacity:0.9;">${r.title}</div></div>`).join('');
+            let el = document.getElementById(id); if(el) el.innerHTML = html;
+        };
+        renderList(IDS.LISTS.EIGEN, eigenScores, '#00ff41');
+        renderList(IDS.LISTS.BETWEEN, betweenness, '#00e5ff');
+        renderList(IDS.LISTS.DEGREE, degrees, '#e040fb');
+    }
+
+    function getColorByYear(year) {
+        let y = parseInt(year) || 2022;
+        if (y < 2020) return '#e040fb';
+        if (y < 2023) return '#00e5ff';
+        return '#00ff41';
+    }
+
+    function updateText(id, val) { var el = document.getElementById(id); if(el) el.innerText = val; }
+
     window.addEventListener('resize', function() {
-        if(graphChart) graphChart.resize();
         if(radarChart) radarChart.resize();
         if(lineChart) lineChart.resize();
+        if(graphChart) graphChart.resize();
+        if(collabChart) collabChart.resize();
+        if(visitTrendChart) visitTrendChart.resize();
+        if(visitDeviceChart) visitDeviceChart.resize();
     });
 
 })();

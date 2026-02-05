@@ -6,8 +6,6 @@ authors:
   - "James Hu"
   - "Hsinchun Chen"
 date: 2025-02-07
-publication: "ACM Transactions on Management Information Systems"
-publication_types: ["2"]
 doi: "10.1145/3682069"
 draft: false
 

@@ -23,7 +23,7 @@ sections:
         | 🌟 **5** Q1 Journal Publications | 🏛️ **3** FT50 Publications | 🎯 **2** UTD24 Publications |
         |:---:|:---:|:---:|
         
-        **Top Venues:** MISQ • JMIS • ACM TMIS • ISF • IEEE ISI • HICSS • AMCIS • ICIS • ACM KDD
+        **Selected Venues:** MISQ • JMIS • ACM TMIS • ISF • IEEE ISI • HICSS • AMCIS • ICIS • ACM KDD
         
         {{< publication_metrics >}}
         
@@ -35,20 +35,8 @@ sections:
         
         {{< spoiler text="📊 Research Dashboard" >}}
         {{< research_dashboard >}}
-        {{< /spoiler >}}
-        
-        {{< spoiler text="🤝 Collaboration Network" >}}
-        {{< research_network >}}
-        {{< network_stats >}}
-        {{< /spoiler >}}
-        
-        {{< spoiler text="🌍 Research Footprint" >}}
-        {{< impact_map >}}
-        
-        **Legend:** 🟢 Conference | 🔵 Collaboration | 🟠 Institution
-        
-        *Interactive map of conference presentations and collaborator institutions worldwide*
-        {{< /spoiler >}}
+        {{< /spoiler >}}   
+
     design:
       columns: '1'
 
@@ -272,12 +260,14 @@ sections:
     design:
       columns: '1'
   
-  # ---------- MEDIA ----------
+ # ---------- MEDIA ----------
   - block: markdown
     id: media
     content:
       title: Public Engagement & Media Coverage
       text: |
+        {{< altmetric_summary >}}
+
         {{< spoiler text="📺 Media Coverage (2)" >}}
         
         - **"Benjamin Ampel Receives ACM SIGMIS Doctoral Dissertation Award"** — Georgia State University (January 28, 2025)

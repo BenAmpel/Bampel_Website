@@ -1,0 +1,108 @@
+{{/* Altmetric Aggregator - Reads from generated JSON */}}
+<div id="altmetric-summary-box" style="display:none; margin: 30px 0; padding: 25px; background: var(--card-bg, rgba(255,255,255,0.02)); border: 1px solid var(--card-border, #333); border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
+    
+    <div style="display:flex; align-items:center; gap:15px; margin-bottom:20px; border-bottom:1px solid var(--card-border, #444); padding-bottom:15px;">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16 29.3333C23.3638 29.3333 29.3333 23.3638 29.3333 16C29.3333 8.63616 23.3638 2.66663 16 2.66663C8.63616 2.66663 2.66663 8.63616 2.66663 16C2.66663 23.3638 8.63616 29.3333 16 29.3333Z" fill="url(#paint0_linear)"/>
+            <path d="M22.5 16C22.5 19.5899 19.5899 22.5 16 22.5C12.4101 22.5 9.5 19.5899 9.5 16C9.5 12.4101 12.4101 9.5 16 9.5C19.5899 9.5 22.5 12.4101 22.5 16Z" fill="white"/>
+            <defs>
+                <linearGradient id="paint0_linear" x1="2.66663" y1="2.66663" x2="29.3333" y2="29.3333" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#00E5FF"/>
+                    <stop offset="0.33" stop-color="#00FF41"/>
+                    <stop offset="0.66" stop-color="#FFD700"/>
+                    <stop offset="1" stop-color="#FF4136"/>
+                </linearGradient>
+            </defs>
+        </svg>
+        <div>
+            <h4 style="margin:0; font-size:1.1rem; font-weight:700; color:inherit;">Cumulative Research Attention</h4>
+            <span style="display:block; margin-top:4px; font-size:0.8rem; opacity:0.7;">Aggregated impact across news, policy, patents, social media, and readership</span>
+        </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap:15px; text-align:center; margin-bottom: 20px;">
+        
+        <div style="padding: 10px; background: rgba(0, 229, 255, 0.05); border-radius: 8px;">
+            <div id="am-total-score" style="font-size:1.8rem; font-weight:800; color:#00e5ff;">0</div>
+            <div style="font-size:0.7rem; text-transform:uppercase; letter-spacing:0.5px; opacity:0.8; margin-top:5px;">Total Score</div>
+        </div>
+
+        <div>
+            <div id="am-news" style="font-size:1.4rem; font-weight:700; color:inherit;">0</div>
+            <div style="font-size:0.7rem; opacity:0.6; margin-top:5px;">News Stories</div>
+        </div>
+
+        <div>
+            <div id="am-policy" style="font-size:1.4rem; font-weight:700; color:inherit;">0</div>
+            <div style="font-size:0.7rem; opacity:0.6; margin-top:5px;">Policy Docs</div>
+        </div>
+        
+        <div>
+            <div id="am-patents" style="font-size:1.4rem; font-weight:700; color:inherit;">0</div>
+            <div style="font-size:0.7rem; opacity:0.6; margin-top:5px;">Patents</div>
+        </div>
+
+        <div>
+            <div id="am-twitter" style="font-size:1.4rem; font-weight:700; color:inherit;">0</div>
+            <div style="font-size:0.7rem; opacity:0.6; margin-top:5px;">Social Mentions</div>
+        </div>
+
+        <div>
+            <div id="am-mendeley" style="font-size:1.4rem; font-weight:700; color:inherit;">0</div>
+            <div style="font-size:0.7rem; opacity:0.6; margin-top:5px;">Mendeley Readers</div>
+        </div>
+    </div>
+
+    <details style="font-size: 0.75rem; opacity: 0.8; border-top: 1px solid var(--card-border, #444); padding-top: 10px; cursor: pointer;">
+        <summary style="font-weight: 600; outline: none; list-style: none;">
+            <span style="border-bottom: 1px dotted currentColor;">How is the Total Score calculated?</span>
+        </summary>
+        <div style="margin-top: 10px; line-height: 1.5; color: var(--text-muted, #aaa);">
+            <p style="margin-bottom: 8px;">The Altmetric Attention Score is a weighted index that reflects the relative reach of research. Higher weights are assigned to mentions that imply broader societal or economic impact:</p>
+            <ul style="list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px;">
+                <li>📰 <strong>News:</strong> 8 points</li>
+                <li>🏛️ <strong>Policy:</strong> 3 points</li>
+                <li>💡 <strong>Patents:</strong> 3 points</li>
+                <li>🐦 <strong>Social Media:</strong> 1 point</li>
+            </ul>
+            <p style="margin-top: 8px; font-style: italic;">*Mendeley readership counts are tracked to gauge academic uptake but receive a 0 weight in the score calculation.</p>
+        </div>
+    </details>
+</div>
+
+<script type="text/javascript">
+(function() {
+    fetch('/data/altmetric.json')
+    .then(response => {
+        if (!response.ok) throw new Error("JSON not found");
+        return response.json();
+    })
+    .then(stats => {
+        const box = document.getElementById('altmetric-summary-box');
+        if (box) box.style.display = 'block';
+
+        animateValue('am-total-score', 0, stats.score || 0, 1000);
+        document.getElementById('am-news').innerText = stats.news || 0;
+        document.getElementById('am-policy').innerText = stats.policy || 0;
+        document.getElementById('am-patents').innerText = stats.patents || 0;
+        document.getElementById('am-twitter').innerText = stats.twitter || 0;
+        document.getElementById('am-mendeley').innerText = stats.mendeley || 0;
+    })
+    .catch(e => {
+        console.warn('Altmetric JSON not loaded:', e);
+    });
+
+    function animateValue(id, start, end, duration) {
+        const obj = document.getElementById(id);
+        if (!obj) return;
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            obj.innerHTML = Math.floor(progress * (end - start) + start);
+            if (progress < 1) window.requestAnimationFrame(step);
+        };
+        window.requestAnimationFrame(step);
+    }
+})();
+</script>

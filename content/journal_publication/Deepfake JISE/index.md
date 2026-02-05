@@ -3,7 +3,6 @@ title: "Seeing Is Not Believing: A Deepfake Video Call Scam at Pan-Asia Trading"
 authors:
   - "Benjamin M. Ampel"
 date: 2026-03-01
-publication: "Journal of Information Systems Education"
 publication_types: ["2"]
 draft: false
 

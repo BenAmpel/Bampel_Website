@@ -8,7 +8,7 @@ authors:
   - Hsinchun Chen
 
 date: '2023-10-01T00:00:00Z'
-doi: '10.1109/ISI58743.2023.10297177'
+doi: '10.1109/ISI58743.2023.10297272'
 
 publishDate: '2023-10-01T00:00:00Z'
 
@@ -32,12 +32,12 @@ awards:
 - Best Paper Award
 
 
-url_pdf: 'https://ieeexplore.ieee.org/document/10297177'
+url_pdf: 'https://ieeexplore.ieee.org/document/10297272'
 ---
 
-{{< altmetric doi="10.1109/ISI58743.2023.10297177" >}}
+{{< altmetric doi="10.1109/ISI58743.2023.10297272" >}}
 
-{{< dimensions doi="10.1109/ISI58743.2023.10297177" >}}
+{{< dimensions doi="10.1109/ISI58743.2023.10297272" >}}
 
 
 
