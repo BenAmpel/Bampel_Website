@@ -1,6 +1,10 @@
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 
 <div id="dashboard-wrapper" style="min-height:1300px; margin:30px 0; font-family:sans-serif;">
 <div style="display:grid; grid-template-columns:1fr 1fr; grid-template-rows:auto 600px 600px 300px; gap:0; border:1px solid var(--card-border, #333); border-radius:12px; overflow:hidden; background:var(--card-bg, rgba(255,255,255,0.02)); box-shadow:0 4px 20px rgba(0,0,0,0.1);">
@@ -98,6 +102,23 @@
     <div style="position:absolute; top:20px; right:20px; z-index:400; pointer-events:none; text-align:right;">
         <h4 style="margin:0; font-size:0.8rem; opacity:0.7; text-transform:uppercase; color:#333; text-shadow:0 0 5px white;">Research Footprint</h4>
     </div>
+    <div class="footprint-controls" aria-label="Footprint controls">
+        <div class="footprint-group" role="group" aria-label="Categories">
+            <label class="footprint-check"><input type="checkbox" data-footprint-cat="Conference" checked> Conferences</label>
+            <label class="footprint-check"><input type="checkbox" data-footprint-cat="Institution" checked> Institutions</label>
+            <label class="footprint-check"><input type="checkbox" data-footprint-cat="Collaboration" checked> Collaborations</label>
+        </div>
+        <div class="footprint-group" role="group" aria-label="Layers">
+            <label class="footprint-check"><input type="checkbox" data-footprint-layer="routes" checked> Routes</label>
+            <label class="footprint-check"><input type="checkbox" data-footprint-layer="heat" checked> Heat</label>
+            <label class="footprint-check"><input type="checkbox" data-footprint-layer="clusters" checked> Clusters</label>
+        </div>
+        <div class="footprint-group footprint-timeline" role="group" aria-label="Timeline">
+            <span class="footprint-year-label" id="footprint-year-label">Up to —</span>
+            <input type="range" id="footprint-year-range" min="2018" max="2026" value="2026" step="1" />
+        </div>
+    </div>
+    <div class="footprint-legend" id="footprint-legend"></div>
     <div id="dashboard-footprint-map" style="width:100%; height:100%; z-index:1;"></div>
 </div>
 
@@ -205,6 +226,48 @@ body:not(.dark) .impact-toggle.is-active { color:#0b7a2f; border-color:#0b7a2f; 
 body:not(.dark) .collab-chip.is-active { color:#0077b6; border-color:#0077b6; background:rgba(0,119,182,0.15); }
 body:not(.dark) .impact-action { color:#0b7a2f; }
 body:not(.dark) .impact-pin { background:rgba(0,119,182,0.12); border-color:rgba(0,119,182,0.3); }
+
+/* Footprint map controls */
+.footprint-controls { position:absolute; top:16px; left:16px; z-index:20; display:flex; flex-direction:column; gap:8px; pointer-events:auto; }
+.footprint-group { display:flex; flex-wrap:wrap; gap:8px; padding:6px 8px; border-radius:10px; border:1px solid var(--card-border, #333); background:rgba(0,0,0,0.35); backdrop-filter: blur(6px); }
+.footprint-check { display:flex; align-items:center; gap:6px; font-size:0.62rem; color:#cfead2; }
+.footprint-check input { accent-color:#00e5ff; }
+.footprint-timeline { flex-direction:column; align-items:flex-start; gap:6px; }
+.footprint-year-label { font-size:0.62rem; letter-spacing:0.04em; text-transform:uppercase; color:#bde8ff; }
+.footprint-timeline input[type="range"] { width:200px; }
+.footprint-legend { position:absolute; bottom:14px; right:14px; z-index:15; max-width:200px; background:rgba(0,0,0,0.4); border:1px solid var(--card-border, #333); border-radius:12px; padding:8px 10px; font-size:0.62rem; color:#d6dde2; backdrop-filter: blur(6px); pointer-events:none; }
+.footprint-legend .legend-row { display:flex; align-items:center; gap:6px; margin-bottom:4px; }
+.footprint-legend .legend-row:last-child { margin-bottom:0; }
+.footprint-legend-dot { width:8px; height:8px; border-radius:50%; background:var(--legend-color); box-shadow:0 0 6px rgba(0,0,0,0.4); }
+
+.footprint-marker { position:relative; width:16px; height:16px; }
+.footprint-marker .ring { position:absolute; inset:-6px; border-radius:50%; border:1.5px solid currentColor; opacity:0.6; animation: footprintPulse 2.6s ease-out infinite; }
+.footprint-marker .dot { position:absolute; inset:0; border-radius:50%; background:currentColor; box-shadow:0 0 6px rgba(0,0,0,0.5); }
+.footprint-marker.conference { color:#00ff41; }
+.footprint-marker.institution { color:#ff6b35; }
+.footprint-marker.collaboration { color:#00bfff; }
+
+.footprint-arc { stroke:#00e5ff; stroke-width:1.2; stroke-opacity:0.4; stroke-dasharray:6 10; animation: arcDash 6s linear infinite; }
+
+.marker-cluster-small { background:rgba(0,229,255,0.15) !important; }
+.marker-cluster-small div { background:rgba(0,229,255,0.35) !important; color:#0c1f2a !important; }
+.marker-cluster-medium { background:rgba(0,255,65,0.15) !important; }
+.marker-cluster-medium div { background:rgba(0,255,65,0.35) !important; color:#0c1f2a !important; }
+.marker-cluster-large { background:rgba(224,64,251,0.15) !important; }
+.marker-cluster-large div { background:rgba(224,64,251,0.35) !important; color:#0c1f2a !important; }
+
+@keyframes footprintPulse { 0% { transform:scale(0.7); opacity:0.6; } 70% { transform:scale(1.6); opacity:0; } 100% { opacity:0; } }
+@keyframes arcDash { to { stroke-dashoffset: -32; } }
+
+body:not(.dark) .footprint-group,
+body:not(.dark) .footprint-legend { background:rgba(255,255,255,0.9); color:#333; border-color:#e0e0e0; }
+body:not(.dark) .footprint-year-label { color:#0b4f6c; }
+
+@media (max-width: 900px) {
+    .footprint-controls { top:12px; left:12px; }
+    .footprint-legend { bottom:12px; right:12px; }
+    .footprint-timeline input[type="range"] { width:160px; }
+}
 </style>
 
 <script type="text/javascript">
@@ -656,17 +719,28 @@ body:not(.dark) .impact-pin { background:rgba(0,119,182,0.12); border-color:rgba
                 const isFocus = n.id === impactState.focusId;
                 const isHighlight = highlight.has(n.id);
                 const baseColor = impactState.colorMode === 'topic' ? n.topicColor : n.yearColor;
+                const isPinned = impactState.pinned.has(n.id);
+                const showLabel = isFocus || isPinned;
                 return Object.assign({}, n, {
                     itemStyle: {
                         color: baseColor,
                         opacity: focusActive ? (isHighlight ? 1 : 0.08) : 1,
-                        borderColor: isFocus ? '#fff' : (impactState.pinned.has(n.id) ? '#00e5ff' : 'transparent'),
-                        borderWidth: isFocus ? 2 : (impactState.pinned.has(n.id) ? 1 : 0)
+                        borderColor: isFocus ? '#fff' : (isPinned ? '#00e5ff' : 'transparent'),
+                        borderWidth: isFocus ? 2 : (isPinned ? 1 : 0)
                     },
                     label: {
-                        show: (n.value >= citationThreshold && n.value > 0) || isHighlight,
+                        show: showLabel,
                         color: isDark ? '#eee' : '#222',
-                        position: 'right'
+                        position: 'right',
+                        formatter: p => p.name.length > 18 ? p.name.substring(0, 18) + '…' : p.name
+                    },
+                    emphasis: {
+                        label: {
+                            show: true,
+                            color: isDark ? '#fff' : '#111',
+                            fontWeight: 'bold',
+                            formatter: p => p.name.length > 28 ? p.name.substring(0, 28) + '…' : p.name
+                        }
                     }
                 });
             });
@@ -675,7 +749,7 @@ body:not(.dark) .impact-pin { background:rgba(0,119,182,0.12); border-color:rgba
                 const linkHighlight = !focusActive || (highlight.has(l.source) && highlight.has(l.target));
                 return Object.assign({}, l, {
                     lineStyle: Object.assign({}, l.lineStyle, {
-                        opacity: focusActive ? (linkHighlight ? Math.min(0.85, l.lineStyle.opacity + 0.2) : 0.04) : l.lineStyle.opacity,
+                        opacity: focusActive ? (linkHighlight ? Math.min(0.65, l.lineStyle.opacity + 0.15) : 0.03) : Math.min(0.25, l.lineStyle.opacity),
                         color: isDark ? '#aaa' : '#666'
                     })
                 });
@@ -1050,29 +1124,177 @@ body:not(.dark) .impact-pin { background:rgba(0,119,182,0.12); border-color:rgba
 
         if (document.body.classList.contains('dark')) { darkTiles.addTo(map); } else { lightTiles.addTo(map); }
 
-        var createIcon = (color) => L.divIcon({
-            className: 'custom-marker',
-            html: `<div style="width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 4px rgba(0,0,0,0.3);background:${color};"></div>`,
-            iconSize: [20, 20], iconAnchor: [10, 10]
-        });
-        
-        var confIcon = createIcon('#00ff41');
-        var collabIcon = createIcon('#00bfff');
-        var instIcon = createIcon('#ff6b35');
-
         var points = [
             {{ range $.Site.Data.impact_map }}
             { "title": "{{ .title }}", "lat": {{ .lat }}, "lng": {{ .lng }}, "location": "{{ .location }}", "desc": "{{ .description }}", "cat": "{{ .category }}" },
             {{ end }}
         ];
 
-        points.forEach(function(point) {
-            var icon = confIcon;
-            if(point.cat === 'Collaboration') icon = collabIcon;
-            if(point.cat === 'Institution') icon = instIcon;
-            var popup = `<div><strong>${point.title}</strong><br><span style="font-size:0.8em">${point.location}</span><br><span style="font-size:0.8em;opacity:0.7">${point.cat}</span></div>`;
-            L.marker([point.lat, point.lng], {icon: icon}).addTo(map).bindPopup(popup);
+        const categoryColors = {
+            Conference: '#00ff41',
+            Collaboration: '#00bfff',
+            Institution: '#ff6b35'
+        };
+
+        function extractYears(text) {
+            if (!text) return [];
+            const matches = text.match(/(19|20)\d{2}/g) || [];
+            return matches.map(v => parseInt(v, 10)).filter(y => y > 1900 && y < 2100);
+        }
+
+        const enrichedPoints = points.map(p => {
+            const years = [...new Set([...extractYears(p.title), ...extractYears(p.desc)])].sort();
+            const minYear = years.length ? years[0] : null;
+            const maxYear = years.length ? years[years.length - 1] : null;
+            return Object.assign({}, p, { years: years, minYear: minYear, maxYear: maxYear });
         });
+
+        const yearValues = enrichedPoints.filter(p => p.minYear).map(p => p.maxYear || p.minYear);
+        const minYear = yearValues.length ? Math.min(...yearValues) : (new Date().getFullYear() - 6);
+        const maxYear = yearValues.length ? Math.max(...yearValues) : new Date().getFullYear();
+
+        const state = {
+            categories: { Conference: true, Collaboration: true, Institution: true },
+            layers: { routes: true, heat: true, clusters: true },
+            year: maxYear
+        };
+
+        const legendEl = document.getElementById('footprint-legend');
+        if (legendEl) {
+            legendEl.innerHTML = Object.keys(categoryColors).map(cat => (
+                `<div class="legend-row"><span class="footprint-legend-dot" style="--legend-color:${categoryColors[cat]};"></span><span>${cat}</span></div>`
+            )).join('');
+        }
+
+        const rangeEl = document.getElementById('footprint-year-range');
+        const labelEl = document.getElementById('footprint-year-label');
+        if (rangeEl && labelEl) {
+            rangeEl.min = minYear;
+            rangeEl.max = maxYear;
+            rangeEl.value = maxYear;
+            labelEl.textContent = `Up to ${maxYear}`;
+            rangeEl.addEventListener('input', () => {
+                state.year = parseInt(rangeEl.value, 10);
+                labelEl.textContent = `Up to ${state.year}`;
+                applyFilters();
+            });
+        }
+
+        function createIcon(category) {
+            const cls = category.toLowerCase();
+            return L.divIcon({
+                className: '',
+                html: `<div class="footprint-marker ${cls}"><span class="ring"></span><span class="dot"></span></div>`,
+                iconSize: [16, 16],
+                iconAnchor: [8, 8]
+            });
+        }
+
+        const markerLayer = L.layerGroup();
+        const arcLayer = L.layerGroup().addTo(map);
+        const clusterLayer = (L.markerClusterGroup ? L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 50 }) : null);
+        const heatLayer = (L.heatLayer ? L.heatLayer([], { radius: 26, blur: 18, maxZoom: 4, minOpacity: 0.12, gradient: { 0.0: 'rgba(0,0,0,0)', 0.4: '#00bfff', 0.7: '#00ff41', 1.0: '#e040fb' } }) : null);
+
+        function withinYear(point) {
+            if (!point.minYear) return true;
+            return point.minYear <= state.year;
+        }
+
+        function buildMarkers(list) {
+            markerLayer.clearLayers();
+            if (clusterLayer) clusterLayer.clearLayers();
+            list.forEach(point => {
+                const icon = createIcon(point.cat || 'Collaboration');
+                const popup = `<div><strong>${point.title}</strong><br><span style="font-size:0.8em">${point.location}</span><br><span style="font-size:0.8em;opacity:0.7">${point.cat}</span></div>`;
+                const marker = L.marker([point.lat, point.lng], { icon: icon }).bindPopup(popup);
+                if (state.layers.clusters && clusterLayer) {
+                    clusterLayer.addLayer(marker);
+                } else {
+                    markerLayer.addLayer(marker);
+                }
+            });
+
+            if (state.layers.clusters && clusterLayer) {
+                if (!map.hasLayer(clusterLayer)) map.addLayer(clusterLayer);
+                if (map.hasLayer(markerLayer)) map.removeLayer(markerLayer);
+            } else {
+                if (!map.hasLayer(markerLayer)) map.addLayer(markerLayer);
+                if (clusterLayer && map.hasLayer(clusterLayer)) map.removeLayer(clusterLayer);
+            }
+        }
+
+        function createArc(latlng1, latlng2) {
+            const lat1 = latlng1.lat, lng1 = latlng1.lng;
+            const lat2 = latlng2.lat, lng2 = latlng2.lng;
+            const midLat = (lat1 + lat2) / 2;
+            const midLng = (lng1 + lng2) / 2;
+            const dx = lng2 - lng1;
+            const dy = lat2 - lat1;
+            const norm = Math.sqrt(dx * dx + dy * dy) || 1;
+            const offset = Math.min(12, norm * 0.25);
+            const ctrlLat = midLat + (-dx / norm) * offset;
+            const ctrlLng = midLng + (dy / norm) * offset;
+            const coords = [];
+            for (let t = 0; t <= 1.001; t += 0.06) {
+                const lat = (1 - t) * (1 - t) * lat1 + 2 * (1 - t) * t * ctrlLat + t * t * lat2;
+                const lng = (1 - t) * (1 - t) * lng1 + 2 * (1 - t) * t * ctrlLng + t * t * lng2;
+                coords.push([lat, lng]);
+            }
+            return coords;
+        }
+
+        function buildArcs(list) {
+            arcLayer.clearLayers();
+            if (!state.layers.routes) return;
+            const routePoints = list
+                .filter(p => p.minYear)
+                .filter(p => p.cat === 'Conference' || p.cat === 'Institution')
+                .sort((a, b) => (a.minYear || 9999) - (b.minYear || 9999));
+
+            for (let i = 0; i < routePoints.length - 1; i++) {
+                const start = routePoints[i];
+                const end = routePoints[i + 1];
+                const arc = L.polyline(createArc({ lat: start.lat, lng: start.lng }, { lat: end.lat, lng: end.lng }), { className: 'footprint-arc' });
+                arcLayer.addLayer(arc);
+            }
+        }
+
+        function buildHeat(list) {
+            if (!heatLayer) return;
+            if (!state.layers.heat) {
+                if (map.hasLayer(heatLayer)) map.removeLayer(heatLayer);
+                return;
+            }
+            const weights = { Conference: 0.8, Institution: 0.9, Collaboration: 0.6 };
+            const heatPoints = list.map(p => [p.lat, p.lng, weights[p.cat] || 0.5]);
+            heatLayer.setLatLngs(heatPoints);
+            if (!map.hasLayer(heatLayer)) heatLayer.addTo(map);
+        }
+
+        function applyFilters() {
+            const filtered = enrichedPoints.filter(p => state.categories[p.cat] && withinYear(p));
+            buildMarkers(filtered);
+            buildArcs(filtered);
+            buildHeat(filtered);
+        }
+
+        document.querySelectorAll('input[data-footprint-cat]').forEach(input => {
+            input.addEventListener('change', () => {
+                const cat = input.getAttribute('data-footprint-cat');
+                state.categories[cat] = input.checked;
+                applyFilters();
+            });
+        });
+
+        document.querySelectorAll('input[data-footprint-layer]').forEach(input => {
+            input.addEventListener('change', () => {
+                const layer = input.getAttribute('data-footprint-layer');
+                state.layers[layer] = input.checked;
+                applyFilters();
+            });
+        });
+
+        applyFilters();
 
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((m) => {
