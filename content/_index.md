@@ -25,6 +25,10 @@ sections:
         
         **Top Venues:** MISQ • JMIS • ACM TMIS • ISF • IEEE ISI • HICSS • AMCIS • ICIS • ACM KDD
         
+        {{< publication_metrics >}}
+        
+        [📄 Download Research Summary (PDF) →](/uploads/research-summary.pdf)
+        
         [📖 View Google Scholar Profile →](https://scholar.google.com/citations?user=XDdwaZUAAAAJ&hl=en)
         
         ---
@@ -54,6 +58,8 @@ sections:
     content:
       title: Publications
       text: |
+        {{< publications_filter >}}
+        
         {{< spoiler text="📄 Journal Publications (8)" >}}
         
         1. B. Ampel, "[**A Computational Design Framework for Targeted Disruption of Hacker Communities**](/journal_publication/hacker-communities-isf/)," Forthcoming at *Information Systems Frontiers (ISF)*.
@@ -142,6 +148,8 @@ sections:
       text: |
         {{< spoiler text="🎓 Georgia State University (7 courses)" >}}
         
+        {{< teaching_outcomes >}}
+        
         | Course | Title | Semester | Evaluation |
         |--------|-------|----------|------------|
         | CIS 8684 | Cyber Threat Intelligence | Spring 2026 | - |
@@ -213,18 +221,7 @@ sections:
       text: |
         {{< spoiler text="🏆 Awards & Honors (12)" >}}
         
-        - **Robinson College of Business IS Cybersecurity Graduate Program Top Professor** (2025)
-        - **ACM SIGMIS Doctoral Dissertation Award** (2024)
-        - **Best Paper Award**, IEEE Intelligence and Security Informatics (2023)
-        - **Doctoral Consortium**, International Conference on Information Systems (2023)
-        - **Doctoral Consortium**, Americas Conference on Information Systems (2023)
-        - **Paul S. and Shirley Goodman Scholarship** (2023)
-        - **Samtani-Garcia MIS PhD Commitment Scholarship** (2022)
-        - **James F. LaSalle Teaching Excellence Award** (2022)
-        - **Best Paper Award**, IEEE Intelligence and Security Informatics (2020)
-        - **Nunamaker-Chen MIS Doctoral Scholarship** (2020)
-        - **NSF CyberCorps: Scholarship for Service Fellow** (2018-2021)
-        - **UArizona MIS Undergraduate Outstanding Senior** (2017)
+        {{< awards_timeline >}}
         
         {{< /spoiler >}}
     design:

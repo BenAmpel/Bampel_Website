@@ -1727,6 +1727,79 @@ function runEnhancements() {
     window.addEventListener('scroll', updateScrollProgress);
     updateScrollProgress();
   }
+
+  // ===== DYNAMIC SECTION NAV HIGHLIGHT (SCROLL SPY) =====
+  function initScrollSpy() {
+    if (document.body.dataset.scrollSpyInit === 'true') return;
+    document.body.dataset.scrollSpyInit = 'true';
+
+    const navLinks = Array.from(document.querySelectorAll('.navbar-nav a[href^="#"], .navbar-nav a[href^="/#"]'));
+    if (!navLinks.length) return;
+
+    const linkMap = new Map();
+    const sections = [];
+
+    navLinks.forEach(link => {
+      let href = link.getAttribute('href');
+      if (!href) return;
+      if (href.startsWith('/')) href = href.slice(1);
+      if (!href.startsWith('#')) return;
+      const id = href.slice(1);
+      if (!id) return;
+      const section = document.getElementById(id);
+      if (!section) return;
+      linkMap.set(id, link);
+      sections.push(section);
+    });
+
+    if (!sections.length) return;
+
+    function setActive(id) {
+      navLinks.forEach(l => l.classList.remove('active'));
+      const link = linkMap.get(id);
+      if (link) link.classList.add('active');
+    }
+
+    if ('IntersectionObserver' in window) {
+      const visibility = new Map();
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          visibility.set(entry.target.id, entry.intersectionRatio);
+        });
+        let bestId = null;
+        let bestRatio = 0;
+        visibility.forEach((ratio, id) => {
+          if (ratio > bestRatio) {
+            bestRatio = ratio;
+            bestId = id;
+          }
+        });
+        if (bestId) setActive(bestId);
+      }, { rootMargin: '-25% 0px -55% 0px', threshold: [0, 0.25, 0.5, 0.75, 1] });
+
+      sections.forEach(section => observer.observe(section));
+      setTimeout(() => {
+        const firstVisible = sections.find(sec => sec.getBoundingClientRect().top >= 0);
+        setActive((firstVisible && firstVisible.id) || sections[0].id);
+      }, 50);
+    } else {
+      function onScroll() {
+        let currentId = sections[0].id;
+        sections.forEach(sec => {
+          const rect = sec.getBoundingClientRect();
+          if (rect.top <= 120 && rect.bottom > 120) {
+            currentId = sec.id;
+          }
+        });
+        setActive(currentId);
+      }
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    }
+  }
+
+  initScrollSpy();
+  setTimeout(initScrollSpy, 500);
   
   // ===== RESEARCH VISUALIZATIONS INJECTION (into Research Impact section) =====
   // Find by searching all headings for "Research Impact"

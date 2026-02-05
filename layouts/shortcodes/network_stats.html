@@ -15,7 +15,7 @@
         var text = isDark ? '#aaa' : '#666';
         
         return `
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 30px; opacity: 0; transition: opacity 1s ease;" id="stats-grid">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-top: 30px; opacity: 0; transition: opacity 1s ease;" id="stats-grid">
             <div style="background: ${bg}; padding: 20px; border-radius: 8px; border: 1px solid ${border}; text-align: center;">
                 <h3 style="margin: 0; font-size: 3rem; font-weight: 800; color: ${isDark ? '#00ff41' : '#d93025'};">
                     <span id="val-collab">0</span>
@@ -36,12 +36,33 @@
                 </h3>
                 <p style="margin: 5px 0 0; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; color: ${text};">Top Collaborator</p>
             </div>
+
+            <div style="background: ${bg}; padding: 20px; border-radius: 8px; border: 1px solid ${border}; text-align: center;">
+                <h3 style="margin: 0; font-size: 3rem; font-weight: 800; color: ${isDark ? '#ffb74d' : '#ef6c00'};">
+                    <span id="val-inst">0</span>
+                </h3>
+                <p style="margin: 5px 0 0; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; color: ${text};">Institutions</p>
+            </div>
+
+            <div style="background: ${bg}; padding: 20px; border-radius: 8px; border: 1px solid ${border}; text-align: center;">
+                <h3 style="margin: 0; font-size: 3rem; font-weight: 800; color: ${isDark ? '#64b5f6' : '#1976d2'};">
+                    <span id="val-country">0</span>
+                </h3>
+                <p style="margin: 5px 0 0; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; color: ${text};">Countries</p>
+            </div>
+
+            <div style="background: ${bg}; padding: 20px; border-radius: 8px; border: 1px solid ${border}; text-align: center;">
+                <h3 style="margin: 0; font-size: 3rem; font-weight: 800; color: ${isDark ? '#81c784' : '#2e7d32'};">
+                    <span id="val-cross">0</span>
+                </h3>
+                <p style="margin: 5px 0 0; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; color: ${text};">Cross-Disciplinary Papers</p>
+            </div>
         </div>`;
     }
 
     // 2. DATA PROCESSING
     var nameMap = {
-        'B Ampel': 'Benjamin Ampel', 'BM Ampel': 'Benjamin Ampel', 'B. Ampel': 'Benjamin Ampel', 'admin': 'Benjamin Ampel',
+        'B Ampel': 'Benjamin Ampel', 'BM Ampel': 'Benjamin Ampel', 'B. Ampel': 'Benjamin Ampel', 'admin': 'Benjamin Ampel', 'Benjamin M. Ampel': 'Benjamin Ampel',
         'H Chen': 'Hsinchun Chen', 'H. Chen': 'Hsinchun Chen',
         'S Samtani': 'Sagar Samtani', 'S. Samtani': 'Sagar Samtani',
         'S Ullman': 'Steven Ullman', 'S. Ullman': 'Steven Ullman',
@@ -65,15 +86,44 @@
     root.innerHTML = renderLayout();
 
     // Fetch Data
-    fetch('/data/publications.json')
-        .then(res => res.json())
-        .then(data => {
+    Promise.all([
+        fetch('/data/publications.json').then(res => res.json()).catch(() => null),
+        fetch('/data/collaboration_meta.json').then(res => res.json()).catch(() => null)
+    ])
+        .then(([data, meta]) => {
             if(!Array.isArray(data)) return;
 
             let collaborators = new Set();
             let counts = {};
             let totalAuthors = 0;
             let papers = 0;
+            let institutions = new Set();
+            let countries = new Set();
+            let crossDisciplinary = 0;
+
+            const instMap = new Map((meta?.institutions || []).map(inst => [inst.name, inst]));
+            const collabMap = new Map((meta?.collaborators || []).map(c => [normalize(c.name), c]));
+
+            function getInstitution(name) {
+                const entry = collabMap.get(name);
+                return entry?.institution || null;
+            }
+
+            function getCountry(name) {
+                const instName = getInstitution(name);
+                if (!instName) return null;
+                const inst = instMap.get(instName);
+                return inst?.country || null;
+            }
+
+            function getDiscipline(name) {
+                const entry = collabMap.get(name);
+                if (entry?.discipline) return entry.discipline;
+                const instName = getInstitution(name);
+                if (!instName) return null;
+                const inst = instMap.get(instName);
+                return inst?.discipline || null;
+            }
 
             data.forEach(p => {
                 if(!p.authors) return;
@@ -85,10 +135,25 @@
                 // Team size is co-authors + you
                 totalAuthors += (coAuths.length + 1);
 
+                let disciplines = new Set();
+
                 coAuths.forEach(a => {
                     collaborators.add(a);
                     counts[a] = (counts[a] || 0) + 1;
                 });
+
+                auths.forEach(a => {
+                    const inst = getInstitution(a);
+                    if (inst) institutions.add(inst);
+                    const country = getCountry(a);
+                    if (country) countries.add(country);
+                    const discipline = getDiscipline(a);
+                    if (discipline) disciplines.add(discipline);
+                });
+
+                if (disciplines.size >= 2) {
+                    crossDisciplinary += 1;
+                }
             });
 
             // Update UI
@@ -99,6 +164,10 @@
 
             let top = Object.entries(counts).sort((a,b) => b[1] - a[1])[0];
             if(top) document.getElementById('val-top').innerText = top[0];
+
+            animateValue("val-inst", 0, institutions.size, 2000, false);
+            animateValue("val-country", 0, countries.size, 2000, false);
+            animateValue("val-cross", 0, crossDisciplinary, 2000, false);
 
             // Fade In
             document.getElementById('stats-grid').style.opacity = '1';
@@ -128,6 +197,9 @@
                 let c = document.getElementById('val-collab').innerText;
                 let t = document.getElementById('val-team').innerText;
                 let p = document.getElementById('val-top').innerText;
+                let i = document.getElementById('val-inst').innerText;
+                let o = document.getElementById('val-country').innerText;
+                let x = document.getElementById('val-cross').innerText;
                 
                 // Re-render layout with new theme colors
                 root.innerHTML = renderLayout();
@@ -136,6 +208,9 @@
                 document.getElementById('val-collab').innerText = c;
                 document.getElementById('val-team').innerText = t;
                 document.getElementById('val-top').innerText = p;
+                document.getElementById('val-inst').innerText = i;
+                document.getElementById('val-country').innerText = o;
+                document.getElementById('val-cross').innerText = x;
                 document.getElementById('stats-grid').style.opacity = '1';
             }, 100);
         });
