@@ -30,6 +30,20 @@ def extract_year(value):
     return None
 
 
+def normalize_date(value):
+    if value is None:
+        return None
+    if isinstance(value, (datetime, date)):
+        if isinstance(value, datetime):
+            return value.date().isoformat()
+        return value.isoformat()
+    text = str(value)
+    match = re.search(r"(19|20)\d{2}-\d{2}-\d{2}", text)
+    if match:
+        return match.group(0)
+    return None
+
+
 def normalize_authors(authors):
     if authors is None:
         return []
@@ -94,6 +108,10 @@ def collect_publications():
                 or extract_year(data.get("publishDate"))
                 or extract_year(data.get("year"))
             )
+            iso_date = (
+                normalize_date(data.get("date"))
+                or normalize_date(data.get("publishDate"))
+            )
             authors = normalize_authors(data.get("authors"))
             venue = normalize_venue(data)
             url = f"/{dir_name}/{folder_slug}/"
@@ -105,6 +123,7 @@ def collect_publications():
                     "type": pub_type,
                     "venue": venue,
                     "url": url,
+                    "date": iso_date,
                 }
             )
     items.sort(key=lambda x: (x["year"] or 0, x["title"]))
