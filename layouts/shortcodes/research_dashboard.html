@@ -300,6 +300,8 @@ body:not(.dark) .footprint-year-label { color:#0b4f6c; }
 .dash-geo-labels { display:flex; justify-content:space-between; gap:8px; font-size:0.6rem; text-transform:uppercase; letter-spacing:0.05em; }
 
 .dash-mini-map { height:110px; border-radius:12px; border:1px solid var(--card-border, #333); overflow:hidden; background:rgba(0,0,0,0.25); }
+.dash-mini-map { min-height:110px; flex:0 0 110px; position:relative; }
+.dash-mini-map .leaflet-container { width:100%; height:100%; }
 
 .dash-region-badge { font-size:0.58rem; text-transform:uppercase; letter-spacing:0.06em; color:#00e5ff; padding:4px 8px; border-radius:999px; border:1px solid rgba(0,229,255,0.35); background:rgba(0,229,255,0.12); }
 
@@ -536,7 +538,7 @@ body:not(.dark) .centrality-tab.is-active { background:rgba(0,119,182,0.15); }
                     radius: ['40%', '70%'],
                     center: ['50%', '50%'],
                     itemStyle: { borderRadius: 4, borderColor: isDark?'#111':'#fff', borderWidth: 2 },
-                    label: { show: true, position: 'inside', formatter: '{d}%', color: isDark ? '#fff' : '#111', fontSize: 11 },
+                    label: { show: true, position: 'inside', formatter: p => `${Math.round(p.percent)}%`, color: isDark ? '#fff' : '#111', fontSize: 11 },
                     labelLine: { show: false },
                     data: data.devices.map(d => ({ name: d.device, value: d.users }))
                 }]
@@ -627,9 +629,7 @@ body:not(.dark) .centrality-tab.is-active { background:rgba(0,119,182,0.15); }
                     countryCounts[country] = (countryCounts[country] || 0) + count;
                 });
                 const topCountry = Object.entries(countryCounts).sort((a,b) => b[1]-a[1])[0];
-                if (topCountry) {
-                    regionEl.textContent = `Top Region: ${topCountry[0]}`;
-                }
+                regionEl.textContent = `Top Region: ${topCountry ? topCountry[0] : 'Global'}`;
             }
 
             // Mini map (top 3 locations if coordinates available)
