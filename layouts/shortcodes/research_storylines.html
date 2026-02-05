@@ -5,7 +5,8 @@
 {{- else -}}
 {{- $pubData = getJSON "static/data/publications.json" -}}
 {{- end -}}
-{{- if and (kindIs "map" $pubData) (isSet $pubData "individualPublications") (not (isSet $pubData 0)) -}}
+{{- if isSet $pubData 0 -}}
+{{- else if isSet $pubData "individualPublications" -}}
 {{- $pubData = $pubData.individualPublications -}}
 {{- end -}}
 
