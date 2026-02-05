@@ -1,12 +1,6 @@
-<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+<!-- Dashboard assets are lazy-loaded when the Research Dashboard spoiler opens. -->
 
-<div id="dashboard-wrapper" style="min-height:1300px; margin:30px 0; font-family:sans-serif;">
+<div id="dashboard-wrapper" data-baseurl="{{ .Site.BaseURL }}" style="min-height:1300px; margin:30px 0; font-family:sans-serif;">
 <div style="display:grid; grid-template-columns:1fr 1fr; grid-template-rows:auto 600px 600px 300px; gap:0; border:1px solid var(--card-border, #333); border-radius:12px; overflow:hidden; background:var(--card-bg, rgba(255,255,255,0.02)); box-shadow:0 4px 20px rgba(0,0,0,0.1);">
 
 <div style="grid-column:1; grid-row:1; padding:20px; border-right:1px solid var(--card-border, #333); border-bottom:1px solid var(--card-border, #333);">
@@ -422,35 +416,112 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
 
     var lineChart, graphChart, collabChart, visitTrendChart, visitDeviceChart, centralityRadarChart, footprintMap;
 
-    // 2. DATA LOADING
-    const safeFetch = (url) => fetch(url).then(r => r.ok ? r.json() : null).catch(e => null);
+    const dashboardWrapper = document.getElementById('dashboard-wrapper');
 
-    Promise.all([
-        safeFetch('/data/publications.json'),
-        safeFetch('/data/scholar-metrics.json'),
-        safeFetch('/data/visitor_stats.json'),
-        safeFetch('/data/cv_topics.json')
-    ]).then(([papersData, scholarData, visitorData, cvTopics]) => {
-        
-        let papers = [];
-        if (scholarData && scholarData.individualPublications) {
-            papers = scholarData.individualPublications;
-        } else if (papersData) {
-            papers = Array.isArray(papersData) ? papersData : (papersData.individualPublications || []);
+    const normalizeBaseUrl = (url) => {
+        if (!url) return '';
+        if (url === '/') return '';
+        return url.endsWith('/') ? url.slice(0, -1) : url;
+    };
+
+    const baseUrl = normalizeBaseUrl(dashboardWrapper ? dashboardWrapper.getAttribute('data-baseurl') : '');
+    const buildDataUrl = (path) => {
+        const cleaned = String(path || '').replace(/^\/+/, '');
+        return baseUrl ? `${baseUrl}/${cleaned}` : `/${cleaned}`;
+    };
+
+    // 2. DATA + ASSET LOADING
+    const safeFetch = (url) => fetch(url, { cache: 'force-cache' }).then(r => r.ok ? r.json() : null).catch(() => null);
+
+    function loadStyleOnce(href) {
+        if (!href) return Promise.resolve();
+        const existing = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).some(link => link.href === href);
+        if (existing) return Promise.resolve();
+        return new Promise((resolve, reject) => {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = href;
+            link.dataset.dashboardAsset = 'true';
+            link.onload = () => resolve();
+            link.onerror = () => reject(new Error(`Failed to load ${href}`));
+            document.head.appendChild(link);
+        });
+    }
+
+    function loadScriptOnce(src, testFn) {
+        if (!src) return Promise.resolve();
+        if (testFn && testFn()) return Promise.resolve();
+        const existing = Array.from(document.scripts).some(script => script.src === src);
+        if (existing) return Promise.resolve();
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.async = true;
+            script.dataset.dashboardAsset = 'true';
+            script.onload = () => resolve();
+            script.onerror = () => reject(new Error(`Failed to load ${src}`));
+            document.head.appendChild(script);
+        });
+    }
+
+    function loadDashboardAssets() {
+        if (window.__dashboardAssetsPromise) return window.__dashboardAssetsPromise;
+        window.__dashboardAssetsPromise = Promise.all([
+            loadStyleOnce('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'),
+            loadStyleOnce('https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css'),
+            loadStyleOnce('https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css'),
+            loadScriptOnce('https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js', () => window.echarts),
+            loadScriptOnce('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js', () => window.L),
+            loadScriptOnce('https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js', () => window.L && window.L.markerClusterGroup),
+            loadScriptOnce('https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js', () => window.L && window.L.heatLayer)
+        ]);
+        return window.__dashboardAssetsPromise;
+    }
+
+    let dashboardInitialized = false;
+    const scheduleWork = (cb) => {
+        if (typeof window.requestIdleCallback === 'function') {
+            window.requestIdleCallback(cb, { timeout: 1500 });
+        } else {
+            setTimeout(cb, 0);
         }
+    };
 
-        processMetrics(papers, scholarData);
+    function initDashboard() {
+        if (dashboardInitialized) return;
+        dashboardInitialized = true;
 
-        if(scholarData && scholarData.citationsByYear) renderLine(scholarData.citationsByYear);
-        renderWorkingMap(papers); 
-        calculateAllMetrics(papers);
-        renderCollabNetwork(papers);
-        renderFootprintMap();
-        renderCvTopics(cvTopics);
-        
-        if(visitorData) renderVisitorStats(visitorData);
+        loadDashboardAssets().then(() => {
+            return Promise.all([
+                safeFetch(buildDataUrl('data/publications.json')),
+                safeFetch(buildDataUrl('data/scholar-metrics.json')),
+                safeFetch(buildDataUrl('data/visitor_stats.json')),
+                safeFetch(buildDataUrl('data/cv_topics.json')),
+                safeFetch(buildDataUrl('data/dashboard_network.json'))
+            ]);
+        }).then(([papersData, scholarData, visitorData, cvTopics, dashboardNetwork]) => {
+            let papers = [];
+            if (scholarData && scholarData.individualPublications) {
+                papers = scholarData.individualPublications;
+            } else if (papersData) {
+                papers = Array.isArray(papersData) ? papersData : (papersData.individualPublications || []);
+            }
 
-    }).catch(err => console.error("Dashboard Error:", err));
+            processMetrics(papers, scholarData);
+
+            scheduleWork(() => {
+                if (scholarData && scholarData.citationsByYear) renderLine(scholarData.citationsByYear);
+                renderWorkingMap(papers);
+                const centralityData = dashboardNetwork && dashboardNetwork.centrality ? dashboardNetwork.centrality : null;
+                const collabData = dashboardNetwork && dashboardNetwork.collaboration ? dashboardNetwork.collaboration : null;
+                calculateAllMetrics(papers, centralityData);
+                renderCollabNetwork(papers, collabData);
+                renderFootprintMap();
+                renderCvTopics(cvTopics);
+                if (visitorData) renderVisitorStats(visitorData);
+            });
+        }).catch(err => console.error("Dashboard Error:", err));
+    }
 
 
     // ========================================================================
@@ -1112,13 +1183,14 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
     // ========================================================================
     // LOGIC: COLLABORATION NETWORK
     // ========================================================================
-    function renderCollabNetwork(papers) {
+    function renderCollabNetwork(papers, precomputed) {
         var dom = document.getElementById(IDS.COLLAB);
         if(!dom) return;
         if(collabChart) collabChart.dispose();
         collabChart = echarts.init(dom);
 
         var myName = "Benjamin Ampel";
+        const usingPrecomputed = precomputed && precomputed.ranges;
         var nameMap = {
             'B Ampel': 'Benjamin Ampel', 'BM Ampel': 'Benjamin Ampel', 'B. Ampel': 'Benjamin Ampel', 'admin': 'Benjamin Ampel',
             'H Chen': 'Hsinchun Chen', 'H. Chen': 'Hsinchun Chen',
@@ -1157,67 +1229,105 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
                     chip.addEventListener('click', () => {
                         collabRange = chip.getAttribute('data-collab-range');
                         collabFocusId = null;
-                        renderCollabNetwork(papers);
+                        renderCollabNetwork(papers, precomputed);
                     });
                 }
             });
         }
 
-        const currentYear = new Date().getFullYear();
-        let filteredPapers = papers;
-        if (collabRange !== 'all') {
-            const yearsBack = parseInt(collabRange, 10) || 0;
-            const minYear = currentYear - yearsBack + 1;
-            filteredPapers = papers.filter(p => (p.year || 0) >= minYear);
-        }
+        const currentYear = (precomputed && precomputed.currentYear) || new Date().getFullYear();
 
         var nodeCounts = new Map();
-        var linkCounts = new Map();
         var authorMeta = new Map();
         var maxCount = 0;
+        var nodesBase = [];
+        var linksBase = [];
 
-        filteredPapers.forEach(function(paper) {
-            var rawAuthors = paper.authors;
-            if (!rawAuthors) return;
-            var authorList = Array.isArray(rawAuthors) ? rawAuthors : rawAuthors.split(',');
-            var authors = [...new Set(authorList.map(a => normalize(a.trim())).filter(a => a))];
+        if (usingPrecomputed) {
+            const rangeKey = (collabRange && precomputed.ranges[collabRange]) ? collabRange : 'all';
+            const rangeData = precomputed.ranges[rangeKey] || {};
+            nodesBase = Array.isArray(rangeData.nodes) ? rangeData.nodes : [];
+            linksBase = Array.isArray(rangeData.links) ? rangeData.links : [];
+            maxCount = rangeData.maxCount || 0;
+            nodeCounts = new Map(nodesBase.map(n => [n.id, n.count || 0]));
 
-            authors.forEach(auth => {
-                let count = (nodeCounts.get(auth) || 0) + 1;
-                nodeCounts.set(auth, count);
-                if (auth !== myName && count > maxCount) maxCount = count;
+            const metaObj = rangeData.authorMeta || {};
+            Object.keys(metaObj).forEach(name => {
+                const meta = metaObj[name] || {};
+                authorMeta.set(name, {
+                    count: meta.count || 0,
+                    years: new Set(meta.years || []),
+                    venues: new Map(Object.entries(meta.venues || {})),
+                    coauthors: new Map(Object.entries(meta.coauthors || {}))
+                });
+            });
+        } else {
+            let filteredPapers = papers;
+            if (collabRange !== 'all') {
+                const yearsBack = parseInt(collabRange, 10) || 0;
+                const minYear = currentYear - yearsBack + 1;
+                filteredPapers = papers.filter(p => (p.year || 0) >= minYear);
+            }
 
-                if (!authorMeta.has(auth)) {
-                    authorMeta.set(auth, { count: 0, years: new Set(), venues: new Map(), coauthors: new Map() });
+            var linkCounts = new Map();
+
+            filteredPapers.forEach(function(paper) {
+                var rawAuthors = paper.authors;
+                if (!rawAuthors) return;
+                var authorList = Array.isArray(rawAuthors) ? rawAuthors : rawAuthors.split(',');
+                var authors = [...new Set(authorList.map(a => normalize(a.trim())).filter(a => a))];
+
+                authors.forEach(auth => {
+                    let count = (nodeCounts.get(auth) || 0) + 1;
+                    nodeCounts.set(auth, count);
+                    if (auth !== myName && count > maxCount) maxCount = count;
+
+                    if (!authorMeta.has(auth)) {
+                        authorMeta.set(auth, { count: 0, years: new Set(), venues: new Map(), coauthors: new Map() });
+                    }
+                    const meta = authorMeta.get(auth);
+                    meta.count += 1;
+                    if (paper.year) meta.years.add(paper.year);
+                    if (paper.venue) meta.venues.set(paper.venue, (meta.venues.get(paper.venue) || 0) + 1);
+                });
+
+                for (let i = 0; i < authors.length; i++) {
+                    for (let j = i + 1; j < authors.length; j++) {
+                        let source = authors[i], target = authors[j];
+                        if (source === target) continue;
+                        let pairId = [source, target].sort().join("|");
+                        linkCounts.set(pairId, (linkCounts.get(pairId) || 0) + 1);
+
+                        const metaA = authorMeta.get(source);
+                        const metaB = authorMeta.get(target);
+                        if (metaA) metaA.coauthors.set(target, (metaA.coauthors.get(target) || 0) + 1);
+                        if (metaB) metaB.coauthors.set(source, (metaB.coauthors.get(source) || 0) + 1);
+                    }
                 }
-                const meta = authorMeta.get(auth);
-                meta.count += 1;
-                if (paper.year) meta.years.add(paper.year);
-                if (paper.venue) meta.venues.set(paper.venue, (meta.venues.get(paper.venue) || 0) + 1);
             });
 
-            for (let i = 0; i < authors.length; i++) {
-                for (let j = i + 1; j < authors.length; j++) {
-                    let source = authors[i], target = authors[j];
-                    if (source === target) continue;
-                    let pairId = [source, target].sort().join("|");
-                    linkCounts.set(pairId, (linkCounts.get(pairId) || 0) + 1);
+            nodesBase = Array.from(nodeCounts.entries()).map(([name, count]) => ({ id: name, count: count }));
+            linksBase = Array.from(linkCounts.entries()).map(([id, count]) => {
+                let [source, target] = id.split("|");
+                return { source: source, target: target, count: count };
+            });
+        }
 
-                    const metaA = authorMeta.get(source);
-                    const metaB = authorMeta.get(target);
-                    if (metaA) metaA.coauthors.set(target, (metaA.coauthors.get(target) || 0) + 1);
-                    if (metaB) metaB.coauthors.set(source, (metaB.coauthors.get(source) || 0) + 1);
-                }
-            }
-        });
+        if (!maxCount && nodesBase.length) {
+            maxCount = Math.max(...nodesBase.filter(n => n.id !== myName).map(n => n.count || 0), 0);
+        }
 
-        var nodes = Array.from(nodeCounts.entries()).map(([name, count]) => {
+        const maxValue = Math.max(maxCount || 0, 1);
+
+        var nodes = nodesBase.map(({ id, count }) => {
+            let name = id;
             let isMe = (name === myName);
+            const countVal = count || 0;
             return {
                 id: name,
                 name: name,
-                value: count,
-                symbolSize: isMe ? 60 : Math.max(18, Math.min(52, count * 7)),
+                value: countVal,
+                symbolSize: isMe ? 60 : Math.max(18, Math.min(52, countVal * 7)),
                 itemStyle: { color: isMe ? '#ffffff' : null },
                 fixed: isMe,
                 x: isMe ? dom.clientWidth / 2 : null,
@@ -1228,13 +1338,12 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
         const nodeIndexMap = new Map();
         nodes.forEach((n, idx) => { nodeIndexMap.set(n.name, idx); });
 
-        var links = Array.from(linkCounts.entries()).map(([id, count]) => {
-            let [source, target] = id.split("|");
-            return {
-                source: source, target: target, value: count,
-                lineStyle: { width: Math.min(1.5 + (count * 0.8), 6), opacity: 0.6 }
-            };
-        });
+        var links = linksBase.map(({ source, target, count }) => ({
+            source: source,
+            target: target,
+            value: count,
+            lineStyle: { width: Math.min(1.5 + (count * 0.8), 6), opacity: 0.6 }
+        }));
 
         function getCollabColor(val, max, isDark) {
             var ratio = Math.min(Math.max((val - 1) / (max - 1 || 1), 0), 1);
@@ -1289,7 +1398,7 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
             const styledNodes = nodes.map(n => {
                 const isFocus = collabFocusId === n.id;
                 const isHighlight = highlight.size === 0 || highlight.has(n.id);
-                const baseColor = n.id === myName ? (isDark ? '#fff' : '#000') : getCollabColor(n.value, maxCount, isDark);
+                const baseColor = n.id === myName ? (isDark ? '#fff' : '#000') : getCollabColor(n.value, maxValue, isDark);
                 return Object.assign({}, n, {
                     itemStyle: {
                         color: baseColor,
@@ -1306,7 +1415,7 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
                 return Object.assign({}, l, {
                     lineStyle: Object.assign({}, l.lineStyle, {
                         opacity: highlight.size === 0 ? l.lineStyle.opacity : (linkHighlight ? Math.min(0.8, l.lineStyle.opacity + 0.2) : 0.05),
-                        color: getCollabColor(l.value, maxCount, isDark)
+                        color: getCollabColor(l.value, maxValue, isDark)
                     })
                 });
             });
@@ -1572,15 +1681,62 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
         });
     }
 
-    function calculateAllMetrics(papers) {
+    function calculateAllMetrics(papers, precomputed) {
         let n = papers.length;
         const currentYear = new Date().getFullYear();
         if (n === 0) return;
+        const percentile = (arr, p) => {
+            const sorted = arr.slice().sort((a,b) => a - b);
+            if (!sorted.length) return 0;
+            const idx = Math.floor((sorted.length - 1) * p);
+            return sorted[idx];
+        };
+
+        let centralityInfo = [];
+        let topicLinks = [];
+        let venueLinks = [];
+        let authorLinks = [];
+        let density = 0;
+        let clusteringCoeff = 0;
+        let pathStats = { avgPath: 0 };
+        let maxTopic = 1;
+        let maxVenue = 1;
+        let maxAuthor = 1;
+        let topicThresh = 0;
+        let venueThresh = 0;
+        let authorThresh = 0;
+        let citeThresh = 0;
+
+        if (precomputed && Array.isArray(precomputed.papers) && precomputed.papers.length) {
+            centralityInfo = precomputed.papers.map((info, idx) => {
+                if (!info) return info;
+                const hasAuthors = Array.isArray(info.authors) && info.authors.length;
+                if (hasAuthors) return info;
+                const fallback = papers[idx] ? papers[idx].authors : null;
+                const list = Array.isArray(fallback) ? fallback : (fallback ? fallback.split(',').map(a => a.trim()) : []);
+                return Object.assign({}, info, { authors: list });
+            });
+            topicLinks = centralityInfo.map(p => p.topicLinks || 0);
+            venueLinks = centralityInfo.map(p => p.venueLinks || 0);
+            authorLinks = centralityInfo.map(p => p.authorLinks || 0);
+            density = (precomputed.metrics && precomputed.metrics.density) ? precomputed.metrics.density : 0;
+            clusteringCoeff = (precomputed.metrics && precomputed.metrics.clustering) ? precomputed.metrics.clustering : 0;
+            pathStats = { avgPath: (precomputed.metrics && precomputed.metrics.avgPath) ? precomputed.metrics.avgPath : 0 };
+            const thresholds = precomputed.thresholds || {};
+            topicThresh = thresholds.topic !== undefined ? thresholds.topic : percentile(topicLinks, 0.75);
+            venueThresh = thresholds.venue !== undefined ? thresholds.venue : percentile(venueLinks, 0.75);
+            authorThresh = thresholds.author !== undefined ? thresholds.author : percentile(authorLinks, 0.75);
+            citeThresh = thresholds.citation !== undefined ? thresholds.citation : percentile(centralityInfo.map(c => c.citations || 0), 0.75);
+            const maxLinks = precomputed.maxLinks || {};
+            maxTopic = maxLinks.topic || Math.max(...topicLinks, 1);
+            maxVenue = maxLinks.venue || Math.max(...venueLinks, 1);
+            maxAuthor = maxLinks.author || Math.max(...authorLinks, 1);
+        } else {
         let adj = Array.from({length: n}, () => []);
         let degrees = new Array(n).fill(0);
-        let topicLinks = new Array(n).fill(0);
-        let venueLinks = new Array(n).fill(0);
-        let authorLinks = new Array(n).fill(0);
+        topicLinks = new Array(n).fill(0);
+        venueLinks = new Array(n).fill(0);
+        authorLinks = new Array(n).fill(0);
 
         const normalizeAuthor = (name) => name.toLowerCase().replace(/\s+/g, ' ').trim();
         const authorSets = papers.map(p => {
@@ -1652,9 +1808,9 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
         }
 
         const edgeCount = degrees.reduce((sum, d) => sum + d, 0) / 2;
-        const density = n > 1 ? (2 * edgeCount) / (n * (n - 1)) : 0;
+        density = n > 1 ? (2 * edgeCount) / (n * (n - 1)) : 0;
 
-        const pathStats = (() => {
+        pathStats = (() => {
             let totalDist = 0;
             let totalPairs = 0;
             for (let i = 0; i < n; i++) {
@@ -1674,7 +1830,7 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
             return { avgPath: totalPairs ? (totalDist / totalPairs) : 0 };
         })();
 
-        const clusteringCoeff = (() => {
+        clusteringCoeff = (() => {
             let total = 0;
             let count = 0;
             const adjSet = adj.map(list => new Set(list));
@@ -1694,7 +1850,7 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
             return count ? total / count : 0;
         })();
 
-        const centralityInfo = papers.map((p, i) => ({
+        centralityInfo = papers.map((p, i) => ({
             index: i,
             title: p.title,
             year: p.year,
@@ -1709,17 +1865,11 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
             authors: Array.isArray(p.authors) ? p.authors : (p.authors ? p.authors.split(',').map(a => a.trim()) : [])
         }));
 
-        const percentile = (arr, p) => {
-            const sorted = arr.slice().sort((a,b) => a - b);
-            if (!sorted.length) return 0;
-            const idx = Math.floor((sorted.length - 1) * p);
-            return sorted[idx];
-        };
-
-        const topicThresh = percentile(topicLinks, 0.75);
-        const venueThresh = percentile(venueLinks, 0.75);
-        const authorThresh = percentile(authorLinks, 0.75);
-        const citeThresh = percentile(centralityInfo.map(c => c.citations || 0), 0.75);
+        topicThresh = percentile(topicLinks, 0.75);
+        venueThresh = percentile(venueLinks, 0.75);
+        authorThresh = percentile(authorLinks, 0.75);
+        citeThresh = percentile(centralityInfo.map(c => c.citations || 0), 0.75);
+        }
 
         const sparklineValues = (paper) => {
             const cites = paper.citations || 0;
@@ -1814,9 +1964,9 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
             centralityRadarChart = echarts.init(radarEl);
         }
 
-        const maxTopic = Math.max(...topicLinks, 1);
-        const maxVenue = Math.max(...venueLinks, 1);
-        const maxAuthor = Math.max(...authorLinks, 1);
+        maxTopic = Math.max(...topicLinks, 1);
+        maxVenue = Math.max(...venueLinks, 1);
+        maxAuthor = Math.max(...authorLinks, 1);
 
         const setCohesionRadar = (paper) => {
             if (!paper || !centralityRadarChart) return;
@@ -1919,7 +2069,6 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
     });
 
     function refreshDashboardLayout() {
-        if(radarChart) radarChart.resize();
         if(lineChart) lineChart.resize();
         if(graphChart) graphChart.resize();
         if(collabChart) collabChart.resize();
@@ -1933,18 +2082,30 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
         }
     }
 
-    const dashboardWrapper = document.getElementById('dashboard-wrapper');
+    const startDashboard = () => {
+        initDashboard();
+        setTimeout(refreshDashboardLayout, 200);
+    };
+
     const dashboardDetails = dashboardWrapper ? dashboardWrapper.closest('details') : null;
     if (dashboardDetails) {
         dashboardDetails.addEventListener('toggle', () => {
-            if (dashboardDetails.open) {
-                setTimeout(refreshDashboardLayout, 200);
-            }
+            if (dashboardDetails.open) startDashboard();
         });
         if (dashboardDetails.open) {
-            setTimeout(refreshDashboardLayout, 200);
+            startDashboard();
         }
-    }
+    } else if (dashboardWrapper && 'IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+            if (entries.some(entry => entry.isIntersecting)) {
+                startDashboard();
+                observer.disconnect();
+            }
+        }, { rootMargin: '200px' });
+        observer.observe(dashboardWrapper);
+    } else {
+        startDashboard();
+        }
 
 })();
 </script>
