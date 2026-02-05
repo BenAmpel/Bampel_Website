@@ -95,19 +95,25 @@
     const pubSeries = years.map((year) => pubsByYear.get(year) || 0);
     const citeSeries = years.map((year) => citesByYear.get(year) || 0);
 
-    const maxValue = Math.max(1, ...pubSeries, ...citeSeries);
     const width = 320;
     const height = 80;
-    const padding = 6;
+    const padding = 4;
+
+    const normalizeSeries = (series) => {
+      const minValue = Math.min(...series);
+      const maxValue = Math.max(...series);
+      const range = Math.max(maxValue - minValue, 1);
+      return series.map((value) => (value - minValue) / range);
+    };
 
     const points = (series) => series.map((value, index) => {
       const x = padding + (width - 2 * padding) * (index / Math.max(series.length - 1, 1));
-      const y = height - padding - (height - 2 * padding) * (value / maxValue);
+      const y = height - padding - (height - 2 * padding) * value;
       return `${x.toFixed(1)},${y.toFixed(1)}`;
     }).join(' ');
 
-    const citePoints = points(citeSeries);
-    const pubPoints = points(pubSeries);
+    const citePoints = points(normalizeSeries(citeSeries));
+    const pubPoints = points(normalizeSeries(pubSeries));
 
     sparklineEl.innerHTML = `
       <polyline class="sparkline-path citations" points="${citePoints}"></polyline>
