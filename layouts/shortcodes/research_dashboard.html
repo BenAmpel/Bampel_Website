@@ -108,6 +108,11 @@
             <label class="footprint-check footprint-check-institution"><input type="checkbox" data-footprint-cat="Institution" checked><span class="footprint-check-dot"></span> Institutions</label>
             <label class="footprint-check footprint-check-collaboration"><input type="checkbox" data-footprint-cat="Collaboration" checked><span class="footprint-check-dot"></span> Collaborations</label>
         </div>
+        <div class="footprint-group footprint-key" aria-label="Category key">
+            <span class="footprint-key-item footprint-check-conference"><span class="footprint-check-dot"></span> Conference</span>
+            <span class="footprint-key-item footprint-check-collaboration"><span class="footprint-check-dot"></span> Collaboration</span>
+            <span class="footprint-key-item footprint-check-institution"><span class="footprint-check-dot"></span> Institution</span>
+        </div>
         <div class="footprint-group" role="group" aria-label="Layers">
             <label class="footprint-check"><input type="checkbox" data-footprint-layer="routes" checked> Routes</label>
             <label class="footprint-check"><input type="checkbox" data-footprint-layer="heat" checked> Heat</label>
@@ -250,10 +255,12 @@ body:not(.dark) .impact-pin { background:rgba(0,119,182,0.12); border-color:rgba
 .footprint-check-conference { color:#00ff41; }
 .footprint-check-institution { color:#ff6b35; }
 .footprint-check-collaboration { color:#00bfff; }
+.footprint-key { display:flex; gap:10px; justify-content:space-between; }
+.footprint-key-item { display:flex; align-items:center; gap:6px; font-size:0.58rem; text-transform:uppercase; letter-spacing:0.06em; }
 .footprint-timeline { flex-direction:column; align-items:flex-start; gap:6px; }
 .footprint-year-label { font-size:0.62rem; letter-spacing:0.04em; text-transform:uppercase; color:#bde8ff; }
 .footprint-timeline input[type="range"] { width:200px; }
-.footprint-legend { position:absolute; bottom:14px; right:14px; z-index:15; max-width:200px; background:rgba(0,0,0,0.4); border:1px solid var(--card-border, #333); border-radius:12px; padding:8px 10px; font-size:0.62rem; color:#d6dde2; backdrop-filter: blur(6px); pointer-events:none; }
+.footprint-legend { position:absolute; bottom:14px; right:14px; z-index:30; max-width:200px; background:rgba(0,0,0,0.4); border:1px solid var(--card-border, #333); border-radius:12px; padding:8px 10px; font-size:0.62rem; color:#d6dde2; backdrop-filter: blur(6px); pointer-events:none; }
 .footprint-legend .legend-row { display:flex; align-items:center; gap:6px; margin-bottom:4px; }
 .footprint-legend .legend-row:last-child { margin-bottom:0; }
 .footprint-legend-dot { width:8px; height:8px; border-radius:50%; background:var(--legend-color); box-shadow:0 0 6px rgba(0,0,0,0.4); }
