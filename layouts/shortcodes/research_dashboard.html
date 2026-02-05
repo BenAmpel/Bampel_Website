@@ -1944,7 +1944,8 @@ body:not(.dark) .centrality-tab.is-active { background:rgba(0,119,182,0.15); }
         }
     }
 
-    const dashboardDetails = document.querySelector('details.spoiler');
+    const dashboardWrapper = document.getElementById('dashboard-wrapper');
+    const dashboardDetails = dashboardWrapper ? dashboardWrapper.closest('details') : null;
     if (dashboardDetails) {
         dashboardDetails.addEventListener('toggle', () => {
             if (dashboardDetails.open) {
