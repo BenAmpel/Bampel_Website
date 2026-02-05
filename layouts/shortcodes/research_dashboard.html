@@ -57,22 +57,28 @@
 </div>
 
 <div style="grid-column:2; grid-row:2; padding:25px; border-bottom:1px solid var(--card-border, #333); display:flex; flex-direction:column; height:100%; overflow:hidden;">
-    <h4 style="font-size:0.8rem; opacity:0.7; text-transform:uppercase; margin-bottom:15px; border-bottom:1px solid var(--card-border, #444); padding-bottom:10px;">Network Centrality Analysis</h4>
-    <div style="overflow-y:auto; padding-right:5px; flex-grow:1;">
-        <div style="margin-bottom:20px;">
-            <div style="font-size:0.75rem; font-weight:bold; color:#00ff41; margin-bottom:4px;">INFLUENCE (Eigenvector)</div>
-            <p style="font-size:0.65rem; opacity:0.5; margin:0 0 8px 0;">Papers connected to other highly connected papers</p>
-            <div id="dash-list-eigen" style="font-size:0.8rem; line-height:1.4;"><span style="opacity:0.3;">Calculating...</span></div>
+    <div class="centrality-header">
+        <h4 style="font-size:0.8rem; opacity:0.7; text-transform:uppercase; margin:0;">Network Centrality Analysis</h4>
+        <div class="centrality-tabs" role="tablist">
+            <button class="centrality-tab is-active" data-centrality-tab="eigen" type="button" role="tab" aria-selected="true">Influence</button>
+            <button class="centrality-tab" data-centrality-tab="between" type="button" role="tab" aria-selected="false">Bridges</button>
+            <button class="centrality-tab" data-centrality-tab="degree" type="button" role="tab" aria-selected="false">Hubs</button>
         </div>
-        <div style="margin-bottom:20px;">
-            <div style="font-size:0.75rem; font-weight:bold; color:#00e5ff; margin-bottom:4px;">BRIDGES (Betweenness)</div>
-            <p style="font-size:0.65rem; opacity:0.5; margin:0 0 8px 0;">Papers that connect different research clusters</p>
-            <div id="dash-list-between" style="font-size:0.8rem; line-height:1.4;"></div>
+    </div>
+    <div class="centrality-metrics">
+        <div class="centrality-metric"><span>Density</span><strong id="centrality-density">--</strong></div>
+        <div class="centrality-metric"><span>Avg Path</span><strong id="centrality-path">--</strong></div>
+        <div class="centrality-metric"><span>Clustering</span><strong id="centrality-cluster">--</strong></div>
+        <div class="centrality-metric"><span>Top Mover (2 yrs)</span><strong id="centrality-mover">--</strong></div>
+    </div>
+    <div class="centrality-body">
+        <div class="centrality-list" id="centrality-list">
+            <span style="opacity:0.3;">Calculating...</span>
         </div>
-        <div>
-            <div style="font-size:0.75rem; font-weight:bold; color:#e040fb; margin-bottom:4px;">HUBS (Degree)</div>
-            <p style="font-size:0.65rem; opacity:0.5; margin:0 0 8px 0;">Papers with the most direct relationships</p>
-            <div id="dash-list-degree" style="font-size:0.8rem; line-height:1.4;"></div>
+        <div class="centrality-side">
+            <div class="centrality-side-title">Cohesion Radar</div>
+            <div id="centrality-radar" style="width:100%; height:160px;"></div>
+            <div class="centrality-side-note" id="centrality-note">Hover a paper to see how it connects across topic, venue, and co-author links.</div>
         </div>
     </div>
 </div>
@@ -307,6 +313,51 @@ body:not(.dark) .footprint-year-label { color:#0b4f6c; }
 body:not(.dark) .dash-geo-mix { background:rgba(255,255,255,0.85); color:#333; border-color:#e0e0e0; }
 body:not(.dark) .dash-momentum { background:rgba(11,122,47,0.1); color:#0b7a2f; border-color:#0b7a2f; }
 body:not(.dark) .dash-region-badge { color:#0077b6; border-color:#0077b6; background:rgba(0,119,182,0.12); }
+
+/* Centrality panel */
+.centrality-header { display:flex; align-items:center; justify-content:space-between; gap:10px; padding-bottom:10px; border-bottom:1px solid var(--card-border, #444); margin-bottom:10px; }
+.centrality-tabs { display:flex; gap:6px; }
+.centrality-tab { border:1px solid rgba(0,229,255,0.35); background:transparent; color:#bde8ff; font-size:0.6rem; letter-spacing:0.06em; text-transform:uppercase; padding:4px 8px; border-radius:999px; cursor:pointer; }
+.centrality-tab.is-active { background:rgba(0,229,255,0.18); border-color:#00e5ff; color:#00e5ff; }
+
+.centrality-metrics { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:8px; margin-bottom:10px; }
+.centrality-metric { border:1px solid var(--card-border, #333); border-radius:10px; padding:8px; background:rgba(0,0,0,0.25); display:flex; flex-direction:column; gap:4px; font-size:0.6rem; text-transform:uppercase; letter-spacing:0.04em; color:#cfead2; }
+.centrality-metric strong { font-size:0.9rem; color:#00ff41; text-transform:none; letter-spacing:0; }
+.centrality-metric:nth-child(2) strong { color:#00e5ff; }
+.centrality-metric:nth-child(3) strong { color:#e040fb; }
+.centrality-metric:nth-child(4) strong { color:#ffd166; }
+
+.centrality-body { display:grid; grid-template-columns:1.1fr 0.9fr; gap:12px; flex-grow:1; min-height:0; }
+.centrality-list { overflow-y:auto; padding-right:6px; display:flex; flex-direction:column; gap:10px; }
+.centrality-item { border:1px solid var(--card-border, #333); border-radius:12px; padding:10px; background:rgba(0,0,0,0.22); position:relative; overflow:hidden; cursor:pointer; transition:transform 0.15s ease, border-color 0.15s ease; }
+.centrality-item:hover { transform:translateY(-2px); border-color:rgba(0,229,255,0.5); }
+.centrality-bar { position:absolute; left:0; top:0; bottom:0; width:0; background:linear-gradient(90deg, rgba(0,229,255,0.22), rgba(0,255,65,0.12)); opacity:0.35; transition:width 0.4s ease; }
+.centrality-item-header { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; position:relative; z-index:1; }
+.centrality-rank { font-size:0.8rem; font-weight:700; color:#00e5ff; min-width:20px; }
+.centrality-main { flex:1; min-width:0; }
+.centrality-title { font-size:0.75rem; line-height:1.3; font-weight:600; color:#f3f8ff; margin:0; }
+.centrality-meta { font-size:0.6rem; opacity:0.7; margin-top:4px; display:flex; gap:8px; flex-wrap:wrap; }
+.centrality-badges { display:flex; gap:6px; align-items:center; }
+.centrality-sidebits { display:flex; flex-direction:column; align-items:flex-end; gap:6px; }
+.centrality-badge { font-size:0.55rem; text-transform:uppercase; letter-spacing:0.06em; padding:2px 6px; border-radius:999px; background:rgba(224,64,251,0.15); color:#e040fb; border:1px solid rgba(224,64,251,0.3); }
+.centrality-pills { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
+.centrality-pill { font-size:0.55rem; text-transform:uppercase; letter-spacing:0.06em; padding:2px 6px; border-radius:999px; background:rgba(0,255,65,0.12); color:#b9f6ca; border:1px solid rgba(0,255,65,0.3); }
+.centrality-sparkline { width:90px; height:26px; }
+.centrality-side { border:1px solid var(--card-border, #333); border-radius:12px; padding:10px; background:rgba(0,0,0,0.2); display:flex; flex-direction:column; gap:8px; }
+.centrality-side-title { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; color:#bde8ff; }
+.centrality-side-note { font-size:0.6rem; opacity:0.7; line-height:1.4; }
+
+body:not(.dark) .centrality-metric,
+body:not(.dark) .centrality-item,
+body:not(.dark) .centrality-side { background:rgba(255,255,255,0.9); border-color:#e0e0e0; color:#333; }
+body:not(.dark) .centrality-title { color:#1a1a1a; }
+body:not(.dark) .centrality-tab { color:#0077b6; border-color:#0077b6; }
+body:not(.dark) .centrality-tab.is-active { background:rgba(0,119,182,0.15); }
+
+@media (max-width: 900px) {
+    .centrality-metrics { grid-template-columns:repeat(2, minmax(0,1fr)); }
+    .centrality-body { grid-template-columns:1fr; }
+}
 </style>
 
 <script type="text/javascript">
@@ -351,7 +402,7 @@ body:not(.dark) .dash-region-badge { color:#0077b6; border-color:#0077b6; backgr
     let collabRange = 'all';
     let collabFocusId = null;
 
-    var radarChart, lineChart, graphChart, collabChart, visitTrendChart, visitDeviceChart;
+    var radarChart, lineChart, graphChart, collabChart, visitTrendChart, visitDeviceChart, centralityRadarChart;
 
     // 2. DATA LOADING
     const safeFetch = (url) => fetch(url).then(r => r.ok ? r.json() : null).catch(e => null);
@@ -1032,6 +1083,8 @@ body:not(.dark) .dash-region-badge { color:#0077b6; border-color:#0077b6; backgr
         renderPins();
         setInspector(null);
         updateImpactGraph();
+        graphChart.__refresh = updateImpactGraph;
+        graphChart.__nodes = nodes;
 
         graphChart.off('click');
         graphChart.on('click', (params) => {
@@ -1097,6 +1150,7 @@ body:not(.dark) .dash-region-badge { color:#0077b6; border-color:#0077b6; backgr
             }
             return nameMap[clean] || clean;
         }
+        collabChart.__normalize = normalize;
 
         const chipRow = document.querySelector('.collab-chip-row');
         if (chipRow) {
@@ -1174,6 +1228,9 @@ body:not(.dark) .dash-region-badge { color:#0077b6; border-color:#0077b6; backgr
                 y: isMe ? dom.clientHeight / 2 : null
             };
         });
+
+        const nodeIndexMap = new Map();
+        nodes.forEach((n, idx) => { nodeIndexMap.set(n.name, idx); });
 
         var links = Array.from(linkCounts.entries()).map(([id, count]) => {
             let [source, target] = id.split("|");
@@ -1276,6 +1333,8 @@ body:not(.dark) .dash-region-badge { color:#0077b6; border-color:#0077b6; backgr
 
         setSpotlight(collabFocusId);
         updateCollabGraph();
+        collabChart.__refresh = updateCollabGraph;
+        collabChart.__indexMap = nodeIndexMap;
 
         collabChart.off('click');
         collabChart.on('click', (params) => {
@@ -1518,30 +1577,69 @@ body:not(.dark) .dash-region-badge { color:#0077b6; border-color:#0077b6; backgr
 
     function calculateAllMetrics(papers) {
         let n = papers.length;
+        if (n === 0) return;
         let adj = Array.from({length: n}, () => []);
         let degrees = new Array(n).fill(0);
+        let topicLinks = new Array(n).fill(0);
+        let venueLinks = new Array(n).fill(0);
+        let authorLinks = new Array(n).fill(0);
+
+        const normalizeAuthor = (name) => name.toLowerCase().replace(/\s+/g, ' ').trim();
+        const authorSets = papers.map(p => {
+            if (!p.authors) return new Set();
+            let list = Array.isArray(p.authors) ? p.authors : p.authors.split(',');
+            return new Set(list.map(a => normalizeAuthor(a)).filter(Boolean));
+        });
+
+        const wordSets = papers.map(p => {
+            let text = (p.title || "").toLowerCase().replace(/[^a-z0-9 ]/g, ' ');
+            return new Set(text.split(/\s+/).filter(w => w.length > 4));
+        });
+
         const getWeight = (i, j) => {
             let p1 = papers[i], p2 = papers[j];
             let w = 0;
-            if(p1.venue === p2.venue && p1.venue) w += 1;
-            let t1 = (p1.title||"").toLowerCase(); let t2 = (p2.title||"").toLowerCase();
-            let common = t1.split(' ').filter(word => word.length > 4 && t2.includes(word)).length;
-            if(common > 0) w += common * 0.5;
+            if(p1.venue === p2.venue && p1.venue) { w += 1; venueLinks[i] += 1; venueLinks[j] += 1; }
+            let commonWords = 0;
+            wordSets[i].forEach(word => { if(wordSets[j].has(word)) commonWords++; });
+            if(commonWords > 0) { w += commonWords * 0.5; topicLinks[i] += commonWords; topicLinks[j] += commonWords; }
+            let commonAuthors = 0;
+            authorSets[i].forEach(a => { if(authorSets[j].has(a)) commonAuthors++; });
+            if(commonAuthors > 0) { authorLinks[i] += commonAuthors; authorLinks[j] += commonAuthors; }
             return w;
         };
+
         for(let i=0; i<n; i++) {
             for(let j=i+1; j<n; j++) {
                 let weight = getWeight(i, j);
                 if(weight > 0.5) { adj[i].push(j); adj[j].push(i); degrees[i]++; degrees[j]++; }
             }
         }
-        let eigenScores = new Array(n).fill(1.0);
-        for(let iter=0; iter<10; iter++) {
-            let nextScores = new Array(n).fill(0);
-            for(let i=0; i<n; i++) { for(let neighbor of adj[i]) { nextScores[i] += eigenScores[neighbor]; } }
-            let maxS = Math.max(...nextScores) || 1;
-            eigenScores = nextScores.map(s => s / maxS);
-        }
+
+        const computeEigen = (indices) => {
+            const mapIndex = new Map();
+            indices.forEach((idx, i) => mapIndex.set(idx, i));
+            const size = indices.length;
+            let subAdj = Array.from({length: size}, () => []);
+            indices.forEach((idx, i) => {
+                adj[idx].forEach(nbr => {
+                    if (mapIndex.has(nbr)) subAdj[i].push(mapIndex.get(nbr));
+                });
+            });
+            let scores = new Array(size).fill(1.0);
+            for(let iter=0; iter<10; iter++) {
+                let nextScores = new Array(size).fill(0);
+                for(let i=0; i<size; i++) { for(let neighbor of subAdj[i]) { nextScores[i] += scores[neighbor]; } }
+                let maxS = Math.max(...nextScores) || 1;
+                scores = nextScores.map(s => s / maxS);
+            }
+            const result = new Array(n).fill(0);
+            indices.forEach((idx, i) => { result[idx] = scores[i] || 0; });
+            return result;
+        };
+
+        let eigenScores = computeEigen([...Array(n).keys()]);
+
         let betweenness = new Array(n).fill(0);
         for(let s=0; s<n; s++) {
             let q = [s], preds = Array.from({length: n}, () => []), levels = new Array(n).fill(-1); levels[s] = 0;
@@ -1554,14 +1652,267 @@ body:not(.dark) .dash-region-badge { color:#0077b6; border-color:#0077b6; backgr
             }
             for(let i=0; i<n; i++) { if(i !== s && levels[i] > 0) { for(let p of preds[i]) betweenness[p] += 1; } }
         }
-        const renderList = (id, scores, color) => {
-            let ranked = papers.map((p, i) => ({ title: p.title, val: scores[i] })).sort((a,b) => b.val - a.val).slice(0, 3);
-            let html = ranked.map((r, i) => `<div style="display:flex; gap:8px; margin-bottom:6px; align-items:start;"><div style="font-weight:bold; color:${color}; font-size:0.9em; min-width:15px;">${i+1}.</div><div style="font-size:0.8em; line-height:1.2; opacity:0.9;">${r.title}</div></div>`).join('');
-            let el = document.getElementById(id); if(el) el.innerHTML = html;
+
+        const edgeCount = degrees.reduce((sum, d) => sum + d, 0) / 2;
+        const density = n > 1 ? (2 * edgeCount) / (n * (n - 1)) : 0;
+
+        const pathStats = (() => {
+            let totalDist = 0;
+            let totalPairs = 0;
+            for (let i = 0; i < n; i++) {
+                let dist = new Array(n).fill(-1);
+                dist[i] = 0;
+                let queue = [i];
+                while (queue.length) {
+                    const v = queue.shift();
+                    adj[v].forEach(w => {
+                        if (dist[w] === -1) { dist[w] = dist[v] + 1; queue.push(w); }
+                    });
+                }
+                for (let j = i + 1; j < n; j++) {
+                    if (dist[j] > 0) { totalDist += dist[j]; totalPairs += 1; }
+                }
+            }
+            return { avgPath: totalPairs ? (totalDist / totalPairs) : 0 };
+        })();
+
+        const clusteringCoeff = (() => {
+            let total = 0;
+            let count = 0;
+            const adjSet = adj.map(list => new Set(list));
+            for (let i = 0; i < n; i++) {
+                const neighbors = adj[i];
+                const k = neighbors.length;
+                if (k < 2) continue;
+                let links = 0;
+                for (let a = 0; a < k; a++) {
+                    for (let b = a + 1; b < k; b++) {
+                        if (adjSet[neighbors[a]].has(neighbors[b])) links++;
+                    }
+                }
+                total += (2 * links) / (k * (k - 1));
+                count++;
+            }
+            return count ? total / count : 0;
+        })();
+
+        const currentYear = new Date().getFullYear();
+        const recentIndices = papers.map((p, i) => (p.year && p.year >= currentYear - 1) ? i : null).filter(v => v !== null);
+        const recentEigen = recentIndices.length ? computeEigen(recentIndices) : new Array(n).fill(0);
+
+        const movers = papers.map((p, i) => {
+            return { index: i, delta: (recentEigen[i] || 0) - (eigenScores[i] || 0) };
+        }).sort((a,b) => b.delta - a.delta);
+
+        const mover = movers.length ? movers[0] : null;
+
+        const centralityInfo = papers.map((p, i) => ({
+            index: i,
+            title: p.title,
+            year: p.year,
+            venue: p.venue,
+            citations: p.citations || 0,
+            eigen: eigenScores[i],
+            between: betweenness[i],
+            degree: degrees[i],
+            topicLinks: topicLinks[i],
+            venueLinks: venueLinks[i],
+            authorLinks: authorLinks[i],
+            authors: Array.isArray(p.authors) ? p.authors : (p.authors ? p.authors.split(',').map(a => a.trim()) : [])
+        }));
+
+        const percentile = (arr, p) => {
+            const sorted = arr.slice().sort((a,b) => a - b);
+            if (!sorted.length) return 0;
+            const idx = Math.floor((sorted.length - 1) * p);
+            return sorted[idx];
         };
-        renderList(IDS.LISTS.EIGEN, eigenScores, '#00ff41');
-        renderList(IDS.LISTS.BETWEEN, betweenness, '#00e5ff');
-        renderList(IDS.LISTS.DEGREE, degrees, '#e040fb');
+
+        const topicThresh = percentile(topicLinks, 0.75);
+        const venueThresh = percentile(venueLinks, 0.75);
+        const authorThresh = percentile(authorLinks, 0.75);
+        const citeThresh = percentile(centralityInfo.map(c => c.citations || 0), 0.75);
+
+        const sparklineValues = (paper) => {
+            const cites = paper.citations || 0;
+            const year = paper.year || currentYear;
+            const age = Math.max(1, currentYear - year + 1);
+            const steps = 6;
+            let vals = [];
+            for (let i = 1; i <= steps; i++) {
+                const t = i / steps;
+                const scaled = cites * Math.pow(t, 1.4);
+                vals.push(Math.max(0, scaled));
+            }
+            if (vals.every(v => v === 0)) {
+                vals = [0,0,0,0,0,0];
+            }
+            return vals;
+        };
+
+        const sparklineSvg = (values) => {
+            const w = 90, h = 26;
+            const max = Math.max(...values, 1);
+            const pts = values.map((v, i) => {
+                const x = 2 + (i / (values.length - 1)) * (w - 4);
+                const y = h - 3 - (v / max) * (h - 8);
+                return `${x},${y}`;
+            }).join(' ');
+            return `<svg class="centrality-sparkline" viewBox="0 0 ${w} ${h}" role="img" aria-label="Estimated citation growth"><polyline points="${pts}" fill="none" stroke="#00e5ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+        };
+
+        const renderCentralityList = (mode) => {
+            const scores = {
+                eigen: { key: 'eigen', color: '#00ff41', label: 'Influence' },
+                between: { key: 'between', color: '#00e5ff', label: 'Bridges' },
+                degree: { key: 'degree', color: '#e040fb', label: 'Hubs' }
+            }[mode];
+
+            const ranked = centralityInfo.slice().sort((a,b) => b[scores.key] - a[scores.key]).slice(0, 6);
+            const maxScore = Math.max(...ranked.map(r => r[scores.key]), 1);
+
+            const listEl = document.getElementById('centrality-list');
+            if (!listEl) return;
+            listEl.innerHTML = ranked.map((r, idx) => {
+                const pills = [];
+                if (r.topicLinks >= topicThresh) pills.push('Topic hub');
+                if (r.venueLinks >= venueThresh) pills.push('Venue anchor');
+                if (r.authorLinks >= authorThresh) pills.push('Co-author dense');
+                if (r.citations >= citeThresh) pills.push('High impact');
+                if (mode === 'between') pills.unshift('Cross-cluster');
+                const pillHtml = pills.slice(0, 3).map(p => `<span class="centrality-pill">${p}</span>`).join('');
+                const scorePct = Math.min(100, Math.round((r[scores.key] / maxScore) * 100));
+                const badge = idx < 3 ? `<span class="centrality-badge">Top ${idx + 1}</span>` : '';
+                return `<div class="centrality-item" data-paper-index="${r.index}" tabindex="0" role="button">
+                    <div class="centrality-bar" style="width:${scorePct}%;"></div>
+                    <div class="centrality-item-header">
+                        <div class="centrality-rank">#${idx + 1}</div>
+                        <div class="centrality-main">
+                            <div class="centrality-title">${r.title}</div>
+                            <div class="centrality-meta">${r.year || '—'} · ${r.venue || '—'}</div>
+                            <div class="centrality-pills">${pillHtml}</div>
+                        </div>
+                        <div class="centrality-sidebits">
+                            <div class="centrality-badges">${badge}</div>
+                            ${sparklineSvg(sparklineValues(r))}
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            listEl.querySelectorAll('.centrality-item').forEach(item => {
+                item.addEventListener('mouseenter', () => highlightPaper(parseInt(item.getAttribute('data-paper-index'), 10)));
+                item.addEventListener('mouseleave', () => clearHighlight());
+                item.addEventListener('focusin', () => highlightPaper(parseInt(item.getAttribute('data-paper-index'), 10)));
+                item.addEventListener('focusout', () => clearHighlight());
+            });
+
+            setCohesionRadar(ranked[0]);
+        };
+
+        const updateMetricCard = (id, value, suffix) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.textContent = suffix ? `${value}${suffix}` : value;
+        };
+
+        updateMetricCard('centrality-density', density.toFixed(2));
+        updateMetricCard('centrality-path', pathStats.avgPath ? pathStats.avgPath.toFixed(2) : '—');
+        updateMetricCard('centrality-cluster', clusteringCoeff ? clusteringCoeff.toFixed(2) : '—');
+        if (mover) {
+            const moverPaper = papers[mover.index];
+            updateMetricCard('centrality-mover', moverPaper ? moverPaper.title.split(':')[0] : '—');
+        }
+
+        const radarEl = document.getElementById('centrality-radar');
+        if (radarEl) {
+            if (centralityRadarChart) centralityRadarChart.dispose();
+            centralityRadarChart = echarts.init(radarEl);
+        }
+
+        const maxTopic = Math.max(...topicLinks, 1);
+        const maxVenue = Math.max(...venueLinks, 1);
+        const maxAuthor = Math.max(...authorLinks, 1);
+
+        const setCohesionRadar = (paper) => {
+            if (!paper || !centralityRadarChart) return;
+            const values = [
+                Math.round((paper.topicLinks / maxTopic) * 10),
+                Math.round((paper.venueLinks / maxVenue) * 10),
+                Math.round((paper.authorLinks / maxAuthor) * 10)
+            ];
+            const noteEl = document.getElementById('centrality-note');
+            if (noteEl) {
+                noteEl.textContent = `${paper.title}`;
+            }
+            centralityRadarChart.setOption({
+                tooltip: { show: false },
+                radar: {
+                    indicator: [
+                        { name: 'Topic', max: 10 },
+                        { name: 'Venue', max: 10 },
+                        { name: 'Co-author', max: 10 }
+                    ],
+                    splitNumber: 4,
+                    axisName: { color: '#bde8ff', fontSize: 10 },
+                    splitLine: { lineStyle: { color: 'rgba(0,229,255,0.2)' } },
+                    axisLine: { lineStyle: { color: 'rgba(0,229,255,0.3)' } },
+                    splitArea: { show: false }
+                },
+                series: [{
+                    type: 'radar',
+                    data: [{ value: values, areaStyle: { color: 'rgba(0,229,255,0.25)' }, lineStyle: { color: '#00e5ff', width: 2 } }]
+                }]
+            });
+        };
+
+        const highlightPaper = (index) => {
+            if (!Number.isFinite(index)) return;
+            const paper = papers[index];
+            if (graphChart) {
+                graphChart.dispatchAction({ type: 'downplay', seriesIndex: 0 });
+                graphChart.dispatchAction({ type: 'highlight', seriesIndex: 0, dataIndex: index });
+            }
+            if (collabChart) {
+                collabChart.dispatchAction({ type: 'downplay', seriesIndex: 0 });
+                const names = Array.isArray(paper.authors) ? paper.authors : (paper.authors ? paper.authors.split(',') : []);
+                const indexMap = collabChart.__indexMap || new Map();
+                const normalize = collabChart.__normalize;
+                names.forEach(name => {
+                    const key = normalize ? normalize(name) : name.trim();
+                    if (indexMap.has(key)) {
+                        collabChart.dispatchAction({ type: 'highlight', seriesIndex: 0, dataIndex: indexMap.get(key) });
+                    }
+                });
+            }
+            const info = centralityInfo.find(c => c.index === index);
+            if (info) setCohesionRadar(info);
+        };
+
+        const clearHighlight = () => {
+            if (graphChart && graphChart.__refresh) {
+                graphChart.dispatchAction({ type: 'downplay', seriesIndex: 0 });
+                graphChart.__refresh();
+            }
+            if (collabChart && collabChart.__refresh) {
+                collabChart.dispatchAction({ type: 'downplay', seriesIndex: 0 });
+                collabChart.__refresh();
+            }
+        };
+
+        const tabs = document.querySelectorAll('.centrality-tab');
+        tabs.forEach(tab => {
+            if (!tab.dataset.bound) {
+                tab.dataset.bound = 'true';
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('is-active'));
+                    tab.classList.add('is-active');
+                    renderCentralityList(tab.getAttribute('data-centrality-tab'));
+                });
+            }
+        });
+
+        renderCentralityList('eigen');
     }
 
     function getColorByYear(year) {
@@ -1580,6 +1931,7 @@ body:not(.dark) .dash-region-badge { color:#0077b6; border-color:#0077b6; backgr
         if(collabChart) collabChart.resize();
         if(visitTrendChart) visitTrendChart.resize();
         if(visitDeviceChart) visitDeviceChart.resize();
+        if(centralityRadarChart) centralityRadarChart.resize();
     });
 
 })();
