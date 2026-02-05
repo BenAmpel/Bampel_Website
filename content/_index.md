@@ -46,11 +46,7 @@ sections:
     content:
       title: Publications
       text: |
-        {{< spoiler text="📚 Publications (Search & Filter)" >}}
-
         {{< publications_filter >}}
-
-        {{< /spoiler >}}
     design:
       columns: '1'
 

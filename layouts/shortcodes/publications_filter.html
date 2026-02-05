@@ -1,39 +1,44 @@
-<div class="pub-filter" id="pub-filter">
-  <div class="pub-filter-header">
-    <div class="pub-filter-title">Filter Publications</div>
-    <div class="pub-filter-actions">
-      <button class="pub-filter-reset" type="button">Clear Filters</button>
-      <div class="pub-filter-count" id="pub-filter-count"></div>
+<details class="spoiler pub-filter-spoiler">
+  <summary>📚 Publications (Search &amp; Filter)</summary>
+  <div class="spoiler-content">
+    <div class="pub-filter" id="pub-filter">
+      <div class="pub-filter-header">
+        <div class="pub-filter-title">Filter Publications</div>
+        <div class="pub-filter-actions">
+          <button class="pub-filter-reset" type="button">Clear Filters</button>
+          <div class="pub-filter-count" id="pub-filter-count"></div>
+        </div>
+      </div>
+
+      <div class="pub-filter-body">
+        <div class="pub-filter-panel">
+          <details class="pub-filter-group" open>
+            <summary>Type</summary>
+            <div class="pub-filter-options" id="pub-filter-type"></div>
+          </details>
+
+          <details class="pub-filter-group" open>
+            <summary>Year</summary>
+            <div class="pub-filter-options" id="pub-filter-year"></div>
+          </details>
+
+          <details class="pub-filter-group">
+            <summary>Venue</summary>
+            <div class="pub-filter-options pub-filter-scroll" id="pub-filter-venue"></div>
+          </details>
+
+          <details class="pub-filter-group">
+            <summary>Co-author</summary>
+            <div class="pub-filter-options pub-filter-scroll" id="pub-filter-author"></div>
+          </details>
+        </div>
+
+        <div class="pub-filter-results">
+          <div class="pub-filter-summary" id="pub-filter-summary"></div>
+          <div class="pub-filter-list" id="pub-filter-list"></div>
+        </div>
+      </div>
     </div>
   </div>
-
-  <div class="pub-filter-body">
-    <div class="pub-filter-panel">
-      <details class="pub-filter-group" open>
-        <summary>Type</summary>
-        <div class="pub-filter-options" id="pub-filter-type"></div>
-      </details>
-
-      <details class="pub-filter-group" open>
-        <summary>Year</summary>
-        <div class="pub-filter-options" id="pub-filter-year"></div>
-      </details>
-
-      <details class="pub-filter-group">
-        <summary>Venue</summary>
-        <div class="pub-filter-options pub-filter-scroll" id="pub-filter-venue"></div>
-      </details>
-
-      <details class="pub-filter-group">
-        <summary>Co-author</summary>
-        <div class="pub-filter-options pub-filter-scroll" id="pub-filter-author"></div>
-      </details>
-    </div>
-
-    <div class="pub-filter-results">
-      <div class="pub-filter-summary" id="pub-filter-summary"></div>
-      <div class="pub-filter-list" id="pub-filter-list"></div>
-    </div>
-  </div>
-</div>
+</details>
 <script src="/js/publications_filter.js" defer></script>
