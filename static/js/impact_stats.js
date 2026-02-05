@@ -4,6 +4,13 @@
 
   const cards = Array.from(root.querySelectorAll('.impact-card'));
   const updatedEl = root.querySelector('[data-impact-updated]');
+  const baseUrl = root.getAttribute('data-baseurl') || '/';
+  const normalizeBase = (value) => {
+    if (!value) return '/';
+    if (!value.endsWith('/')) return `${value}/`;
+    return value;
+  };
+  const base = normalizeBase(baseUrl);
 
   const safeFetch = (url) =>
     fetch(url)
@@ -108,12 +115,12 @@
   };
 
   Promise.all([
-    safeFetch('/data/publications.json'),
-    safeFetch('/data/awards.json'),
-    safeFetch('/data/scholar-metrics.json'),
-    safeFetch('/data/journal_lists/q1.json'),
-    safeFetch('/data/journal_lists/ft50.json'),
-    safeFetch('/data/journal_lists/utd24.json')
+    safeFetch(`${base}data/publications.json`),
+    safeFetch(`${base}data/awards.json`),
+    safeFetch(`${base}data/scholar-metrics.json`),
+    safeFetch(`${base}data/journal_lists/q1.json`),
+    safeFetch(`${base}data/journal_lists/ft50.json`),
+    safeFetch(`${base}data/journal_lists/utd24.json`)
   ]).then(([pubData, awardsData, scholarData, q1ListRaw, ft50ListRaw, utd24ListRaw]) => {
     const pubs = Array.isArray(pubData) ? pubData : (pubData && pubData.publications) || [];
     const awards = Array.isArray(awardsData) ? awardsData : [];
