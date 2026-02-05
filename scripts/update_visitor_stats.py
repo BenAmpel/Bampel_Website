@@ -39,24 +39,29 @@ def fetch_analytics():
     monthly_resp = client.run_report(monthly_req)
     monthly_data = [{"month": r.dimension_values[0].value, "visitors": int(r.metric_values[0].value)} for r in monthly_resp.rows]
 
-    # 2. Locations (City, Region, Country)
-    geo_req = RunReportRequest(
-        property=f"properties/{PROPERTY_ID}",
-        dimensions=[Dimension(name="city"), Dimension(name="region"), Dimension(name="country")],
-        metrics=[Metric(name="totalUsers")],
-        date_ranges=[DateRange(start_date="30daysAgo", end_date="today")],
-        limit=20
-    )
-    geo_resp = client.run_report(geo_req)
-    location_data = [
-        {
-            "city": r.dimension_values[0].value,
-            "region": r.dimension_values[1].value,
-            "country": r.dimension_values[2].value,
-            "visitors": int(r.metric_values[0].value)
-        }
-        for r in geo_resp.rows
-    ]
+    # 2. Locations (City, Region, Country) across ranges
+    def fetch_locations(start_date, end_date="today", limit=20):
+        req = RunReportRequest(
+            property=f"properties/{PROPERTY_ID}",
+            dimensions=[Dimension(name="city"), Dimension(name="region"), Dimension(name="country")],
+            metrics=[Metric(name="totalUsers")],
+            date_ranges=[DateRange(start_date=start_date, end_date=end_date)],
+            limit=limit
+        )
+        resp = client.run_report(req)
+        return [
+            {
+                "city": r.dimension_values[0].value,
+                "region": r.dimension_values[1].value,
+                "country": r.dimension_values[2].value,
+                "visitors": int(r.metric_values[0].value)
+            }
+            for r in resp.rows
+        ]
+
+    location_data_30 = fetch_locations("30daysAgo")
+    location_data_90 = fetch_locations("90daysAgo")
+    location_data_all = fetch_locations("2000-01-01")
 
     # 3. Top Pages (FIXED: Moved desc=True to OrderBy parent)
     page_req = RunReportRequest(
@@ -109,7 +114,10 @@ def fetch_analytics():
 
     return {
         "monthly_trend": monthly_data,
-        "top_locations": location_data,
+        "top_locations": location_data_30,
+        "top_locations_30": location_data_30,
+        "top_locations_90": location_data_90,
+        "top_locations_all": location_data_all,
         "top_pages": page_data,
         "devices": device_data,
         "total_last_30_days": total_last_30_days,
