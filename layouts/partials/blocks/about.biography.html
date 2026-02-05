@@ -124,6 +124,9 @@
     {{ with $person_page.Content }}
     <details class="spoiler bio-story">
       <summary>Biography</summary>
+      <div class="bio-story-progress" aria-hidden="true">
+        <span class="bio-story-progress-bar" data-bio-progress-bar></span>
+      </div>
       <div class="spoiler-content">
         {{ $bio_tldr := $person.bio_tldr }}
         <div class="bio-story-mode" data-story-mode>
@@ -156,6 +159,7 @@
     </details>
     <script src="/js/bio_story_mode.js" defer></script>
     <script src="/js/bio_highlight_chips.js" defer></script>
+    <script src="/js/bio_reading_pulse.js" defer></script>
     {{ end }}
 
     <div class="row">

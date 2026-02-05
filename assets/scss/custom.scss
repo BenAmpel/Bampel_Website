@@ -1530,6 +1530,28 @@ section#about .bio-story-mode,
   gap: 10px;
 }
 
+section#about .bio-story-progress,
+.wg-about .bio-story-progress,
+.hb-about .bio-story-progress {
+  height: 2px;
+  background: rgba(0, 229, 255, 0.12);
+  border-radius: 999px;
+  margin: 0 14px 8px;
+  overflow: hidden;
+}
+
+section#about .bio-story-progress-bar,
+.wg-about .bio-story-progress-bar,
+.hb-about .bio-story-progress-bar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(0, 255, 65, 0.8), rgba(0, 229, 255, 0.8));
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 0.2s ease;
+}
+
 section#about .bio-story-header,
 .wg-about .bio-story-header,
 .hb-about .bio-story-header {
@@ -1669,6 +1691,14 @@ section#about .bio-story-full,
   display: none;
 }
 
+section#about .bio-story .spoiler-content,
+.wg-about .bio-story .spoiler-content,
+.hb-about .bio-story .spoiler-content {
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
 section#about .bio-story-full.is-visible,
 .wg-about .bio-story-full.is-visible,
 .hb-about .bio-story-full.is-visible {
@@ -1680,6 +1710,12 @@ body:not(.dark) .wg-about .bio-story-mode,
 body:not(.dark) .hb-about .bio-story-mode {
   background: rgba(255, 255, 255, 0.95);
   border-color: rgba(0, 0, 0, 0.1);
+}
+
+body:not(.dark) section#about .bio-story-progress,
+body:not(.dark) .wg-about .bio-story-progress,
+body:not(.dark) .hb-about .bio-story-progress {
+  background: rgba(0, 0, 0, 0.06);
 }
 
 body:not(.dark) section#about .bio-story-title,
