@@ -6,7 +6,7 @@ date: 2026-03-01
 publication_types: ["2"]
 draft: false
 
-publishDate: "2026-03-01T00:00:00Z"
+publishDate: "2026-02-05T00:00:00Z"
 
 publication: "*Journal of Information Systems Education (JISE)*, 37:2"
 publication_short: ""
