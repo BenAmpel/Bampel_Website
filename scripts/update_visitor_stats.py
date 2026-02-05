@@ -43,7 +43,7 @@ def fetch_analytics():
     geo_req = RunReportRequest(
         property=f"properties/{PROPERTY_ID}",
         dimensions=[Dimension(name="city"), Dimension(name="region"), Dimension(name="country")],
-        metrics=[Metric(name="activeUsers")],
+        metrics=[Metric(name="totalUsers")],
         date_ranges=[DateRange(start_date="30daysAgo", end_date="today")],
         limit=20
     )
@@ -75,21 +75,32 @@ def fetch_analytics():
     page_resp = client.run_report(page_req)
     page_data = [{"path": r.dimension_values[0].value, "views": int(r.metric_values[0].value)} for r in page_resp.rows]
 
-    # 4. Device Category (NEW: Mobile vs Desktop)
+    # 4. Device Category (Mobile vs Desktop)
     device_req = RunReportRequest(
         property=f"properties/{PROPERTY_ID}",
         dimensions=[Dimension(name="deviceCategory")],
-        metrics=[Metric(name="activeUsers")],
+        metrics=[Metric(name="totalUsers")],
         date_ranges=[DateRange(start_date="30daysAgo", end_date="today")]
     )
     device_resp = client.run_report(device_req)
     device_data = [{"device": r.dimension_values[0].value, "users": int(r.metric_values[0].value)} for r in device_resp.rows]
 
-    # 5. Lifetime Total Visitors (All-time)
+    # 5. Total Visitors (Last 30 Days)
+    last30_req = RunReportRequest(
+        property=f"properties/{PROPERTY_ID}",
+        metrics=[Metric(name="totalUsers")],
+        date_ranges=[DateRange(start_date="30daysAgo", end_date="today")]
+    )
+    last30_resp = client.run_report(last30_req)
+    total_last_30_days = 0
+    if last30_resp.rows:
+        total_last_30_days = int(last30_resp.rows[0].metric_values[0].value)
+
+    # 6. Lifetime Total Visitors (All-time)
     lifetime_req = RunReportRequest(
         property=f"properties/{PROPERTY_ID}",
         metrics=[Metric(name="totalUsers")],
-        date_ranges=[DateRange(start_date="2020-01-01", end_date="today")]
+        date_ranges=[DateRange(start_date="2000-01-01", end_date="today")]
     )
     lifetime_resp = client.run_report(lifetime_req)
     lifetime_total = 0
@@ -101,7 +112,7 @@ def fetch_analytics():
         "top_locations": location_data,
         "top_pages": page_data,
         "devices": device_data,
-        "total_last_30_days": sum(d['visitors'] for d in location_data), # Approximation
+        "total_last_30_days": total_last_30_days,
         "lifetime_total": lifetime_total
     }
 
