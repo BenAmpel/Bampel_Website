@@ -104,9 +104,9 @@
     </div>
     <div class="footprint-controls" aria-label="Footprint controls">
         <div class="footprint-group" role="group" aria-label="Categories">
-            <label class="footprint-check"><input type="checkbox" data-footprint-cat="Conference" checked> Conferences</label>
-            <label class="footprint-check"><input type="checkbox" data-footprint-cat="Institution" checked> Institutions</label>
-            <label class="footprint-check"><input type="checkbox" data-footprint-cat="Collaboration" checked> Collaborations</label>
+            <label class="footprint-check footprint-check-conference"><input type="checkbox" data-footprint-cat="Conference" checked><span class="footprint-check-dot"></span> Conferences</label>
+            <label class="footprint-check footprint-check-institution"><input type="checkbox" data-footprint-cat="Institution" checked><span class="footprint-check-dot"></span> Institutions</label>
+            <label class="footprint-check footprint-check-collaboration"><input type="checkbox" data-footprint-cat="Collaboration" checked><span class="footprint-check-dot"></span> Collaborations</label>
         </div>
         <div class="footprint-group" role="group" aria-label="Layers">
             <label class="footprint-check"><input type="checkbox" data-footprint-layer="routes" checked> Routes</label>
@@ -118,7 +118,11 @@
             <input type="range" id="footprint-year-range" min="2018" max="2026" value="2026" step="1" />
         </div>
     </div>
-    <div class="footprint-legend" id="footprint-legend"></div>
+    <div class="footprint-legend" id="footprint-legend">
+        <div class="legend-row"><span class="footprint-legend-dot" style="--legend-color:#00ff41;"></span><span>Conference</span></div>
+        <div class="legend-row"><span class="footprint-legend-dot" style="--legend-color:#00bfff;"></span><span>Collaboration</span></div>
+        <div class="legend-row"><span class="footprint-legend-dot" style="--legend-color:#ff6b35;"></span><span>Institution</span></div>
+    </div>
     <div id="dashboard-footprint-map" style="width:100%; height:100%; z-index:1;"></div>
 </div>
 
@@ -242,6 +246,10 @@ body:not(.dark) .impact-pin { background:rgba(0,119,182,0.12); border-color:rgba
 .footprint-group { display:flex; flex-wrap:wrap; gap:8px; padding:6px 8px; border-radius:10px; border:1px solid var(--card-border, #333); background:rgba(0,0,0,0.35); backdrop-filter: blur(6px); }
 .footprint-check { display:flex; align-items:center; gap:6px; font-size:0.62rem; color:#cfead2; }
 .footprint-check input { accent-color:#00e5ff; }
+.footprint-check-dot { width:8px; height:8px; border-radius:50%; background:currentColor; box-shadow:0 0 6px rgba(0,0,0,0.4); }
+.footprint-check-conference { color:#00ff41; }
+.footprint-check-institution { color:#ff6b35; }
+.footprint-check-collaboration { color:#00bfff; }
 .footprint-timeline { flex-direction:column; align-items:flex-start; gap:6px; }
 .footprint-year-label { font-size:0.62rem; letter-spacing:0.04em; text-transform:uppercase; color:#bde8ff; }
 .footprint-timeline input[type="range"] { width:200px; }
