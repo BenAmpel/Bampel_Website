@@ -46,11 +46,11 @@ sections:
     content:
       title: Publications
       text: |
+        {{< publications_filter >}}
+
         {{< spoiler text="🧪 Paper Diff View" >}}
         {{< paper_diff >}}
         {{< /spoiler >}}
-
-        {{< publications_filter >}}
     design:
       columns: '1'
 
