@@ -115,7 +115,6 @@
         </div>
         <div class="footprint-group" role="group" aria-label="Layers">
             <label class="footprint-check"><input type="checkbox" data-footprint-layer="routes" checked> Routes</label>
-            <label class="footprint-check"><input type="checkbox" data-footprint-layer="heat" checked> Heat</label>
             <label class="footprint-check"><input type="checkbox" data-footprint-layer="clusters" checked> Clusters</label>
         </div>
         <div class="footprint-group footprint-timeline" role="group" aria-label="Timeline">
@@ -271,6 +270,12 @@ body:not(.dark) .impact-pin { background:rgba(0,119,182,0.12); border-color:rgba
 .footprint-marker.conference { color:#00ff41; }
 .footprint-marker.institution { color:#ff6b35; }
 .footprint-marker.collaboration { color:#00bfff; }
+.footprint-marker.conference .dot { background:#00ff41; }
+.footprint-marker.institution .dot { background:#ff6b35; }
+.footprint-marker.collaboration .dot { background:#00bfff; }
+.footprint-marker.conference .ring { border-color:#00ff41; }
+.footprint-marker.institution .ring { border-color:#ff6b35; }
+.footprint-marker.collaboration .ring { border-color:#00bfff; }
 
 .footprint-arc { stroke:#00e5ff; stroke-width:1.2; stroke-opacity:0.4; stroke-dasharray:6 10; animation: arcDash 6s linear infinite; }
 
@@ -1524,7 +1529,7 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
 
         const state = {
             categories: { Conference: true, Collaboration: true, Institution: true },
-            layers: { routes: true, heat: true, clusters: true },
+            layers: { routes: true, clusters: true },
             year: maxYear
         };
 
@@ -1551,9 +1556,10 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
 
         function createIcon(category) {
             const cls = category.toLowerCase();
+            const color = categoryColors[category] || '#00bfff';
             return L.divIcon({
                 className: '',
-                html: `<div class="footprint-marker ${cls}"><span class="ring"></span><span class="dot"></span></div>`,
+                html: `<div class="footprint-marker ${cls}" style="color:${color}"><span class="ring"></span><span class="dot"></span></div>`,
                 iconSize: [16, 16],
                 iconAnchor: [8, 8]
             });
@@ -1562,7 +1568,7 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
         const markerLayer = L.layerGroup();
         const arcLayer = L.layerGroup().addTo(map);
         const clusterLayer = (L.markerClusterGroup ? L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 50 }) : null);
-        const heatLayer = (L.heatLayer ? L.heatLayer([], { radius: 26, blur: 18, maxZoom: 4, minOpacity: 0.12, gradient: { 0.0: 'rgba(0,0,0,0)', 0.4: '#00bfff', 0.7: '#00ff41', 1.0: '#e040fb' } }) : null);
+        const heatLayer = null;
 
         function withinYear(point) {
             if (!point.minYear) return true;
@@ -1628,17 +1634,7 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
             }
         }
 
-        function buildHeat(list) {
-            if (!heatLayer) return;
-            if (!state.layers.heat) {
-                if (map.hasLayer(heatLayer)) map.removeLayer(heatLayer);
-                return;
-            }
-            const weights = { Conference: 0.8, Institution: 0.9, Collaboration: 0.6 };
-            const heatPoints = list.map(p => [p.lat, p.lng, weights[p.cat] || 0.5]);
-            heatLayer.setLatLngs(heatPoints);
-            if (!map.hasLayer(heatLayer)) heatLayer.addTo(map);
-        }
+        function buildHeat(list) { return; }
 
         function applyFilters() {
             const filtered = enrichedPoints.filter(p => state.categories[p.cat] && withinYear(p));
