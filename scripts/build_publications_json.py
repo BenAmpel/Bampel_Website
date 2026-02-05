@@ -63,6 +63,31 @@ def normalize_venue(data):
     venue = str(venue).strip()
     venue = re.sub(r"[*_`]", "", venue)
     venue = re.sub(r"^In\s+", "", venue)
+    # Remove parenthetical abbreviations (e.g., "(JISE)")
+    venue = re.sub(r"\s*\(([A-Z0-9&\.\s]{2,})\)\s*", " ", venue).strip()
+    # Drop trailing status labels and volume/issue/page details
+    venue = re.sub(r",\s*(Forthcoming|In Press)\s*$", "", venue, flags=re.IGNORECASE).strip()
+    if re.search(r",\s*\d", venue):
+        venue = venue.split(",")[0].strip()
+    # Normalize common venue aliases to canonical names
+    canonical_map = {
+        "misq": "MIS Quarterly",
+        "mis quarterly": "MIS Quarterly",
+        "management information systems quarterly": "MIS Quarterly",
+        "jmis": "Journal of Management Information Systems",
+        "journal of management information systems": "Journal of Management Information Systems",
+        "acm tmis": "ACM Transactions on Management Information Systems",
+        "tmis": "ACM Transactions on Management Information Systems",
+        "transactions on management information systems": "ACM Transactions on Management Information Systems",
+        "acm transactions on management information systems": "ACM Transactions on Management Information Systems",
+        "isf": "Information Systems Frontiers",
+        "information systems frontiers": "Information Systems Frontiers",
+        "jise": "Journal of Information Systems Education",
+        "journal of information systems education": "Journal of Information Systems Education",
+    }
+    key = re.sub(r"[^a-z0-9]+", " ", venue.lower()).strip()
+    if key in canonical_map:
+        venue = canonical_map[key]
     return venue.strip()
 
 def slugify(value):
