@@ -951,6 +951,417 @@ section#about .hb-about-content,
   }
 }
 
+
+// Bio snapshot highlight
+section#about .bio-tagline,
+.wg-about .bio-tagline,
+.hb-about .bio-tagline {
+  margin: 12px 0 18px;
+  padding: 12px 16px;
+  border-left: 3px solid rgba(0, 255, 65, 0.7);
+  background: rgba(0, 255, 65, 0.06);
+  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  color: #c9d1d9;
+  font-size: 0.9rem;
+}
+
+section#about .bio-snapshot,
+.wg-about .bio-snapshot,
+.hb-about .bio-snapshot {
+  margin: 10px 0 20px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 255, 65, 0.2);
+  background: rgba(0, 0, 0, 0.35);
+}
+
+section#about .bio-snapshot-header,
+.wg-about .bio-snapshot-header,
+.hb-about .bio-snapshot-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+section#about .bio-snapshot-title,
+.wg-about .bio-snapshot-title,
+.hb-about .bio-snapshot-title {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #00ff41;
+  font-weight: 700;
+}
+
+section#about .bio-snapshot-meta,
+.wg-about .bio-snapshot-meta,
+.hb-about .bio-snapshot-meta {
+  font-size: 0.7rem;
+  opacity: 0.7;
+}
+
+section#about .bio-snapshot-grid,
+.wg-about .bio-snapshot-grid,
+.hb-about .bio-snapshot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+section#about .bio-snapshot-card,
+.wg-about .bio-snapshot-card,
+.hb-about .bio-snapshot-card {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+section#about .bio-snapshot-card .label,
+.wg-about .bio-snapshot-card .label,
+.hb-about .bio-snapshot-card .label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.7;
+}
+
+section#about .bio-snapshot-card .value,
+.wg-about .bio-snapshot-card .value,
+.hb-about .bio-snapshot-card .value {
+  margin-top: 4px;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #00ff41;
+  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace;
+}
+
+section#about .bio-snapshot-card .meta,
+.wg-about .bio-snapshot-card .meta,
+.hb-about .bio-snapshot-card .meta {
+  margin-top: 4px;
+  font-size: 0.65rem;
+  opacity: 0.7;
+}
+
+section#about .bio-badges,
+.wg-about .bio-badges,
+.hb-about .bio-badges {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+section#about .bio-badge,
+.wg-about .bio-badge,
+.hb-about .bio-badge {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 229, 255, 0.35);
+  background: rgba(0, 229, 255, 0.12);
+  color: #00e5ff;
+}
+
+// Bio explorer interactive panel
+section#about .bio-explorer,
+.wg-about .bio-explorer,
+.hb-about .bio-explorer {
+  margin: 16px 0 18px;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 255, 65, 0.22);
+  background: linear-gradient(135deg, rgba(0, 255, 65, 0.08) 0%, rgba(0, 229, 255, 0.05) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+section#about .bio-explorer::after,
+.wg-about .bio-explorer::after,
+.hb-about .bio-explorer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top left, rgba(0, 255, 65, 0.12), transparent 55%);
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+section#about .bio-explorer-header,
+.wg-about .bio-explorer-header,
+.hb-about .bio-explorer-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  align-items: baseline;
+  position: relative;
+  z-index: 1;
+}
+
+section#about .bio-explorer-kicker,
+.wg-about .bio-explorer-kicker,
+.hb-about .bio-explorer-kicker {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #00e5ff;
+  font-weight: 700;
+}
+
+section#about .bio-explorer-title,
+.wg-about .bio-explorer-title,
+.hb-about .bio-explorer-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #c9d1d9;
+}
+
+section#about .bio-explorer-controls,
+.wg-about .bio-explorer-controls,
+.hb-about .bio-explorer-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+section#about .bio-explorer-tab,
+.wg-about .bio-explorer-tab,
+.hb-about .bio-explorer-tab {
+  border: 1px solid rgba(0, 255, 65, 0.25);
+  background: rgba(0, 0, 0, 0.35);
+  color: #c9d1d9;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+section#about .bio-explorer-tab.is-active,
+.wg-about .bio-explorer-tab.is-active,
+.hb-about .bio-explorer-tab.is-active,
+section#about .bio-explorer-tab[aria-selected="true"],
+.wg-about .bio-explorer-tab[aria-selected="true"],
+.hb-about .bio-explorer-tab[aria-selected="true"] {
+  background: rgba(0, 255, 65, 0.2);
+  color: #00ff41;
+  border-color: rgba(0, 255, 65, 0.6);
+  box-shadow: 0 0 12px rgba(0, 255, 65, 0.25);
+}
+
+section#about .bio-explorer-tab:focus,
+.wg-about .bio-explorer-tab:focus,
+.hb-about .bio-explorer-tab:focus {
+  outline: none;
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
+}
+
+section#about .bio-explorer-panel,
+.wg-about .bio-explorer-panel,
+.hb-about .bio-explorer-panel {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px dashed rgba(0, 229, 255, 0.4);
+  background: rgba(0, 0, 0, 0.45);
+  position: relative;
+  z-index: 1;
+}
+
+section#about .bio-explorer-summary,
+.wg-about .bio-explorer-summary,
+.hb-about .bio-explorer-summary {
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+section#about .bio-explorer-highlights,
+.wg-about .bio-explorer-highlights,
+.hb-about .bio-explorer-highlights {
+  list-style: none;
+  padding-left: 0;
+  margin: 10px 0 0;
+  display: grid;
+  gap: 8px;
+}
+
+section#about .bio-explorer-highlights li,
+.wg-about .bio-explorer-highlights li,
+.hb-about .bio-explorer-highlights li {
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border-left: 2px solid rgba(0, 255, 65, 0.6);
+}
+
+section#about .bio-explorer-cta,
+.wg-about .bio-explorer-cta,
+.hb-about .bio-explorer-cta {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 255, 65, 0.5);
+  color: #00ff41 !important;
+  background: rgba(0, 255, 65, 0.08);
+}
+
+section#about .bio-quicklinks,
+.wg-about .bio-quicklinks,
+.hb-about .bio-quicklinks {
+  margin: 10px 0 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+section#about .bio-quicklink,
+.wg-about .bio-quicklink,
+.hb-about .bio-quicklink {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(88, 166, 255, 0.4);
+  background: rgba(88, 166, 255, 0.12);
+  color: #58a6ff !important;
+}
+
+section#about .bio-quicklink:hover,
+.wg-about .bio-quicklink:hover,
+.hb-about .bio-quicklink:hover {
+  border-color: rgba(0, 255, 65, 0.6);
+  background: rgba(0, 255, 65, 0.12);
+  color: #00ff41 !important;
+}
+
+body:not(.dark) section#about .bio-tagline,
+body:not(.dark) .wg-about .bio-tagline,
+body:not(.dark) .hb-about .bio-tagline {
+  background: rgba(0, 0, 0, 0.04);
+  border-left-color: #0b7a3e;
+  color: #333 !important;
+}
+
+body:not(.dark) section#about .bio-snapshot,
+body:not(.dark) .wg-about .bio-snapshot,
+body:not(.dark) .hb-about .bio-snapshot {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+body:not(.dark) section#about .bio-snapshot-title,
+body:not(.dark) .wg-about .bio-snapshot-title,
+body:not(.dark) .hb-about .bio-snapshot-title {
+  color: #0b7a3e;
+}
+
+body:not(.dark) section#about .bio-snapshot-card,
+body:not(.dark) .wg-about .bio-snapshot-card,
+body:not(.dark) .hb-about .bio-snapshot-card {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+body:not(.dark) section#about .bio-snapshot-card .value,
+body:not(.dark) .wg-about .bio-snapshot-card .value,
+body:not(.dark) .hb-about .bio-snapshot-card .value {
+  color: #0b7a3e;
+}
+
+body:not(.dark) section#about .bio-badge,
+body:not(.dark) .wg-about .bio-badge,
+body:not(.dark) .hb-about .bio-badge {
+  border-color: rgba(11, 122, 62, 0.3);
+  background: rgba(11, 122, 62, 0.08);
+  color: #0b7a3e;
+}
+
+body:not(.dark) section#about .bio-explorer,
+body:not(.dark) .wg-about .bio-explorer,
+body:not(.dark) .hb-about .bio-explorer {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+body:not(.dark) section#about .bio-explorer-kicker,
+body:not(.dark) .wg-about .bio-explorer-kicker,
+body:not(.dark) .hb-about .bio-explorer-kicker {
+  color: #0b7a3e;
+}
+
+body:not(.dark) section#about .bio-explorer-title,
+body:not(.dark) .wg-about .bio-explorer-title,
+body:not(.dark) .hb-about .bio-explorer-title {
+  color: #222;
+}
+
+body:not(.dark) section#about .bio-explorer-tab,
+body:not(.dark) .wg-about .bio-explorer-tab,
+body:not(.dark) .hb-about .bio-explorer-tab {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #333;
+}
+
+body:not(.dark) section#about .bio-explorer-tab.is-active,
+body:not(.dark) .wg-about .bio-explorer-tab.is-active,
+body:not(.dark) .hb-about .bio-explorer-tab.is-active,
+body:not(.dark) section#about .bio-explorer-tab[aria-selected="true"],
+body:not(.dark) .wg-about .bio-explorer-tab[aria-selected="true"],
+body:not(.dark) .hb-about .bio-explorer-tab[aria-selected="true"] {
+  background: rgba(11, 122, 62, 0.12);
+  color: #0b7a3e;
+  border-color: rgba(11, 122, 62, 0.3);
+}
+
+body:not(.dark) section#about .bio-explorer-panel,
+body:not(.dark) .wg-about .bio-explorer-panel,
+body:not(.dark) .hb-about .bio-explorer-panel {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+body:not(.dark) section#about .bio-explorer-highlights li,
+body:not(.dark) .wg-about .bio-explorer-highlights li,
+body:not(.dark) .hb-about .bio-explorer-highlights li {
+  background: rgba(0, 0, 0, 0.02);
+  border-left-color: rgba(11, 122, 62, 0.6);
+}
+
+body:not(.dark) section#about .bio-explorer-cta,
+body:not(.dark) .wg-about .bio-explorer-cta,
+body:not(.dark) .hb-about .bio-explorer-cta {
+  border-color: rgba(11, 122, 62, 0.4);
+  background: rgba(11, 122, 62, 0.08);
+  color: #0b7a3e !important;
+}
+
+body:not(.dark) section#about .bio-quicklink,
+body:not(.dark) .wg-about .bio-quicklink,
+body:not(.dark) .hb-about .bio-quicklink {
+  border-color: rgba(0, 0, 0, 0.12);
+  background: rgba(0, 0, 0, 0.04);
+  color: #1a0dab !important;
+}
+
 // Interests list styling - comprehensive selectors for Hugo Blox
 section#about .interests,
 section#about ul.interests,

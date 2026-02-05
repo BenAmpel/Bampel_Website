@@ -90,6 +90,82 @@
     {{/* Only display widget title in explicit instances of about widget, not in author pages. */}}
     {{ with $block.content.title }}<h1>{{ . | markdownify | emojify }}</h1>{{ end }}
 
+    {{ with $person.bio_tagline }}
+    <div class="bio-tagline">{{ . | markdownify | emojify }}</div>
+    {{ end }}
+
+    <div class="bio-snapshot" id="bio-snapshot">
+      <div class="bio-snapshot-header">
+        <div class="bio-snapshot-title">Research Snapshot</div>
+        <div class="bio-snapshot-meta" id="bio-snapshot-meta"></div>
+      </div>
+      <div class="bio-snapshot-grid">
+        <div class="bio-snapshot-card">
+          <div class="label">Publications</div>
+          <div class="value" id="bio-metric-pubs">-</div>
+          <div class="meta" id="bio-metric-top-venue"></div>
+        </div>
+        <div class="bio-snapshot-card">
+          <div class="label">Citations</div>
+          <div class="value" id="bio-metric-cites">-</div>
+          <div class="meta" id="bio-metric-updated"></div>
+        </div>
+        <div class="bio-snapshot-card">
+          <div class="label">h-index</div>
+          <div class="value" id="bio-metric-hindex">-</div>
+        </div>
+        <div class="bio-snapshot-card">
+          <div class="label">i10-index</div>
+          <div class="value" id="bio-metric-i10">-</div>
+        </div>
+        <div class="bio-snapshot-card">
+          <div class="label">Years Active</div>
+          <div class="value" id="bio-metric-years">-</div>
+          <div class="meta" id="bio-metric-years-range"></div>
+        </div>
+        <div class="bio-snapshot-card">
+          <div class="label">Citation Velocity</div>
+          <div class="value" id="bio-metric-velocity">-</div>
+          <div class="meta">Cites / year</div>
+        </div>
+      </div>
+      {{ with $person.bio_badges }}
+      <div class="bio-badges">
+        {{ range . }}
+        <span class="bio-badge">{{ . | markdownify | emojify }}</span>
+        {{ end }}
+      </div>
+      {{ end }}
+    </div>
+    <script src="/js/bio_snapshot.js" defer></script>
+
+    {{ $bio_modes := $person.bio_modes }}
+    {{ $bio_explorer := $person.bio_explorer }}
+    {{ if $bio_modes }}
+    <div class="bio-explorer" data-bio-explorer{{ with $bio_explorer.default_mode }} data-default-mode="{{ . }}"{{ end }}>
+      <div class="bio-explorer-header">
+        <div class="bio-explorer-kicker">{{ with $bio_explorer.kicker }}{{ . }}{{ else }}Bio Console{{ end }}</div>
+        <div class="bio-explorer-title">{{ with $bio_explorer.title }}{{ . }}{{ else }}Choose a track to explore{{ end }}</div>
+      </div>
+      <div class="bio-explorer-controls" role="tablist" aria-label="Biography explorer"></div>
+      <div class="bio-explorer-panel" role="tabpanel" tabindex="0" aria-live="polite">
+        <div class="bio-explorer-summary" id="bio-explorer-summary"></div>
+        <ul class="bio-explorer-highlights" id="bio-explorer-highlights"></ul>
+        <a class="bio-explorer-cta" id="bio-explorer-cta" href="#"></a>
+      </div>
+      <script type="application/json" data-bio-modes>{{ $bio_modes | jsonify }}</script>
+    </div>
+    <script src="/js/bio_explorer.js" defer></script>
+    {{ end }}
+
+    {{ with $person.bio_quicklinks }}
+    <div class="bio-quicklinks" aria-label="Biography quick links">
+      {{ range . }}
+      <a class="bio-quicklink" href="{{ .href }}">{{ .label }}</a>
+      {{ end }}
+    </div>
+    {{ end }}
+
     {{ with $person_page.Content }}
     <div class="article-style">
       {{ . }}
