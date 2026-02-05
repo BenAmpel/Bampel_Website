@@ -109,12 +109,18 @@ def build_pdf():
     params_path = ROOT / "config" / "_default" / "params.yaml"
     publications_path = ROOT / "static" / "data" / "publications.json"
     scholar_path = ROOT / "static" / "data" / "scholar-metrics.json"
+    awards_path = ROOT / "static" / "data" / "awards.json"
+    teaching_path = ROOT / "static" / "data" / "teaching.json"
+    collab_path = ROOT / "static" / "data" / "collaboration_meta.json"
 
     author_data = load_yaml_front_matter(author_path)
     config_data = load_yaml_file(config_path)
     params_data = load_yaml_file(params_path)
     publications = load_json(publications_path, [])
     scholar = load_json(scholar_path, {})
+    awards = load_json(awards_path, [])
+    teaching = load_json(teaching_path, [])
+    collab_meta = load_json(collab_path, {})
 
     name = author_data.get("title") or "Benjamin M. Ampel"
     role = author_data.get("role", "")
@@ -135,6 +141,7 @@ def build_pdf():
         if venue:
             top_venues[venue] = top_venues.get(venue, 0) + 1
     top_venue = sorted(top_venues.items(), key=lambda x: (-x[1], x[0]))[0][0] if top_venues else "n/a"
+    top_venue_list = [v for v, _ in sorted(top_venues.items(), key=lambda x: (-x[1], x[0]))[:6]]
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     STATIC_DIR.mkdir(parents=True, exist_ok=True)
@@ -149,6 +156,7 @@ def build_pdf():
     styles.add(ParagraphStyle(name="Meta", fontSize=8, leading=10, textColor=colors.HexColor("#555555")))
     styles.add(ParagraphStyle(name="MetricLabel", fontSize=8, leading=10, textColor=colors.black))
     styles.add(ParagraphStyle(name="MetricValue", fontSize=8, leading=10, textColor=colors.black))
+    styles.add(ParagraphStyle(name="BulletItem", fontSize=8.5, leading=10.5, leftIndent=10))
 
     page_width, page_height = letter
     left_margin = 0.65 * inch
@@ -275,9 +283,30 @@ def build_pdf():
         for author in pub.get("authors") or []:
             if "ampel" not in author.lower():
                 coauthors.add(author)
+    institutions = {inst.get("name") for inst in collab_meta.get("institutions", []) if inst.get("name")}
+    countries = {inst.get("country") for inst in collab_meta.get("institutions", []) if inst.get("country")}
+
     story.append(Paragraph("Collaboration", styles["SectionTitle"]))
     story.append(Paragraph(f"Unique co-authors: {len(coauthors)}", styles["BodySmall"]))
+    if institutions:
+        story.append(Paragraph(f"Institutions: {len(institutions)}", styles["BodySmall"]))
+    if countries:
+        story.append(Paragraph(f"Countries: {len(countries)}", styles["BodySmall"]))
     story.append(Spacer(1, 8))
+
+    # Teaching snapshot
+    evals = [row.get("evaluation") for row in teaching if isinstance(row.get("evaluation"), (int, float))]
+    avg_eval = sum(evals) / len(evals) if evals else None
+    institutions_taught = {row.get("institution") for row in teaching if row.get("institution")}
+    unique_courses = {row.get("course") for row in teaching if row.get("course")}
+    if teaching:
+        story.append(Paragraph("Teaching Snapshot", styles["SectionTitle"]))
+        story.append(Paragraph(f"Courses taught: {len(teaching)} ({len(unique_courses)} unique)", styles["BodySmall"]))
+        if avg_eval is not None:
+            story.append(Paragraph(f"Avg evaluation: {avg_eval:.2f}/5", styles["BodySmall"]))
+        if institutions_taught:
+            story.append(Paragraph(f"Institutions: {len(institutions_taught)}", styles["BodySmall"]))
+        story.append(Spacer(1, 8))
 
     story.append(FrameBreak())
 
@@ -285,6 +314,12 @@ def build_pdf():
         story.append(Paragraph("Research Focus", styles["SectionTitle"]))
         focus = ", ".join(interests[:6])
         story.append(Paragraph(focus, styles["BodySmall"]))
+        story.append(Spacer(1, 8))
+
+    if top_venue_list:
+        story.append(Paragraph("Top Venues", styles["SectionTitle"]))
+        for venue in top_venue_list:
+            story.append(Paragraph(f"&bull; {venue}", styles["BulletItem"]))
         story.append(Spacer(1, 8))
 
     if latest:
@@ -300,6 +335,24 @@ def build_pdf():
             if meta_parts:
                 story.append(Paragraph(" | ".join(meta_parts), styles["Meta"]))
             story.append(Spacer(1, 6))
+
+    if awards:
+        story.append(Paragraph("Recent Awards", styles["SectionTitle"]))
+        def award_sort(a):
+            end = a.get("endYear") or a.get("year") or 0
+            return int(end)
+        for item in sorted(awards, key=award_sort, reverse=True)[:4]:
+            year = item.get("endYear") or item.get("year") or ""
+            title = item.get("title", "")
+            story.append(Paragraph(f"&bull; {year} — {truncate(title, 70)}", styles["BulletItem"]))
+        story.append(Spacer(1, 8))
+
+    if scholar.get("citationsByYear"):
+        story.append(Paragraph("Citation Trend", styles["SectionTitle"]))
+        trend = sorted(scholar["citationsByYear"], key=lambda x: int(x.get("year", 0)), reverse=True)[:3]
+        for item in trend:
+            story.append(Paragraph(f"&bull; {item.get('year')}: {item.get('citations')}", styles["BulletItem"]))
+        story.append(Spacer(1, 6))
 
     generated = datetime.now().strftime("%Y-%m-%d")
     story.append(Spacer(1, 6))
