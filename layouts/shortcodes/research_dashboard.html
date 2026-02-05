@@ -28,6 +28,27 @@
         <h4 style="margin:0; font-size:0.8rem; opacity:0.7; text-transform:uppercase;">Impact Map</h4>
         <p style="margin:0; font-size:0.65rem; opacity:0.5;">Connections by Topic, Venue & Co-authors</p>
     </div>
+    <div class="impact-map-controls" aria-label="Impact map controls">
+        <div class="impact-control-group" role="group" aria-label="Color mode">
+            <button class="impact-toggle is-active" data-impact-color="topic" type="button">Color: Topic</button>
+            <button class="impact-toggle" data-impact-color="year" type="button">Color: Year</button>
+        </div>
+        <div class="impact-control-group" role="group" aria-label="Connection types">
+            <label class="impact-check"><input type="checkbox" data-impact-link="topic" checked> Topics</label>
+            <label class="impact-check"><input type="checkbox" data-impact-link="venue" checked> Venues</label>
+            <label class="impact-check"><input type="checkbox" data-impact-link="author" checked> Co-authors</label>
+        </div>
+    </div>
+    <div class="impact-map-legend" id="impact-map-legend"></div>
+    <div class="impact-map-inspector" id="impact-map-inspector" aria-live="polite">
+        <div class="impact-inspector-title">Focus lens</div>
+        <div class="impact-inspector-body">Click a node to reveal context, then pin highlights you want to keep.</div>
+        <div class="impact-inspector-actions">
+            <button class="impact-action" type="button" data-impact-action="pin" disabled>Pin highlight</button>
+            <button class="impact-action" type="button" data-impact-action="clear" disabled>Clear focus</button>
+        </div>
+        <div class="impact-inspector-pins" id="impact-map-pins"></div>
+    </div>
     <div id="dashboard-impact-map" style="width:100%; height:100%;"></div>
 </div>
 
@@ -56,6 +77,19 @@
     <div style="position:absolute; top:20px; left:20px; z-index:10; pointer-events:none;">
         <h4 style="margin:0; font-size:0.8rem; opacity:0.7; text-transform:uppercase;">Collaboration Network</h4>
         <p style="margin:0; font-size:0.65rem; opacity:0.5;">Co-authorship Connections</p>
+    </div>
+    <div class="collab-controls" aria-label="Collaboration filters">
+        <div class="collab-chip-row" role="group" aria-label="Year range">
+            <button class="collab-chip is-active" data-collab-range="all" type="button">All-time</button>
+            <button class="collab-chip" data-collab-range="5" type="button">Last 5 yrs</button>
+            <button class="collab-chip" data-collab-range="3" type="button">Last 3 yrs</button>
+            <button class="collab-chip" data-collab-range="2" type="button">Last 2 yrs</button>
+        </div>
+    </div>
+    <div class="collab-spotlight" id="collab-spotlight" aria-live="polite">
+        <div class="collab-spotlight-title">Collaborator spotlight</div>
+        <div class="collab-spotlight-body">Select a node to see their co-authorship footprint, top venues, and key connections.</div>
+        <div class="collab-spotlight-meta" id="collab-spotlight-meta"></div>
     </div>
     <div id="dashboard-collab-network" style="width:100%; height:100%;"></div>
 </div>
@@ -112,6 +146,65 @@
 .collaboration-marker .marker-pin { background: #00bfff; }
 .institution-marker .marker-pin { background: #ff6b35; }
 body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px currentColor; }
+
+/* Impact map controls */
+.impact-map-controls { position:absolute; top:16px; right:16px; z-index:20; display:flex; flex-direction:column; gap:8px; pointer-events:auto; }
+.impact-control-group { display:flex; flex-wrap:wrap; gap:6px; padding:6px; border-radius:10px; border:1px solid var(--card-border, #333); background:rgba(0,0,0,0.35); backdrop-filter: blur(6px); }
+.impact-toggle { border:1px solid rgba(0,255,65,0.3); background:transparent; color:#b9f6ca; font-size:0.6rem; letter-spacing:0.05em; text-transform:uppercase; padding:4px 8px; border-radius:999px; cursor:pointer; }
+.impact-toggle.is-active { background:rgba(0,255,65,0.18); border-color:#00ff41; color:#00ff41; }
+.impact-check { display:flex; align-items:center; gap:6px; font-size:0.62rem; color:#cfead2; }
+.impact-check input { accent-color:#00ff41; }
+.impact-map-legend { position:absolute; bottom:14px; left:14px; z-index:15; max-width:240px; background:rgba(0,0,0,0.4); border:1px solid var(--card-border, #333); border-radius:12px; padding:8px 10px; font-size:0.62rem; color:#d6dde2; backdrop-filter: blur(6px); pointer-events:auto; }
+.impact-map-legend .legend-row { display:flex; align-items:center; gap:6px; margin-bottom:4px; }
+.impact-map-legend .legend-row:last-child { margin-bottom:0; }
+.impact-legend-dot { width:8px; height:8px; border-radius:50%; background:var(--legend-color); box-shadow:0 0 6px rgba(0,0,0,0.4); }
+.impact-map-inspector { position:absolute; top:92px; right:16px; width:230px; z-index:20; background:rgba(0,0,0,0.48); border:1px solid var(--card-border, #333); border-radius:12px; padding:10px; font-size:0.62rem; color:#e0e0e0; backdrop-filter: blur(6px); pointer-events:auto; }
+.impact-inspector-title { font-size:0.68rem; text-transform:uppercase; opacity:0.7; margin-bottom:6px; }
+.impact-inspector-body { line-height:1.4; margin-bottom:8px; opacity:0.9; }
+.impact-inspector-actions { display:flex; gap:6px; margin-bottom:8px; }
+.impact-action { flex:1; border-radius:999px; border:1px solid rgba(0,255,65,0.3); background:transparent; color:#c8f7c5; font-size:0.58rem; padding:4px 6px; text-transform:uppercase; letter-spacing:0.08em; cursor:pointer; }
+.impact-action:disabled { opacity:0.4; cursor:not-allowed; }
+.impact-inspector-pins { display:flex; flex-wrap:wrap; gap:6px; }
+.impact-pin { display:flex; align-items:center; gap:6px; padding:4px 6px; border-radius:999px; background:rgba(0,229,255,0.12); border:1px solid rgba(0,229,255,0.3); font-size:0.58rem; }
+.impact-pin button { border:none; background:transparent; color:#00e5ff; cursor:pointer; font-size:0.7rem; line-height:1; }
+
+/* Collaboration network controls */
+.collab-controls { position:absolute; top:16px; right:16px; z-index:20; pointer-events:auto; }
+.collab-chip-row { display:flex; flex-wrap:wrap; gap:6px; padding:6px; border-radius:10px; border:1px solid var(--card-border, #333); background:rgba(0,0,0,0.35); backdrop-filter: blur(6px); }
+.collab-chip { border:1px solid rgba(0,229,255,0.3); background:transparent; color:#bde8ff; font-size:0.6rem; letter-spacing:0.04em; text-transform:uppercase; padding:4px 8px; border-radius:999px; cursor:pointer; }
+.collab-chip.is-active { background:rgba(0,229,255,0.18); border-color:#00e5ff; color:#00e5ff; }
+.collab-spotlight { position:absolute; bottom:16px; left:16px; width:240px; z-index:20; background:rgba(0,0,0,0.48); border:1px solid var(--card-border, #333); border-radius:12px; padding:10px; font-size:0.62rem; color:#e0e0e0; backdrop-filter: blur(6px); pointer-events:auto; }
+.collab-spotlight-title { font-size:0.68rem; text-transform:uppercase; opacity:0.7; margin-bottom:6px; }
+.collab-spotlight-body { line-height:1.4; margin-bottom:8px; opacity:0.9; }
+.collab-spotlight-meta { display:grid; gap:6px; }
+.collab-meta-row { display:flex; justify-content:space-between; gap:10px; }
+.collab-meta-row span { opacity:0.7; }
+.collab-meta-row strong { font-weight:700; color:#00e5ff; }
+
+@media (max-width: 900px) {
+    .impact-map-controls { top:12px; right:12px; }
+    .impact-map-legend { bottom:12px; left:12px; }
+    .impact-map-inspector { top:auto; bottom:12px; right:12px; width:200px; }
+    .collab-controls { top:12px; right:12px; }
+    .collab-spotlight { bottom:12px; left:12px; width:210px; }
+}
+
+body:not(.dark) .impact-control-group,
+body:not(.dark) .impact-map-legend,
+body:not(.dark) .impact-map-inspector,
+body:not(.dark) .collab-chip-row,
+body:not(.dark) .collab-spotlight {
+    background:rgba(255,255,255,0.85);
+    color:#333;
+    border-color:#e0e0e0;
+}
+body:not(.dark) .impact-toggle,
+body:not(.dark) .impact-action,
+body:not(.dark) .collab-chip { color:#1a1a1a; border-color:#bdbdbd; }
+body:not(.dark) .impact-toggle.is-active { color:#0b7a2f; border-color:#0b7a2f; background:rgba(11,122,47,0.15); }
+body:not(.dark) .collab-chip.is-active { color:#0077b6; border-color:#0077b6; background:rgba(0,119,182,0.15); }
+body:not(.dark) .impact-action { color:#0b7a2f; }
+body:not(.dark) .impact-pin { background:rgba(0,119,182,0.12); border-color:rgba(0,119,182,0.3); }
 </style>
 
 <script type="text/javascript">
@@ -136,6 +229,25 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
         },
         LISTS: { EIGEN: 'dash-list-eigen', BETWEEN: 'dash-list-between', DEGREE: 'dash-list-degree' }
     };
+
+    const TOPIC_TAXONOMY = {
+        'AI / Deep Learning': ['Deep Learning', 'Neural', 'Transfer Learning', 'Embedding', 'Machine Learning', 'Artificial Intelligence', 'Adversarial'],
+        'Cybersecurity': ['Cyber', 'Vulnerability', 'Exploit', 'Attack', 'Threat', 'Security', 'Malicious', 'Ransomware', 'Phishing'],
+        'LLMs & NLP': ['Large Language Model', 'LLM', 'Text Analytics', 'NLP', 'Transformer', 'Bert', 'GPT', 'Language Models'],
+        'Hacker Communities': ['Hacker', 'Forum', 'Dark Web', 'Paste', 'Community', 'Marketplace', 'Underground'],
+        'Design Science': ['Design Science', 'Framework', 'Artifact', 'System', 'Implementation', 'Prototyping'],
+        'Behavioral': ['Nudging', 'Bias', 'Social', 'Human', 'Behavior', 'Psychology', 'Decision', 'Trust']
+    };
+
+    const impactState = {
+        colorMode: 'topic',
+        linkTypes: { topic: true, venue: true, author: true },
+        focusId: null,
+        pinned: new Set()
+    };
+
+    let collabRange = 'all';
+    let collabFocusId = null;
 
     var radarChart, lineChart, graphChart, collabChart, visitTrendChart, visitDeviceChart;
 
@@ -282,24 +394,15 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
     // LOGIC: METRICS & RADAR
     // ========================================================================
     function processMetrics(papers, scholarData) {
-        const taxonomy = {
-            'AI / Deep Learning': ['Deep Learning', 'Neural', 'Transfer Learning', 'Embedding', 'Machine Learning', 'Artificial Intelligence', 'Adversarial'],
-            'Cybersecurity':      ['Cyber', 'Vulnerability', 'Exploit', 'Attack', 'Threat', 'Security', 'Malicious', 'Ransomware', 'Phishing'],
-            'LLMs & NLP':         ['Large Language Model', 'LLM', 'Text Analytics', 'NLP', 'Transformer', 'Bert', 'GPT', 'Language Models'],
-            'Hacker Communities': ['Hacker', 'Forum', 'Dark Web', 'Paste', 'Community', 'Marketplace', 'Underground'],
-            'Design Science':     ['Design Science', 'Framework', 'Artifact', 'System', 'Implementation', 'Prototyping'],
-            'Behavioral':         ['Nudging', 'Bias', 'Social', 'Human', 'Behavior', 'Psychology', 'Decision', 'Trust']
-        };
-
         let counts = {};
         let recentCounts = {};
         let currentYear = new Date().getFullYear();
-        Object.keys(taxonomy).forEach(k => { counts[k] = 0; recentCounts[k] = 0; });
+        Object.keys(TOPIC_TAXONOMY).forEach(k => { counts[k] = 0; recentCounts[k] = 0; });
 
         papers.forEach(p => {
             let text = (p.title || "").toLowerCase();
-            Object.keys(taxonomy).forEach(cat => {
-                if(taxonomy[cat].some(k => text.includes(k.toLowerCase()))) {
+            Object.keys(TOPIC_TAXONOMY).forEach(cat => {
+                if(TOPIC_TAXONOMY[cat].some(k => text.includes(k.toLowerCase()))) {
                     counts[cat]++;
                     if(p.year >= currentYear - 2) recentCounts[cat]++;
                 }
@@ -391,9 +494,15 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
         const WEIGHT_VENUE = 2.0;
         const WEIGHT_AUTHOR = 3.0;
         const LINK_THRESHOLD = 1.5;
+        const topicPalette = ['#00ff41', '#00e5ff', '#e040fb', '#ffd166', '#ff6b35', '#7c4dff', '#4dd0e1', '#80cbc4'];
+        const topicColors = {};
+        const topics = Object.keys(TOPIC_TAXONOMY);
+        topics.forEach((t, i) => { topicColors[t] = topicPalette[i % topicPalette.length]; });
+        if (!topicColors.Other) topicColors.Other = '#9e9e9e';
 
         let nodes = [];
-        let links = [];
+        let linksRaw = [];
+        let citationValues = [];
 
         papers.forEach((p, index) => {
             let words = (p.title||"").toLowerCase().replace(/[^a-z0-9 ]/g, '').split(/\s+/).filter(w => w.length > 3 && !STOP_WORDS.has(w));
@@ -408,18 +517,33 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
             }
             p._venue = p.venue ? p.venue.toLowerCase().trim() : "";
 
+            const text = (p.title || "").toLowerCase();
+            let topic = 'Other';
+            for (let i = 0; i < topics.length; i++) {
+                const cat = topics[i];
+                if (TOPIC_TAXONOMY[cat].some(k => text.includes(k.toLowerCase()))) {
+                    topic = cat;
+                    break;
+                }
+            }
+            const citations = p.citations || 0;
+            citationValues.push(citations);
             nodes.push({
                 id: index,
                 name: p.title,
-                value: p.citations || 0,
+                value: citations,
                 year: p.year,
                 authors: p.authors,
                 venue: p.venue,
-                symbolSize: Math.max(10, Math.min(65, Math.log((p.citations || 0) + 2) * 9)),
-                itemStyle: { color: getColorByYear(p.year) },
-                label: { show: (p.citations || 0) > 15, formatter: p => p.name.length > 15 ? p.name.substring(0, 15) + '...' : p.name }
+                topic: topic,
+                yearColor: getColorByYear(p.year),
+                topicColor: topicColors[topic] || topicColors.Other,
+                symbolSize: Math.max(10, Math.min(65, Math.log((citations) + 2) * 9)),
+                label: { show: false, formatter: p => p.name.length > 18 ? p.name.substring(0, 18) + '...' : p.name }
             });
         });
+
+        impactState.pinned = new Set(Array.from(impactState.pinned).filter(id => id >= 0 && id < nodes.length));
 
         for (let i = 0; i < papers.length; i++) {
             for (let j = i + 1; j < papers.length; j++) {
@@ -438,8 +562,9 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
                 if (score >= LINK_THRESHOLD) {
                     let avgCites = ((p1.citations || 0) + (p2.citations || 0)) / 2;
                     let impactBonus = Math.log(avgCites + 1) * 1.5;
-                    links.push({
+                    linksRaw.push({
                         source: i, target: j, value: score + impactBonus, reason: reasons.join(", "),
+                        types: { topic: commonWords > 0, venue: (p1._venue && p2._venue && p1._venue === p2._venue), author: commonAuthors > 0 },
                         lineStyle: { width: Math.min((score * 0.5) + impactBonus, 5), opacity: Math.min(0.15 + (score * 0.1), 0.7), curveness: 0.2 }
                     });
                 }
@@ -447,30 +572,228 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
         }
 
         let isDark = document.body.classList.contains('dark');
-        graphChart.setOption({
-            backgroundColor: 'transparent',
-            tooltip: {
-                trigger: 'item',
-                confine: true, 
-                position: function (point, params, dom, rect, size) {
-                    return [point[0] - (size.contentSize[0] / 2), point[1] - size.contentSize[1] - 20];
-                },
-                formatter: (p) => {
-                    if (p.dataType === 'edge') {
-                        return `<div style="max-width:200px; white-space:normal;"><strong>Connection</strong><br>Strength: ${Math.floor(p.value)}<br>${p.data.reason}</div>`;
+        const citationThreshold = citationValues.length ? citationValues.sort((a,b) => a - b)[Math.floor(citationValues.length * 0.75)] : 0;
+
+        const legendEl = document.getElementById('impact-map-legend');
+        const inspectorEl = document.getElementById('impact-map-inspector');
+        const inspectorBody = inspectorEl ? inspectorEl.querySelector('.impact-inspector-body') : null;
+        const inspectorPin = inspectorEl ? inspectorEl.querySelector('[data-impact-action="pin"]') : null;
+        const inspectorClear = inspectorEl ? inspectorEl.querySelector('[data-impact-action="clear"]') : null;
+        const pinsEl = document.getElementById('impact-map-pins');
+
+        function renderLegend() {
+            if (!legendEl) return;
+            if (impactState.colorMode === 'topic') {
+                const usedTopics = Array.from(new Set(nodes.map(n => n.topic)));
+                legendEl.innerHTML = usedTopics.map(t => {
+                    const color = topicColors[t] || topicColors.Other;
+                    return `<div class="legend-row"><span class="impact-legend-dot" style="--legend-color:${color};"></span><span>${t}</span></div>`;
+                }).join('');
+            } else {
+                legendEl.innerHTML = [
+                    `<div class="legend-row"><span class="impact-legend-dot" style="--legend-color:${getColorByYear(2018)};"></span><span>2019 &amp; earlier</span></div>`,
+                    `<div class="legend-row"><span class="impact-legend-dot" style="--legend-color:${getColorByYear(2021)};"></span><span>2020 - 2022</span></div>`,
+                    `<div class="legend-row"><span class="impact-legend-dot" style="--legend-color:${getColorByYear(2024)};"></span><span>2023 - present</span></div>`
+                ].join('');
+            }
+        }
+
+        function renderPins() {
+            if (!pinsEl) return;
+            if (impactState.pinned.size === 0) {
+                pinsEl.innerHTML = '';
+                return;
+            }
+            pinsEl.innerHTML = Array.from(impactState.pinned).map(id => {
+                const node = nodes[id];
+                const label = node ? (node.name.length > 26 ? node.name.slice(0, 26) + '...' : node.name) : 'Pinned';
+                return `<div class="impact-pin"><span>${label}</span><button type="button" data-pin-remove="${id}">×</button></div>`;
+            }).join('');
+        }
+
+        function setInspector(node) {
+            if (!inspectorBody || !inspectorPin || !inspectorClear) return;
+            if (!node) {
+                inspectorBody.textContent = 'Click a node to reveal context, then pin highlights you want to keep.';
+                inspectorPin.disabled = true;
+                inspectorClear.disabled = true;
+            } else {
+                inspectorBody.innerHTML = `<strong>${node.name}</strong><br>
+                    <span style="opacity:0.8">Topic: ${node.topic}</span><br>
+                    <span style="opacity:0.8">Venue: ${node.venue || '—'}</span><br>
+                    <span style="opacity:0.8">Year: ${node.year || '—'} · Citations: ${node.value}</span>`;
+                inspectorPin.disabled = false;
+                inspectorClear.disabled = false;
+            }
+        }
+
+        function getFilteredLinks() {
+            const types = impactState.linkTypes;
+            return linksRaw.filter(link => {
+                return (types.topic && link.types.topic) || (types.venue && link.types.venue) || (types.author && link.types.author);
+            });
+        }
+
+        function updateImpactGraph() {
+            const activeLinks = getFilteredLinks();
+            const neighborMap = new Map();
+            activeLinks.forEach(l => {
+                if (!neighborMap.has(l.source)) neighborMap.set(l.source, new Set());
+                if (!neighborMap.has(l.target)) neighborMap.set(l.target, new Set());
+                neighborMap.get(l.source).add(l.target);
+                neighborMap.get(l.target).add(l.source);
+            });
+
+            const highlight = new Set(impactState.pinned);
+            if (impactState.focusId !== null && impactState.focusId !== undefined) {
+                highlight.add(impactState.focusId);
+                const neighbors = neighborMap.get(impactState.focusId);
+                if (neighbors) neighbors.forEach(n => highlight.add(n));
+            }
+
+            const focusActive = impactState.focusId !== null && impactState.focusId !== undefined;
+            const styledNodes = nodes.map(n => {
+                const isFocus = n.id === impactState.focusId;
+                const isHighlight = highlight.has(n.id);
+                const baseColor = impactState.colorMode === 'topic' ? n.topicColor : n.yearColor;
+                return Object.assign({}, n, {
+                    itemStyle: {
+                        color: baseColor,
+                        opacity: focusActive ? (isHighlight ? 1 : 0.08) : 1,
+                        borderColor: isFocus ? '#fff' : (impactState.pinned.has(n.id) ? '#00e5ff' : 'transparent'),
+                        borderWidth: isFocus ? 2 : (impactState.pinned.has(n.id) ? 1 : 0)
+                    },
+                    label: {
+                        show: (n.value >= citationThreshold && n.value > 0) || isHighlight,
+                        color: isDark ? '#eee' : '#222',
+                        position: 'right'
                     }
-                    return `<div style="max-width:250px; white-space:normal; word-wrap:break-word;">
-                                <strong>${p.name}</strong><br>
-                                <span style="opacity:0.8">Year: ${p.data.year}</span><br>
-                                <span style="opacity:0.8">Citations: ${p.value}</span>
-                            </div>`;
+                });
+            });
+
+            const styledLinks = activeLinks.map(l => {
+                const linkHighlight = !focusActive || (highlight.has(l.source) && highlight.has(l.target));
+                return Object.assign({}, l, {
+                    lineStyle: Object.assign({}, l.lineStyle, {
+                        opacity: focusActive ? (linkHighlight ? Math.min(0.85, l.lineStyle.opacity + 0.2) : 0.04) : l.lineStyle.opacity,
+                        color: isDark ? '#aaa' : '#666'
+                    })
+                });
+            });
+
+            graphChart.setOption({
+                backgroundColor: 'transparent',
+                tooltip: {
+                    trigger: 'item',
+                    confine: true,
+                    position: function (point, params, dom, rect, size) {
+                        return [point[0] - (size.contentSize[0] / 2), point[1] - size.contentSize[1] - 20];
+                    },
+                    formatter: (p) => {
+                        if (p.dataType === 'edge') {
+                            return `<div style="max-width:200px; white-space:normal;"><strong>Connection</strong><br>Strength: ${Math.floor(p.value)}<br>${p.data.reason}</div>`;
+                        }
+                        return `<div style="max-width:260px; white-space:normal; word-wrap:break-word;">
+                                    <strong>${p.name}</strong><br>
+                                    <span style="opacity:0.8">Topic: ${p.data.topic}</span><br>
+                                    <span style="opacity:0.8">Venue: ${p.data.venue || '—'}</span><br>
+                                    <span style="opacity:0.8">Year: ${p.data.year || '—'} · Citations: ${p.value}</span>
+                                </div>`;
+                    }
+                },
+                series: [{
+                    type: 'graph',
+                    layout: 'force',
+                    data: styledNodes,
+                    links: styledLinks,
+                    roam: true,
+                    zoom: 0.75,
+                    label: { position: 'right' },
+                    lineStyle: { color: isDark ? '#aaa' : '#666' },
+                    force: { repulsion: 500, gravity: 0.1, edgeLength: [50, 300] }
+                }]
+            }, false);
+        }
+
+        function setupImpactControls() {
+            const controls = document.querySelector('.impact-map-controls');
+            if (controls && !controls.dataset.bound) {
+                controls.dataset.bound = 'true';
+                controls.addEventListener('click', (e) => {
+                    const btn = e.target.closest('button[data-impact-color]');
+                    if (btn) {
+                        impactState.colorMode = btn.getAttribute('data-impact-color');
+                        controls.querySelectorAll('.impact-toggle').forEach(b => b.classList.toggle('is-active', b === btn));
+                        renderLegend();
+                        updateImpactGraph();
+                    }
+                });
+                controls.querySelectorAll('input[data-impact-link]').forEach(input => {
+                    input.addEventListener('change', () => {
+                        impactState.linkTypes[input.getAttribute('data-impact-link')] = input.checked;
+                        updateImpactGraph();
+                    });
+                });
+            }
+
+            if (inspectorEl && !inspectorEl.dataset.bound) {
+                inspectorEl.dataset.bound = 'true';
+                inspectorEl.addEventListener('click', (e) => {
+                    const action = e.target.closest('[data-impact-action]');
+                    if (action) {
+                        const type = action.getAttribute('data-impact-action');
+                        if (type === 'pin' && impactState.focusId !== null) {
+                            impactState.pinned.add(impactState.focusId);
+                            renderPins();
+                            updateImpactGraph();
+                        }
+                        if (type === 'clear') {
+                            impactState.focusId = null;
+                            setInspector(null);
+                            updateImpactGraph();
+                        }
+                    }
+                    const removeBtn = e.target.closest('[data-pin-remove]');
+                    if (removeBtn) {
+                        const id = parseInt(removeBtn.getAttribute('data-pin-remove'), 10);
+                        impactState.pinned.delete(id);
+                        renderPins();
+                        updateImpactGraph();
+                    }
+                });
+            }
+        }
+
+        setupImpactControls();
+        renderLegend();
+        renderPins();
+        setInspector(null);
+        updateImpactGraph();
+
+        graphChart.off('click');
+        graphChart.on('click', (params) => {
+            if (params.dataType === 'node') {
+                if (impactState.focusId === params.data.id) {
+                    impactState.focusId = null;
+                    setInspector(null);
+                } else {
+                    impactState.focusId = params.data.id;
+                    setInspector(params.data);
                 }
-            },
-            series: [{ type: 'graph', layout: 'force', data: nodes, links: links, roam: true, zoom: 0.75, label: { position: 'right', color: 'inherit' }, lineStyle: { color: isDark ? '#aaa' : '#666' }, force: { repulsion: 500, gravity: 0.1, edgeLength: [50, 300] } }]
+                updateImpactGraph();
+            }
         });
-        
+
         const btn = document.querySelector('.js-theme-toggle');
-        if(btn) { btn.addEventListener('click', () => { setTimeout(() => { let isDarkNow = document.body.classList.contains('dark'); graphChart.setOption({ series: [{ lineStyle: { color: isDarkNow ? '#aaa' : '#666' } }] }); }, 100); }); }
+        if(btn && !btn.dataset.impactBound) {
+            btn.dataset.impactBound = 'true';
+            btn.addEventListener('click', () => {
+                setTimeout(() => {
+                    isDark = document.body.classList.contains('dark');
+                    updateImpactGraph();
+                }, 100);
+            });
+        }
     }
 
 
@@ -502,22 +825,62 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
             'M Wagner': 'Mason Wagner', 'RY Reyes': 'Raul Reyes',
             'S Yang': 'Shanchieh Yang', 'Y Li': 'Yidong Li', 'Y. Li': 'Yidong Li'
         };
-        function normalize(name) { return nameMap[name] || name; }
+        function normalize(name) {
+            if (!name) return '';
+            let clean = name.replace(/\s+/g, ' ').trim();
+            if (clean.includes(',')) {
+                const parts = clean.split(',').map(p => p.trim()).filter(Boolean);
+                if (parts.length >= 2) clean = `${parts[1]} ${parts[0]}`;
+            }
+            return nameMap[clean] || clean;
+        }
+
+        const chipRow = document.querySelector('.collab-chip-row');
+        if (chipRow) {
+            chipRow.querySelectorAll('.collab-chip').forEach(chip => {
+                chip.classList.toggle('is-active', chip.getAttribute('data-collab-range') === collabRange);
+                if (!chip.dataset.bound) {
+                    chip.dataset.bound = 'true';
+                    chip.addEventListener('click', () => {
+                        collabRange = chip.getAttribute('data-collab-range');
+                        collabFocusId = null;
+                        renderCollabNetwork(papers);
+                    });
+                }
+            });
+        }
+
+        const currentYear = new Date().getFullYear();
+        let filteredPapers = papers;
+        if (collabRange !== 'all') {
+            const yearsBack = parseInt(collabRange, 10) || 0;
+            const minYear = currentYear - yearsBack + 1;
+            filteredPapers = papers.filter(p => (p.year || 0) >= minYear);
+        }
 
         var nodeCounts = new Map();
         var linkCounts = new Map();
+        var authorMeta = new Map();
         var maxCount = 0;
 
-        papers.forEach(function(paper) {
+        filteredPapers.forEach(function(paper) {
             var rawAuthors = paper.authors;
             if (!rawAuthors) return;
             var authorList = Array.isArray(rawAuthors) ? rawAuthors : rawAuthors.split(',');
-            var authors = [...new Set(authorList.map(a => normalize(a.trim())).filter(a => a))]; 
-            
+            var authors = [...new Set(authorList.map(a => normalize(a.trim())).filter(a => a))];
+
             authors.forEach(auth => {
                 let count = (nodeCounts.get(auth) || 0) + 1;
                 nodeCounts.set(auth, count);
                 if (auth !== myName && count > maxCount) maxCount = count;
+
+                if (!authorMeta.has(auth)) {
+                    authorMeta.set(auth, { count: 0, years: new Set(), venues: new Map(), coauthors: new Map() });
+                }
+                const meta = authorMeta.get(auth);
+                meta.count += 1;
+                if (paper.year) meta.years.add(paper.year);
+                if (paper.venue) meta.venues.set(paper.venue, (meta.venues.get(paper.venue) || 0) + 1);
             });
 
             for (let i = 0; i < authors.length; i++) {
@@ -526,6 +889,11 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
                     if (source === target) continue;
                     let pairId = [source, target].sort().join("|");
                     linkCounts.set(pairId, (linkCounts.get(pairId) || 0) + 1);
+
+                    const metaA = authorMeta.get(source);
+                    const metaB = authorMeta.get(target);
+                    if (metaA) metaA.coauthors.set(target, (metaA.coauthors.get(target) || 0) + 1);
+                    if (metaB) metaB.coauthors.set(source, (metaB.coauthors.get(source) || 0) + 1);
                 }
             }
         });
@@ -536,7 +904,7 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
                 id: name,
                 name: name,
                 value: count,
-                symbolSize: isMe ? 60 : Math.max(20, Math.min(50, count * 8)),
+                symbolSize: isMe ? 60 : Math.max(18, Math.min(52, count * 7)),
                 itemStyle: { color: isMe ? '#ffffff' : null },
                 fixed: isMe,
                 x: isMe ? dom.clientWidth / 2 : null,
@@ -558,32 +926,113 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
             return isDark ? `hsl(${hue}, 90%, 60%)` : `hsl(${hue}, 80%, 40%)`;
         }
 
-        let isDark = document.body.classList.contains('dark');
-        nodes.forEach(n => {
-            if(n.id === myName) {
-                n.itemStyle = { color: isDark ? '#fff' : '#000', borderColor: isDark?'#000':'#fff', borderWidth: 2 };
-            } else {
-                n.itemStyle = { color: getCollabColor(n.value, maxCount, isDark) };
+        const spotlight = document.getElementById('collab-spotlight-meta');
+        const spotlightBody = document.querySelector('.collab-spotlight-body');
+        const spotlightTitle = document.querySelector('.collab-spotlight-title');
+
+        function setSpotlight(name) {
+            if (!spotlight || !spotlightBody || !spotlightTitle) return;
+            if (!name || !authorMeta.has(name)) {
+                spotlightTitle.textContent = 'Collaborator spotlight';
+                spotlightBody.textContent = 'Select a node to see their co-authorship footprint, top venues, and key connections.';
+                spotlight.innerHTML = '';
+                return;
             }
-            n.label = { show: n.value > 1 || n.id === myName, color: isDark?'#eee':'#333' };
-        });
-        links.forEach(l => {
-            l.lineStyle.color = getCollabColor(l.value, maxCount, isDark);
+            const meta = authorMeta.get(name);
+            const years = Array.from(meta.years).sort();
+            const yearRange = years.length ? `${years[0]} - ${years[years.length - 1]}` : '—';
+            const topVenues = Array.from(meta.venues.entries()).sort((a,b) => b[1]-a[1]).slice(0, 3).map(v => v[0]).join(', ') || '—';
+            const topCoauthors = Array.from(meta.coauthors.entries()).sort((a,b) => b[1]-a[1]).slice(0, 3).map(c => `${c[0]} (${c[1]})`).join(', ') || '—';
+
+            spotlightTitle.textContent = name;
+            spotlightBody.textContent = `${meta.count} co-authored papers`;
+            spotlight.innerHTML = `
+                <div class="collab-meta-row"><span>Active years</span><strong>${yearRange}</strong></div>
+                <div class="collab-meta-row"><span>Top venues</span><strong>${topVenues}</strong></div>
+                <div class="collab-meta-row"><span>Key co-authors</span><strong>${topCoauthors}</strong></div>
+            `;
+        }
+
+        function updateCollabGraph() {
+            const neighborMap = new Map();
+            links.forEach(l => {
+                if (!neighborMap.has(l.source)) neighborMap.set(l.source, new Set());
+                if (!neighborMap.has(l.target)) neighborMap.set(l.target, new Set());
+                neighborMap.get(l.source).add(l.target);
+                neighborMap.get(l.target).add(l.source);
+            });
+
+            const highlight = new Set();
+            if (collabFocusId) {
+                highlight.add(collabFocusId);
+                const neighbors = neighborMap.get(collabFocusId);
+                if (neighbors) neighbors.forEach(n => highlight.add(n));
+            }
+
+            let isDark = document.body.classList.contains('dark');
+            const styledNodes = nodes.map(n => {
+                const isFocus = collabFocusId === n.id;
+                const isHighlight = highlight.size === 0 || highlight.has(n.id);
+                const baseColor = n.id === myName ? (isDark ? '#fff' : '#000') : getCollabColor(n.value, maxCount, isDark);
+                return Object.assign({}, n, {
+                    itemStyle: {
+                        color: baseColor,
+                        opacity: highlight.size === 0 ? 1 : (isHighlight ? 1 : 0.08),
+                        borderColor: isFocus ? '#00e5ff' : (n.id === myName ? (isDark ? '#000' : '#fff') : 'transparent'),
+                        borderWidth: isFocus ? 2 : (n.id === myName ? 2 : 0)
+                    },
+                    label: { show: n.value > 1 || n.id === myName || isHighlight, color: isDark?'#eee':'#333' }
+                });
+            });
+
+            const styledLinks = links.map(l => {
+                const linkHighlight = highlight.size === 0 || (highlight.has(l.source) && highlight.has(l.target));
+                return Object.assign({}, l, {
+                    lineStyle: Object.assign({}, l.lineStyle, {
+                        opacity: highlight.size === 0 ? l.lineStyle.opacity : (linkHighlight ? Math.min(0.8, l.lineStyle.opacity + 0.2) : 0.05),
+                        color: getCollabColor(l.value, maxCount, isDark)
+                    })
+                });
+            });
+
+            collabChart.setOption({
+                backgroundColor: 'transparent',
+                tooltip: { formatter: p => p.dataType==='edge' ? `${p.data.source} & ${p.data.target}<br>${p.value} Papers` : `${p.name}: ${p.value} Papers` },
+                series: [{
+                    type: 'graph', layout: 'force', data: styledNodes, links: styledLinks, roam: true, zoom: 0.6,
+                    label: { position: 'right' },
+                    lineStyle: { curveness: 0.2 },
+                    force: { repulsion: 800, gravity: 0.1, edgeLength: [30, 150] }
+                }]
+            }, false);
+        }
+
+        if (collabFocusId && !nodeCounts.has(collabFocusId)) {
+            collabFocusId = null;
+        }
+
+        setSpotlight(collabFocusId);
+        updateCollabGraph();
+
+        collabChart.off('click');
+        collabChart.on('click', (params) => {
+            if (params.dataType === 'node') {
+                if (collabFocusId === params.data.id) {
+                    collabFocusId = null;
+                    setSpotlight(null);
+                } else {
+                    collabFocusId = params.data.id;
+                    setSpotlight(collabFocusId);
+                }
+                updateCollabGraph();
+            }
         });
 
-        collabChart.setOption({
-            backgroundColor: 'transparent',
-            tooltip: { formatter: p => p.dataType==='edge' ? `${p.data.source} & ${p.data.target}<br>${p.value} Papers` : `${p.name}: ${p.value} Papers` },
-            series: [{
-                type: 'graph', layout: 'force', data: nodes, links: links, roam: true, zoom: 0.6,
-                label: { position: 'right' },
-                lineStyle: { curveness: 0.2 },
-                force: { repulsion: 800, gravity: 0.1, edgeLength: [30, 150] }
-            }]
-        });
-        
         const btn = document.querySelector('.js-theme-toggle');
-        if(btn) { btn.addEventListener('click', () => { setTimeout(() => { renderCollabNetwork(papers); }, 100); }); }
+        if(btn && !btn.dataset.collabBound) {
+            btn.dataset.collabBound = 'true';
+            btn.addEventListener('click', () => { setTimeout(() => { updateCollabGraph(); }, 100); });
+        }
     }
 
 
