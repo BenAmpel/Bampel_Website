@@ -1,0 +1,209 @@
+{{ $storylines := site.Data.storylines.tracks | default (slice) }}
+{{ $pubData := .Site.Data.publications }}
+{{ if and (isSet $pubData "individualPublications") (not (isSet $pubData 0)) }}
+  {{ $pubData = $pubData.individualPublications }}
+{{ end }}
+
+{{ $pubMap := dict }}
+{{ range $pubData }}
+  {{ $pubMap = merge $pubMap (dict .url .) }}
+{{ end }}
+
+<div class="storylines" data-storylines>
+  <div class="storylines-header">
+    <div>
+      <h3>Research Storylines</h3>
+      <p>Choose a track and step through the arc like a mini documentary.</p>
+    </div>
+    <div class="storylines-progress" data-storylines-progress>1 / 1</div>
+  </div>
+
+  <div class="storylines-tabs" role="tablist">
+    {{ range $index, $track := $storylines }}
+      <button class="storylines-tab{{ if eq $index 0 }} is-active{{ end }}" type="button" role="tab" data-track="{{ $track.id }}" aria-selected="{{ if eq $index 0 }}true{{ else }}false{{ end }}">
+        {{ $track.title }}
+      </button>
+    {{ end }}
+  </div>
+
+  <div class="storylines-body">
+    <div class="storylines-steps" data-storylines-steps>
+      {{ range $tindex, $track := $storylines }}
+        <div class="storylines-track{{ if eq $tindex 0 }} is-active{{ end }}" data-track="{{ $track.id }}" role="tabpanel">
+          <div class="storylines-track-head">
+            <div>
+              <div class="storylines-track-title">{{ $track.title }}</div>
+              <div class="storylines-track-desc">{{ $track.description }}</div>
+            </div>
+            <div class="storylines-controls">
+              <button type="button" class="storylines-nav" data-nav="prev">Prev</button>
+              <button type="button" class="storylines-nav" data-nav="next">Next</button>
+            </div>
+          </div>
+          <div class="storylines-track-content">
+            <div class="storylines-step-list" role="list">
+              {{ range $sindex, $step := $track.steps }}
+                {{ $pub := index $pubMap $step.url }}
+                <button type="button" class="storylines-step{{ if eq $sindex 0 }} is-active{{ end }}" data-step="{{ $sindex }}" role="listitem">
+                  <span class="storylines-step-index">{{ add $sindex 1 }}</span>
+                  <span class="storylines-step-title">{{ $pub.title }}</span>
+                  <span class="storylines-step-meta">{{ $pub.year }} · {{ $pub.venue }}</span>
+                </button>
+              {{ end }}
+            </div>
+            <div class="storylines-step-card" data-storylines-card>
+              {{ range $sindex, $step := $track.steps }}
+                {{ $pub := index $pubMap $step.url }}
+                {{ if $pub }}
+                <article class="storylines-card{{ if eq $sindex 0 }} is-active{{ end }}" data-step="{{ $sindex }}">
+                  <div class="storylines-card-top">
+                    <div>
+                      <h4>{{ $pub.title }}</h4>
+                      <div class="storylines-card-meta">{{ $pub.year }} · {{ $pub.venue }}</div>
+                    </div>
+                    <a class="storylines-card-link" href="{{ $pub.url | relURL }}">Read paper →</a>
+                  </div>
+                  <p>{{ $pub.abstract }}</p>
+                </article>
+                {{ end }}
+              {{ end }}
+            </div>
+          </div>
+        </div>
+      {{ end }}
+    </div>
+  </div>
+</div>
+
+<style>
+.storylines { margin: 30px 0; padding: 24px; border-radius: 16px; border:1px solid var(--card-border, #333); background:linear-gradient(135deg, rgba(0,0,0,0.55), rgba(0,0,0,0.15)); box-shadow: 0 12px 30px rgba(0,0,0,0.25); }
+.storylines-header { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:16px; }
+.storylines-header h3 { margin:0; font-size:1.2rem; color:#00ff41; text-transform:uppercase; letter-spacing:0.08em; }
+.storylines-header p { margin:6px 0 0; font-size:0.85rem; opacity:0.7; }
+.storylines-progress { font-size:0.7rem; padding:6px 12px; border-radius:999px; border:1px solid rgba(0,229,255,0.35); color:#00e5ff; text-transform:uppercase; letter-spacing:0.08em; }
+
+.storylines-tabs { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+.storylines-tab { border:1px solid rgba(0,255,65,0.35); background:transparent; color:#b9f6ca; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.06em; padding:6px 12px; border-radius:999px; cursor:pointer; }
+.storylines-tab.is-active { background:rgba(0,255,65,0.2); border-color:#00ff41; color:#00ff41; }
+
+.storylines-track { display:none; }
+.storylines-track.is-active { display:block; }
+.storylines-track-head { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:14px; }
+.storylines-track-title { font-size:1rem; font-weight:700; }
+.storylines-track-desc { font-size:0.78rem; opacity:0.7; }
+.storylines-controls { display:flex; gap:8px; }
+.storylines-nav { border:1px solid rgba(0,229,255,0.35); background:rgba(0,229,255,0.1); color:#00e5ff; padding:6px 12px; border-radius:999px; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; cursor:pointer; }
+.storylines-nav:disabled { opacity:0.4; cursor:not-allowed; }
+
+.storylines-track-content { display:grid; grid-template-columns: 1.05fr 1.2fr; gap:16px; }
+.storylines-step-list { display:flex; flex-direction:column; gap:8px; }
+.storylines-step { text-align:left; border:1px solid var(--card-border, #333); border-radius:12px; padding:10px; background:rgba(0,0,0,0.25); color:#cfead2; display:grid; gap:4px; cursor:pointer; }
+.storylines-step.is-active { border-color:#00ff41; background:rgba(0,255,65,0.12); }
+.storylines-step-index { font-size:0.7rem; color:#00e5ff; }
+.storylines-step-title { font-size:0.82rem; font-weight:600; }
+.storylines-step-meta { font-size:0.65rem; opacity:0.7; }
+
+.storylines-step-card { border:1px solid var(--card-border, #333); border-radius:14px; padding:16px; background:rgba(0,0,0,0.3); min-height:220px; }
+.storylines-card { display:none; }
+.storylines-card.is-active { display:block; }
+.storylines-card h4 { margin:0 0 6px; font-size:1rem; }
+.storylines-card-meta { font-size:0.7rem; opacity:0.7; margin-bottom:8px; }
+.storylines-card-top { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+.storylines-card-link { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; color:#00e5ff; text-decoration:none; border:1px solid rgba(0,229,255,0.35); padding:6px 10px; border-radius:999px; }
+.storylines-card p { font-size:0.82rem; line-height:1.5; opacity:0.85; }
+
+@media (max-width: 900px) {
+  .storylines-track-content { grid-template-columns: 1fr; }
+}
+
+body:not(.dark) .storylines { background:rgba(255,255,255,0.95); }
+body:not(.dark) .storylines-step { background:rgba(255,255,255,0.85); color:#333; }
+body:not(.dark) .storylines-card { color:#222; }
+body:not(.dark) .storylines-card-link { color:#0077b6; border-color:#0077b6; }
+</style>
+
+<script>
+(() => {
+  const root = document.querySelector('[data-storylines]');
+  if (!root) return;
+
+  const tabs = Array.from(root.querySelectorAll('.storylines-tab'));
+  const tracks = Array.from(root.querySelectorAll('.storylines-track'));
+  const progress = root.querySelector('[data-storylines-progress]');
+
+  const setProgress = (current, total) => {
+    if (progress) progress.textContent = `${current} / ${total}`;
+  };
+
+  const activateTrack = (trackId) => {
+    tabs.forEach(tab => {
+      const isActive = tab.dataset.track === trackId;
+      tab.classList.toggle('is-active', isActive);
+      tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+    tracks.forEach(track => {
+      const isActive = track.dataset.track === trackId;
+      track.classList.toggle('is-active', isActive);
+      if (isActive) {
+        const steps = Array.from(track.querySelectorAll('.storylines-step'));
+        const cards = Array.from(track.querySelectorAll('.storylines-card'));
+        steps.forEach((step, idx) => step.classList.toggle('is-active', idx === 0));
+        cards.forEach((card, idx) => card.classList.toggle('is-active', idx === 0));
+        setProgress(1, steps.length || 1);
+        updateNav(track, 0, steps.length);
+      }
+    });
+  };
+
+  const updateNav = (track, index, total) => {
+    const prev = track.querySelector('[data-nav="prev"]');
+    const next = track.querySelector('[data-nav="next"]');
+    if (prev) prev.disabled = index <= 0;
+    if (next) next.disabled = index >= total - 1;
+  };
+
+  const activateStep = (track, index) => {
+    const steps = Array.from(track.querySelectorAll('.storylines-step'));
+    const cards = Array.from(track.querySelectorAll('.storylines-card'));
+    steps.forEach((step, idx) => step.classList.toggle('is-active', idx === index));
+    cards.forEach((card, idx) => card.classList.toggle('is-active', idx === index));
+    setProgress(index + 1, steps.length || 1);
+    updateNav(track, index, steps.length);
+  };
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => activateTrack(tab.dataset.track));
+  });
+
+  tracks.forEach(track => {
+    const steps = Array.from(track.querySelectorAll('.storylines-step'));
+    const navPrev = track.querySelector('[data-nav="prev"]');
+    const navNext = track.querySelector('[data-nav="next"]');
+
+    steps.forEach(step => {
+      step.addEventListener('click', () => {
+        const index = Number(step.dataset.step || 0);
+        activateStep(track, index);
+      });
+    });
+
+    if (navPrev) {
+      navPrev.addEventListener('click', () => {
+        const active = track.querySelector('.storylines-step.is-active');
+        const index = Number(active ? active.dataset.step : 0);
+        activateStep(track, Math.max(0, index - 1));
+      });
+    }
+
+    if (navNext) {
+      navNext.addEventListener('click', () => {
+        const active = track.querySelector('.storylines-step.is-active');
+        const index = Number(active ? active.dataset.step : 0);
+        activateStep(track, Math.min(steps.length - 1, index + 1));
+      });
+    }
+  });
+
+  if (tabs.length) activateTrack(tabs[0].dataset.track);
+})();
+</script>

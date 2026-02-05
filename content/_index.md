@@ -33,6 +33,10 @@ sections:
         {{< research_dashboard >}}
         {{< /spoiler >}}   
 
+        {{< spoiler text="🧭 Research Storylines" >}}
+        {{< research_storylines >}}
+        {{< /spoiler >}}
+
     design:
       columns: '1'
 
