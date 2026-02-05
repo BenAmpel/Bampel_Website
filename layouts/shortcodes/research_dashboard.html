@@ -153,9 +153,6 @@
     <h4 style="font-size:0.8rem; opacity:0.7; text-transform:uppercase; margin-bottom:15px;">Audience & Reach</h4>
     <div style="display:flex; gap:20px; height:100%;">
         <div style="flex:1; display:flex; flex-direction:column; gap:12px;">
-            <div style="flex:1; position:relative;">
-                <div id="dash-visit-device" style="width:100%; height:100%;"></div>
-            </div>
             <div id="dash-visit-geo" class="dash-geo-mix"></div>
             <div id="dash-visit-minimap" class="dash-mini-map">
                 <div class="dash-mini-map-inner"></div>
@@ -640,6 +637,11 @@ body:not(.dark) .centrality-tab.is-active { background:rgba(0,119,182,0.15); }
             // Mini map (top 3 locations if coordinates available)
             const mapEl = document.getElementById('dash-visit-minimap');
             if (mapEl) {
+                const updateMiniMapVisibility = () => {
+                    const ready = mapEl._tileLoaded && mapEl._hasMarkers;
+                    mapEl.classList.toggle('is-ready', !!ready);
+                };
+
                 const CITY_COORDS = {
                     'Lanzhou|China': [36.0611, 103.8343],
                     'Arlington|United States': [38.8816, -77.0910],
@@ -667,7 +669,8 @@ body:not(.dark) .centrality-tab.is-active { background:rgba(0,119,182,0.15); }
                 }).filter(Boolean);
 
                 if (top3.length === 0 || typeof L === 'undefined') {
-                    mapEl.classList.remove('is-ready');
+                    mapEl._hasMarkers = false;
+                    updateMiniMapVisibility();
                 } else {
                     const mapInner = mapEl.querySelector('.dash-mini-map-inner') || mapEl;
                     if (!mapEl.dataset.inited) {
@@ -678,6 +681,11 @@ body:not(.dark) .centrality-tab.is-active { background:rgba(0,119,182,0.15); }
                             : L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { subdomains: 'abcd' });
                         tiles.addTo(miniMap);
                         mapEl._miniMap = miniMap;
+                        mapEl._tileLoaded = false;
+                        tiles.on('load', () => {
+                            mapEl._tileLoaded = true;
+                            updateMiniMapVisibility();
+                        });
                         setTimeout(() => miniMap.invalidateSize(), 200);
                     }
                     const miniMap = mapEl._miniMap;
@@ -692,7 +700,8 @@ body:not(.dark) .centrality-tab.is-active { background:rgba(0,119,182,0.15); }
                         group.addTo(miniMap);
                         mapEl._miniMarkers = group;
                         miniMap.fitBounds(group.getBounds().pad(0.4));
-                        mapEl.classList.add('is-ready');
+                        mapEl._hasMarkers = true;
+                        updateMiniMapVisibility();
                     }
                 }
             }
