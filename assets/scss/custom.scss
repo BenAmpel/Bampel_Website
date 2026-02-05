@@ -5087,6 +5087,23 @@ body:not(.dark) .pub-filter-reset {
   gap: 8px;
 }
 
+.impact-stats-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.impact-tag {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 229, 255, 0.35);
+  background: rgba(0, 229, 255, 0.12);
+  color: #00e5ff;
+}
+
 .impact-stats-title {
   font-size: 0.7rem;
   text-transform: uppercase;
@@ -5206,6 +5223,12 @@ body:not(.dark) .impact-card::after {
   background: rgba(255, 255, 255, 0.95);
   color: #222;
   border-color: rgba(0, 0, 0, 0.12);
+}
+
+body:not(.dark) .impact-tag {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #1a0dab;
 }
 
 // Featured publication card

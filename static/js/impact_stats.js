@@ -4,6 +4,7 @@
 
   const cards = Array.from(root.querySelectorAll('.impact-card'));
   const updatedEl = root.querySelector('[data-impact-updated]');
+  const latestYearEl = root.querySelector('[data-impact-latest-year]');
   const baseUrl = root.getAttribute('data-baseurl') || '/';
   const normalizeBase = (value) => {
     if (!value) return '/';
@@ -158,6 +159,10 @@
     const conferences = countByType(pubs, 'conference');
     const workshops = countByType(pubs, 'workshop');
     const total = journals + conferences + workshops || pubs.length;
+    const latestYear = pubs.reduce((max, pub) => {
+      if (!pub.year) return max;
+      return Math.max(max, pub.year);
+    }, 0);
 
     const bestPaperAwards = awards.filter((award) => /best paper/i.test(award.title || '')).length;
     const bestPaperYears = unique(
@@ -195,6 +200,9 @@
     if (updatedEl) {
       const updatedLabel = (scholarData && scholarData.lastUpdated) ? scholarData.lastUpdated : 'Recent';
       updatedEl.textContent = `Updated ${updatedLabel}`;
+    }
+    if (latestYearEl && latestYear) {
+      latestYearEl.textContent = String(latestYear);
     }
 
     updateCard('journals', {
