@@ -5022,3 +5022,129 @@ body:not(.dark) .pub-filter-reset {
     grid-column: 4 / 5;
   }
 }
+
+// Research impact stats
+.impact-stats {
+  margin: 12px 0 20px;
+  display: grid;
+  gap: 14px;
+}
+
+.impact-stats-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.impact-stats-title {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #00e5ff;
+  font-weight: 700;
+}
+
+.impact-stats-updated {
+  font-size: 0.65rem;
+  opacity: 0.7;
+}
+
+.impact-stats-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.impact-card {
+  position: relative;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 255, 65, 0.22);
+  background: rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.impact-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 16px rgba(0, 255, 65, 0.15);
+}
+
+.impact-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.8;
+}
+
+.impact-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #00ff41;
+  margin-top: 4px;
+}
+
+.impact-meta {
+  font-size: 0.65rem;
+  opacity: 0.7;
+  margin-top: 2px;
+}
+
+.impact-progress {
+  height: 4px;
+  background: rgba(0, 255, 65, 0.1);
+  border-radius: 999px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+.impact-progress span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: left;
+  transform: scaleX(0);
+  background: linear-gradient(90deg, rgba(0, 255, 65, 0.8), rgba(0, 229, 255, 0.8));
+  transition: transform 0.4s ease;
+}
+
+.impact-card::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  padding: 6px 8px;
+  font-size: 0.6rem;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(0, 229, 255, 0.35);
+  color: #c9d1d9;
+  opacity: 0;
+  transform: translateY(6px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  white-space: pre-line;
+}
+
+.impact-card:hover::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+body:not(.dark) .impact-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+body:not(.dark) .impact-value {
+  color: #0b7a3e;
+}
+
+body:not(.dark) .impact-card::after {
+  background: rgba(255, 255, 255, 0.95);
+  color: #222;
+  border-color: rgba(0, 0, 0, 0.12);
+}

@@ -17,11 +17,7 @@ sections:
     content:
       title: Research Impact
       text: |
-        | 📄 **8** Journal Articles | 📋 **16** Conference Papers | 📝 **6** Workshop Papers | 🏆 **2** Best Paper Awards |
-        |:---:|:---:|:---:|:---:|
-        
-        | 🌟 **5** Q1 Journal Publications | 🏛️ **3** FT50 Publications | 🎯 **2** UTD24 Publications |
-        |:---:|:---:|:---:|
+        {{< impact_stats >}}
         
         **Selected Venues:** MISQ • JMIS • ACM TMIS • ISF • IEEE ISI • HICSS • AMCIS • ICIS • ACM KDD
         
