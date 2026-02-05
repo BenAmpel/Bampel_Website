@@ -99,6 +99,29 @@
     bar.style.transform = `scaleX(${ratio})`;
   };
 
+  const triggerFilter = (type) => {
+    if (!type) return;
+    const target = document.getElementById('publications');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    window.dispatchEvent(new CustomEvent('pub-filter:apply', { detail: { type } }));
+  };
+
+  cards.forEach((card) => {
+    const filterType = card.dataset.filterType;
+    if (!filterType) return;
+    card.setAttribute('role', 'button');
+    card.setAttribute('aria-label', `View ${filterType} publications`);
+    card.addEventListener('click', () => triggerFilter(filterType));
+    card.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        triggerFilter(filterType);
+      }
+    });
+  });
+
   const updateCard = (metric, data) => {
     const card = cards.find((item) => item.dataset.metric === metric);
     if (!card) return;

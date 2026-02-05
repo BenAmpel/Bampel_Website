@@ -134,6 +134,27 @@
       });
     }
 
+    const applyExternalType = (type) => {
+      if (!type) return;
+      root.querySelectorAll('input[type="checkbox"]').forEach((input) => {
+        input.checked = false;
+      });
+      Object.keys(state).forEach((key) => state[key].clear());
+      const target = root.querySelector(`input[data-group=\"type\"][data-value=\"${type}\"]`);
+      if (target) {
+        target.checked = true;
+        state.type.add(type);
+      }
+      applyFilters(items);
+    };
+
+    window.addEventListener('pub-filter:apply', (event) => {
+      const detail = event.detail || {};
+      if (detail.type) {
+        applyExternalType(detail.type);
+      }
+    });
+
     applyFilters(items);
   });
 })();

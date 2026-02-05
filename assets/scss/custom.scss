@@ -5116,6 +5116,10 @@ body:not(.dark) .pub-filter-reset {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+.impact-card[data-action="filter"] {
+  cursor: pointer;
+}
+
 .impact-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 0 16px rgba(0, 255, 65, 0.15);
