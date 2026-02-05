@@ -145,7 +145,8 @@
           {{ with $person.bio_highlights }}
           <div class="bio-highlight-chips" data-bio-chips>
             {{ range . }}
-            <button type="button" class="bio-chip" data-target="{{ .target }}">{{ .label }}</button>
+            {{ $tooltip := .tooltip | default (printf "Jump to %s" .label) }}
+            <button type="button" class="bio-chip" data-target="{{ .target }}" data-tooltip="{{ $tooltip }}" aria-label="{{ $tooltip }}">{{ .label }}</button>
             {{ end }}
           </div>
           {{ end }}
