@@ -10,6 +10,7 @@ doi: "10.25300/MISQ/2025/19532"
 draft: false
 
 publishDate: "2026-01-01T00:00:00Z"
+url: "/journal_publication/voice-phishing-misq/"
 
 publication: "*Management Information Systems Quarterly (MISQ)*, Forthcoming"
 publication_short: ""
@@ -26,7 +27,8 @@ featured: true
 
 url_pdf: ''
 ---
-
 {{< altmetric doi="10.25300/MISQ/2025/19532" >}}
 
 {{< dimensions doi="10.25300/MISQ/2025/19532" >}}
+
+{{< publication_extras >}}

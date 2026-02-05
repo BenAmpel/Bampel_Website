@@ -8,6 +8,7 @@ date: '2023-08-01T00:00:00Z'
 doi: ''
 
 publishDate: '2023-08-01T00:00:00Z'
+url: "/conference_publication/ethereum-amcis-2023/"
 
 publication_types: ['1']
 
@@ -27,3 +28,4 @@ featured: false
 
 url_pdf: 'https://aisel.aisnet.org/amcis2023/conf_theme/conf_theme/7/'
 ---
+{{< publication_extras >}}

@@ -7,6 +7,7 @@ publication_types: ["2"]
 draft: false
 
 publishDate: "2026-02-05T00:00:00Z"
+url: "/journal_publication/deepfake-jise/"
 
 publication: "*Journal of Information Systems Education (JISE)*, 37:2"
 publication_short: ""
@@ -23,3 +24,4 @@ featured: false
 
 url_pdf: ''
 ---
+{{< publication_extras >}}

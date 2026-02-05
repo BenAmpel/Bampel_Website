@@ -12,6 +12,7 @@ date: '2023-10-01T00:00:00Z'
 doi: ''
 
 publishDate: '2023-10-01T00:00:00Z'
+url: "/workshop_publication/adversarial-phishing-wds-2023/"
 
 publication_types: ['1']
 
@@ -30,3 +31,4 @@ featured: false
 
 url_pdf: ''
 ---
+{{< publication_extras >}}

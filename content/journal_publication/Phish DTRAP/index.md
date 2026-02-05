@@ -10,6 +10,7 @@ doi: "10.1145/3603507"
 
 # Schedule page publish date (NOT publication's date).
 publishDate: "2017-01-01T00:00:00Z"
+url: "/journal_publication/phish-dtrap/"
 
 # Publication type.
 # Legend: 0 = Uncategorized; 1 = Conference paper; 2 = Journal article;
@@ -60,8 +61,8 @@ url_pdf: https://dl.acm.org/doi/pdf/10.1145/3603507
 #   Otherwise, set `slides: ""`.
 #slides: example
 ---
-
 {{< altmetric doi="10.1145/3603507" >}}
 
 {{< dimensions doi="10.1145/3603507" >}}
 
+{{< publication_extras >}}

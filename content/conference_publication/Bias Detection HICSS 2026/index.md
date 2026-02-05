@@ -10,6 +10,7 @@ date: '2026-01-06T00:00:00Z'
 doi: '10.24251/HICSS.2026.218'
 
 publishDate: '2026-01-06T00:00:00Z'
+url: "/conference_publication/bias-detection-hicss-2026/"
 
 publication_types: ['1']
 
@@ -31,10 +32,8 @@ featured: false
 
 url_pdf: 'https://hdl.handle.net/10125/111610'
 ---
-
 {{< altmetric doi="10.24251/HICSS.2026.218" >}}
 
 {{< dimensions doi="10.24251/HICSS.2026.218" >}}
 
-
-
+{{< publication_extras >}}

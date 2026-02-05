@@ -13,6 +13,7 @@ doi: '10.1109/ISI53945.2021.9624848'
 
 # Schedule page publish date (NOT publication's date).
 publishDate: '2017-01-01T00:00:00Z'
+url: "/conference_publication/hack2vec-isi-2021/"
 
 # Publication type.
 # Legend: 0 = Uncategorized; 1 = Conference paper; 2 = Journal article;
@@ -61,10 +62,8 @@ url_pdf: 'https://par.nsf.gov/servlets/purl/10344545'
 #   Otherwise, set `slides: ""`.
 # slides: example
 ---
-
 {{< altmetric doi="10.1109/ISI53945.2021.9624848" >}}
 
 {{< dimensions doi="10.1109/ISI53945.2021.9624848" >}}
 
-
-
+{{< publication_extras >}}

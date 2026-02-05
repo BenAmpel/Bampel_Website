@@ -8,6 +8,7 @@ doi: "10.1007/s10796-025-10645-8"
 draft: false
 
 publishDate: "2026-01-01T00:00:00Z"
+url: "/journal_publication/hacker-communities-isf/"
 
 publication: "*Information Systems Frontiers (ISF)*, Forthcoming"
 publication_short: ""
@@ -23,7 +24,8 @@ featured: false
 
 url_pdf: ''
 ---
-
 {{< altmetric doi="10.1007/s10796-025-10645-8" >}}
 
 {{< dimensions doi="10.1007/s10796-025-10645-8" >}}
+
+{{< publication_extras >}}

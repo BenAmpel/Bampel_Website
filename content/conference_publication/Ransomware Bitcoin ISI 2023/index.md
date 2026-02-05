@@ -12,6 +12,7 @@ date: '2023-10-01T00:00:00Z'
 doi: '10.1109/ISI58743.2023.10297290'
 
 publishDate: '2023-10-01T00:00:00Z'
+url: "/conference_publication/ransomware-bitcoin-isi-2023/"
 
 publication_types: ['1']
 
@@ -32,10 +33,8 @@ featured: false
 
 url_pdf: 'https://ieeexplore.ieee.org/document/10297290'
 ---
-
 {{< altmetric doi="10.1109/ISI58743.2023.10297290" >}}
 
 {{< dimensions doi="10.1109/ISI58743.2023.10297290" >}}
 
-
-
+{{< publication_extras >}}

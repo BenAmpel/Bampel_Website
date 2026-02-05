@@ -10,6 +10,7 @@ date: '2025-05-01T00:00:00Z'
 doi: '10.1109/SPW67851.2025.00041'
 
 publishDate: '2025-05-01T00:00:00Z'
+url: "/conference_publication/phishing-spw-2025/"
 
 publication_types: ['1']
 
@@ -29,7 +30,8 @@ featured: false
 
 url_pdf: ''
 ---
-
 {{< altmetric doi="10.1109/SPW67851.2025.00041" >}}
 
 {{< dimensions doi="10.1109/SPW67851.2025.00041" >}}
+
+{{< publication_extras >}}

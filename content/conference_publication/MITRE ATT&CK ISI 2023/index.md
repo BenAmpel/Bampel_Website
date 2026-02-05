@@ -11,6 +11,7 @@ date: '2023-10-01T00:00:00Z'
 doi: '10.1109/ISI58743.2023.10297272'
 
 publishDate: '2023-10-01T00:00:00Z'
+url: "/conference_publication/mitre-attandck-isi-2023/"
 
 publication_types: ['1']
 
@@ -34,10 +35,8 @@ awards:
 
 url_pdf: 'https://ieeexplore.ieee.org/document/10297272'
 ---
-
 {{< altmetric doi="10.1109/ISI58743.2023.10297272" >}}
 
 {{< dimensions doi="10.1109/ISI58743.2023.10297272" >}}
 
-
-
+{{< publication_extras >}}

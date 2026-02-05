@@ -11,6 +11,7 @@ doi: "10.25300/MISQ/2023/17316"
 
 # Schedule page publish date (NOT publication's date).
 publishDate: "2017-01-01T00:00:00Z"
+url: "/journal_publication/dtl-el-misq/"
 
 # Publication type.
 # Legend: 0 = Uncategorized; 1 = Conference paper; 2 = Journal article;
@@ -64,7 +65,8 @@ image:
 #   Otherwise, set `slides: ""`.
 # slides: example
 ---
-
 {{< altmetric doi="10.25300/MISQ/2023/17316" >}}
 
 {{< dimensions doi="10.25300/MISQ/2023/17316" >}}
+
+{{< publication_extras >}}

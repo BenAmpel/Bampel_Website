@@ -12,6 +12,7 @@ date: '2023-08-01T00:00:00Z'
 doi: ''
 
 publishDate: '2023-08-01T00:00:00Z'
+url: "/conference_publication/phishing-robustness-amcis-2023/"
 
 publication_types: ['1']
 
@@ -31,3 +32,4 @@ featured: false
 
 url_pdf: 'https://aisel.aisnet.org/amcis2023/sig_sec/sig_sec/11/'
 ---
+{{< publication_extras >}}

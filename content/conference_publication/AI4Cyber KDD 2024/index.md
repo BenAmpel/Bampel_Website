@@ -12,6 +12,7 @@ date: '2024-08-26T00:00:00Z'
 doi: '10.1145/3637528.3671494'
 
 publishDate: '2024-08-26T00:00:00Z'
+url: "/conference_publication/ai4cyber-kdd-2024/"
 
 publication_types: ['1']
 
@@ -32,10 +33,8 @@ featured: false
 
 url_pdf: 'https://ai4cyber-kdd.com/'
 ---
-
 {{< altmetric doi="10.1145/3637528.3671494" >}}
 
 {{< dimensions doi="10.1145/3637528.3671494" >}}
 
-
-
+{{< publication_extras >}}

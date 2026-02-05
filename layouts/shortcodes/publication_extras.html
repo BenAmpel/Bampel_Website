@@ -1,0 +1,202 @@
+{{/*
+  Publication extras: Key contributions, artifacts, related papers, citation block.
+  Usage: {{< publication_extras >}}
+*/}}
+
+{{ $currentUrl := .RelPermalink }}
+{{ if not (hasSuffix $currentUrl "/") }}{{ $currentUrl = printf "%s/" $currentUrl }}{{ end }}
+
+{{ $abstract := .Params.abstract | default "" }}
+{{ $abstractClean := replaceRE "\r|\n" " " $abstract | replaceRE "\s+" " " | trim }}
+
+{{ $contribs := .Params.key_contributions }}
+{{ if not $contribs }}
+  {{ $scratch := newScratch }}
+  {{ $scratch.Set "auto" (slice) }}
+  {{ $sentences := split $abstractClean "." }}
+  {{ range $sentences }}
+    {{ $s := trim . " " }}
+    {{ if gt (len $s) 30 }}
+      {{ $scratch.Set "auto" (append ($scratch.Get "auto") (printf "%s." $s)) }}
+    {{ end }}
+  {{ end }}
+  {{ $contribs = first 3 ($scratch.Get "auto") }}
+{{ end }}
+
+{{ $authors := slice }}
+{{ range .Params.authors }}
+  {{ $name := . }}
+  {{ with $.Site.GetPage (printf "/authors/%s" .) }}
+    {{ $name = .Title }}
+  {{ end }}
+  {{ $authors = $authors | append $name }}
+{{ end }}
+{{ $authorsStr := delimit $authors ", " }}
+
+{{ $year := .Date.Format "2006" }}
+{{ with .Params.year }}{{ $year = printf "%v" . }}{{ end }}
+
+{{ $venue := .Params.publication | default .Params.publication_short | default .Params.venue | default "" }}
+{{ $venuePlain := $venue | plainify }}
+
+{{ $citationText := printf "%s (%s). %s.%s" $authorsStr $year .Title (cond (ne $venuePlain "") (printf " %s" $venuePlain) "") }}
+{{ with .Params.doi }}
+  {{ if ne . "" }}
+    {{ $citationText = printf "%s https://doi.org/%s" $citationText . }}
+  {{ end }}
+{{ end }}
+
+{{ $pubData := .Site.Data.publications }}
+{{ if and (isSet $pubData "individualPublications") (not (isSet $pubData 0)) }}
+  {{ $pubData = $pubData.individualPublications }}
+{{ end }}
+
+{{ $current := dict }}
+{{ range $pubData }}
+  {{ if eq .url $currentUrl }}
+    {{ $current = . }}
+  {{ end }}
+{{ end }}
+
+{{ $currentTitle := .Title | default $current.title }}
+{{ $currentVenue := $current.venue | default $venuePlain }}
+{{ $currentType := $current.type | default "" }}
+
+{{ $titleTokens := slice }}
+{{ if $currentTitle }}
+  {{ $cleanTitle := replaceRE "[^a-z0-9 ]" "" (lower $currentTitle) }}
+  {{ range split $cleanTitle " " }}
+    {{ if gt (len .) 3 }}{{ $titleTokens = $titleTokens | append . }}{{ end }}
+  {{ end }}
+{{ end }}
+
+{{ $related := slice }}
+{{ range $pubData }}
+  {{ if ne .url $currentUrl }}
+    {{ $score := 0 }}
+    {{ if and $currentVenue (eq .venue $currentVenue) }}{{ $score = add $score 3 }}{{ end }}
+    {{ if and $currentType (eq .type $currentType) }}{{ $score = add $score 2 }}{{ end }}
+    {{ $tokens := slice }}
+    {{ $cleanCandidate := replaceRE "[^a-z0-9 ]" "" (lower .title) }}
+    {{ range split $cleanCandidate " " }}
+      {{ if gt (len .) 3 }}{{ $tokens = $tokens | append . }}{{ end }}
+    {{ end }}
+    {{ $overlap := intersect $tokens $titleTokens }}
+    {{ $score = add $score (len $overlap) }}
+    {{ if gt $score 0 }}
+      {{ $related = $related | append (dict "item" . "score" $score) }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{ $related = sort $related "score" "desc" }}
+
+<div class="pub-extras">
+  <div class="pub-extras-grid">
+    <div class="pub-extras-card">
+      <h3>Key Contributions</h3>
+      {{ if $contribs }}
+        <ul>
+          {{ range $contribs }}
+            <li>{{ . }}</li>
+          {{ end }}
+        </ul>
+      {{ else }}
+        <p class="pub-muted">Key contributions will be added soon.</p>
+      {{ end }}
+    </div>
+
+    <div class="pub-extras-card">
+      <h3>Artifacts</h3>
+      {{ $artifacts := slice }}
+      {{ with .Params.url_pdf }}{{ if ne . "" }}{{ $artifacts = $artifacts | append (dict "label" "PDF" "url" .) }}{{ end }}{{ end }}
+      {{ with .Params.url_code }}{{ if ne . "" }}{{ $artifacts = $artifacts | append (dict "label" "Code" "url" .) }}{{ end }}{{ end }}
+      {{ with .Params.url_dataset }}{{ if ne . "" }}{{ $artifacts = $artifacts | append (dict "label" "Data" "url" .) }}{{ end }}{{ end }}
+      {{ with .Params.url_project }}{{ if ne . "" }}{{ $artifacts = $artifacts | append (dict "label" "Project" "url" .) }}{{ end }}{{ end }}
+      {{ with .Params.url_slides }}{{ if ne . "" }}{{ $artifacts = $artifacts | append (dict "label" "Slides" "url" .) }}{{ end }}{{ end }}
+      {{ with .Params.url_video }}{{ if ne . "" }}{{ $artifacts = $artifacts | append (dict "label" "Video" "url" .) }}{{ end }}{{ end }}
+
+      {{ if gt (len $artifacts) 0 }}
+        <div class="pub-artifacts">
+          {{ range $artifacts }}
+            {{ $href := .url }}
+            {{ if not (hasPrefix $href "http") }}{{ $href = relURL $href }}{{ end }}
+            <a class="pub-chip" href="{{ $href }}" target="_blank" rel="noopener">{{ .label }}</a>
+          {{ end }}
+        </div>
+      {{ else }}
+        <p class="pub-muted">No artifacts listed yet.</p>
+      {{ end }}
+    </div>
+
+    <div class="pub-extras-card">
+      <h3>Related Papers</h3>
+      {{ if gt (len $related) 0 }}
+        <ul class="pub-related">
+          {{ range first 3 $related }}
+            {{ $item := .item }}
+            <li>
+              <a href="{{ $item.url | relURL }}">{{ $item.title }}</a>
+              <span>{{ $item.year }} · {{ $item.venue }}</span>
+            </li>
+          {{ end }}
+        </ul>
+      {{ else }}
+        <p class="pub-muted">Related papers will appear as the catalog grows.</p>
+      {{ end }}
+    </div>
+
+    <div class="pub-extras-card">
+      <h3>Citation</h3>
+      <div class="pub-citation">
+        <div class="pub-citation-text">{{ $citationText }}</div>
+        <button class="pub-copy" type="button" data-citation-copy data-citation="{{ $citationText }}">Copy</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.pub-extras { margin-top: 2rem; }
+.pub-extras-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:16px; }
+.pub-extras-card { border:1px solid var(--card-border, #333); border-radius:14px; padding:16px; background:var(--card-bg, rgba(0,0,0,0.25)); box-shadow:0 8px 20px rgba(0,0,0,0.12); }
+.pub-extras-card h3 { margin:0 0 10px; font-size:0.9rem; text-transform:uppercase; letter-spacing:0.08em; color:#00ff41; }
+.pub-extras-card ul { margin:0; padding-left:18px; }
+.pub-extras-card li { margin-bottom:6px; font-size:0.82rem; line-height:1.4; }
+.pub-muted { font-size:0.8rem; opacity:0.7; }
+.pub-artifacts { display:flex; flex-wrap:wrap; gap:8px; }
+.pub-chip { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; padding:6px 10px; border-radius:999px; border:1px solid rgba(0,229,255,0.35); color:#bde8ff; background:rgba(0,229,255,0.1); text-decoration:none; }
+.pub-related { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px; }
+.pub-related li { display:flex; flex-direction:column; gap:2px; }
+.pub-related a { color:#00e5ff; text-decoration:none; font-size:0.82rem; }
+.pub-related span { font-size:0.72rem; opacity:0.7; }
+.pub-citation { display:flex; flex-direction:column; gap:10px; }
+.pub-citation-text { font-size:0.8rem; line-height:1.4; background:rgba(0,0,0,0.35); border-radius:10px; padding:10px; border:1px solid rgba(0,255,65,0.2); }
+.pub-copy { align-self:flex-start; border-radius:999px; border:1px solid rgba(0,255,65,0.4); color:#00ff41; background:rgba(0,255,65,0.12); padding:6px 12px; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; cursor:pointer; }
+.pub-copy.copied { color:#111; background:#00ff41; }
+
+body:not(.dark) .pub-extras-card { background:rgba(255,255,255,0.92); }
+body:not(.dark) .pub-extras-card h3 { color:#0b7a2f; }
+body:not(.dark) .pub-citation-text { background:rgba(255,255,255,0.9); }
+</style>
+
+<script>
+(() => {
+  const root = document.currentScript && document.currentScript.closest('.pub-extras');
+  if (!root) return;
+  const btn = root.querySelector('[data-citation-copy]');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    const text = btn.getAttribute('data-citation') || '';
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.classList.add('copied');
+      btn.textContent = 'Copied';
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.textContent = 'Copy';
+      }, 1500);
+    });
+  });
+})();
+</script>

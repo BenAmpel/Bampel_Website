@@ -11,6 +11,7 @@ date: '2025-12-14T00:00:00Z'
 doi: ''
 
 publishDate: '2025-12-14T00:00:00Z'
+url: "/workshop_publication/phishing-nudging-wisp-2025/"
 
 publication_types: ['1']
 
@@ -30,3 +31,4 @@ featured: false
 
 url_pdf: ''
 ---
+{{< publication_extras >}}

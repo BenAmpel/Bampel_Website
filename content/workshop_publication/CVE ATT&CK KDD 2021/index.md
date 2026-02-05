@@ -11,6 +11,7 @@ date: '2021-08-01T00:00:00Z'
 doi: '10.48550/arXiv.2108.01696'
 
 publishDate: '2021-08-01T00:00:00Z'
+url: "/workshop_publication/cve-attandck-kdd-2021/"
 
 publication_types: ['1']
 
@@ -31,8 +32,8 @@ featured: false
 
 url_pdf: 'https://arxiv.org/abs/2108.01696'
 ---
-
 {{< altmetric doi="10.48550/arXiv.2108.01696" >}}
 
 {{< dimensions doi="10.48550/arXiv.2108.01696" >}}
 
+{{< publication_extras >}}

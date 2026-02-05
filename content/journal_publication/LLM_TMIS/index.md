@@ -11,6 +11,7 @@ draft: false
 
 # Schedule page publish date (NOT publication's date).
 publishDate: "2017-01-01T00:00:00Z"
+url: "/journal_publication/llm_tmis/"
 
 # Publication type.
 # Legend: 0 = Uncategorized; 1 = Conference paper; 2 = Journal article;
@@ -49,8 +50,8 @@ url_pdf: https://dl.acm.org/doi/10.1145/3682069
 #   Otherwise, set `projects: []`.
 # projects: []
 ---
-
 {{< altmetric doi="10.1145/3682069" >}}
 
 {{< dimensions doi="10.1145/3682069" >}}
 
+{{< publication_extras >}}
