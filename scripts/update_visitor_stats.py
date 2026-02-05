@@ -39,16 +39,24 @@ def fetch_analytics():
     monthly_resp = client.run_report(monthly_req)
     monthly_data = [{"month": r.dimension_values[0].value, "visitors": int(r.metric_values[0].value)} for r in monthly_resp.rows]
 
-    # 2. Locations (Existing - City & Country)
+    # 2. Locations (City, Region, Country)
     geo_req = RunReportRequest(
         property=f"properties/{PROPERTY_ID}",
-        dimensions=[Dimension(name="city"), Dimension(name="country")],
+        dimensions=[Dimension(name="city"), Dimension(name="region"), Dimension(name="country")],
         metrics=[Metric(name="activeUsers")],
         date_ranges=[DateRange(start_date="30daysAgo", end_date="today")],
         limit=20
     )
     geo_resp = client.run_report(geo_req)
-    location_data = [{"city": r.dimension_values[0].value, "country": r.dimension_values[1].value, "visitors": int(r.metric_values[0].value)} for r in geo_resp.rows]
+    location_data = [
+        {
+            "city": r.dimension_values[0].value,
+            "region": r.dimension_values[1].value,
+            "country": r.dimension_values[2].value,
+            "visitors": int(r.metric_values[0].value)
+        }
+        for r in geo_resp.rows
+    ]
 
     # 3. Top Pages (FIXED: Moved desc=True to OrderBy parent)
     page_req = RunReportRequest(
