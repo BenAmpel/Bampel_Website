@@ -7,7 +7,9 @@
 
   let modes = [];
   try {
-    modes = JSON.parse(dataEl.textContent || '[]');
+    const raw = (dataEl.textContent || '').trim();
+    const parsed = JSON.parse(raw || '[]');
+    modes = typeof parsed === 'string' ? JSON.parse(parsed) : parsed;
   } catch (err) {
     return;
   }
