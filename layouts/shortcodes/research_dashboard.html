@@ -1585,6 +1585,7 @@ body:not(.dark) .centrality-tab.is-active { background:rgba(0,119,182,0.15); }
 
     function calculateAllMetrics(papers) {
         let n = papers.length;
+        const currentYear = new Date().getFullYear();
         if (n === 0) return;
         let adj = Array.from({length: n}, () => []);
         let degrees = new Array(n).fill(0);
