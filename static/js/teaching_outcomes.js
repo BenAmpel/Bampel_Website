@@ -1,0 +1,87 @@
+(function () {
+  const root = document.getElementById('teach-outcomes');
+  if (!root) return;
+
+  const avgEl = document.getElementById('teach-avg');
+  const avgMetaEl = document.getElementById('teach-avg-meta');
+  const totalEl = document.getElementById('teach-total');
+  const uniqueEl = document.getElementById('teach-unique');
+  const instEl = document.getElementById('teach-institutions');
+  const latestEl = document.getElementById('teach-latest');
+  const topEl = document.getElementById('teach-top');
+  const topMetaEl = document.getElementById('teach-top-meta');
+  const barsEl = document.getElementById('teach-bars');
+
+  const safeFetch = (url) => fetch(url).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+
+  const termOrder = { Spring: 1, Summer: 2, Fall: 3, Winter: 4 };
+  const parseTerm = (term) => {
+    if (!term) return { order: -1, label: '' };
+    const match = String(term).match(/(Spring|Summer|Fall|Winter)\s+(\d{4})/);
+    if (!match) return { order: -1, label: term };
+    const season = match[1];
+    const year = Number(match[2]);
+    return { order: year * 10 + (termOrder[season] || 0), label: `${season} ${year}` };
+  };
+
+  safeFetch('/data/teaching.json').then((items) => {
+    const entries = Array.isArray(items) ? items : [];
+    if (!entries.length) return;
+
+    const totalCourses = entries.length;
+    const uniqueCourses = new Set(entries.map((e) => e.course).filter(Boolean)).size;
+    const institutions = Array.from(new Set(entries.map((e) => e.institution).filter(Boolean)));
+
+    const evals = entries.filter((e) => typeof e.evaluation === 'number');
+    const avgEval = evals.length
+      ? evals.reduce((sum, e) => sum + e.evaluation, 0) / evals.length
+      : null;
+    const topEval = evals.length
+      ? evals.reduce((best, e) => (e.evaluation > best.evaluation ? e : best), evals[0])
+      : null;
+
+    const latest = entries.map((e) => parseTerm(e.term)).reduce((best, curr) => (
+      curr.order > best.order ? curr : best
+    ), { order: -1, label: '' });
+
+    totalEl.textContent = totalCourses;
+    uniqueEl.textContent = `${uniqueCourses} unique courses`;
+    instEl.textContent = institutions.length;
+    latestEl.textContent = latest.label ? `Latest: ${latest.label}` : '';
+
+    if (avgEval !== null) {
+      avgEl.textContent = `${avgEval.toFixed(2)}/5`;
+      avgMetaEl.textContent = `${evals.length} evals recorded`;
+    } else {
+      avgEl.textContent = 'n/a';
+      avgMetaEl.textContent = 'No evals recorded';
+    }
+
+    if (topEval) {
+      topEl.textContent = `${topEval.evaluation.toFixed(1)}/5`;
+      topMetaEl.textContent = `${topEval.course} • ${topEval.term}`;
+    } else {
+      topEl.textContent = 'n/a';
+    }
+
+    const counts = new Map();
+    entries.forEach((e) => {
+      if (!e.institution) return;
+      counts.set(e.institution, (counts.get(e.institution) || 0) + 1);
+    });
+
+    const maxCount = Math.max(...counts.values());
+    barsEl.innerHTML = Array.from(counts.entries()).map(([institution, count]) => {
+      const width = Math.round((count / maxCount) * 100);
+      return `
+        <div class="teach-bar">
+          <div class="label">${institution}</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:${width}%"></div>
+          </div>
+          <div class="count">${count}</div>
+        </div>
+      `;
+    }).join('');
+  });
+})();

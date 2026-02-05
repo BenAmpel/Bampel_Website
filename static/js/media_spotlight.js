@@ -1,0 +1,145 @@
+(function () {
+  const root = document.getElementById('media-spotlight');
+  if (!root) return;
+
+  const summaryEl = document.getElementById('media-summary');
+  const yearsEl = document.getElementById('media-years');
+  const typesEl = document.getElementById('media-types');
+  const featuredEl = document.getElementById('media-featured');
+  const listEl = document.getElementById('media-list');
+
+  const safeFetch = (url) => fetch(url).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  const normalize = (item) => {
+    const rawDate = String(item.date || '');
+    let dateObj = null;
+    if (rawDate) {
+      const parsed = new Date(rawDate);
+      if (!Number.isNaN(parsed.getTime())) {
+        dateObj = parsed;
+      }
+    }
+
+    const year = dateObj ? dateObj.getFullYear() : null;
+    const month = dateObj ? dateObj.getMonth() : null;
+    const dateLabel = dateObj ? `${monthNames[month]} ${year}` : '';
+
+    return {
+      title: item.title || '',
+      outlet: item.outlet || '',
+      type: item.type || 'Coverage',
+      tags: Array.isArray(item.tags) ? item.tags.filter(Boolean) : [],
+      summary: item.summary || '',
+      dateObj,
+      year,
+      dateLabel
+    };
+  };
+
+  const slugify = (value) => String(value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+
+  safeFetch('/data/media.json').then((raw) => {
+    const items = Array.isArray(raw) ? raw.map(normalize) : [];
+    if (!items.length) {
+      listEl.textContent = 'No media coverage available.';
+      return;
+    }
+
+    items.sort((a, b) => (b.dateObj ? b.dateObj.getTime() : 0) - (a.dateObj ? a.dateObj.getTime() : 0));
+
+    const outlets = new Set(items.map((item) => item.outlet).filter(Boolean));
+    const years = Array.from(new Set(items.map((item) => item.year).filter((y) => Number.isFinite(y)))).sort((a, b) => b - a);
+    const types = Array.from(new Set(items.map((item) => item.type)));
+
+    summaryEl.textContent = `${items.length} mentions • ${outlets.size} outlets`;
+
+    let activeYear = 'All';
+    let activeType = 'All';
+
+    const setActiveYear = (year) => {
+      activeYear = year;
+      yearsEl.querySelectorAll('.media-year').forEach((button) => {
+        button.classList.toggle('active', button.dataset.year === String(year));
+        button.setAttribute('aria-selected', button.dataset.year === String(year) ? 'true' : 'false');
+      });
+      render();
+    };
+
+    const setActiveType = (type) => {
+      activeType = type;
+      typesEl.querySelectorAll('.media-type').forEach((button) => {
+        button.classList.toggle('active', button.dataset.type === type);
+        button.setAttribute('aria-selected', button.dataset.type === type ? 'true' : 'false');
+      });
+      render();
+    };
+
+    const render = () => {
+      const filtered = items.filter((item) => (
+        (activeYear === 'All' || String(item.year) === String(activeYear)) &&
+        (activeType === 'All' || item.type === activeType)
+      ));
+
+      if (!filtered.length) {
+        featuredEl.innerHTML = '';
+        listEl.innerHTML = '<div class="media-empty">No coverage matches those filters.</div>';
+        return;
+      }
+
+      const featured = filtered[0];
+      const featuredTags = featured.tags.map((tag) => `<span class="media-tag">${tag}</span>`).join('');
+      const featuredMeta = [featured.outlet, featured.dateLabel, featured.type].filter(Boolean).join(' • ');
+
+      featuredEl.innerHTML = `
+        <div class="media-featured-label">Featured</div>
+        <div class="media-featured-title">${featured.title}</div>
+        <div class="media-featured-meta">${featuredMeta}</div>
+        ${featured.summary ? `<div class="media-featured-summary">${featured.summary}</div>` : ''}
+        ${featuredTags ? `<div class="media-featured-tags">${featuredTags}</div>` : ''}
+      `;
+
+      const remaining = filtered.slice(1);
+      if (!remaining.length) {
+        listEl.innerHTML = '<div class="media-empty">Additional coverage coming soon.</div>';
+        return;
+      }
+
+      listEl.innerHTML = remaining.map((item) => {
+        const meta = [item.outlet, item.dateLabel, item.type].filter(Boolean).join(' • ');
+        const tags = item.tags.map((tag) => `<span class="media-tag">${tag}</span>`).join('');
+        return `
+          <div class="media-card">
+            <div class="media-card-title">${item.title}</div>
+            <div class="media-card-meta">${meta}</div>
+            ${item.summary ? `<div class="media-card-summary">${item.summary}</div>` : ''}
+            ${tags ? `<div class="media-card-tags">${tags}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+    };
+
+    yearsEl.innerHTML = ['All', ...years].map((year) => (
+      `<button class="media-year" type="button" data-year="${year}" aria-selected="false">${year}</button>`
+    )).join('');
+
+    yearsEl.querySelectorAll('.media-year').forEach((button) => {
+      button.addEventListener('click', () => setActiveYear(button.dataset.year));
+    });
+
+    typesEl.innerHTML = ['All', ...types].map((type) => {
+      const typeClass = slugify(type);
+      return `<button class="media-type ${typeClass}" type="button" data-type="${type}" aria-selected="false">${type}</button>`;
+    }).join('');
+
+    typesEl.querySelectorAll('.media-type').forEach((button) => {
+      button.addEventListener('click', () => setActiveType(button.dataset.type));
+    });
+
+    setActiveYear('All');
+    setActiveType('All');
+  });
+})();
