@@ -1266,19 +1266,6 @@ section#about .edu-path,
   position: relative;
 }
 
-section#about .edu-path::before,
-.wg-about .edu-path::before,
-.hb-about .edu-path::before {
-  content: '';
-  position: absolute;
-  left: 6px;
-  right: 6px;
-  top: 30px;
-  height: 2px;
-  background: linear-gradient(90deg, rgba(0, 255, 65, 0.3) 0%, rgba(0, 229, 255, 0.15) 100%);
-  opacity: 0.8;
-}
-
 section#about .edu-step,
 .wg-about .edu-step,
 .hb-about .edu-step {
