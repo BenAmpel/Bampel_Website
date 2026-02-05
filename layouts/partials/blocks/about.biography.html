@@ -148,6 +148,15 @@
               <div class="edu-year">{{ .year }}</div>
             {{ end }}
             <div class="edu-content">
+              {{ with .logo }}
+              {{ $logo := resources.Get (printf "media/%s.png" .) }}
+              {{ if $logo }}
+              {{ $logo_img := $logo.Fit "120x120" }}
+              <div class="edu-logo">
+                <img src="{{ $logo_img.RelPermalink }}" alt="{{ . }} logo" loading="lazy" decoding="async">
+              </div>
+              {{ end }}
+              {{ end }}
               <div class="edu-degree">{{ .course }}</div>
               <div class="edu-institution">{{ .institution }}</div>
             </div>

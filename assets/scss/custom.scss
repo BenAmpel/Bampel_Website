@@ -1326,6 +1326,36 @@ section#about .edu-content,
 .hb-about .edu-content {
   z-index: 1;
   padding-left: 24px;
+  display: grid;
+  gap: 8px;
+}
+
+section#about .edu-logo,
+.wg-about .edu-logo,
+.hb-about .edu-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+section#about .edu-logo img,
+.wg-about .edu-logo img,
+.hb-about .edu-logo img {
+  width: 70%;
+  height: auto;
+  filter: drop-shadow(0 0 6px rgba(0, 255, 65, 0.25));
+}
+
+body:not(.dark) section#about .edu-logo,
+body:not(.dark) .wg-about .edu-logo,
+body:not(.dark) .hb-about .edu-logo {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.12);
 }
 
 section#about .edu-degree,

@@ -120,24 +120,29 @@ education:
       year: 2024
       start_year: 2019
       end_year: 2024
+      logo: UA
     - course: M.S., Management Information Systems
       institution: University of Arizona
       year: 2019
       start_year: 2018
       end_year: 2019
+      logo: UA
     - course: B.S.B.A., Management Information Systems
       institution: University of Arizona
       year: 2017
       start_year: 2015
       end_year: 2017
+      logo: UA
     - course: Undergraduate studies (no degree received)
       institution: University of Pittsburgh
       start_year: 2013
       end_year: 2015
+      logo: pitt
     - course: High School
       institution: Tucson High School
       start_year: 2009
       end_year: 2013
+      logo: THMS
 
 # Social/Academic Networking
 social:
