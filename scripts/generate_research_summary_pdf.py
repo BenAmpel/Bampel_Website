@@ -7,8 +7,18 @@ import yaml
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import (
+    BaseDocTemplate,
+    Frame,
+    PageTemplate,
+    FrameBreak,
+    Paragraph,
+    Spacer,
+    Table,
+    TableStyle,
+    HRFlowable,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -47,6 +57,7 @@ def build_metrics(publications, scholar):
 
     counts = {"journal": 0, "conference": 0, "workshop": 0}
     years = []
+    author_counts = []
     for pub in publications:
         pub_type = pub.get("type")
         if pub_type in counts:
@@ -54,8 +65,11 @@ def build_metrics(publications, scholar):
         year = pub.get("year")
         if isinstance(year, int):
             years.append(year)
+        authors = pub.get("authors") or []
+        author_counts.append(len(authors))
 
     year_range = f"{min(years)}-{max(years)}" if years else "n/a"
+    avg_authors = sum(author_counts) / len(author_counts) if author_counts else None
     return {
         "citations": citations,
         "h_index": h_index,
@@ -63,26 +77,30 @@ def build_metrics(publications, scholar):
         "velocity": velocity,
         "counts": counts,
         "year_range": year_range,
+        "avg_authors": avg_authors,
     }
 
 
-def select_publications(scholar, fallback):
-    items = []
-    if scholar and scholar.get("individualPublications"):
-        items = scholar["individualPublications"]
-        items = sorted(items, key=lambda x: x.get("citations", 0), reverse=True)
-    else:
-        items = sorted(fallback, key=lambda x: x.get("year", 0), reverse=True)
+def select_latest_manuscripts(publications):
+    def sort_key(pub):
+        return (pub.get("date") or "", pub.get("year") or 0)
 
-    selected = []
+    items = sorted(publications, key=sort_key, reverse=True)
+    latest = []
     for pub in items:
-        title = pub.get("title")
-        if not title:
+        if not pub.get("title"):
             continue
-        selected.append(pub)
-        if len(selected) == 3:
+        latest.append(pub)
+        if len(latest) == 3:
             break
-    return selected
+    return latest
+
+
+def truncate(text, limit=220):
+    text = " ".join(str(text).split())
+    if len(text) <= limit:
+        return text
+    return text[:limit].rsplit(" ", 1)[0] + "..."
 
 
 def build_pdf():
@@ -91,31 +109,39 @@ def build_pdf():
     params_path = ROOT / "config" / "_default" / "params.yaml"
     publications_path = ROOT / "static" / "data" / "publications.json"
     scholar_path = ROOT / "static" / "data" / "scholar-metrics.json"
+    awards_path = ROOT / "static" / "data" / "awards.json"
+    teaching_path = ROOT / "static" / "data" / "teaching.json"
+    collab_path = ROOT / "static" / "data" / "collaboration_meta.json"
 
     author_data = load_yaml_front_matter(author_path)
     config_data = load_yaml_file(config_path)
     params_data = load_yaml_file(params_path)
     publications = load_json(publications_path, [])
     scholar = load_json(scholar_path, {})
+    awards = load_json(awards_path, [])
+    teaching = load_json(teaching_path, [])
+    collab_meta = load_json(collab_path, {})
 
     name = author_data.get("title") or "Benjamin M. Ampel"
     role = author_data.get("role", "")
     orgs = author_data.get("organizations", [])
     org = orgs[0]["name"] if orgs else ""
     email = author_data.get("email", "")
-    base_url = str(config_data.get("baseURL", "")).strip()
-    base_url = base_url.rstrip("/")
+    base_url = str(config_data.get("baseURL", "")).strip().rstrip("/")
     summary = params_data.get("marketing", {}).get("seo", {}).get("description", "")
     interests = author_data.get("interests") or scholar.get("metrics", {}).get("interests") or []
 
+    summary = truncate(summary, 240)
     metrics = build_metrics(publications, scholar)
-    selected = select_publications(scholar, publications)
+    latest = select_latest_manuscripts(publications)
+
     top_venues = {}
     for pub in publications:
         venue = pub.get("venue")
         if venue:
             top_venues[venue] = top_venues.get(venue, 0) + 1
-    venue_list = [v for v, _ in sorted(top_venues.items(), key=lambda x: (-x[1], x[0]))[:6]]
+    top_venue = sorted(top_venues.items(), key=lambda x: (-x[1], x[0]))[0][0] if top_venues else "n/a"
+    top_venue_list = [v for v, _ in sorted(top_venues.items(), key=lambda x: (-x[1], x[0]))[:6]]
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     STATIC_DIR.mkdir(parents=True, exist_ok=True)
@@ -124,67 +150,165 @@ def build_pdf():
     static_path = STATIC_DIR / "research-summary.pdf"
 
     styles = getSampleStyleSheet()
-    styles.add(ParagraphStyle(name="SectionTitle", fontSize=12, leading=14, spaceAfter=6, textColor=colors.HexColor("#00ff41")))
-    styles.add(ParagraphStyle(name="BodySmall", fontSize=9.5, leading=12))
-    styles.add(ParagraphStyle(name="Meta", fontSize=8.5, leading=11, textColor=colors.grey))
+    styles.add(ParagraphStyle(name="TitleStyle", fontSize=18, leading=22, textColor=colors.black))
+    styles.add(ParagraphStyle(name="SectionTitle", fontSize=10.5, leading=12, spaceAfter=4, textColor=colors.black))
+    styles.add(ParagraphStyle(name="BodySmall", fontSize=9, leading=11, textColor=colors.black))
+    styles.add(ParagraphStyle(name="Meta", fontSize=8, leading=10, textColor=colors.HexColor("#555555")))
+    styles.add(ParagraphStyle(name="MetricLabel", fontSize=8, leading=10, textColor=colors.black))
+    styles.add(ParagraphStyle(name="MetricValue", fontSize=8, leading=10, textColor=colors.black))
+    styles.add(ParagraphStyle(name="BulletItem", fontSize=8.5, leading=10.5, leftIndent=10))
 
-    doc = SimpleDocTemplate(
+    page_width, page_height = letter
+    left_margin = 0.65 * inch
+    right_margin = 0.65 * inch
+    top_margin = 0.6 * inch
+    bottom_margin = 0.6 * inch
+    usable_width = page_width - left_margin - right_margin
+    usable_height = page_height - top_margin - bottom_margin
+
+    header_height = 1.1 * inch
+    column_gap = 0.28 * inch
+    column_height = usable_height - header_height - 0.1 * inch
+    column_width = (usable_width - column_gap) / 2
+
+    doc = BaseDocTemplate(
         str(output_path),
         pagesize=letter,
-        leftMargin=0.65 * inch,
-        rightMargin=0.65 * inch,
-        topMargin=0.6 * inch,
-        bottomMargin=0.6 * inch,
+        leftMargin=left_margin,
+        rightMargin=right_margin,
+        topMargin=top_margin,
+        bottomMargin=bottom_margin,
         title="Research Summary",
         author=name,
     )
 
+    header_frame = Frame(
+        left_margin,
+        page_height - top_margin - header_height,
+        usable_width,
+        header_height,
+        id="header",
+        showBoundary=0,
+    )
+    left_frame = Frame(
+        left_margin,
+        bottom_margin,
+        column_width,
+        column_height,
+        id="col_left",
+        showBoundary=0,
+    )
+    right_frame = Frame(
+        left_margin + column_width + column_gap,
+        bottom_margin,
+        column_width,
+        column_height,
+        id="col_right",
+        showBoundary=0,
+    )
+    doc.addPageTemplates([PageTemplate(id="two_col", frames=[header_frame, left_frame, right_frame])])
+
     story = []
-    story.append(Paragraph(f"<b>{name}</b>", ParagraphStyle("Title", fontSize=20, leading=24)))
+
+    header_stack = []
+    header_stack.append(Paragraph(f"<b>{name}</b>", styles["TitleStyle"]))
     if role or org:
-        story.append(Paragraph(f"{role} | {org}".strip(" |"), styles["BodySmall"]))
+        header_stack.append(Paragraph(f"{role} | {org}".strip(" |"), styles["BodySmall"]))
     contact_line = " | ".join([p for p in [email, base_url] if p])
     if contact_line:
-        story.append(Paragraph(contact_line, styles["Meta"]))
-    story.append(Spacer(1, 10))
+        header_stack.append(Paragraph(contact_line, styles["Meta"]))
+
+    accent_bar = Table(
+        [["", header_stack]],
+        colWidths=[0.12 * inch, usable_width - 0.12 * inch],
+    )
+    accent_bar.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (0, 0), colors.black),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (0, 0), 0),
+        ("RIGHTPADDING", (0, 0), (0, 0), 0),
+        ("LEFTPADDING", (1, 0), (1, 0), 12),
+        ("TOPPADDING", (1, 0), (1, 0), 2),
+    ]))
+    story.append(accent_bar)
+    story.append(Spacer(1, 6))
+    story.append(HRFlowable(width="100%", thickness=0.6, color=colors.black))
+    story.append(Spacer(1, 8))
+    story.append(FrameBreak())
 
     if summary:
-        story.append(Paragraph("Research Summary", styles["SectionTitle"]))
+        story.append(Paragraph("Research Snapshot", styles["SectionTitle"]))
         story.append(Paragraph(summary, styles["BodySmall"]))
-        story.append(Spacer(1, 8))
+        story.append(Spacer(1, 6))
 
-    story.append(Paragraph("Research Metrics", styles["SectionTitle"]))
-    venue_cell = Paragraph(", ".join(venue_list), styles["BodySmall"]) if venue_list else Paragraph("n/a", styles["BodySmall"])
-    metrics_table = Table([
-        ["Citations", "h-index", "i10-index"],
-        [metrics.get("citations", "n/a"), metrics.get("h_index", "n/a"), metrics.get("i10", "n/a")],
-        ["Publications", "J/C/W", "Citation Velocity"],
-        [
-            len(publications),
-            f"{metrics['counts']['journal']}/{metrics['counts']['conference']}/{metrics['counts']['workshop']}",
-            metrics.get("velocity", "n/a"),
-        ],
-        ["Years Active", "Top Venues", ""],
-        [metrics.get("year_range", "n/a"), venue_cell, ""],
-    ], colWidths=[1.4 * inch, 2.6 * inch, 1.8 * inch])
+    story.append(Paragraph("Key Metrics", styles["SectionTitle"]))
+    total_pubs = len(publications)
+    citations = metrics.get("citations")
+    avg_cites = None
+    if citations and total_pubs:
+        avg_cites = citations / total_pubs
 
+    metric_rows = [
+        ("Publications", total_pubs),
+        ("J / C / W", f"{metrics['counts']['journal']} / {metrics['counts']['conference']} / {metrics['counts']['workshop']}"),
+        ("Years Active", metrics.get("year_range", "n/a")),
+        ("Citations", citations if citations is not None else "n/a"),
+        ("h-index", metrics.get("h_index", "n/a")),
+        ("i10-index", metrics.get("i10", "n/a")),
+        ("Avg cites/paper", f"{avg_cites:.1f}" if avg_cites else "n/a"),
+        ("Avg authors/paper", f"{metrics['avg_authors']:.1f}" if metrics.get("avg_authors") else "n/a"),
+        ("Citation velocity", metrics.get("velocity", "n/a")),
+        ("Top venue", top_venue),
+    ]
+
+    metrics_table = Table(
+        [[Paragraph(f"<b>{label}</b>", styles["MetricLabel"]), Paragraph(str(value), styles["MetricValue"])]
+         for label, value in metric_rows],
+        colWidths=[1.5 * inch, column_width - 1.5 * inch],
+    )
     metrics_table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0d1117")),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("BACKGROUND", (0, 2), (-1, 2), colors.HexColor("#0d1117")),
-        ("TEXTCOLOR", (0, 2), (-1, 2), colors.white),
-        ("BACKGROUND", (0, 4), (-1, 4), colors.HexColor("#0d1117")),
-        ("TEXTCOLOR", (0, 4), (-1, 4), colors.white),
-        ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#1f2a36")),
-        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#999999")),
+        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#f5f5f5")),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-        ("FONTNAME", (0, 2), (-1, 2), "Helvetica-Bold"),
-        ("FONTNAME", (0, 4), (-1, 4), "Helvetica-Bold"),
-        ("FONTSIZE", (0, 0), (-1, -1), 9),
+        ("LEFTPADDING", (0, 0), (-1, -1), 6),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+        ("TOPPADDING", (0, 0), (-1, -1), 4),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
     ]))
     story.append(metrics_table)
-    story.append(Spacer(1, 10))
+    story.append(Spacer(1, 6))
+
+    coauthors = set()
+    for pub in publications:
+        for author in pub.get("authors") or []:
+            if "ampel" not in author.lower():
+                coauthors.add(author)
+    institutions = {inst.get("name") for inst in collab_meta.get("institutions", []) if inst.get("name")}
+    countries = {inst.get("country") for inst in collab_meta.get("institutions", []) if inst.get("country")}
+
+    story.append(Paragraph("Collaboration", styles["SectionTitle"]))
+    story.append(Paragraph(f"Unique co-authors: {len(coauthors)}", styles["BodySmall"]))
+    if institutions:
+        story.append(Paragraph(f"Institutions: {len(institutions)}", styles["BodySmall"]))
+    if countries:
+        story.append(Paragraph(f"Countries: {len(countries)}", styles["BodySmall"]))
+    story.append(Spacer(1, 8))
+
+    # Teaching snapshot
+    evals = [row.get("evaluation") for row in teaching if isinstance(row.get("evaluation"), (int, float))]
+    avg_eval = sum(evals) / len(evals) if evals else None
+    institutions_taught = {row.get("institution") for row in teaching if row.get("institution")}
+    unique_courses = {row.get("course") for row in teaching if row.get("course")}
+    if teaching:
+        story.append(Paragraph("Teaching Snapshot", styles["SectionTitle"]))
+        story.append(Paragraph(f"Courses taught: {len(teaching)} ({len(unique_courses)} unique)", styles["BodySmall"]))
+        if avg_eval is not None:
+            story.append(Paragraph(f"Avg evaluation: {avg_eval:.2f}/5", styles["BodySmall"]))
+        if institutions_taught:
+            story.append(Paragraph(f"Institutions: {len(institutions_taught)}", styles["BodySmall"]))
+        story.append(Spacer(1, 8))
+
+    story.append(FrameBreak())
 
     if interests:
         story.append(Paragraph("Research Focus", styles["SectionTitle"]))
@@ -192,22 +316,46 @@ def build_pdf():
         story.append(Paragraph(focus, styles["BodySmall"]))
         story.append(Spacer(1, 8))
 
-    if selected:
-        story.append(Paragraph("Selected Publications", styles["SectionTitle"]))
-        for pub in selected:
-            title = pub.get("title", "")
+    if top_venue_list:
+        story.append(Paragraph("Top Venues", styles["SectionTitle"]))
+        for venue in top_venue_list:
+            story.append(Paragraph(f"&bull; {venue}", styles["BulletItem"]))
+        story.append(Spacer(1, 8))
+
+    if latest:
+        story.append(Paragraph("Latest Manuscripts", styles["SectionTitle"]))
+        for pub in latest:
+            title = truncate(pub.get("title", ""), 85)
             venue = pub.get("venue", "")
             year = pub.get("year", "")
-            citations = pub.get("citations")
-            line = f"<b>{title}</b> ({year})"
-            story.append(Paragraph(line, styles["BodySmall"]))
-            meta_parts = [p for p in [venue, f"Citations: {citations}" if citations is not None else ""] if p]
+            pub_type = pub.get("type", "")
+            type_label = pub_type.capitalize() if pub_type else ""
+            story.append(Paragraph(f"<b>{title}</b>", styles["BodySmall"]))
+            meta_parts = [p for p in [venue, str(year) if year else "", type_label] if p]
             if meta_parts:
                 story.append(Paragraph(" | ".join(meta_parts), styles["Meta"]))
-            story.append(Spacer(1, 4))
+            story.append(Spacer(1, 6))
+
+    if awards:
+        story.append(Paragraph("Recent Awards", styles["SectionTitle"]))
+        def award_sort(a):
+            end = a.get("endYear") or a.get("year") or 0
+            return int(end)
+        for item in sorted(awards, key=award_sort, reverse=True)[:4]:
+            year = item.get("endYear") or item.get("year") or ""
+            title = item.get("title", "")
+            story.append(Paragraph(f"&bull; {year} — {truncate(title, 70)}", styles["BulletItem"]))
+        story.append(Spacer(1, 8))
+
+    if scholar.get("citationsByYear"):
+        story.append(Paragraph("Citation Trend", styles["SectionTitle"]))
+        trend = sorted(scholar["citationsByYear"], key=lambda x: int(x.get("year", 0)), reverse=True)[:3]
+        for item in trend:
+            story.append(Paragraph(f"&bull; {item.get('year')}: {item.get('citations')}", styles["BulletItem"]))
+        story.append(Spacer(1, 6))
 
     generated = datetime.now().strftime("%Y-%m-%d")
-    story.append(Spacer(1, 8))
+    story.append(Spacer(1, 6))
     story.append(Paragraph(f"Generated on {generated}", styles["Meta"]))
 
     doc.build(story)
