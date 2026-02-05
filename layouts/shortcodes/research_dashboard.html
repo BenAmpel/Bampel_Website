@@ -408,7 +408,7 @@ body:not(.dark) .centrality-tab.is-active { background:rgba(0,119,182,0.15); }
     let collabRange = 'all';
     let collabFocusId = null;
 
-    var radarChart, lineChart, graphChart, collabChart, visitTrendChart, visitDeviceChart, centralityRadarChart;
+    var radarChart, lineChart, graphChart, collabChart, visitTrendChart, visitDeviceChart, centralityRadarChart, footprintMap;
 
     // 2. DATA LOADING
     const safeFetch = (url) => fetch(url).then(r => r.ok ? r.json() : null).catch(e => null);
@@ -1373,6 +1373,7 @@ body:not(.dark) .centrality-tab.is-active { background:rgba(0,119,182,0.15); }
         if(!container) return;
         
         var map = L.map(IDS.FOOTPRINT).setView([30, -20], 2);
+        footprintMap = map;
 
         var lightTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; OpenStreetMap &copy; CARTO', subdomains: 'abcd', maxZoom: 18 });
         var darkTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; OpenStreetMap &copy; CARTO', subdomains: 'abcd', maxZoom: 18 });
@@ -1925,7 +1926,35 @@ body:not(.dark) .centrality-tab.is-active { background:rgba(0,119,182,0.15); }
         if(visitTrendChart) visitTrendChart.resize();
         if(visitDeviceChart) visitDeviceChart.resize();
         if(centralityRadarChart) centralityRadarChart.resize();
+        if(footprintMap) footprintMap.invalidateSize();
     });
+
+    function refreshDashboardLayout() {
+        if(radarChart) radarChart.resize();
+        if(lineChart) lineChart.resize();
+        if(graphChart) graphChart.resize();
+        if(collabChart) collabChart.resize();
+        if(visitTrendChart) visitTrendChart.resize();
+        if(visitDeviceChart) visitDeviceChart.resize();
+        if(centralityRadarChart) centralityRadarChart.resize();
+        if(footprintMap) footprintMap.invalidateSize();
+        const miniMapContainer = document.getElementById('dash-visit-minimap');
+        if (miniMapContainer && miniMapContainer._miniMap) {
+            miniMapContainer._miniMap.invalidateSize();
+        }
+    }
+
+    const dashboardDetails = document.querySelector('details.spoiler');
+    if (dashboardDetails) {
+        dashboardDetails.addEventListener('toggle', () => {
+            if (dashboardDetails.open) {
+                setTimeout(refreshDashboardLayout, 200);
+            }
+        });
+        if (dashboardDetails.open) {
+            setTimeout(refreshDashboardLayout, 200);
+        }
+    }
 
 })();
 </script>
