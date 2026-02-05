@@ -113,14 +113,6 @@
     <script src="/js/bio_explorer.js" defer></script>
     {{ end }}
 
-    {{ with $person.bio_badges }}
-    <div class="bio-badges">
-      {{ range . }}
-      <span class="bio-badge">{{ . | markdownify | emojify }}</span>
-      {{ end }}
-    </div>
-    {{ end }}
-
     {{ with $person.bio_quicklinks }}
     <div class="bio-quicklinks" aria-label="Biography quick links">
       {{ range . }}
