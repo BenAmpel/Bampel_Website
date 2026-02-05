@@ -108,7 +108,7 @@
         <ul class="bio-explorer-highlights" id="bio-explorer-highlights"></ul>
         <a class="bio-explorer-cta" id="bio-explorer-cta" href="#"></a>
       </div>
-      <script type="application/json" data-bio-modes>{{ $bio_modes | jsonify }}</script>
+      <script type="application/json" data-bio-modes>{{ $bio_modes | jsonify | safeHTML }}</script>
     </div>
     <script src="/js/bio_explorer.js" defer></script>
     {{ end }}
