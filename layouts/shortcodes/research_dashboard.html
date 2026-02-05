@@ -709,22 +709,23 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
         const isValid = (value) => value && value.trim() !== "" && value !== "(not set)";
 
         const normalizeCountry = (country) => {
+            if (!country) return '';
             if (country === "United States") return "USA";
             return country;
         };
 
         const normalizeRegion = (region, country) => {
-            if (!isValid(region)) return "";
+            if (!isValid(region)) return '';
             if (country === "United States" && stateMap[region]) return stateMap[region];
             return region;
         };
 
         const formatLocation = (loc) => {
-            const city = isValid(loc.city || '') ? loc.city : '';
-            const country = isValid(loc.country || '') ? normalizeCountry(loc.country) : '';
-            const region = normalizeRegion(loc.region || '', loc.country);
-            const parts = [city, region, country].filter(Boolean);
-            return parts.length ? parts.join(', ') : (country || region || city || '—');
+            const city = isValid(loc.city || '') ? loc.city : '—';
+            const rawCountry = isValid(loc.country || '') ? loc.country : '';
+            const country = normalizeCountry(rawCountry) || '—';
+            const region = normalizeRegion(loc.region || '', rawCountry) || '—';
+            return `${city}, ${region}, ${country}`;
         };
 
         const locationsByRange = {
@@ -835,14 +836,17 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
             }
 
             if (regionEl) {
-                const countryCounts = {};
+                const regionCounts = {};
                 list.forEach(c => {
-                    const country = normalizeCountry(c.country);
+                    const rawCountry = isValid(c.country || '') ? c.country : '';
+                    const country = normalizeCountry(rawCountry) || '—';
+                    const region = normalizeRegion(c.region || '', rawCountry) || '—';
+                    const key = region !== '—' ? `${region}, ${country}` : country;
                     const count = c.visitors || c.users || 0;
-                    countryCounts[country] = (countryCounts[country] || 0) + count;
+                    regionCounts[key] = (regionCounts[key] || 0) + count;
                 });
-                const topCountry = Object.entries(countryCounts).sort((a,b) => b[1]-a[1])[0];
-                regionEl.textContent = `Top Region: ${topCountry ? topCountry[0] : '—'}`;
+                const topRegion = Object.entries(regionCounts).sort((a,b) => b[1]-a[1])[0];
+                regionEl.textContent = `Top Region: ${topRegion ? topRegion[0] : '—'}`;
             }
 
             if (data.monthly_trend) {
