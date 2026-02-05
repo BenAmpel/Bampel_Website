@@ -134,34 +134,26 @@
 
     <div class="row">
 
-      {{ with $person.interests }}
-      <div class="col-md-5">
-        <div class="section-subheading">{{ i18n "interests" | markdownify }}</div>
-        <ul class="ul-interests fa-ul mb-0">
-          {{ range . }}
-          <li>
-            <i class="fa-li fa-solid fa-book"></i>
-            {{ . | markdownify | emojify }}
-          </li>
-          {{ end }}
-        </ul>
-      </div>
-      {{ end }}
-
       {{ with $person.education }}
-      <div class="col-md-7">
+      <div class="col-md-12">
         <div class="section-subheading">{{ i18n "education" | markdownify }}</div>
-        <ul class="ul-edu fa-ul mb-0">
-          {{ range .courses }}
-          <li>
-            <i class="fa-li fa-solid fa-graduation-cap"></i>
-            <div class="description">
-              <p class="course">{{ .course }}{{ with .year }}, {{ . }}{{ end }}</p>
-              <p class="institution">{{ .institution }}</p>
+        <div class="edu-path">
+          {{ range sort .courses "start_year" }}
+          <div class="edu-step">
+            {{ if .start_year }}
+              <div class="edu-year">
+                {{ if .end_year }}{{ .start_year }}–{{ .end_year }}{{ else }}{{ .start_year }}{{ end }}
+              </div>
+            {{ else if .year }}
+              <div class="edu-year">{{ .year }}</div>
+            {{ end }}
+            <div class="edu-content">
+              <div class="edu-degree">{{ .course }}</div>
+              <div class="edu-institution">{{ .institution }}</div>
             </div>
-          </li>
+          </div>
           {{ end }}
-        </ul>
+        </div>
       </div>
       {{ end }}
 

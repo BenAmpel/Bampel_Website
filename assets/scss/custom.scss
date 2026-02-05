@@ -1252,6 +1252,124 @@ section#about .bio-quicklink:hover,
   color: #00ff41 !important;
 }
 
+// Education progression path
+section#about .edu-path,
+.wg-about .edu-path,
+.hb-about .edu-path {
+  margin-top: 10px;
+  display: grid;
+  gap: 16px;
+}
+
+section#about .edu-step,
+.wg-about .edu-step,
+.hb-about .edu-step {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(60px, 80px) 1fr;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 255, 65, 0.18);
+  background: rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+
+section#about .edu-step::before,
+.wg-about .edu-step::before,
+.hb-about .edu-step::before {
+  content: '';
+  position: absolute;
+  left: 32px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, rgba(0, 255, 65, 0.3) 0%, rgba(0, 229, 255, 0.1) 100%);
+}
+
+section#about .edu-step::after,
+.wg-about .edu-step::after,
+.hb-about .edu-step::after {
+  content: '';
+  position: absolute;
+  left: 26px;
+  top: 18px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #00ff41;
+  box-shadow: 0 0 12px rgba(0, 255, 65, 0.6);
+}
+
+section#about .edu-year,
+.wg-about .edu-year,
+.hb-about .edu-year {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #00e5ff;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  z-index: 1;
+}
+
+section#about .edu-content,
+.wg-about .edu-content,
+.hb-about .edu-content {
+  z-index: 1;
+}
+
+section#about .edu-degree,
+.wg-about .edu-degree,
+.hb-about .edu-degree {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #c9d1d9;
+}
+
+section#about .edu-institution,
+.wg-about .edu-institution,
+.hb-about .edu-institution {
+  font-size: 0.75rem;
+  opacity: 0.75;
+  margin-top: 4px;
+}
+
+@media (max-width: 768px) {
+  section#about .edu-step,
+  .wg-about .edu-step,
+  .hb-about .edu-step {
+    grid-template-columns: 1fr;
+  }
+
+  section#about .edu-step::before,
+  .wg-about .edu-step::before,
+  .hb-about .edu-step::before,
+  section#about .edu-step::after,
+  .wg-about .edu-step::after,
+  .hb-about .edu-step::after {
+    left: 12px;
+  }
+}
+
+body:not(.dark) section#about .edu-step,
+body:not(.dark) .wg-about .edu-step,
+body:not(.dark) .hb-about .edu-step {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+body:not(.dark) section#about .edu-year,
+body:not(.dark) .wg-about .edu-year,
+body:not(.dark) .hb-about .edu-year {
+  color: #0b7a3e;
+}
+
+body:not(.dark) section#about .edu-degree,
+body:not(.dark) .wg-about .edu-degree,
+body:not(.dark) .hb-about .edu-degree {
+  color: #222;
+}
+
 body:not(.dark) section#about .bio-tagline,
 body:not(.dark) .wg-about .bio-tagline,
 body:not(.dark) .hb-about .bio-tagline {

@@ -118,12 +118,23 @@ education:
     - course: Ph.D., Management Information Systems
       institution: University of Arizona
       year: 2024
+      start_year: 2024
     - course: M.S., Management Information Systems
       institution: University of Arizona
       year: 2019
+      start_year: 2019
     - course: B.S.B.A., Management Information Systems
       institution: University of Arizona
       year: 2017
+      start_year: 2017
+    - course: Undergraduate studies (no degree received)
+      institution: University of Pittsburgh
+      start_year: 2013
+      end_year: 2015
+    - course: High School
+      institution: Tucson High School
+      start_year: 2009
+      end_year: 2013
 
 # Social/Academic Networking
 social:
