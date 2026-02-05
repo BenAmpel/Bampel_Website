@@ -101,28 +101,8 @@ sections:
       title: Invited Talks & Presentations
       text: |
         {{< spoiler text="🎤 Invited Talks (7)" >}}
-        
-        1. **Vulnerability Remediation Across International Open-Source AI: A Large Language Model-Graph Learning Approach**  
-           AI in Cybersecurity Machine Learning / Deep Learning Data Analytics at HICSS-59, Hawaii (January 2026)
-        
-        2. **Foundation Models for Cybersecurity Applications**  
-           AI-Enabled Cybersecurity Workshop at HICSS-58, Hawaii (January 2025)
-        
-        3. **How Has Generative AI Affected Education, Research, And Practice?**  
-           MIS 50th Academic Conference, University of Arizona (March 2024)
-        
-        4. **Large Language Models for Advanced Text Analytics**  
-           AI in Cybersecurity Workshop at HICSS-57, Hawaii (January 2024)
-        
-        5. **LLM Overview & Advanced Text Analytics**  
-           Fall 2023 AI Bootcamp (October 2023)
-        
-        6. **Deep Learning for The Detection of Vishing Calls**  
-           International Conference on Secure Knowledge Management (September 2023)
-        
-        7. **Analytics and Visualizations/UI in AI for Cybersecurity**  
-           AI in Cybersecurity Workshop at HICSS-56, Hawaii (January 2023)
-        
+        {{< talks_showcase >}}
+
         {{< /spoiler >}}
     design:
       columns: '1'
@@ -147,42 +127,7 @@ sections:
     content:
       title: Professional Service
       text: |
-        {{< spoiler text="📝 Editorial Roles (3)" >}}
-        
-        - **Associate Editor**, ACM Digital Threats: Research and Practice (DTRAP), 2025-Present
-        - **Editorial Board**, Journal of Information Systems Education (JISE), 2025-Present
-        - **Associate Editor**, ICIS Track on Digital Innovation and Entrepreneurship, 2025
-        
-        {{< /spoiler >}}
-        
-        {{< spoiler text="🎯 Conference Leadership (3)" >}}
-        
-        - **Co-Chair**, ECIS Ancillary Meetings (2025)
-        - **Co-Chair**, HICSS Junior Faculty Consortium (2025-2027)
-        - **Co-Chair**, AI4Cyber Workshop at KDD (2024)
-        
-        {{< /spoiler >}}
-        
-        {{< spoiler text="👥 Program Committees" >}}
-        
-        INFORMS WDS, SWAIB, IEEE ISI, WITS, ACM CCS AISec Workshop, ICDM Data Mining for Cybersecurity, AI4Cyber-KDD
-        
-        {{< /spoiler >}}
-        
-        {{< spoiler text="📖 Journal Reviewing" >}}
-        
-        EJIS, ISJ, MISQ, IJIM, JMIS, IPM, Computers & Security, DTRAP, TRR, TDSC, TMIS
-        
-        {{< /spoiler >}}
-        
-        {{< spoiler text="🔬 Research Affiliations (4)" >}}
-        
-        - **Academic Mentor**, Collaborative Human-AI Center (CHAI), Georgia State University, 2025-Present
-        - **Academic Mentor**, Assistive Intelligence Lab, Georgia State University, 2025-Present
-        - **Academic Mentor**, Data Science & AI Lab (DSAIL), Indiana University, 2024-Present
-        - **Academic Mentor**, Artificial Intelligence Lab, University of Arizona, 2020-Present
-        
-        {{< /spoiler >}}
+        {{< service_hub >}}
     design:
       columns: '1'
   
@@ -193,13 +138,7 @@ sections:
       title: Public Engagement & Media Coverage
       text: |
         {{< altmetric_summary >}}
-
-        {{< spoiler text="📺 Media Coverage (2)" >}}
-        
-        - **"Benjamin Ampel Receives ACM SIGMIS Doctoral Dissertation Award"** — Georgia State University (January 28, 2025)
-        - **"More Older Americans Being Scammed; Is Technology a Factor?"** — The National Desk (November 19, 2024)
-        
-        {{< /spoiler >}}
+        {{< media_spotlight >}}
     design:
       columns: '1'
 
