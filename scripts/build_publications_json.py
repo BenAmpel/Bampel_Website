@@ -139,6 +139,7 @@ def collect_publications():
             )
             authors = normalize_authors(data.get("authors"))
             venue = normalize_venue(data)
+            abstract = data.get("abstract") or data.get("summary") or data.get("description")
             url = f"/{dir_name}/{folder_slug}/"
             items.append(
                 {
@@ -149,6 +150,7 @@ def collect_publications():
                     "venue": venue,
                     "url": url,
                     "date": iso_date,
+                    "abstract": str(abstract).strip() if abstract else None,
                 }
             )
     items.sort(key=lambda x: (x["year"] or 0, x["title"]))

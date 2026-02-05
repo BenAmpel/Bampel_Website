@@ -18,6 +18,8 @@ sections:
       title: Research Impact
       text: |
         {{< impact_stats >}}
+
+        {{< featured_publication >}}
         
         **Selected Venues:** MISQ • JMIS • ACM TMIS • ISF • IEEE ISI • HICSS • AMCIS • ICIS • ACM KDD
         
