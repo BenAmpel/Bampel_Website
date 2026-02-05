@@ -30,6 +30,9 @@ jobs:
       - name: Update Publications Index
         run: python scripts/build_publications_json.py
 
+      - name: Validate Publications JSON
+        run: python scripts/validate_publications_json.py
+
       - name: Update Altmetric Stats
         env:
           ALTMETRIC_API_KEY: ${{ secrets.ALTMETRIC_API_KEY }}
