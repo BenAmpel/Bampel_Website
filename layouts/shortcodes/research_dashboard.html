@@ -13,7 +13,7 @@
 <div style="grid-column:2; grid-row:1; padding:25px; border-bottom:1px solid var(--card-border, #333); display:flex; flex-direction:column;">
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:20px;">
         <div><div style="font-size:0.75rem; opacity:0.6;">Primary Focus</div><div id="dash-metric-focus" style="font-size:1rem; font-weight:800; color:#00ff41; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">...</div></div>
-        <div><div style="font-size:0.75rem; opacity:0.6;">Trending</div><div id="dash-metric-trend" style="font-size:1rem; font-weight:800; color:#00e5ff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">...</div></div>
+        <div><div style="font-size:0.75rem; opacity:0.6;">Emerging Focus</div><div id="dash-metric-trend" style="font-size:1rem; font-weight:800; color:#00e5ff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">...</div></div>
         <div><div style="font-size:0.75rem; opacity:0.6;">Total Citations</div><div id="dash-metric-cites" style="font-size:1.4rem; font-weight:800; color:#e040fb;">0</div></div>
         <div><div style="font-size:0.75rem; opacity:0.6;">h-index</div><div id="dash-metric-hindex" style="font-size:1.4rem; font-weight:800; opacity:0.9;">0</div></div>
     </div>
@@ -315,21 +315,62 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
             updateText(IDS.METRICS.HINDEX, scholarData.metrics.hIndex || 0);
         }
         
-        renderRadarChart(counts); 
+        renderRadarChart(counts, recentCounts); 
     }
 
-    function renderRadarChart(counts) {
+    function renderRadarChart(counts, recentCounts) {
         var dom = document.getElementById(IDS.RADAR);
         if(!dom) return;
         if(radarChart) radarChart.dispose();
         radarChart = echarts.init(dom);
-        let data = Object.keys(counts).map(k => ({ name: k, value: counts[k] }));
+        const icons = {
+            'AI / Deep Learning': '🧠',
+            'Cybersecurity': '🔐',
+            'LLMs & NLP': '💬',
+            'Hacker Communities': '🕶️',
+            'Design Science': '🧪',
+            'Behavioral': '🧭'
+        };
+        let categories = Object.keys(counts);
+        let data = categories.map(k => ({ name: k, value: counts[k] }));
+        let recent = categories.map(k => recentCounts[k] || 0);
         let max = Math.max(...data.map(d => d.value)) || 1;
         let isDark = document.body.classList.contains('dark');
+        const labelColor = isDark ? '#aaa' : '#333';
         radarChart.setOption({
             tooltip: { trigger: 'item' },
-            radar: { indicator: data.map(d => ({ name: d.name, max: max + 2 })), shape: 'circle', splitArea: { show: false }, axisName: { color: isDark ? '#aaa' : '#333' } },
-            series: [{ type: 'radar', data: [{ value: data.map(d => d.value), itemStyle: { color: isDark ? '#00ff41' : '#d93025' }, areaStyle: { opacity: 0.2 } }] }]
+            radar: {
+                indicator: data.map(d => ({ name: d.name, max: max + 2 })),
+                shape: 'circle',
+                splitArea: { show: false },
+                axisName: {
+                    color: labelColor,
+                    formatter: function(value) {
+                        const icon = icons[value] || '';
+                        const short = value.replace(' / ', ' ').replace(' & ', ' ');
+                        return icon ? `${icon} ${short}` : short;
+                    }
+                }
+            },
+            series: [
+                {
+                    type: 'radar',
+                    data: [
+                        {
+                            value: data.map(d => d.value),
+                            name: 'All-time',
+                            itemStyle: { color: isDark ? '#00ff41' : '#d93025' },
+                            areaStyle: { opacity: 0.15 }
+                        },
+                        {
+                            value: recent,
+                            name: 'Last 2 Years',
+                            itemStyle: { color: isDark ? '#00e5ff' : '#1a73e8' },
+                            areaStyle: { opacity: 0.25 }
+                        }
+                    ]
+                }
+            ]
         });
     }
     
