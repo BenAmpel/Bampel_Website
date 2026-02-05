@@ -1256,9 +1256,27 @@ section#about .bio-quicklink:hover,
 section#about .edu-path,
 .wg-about .edu-path,
 .hb-about .edu-path {
-  margin-top: 10px;
-  display: grid;
-  gap: 16px;
+  margin-top: 12px;
+  display: flex;
+  gap: 18px;
+  align-items: stretch;
+  overflow-x: auto;
+  padding: 8px 6px 16px;
+  scroll-snap-type: x proximity;
+  position: relative;
+}
+
+section#about .edu-path::before,
+.wg-about .edu-path::before,
+.hb-about .edu-path::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  top: 30px;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(0, 255, 65, 0.3) 0%, rgba(0, 229, 255, 0.15) 100%);
+  opacity: 0.8;
 }
 
 section#about .edu-step,
@@ -1266,25 +1284,15 @@ section#about .edu-step,
 .hb-about .edu-step {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(60px, 80px) 1fr;
-  gap: 12px;
-  padding: 10px 14px;
+  gap: 8px;
+  padding: 18px 16px 16px;
   border-radius: 12px;
   border: 1px solid rgba(0, 255, 65, 0.18);
   background: rgba(0, 0, 0, 0.35);
   overflow: hidden;
-}
-
-section#about .edu-step::before,
-.wg-about .edu-step::before,
-.hb-about .edu-step::before {
-  content: '';
-  position: absolute;
-  left: 32px;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: linear-gradient(180deg, rgba(0, 255, 65, 0.3) 0%, rgba(0, 229, 255, 0.1) 100%);
+  min-width: 220px;
+  flex: 0 0 auto;
+  scroll-snap-align: start;
 }
 
 section#about .edu-step::after,
@@ -1292,10 +1300,10 @@ section#about .edu-step::after,
 .hb-about .edu-step::after {
   content: '';
   position: absolute;
-  left: 26px;
-  top: 18px;
-  width: 14px;
-  height: 14px;
+  left: 18px;
+  top: 22px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: #00ff41;
   box-shadow: 0 0 12px rgba(0, 255, 65, 0.6);
@@ -1310,12 +1318,14 @@ section#about .edu-year,
   letter-spacing: 1px;
   text-transform: uppercase;
   z-index: 1;
+  padding-left: 24px;
 }
 
 section#about .edu-content,
 .wg-about .edu-content,
 .hb-about .edu-content {
   z-index: 1;
+  padding-left: 24px;
 }
 
 section#about .edu-degree,
@@ -1335,19 +1345,16 @@ section#about .edu-institution,
 }
 
 @media (max-width: 768px) {
+  section#about .edu-path,
+  .wg-about .edu-path,
+  .hb-about .edu-path {
+    gap: 14px;
+  }
+
   section#about .edu-step,
   .wg-about .edu-step,
   .hb-about .edu-step {
-    grid-template-columns: 1fr;
-  }
-
-  section#about .edu-step::before,
-  .wg-about .edu-step::before,
-  .hb-about .edu-step::before,
-  section#about .edu-step::after,
-  .wg-about .edu-step::after,
-  .hb-about .edu-step::after {
-    left: 12px;
+    min-width: 200px;
   }
 }
 
