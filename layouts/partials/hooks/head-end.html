@@ -616,6 +616,17 @@ body:not(.dark) section:hover h1::after {
   margin: 10px 5px 10px 0;
 }
 
+.cite-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.cite-actions .cite-button {
+  margin: 0;
+}
+
 .cite-button:hover {
   background: linear-gradient(135deg, #1976d2, #1e88e5);
   transform: translateY(-2px);
@@ -629,6 +640,30 @@ body:not(.dark) section:hover h1::after {
 .cite-button svg {
   width: 16px;
   height: 16px;
+}
+
+.cite-tooltip-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.cite-tooltip-btn {
+  border-radius: 999px;
+  border: 1px solid rgba(0, 255, 65, 0.35);
+  color: #00ff41;
+  background: rgba(0, 255, 65, 0.12);
+  padding: 4px 8px;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+.cite-tooltip-btn.copied {
+  color: #111;
+  background: #00ff41;
 }
 
 /* ===== COLLAPSIBLE PUBLICATION SECTIONS ===== */
@@ -1492,6 +1527,9 @@ table tbody tr:hover {
 <script>
 // Run enhancements after page is fully loaded
 function runEnhancements() {
+  const prefersReducedMotion = window.matchMedia
+    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    : false;
   
   // ===== THEME TOGGLE BUTTON CUSTOMIZATION =====
   // Rename the day/night toggle to "render_pdf()" / "view_source"
@@ -1956,15 +1994,23 @@ function runEnhancements() {
       const targetWidth = bar.getAttribute('data-width');
       if (targetWidth && !bar.classList.contains('animated')) {
         bar.classList.add('animated');
-        setTimeout(() => {
+        if (prefersReducedMotion) {
           bar.style.width = targetWidth;
-        }, index * 100);
+        } else {
+          setTimeout(() => {
+            bar.style.width = targetWidth;
+          }, index * 100);
+        }
       }
     });
   }
   
   // ===== ANIMATED COUNTERS =====
   function animateCounter(element, target, suffix = '') {
+    if (prefersReducedMotion) {
+      element.textContent = target;
+      return;
+    }
     const duration = 2000;
     const start = 0;
     const startTime = performance.now();
@@ -2006,10 +2052,14 @@ function runEnhancements() {
     skillBars.forEach(bar => {
       const width = bar.getAttribute('data-width') || bar.style.width;
       if (width) {
-        bar.style.width = '0';
-        setTimeout(() => {
+        if (prefersReducedMotion) {
           bar.style.width = width;
-        }, 100);
+        } else {
+          bar.style.width = '0';
+          setTimeout(() => {
+            bar.style.width = width;
+          }, 100);
+        }
       }
     });
   }
@@ -2018,9 +2068,13 @@ function runEnhancements() {
   function animateTimeline() {
     const items = document.querySelectorAll('.timeline-item');
     items.forEach((item, index) => {
-      setTimeout(() => {
+      if (prefersReducedMotion) {
         item.classList.add('visible');
-      }, index * 150);
+      } else {
+        setTimeout(() => {
+          item.classList.add('visible');
+        }, index * 150);
+      }
     });
   }
   
@@ -2190,21 +2244,105 @@ function runEnhancements() {
   
   // Map and dashboard are now static PNG images with theme switching
   
-  // ===== CITE BUTTON FUNCTIONALITY =====
-  window.copyBibtex = function(button) {
-    const bibtex = button.dataset.bibtex;
-    
-    navigator.clipboard.writeText(bibtex).then(() => {
-      const originalText = button.innerHTML;
+  // ===== CITATION COPY HELPERS =====
+  const decodeCopyText = (raw) => {
+    if (!raw) return '';
+    try { return decodeURIComponent(raw); } catch (e) { return raw; }
+  };
+
+  const fallbackCopy = (text) => {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'absolute';
+    textarea.style.left = '-9999px';
+    document.body.appendChild(textarea);
+    textarea.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(textarea);
+  };
+
+  const copyTextToClipboard = (text, button) => {
+    if (!text) return;
+    const applyFeedback = () => {
+      if (!button) return;
+      const original = button.dataset.copyOriginalHtml || button.innerHTML;
+      if (!button.dataset.copyOriginalHtml) button.dataset.copyOriginalHtml = original;
       button.classList.add('copied');
-      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Copied!';
-      
+      button.innerHTML = 'Copied';
       setTimeout(() => {
         button.classList.remove('copied');
-        button.innerHTML = originalText;
-      }, 2000);
-    });
+        button.innerHTML = original;
+      }, 1500);
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(applyFeedback).catch(() => {
+        fallbackCopy(text);
+        applyFeedback();
+      });
+    } else {
+      fallbackCopy(text);
+      applyFeedback();
+    }
   };
+
+  window.copyBibtex = function(button) {
+    const raw = button ? (button.dataset.bibtex || button.dataset.copyText) : '';
+    copyTextToClipboard(decodeCopyText(raw), button);
+  };
+
+  window.buildCitationFormats = function(meta) {
+    const info = meta || {};
+    const title = (info.title || '').toString().trim() || 'Untitled';
+    const year = info.year || new Date().getFullYear();
+    const venue = (info.venue || '').toString().trim();
+    const doi = (info.doi || '').toString().trim();
+    const type = (info.type || '').toString().trim();
+
+    const normalizeAuthors = (authors) => {
+      if (!authors) return [];
+      if (Array.isArray(authors)) return authors.filter(Boolean);
+      if (typeof authors === 'string') {
+        return authors.split(',').map(a => a.trim()).filter(Boolean);
+      }
+      return [];
+    };
+
+    const joinAuthors = (list, conj) => {
+      if (!list.length) return '';
+      if (list.length === 1) return list[0];
+      if (list.length === 2) return `${list[0]} ${conj} ${list[1]}`;
+      return `${list.slice(0, -1).join(', ')}, ${conj} ${list[list.length - 1]}`;
+    };
+
+    const authors = normalizeAuthors(info.authors);
+    const apaAuthors = joinAuthors(authors, '&') || 'Unknown';
+    const chicagoAuthors = joinAuthors(authors, 'and') || 'Unknown';
+
+    const apa = `${apaAuthors} (${year}). ${title}.${venue ? ' ' + venue : ''}${doi ? ' https://doi.org/' + doi : ''}`;
+    const chicago = `${chicagoAuthors}. ${year}. "${title}."${venue ? ' ' + venue : ''}${doi ? ' https://doi.org/' + doi : ''}`;
+
+    const bibType = type === 'journal' ? 'article' : (type === 'conference' || type === 'workshop') ? 'inproceedings' : 'misc';
+    const venueField = bibType === 'article' ? 'journal' : 'booktitle';
+    const authorKeyBase = (authors[0] || 'ampel').split(' ').slice(-1)[0].replace(/[^a-zA-Z]/g, '').toLowerCase() || 'cite';
+    const firstWord = title.split(/\s+/)[0] || '';
+    const titleKey = firstWord.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || 'work';
+    const citationKey = `${authorKeyBase}${year}${titleKey}`;
+    const venueLine = venue ? `  ${venueField}={${venue}},\n` : '';
+    const doiLine = doi ? `,\n  doi={${doi}}` : '';
+    const bibtex = `@${bibType}{${citationKey},\n  title={${title}},\n  author={${authors.join(' and ')}},\n${venueLine}  year={${year}}${doiLine}\n}`;
+
+    return { apa, chicago, bibtex };
+  };
+
+  document.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-copy-text]');
+    if (!button) return;
+    event.preventDefault();
+    const text = decodeCopyText(button.dataset.copyText || '');
+    copyTextToClipboard(text, button);
+  });
   
   // Add cite buttons to publication pages
   function addCiteButtons() {
@@ -2215,6 +2353,7 @@ function runEnhancements() {
                                window.location.pathname.includes('/workshop_publication/');
     
     if (!isPublicationPage) return;
+    if (document.querySelector('.pub-extras')) return;
     
     // Find the publication title
     const titleEl = document.querySelector('article h1') || document.querySelector('.article-title');
@@ -2244,17 +2383,13 @@ function runEnhancements() {
     const venueEl = document.querySelector('.pub-publication, .article-metadata');
     const venue = venueEl ? venueEl.textContent.trim().split(',')[0] : '';
     
-    // Generate citation key
-    const keyWord = title.split(/\s+/)[0].toLowerCase().replace(/[^a-z]/g, '');
-    const citationKey = `ampel${year}${keyWord}`;
-    
-    // Generate BibTeX
-    const bibtex = `@article{${citationKey},
-  title={${title}},
-  author={${authors.join(' and ')}},
-  journal={${venue}},
-  year={${year}}${doi ? `,\n  doi={${doi}}` : ''}
-}`;
+    const citations = window.buildCitationFormats({
+      title,
+      authors,
+      year,
+      venue,
+      doi
+    });
     
     // Find the button area (near PDF/links)
     const buttonArea = document.querySelector('.btn-links') || 
@@ -2262,17 +2397,26 @@ function runEnhancements() {
                        document.querySelector('.article-container');
     
     if (buttonArea) {
-      const citeBtn = document.createElement('button');
-      citeBtn.className = 'cite-button';
-      citeBtn.dataset.bibtex = bibtex;
-      citeBtn.onclick = function() { window.copyBibtex(this); };
-      citeBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Cite (BibTeX)';
-      
-      // Insert at beginning of button area or after it
+      if (buttonArea.querySelector('.cite-actions')) return;
+      const wrapper = document.createElement('div');
+      wrapper.className = 'cite-actions';
+      const makeBtn = (label, text) => {
+        const btn = document.createElement('button');
+        btn.className = 'cite-button';
+        btn.type = 'button';
+        btn.dataset.copyText = encodeURIComponent(text || '');
+        btn.dataset.copyLabel = label;
+        btn.textContent = `Copy ${label}`;
+        return btn;
+      };
+      wrapper.appendChild(makeBtn('APA', citations.apa));
+      wrapper.appendChild(makeBtn('Chicago', citations.chicago));
+      wrapper.appendChild(makeBtn('BibTeX', citations.bibtex));
+
       if (buttonArea.classList.contains('btn-links')) {
-        buttonArea.insertBefore(citeBtn, buttonArea.firstChild);
+        buttonArea.insertBefore(wrapper, buttonArea.firstChild);
       } else {
-        buttonArea.appendChild(citeBtn);
+        buttonArea.appendChild(wrapper);
       }
     }
   }

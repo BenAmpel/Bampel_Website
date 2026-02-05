@@ -6,6 +6,9 @@
   const updatedEl = root.querySelector('[data-impact-updated]');
   const latestYearEl = root.querySelector('[data-impact-latest-year]');
   const baseUrl = root.getAttribute('data-baseurl') || '/';
+  const prefersReducedMotion = window.matchMedia
+    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    : false;
   const normalizeBase = (value) => {
     if (!value) return '/';
     if (!value.endsWith('/')) return `${value}/`;
@@ -78,6 +81,10 @@
   };
 
   const animateValue = (el, value) => {
+    if (prefersReducedMotion) {
+      el.textContent = value.toString();
+      return;
+    }
     const duration = 900;
     const start = performance.now();
 
@@ -104,16 +111,25 @@
     if (!type) return;
     const target = document.getElementById('publications');
     if (target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      target.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
     }
     window.dispatchEvent(new CustomEvent('pub-filter:apply', { detail: { type } }));
   };
 
   cards.forEach((card) => {
     const filterType = card.dataset.filterType;
-    if (!filterType) return;
+    const labelText = card.querySelector('.impact-label')
+      ? card.querySelector('.impact-label').textContent.trim()
+      : 'Impact metric';
+    const tooltip = card.dataset.tooltip;
+    const actionHint = filterType ? 'Press Enter to filter publications.' : '';
+    const ariaLabel = [labelText, tooltip, actionHint].filter(Boolean).join(' ');
+    card.setAttribute('aria-label', ariaLabel);
+    if (!filterType) {
+      card.setAttribute('role', 'group');
+      return;
+    }
     card.setAttribute('role', 'button');
-    card.setAttribute('aria-label', `View ${filterType} publications`);
     card.addEventListener('click', () => triggerFilter(filterType));
     card.addEventListener('keydown', (event) => {
       if (event.key === 'Enter' || event.key === ' ') {

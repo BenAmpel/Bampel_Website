@@ -5,7 +5,7 @@
 
 <div style="grid-column:1; grid-row:1; padding:20px; border-right:1px solid var(--card-border, #333); border-bottom:1px solid var(--card-border, #333);">
     <h4 style="margin:0 0 10px; opacity:0.7; text-align:center; text-transform:uppercase; font-size:0.8rem;">Research Profile Topics</h4>
-    <div id="dashboard-topics" class="profile-topics"></div>
+    <div id="dashboard-topics" class="profile-topics" role="list" aria-label="Research topic cards"></div>
     <div class="profile-topics-note">Topic model inferred from academic outputs in the CV.</div>
 </div>
 
@@ -18,7 +18,7 @@
     </div>
     <div style="flex-grow:1; border-top:1px solid var(--card-border, #333); padding-top:15px; position:relative;">
         <h4 style="margin:0 0 5px; font-size:0.7rem; opacity:0.5; text-transform:uppercase;">Citation Velocity</h4>
-        <div id="dashboard-timeline" style="width:100%; height:160px;"></div>
+        <div id="dashboard-timeline" style="width:100%; height:160px;" role="img" aria-label="Citation velocity by year chart" tabindex="0"></div>
     </div>
 </div>
 
@@ -48,7 +48,7 @@
         </div>
         <div class="impact-inspector-pins" id="impact-map-pins"></div>
     </div>
-    <div id="dashboard-impact-map" style="width:100%; height:100%;"></div>
+    <div id="dashboard-impact-map" style="width:100%; height:100%;" role="img" aria-label="Impact map connecting papers by topic, venue, and co-authorship" tabindex="0"></div>
 </div>
 
 <div style="grid-column:2; grid-row:2; padding:25px; border-bottom:1px solid var(--card-border, #333); display:flex; flex-direction:column; height:100%; overflow:hidden;">
@@ -71,7 +71,7 @@
         </div>
         <div class="centrality-side">
             <div class="centrality-side-title">Cohesion Radar</div>
-            <div id="centrality-radar" style="width:100%; height:160px;"></div>
+            <div id="centrality-radar" style="width:100%; height:160px;" role="img" aria-label="Cohesion radar for selected paper" tabindex="0"></div>
             <div class="centrality-side-note" id="centrality-note">Hover a paper to see how it connects across topic, venue, and co-author links.</div>
         </div>
     </div>
@@ -95,7 +95,7 @@
         <div class="collab-spotlight-body">Select a node to see their co-authorship footprint, top venues, and key connections.</div>
         <div class="collab-spotlight-meta" id="collab-spotlight-meta"></div>
     </div>
-    <div id="dashboard-collab-network" style="width:100%; height:100%;"></div>
+    <div id="dashboard-collab-network" style="width:100%; height:100%;" role="img" aria-label="Collaboration network of co-authorship connections" tabindex="0"></div>
 </div>
 
 <div style="grid-column:2; grid-row:3; padding:0; border-bottom:1px solid var(--card-border, #333); position:relative; height:100%;">
@@ -127,7 +127,7 @@
         <div class="legend-row"><span class="footprint-legend-dot" style="--legend-color:#00bfff;"></span><span>Collaboration</span></div>
         <div class="legend-row"><span class="footprint-legend-dot" style="--legend-color:#ff6b35;"></span><span>Institution</span></div>
     </div>
-    <div id="dashboard-footprint-map" style="width:100%; height:100%; z-index:1;"></div>
+    <div id="dashboard-footprint-map" style="width:100%; height:100%; z-index:1;" role="img" aria-label="Research footprint map of conferences, collaborations, and institutions" tabindex="0"></div>
 </div>
 
 <div style="grid-column:1; grid-row:4; padding:25px; border-right:1px solid var(--card-border, #333); display:flex; flex-direction:column;">
@@ -147,7 +147,7 @@
             </div>
         </div>
         <div style="flex-grow:1; position:relative;">
-            <div id="dash-visit-trend" style="width:100%; height:100%;"></div>
+            <div id="dash-visit-trend" style="width:100%; height:100%;" role="img" aria-label="Traffic trend chart" tabindex="0"></div>
         </div>
     </div>
 </div>
@@ -156,8 +156,8 @@
     <h4 style="font-size:0.8rem; opacity:0.7; text-transform:uppercase; margin-bottom:15px;">Audience & Reach</h4>
     <div style="display:flex; gap:20px; height:100%;">
         <div style="flex:1; display:flex; flex-direction:column; gap:12px;">
-            <div id="dash-visit-geo" class="dash-geo-mix"></div>
-            <div id="dash-visit-minimap" class="dash-mini-map">
+            <div id="dash-visit-geo" class="dash-geo-mix" role="img" aria-label="Audience geographic distribution chart" tabindex="0"></div>
+            <div id="dash-visit-minimap" class="dash-mini-map" role="img" aria-label="Global footprint preview map" tabindex="0">
                 <div class="dash-mini-map-inner"></div>
                 <div class="dash-mini-map-fallback">Global footprint preview</div>
             </div>
@@ -173,7 +173,7 @@
                     <button class="dash-geo-tab" data-geo-range="90" type="button" role="tab" aria-selected="false">Last 90 days</button>
                     <button class="dash-geo-tab" data-geo-range="all" type="button" role="tab" aria-selected="false">All-time</button>
                 </div>
-                <div class="dash-geo-spark" id="dash-geo-spark"></div>
+                <div class="dash-geo-spark" id="dash-geo-spark" role="img" aria-label="Geo trend sparkline" tabindex="0"></div>
             </div>
             <div id="dash-visit-locations" class="dash-location-chips">
                 <span style="opacity:0.5;">Loading...</span>
@@ -465,6 +465,14 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
         return baseUrl ? `${baseUrl}/${cleaned}` : `/${cleaned}`;
     };
 
+    const prefersReducedMotion = window.matchMedia
+        ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        : false;
+    const withReducedMotion = (option) => {
+        if (!prefersReducedMotion) return option;
+        return Object.assign({}, option, { animation: false, animationDuration: 0, animationDurationUpdate: 0 });
+    };
+
     // 2. DATA + ASSET LOADING
     const safeFetch = (url) => fetch(url, { cache: 'force-cache' }).then(r => r.ok ? r.json() : null).catch(() => null);
 
@@ -595,12 +603,13 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
                 itemStyle: { color: v === maxVal ? '#00ff41' : '#00c853' }
             }));
             
-            visitTrendChart.setOption({
+            visitTrendChart.setOption(withReducedMotion({
                 tooltip: { trigger: 'axis', formatter: params => {
                     const barPoint = params.find(p => p.seriesType === 'bar') || params[0];
                     const val = (barPoint.data && barPoint.data.value !== undefined) ? barPoint.data.value : barPoint.data;
                     return `${barPoint.axisValueLabel}: ${val} visitors`;
                 }},
+                aria: { enabled: true, description: 'Traffic trend showing visitors per month.' },
                 grid: { top: 10, right: 10, bottom: 20, left: 10, containLabel: false },
                 xAxis: { show: false, data: labels },
                 yAxis: { show: false, type: 'value' },
@@ -620,7 +629,7 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
                     itemStyle: { color: '#00e5ff' },
                     areaStyle: { color: 'rgba(0,229,255,0.15)' }
                 }]
-            });
+            }));
 
             const momentumEl = document.getElementById('dash-visit-momentum');
             if (momentumEl) {
@@ -656,8 +665,9 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
             visitDeviceChart = echarts.init(domDevice);
             let isDark = document.body.classList.contains('dark');
             
-            visitDeviceChart.setOption({
+            visitDeviceChart.setOption(withReducedMotion({
                 tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+                aria: { enabled: true, description: 'Device mix of audience visits.' },
                 series: [{
                     type: 'pie',
                     radius: ['40%', '70%'],
@@ -667,7 +677,7 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
                     labelLine: { show: false },
                     data: data.devices.map(d => ({ name: d.device, value: d.users }))
                 }]
-            });
+            }));
         }
 
         // 3. Top Locations + Geo Trend (30/90/All)
@@ -953,6 +963,33 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
         let linksRaw = [];
         let citationValues = [];
 
+        const escapeHtml = (str) => String(str || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/\"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+
+        const buildCiteButtons = (meta) => {
+            if (!window.buildCitationFormats) return '';
+            const citations = window.buildCitationFormats({
+                title: meta.name,
+                authors: meta.authors,
+                year: meta.year,
+                venue: meta.venue,
+                type: meta.type
+            });
+            const buttons = [
+                { label: 'APA', text: citations.apa },
+                { label: 'Chicago', text: citations.chicago },
+                { label: 'BibTeX', text: citations.bibtex }
+            ].filter(b => b.text).map(b => {
+                const encoded = encodeURIComponent(b.text);
+                return `<button class="cite-tooltip-btn" type="button" data-copy-text="${encoded}" data-copy-label="${b.label}">Copy ${b.label}</button>`;
+            }).join('');
+            return buttons ? `<div class="cite-tooltip-actions">${buttons}</div>` : '';
+        };
+
         papers.forEach((p, index) => {
             let words = (p.title||"").toLowerCase().replace(/[^a-z0-9 ]/g, '').split(/\s+/).filter(w => w.length > 3 && !STOP_WORDS.has(w));
             p._words = new Set(words);
@@ -984,6 +1021,7 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
                 year: p.year,
                 authors: p.authors,
                 venue: p.venue,
+                type: p.type,
                 topic: topic,
                 yearColor: getColorByYear(p.year),
                 topicColor: topicColors[topic] || topicColors.Other,
@@ -1141,11 +1179,13 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
                 });
             });
 
-            graphChart.setOption({
+            graphChart.setOption(withReducedMotion({
                 backgroundColor: 'transparent',
                 tooltip: {
                     trigger: 'item',
+                    enterable: true,
                     confine: true,
+                    extraCssText: 'pointer-events:auto; max-width:340px;',
                     position: function (point, params, dom, rect, size) {
                         return [point[0] - (size.contentSize[0] / 2), point[1] - size.contentSize[1] - 20];
                     },
@@ -1153,14 +1193,17 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
                         if (p.dataType === 'edge') {
                             return `<div style="max-width:200px; white-space:normal;"><strong>Connection</strong><br>Strength: ${Math.floor(p.value)}<br>${p.data.reason}</div>`;
                         }
+                        const citeButtons = buildCiteButtons(p.data || {});
                         return `<div style="max-width:260px; white-space:normal; word-wrap:break-word;">
-                                    <strong>${p.name}</strong><br>
-                                    <span style="opacity:0.8">Topic: ${p.data.topic}</span><br>
-                                    <span style="opacity:0.8">Venue: ${p.data.venue || '—'}</span><br>
-                                    <span style="opacity:0.8">Year: ${p.data.year || '—'} · Citations: ${p.value}</span>
+                                    <strong>${escapeHtml(p.name)}</strong><br>
+                                    <span style="opacity:0.8">Topic: ${escapeHtml(p.data.topic || '—')}</span><br>
+                                    <span style="opacity:0.8">Venue: ${escapeHtml(p.data.venue || '—')}</span><br>
+                                    <span style="opacity:0.8">Year: ${escapeHtml(p.data.year || '—')} · Citations: ${p.value}</span>
+                                    ${citeButtons}
                                 </div>`;
                     }
                 },
+                aria: { enabled: true, description: 'Impact map linking publications by topic, venue, and co-authorship.' },
                 series: [{
                     type: 'graph',
                     layout: 'force',
@@ -1172,7 +1215,7 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
                     lineStyle: { color: isDark ? '#aaa' : '#666' },
                     force: { repulsion: 500, gravity: 0.1, edgeLength: [50, 300] }
                 }]
-            }, false);
+            }), false);
         }
 
         function setupImpactControls() {
@@ -1499,16 +1542,17 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
                 });
             });
 
-            collabChart.setOption({
+            collabChart.setOption(withReducedMotion({
                 backgroundColor: 'transparent',
                 tooltip: { formatter: p => p.dataType==='edge' ? `${p.data.source} & ${p.data.target}<br>${p.value} Papers` : `${p.name}: ${p.value} Papers` },
+                aria: { enabled: true, description: 'Collaboration network showing co-authorship connections.' },
                 series: [{
                     type: 'graph', layout: 'force', data: styledNodes, links: styledLinks, roam: true, zoom: 0.6,
                     label: { position: 'right' },
                     lineStyle: { curveness: 0.2 },
                     force: { repulsion: 800, gravity: 0.1, edgeLength: [30, 150] }
                 }]
-            }, false);
+            }), false);
         }
 
         if (collabFocusId && !nodeCounts.has(collabFocusId)) {
@@ -1742,13 +1786,14 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
         if(lineChart) lineChart.dispose();
         lineChart = echarts.init(dom);
         let isDark = document.body.classList.contains('dark');
-        lineChart.setOption({
+        lineChart.setOption(withReducedMotion({
             tooltip: { trigger: 'axis', formatter: '{b}: {c} Citations' },
+            aria: { enabled: true, description: 'Citation velocity by year.' },
             grid: { top: 10, right: 10, bottom: 20, left: 30, containLabel: true },
             xAxis: { type: 'category', data: history.map(d => d.year), axisLine: { show: false }, axisLabel: { color: isDark ? '#888' : '#666', fontSize: 9 } },
             yAxis: { type: 'value', splitLine: { show: false }, axisLabel: { color: isDark ? '#888' : '#666', fontSize: 9 } },
             series: [{ type: 'bar', data: history.map(d => d.citations), itemStyle: { color: isDark ? '#00e5ff' : '#1a0dab', borderRadius: [2,2,0,0] }, barWidth: '40%' }]
-        });
+        }));
     }
 
     function calculateAllMetrics(papers, precomputed) {
@@ -2009,6 +2054,13 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
             }).join('');
 
             listEl.querySelectorAll('.centrality-item').forEach(item => {
+                const idx = parseInt(item.getAttribute('data-paper-index'), 10);
+                const info = centralityInfo.find(c => c.index === idx);
+                if (info) {
+                    const yearLabel = info.year || 'Year unknown';
+                    const venueLabel = info.venue || 'Venue unknown';
+                    item.setAttribute('aria-label', `Highlight ${info.title}. ${yearLabel}. ${venueLabel}.`);
+                }
                 item.addEventListener('mouseenter', () => highlightPaper(parseInt(item.getAttribute('data-paper-index'), 10)));
                 item.addEventListener('mouseleave', () => clearHighlight());
                 item.addEventListener('focusin', () => highlightPaper(parseInt(item.getAttribute('data-paper-index'), 10)));
@@ -2049,8 +2101,9 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
             if (noteEl) {
                 noteEl.textContent = `${paper.title}`;
             }
-            centralityRadarChart.setOption({
+            centralityRadarChart.setOption(withReducedMotion({
                 tooltip: { show: false },
+                aria: { enabled: true, description: 'Cohesion radar comparing topic, venue, and co-author links.' },
                 radar: {
                     indicator: [
                         { name: 'Topic', max: 10 },
@@ -2067,7 +2120,7 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
                     type: 'radar',
                     data: [{ value: values, areaStyle: { color: 'rgba(0,229,255,0.25)' }, lineStyle: { color: '#00e5ff', width: 2 } }]
                 }]
-            });
+            }));
         };
 
         const highlightPaper = (index) => {

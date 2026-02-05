@@ -3,13 +3,14 @@
   Usage: {{< publication_extras >}}
 */}}
 
-{{ $currentUrl := .RelPermalink }}
+{{ $page := .Page }}
+{{ $currentUrl := $page.RelPermalink }}
 {{ if not (hasSuffix $currentUrl "/") }}{{ $currentUrl = printf "%s/" $currentUrl }}{{ end }}
 
-{{ $abstract := .Params.abstract | default "" }}
-{{ $abstractClean := replaceRE "\r|\n" " " $abstract | replaceRE "\s+" " " | trim }}
+{{ $abstract := $page.Params.abstract | default "" }}
+{{ $abstractClean := replaceRE "\\r|\\n" " " $abstract | replaceRE "\\s+" " " | trim " " }}
 
-{{ $contribs := .Params.key_contributions }}
+{{ $contribs := $page.Params.key_contributions }}
 {{ if not $contribs }}
   {{ $scratch := newScratch }}
   {{ $scratch.Set "auto" (slice) }}
@@ -24,7 +25,7 @@
 {{ end }}
 
 {{ $authors := slice }}
-{{ range .Params.authors }}
+{{ range $page.Params.authors }}
   {{ $name := . }}
   {{ with $.Site.GetPage (printf "/authors/%s" .) }}
     {{ $name = .Title }}
@@ -33,18 +34,33 @@
 {{ end }}
 {{ $authorsStr := delimit $authors ", " }}
 
-{{ $year := .Date.Format "2006" }}
-{{ with .Params.year }}{{ $year = printf "%v" . }}{{ end }}
+{{ $year := $page.Date.Format "2006" }}
+{{ with $page.Params.year }}{{ $year = printf "%v" . }}{{ end }}
 
-{{ $venue := .Params.publication | default .Params.publication_short | default .Params.venue | default "" }}
+{{ $venue := $page.Params.publication | default $page.Params.publication_short | default $page.Params.venue | default "" }}
 {{ $venuePlain := $venue | plainify }}
 
-{{ $citationText := printf "%s (%s). %s.%s" $authorsStr $year .Title (cond (ne $venuePlain "") (printf " %s" $venuePlain) "") }}
-{{ with .Params.doi }}
-  {{ if ne . "" }}
-    {{ $citationText = printf "%s https://doi.org/%s" $citationText . }}
-  {{ end }}
+{{ $doi := "" }}
+{{ with $page.Params.doi }}
+  {{ if ne . "" }}{{ $doi = . }}{{ end }}
 {{ end }}
+
+{{ $authorCount := len $authors }}
+{{ $authorsApa := $authorsStr }}
+{{ $authorsChicago := $authorsStr }}
+{{ if eq $authorCount 1 }}
+  {{ $authorsApa = index $authors 0 }}
+  {{ $authorsChicago = index $authors 0 }}
+{{ else if eq $authorCount 2 }}
+  {{ $authorsApa = printf "%s & %s" (index $authors 0) (index $authors 1) }}
+  {{ $authorsChicago = printf "%s and %s" (index $authors 0) (index $authors 1) }}
+{{ else if gt $authorCount 2 }}
+  {{ $firsts := first (sub $authorCount 1) $authors }}
+  {{ $last := index $authors (sub $authorCount 1) }}
+  {{ $authorsApa = printf "%s, & %s" (delimit $firsts ", ") $last }}
+  {{ $authorsChicago = printf "%s, and %s" (delimit $firsts ", ") $last }}
+{{ end }}
+
 
 {{ $pubData := .Site.Data.publications }}
 {{ if and (isSet $pubData "individualPublications") (not (isSet $pubData 0)) }}
@@ -58,9 +74,51 @@
   {{ end }}
 {{ end }}
 
-{{ $currentTitle := .Title | default $current.title }}
+{{ $currentTitle := $page.Title | default $current.title }}
 {{ $currentVenue := $current.venue | default $venuePlain }}
 {{ $currentType := $current.type | default "" }}
+
+{{ $citationApa := printf "%s (%s). %s.%s" $authorsApa $year $page.Title (cond (ne $currentVenue "") (printf " %s" $currentVenue) "") }}
+{{ $citationChicago := printf "%s. %s. \"%s.\"%s" $authorsChicago $year $page.Title (cond (ne $currentVenue "") (printf " %s" $currentVenue) "") }}
+{{ if $doi }}
+  {{ $citationApa = printf "%s https://doi.org/%s" $citationApa $doi }}
+  {{ $citationChicago = printf "%s https://doi.org/%s" $citationChicago $doi }}
+{{ end }}
+
+{{ $bibEntryType := "misc" }}
+{{ if or (eq $currentType "journal") (eq $page.Section "journal_publication") }}
+  {{ $bibEntryType = "article" }}
+{{ else if or (eq $currentType "conference") (eq $currentType "workshop") (eq $page.Section "conference_publication") (eq $page.Section "workshop_publication") }}
+  {{ $bibEntryType = "inproceedings" }}
+{{ end }}
+{{ $bibVenueField := cond (eq $bibEntryType "article") "journal" "booktitle" }}
+
+{{ $citationKey := "ampel" }}
+{{ if gt (len $authors) 0 }}
+  {{ $firstAuthor := index $authors 0 }}
+  {{ $nameParts := split $firstAuthor " " }}
+  {{ if gt (len $nameParts) 0 }}
+    {{ $citationKey = lower (replaceRE "[^a-z]" "" (index $nameParts (sub (len $nameParts) 1))) }}
+  {{ end }}
+{{ end }}
+{{ $titleKey := "" }}
+{{ if $currentTitle }}
+  {{ $titleParts := split (lower $currentTitle) " " }}
+  {{ if gt (len $titleParts) 0 }}
+    {{ $titleKey = replaceRE "[^a-z0-9]" "" (index $titleParts 0) }}
+  {{ end }}
+{{ end }}
+{{ $citationKey = printf "%s%s%s" $citationKey $year $titleKey }}
+
+{{ $venueLine := "" }}
+{{ if $currentVenue }}
+  {{ $venueLine = printf "  %s={%s},\n" $bibVenueField $currentVenue }}
+{{ end }}
+{{ $doiLine := "" }}
+{{ if $doi }}
+  {{ $doiLine = printf ",\n  doi={%s}" $doi }}
+{{ end }}
+{{ $bibtex := printf "@%s{%s,\n  title={%s},\n  author={%s},\n%s  year={%s}%s\n}" $bibEntryType $citationKey $page.Title (delimit $authors " and ") $venueLine $year $doiLine }}
 
 {{ $titleTokens := slice }}
 {{ if $currentTitle }}
@@ -109,12 +167,12 @@
     <div class="pub-extras-card">
       <h3>Artifacts</h3>
       {{ $artifacts := slice }}
-      {{ with .Params.url_pdf }}{{ if ne . "" }}{{ $artifacts = $artifacts | append (dict "label" "PDF" "url" .) }}{{ end }}{{ end }}
-      {{ with .Params.url_code }}{{ if ne . "" }}{{ $artifacts = $artifacts | append (dict "label" "Code" "url" .) }}{{ end }}{{ end }}
-      {{ with .Params.url_dataset }}{{ if ne . "" }}{{ $artifacts = $artifacts | append (dict "label" "Data" "url" .) }}{{ end }}{{ end }}
-      {{ with .Params.url_project }}{{ if ne . "" }}{{ $artifacts = $artifacts | append (dict "label" "Project" "url" .) }}{{ end }}{{ end }}
-      {{ with .Params.url_slides }}{{ if ne . "" }}{{ $artifacts = $artifacts | append (dict "label" "Slides" "url" .) }}{{ end }}{{ end }}
-      {{ with .Params.url_video }}{{ if ne . "" }}{{ $artifacts = $artifacts | append (dict "label" "Video" "url" .) }}{{ end }}{{ end }}
+      {{ with $page.Params.url_pdf }}{{ if ne . "" }}{{ $artifacts = $artifacts | append (dict "label" "PDF" "url" .) }}{{ end }}{{ end }}
+      {{ with $page.Params.url_code }}{{ if ne . "" }}{{ $artifacts = $artifacts | append (dict "label" "Code" "url" .) }}{{ end }}{{ end }}
+      {{ with $page.Params.url_dataset }}{{ if ne . "" }}{{ $artifacts = $artifacts | append (dict "label" "Data" "url" .) }}{{ end }}{{ end }}
+      {{ with $page.Params.url_project }}{{ if ne . "" }}{{ $artifacts = $artifacts | append (dict "label" "Project" "url" .) }}{{ end }}{{ end }}
+      {{ with $page.Params.url_slides }}{{ if ne . "" }}{{ $artifacts = $artifacts | append (dict "label" "Slides" "url" .) }}{{ end }}{{ end }}
+      {{ with $page.Params.url_video }}{{ if ne . "" }}{{ $artifacts = $artifacts | append (dict "label" "Video" "url" .) }}{{ end }}{{ end }}
 
       {{ if gt (len $artifacts) 0 }}
         <div class="pub-artifacts">
@@ -149,8 +207,12 @@
     <div class="pub-extras-card">
       <h3>Citation</h3>
       <div class="pub-citation">
-        <div class="pub-citation-text">{{ $citationText }}</div>
-        <button class="pub-copy" type="button" data-citation-copy data-citation="{{ $citationText }}">Copy</button>
+        <div class="pub-citation-text">{{ $citationApa }}</div>
+        <div class="pub-citation-actions">
+          <button class="pub-copy" type="button" data-copy-text="{{ $citationApa | urlquery }}" data-copy-label="APA">Copy APA</button>
+          <button class="pub-copy" type="button" data-copy-text="{{ $citationChicago | urlquery }}" data-copy-label="Chicago">Copy Chicago</button>
+          <button class="pub-copy" type="button" data-copy-text="{{ $bibtex | urlquery }}" data-copy-label="BibTeX">Copy BibTeX</button>
+        </div>
       </div>
     </div>
   </div>
@@ -172,6 +234,7 @@
 .pub-related span { font-size:0.72rem; opacity:0.7; }
 .pub-citation { display:flex; flex-direction:column; gap:10px; }
 .pub-citation-text { font-size:0.8rem; line-height:1.4; background:rgba(0,0,0,0.35); border-radius:10px; padding:10px; border:1px solid rgba(0,255,65,0.2); }
+.pub-citation-actions { display:flex; flex-wrap:wrap; gap:8px; }
 .pub-copy { align-self:flex-start; border-radius:999px; border:1px solid rgba(0,255,65,0.4); color:#00ff41; background:rgba(0,255,65,0.12); padding:6px 12px; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; cursor:pointer; }
 .pub-copy.copied { color:#111; background:#00ff41; }
 
@@ -179,24 +242,3 @@ body:not(.dark) .pub-extras-card { background:rgba(255,255,255,0.92); }
 body:not(.dark) .pub-extras-card h3 { color:#0b7a2f; }
 body:not(.dark) .pub-citation-text { background:rgba(255,255,255,0.9); }
 </style>
-
-<script>
-(() => {
-  const root = document.currentScript && document.currentScript.closest('.pub-extras');
-  if (!root) return;
-  const btn = root.querySelector('[data-citation-copy]');
-  if (!btn) return;
-  btn.addEventListener('click', () => {
-    const text = btn.getAttribute('data-citation') || '';
-    if (!text) return;
-    navigator.clipboard.writeText(text).then(() => {
-      btn.classList.add('copied');
-      btn.textContent = 'Copied';
-      setTimeout(() => {
-        btn.classList.remove('copied');
-        btn.textContent = 'Copy';
-      }, 1500);
-    });
-  });
-})();
-</script>

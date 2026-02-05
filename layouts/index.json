@@ -1,0 +1,121 @@
+{{- $index := slice -}}
+
+{{- $sections := slice "conference_publication" "journal_publication" "workshop_publication" -}}
+{{- range where .Site.RegularPages "Section" "in" $sections -}}
+  {{- $abstract := .Params.abstract | default .Summary | default .Plain | default "" -}}
+  {{- $authors := .Params.authors | default (slice) -}}
+  {{- $tags := .Params.tags | default (slice) -}}
+  {{- $item := dict
+      "title" .Title
+      "content" ($abstract | plainify)
+      "summary" ($abstract | plainify)
+      "section" .Section
+      "type" .Type
+      "permalink" .Permalink
+      "relpermalink" .RelPermalink
+      "authors" $authors
+      "tags" $tags
+      "date" .Date.Unix
+      "publishdate" (.PublishDate.Format "2006-01-02T15:04:05Z07:00")
+      "lastmod" .Lastmod.Unix
+      "kind" .Kind
+      "lang" .Lang
+      "objectID" (md5 .RelPermalink)
+    -}}
+  {{- $index = $index | append $item -}}
+{{- end -}}
+
+{{- $talksRaw := readFile "static/data/talks.json" | transform.Unmarshal -}}
+{{- if $talksRaw -}}
+  {{- range $talksRaw -}}
+    {{- $tags := .tags | default (slice) -}}
+    {{- $content := printf "%s %s %s %s %s" (.event | default "") (.location | default "") (.type | default "") (.date | default "") (delimit $tags " ") -}}
+    {{- $item := dict
+        "title" (.title | default "Talk")
+        "content" ($content | plainify)
+        "summary" ($content | plainify)
+        "section" "talks"
+        "type" "talks"
+        "permalink" (printf "%s#talks" $.Site.BaseURL)
+        "relpermalink" "#talks"
+        "authors" nil
+        "tags" $tags
+        "date" 0
+        "publishdate" ""
+        "lastmod" 0
+        "kind" "page"
+        "lang" $.Site.Language.Lang
+        "objectID" (md5 (printf "talk-%s" (.title | default "")))
+      -}}
+    {{- $index = $index | append $item -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $serviceRaw := readFile "static/data/service.json" | transform.Unmarshal -}}
+{{- if $serviceRaw -}}
+  {{- range $serviceRaw -}}
+    {{- $years := "" -}}
+    {{- $startYear := .startYear -}}
+    {{- $endYear := .endYear -}}
+    {{- if $startYear -}}
+      {{- $years = printf "%v" $startYear -}}
+      {{- if $endYear -}}
+        {{- $years = printf "%v–%v" $startYear $endYear -}}
+      {{- end -}}
+    {{- end -}}
+    {{- $content := printf "%s %s %s %s %s" (.role | default "") (.venue | default "") (.category | default "") (.institution | default "") $years -}}
+    {{- $item := dict
+        "title" (printf "%s • %s" (.role | default "Service") (.venue | default ""))
+        "content" ($content | plainify)
+        "summary" ($content | plainify)
+        "section" "service"
+        "type" "service"
+        "permalink" (printf "%s#service" $.Site.BaseURL)
+        "relpermalink" "#service"
+        "authors" nil
+        "tags" (slice (.category | default "Service"))
+        "date" 0
+        "publishdate" ""
+        "lastmod" 0
+        "kind" "page"
+        "lang" $.Site.Language.Lang
+        "objectID" (md5 (printf "service-%s-%s" (.role | default "") (.venue | default "")))
+      -}}
+    {{- $index = $index | append $item -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $teachRaw := readFile "static/data/teaching.json" | transform.Unmarshal -}}
+{{- if $teachRaw -}}
+  {{- range $teachRaw -}}
+    {{- $evaluation := "" -}}
+    {{- with .evaluation -}}
+      {{- $evaluation = printf "Evaluation %v" . -}}
+    {{- end -}}
+    {{- $outcomes := .outcomes | default "" -}}
+    {{- if not $outcomes -}}
+      {{- $outcomes = .learning_outcomes | default "" -}}
+    {{- end -}}
+    {{- $content := printf "%s %s %s %s %s %s" (.course | default "") (.title | default "") (.institution | default "") (.term | default "") $evaluation $outcomes -}}
+    {{- $item := dict
+        "title" (printf "%s • %s" (.course | default "Course") (.title | default ""))
+        "content" ($content | plainify)
+        "summary" ($content | plainify)
+        "section" "teaching"
+        "type" "teaching"
+        "permalink" (printf "%s#teaching" $.Site.BaseURL)
+        "relpermalink" "#teaching"
+        "authors" nil
+        "tags" (slice (.institution | default "Teaching"))
+        "date" 0
+        "publishdate" ""
+        "lastmod" 0
+        "kind" "page"
+        "lang" $.Site.Language.Lang
+        "objectID" (md5 (printf "teach-%s-%s" (.course | default "") (.term | default "")))
+      -}}
+    {{- $index = $index | append $item -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $index | jsonify -}}

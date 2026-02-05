@@ -4,12 +4,19 @@
 
 {{ $seed := "abcdefghijklmnopqrstuvwxyz" }}
 {{ $uniqueID := delimit (shuffle (split $seed "")) "" }}
-<div id="network-{{ $uniqueID }}" style="width: 100%; min-height: 700px; height: 700px; border: 1px solid #eee; border-radius: 8px; overflow: hidden; position: relative;"></div>
+<div id="network-{{ $uniqueID }}" style="width: 100%; min-height: 700px; height: 700px; border: 1px solid #eee; border-radius: 8px; overflow: hidden; position: relative;" role="img" aria-label="Collaboration network graph of co-authorship connections" tabindex="0"></div>
 
 <script type="text/javascript">
 (function() {
     var domID = "network-{{ $uniqueID }}";
     var myName = "Benjamin Ampel"; // The center node
+    const prefersReducedMotion = window.matchMedia
+        ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        : false;
+    const withReducedMotion = (option) => {
+        if (!prefersReducedMotion) return option;
+        return Object.assign({}, option, { animation: false, animationDuration: 0, animationDurationUpdate: 0 });
+    };
 
     // --- 1. NAME NORMALIZATION ---
     var nameMap = {
@@ -173,7 +180,7 @@
                 }
             }));
 
-            var option = {
+            var option = withReducedMotion({
                 backgroundColor: bgColor,
                 animationDuration: 1500,
                 animationEasingUpdate: 'quinticInOut',
@@ -183,6 +190,7 @@
                         return `${params.marker} <strong>${params.name}</strong><br>Papers: ${params.value}`;
                     }
                 },
+                aria: { enabled: true, description: 'Collaboration network of co-authorship connections.' },
                 series: [{
                     type: 'graph',
                     layout: 'force',
@@ -200,7 +208,7 @@
                         friction: 0.9
                     }
                 }]
-            };
+            });
 
             myChart.setOption(option);
             

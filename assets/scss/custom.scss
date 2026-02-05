@@ -5284,6 +5284,55 @@ body:not(.dark) .impact-value {
   color: #0b7a3e;
 }
 
+/* ===== ACCESSIBILITY POLISH ===== */
+:root {
+  --focus-ring: rgba(0, 229, 255, 0.85);
+  --focus-glow: rgba(0, 229, 255, 0.35);
+}
+
+a:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible,
+[tabindex]:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px var(--focus-glow);
+}
+
+.centrality-item:focus-visible,
+.impact-card:focus-visible {
+  border-color: rgba(0, 229, 255, 0.7);
+  transform: translateY(-2px);
+}
+
+.impact-toggle:focus-visible,
+.impact-action:focus-visible,
+.collab-chip:focus-visible,
+.dash-geo-tab:focus-visible,
+.centrality-tab:focus-visible,
+.bio-story-btn:focus-visible,
+.pub-chip:focus-visible,
+.pub-copy:focus-visible,
+.cite-button:focus-visible,
+.cite-tooltip-btn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 body:not(.dark) .impact-card::after {
   background: rgba(255, 255, 255, 0.95);
   color: #222;

@@ -1,16 +1,50 @@
 {{/* The Knowledge Graph - Context Aware (Authors + Venue + Topic) */}}
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 
-<div id="knowledge-graph" style="width: 100%; height: 650px; border: 1px solid var(--card-border, #333); border-radius: 8px; background: var(--card-bg, #000);"></div>
+<div id="knowledge-graph" style="width: 100%; height: 650px; border: 1px solid var(--card-border, #333); border-radius: 8px; background: var(--card-bg, #000);" role="img" aria-label="Knowledge graph connecting publications by topic, venue, and co-authorship" tabindex="0"></div>
 
 <script type="text/javascript">
 (function() {
     var dom = document.getElementById('knowledge-graph');
     var myChart = echarts.init(dom);
+    const prefersReducedMotion = window.matchMedia
+        ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        : false;
+    const withReducedMotion = (option) => {
+        if (!prefersReducedMotion) return option;
+        return Object.assign({}, option, { animation: false, animationDuration: 0, animationDurationUpdate: 0 });
+    };
     
     // Config
     const STOP_WORDS = new Set(['the','of','and','in','to','a','for','on','with','using','an','based','via','system','analysis','approach','study','framework','model','data','from','by','detection','paper','research','towards']);
     
+    const escapeHtml = (str) => String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+
+    const buildCiteButtons = (meta) => {
+        if (!window.buildCitationFormats) return '';
+        const citations = window.buildCitationFormats({
+            title: meta.name,
+            authors: meta.authors,
+            year: meta.year,
+            venue: meta.venue,
+            type: meta.type
+        });
+        const buttons = [
+            { label: 'APA', text: citations.apa },
+            { label: 'Chicago', text: citations.chicago },
+            { label: 'BibTeX', text: citations.bibtex }
+        ].filter(b => b.text).map(b => {
+            const encoded = encodeURIComponent(b.text);
+            return `<button class="cite-tooltip-btn" type="button" data-copy-text="${encoded}" data-copy-label="${b.label}">Copy ${b.label}</button>`;
+        }).join('');
+        return buttons ? `<div class="cite-tooltip-actions">${buttons}</div>` : '';
+    };
+
     // Weight Tuning
     const WEIGHT_TOPIC = 1.0;
     const WEIGHT_VENUE = 2.0;
@@ -128,19 +162,24 @@
     function renderChart(nodes, links) {
         let isDark = document.body.classList.contains('dark');
         
-        let option = {
+        let option = withReducedMotion({
             backgroundColor: 'transparent',
             tooltip: {
+                enterable: true,
+                extraCssText: 'pointer-events:auto; max-width:320px;',
                 formatter: (params) => {
-                    if (params.dataType === 'edge') {
-                        return `<strong>Connection Strength:</strong> ${Math.floor(params.value)}<br>Link: ${params.data.reason}`;
-                    }
-                    return `<strong>${params.name}</strong><br>
-                            Year: ${params.data.year}<br>
+                        if (params.dataType === 'edge') {
+                            return `<strong>Connection Strength:</strong> ${Math.floor(params.value)}<br>Link: ${params.data.reason}`;
+                        }
+                        const citeButtons = buildCiteButtons(params.data || {});
+                        return `<strong>${escapeHtml(params.name)}</strong><br>
+                            Year: ${escapeHtml(params.data.year)}<br>
                             Citations: ${params.value}<br>
-                            <span style="font-size:0.8em; opacity:0.8">${params.data.venue || ''}</span>`;
-                }
-            },
+                            <span style="font-size:0.8em; opacity:0.8">${escapeHtml(params.data.venue || '')}</span>
+                            ${citeButtons}`;
+                    }
+                },
+            aria: { enabled: true, description: 'Knowledge graph showing relationships between publications.' },
             series: [{
                 type: 'graph',
                 layout: 'force',
@@ -158,7 +197,7 @@
                     friction: 0.9
                 }
             }]
-        };
+        });
 
         myChart.setOption(option);
 
