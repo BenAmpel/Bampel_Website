@@ -18,6 +18,8 @@
     v = v.replace(/\s+forthcoming$/i, '').trim();
     v = v.replace(/\s+in press$/i, '').trim();
     v = v.replace(/\s+\d+(\s*\(\d+\))?.*$/i, '').trim();
+    v = v.replace(/management information systems quarterly\s*\(misq\)/i, 'MIS Quarterly');
+    v = v.replace(/management information systems quarterly/i, 'MIS Quarterly');
     return v;
   };
 
@@ -41,7 +43,10 @@
     if (!venueKey) return false;
     return list.some((alias) => {
       const aliasKey = toKey(alias);
-      return aliasKey && (venueKey === aliasKey || venueKey.includes(aliasKey));
+      if (!aliasKey) return false;
+      if (venueKey === aliasKey) return true;
+      const pattern = new RegExp(`(^|\\\\s)${aliasKey.replace(/\\s+/g, '\\\\s+')}(\\\\s|$)`);
+      return pattern.test(venueKey);
     });
   };
 
