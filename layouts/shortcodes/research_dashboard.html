@@ -10,8 +10,9 @@
 <div style="display:grid; grid-template-columns:1fr 1fr; grid-template-rows:auto 600px 600px 300px; gap:0; border:1px solid var(--card-border, #333); border-radius:12px; overflow:hidden; background:var(--card-bg, rgba(255,255,255,0.02)); box-shadow:0 4px 20px rgba(0,0,0,0.1);">
 
 <div style="grid-column:1; grid-row:1; padding:20px; border-right:1px solid var(--card-border, #333); border-bottom:1px solid var(--card-border, #333);">
-    <h4 style="margin:0 0 10px; opacity:0.7; text-align:center; text-transform:uppercase; font-size:0.8rem;">Research Profile</h4>
-    <div id="dashboard-radar" style="width:100%; height:300px;"></div>
+    <h4 style="margin:0 0 10px; opacity:0.7; text-align:center; text-transform:uppercase; font-size:0.8rem;">Research Profile Topics</h4>
+    <div id="dashboard-topics" class="profile-topics"></div>
+    <div class="profile-topics-note">Topic model inferred from CV content.</div>
 </div>
 
 <div style="grid-column:2; grid-row:1; padding:25px; border-bottom:1px solid var(--card-border, #333); display:flex; flex-direction:column;">
@@ -361,17 +362,31 @@ body:not(.dark) .centrality-tab.is-active { background:rgba(0,119,182,0.15); }
     .centrality-metrics { grid-template-columns:repeat(2, minmax(0,1fr)); }
     .centrality-body { grid-template-columns:1fr; }
 }
+
+/* Research profile topics */
+.profile-topics { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; }
+.profile-topic-card { border:1px solid var(--card-border, #333); border-radius:12px; padding:10px; background:rgba(0,0,0,0.2); display:flex; flex-direction:column; gap:6px; }
+.profile-topic-header { display:flex; align-items:center; justify-content:space-between; gap:6px; }
+.profile-topic-title { font-size:0.72rem; font-weight:600; color:#f3f8ff; text-transform:uppercase; letter-spacing:0.05em; }
+.profile-topic-weight { font-size:0.6rem; color:#00e5ff; }
+.profile-topic-terms { font-size:0.6rem; opacity:0.7; line-height:1.4; }
+.profile-topic-bar { height:6px; border-radius:999px; background:rgba(255,255,255,0.1); overflow:hidden; }
+.profile-topic-bar span { display:block; height:100%; background:linear-gradient(90deg, rgba(0,255,65,0.9), rgba(0,229,255,0.8)); }
+.profile-topics-note { margin-top:8px; font-size:0.6rem; opacity:0.6; text-align:center; }
+
+body:not(.dark) .profile-topic-card { background:rgba(255,255,255,0.9); border-color:#e0e0e0; }
+body:not(.dark) .profile-topic-title { color:#1a1a1a; }
 </style>
 
 <script type="text/javascript">
 (function() {
     // 1. IDS configuration
     const IDS = {
-        RADAR: 'dashboard-radar',
         LINE: 'dashboard-timeline',
         MAP: 'dashboard-impact-map',
         COLLAB: 'dashboard-collab-network',
         FOOTPRINT: 'dashboard-footprint-map',
+        TOPICS: 'dashboard-topics',
         VISIT: {
             TREND: 'dash-visit-trend',
             DEVICE: 'dash-visit-device',
@@ -405,7 +420,7 @@ body:not(.dark) .centrality-tab.is-active { background:rgba(0,119,182,0.15); }
     let collabRange = 'all';
     let collabFocusId = null;
 
-    var radarChart, lineChart, graphChart, collabChart, visitTrendChart, visitDeviceChart, centralityRadarChart, footprintMap;
+    var lineChart, graphChart, collabChart, visitTrendChart, visitDeviceChart, centralityRadarChart, footprintMap;
 
     // 2. DATA LOADING
     const safeFetch = (url) => fetch(url).then(r => r.ok ? r.json() : null).catch(e => null);
@@ -413,8 +428,9 @@ body:not(.dark) .centrality-tab.is-active { background:rgba(0,119,182,0.15); }
     Promise.all([
         safeFetch('/data/publications.json'),
         safeFetch('/data/scholar-metrics.json'),
-        safeFetch('/data/visitor_stats.json')
-    ]).then(([papersData, scholarData, visitorData]) => {
+        safeFetch('/data/visitor_stats.json'),
+        safeFetch('/data/cv_topics.json')
+    ]).then(([papersData, scholarData, visitorData, cvTopics]) => {
         
         let papers = [];
         if (scholarData && scholarData.individualPublications) {
@@ -425,12 +441,12 @@ body:not(.dark) .centrality-tab.is-active { background:rgba(0,119,182,0.15); }
 
         processMetrics(papers, scholarData);
 
-        renderRadar(papers); 
         if(scholarData && scholarData.citationsByYear) renderLine(scholarData.citationsByYear);
         renderWorkingMap(papers); 
         calculateAllMetrics(papers);
         renderCollabNetwork(papers);
         renderFootprintMap();
+        renderCvTopics(cvTopics);
         
         if(visitorData) renderVisitorStats(visitorData);
 
@@ -736,67 +752,31 @@ body:not(.dark) .centrality-tab.is-active { background:rgba(0,119,182,0.15); }
             updateText(IDS.METRICS.CITES, scholarData.metrics.citations || 0);
             updateText(IDS.METRICS.HINDEX, scholarData.metrics.hIndex || 0);
         }
-        
-        renderRadarChart(counts, recentCounts); 
     }
 
-    function renderRadarChart(counts, recentCounts) {
-        var dom = document.getElementById(IDS.RADAR);
-        if(!dom) return;
-        if(radarChart) radarChart.dispose();
-        radarChart = echarts.init(dom);
-        const icons = {
-            'AI / Deep Learning': '🧠',
-            'Cybersecurity': '🔐',
-            'LLMs & NLP': '💬',
-            'Hacker Communities': '🕶️',
-            'Design Science': '🧪',
-            'Behavioral': '🧭'
-        };
-        let categories = Object.keys(counts);
-        let data = categories.map(k => ({ name: k, value: counts[k] }));
-        let recent = categories.map(k => recentCounts[k] || 0);
-        let max = Math.max(...data.map(d => d.value)) || 1;
-        let isDark = document.body.classList.contains('dark');
-        const labelColor = isDark ? '#aaa' : '#333';
-        radarChart.setOption({
-            tooltip: { trigger: 'item' },
-            radar: {
-                indicator: data.map(d => ({ name: d.name, max: max + 2 })),
-                shape: 'circle',
-                splitArea: { show: false },
-                axisName: {
-                    color: labelColor,
-                    formatter: function(value) {
-                        const icon = icons[value] || '';
-                        const short = value.replace(' / ', ' ').replace(' & ', ' ');
-                        return icon ? `${icon} ${short}` : short;
-                    }
-                }
-            },
-            series: [
-                {
-                    type: 'radar',
-                    data: [
-                        {
-                            value: data.map(d => d.value),
-                            name: 'All-time',
-                            itemStyle: { color: isDark ? '#00ff41' : '#d93025' },
-                            areaStyle: { opacity: 0.15 }
-                        },
-                        {
-                            value: recent,
-                            name: 'Last 2 Years',
-                            itemStyle: { color: isDark ? '#00e5ff' : '#1a73e8' },
-                            areaStyle: { opacity: 0.25 }
-                        }
-                    ]
-                }
-            ]
-        });
-    }
     
-    function renderRadar(papers) { }
+    function renderCvTopics(data) {
+        const el = document.getElementById(IDS.TOPICS);
+        if (!el) return;
+        if (!data || !Array.isArray(data.topics)) {
+            el.innerHTML = '<div style="opacity:0.6; font-size:0.7rem;">Topic model unavailable.</div>';
+            return;
+        }
+        const topics = data.topics.slice(0, 6);
+        const maxWeight = Math.max(...topics.map(t => t.weight || 0), 1);
+        el.innerHTML = topics.map(topic => {
+            const terms = (topic.keywords || []).slice(0, 5).join(', ');
+            const pct = Math.max(8, Math.round((topic.weight / maxWeight) * 100));
+            return `<div class="profile-topic-card">
+                <div class="profile-topic-header">
+                    <div class="profile-topic-title">${topic.label}</div>
+                    <div class="profile-topic-weight">${Math.round((topic.weight || 0) * 100)}%</div>
+                </div>
+                <div class="profile-topic-bar"><span style="width:${pct}%"></span></div>
+                <div class="profile-topic-terms">${terms}</div>
+            </div>`;
+        }).join('');
+    }
 
 
     // ========================================================================
@@ -1929,7 +1909,6 @@ body:not(.dark) .centrality-tab.is-active { background:rgba(0,119,182,0.15); }
     function updateText(id, val) { var el = document.getElementById(id); if(el) el.innerText = val; }
 
     window.addEventListener('resize', function() {
-        if(radarChart) radarChart.resize();
         if(lineChart) lineChart.resize();
         if(graphChart) graphChart.resize();
         if(collabChart) collabChart.resize();
