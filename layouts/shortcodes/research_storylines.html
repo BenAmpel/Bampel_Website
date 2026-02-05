@@ -1,5 +1,10 @@
 {{- $storylines := site.Data.storylines.tracks | default (slice) -}}
-{{- $pubData := .Site.Data.publications -}}
+{{- $pubData := dict -}}
+{{- with .Site.Data.publications -}}
+{{- $pubData = . -}}
+{{- else -}}
+{{- $pubData = getJSON "static/data/publications.json" -}}
+{{- end -}}
 {{- if and (isSet $pubData "individualPublications") (not (isSet $pubData 0)) -}}
 {{- $pubData = $pubData.individualPublications -}}
 {{- end -}}
