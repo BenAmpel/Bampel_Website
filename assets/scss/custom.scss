@@ -1639,6 +1639,30 @@ section#about .bio-highlight-flash,
   }
 }
 
+section#about .bio-annotated,
+.wg-about .bio-annotated,
+.hb-about .bio-annotated {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+section#about .bio-sidenote,
+.wg-about .bio-sidenote,
+.hb-about .bio-sidenote {
+  border: 1px solid rgba(0, 229, 255, 0.4);
+  background: rgba(0, 0, 0, 0.35);
+  color: #00e5ff;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.55rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 section#about .bio-story-full,
 .wg-about .bio-story-full,
 .hb-about .bio-story-full {
@@ -1683,6 +1707,14 @@ body:not(.dark) .hb-about .bio-story-btn.is-active {
 body:not(.dark) section#about .bio-chip,
 body:not(.dark) .wg-about .bio-chip,
 body:not(.dark) .hb-about .bio-chip {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #1a0dab;
+}
+
+body:not(.dark) section#about .bio-sidenote,
+body:not(.dark) .wg-about .bio-sidenote,
+body:not(.dark) .hb-about .bio-sidenote {
   background: rgba(0, 0, 0, 0.04);
   border-color: rgba(0, 0, 0, 0.12);
   color: #1a0dab;
