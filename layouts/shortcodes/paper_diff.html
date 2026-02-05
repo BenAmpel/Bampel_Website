@@ -1,0 +1,270 @@
+{{ $pubData := .Site.Data.publications }}
+{{ if and (isSet $pubData "individualPublications") (not (isSet $pubData 0)) }}
+  {{ $pubData = $pubData.individualPublications }}
+{{ end }}
+
+<div class="paper-diff" data-paper-diff data-baseurl="{{ .Site.BaseURL }}">
+  <div class="paper-diff-header">
+    <div>
+      <h3>Paper Diff View</h3>
+      <p>Pick two papers to see how they diverge across topics, coauthors, venues, and centrality role.</p>
+    </div>
+    <div class="paper-diff-controls">
+      <button type="button" class="paper-diff-btn" data-diff-random>Random</button>
+      <button type="button" class="paper-diff-btn" data-diff-swap>Swap</button>
+    </div>
+  </div>
+
+  <div class="paper-diff-selects">
+    <label>
+      Paper A
+      <select data-diff-select="a"></select>
+    </label>
+    <label>
+      Paper B
+      <select data-diff-select="b"></select>
+    </label>
+  </div>
+
+  <div class="paper-diff-grid">
+    <article class="paper-diff-card" data-diff-card="a">
+      <div class="paper-diff-card-top">
+        <div>
+          <h4 data-diff-title></h4>
+          <div class="paper-diff-meta" data-diff-meta></div>
+        </div>
+        <a class="paper-diff-link" data-diff-link target="_blank" rel="noopener">Read paper →</a>
+      </div>
+      <div class="paper-diff-section">
+        <div class="paper-diff-label">Centrality Role</div>
+        <div class="paper-diff-chips" data-diff-role></div>
+      </div>
+      <div class="paper-diff-section">
+        <div class="paper-diff-label">Coauthors</div>
+        <div class="paper-diff-chips" data-diff-authors></div>
+      </div>
+      <div class="paper-diff-section">
+        <div class="paper-diff-label">Topic Terms</div>
+        <div class="paper-diff-chips" data-diff-terms></div>
+      </div>
+    </article>
+
+    <article class="paper-diff-card" data-diff-card="b">
+      <div class="paper-diff-card-top">
+        <div>
+          <h4 data-diff-title></h4>
+          <div class="paper-diff-meta" data-diff-meta></div>
+        </div>
+        <a class="paper-diff-link" data-diff-link target="_blank" rel="noopener">Read paper →</a>
+      </div>
+      <div class="paper-diff-section">
+        <div class="paper-diff-label">Centrality Role</div>
+        <div class="paper-diff-chips" data-diff-role></div>
+      </div>
+      <div class="paper-diff-section">
+        <div class="paper-diff-label">Coauthors</div>
+        <div class="paper-diff-chips" data-diff-authors></div>
+      </div>
+      <div class="paper-diff-section">
+        <div class="paper-diff-label">Topic Terms</div>
+        <div class="paper-diff-chips" data-diff-terms></div>
+      </div>
+    </article>
+  </div>
+</div>
+
+<style>
+.paper-diff { margin: 30px 0; padding: 24px; border-radius: 16px; border:1px solid var(--card-border, #333); background:linear-gradient(135deg, rgba(0,0,0,0.55), rgba(0,0,0,0.15)); box-shadow: 0 12px 30px rgba(0,0,0,0.25); }
+.paper-diff-header { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:16px; }
+.paper-diff-header h3 { margin:0; font-size:1.1rem; color:#00ff41; text-transform:uppercase; letter-spacing:0.08em; }
+.paper-diff-header p { margin:6px 0 0; font-size:0.85rem; opacity:0.7; }
+.paper-diff-controls { display:flex; gap:8px; }
+.paper-diff-btn { border:1px solid rgba(0,229,255,0.35); background:rgba(0,229,255,0.1); color:#00e5ff; padding:6px 12px; border-radius:999px; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; cursor:pointer; }
+
+.paper-diff-selects { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-bottom:18px; }
+.paper-diff-selects label { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; color:#b9f6ca; display:flex; flex-direction:column; gap:6px; }
+.paper-diff-selects select { background:rgba(0,0,0,0.35); border:1px solid var(--card-border, #333); border-radius:10px; padding:8px 10px; color:#e0f7fa; font-size:0.8rem; }
+
+.paper-diff-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:16px; }
+.paper-diff-card { border:1px solid var(--card-border, #333); border-radius:14px; padding:16px; background:rgba(0,0,0,0.25); display:flex; flex-direction:column; gap:14px; }
+.paper-diff-card-top { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+.paper-diff-card h4 { margin:0 0 6px; font-size:1rem; }
+.paper-diff-meta { font-size:0.75rem; opacity:0.7; }
+.paper-diff-link { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; color:#00e5ff; text-decoration:none; border:1px solid rgba(0,229,255,0.35); padding:6px 10px; border-radius:999px; }
+.paper-diff-section { display:flex; flex-direction:column; gap:8px; }
+.paper-diff-label { font-size:0.65rem; text-transform:uppercase; letter-spacing:0.08em; opacity:0.7; }
+.paper-diff-chips { display:flex; flex-wrap:wrap; gap:6px; }
+.paper-diff-chip { font-size:0.65rem; text-transform:uppercase; letter-spacing:0.06em; padding:4px 8px; border-radius:999px; border:1px solid rgba(0,255,65,0.3); background:rgba(0,255,65,0.1); color:#b9f6ca; }
+.paper-diff-chip.is-unique { border-color:rgba(224,64,251,0.4); background:rgba(224,64,251,0.15); color:#e040fb; }
+.paper-diff-chip.is-muted { border-color:rgba(255,255,255,0.15); background:rgba(255,255,255,0.08); color:#cfd8dc; }
+
+body:not(.dark) .paper-diff { background:rgba(255,255,255,0.95); }
+body:not(.dark) .paper-diff-card { background:rgba(255,255,255,0.9); }
+body:not(.dark) .paper-diff-selects select { background:rgba(255,255,255,0.9); color:#222; }
+body:not(.dark) .paper-diff-link { color:#0077b6; border-color:#0077b6; }
+</style>
+
+<script>
+(() => {
+  const root = document.querySelector('[data-paper-diff]');
+  if (!root) return;
+
+  const normalizeBaseUrl = (url) => {
+    if (!url) return '';
+    if (url === '/') return '';
+    return url.endsWith('/') ? url.slice(0, -1) : url;
+  };
+
+  const baseUrl = normalizeBaseUrl(root.getAttribute('data-baseurl'));
+  const buildUrl = (path) => {
+    const clean = String(path || '').replace(/^\/+/, '');
+    return baseUrl ? `${baseUrl}/${clean}` : `/${clean}`;
+  };
+
+  const selectA = root.querySelector('[data-diff-select="a"]');
+  const selectB = root.querySelector('[data-diff-select="b"]');
+  const btnSwap = root.querySelector('[data-diff-swap]');
+  const btnRandom = root.querySelector('[data-diff-random]');
+
+  const stopwords = new Set([
+    'the','and','for','with','from','into','that','this','their','these','those','using','use','used','paper','study','approach','analysis','toward','towards','based','data','model','models','learning','system','systems','framework','research','information','security','cyber','threat','intelligence','towards','between','across','through','within','into','over','under','about','case'
+  ]);
+
+  const tokenize = (text) => {
+    return (text || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .split(/\s+/)
+      .filter(word => word.length > 3 && !stopwords.has(word));
+  };
+
+  const topTerms = (paper) => {
+    const tokens = tokenize(`${paper.title || ''} ${paper.abstract || ''}`);
+    const counts = new Map();
+    tokens.forEach(t => counts.set(t, (counts.get(t) || 0) + 1));
+    return Array.from(counts.entries())
+      .sort((a,b) => b[1] - a[1])
+      .slice(0, 8)
+      .map(entry => entry[0]);
+  };
+
+  const normalizeAuthor = (name) => (name || '').toLowerCase().replace(/\s+/g, ' ').trim();
+
+  const percentile = (arr, p) => {
+    if (!arr.length) return 0;
+    const sorted = arr.slice().sort((a,b) => a - b);
+    const idx = Math.floor((sorted.length - 1) * p);
+    return sorted[idx];
+  };
+
+  Promise.all([
+    fetch(buildUrl('data/publications.json')).then(r => r.ok ? r.json() : []),
+    fetch(buildUrl('data/dashboard_network.json')).then(r => r.ok ? r.json() : null)
+  ]).then(([pubData, network]) => {
+    if (pubData && pubData.individualPublications) pubData = pubData.individualPublications;
+    const papers = Array.isArray(pubData) ? pubData : [];
+    if (!papers.length) return;
+
+    const centrality = (network && network.centrality && network.centrality.papers) ? network.centrality.papers : [];
+    const centralityMap = new Map();
+    centrality.forEach(item => {
+      if (item && item.title) centralityMap.set(item.title.toLowerCase(), item);
+    });
+
+    const eigenVals = centrality.map(c => c.eigen || 0);
+    const betweenVals = centrality.map(c => c.between || 0);
+    const degreeVals = centrality.map(c => c.degree || 0);
+    const thresholds = {
+      eigen: percentile(eigenVals, 0.75),
+      between: percentile(betweenVals, 0.75),
+      degree: percentile(degreeVals, 0.75)
+    };
+
+    const sortedPapers = papers.slice().sort((a,b) => (b.year || 0) - (a.year || 0));
+    const optionsHtml = sortedPapers.map((paper, index) => {
+      const label = `${paper.year || '—'} · ${paper.title}`;
+      return `<option value="${index}">${label}</option>`;
+    }).join('');
+
+    selectA.innerHTML = optionsHtml;
+    selectB.innerHTML = optionsHtml;
+    selectA.selectedIndex = 0;
+    selectB.selectedIndex = sortedPapers.length > 1 ? 1 : 0;
+
+    const getRoles = (paper) => {
+      const entry = centralityMap.get((paper.title || '').toLowerCase());
+      if (!entry) return ['—'];
+      const roles = [];
+      if (entry.eigen >= thresholds.eigen) roles.push('Influence');
+      if (entry.between >= thresholds.between) roles.push('Bridge');
+      if (entry.degree >= thresholds.degree) roles.push('Hub');
+      return roles.length ? roles : ['—'];
+    };
+
+    const renderChips = (container, items, uniqueSet) => {
+      if (!container) return;
+      if (!items.length) {
+        container.innerHTML = '<span class="paper-diff-chip is-muted">—</span>';
+        return;
+      }
+      container.innerHTML = items.map(item => {
+        const isUnique = uniqueSet && !uniqueSet.has(item.toLowerCase());
+        return `<span class="paper-diff-chip${isUnique ? ' is-unique' : ''}">${item}</span>`;
+      }).join('');
+    };
+
+    const updateCard = (card, paper, other) => {
+      if (!card) return;
+      const titleEl = card.querySelector('[data-diff-title]');
+      const metaEl = card.querySelector('[data-diff-meta]');
+      const linkEl = card.querySelector('[data-diff-link]');
+      if (titleEl) titleEl.textContent = paper.title || 'Untitled';
+      if (metaEl) metaEl.textContent = `${paper.year || '—'} · ${paper.venue || '—'}`;
+      if (linkEl) linkEl.href = paper.url ? paper.url : '#';
+
+      const otherAuthors = new Set((other.authors || []).map(normalizeAuthor));
+      const otherTerms = new Set(topTerms(other));
+
+      const roles = getRoles(paper);
+      renderChips(card.querySelector('[data-diff-role]'), roles, new Set());
+
+      const authors = (paper.authors || []).map(a => a.trim()).filter(Boolean);
+      renderChips(card.querySelector('[data-diff-authors]'), authors, otherAuthors);
+
+      const terms = topTerms(paper);
+      renderChips(card.querySelector('[data-diff-terms]'), terms, otherTerms);
+    };
+
+    const render = () => {
+      const a = sortedPapers[Number(selectA.value) || 0];
+      const b = sortedPapers[Number(selectB.value) || 0];
+      if (!a || !b) return;
+      updateCard(root.querySelector('[data-diff-card="a"]'), a, b);
+      updateCard(root.querySelector('[data-diff-card="b"]'), b, a);
+    };
+
+    selectA.addEventListener('change', render);
+    selectB.addEventListener('change', render);
+
+    btnSwap.addEventListener('click', () => {
+      const temp = selectA.value;
+      selectA.value = selectB.value;
+      selectB.value = temp;
+      render();
+    });
+
+    btnRandom.addEventListener('click', () => {
+      const max = sortedPapers.length;
+      if (max < 2) return;
+      let first = Math.floor(Math.random() * max);
+      let second = Math.floor(Math.random() * max);
+      while (second === first) second = Math.floor(Math.random() * max);
+      selectA.value = String(first);
+      selectB.value = String(second);
+      render();
+    });
+
+    render();
+  }).catch(() => {});
+})();
+</script>
