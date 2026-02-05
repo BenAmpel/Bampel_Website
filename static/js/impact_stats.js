@@ -12,25 +12,55 @@
 
   const normalize = (value) => (value || '').toString().toLowerCase();
 
-  const matchVenue = (venue, patterns) => {
-    const v = normalize(venue);
-    return patterns.some((pattern) => pattern.test(v));
+  const cleanVenueName = (value) => {
+    if (!value) return '';
+    let v = value.split(',')[0].trim();
+    v = v.replace(/\s+forthcoming$/i, '').trim();
+    v = v.replace(/\s+in press$/i, '').trim();
+    v = v.replace(/\s+\d+(\s*\(\d+\))?.*$/i, '').trim();
+    return v;
   };
 
+  const toKey = (value) =>
+    normalize(cleanVenueName(value)).replace(/[^a-z0-9]+/g, ' ').trim();
+
   const unique = (items) => Array.from(new Set(items));
+
+  const flattenJournalList = (list) => {
+    if (!list) return [];
+    const entries = Array.isArray(list) ? list : list.journals || [];
+    return entries.flatMap((item) => {
+      if (typeof item === 'string') return [item];
+      const aliases = Array.isArray(item.aliases) ? item.aliases : [];
+      return [item.name, ...aliases].filter(Boolean);
+    });
+  };
+
+  const matchesList = (venue, list) => {
+    const venueKey = toKey(venue);
+    if (!venueKey) return false;
+    return list.some((alias) => {
+      const aliasKey = toKey(alias);
+      return aliasKey && (venueKey === aliasKey || venueKey.includes(aliasKey));
+    });
+  };
 
   const countByType = (pubs, type) =>
     pubs.filter((pub) => normalize(pub.type) === type).length;
 
-  const countByVenue = (pubs, patterns) => {
+  const countByVenue = (pubs, list) => {
     const matches = pubs.filter(
       (pub) =>
         normalize(pub.type) === 'journal' &&
-        matchVenue(pub.venue || pub.publication || '', patterns)
+        matchesList(pub.venue || pub.publication || '', list)
     );
     return {
       count: matches.length,
-      venues: unique(matches.map((pub) => pub.venue || pub.publication || '').filter(Boolean))
+      venues: unique(
+        matches
+          .map((pub) => cleanVenueName(pub.venue || pub.publication || ''))
+          .filter(Boolean)
+      )
     };
   };
 
@@ -75,10 +105,19 @@
   Promise.all([
     safeFetch('/data/publications.json'),
     safeFetch('/data/awards.json'),
-    safeFetch('/data/scholar-metrics.json')
-  ]).then(([pubData, awardsData, scholarData]) => {
+    safeFetch('/data/scholar-metrics.json'),
+    safeFetch('/data/journal_lists/q1.json'),
+    safeFetch('/data/journal_lists/ft50.json'),
+    safeFetch('/data/journal_lists/utd24.json')
+  ]).then(([pubData, awardsData, scholarData, q1ListRaw, ft50ListRaw, utd24ListRaw]) => {
     const pubs = Array.isArray(pubData) ? pubData : (pubData && pubData.publications) || [];
     const awards = Array.isArray(awardsData) ? awardsData : [];
+    const scholarPubs = (scholarData && scholarData.individualPublications) || [];
+
+    const q1List = flattenJournalList(q1ListRaw);
+    const ft50List = flattenJournalList(ft50ListRaw);
+    const utd24List = flattenJournalList(utd24ListRaw);
+    const combinedTopList = unique([...q1List, ...ft50List, ...utd24List]).filter(Boolean);
 
     const journals = countByType(pubs, 'journal');
     const conferences = countByType(pubs, 'conference');
@@ -93,19 +132,28 @@
         .filter(Boolean)
     ).sort((a, b) => a - b);
 
-    const q1Patterns = [
-      /mis quarterly/, 
-      /journal of management information systems/, 
-      /acm tmis/, 
-      /transactions on management information systems/, 
-      /information systems frontiers/
-    ];
-    const ft50Patterns = [/mis quarterly/, /journal of management information systems/];
-    const utd24Patterns = [/mis quarterly/, /journal of management information systems/];
+    const topListPubs = (() => {
+      const seen = new Set();
+      const merged = [];
+      const add = (pub) => {
+        const titleKey = normalize(pub.title).replace(/[^a-z0-9]+/g, '');
+        if (!titleKey || seen.has(titleKey)) return;
+        seen.add(titleKey);
+        merged.push(pub);
+      };
 
-    const q1 = countByVenue(pubs, q1Patterns);
-    const ft50 = countByVenue(pubs, ft50Patterns);
-    const utd24 = countByVenue(pubs, utd24Patterns);
+      pubs.forEach(add);
+      scholarPubs.forEach((pub) => {
+        if (!matchesList(pub.venue || '', combinedTopList)) return;
+        add({ title: pub.title || '', venue: pub.venue || '', type: 'journal' });
+      });
+
+      return merged;
+    })();
+
+    const q1 = countByVenue(topListPubs, q1List);
+    const ft50 = countByVenue(topListPubs, ft50List);
+    const utd24 = countByVenue(topListPubs, utd24List);
 
     const awardTotal = awards.length || 1;
 
