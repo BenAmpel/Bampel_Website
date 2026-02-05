@@ -169,6 +169,7 @@
       <div class="col-md-12">
         <div class="section-subheading">{{ i18n "education" | markdownify }}</div>
         <div class="edu-path">
+          <div class="edu-scroll-hint" aria-hidden="true">Scroll →</div>
           {{ range sort .courses "start_year" }}
           <div class="edu-step">
             {{ if .start_year }}

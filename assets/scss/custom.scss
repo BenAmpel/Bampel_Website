@@ -1266,6 +1266,21 @@ section#about .edu-path,
   position: relative;
 }
 
+section#about .edu-scroll-hint,
+.wg-about .edu-scroll-hint,
+.hb-about .edu-scroll-hint {
+  position: absolute;
+  right: 12px;
+  bottom: 6px;
+  font-size: 0.55rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #00e5ff;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
 section#about .edu-step,
 .wg-about .edu-step,
 .hb-about .edu-step {
@@ -1368,6 +1383,38 @@ section#about .edu-institution,
     gap: 14px;
   }
 
+  section#about .edu-path::before,
+  .wg-about .edu-path::before,
+  .hb-about .edu-path::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 30px;
+    background: linear-gradient(90deg, rgba(10, 10, 10, 0.85), rgba(10, 10, 10, 0));
+    pointer-events: none;
+  }
+
+  section#about .edu-path::after,
+  .wg-about .edu-path::after,
+  .hb-about .edu-path::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 40px;
+    background: linear-gradient(270deg, rgba(10, 10, 10, 0.85), rgba(10, 10, 10, 0));
+    pointer-events: none;
+  }
+
+  section#about .edu-scroll-hint,
+  .wg-about .edu-scroll-hint,
+  .hb-about .edu-scroll-hint {
+    opacity: 0.75;
+  }
+
   section#about .edu-step,
   .wg-about .edu-step,
   .hb-about .edu-step {
@@ -1380,6 +1427,24 @@ body:not(.dark) .wg-about .edu-step,
 body:not(.dark) .hb-about .edu-step {
   background: rgba(255, 255, 255, 0.95);
   border-color: rgba(0, 0, 0, 0.1);
+}
+
+body:not(.dark) section#about .edu-scroll-hint,
+body:not(.dark) .wg-about .edu-scroll-hint,
+body:not(.dark) .hb-about .edu-scroll-hint {
+  color: #0b7a3e;
+}
+
+body:not(.dark) section#about .edu-path::before,
+body:not(.dark) .wg-about .edu-path::before,
+body:not(.dark) .hb-about .edu-path::before {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0));
+}
+
+body:not(.dark) section#about .edu-path::after,
+body:not(.dark) .wg-about .edu-path::after,
+body:not(.dark) .hb-about .edu-path::after {
+  background: linear-gradient(270deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0));
 }
 
 body:not(.dark) section#about .edu-year,
