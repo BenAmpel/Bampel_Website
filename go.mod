@@ -8,3 +8,5 @@ require (
 	github.com/wowchemy/wowchemy-hugo-themes/modules/wowchemy-plugin-reveal v1.0.0 // indirect
 	github.com/wowchemy/wowchemy-hugo-themes/modules/wowchemy/v5 v5.8.1-0.20230812165002-59b648791d3f
 )
+
+replace github.com/wowchemy/wowchemy-hugo-themes/modules/wowchemy-seo => ./modules/wowchemy-seo
