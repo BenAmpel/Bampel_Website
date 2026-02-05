@@ -1589,6 +1589,56 @@ section#about .bio-story-tldr,
   color: #c9d1d9;
 }
 
+section#about .bio-highlight-chips,
+.wg-about .bio-highlight-chips,
+.hb-about .bio-highlight-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+section#about .bio-chip,
+.wg-about .bio-chip,
+.hb-about .bio-chip {
+  border: 1px solid rgba(0, 229, 255, 0.4);
+  background: rgba(0, 0, 0, 0.35);
+  color: #00e5ff;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+section#about .bio-chip:hover,
+.wg-about .bio-chip:hover,
+.hb-about .bio-chip:hover {
+  border-color: rgba(0, 255, 65, 0.6);
+  color: #00ff41;
+  box-shadow: 0 0 10px rgba(0, 255, 65, 0.25);
+}
+
+section#about .bio-highlight-flash,
+.wg-about .bio-highlight-flash,
+.hb-about .bio-highlight-flash {
+  animation: bio-highlight-pulse 1.2s ease-out;
+  border-left: 2px solid rgba(0, 255, 65, 0.8);
+  padding-left: 10px;
+}
+
+@keyframes bio-highlight-pulse {
+  0% {
+    background: rgba(0, 255, 65, 0.18);
+    box-shadow: 0 0 12px rgba(0, 255, 65, 0.35);
+  }
+  100% {
+    background: transparent;
+    box-shadow: none;
+  }
+}
+
 section#about .bio-story-full,
 .wg-about .bio-story-full,
 .hb-about .bio-story-full {
@@ -1628,6 +1678,14 @@ body:not(.dark) .hb-about .bio-story-btn.is-active {
   background: rgba(11, 122, 62, 0.12);
   color: #0b7a3e;
   border-color: rgba(11, 122, 62, 0.4);
+}
+
+body:not(.dark) section#about .bio-chip,
+body:not(.dark) .wg-about .bio-chip,
+body:not(.dark) .hb-about .bio-chip {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #1a0dab;
 }
 
 // Interests list styling - comprehensive selectors for Hugo Blox

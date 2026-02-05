@@ -36,6 +36,16 @@ bio_tagline: "AI-enabled cybersecurity researcher building LLM and threat-intell
 
 bio_tldr: "Builds AI-enabled cyber threat intelligence that turns adversary chatter into action, with LLM pipelines for phishing detection and early warning signals from hacker communities."
 
+bio_highlights:
+  - label: "LLMs"
+    target: "#bio-llms"
+  - label: "Threat Intel"
+    target: "#bio-threat-intel"
+  - label: "Phishing"
+    target: "#bio-phishing"
+  - label: "Hacker Communities"
+    target: "#bio-hacker-communities"
+
 bio_badges:
   - ACM SIGMIS Doctoral Dissertation Award (ICIS 2024)
   - IEEE ISI Best Paper Awards (2020, 2023)
@@ -170,7 +180,7 @@ highlight_name: true
 
 Dr. Benjamin M. Ampel is an Assistant Professor in Computer Information Systems at Georgia State University's J. Mack Robinson School of Business. He earned his Ph.D. from the University of Arizona under Dr. Hsinchun Chen, and his dissertation *Securing Cyberspace: AI-Enabled Cyber-Adversary Defense* received the **ACM SIGMIS Doctoral Dissertation Award** at ICIS 2024.
 
-His research program builds AI-enabled cyber threat intelligence that turns adversary chatter into actionable defense. He mines hacker communities, analyzes phishing content, and develops Large Language Model applications for cybersecurity. His work appears in *MIS Quarterly*, *Journal of Management Information Systems (JMIS)*, *ACM TMIS*, *Information Systems Frontiers*, and *IEEE ISI*, receiving **Best Paper Awards** at IEEE ISI 2020 and IEEE ISI 2023.
+His research program builds <span id="bio-threat-intel"></span>AI-enabled cyber threat intelligence that turns adversary chatter into actionable defense. He <span id="bio-hacker-communities"></span>mines hacker communities, <span id="bio-phishing"></span>analyzes phishing content, and develops <span id="bio-llms"></span>Large Language Model applications for cybersecurity. His work appears in *MIS Quarterly*, *Journal of Management Information Systems (JMIS)*, *ACM TMIS*, *Information Systems Frontiers*, and *IEEE ISI*, receiving **Best Paper Awards** at IEEE ISI 2020 and IEEE ISI 2023.
 
 From 2018-2021, he served as an **NSF CyberCorps Scholarship-for-Service Fellow**. He currently serves as Associate Editor for *ACM Digital Threats: Research and Practice (DTRAP)* and on the Editorial Board of *Journal of Information Systems Education (JISE)*. He has co-chaired the AI4Cyber Workshop at ACM KDD and the HICSS Junior Faculty Consortium. In 2025, he was recognized as the Robinson College of Business **IS Cybersecurity Graduate Program Top Professor**. {style="text-align: justify;"}
 

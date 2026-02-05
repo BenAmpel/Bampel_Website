@@ -139,6 +139,13 @@
           {{ else }}
           <div class="bio-story-tldr">AI-enabled cybersecurity researcher focused on LLM-driven threat intelligence, phishing detection, and early warning signals from hacker communities.</div>
           {{ end }}
+          {{ with $person.bio_highlights }}
+          <div class="bio-highlight-chips" data-bio-chips>
+            {{ range . }}
+            <button type="button" class="bio-chip" data-target="{{ .target }}">{{ .label }}</button>
+            {{ end }}
+          </div>
+          {{ end }}
         </div>
         <div class="article-style">
           <div class="bio-story-full" data-story-full>
@@ -148,6 +155,7 @@
       </div>
     </details>
     <script src="/js/bio_story_mode.js" defer></script>
+    <script src="/js/bio_highlight_chips.js" defer></script>
     {{ end }}
 
     <div class="row">
