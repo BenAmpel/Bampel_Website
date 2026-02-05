@@ -5129,9 +5129,15 @@ body:not(.dark) .pub-filter-reset {
   white-space: pre-line;
 }
 
-.impact-card:hover::after {
+.impact-card:hover::after,
+.impact-card:focus-visible::after {
   opacity: 1;
   transform: translateY(0);
+}
+
+.impact-card:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.5);
 }
 
 body:not(.dark) .impact-card {
