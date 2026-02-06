@@ -134,25 +134,41 @@
       });
     }
 
-    const applyExternalType = (type) => {
-      if (!type) return;
+    const clearState = () => {
       root.querySelectorAll('input[type="checkbox"]').forEach((input) => {
         input.checked = false;
       });
       Object.keys(state).forEach((key) => state[key].clear());
-      const target = root.querySelector(`input[data-group=\"type\"][data-value=\"${type}\"]`);
-      if (target) {
-        target.checked = true;
-        state.type.add(type);
+    };
+
+    const applyExternalFilters = (detail) => {
+      const payload = detail || {};
+      if (!payload.type && !payload.year) return;
+
+      clearState();
+
+      if (payload.type) {
+        const typeTarget = root.querySelector(`input[data-group=\"type\"][data-value=\"${payload.type}\"]`);
+        if (typeTarget) {
+          typeTarget.checked = true;
+          state.type.add(payload.type);
+        }
       }
+
+      if (payload.year !== undefined && payload.year !== null) {
+        const yearValue = Number(payload.year);
+        const yearTarget = root.querySelector(`input[data-group=\"year\"][data-value=\"${yearValue}\"]`);
+        if (yearTarget) {
+          yearTarget.checked = true;
+          state.year.add(yearValue);
+        }
+      }
+
       applyFilters(items);
     };
 
     window.addEventListener('pub-filter:apply', (event) => {
-      const detail = event.detail || {};
-      if (detail.type) {
-        applyExternalType(detail.type);
-      }
+      applyExternalFilters(event.detail || {});
     });
 
     applyFilters(items);

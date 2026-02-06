@@ -63,7 +63,8 @@
 
 
 {{ $pubData := .Site.Data.publications }}
-{{ if and (isSet $pubData "individualPublications") (not (isSet $pubData 0)) }}
+{{ if isSet $pubData 0 }}
+{{ else if isSet $pubData "individualPublications" }}
   {{ $pubData = $pubData.individualPublications }}
 {{ end }}
 

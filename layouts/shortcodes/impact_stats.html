@@ -4,7 +4,15 @@
     <div class="impact-stats-updated" data-impact-updated>Updated --</div>
   </div>
   <div class="impact-stats-tags" data-impact-tags>
-    <span class="impact-tag">New in <span data-impact-latest-year>--</span></span>
+    <button
+      type="button"
+      class="impact-tag impact-tag-action"
+      data-impact-latest-filter
+      disabled
+      aria-disabled="true">
+      New in <span data-impact-latest-year>--</span>
+    </button>
+    <span class="impact-tag impact-tag-count" data-impact-latest-count hidden>0 papers</span>
   </div>
   <div class="impact-stats-grid" data-impact-row="primary">
     <div class="impact-card" data-metric="journals" data-filter-type="journal" data-action="filter" data-tooltip="Journal articles" tabindex="0">

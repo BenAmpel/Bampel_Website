@@ -5,6 +5,8 @@
   const cards = Array.from(root.querySelectorAll('.impact-card'));
   const updatedEl = root.querySelector('[data-impact-updated]');
   const latestYearEl = root.querySelector('[data-impact-latest-year]');
+  const latestYearFilterEl = root.querySelector('[data-impact-latest-filter]');
+  const latestYearCountEl = root.querySelector('[data-impact-latest-count]');
   const baseUrl = root.getAttribute('data-baseurl') || '/';
   const prefersReducedMotion = window.matchMedia
     ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -107,13 +109,14 @@
     bar.style.transform = `scaleX(${ratio})`;
   };
 
-  const triggerFilter = (type) => {
-    if (!type) return;
+  const triggerFilter = (detail) => {
+    if (!detail) return;
+    const payload = typeof detail === 'string' ? { type: detail } : detail;
     const target = document.getElementById('publications');
     if (target) {
       target.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
     }
-    window.dispatchEvent(new CustomEvent('pub-filter:apply', { detail: { type } }));
+    window.dispatchEvent(new CustomEvent('pub-filter:apply', { detail: payload }));
   };
 
   cards.forEach((card) => {
@@ -130,11 +133,11 @@
       return;
     }
     card.setAttribute('role', 'button');
-    card.addEventListener('click', () => triggerFilter(filterType));
+    card.addEventListener('click', () => triggerFilter({ type: filterType }));
     card.addEventListener('keydown', (event) => {
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
-        triggerFilter(filterType);
+        triggerFilter({ type: filterType });
       }
     });
   });
@@ -217,8 +220,33 @@
       const updatedLabel = (scholarData && scholarData.lastUpdated) ? scholarData.lastUpdated : 'Recent';
       updatedEl.textContent = `Updated ${updatedLabel}`;
     }
-    if (latestYearEl && latestYear) {
-      latestYearEl.textContent = String(latestYear);
+    const latestYearPublications = latestYear
+      ? pubs.filter((pub) => Number(pub.year) === Number(latestYear)).length
+      : 0;
+
+    if (latestYearEl) {
+      latestYearEl.textContent = latestYear ? String(latestYear) : '--';
+    }
+    if (latestYearCountEl) {
+      if (latestYearPublications > 0) {
+        latestYearCountEl.hidden = false;
+        latestYearCountEl.textContent = `${latestYearPublications} paper${latestYearPublications === 1 ? '' : 's'}`;
+      } else {
+        latestYearCountEl.hidden = true;
+      }
+    }
+    if (latestYearFilterEl) {
+      if (latestYear && latestYearPublications > 0) {
+        latestYearFilterEl.disabled = false;
+        latestYearFilterEl.setAttribute('aria-disabled', 'false');
+        latestYearFilterEl.title = `Filter publications to ${latestYear}`;
+        latestYearFilterEl.addEventListener('click', () => {
+          triggerFilter({ year: Number(latestYear) });
+        });
+      } else {
+        latestYearFilterEl.disabled = true;
+        latestYearFilterEl.setAttribute('aria-disabled', 'true');
+      }
     }
 
     updateCard('journals', {

@@ -5169,6 +5169,22 @@ body:not(.dark) .pub-filter-reset {
   color: #00e5ff;
 }
 
+.impact-tag-action {
+  font: inherit;
+  cursor: pointer;
+}
+
+.impact-tag-action:disabled {
+  cursor: default;
+  opacity: 0.75;
+}
+
+.impact-tag-count {
+  border-color: rgba(0, 255, 65, 0.35);
+  background: rgba(0, 255, 65, 0.12);
+  color: #00ff41;
+}
+
 .impact-stats-title {
   font-size: 0.7rem;
   text-transform: uppercase;

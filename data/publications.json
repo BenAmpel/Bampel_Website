@@ -1,0 +1,441 @@
+[
+  {
+    "title": "Performance Modeling of Hyperledger Sawtooth Blockchain",
+    "authors": [
+      "Benjamin M. Ampel",
+      "Mark Patton",
+      "Hsinchun Chen"
+    ],
+    "year": 2019,
+    "type": "conference",
+    "venue": "IEEE ISI",
+    "url": "/conference_publication/sawtooth-19-isi/",
+    "date": "2019-07-01",
+    "abstract": "With the rapid development of blockchain platforms, it is important that different implementations are tested and analyzed for comparative purposes. One such implementation is Hyperledger Sawtooth, a new member of the Hyperledger family. Sawtooth blockchain is a permissioned implementation developed in part by Intel. While research has been done on Hyperledger Fabric, research on Sawtooth is not well documented. Using the Hyperledger Caliper benchmarking tool, we aim to test the performance of the blockchain and identify potential issues."
+  },
+  {
+    "title": "Identifying Vulnerable GitHub Repositories and Users in Scientific Cyberinfrastructure: An Unsupervised Graph Embedding Approach",
+    "authors": [
+      "Ben Lazarine",
+      "Sagar Samtani",
+      "Mark Patton",
+      "Hongyi Zhu",
+      "Steven Ullman",
+      "Benjamin M. Ampel",
+      "Hsinchun Chen"
+    ],
+    "year": 2020,
+    "type": "conference",
+    "venue": "IEEE ISI",
+    "url": "/conference_publication/vuln-github-isi/",
+    "date": "2020-11-01",
+    "abstract": "The scientific cyberinfrastructure community heavily relies on public internet-based systems (e.g., GitHub) to share resources and collaborate. GitHub is one of the most powerful and popular systems for open source collaboration that allows users to share and work on projects in a public space for accelerated development and deployment. Monitoring GitHub for exposed vulnerabilities can save financial cost and prevent misuse and attacks of cyberinfrastructure. Vulnerability scanners that can interface with GitHub directly can be leveraged to conduct such monitoring. This research aims to proactively identify vulnerable communities within scientific cyberinfrastructure. We use social network analysis to construct graphs representing the relationships amongst users and repositories. We leverage prevailing unsupervised graph embedding algorithms to generate graph embeddings that capture the network attributes and nodal features of our repository and user graphs. This enables the clustering of public cyberinfrastructure repositories and users that have similar network attributes and vulnerabilities. Results of this research find that major scientific cyberinfrastructures have vulnerabilities pertaining to secret leakage and insecure coding practices for high-impact genomics research. These results can help organizations address their vulnerable repositories and users in a targeted manner."
+  },
+  {
+    "title": "Labeling Hacker Exploits for Proactive Cyber Threat Intelligence: A Deep Transfer Learning Approach",
+    "authors": [
+      "Benjamin M. Ampel",
+      "Sagar Samtani",
+      "Hongyi Zhu",
+      "Steven Ullman",
+      "Hsinchun Chen"
+    ],
+    "year": 2020,
+    "type": "conference",
+    "venue": "IEEE ISI",
+    "url": "/conference_publication/dtlel-isi/",
+    "date": "2020-11-01",
+    "abstract": "With the rapid development of new technologies, vulnerabilities are at an all-time high. Companies are investing in developing Cyber Threat Intelligence (CTI) to counteract these new vulnerabilities. However, this CTI is generally reactive based on internal data. Hacker forums can provide proactive CTI value through automated analysis of new trends and exploits. One way to identify exploits is by analyzing the source code that is posted on these forums. These source code snippets are often noisy and unlabeled, making standard data labeling techniques ineffective. This study aims to design a novel framework for the automated collection and categorization of hacker forum exploit source code. We propose a deep transfer learning framework, the Deep Transfer Learning for Exploit Labeling (DTL-EL). DTL-EL leverages the learned representation from professional labeled exploits to better generalize to hacker forum exploits. This model classifies the collected hacker forum exploits into eight predefined categories for proactive and timely CTI. The results of this study indicate that DTL-EL outperforms other prominent models in hacker forum literature."
+  },
+  {
+    "title": "Smart Vulnerability Assessment for Scientific Cyberinfrastructure: An Unsupervised Graph Embedding Approach",
+    "authors": [
+      "Steven Ullman",
+      "Sagar Samtani",
+      "Ben Lazarine",
+      "Hongyi Zhu",
+      "Benjamin M. Ampel",
+      "Mark Patton",
+      "Hsinchun Chen"
+    ],
+    "year": 2020,
+    "type": "conference",
+    "venue": "IEEE ISI",
+    "url": "/conference_publication/vuln-ci-isi/",
+    "date": "2020-11-01",
+    "abstract": "The accelerated growth of computing technologies has provided interdisciplinary teams a platform for producing innovative research at an unprecedented speed. Advanced scientific cyberinfrastructures, in particular, provide data storage, applications, software, and other resources to facilitate the development of critical scientific discoveries. Users of these environments often rely on custom developed virtual machine (VM) images that are comprised of a diverse array of open source applications. These can include vulnerabilities undetectable by conventional vulnerability scanners. This research aims to identify the installed applications, their vulnerabilities, and how they vary across images in scientific cyberinfrastructure. We propose a novel unsupervised graph embedding framework that captures relationships between applications, as well as vulnerabilities identified on corresponding GitHub repositories. This embedding is used to cluster images with similar applications and vulnerabilities. We evaluate cluster quality using Silhouette, Calinski-Harabasz, and Davies-Bouldin indices, and application vulnerabilities through inspection of selected clusters. Results reveal that images pertaining to genomics research in our research testbed are at greater risk of high-severity shell spawning and data validation vulnerabilities."
+  },
+  {
+    "title": "Distilling Contextual Embeddings Into A Static Word Embedding For Improving Hacker Forum Analytics",
+    "authors": [
+      "Benjamin M. Ampel",
+      "Hsinchun Chen"
+    ],
+    "year": 2021,
+    "type": "conference",
+    "venue": "IEEE ISI",
+    "url": "/conference_publication/hack2vec-isi-2021/",
+    "date": "2021-11-01",
+    "abstract": "Hacker forums provide malicious actors with a large database of tutorials, goods, and assets to leverage for cyber-attacks. Careful research of these forums can provide tremendous benefit to the cybersecurity community through trend identification and exploit categorization. This study aims to provide a novel static word embedding, Hack2Vec, to improve performance on hacker forum classification tasks. Our proposed Hack2Vec model distills contextual representations from the seminal pre-trained language model BERT to a continuous bag-of-words model to create a highly targeted hacker forum static word embedding. The results of our experimental design indicate that Hack2Vec improves performance over prominent embeddings in accuracy, precision, recall, and F1-score for a benchmark hacker forum classification task."
+  },
+  {
+    "title": "Exploring the Evolution of Exploit-Sharing Hackers:  An Unsupervised Graph Embedding Approach",
+    "authors": [
+      "Kaeli Otto",
+      "Benjamin M. Ampel",
+      "Sagar Samtani",
+      "Hongyi Zhu",
+      "Hsinchun Chen"
+    ],
+    "year": 2021,
+    "type": "conference",
+    "venue": "IEEE ISI",
+    "url": "/conference_publication/exploit-sharing-hackers-isi/",
+    "date": "2021-11-01",
+    "abstract": "Cybercrime was estimated to cost the global economy $945 billion in 2020. Increasingly, law enforcement agencies are using social network analysis (SNA) to identify key hackers from Dark Web hacker forums for targeted investigations. However, past approaches have primarily focused on analyzing key hackers at a single point in time and use a hacker\u2019s structural features only. In this study, we propose a novel Hacker Evolution Identification Framework to identify how hackers evolve within hacker forums. The proposed framework has two novelties in its design. First, the framework captures features such as user statistics, node-level metrics, lexical measures, and post style, when representing each hacker with unsupervised graph embedding methods. Second, the framework incorporates mechanisms to align embedding spaces across multiple time-spells of data to facilitate analysis of how hackers evolve over time. Two experiments were conducted to assess the performance of prevailing graph embedding algorithms and nodal feature variations in the task of graph reconstruction in five time-spells. Results of our experiments indicate that Text-Associated Deep-Walk (TADW) with all of the proposed nodal features outperforms methods without nodal features in terms of Mean Average Precision in each time-spell. We illustrate the potential practical utility of the proposed framework with a case study on an English forum with 51,612 posts. The results produced by the framework in this case study identified key hackers posting piracy assets."
+  },
+  {
+    "title": "Identifying and Categorizing Malicious Content on Paste Sites: A Neural Topic Modeling Approach",
+    "authors": [
+      "Tala Vahedi",
+      "Benjamin M. Ampel",
+      "Sagar Samtani",
+      "Hsinchun Chen"
+    ],
+    "year": 2021,
+    "type": "conference",
+    "venue": "IEEE ISI",
+    "url": "/conference_publication/paste-site-21-isi/",
+    "date": "2021-11-01",
+    "abstract": "Malicious cyber activities impose substantial costs on the U.S. economy and global markets. Cyber-criminals often use information-sharing social media platforms such as paste sites (e.g., Pastebin) to share vast amounts of plain text content related to Personally Identifiable Information (PII), credit card numbers, exploit code, malware, and other sensitive content. Paste sites can provide targeted Cyber Threat Intelligence (CTI) about potential threats and prior breaches. In this research, we propose a novel Bidirectional Encoder Representation from Transformers (BERT) with Latent Dirichlet Allocation (LDA) model to categorize pastes automatically. Our proposed BERT-LDA model leverages a neural network transformer architecture to capture sequential dependencies when representing each sentence in a paste. BERT-LDA replaces the Bag-of-Words (BoW) approach in the conventional LDA with a Bag-of-Labels (BoL) that encompasses class labels at the sequence level. We compared the performance of the proposed BERT-LDA against the conventional LDA and BERT-LDA variants (e.g., GPT2-LDA) on 4,254,453 pastes from three paste sites. Experiment results indicate that the proposed BERT-LDA outperformed the standard LDA and each BERT-LDA variant in terms of perplexity on each paste site. Results of our BERT-LDA case study suggest that significant content relating to hacker community activities, malicious code, network and website vulnerabilities, and PII are shared on paste sites. The insights provided by this study could be used by organizations to proactively mitigate potential damage on their infrastructure."
+  },
+  {
+    "title": "Linking Common Vulnerabilities and Exposures to the MITRE ATT&CK Framework: A Self-Distillation Approach",
+    "authors": [
+      "Benjamin M. Ampel",
+      "Sagar Samtani",
+      "Steven Ullman",
+      "Hsinchun Chen"
+    ],
+    "year": 2021,
+    "type": "workshop",
+    "venue": "AI4Cyber-KDD",
+    "url": "/workshop_publication/cve-attandck-kdd-2021/",
+    "date": "2021-08-01",
+    "abstract": "Common Vulnerabilities and Exposures (CVEs) are used by cybersecurity analysts, networks, and endpoints managers to identify and address system vulnerabilities. The MITRE ATT&CK framework provides mitigation techniques for malicious tactics and can assist organizations in addressing their vulnerabilities. This paper presents a CVE Transformer (CVET) that uses fine-tuning and self-knowledge distillation to automatically link CVEs to relevant ATT&CK tactics, enabling more efficient threat assessment and prioritization of vulnerability remediation efforts."
+  },
+  {
+    "title": "The Role of AI Agents for De-Escalating Commitment in Digital Innovation Projects",
+    "authors": [
+      "Carolin Marx",
+      "Benjamin M. Ampel",
+      "Ben Lazarine"
+    ],
+    "year": 2021,
+    "type": "conference",
+    "venue": "ICIS 2021",
+    "url": "/conference_publication/paper-a-thon-2021/",
+    "date": "2021-12-01",
+    "abstract": "The increasing complexity of managerial decision-making for digital innovation activities accelerates cognitive biases like escalation of commitment (EoC). Decision aids (e.g., AI agents) can assist managers in avoiding EoC scenarios. However, how AI-based decision aids affect EoC in this context remains a critical yet understudied topic. To address this gap, we develop a theoretical model and propose a randomized controlled post-test vignette experiment with a fictive decision-making simulation to study the de-escalating effect of an AI-based decision aid in the digital innovation context. Our model accounts for moderating (AI familiarity, personality traits) and mediating (decision aid reliance) factors. By entangling the de-escalating effect of AI agent decision aid in decision-making scenarios about digital innovation projects we contribute to the digital innovation, AI agent, and the EoC literature. The future implementation of the proposed research design lays the foundation for designing AI agent decision support systems that de-bias managerial decision-making."
+  },
+  {
+    "title": "Benchmarking the Robustness of Phishing Email Detection Systems",
+    "authors": [
+      "Benjamin M. Ampel",
+      "Yang Gao",
+      "James Hu",
+      "Sagar Samtani",
+      "Hsinchun Chen"
+    ],
+    "year": 2023,
+    "type": "conference",
+    "venue": "AMCIS",
+    "url": "/conference_publication/phishing-robustness-amcis-2023/",
+    "date": "2023-08-01",
+    "abstract": "Phishing emails have emerged as one of the most common forms of social engineering attacks inflicting organizations. To combat this ever-present threat, organizations are turning toward AI-enabled phishing email detection systems (PEDS). However, the robustness of AI-enabled PEDS against adversarial text perturbations is currently unclear. In this study, we benchmark the robustness of prevailing AI-enabled PEDS against character, word, sentence, and multi-level adversarial text perturbations to quantitatively demonstrate how these systems respond to specific types of text-based attacks."
+  },
+  {
+    "title": "Disrupting Ransomware Actors on the Bitcoin Blockchain: A Graph Embedding Approach",
+    "authors": [
+      "Benjamin M. Ampel",
+      "Kaeli Otto",
+      "Sagar Samtani",
+      "Hongyi Zhu",
+      "Hsinchun Chen"
+    ],
+    "year": 2023,
+    "type": "conference",
+    "venue": "IEEE ISI",
+    "url": "/conference_publication/ransomware-bitcoin-isi-2023/",
+    "date": "2023-10-01",
+    "abstract": "Ransomware attacks continue to pose significant threats to organizations worldwide, with attackers often demanding payment in Bitcoin. This paper presents a graph embedding approach to identify and disrupt ransomware actors on the Bitcoin blockchain by analyzing transaction patterns and wallet relationships, enabling proactive intervention strategies."
+  },
+  {
+    "title": "Evading Anti-Phishing Models: A Field Note Documenting an Experience in the Machine Learning Security Evasion Competition 2022",
+    "authors": [
+      "Yang Gao",
+      "Benjamin M. Ampel",
+      "Sagar Samtani"
+    ],
+    "year": 2023,
+    "type": "journal",
+    "venue": "Digital Threats: Research and Practice",
+    "url": "/journal_publication/phish-dtrap/",
+    "date": "2023-09-01",
+    "abstract": "Although machine learning-based anti-phishing detectors have provided promising results in phishing website detection, they remain vulnerable to evasion attacks. The Machine Learning Security Evasion Competition 2022 (MLSEC 2022) provides researchers and practitioners with the opportunity to deploy evasion attacks against anti-phishing machine learning models in real-world settings. In this field note, we share our experience participating in MLSEC 2022. We manipulated the source code of ten phishing HTML pages provided by the competition using obfuscation techniques to evade anti-phishing models. Our evasion attacks employing a benign overlap strategy achieved third place in the competition with 46 out of a potential 80 points. The results of our MLSEC 2022 performance can provide valuable insights for research seeking to robustify machine learning-based anti-phishing detectors."
+  },
+  {
+    "title": "Generating Adversarial Phishing Websites to Evade Machine Learning-based Anti-Phishing Detectors: A Reinforcement Learning Approach",
+    "authors": [
+      "Yang Gao",
+      "Sagar Samtani",
+      "Hongyi Zhu",
+      "Benjamin M. Ampel",
+      "Yidong Chai"
+    ],
+    "year": 2023,
+    "type": "workshop",
+    "venue": "WDS",
+    "url": "/workshop_publication/adversarial-phishing-wds-2023/",
+    "date": "2023-10-01",
+    "abstract": "Machine learning-based anti-phishing detectors are widely deployed to protect users from malicious websites. This paper presents a reinforcement learning approach to generate adversarial phishing websites that can evade these detectors, revealing potential vulnerabilities in current defense mechanisms and informing the development of more robust detection systems."
+  },
+  {
+    "title": "Mapping Exploit Code on Paste Sites to the MITRE ATT&CK Framework: A Multi-label Transformer Approach",
+    "authors": [
+      "Benjamin M. Ampel",
+      "Tala Vahedi",
+      "Sagar Samtani",
+      "Hsinchun Chen"
+    ],
+    "year": 2023,
+    "type": "conference",
+    "venue": "IEEE ISI",
+    "url": "/conference_publication/mitre-attandck-isi-2023/",
+    "date": "2023-10-01",
+    "abstract": "Paste sites serve as repositories for sharing code snippets, including malicious exploit code. Understanding how these exploits map to known attack techniques is crucial for threat intelligence. This paper presents a multi-label transformer approach to automatically map exploit code found on paste sites to the MITRE ATT&CK framework, enabling security analysts to quickly understand the potential impact and techniques employed by attackers."
+  },
+  {
+    "title": "The Effect of Consensus Algorithm on Ethereum Price and Volume",
+    "authors": [
+      "Benjamin M. Ampel"
+    ],
+    "year": 2023,
+    "type": "conference",
+    "venue": "AMCIS",
+    "url": "/conference_publication/ethereum-amcis-2023/",
+    "date": "2023-08-01",
+    "abstract": "On September 15, 2022, Ethereum shifted from a proof-of-work to a proof-of-stake consensus algorithm. Did this shift lead to an increase in price and transaction volume? To answer this question, we used synthetic control methods to compare the pre and post trends of Ethereum price and volume. Our analysis revealed that Ethereum's shift from proof-of-work to proof-of-stake had a positive effect on price relative to the synthetic counterfactual, but a non-significant negative effect on transaction volume."
+  },
+  {
+    "title": "Why Following Friends Can Hurt You: A Replication Study",
+    "authors": [
+      "Benjamin M. Ampel",
+      "Steven Ullman"
+    ],
+    "year": 2023,
+    "type": "journal",
+    "venue": "Transactions on Replication Research",
+    "url": "/journal_publication/social-media-trr/",
+    "date": "2023-12-01",
+    "abstract": "This study is a methodological replication of the work originally published in Information Systems Research by Krasnova et al. (2015). The original work studied the effects of envy in the context of Social Network Sites (SNSs) among college-age users. We adapt the constructs and measurement items of the original survey but change the context of the SNS to Instagram instead of Facebook. We also target a sample of college-age students from the United States instead of from Germany. The results of our replication support six of the seven hypotheses from the original paper. Confirming these results reinforce the model proposed by Krasnova et al. (2015). However, our replication did not find a strong mediation effect from envy on an SNS between the intensity of social information consumption on an SNS and users\u2019 cognitive well-being. The results suggest that the difference in population, SNS, or time has led to a change in this effect, inviting further replications and new studies."
+  },
+  {
+    "title": "Creating Proactive Cyber Threat Intelligence with Hacker Exploit Labels: A Deep Transfer Learning Approach",
+    "authors": [
+      "Benjamin M. Ampel",
+      "Sagar Samtani",
+      "Hongyi Zhu",
+      "Hsinchun Chen"
+    ],
+    "year": 2024,
+    "type": "journal",
+    "venue": "MIS Quarterly",
+    "url": "/journal_publication/dtl-el-misq/",
+    "date": "2024-03-01",
+    "abstract": "The rapid proliferation of complex information systems has been met by an ever-increasing quantity of exploits that can cause irreparable cyber breaches. To mitigate these cyber threats, academia and industry have placed a significant focus on proactively identifying and labeling exploits developed by the international hacker community. However, prevailing approaches for labeling exploits in hacker forums do not leverage metadata from exploit DarkNet Markets, or public exploit repositories to enhance labeling performance. In this study, we adopted the computational design science paradigm to develop a novel information technology artifact, the Deep Transfer Learning Exploit Labeler (DTL-EL). DTL-EL incorporates a pre-initialization design, multi-layer deep transfer learning (DTL), and a self-attention mechanism to automatically label exploits in hacker forums. We rigorously evaluated the proposed DTL-EL against state-of-the-art non-DTL benchmark methods based in classical machine learning and deep learning. Results suggest that the proposed DTL-EL significantly outperforms benchmark methods based on accuracy, precision, recall, and F1-score. Our proposed DTL-EL framework provides important practical implications for key stakeholders such as cybersecurity managers, analysts, and educators."
+  },
+  {
+    "title": "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach",
+    "authors": [
+      "Benjamin M. Ampel",
+      "Sagar Samtani",
+      "Hongyi Zhu",
+      "Hsinchun Chen",
+      "Jay F. Nunamaker Jr."
+    ],
+    "year": 2024,
+    "type": "journal",
+    "venue": "Journal of Management Information Systems",
+    "url": "/journal_publication/attack-link-jmis/",
+    "date": "2024-03-01",
+    "abstract": "Cyberattacks have been increasing in volume and intensity, necessitating proactive measures. Cybersecurity risk management frameworks are deployed to provide actionable intelligence to mitigate potential threats by analyzing the available cybersecurity data. Existing frameworks, such as MITRE ATT&CK, provide timely mitigation strategies against attacker capabilities yet do not account for hacker data when developing cyber threat intelligence. Therefore, we developed a novel information technology artifact, ATT&CK-Link, which incorporates a novel transformer and multi-teacher knowledge distillation design, to link hacker threats to this broadly used framework. Here, we illustrated how hospital systems can use this framework to proactively protect their cyberinfrastructure against hacker threats. Our ATT&CK-Link framework has practical implications for cybersecurity professionals, who can implement our framework to generate strategic, operational, and tactical cyber threat intelligence. ATT&CKLink also contributes to the information systems knowledge base by providing design principles to pursue targeted cybersecurity analytics, risk management, and broader text analytics research through simultaneous multi-modal (e.g., text and code) distillation and classification."
+  },
+  {
+    "title": "The 4th Workshop on Artificial Intelligence-enabled Cybersecurity Analytics",
+    "authors": [
+      "Steven Ullman",
+      "Benjamin M. Ampel",
+      "Sagar Samtani",
+      "Shanchieh Yang",
+      "Hsinchun Chen"
+    ],
+    "year": 2024,
+    "type": "conference",
+    "venue": "ACM KDD",
+    "url": "/conference_publication/ai4cyber-kdd-2024/",
+    "date": "2024-08-26",
+    "abstract": "The 4th Workshop on Artificial Intelligence-enabled Cybersecurity Analytics (AI4Cyber) brings together researchers and practitioners to discuss the latest advances in applying AI and machine learning techniques to cybersecurity challenges, including threat detection, vulnerability analysis, and proactive defense mechanisms."
+  },
+  {
+    "title": "Email Phishing Prevention: An Explainable Nudging Approach",
+    "authors": [
+      "Mason Wagner",
+      "Benjamin M. Ampel",
+      "Matthew J. Hashim",
+      "Hsinchun Chen"
+    ],
+    "year": 2025,
+    "type": "workshop",
+    "venue": "WISP",
+    "url": "/workshop_publication/phishing-nudging-wisp-2025/",
+    "date": "2025-12-14",
+    "abstract": "Email phishing remains a persistent cybersecurity threat despite advances in technical defenses. This paper presents an explainable nudging approach for email phishing prevention, combining AI-driven threat detection with human-centric interventions. Drawing on research in behavioral economics and warning science, we develop and evaluate nudging mechanisms that help users recognize and avoid phishing attempts through interpretable warnings and educational cues. Our approach addresses the need for transparency in security systems while promoting long-term user learning beyond immediate threat detection."
+  },
+  {
+    "title": "Examining the Robustness of Machine Learning-based Phishing Website Detection: Action-Masked Reinforcement Learning for Automated Red Teaming",
+    "authors": [
+      "Yang Gao",
+      "Benjamin M. Ampel",
+      "Sagar Samtani"
+    ],
+    "year": 2025,
+    "type": "conference",
+    "venue": "IEEE SPW",
+    "url": "/conference_publication/phishing-spw-2025/",
+    "date": "2025-05-01",
+    "abstract": "Machine learning-based phishing website detectors are increasingly deployed to protect users from malicious websites. However, these detectors remain vulnerable to adversarial evasion attacks. This paper presents an action-masked reinforcement learning approach for automated red teaming to systematically evaluate the robustness of these detectors, identifying vulnerabilities that adversaries could exploit to evade detection and informing the development of more robust defense mechanisms."
+  },
+  {
+    "title": "Large Language Models for Conducting Advanced Text Analytics Information Systems Research",
+    "authors": [
+      "Benjamin M. Ampel",
+      "Chi-Heng Yang",
+      "James Hu",
+      "Hsinchun Chen"
+    ],
+    "year": 2025,
+    "type": "journal",
+    "venue": "ACM Transactions on Management Information Systems",
+    "url": "/journal_publication/llm_tmis/",
+    "date": "2025-02-07",
+    "abstract": "The exponential growth of digital content has generated massive textual datasets, necessitating the use of advanced analytical approaches. Large Language Models (LLMs) have emerged as tools that are capable of processing and extracting insights from massive unstructured textual datasets. However, how to leverage LLMs for text analytics Information Systems (IS) research is currently unclear. To assist the IS community in understanding how to operationalize LLMs, we propose a Text Analytics for Information Systems Research (TAISR) framework. Our proposed framework provides detailed recommendations grounded in IS and LLM literature on how to conduct meaningful text analytics IS research for design science, behavioral, and econometric streams. We conducted three business intelligence case studies using our TAISR framework to demonstrate its application in several IS research contexts. We also outline the potential challenges and limitations of adopting LLMs for IS. By offering a systematic approach and evidence of its utility, our TAISR framework contributes to future IS research streams looking to incorporate powerful LLMs for text analytics."
+  },
+  {
+    "title": "Large Language Models for Infrastructure as Code Vulnerability Remediation",
+    "authors": [
+      "Raul Reyes",
+      "Benjamin M. Ampel",
+      "Hsinchun Chen"
+    ],
+    "year": 2025,
+    "type": "workshop",
+    "venue": "WISP",
+    "url": "/workshop_publication/iac-vuln-wisp-2025/",
+    "date": "2025-12-14",
+    "abstract": "Infrastructure as Code (IaC) has become essential for modern DevOps practices, enabling automated provisioning and management of cloud infrastructure. However, security vulnerabilities and misconfigurations in IaC scripts pose significant risks to organizations. This paper explores the application of large language models (LLMs) for automatically detecting and remediating vulnerabilities in IaC configurations. We evaluate the effectiveness of LLMs in identifying security weaknesses and generating secure code fixes, advancing automated security solutions for cloud infrastructure management."
+  },
+  {
+    "title": "Multi-Agent Systems for Information Systems Research: A Framework for Collaborative AI-Augmented Inquiry",
+    "authors": [
+      "Benjamin M. Ampel",
+      "Steven Ullman"
+    ],
+    "year": 2025,
+    "type": "workshop",
+    "venue": "SIG Services",
+    "url": "/workshop_publication/multi-agent-sig-services-2025/",
+    "date": "2025-12-14",
+    "abstract": "Multi-agent AI systems offer promising capabilities for enhancing information systems research. This paper presents a framework for collaborative AI-augmented inquiry, demonstrating how multiple specialized AI agents can work together to support various stages of the research process, from literature review to data analysis and interpretation. We discuss the design principles for effective multi-agent research systems, including role differentiation, coordination protocols, and human-AI collaboration patterns that preserve scholarly rigor while leveraging AI capabilities."
+  },
+  {
+    "title": "Multi-Agent Systems for Information Systems Research: Provocations for AI-Augmented Scholarship",
+    "authors": [
+      "Benjamin M. Ampel",
+      "Steven Ullman"
+    ],
+    "year": 2025,
+    "type": "workshop",
+    "venue": "ICIS TREO",
+    "url": "/workshop_publication/multi-agent-treo-2025/",
+    "date": "2025-12-15",
+    "abstract": "This TREO talk explores provocative questions about the role of multi-agent AI systems in information systems scholarship. We examine the potential and pitfalls of AI-augmented research, discussing how multi-agent frameworks might transform academic inquiry while preserving scholarly rigor and ethical standards. Drawing on emerging paradigms like agentic services computing, we consider how role-differentiated AI agents can engage in collaborative problem-solving alongside human researchers."
+  },
+  {
+    "title": "A Computational Design Framework for Targeted Disruption of Hacker Communities",
+    "authors": [
+      "Benjamin M. Ampel"
+    ],
+    "year": 2026,
+    "type": "journal",
+    "venue": "Information Systems Frontiers",
+    "url": "/journal_publication/hacker-communities-isf/",
+    "date": "2026-01-01",
+    "abstract": "This paper presents a computational design framework for the targeted disruption of hacker communities. By leveraging advanced analytics and design science principles, the framework provides actionable intelligence for cybersecurity practitioners to proactively combat cyber threats emanating from underground hacker ecosystems."
+  },
+  {
+    "title": "A Domain-Adaptive Soft Prompting Framework for Multi-Type Bias Detection in News",
+    "authors": [
+      "Chengjun Zhang",
+      "Benjamin M. Ampel",
+      "Sagar Samtani"
+    ],
+    "year": 2026,
+    "type": "conference",
+    "venue": "HICSS",
+    "url": "/conference_publication/bias-detection-hicss-2026/",
+    "date": "2026-01-06",
+    "abstract": "Advances in Large Language Models (LLMs) have enabled new opportunities to automate media analysis and improve collaborative social cybersecurity. A key task is bias detection in news reporting, which is essential for promoting information fairness and reducing polarization. However, existing approaches often rely on supervised fine-tuning with labeled datasets and fail to capture domain-specific linguistic patterns, limiting scalability and generalization. To address this, we propose a lightweight, modular framework that combines domain-adaptive pretraining (DAP) with Masked Language Modeling (MLM) and soft prompt tuning to detect six types of media bias (framing, group, semantic properties, connotation, informational spin, and phrasing). Our framework leverages 401,000+ New York Times articles from 2000 to 2024 to pretrain five LLMs, followed by bias prompting with small labeled data. The approach improves F1 by 7.6% and precision by 6.8% over hard prompts on average across the six types of biases."
+  },
+  {
+    "title": "Automatic Extraction of Protected Health Information from Multilingual Hacker Communities",
+    "authors": [
+      "Cade Dacosta",
+      "Benjamin M. Ampel",
+      "Matthew Hashim",
+      "Hsinchun Chen"
+    ],
+    "year": 2026,
+    "type": "conference",
+    "venue": "HICSS",
+    "url": "/conference_publication/phi-hacker-hicss-2026/",
+    "date": "2026-01-06",
+    "abstract": "Protected Health Information (PHI, e.g., electronic health records, insurance information) is increasingly stolen in data breaches by malicious actors with the intent to sell to others in hacker communities. These actors often protect themselves by describing the content and availability of PHI data using encrypted messaging platforms (e.g., Telegram & Discord). In this research, we propose a Named Entity Recognition Framework for PHI (NERF-PHI) to systematically analyze PHI-related hacker conversations. We collected more than three million multilingual hacker posts from Discord servers and Telegram groups. Utilizing open-source machine translation tools, we translated conversations to English and extracted information related to vulnerable individuals and medical entities. Results suggest that encoder-based Large Language Models show significant promise for extracting PHI-related information from hacker communities."
+  },
+  {
+    "title": "Automatically Detecting Voice Phishing: A Large Audio Model Approach",
+    "authors": [
+      "Benjamin M. Ampel",
+      "Sagar Samtani",
+      "Hsinchun Chen"
+    ],
+    "year": 2026,
+    "type": "journal",
+    "venue": "MIS Quarterly",
+    "url": "/journal_publication/voice-phishing-misq/",
+    "date": "2026-01-01",
+    "abstract": "Voice phishing (vishing) attacks have become increasingly sophisticated, exploiting audio-based communication channels to deceive victims. This paper presents a large audio model approach for automatically detecting voice phishing calls, advancing the field of AI-enabled cybersecurity defense against emerging audio-based threats."
+  },
+  {
+    "title": "Seeing Is Not Believing: A Deepfake Video Call Scam at Pan-Asia Trading",
+    "authors": [
+      "Benjamin M. Ampel"
+    ],
+    "year": 2026,
+    "type": "journal",
+    "venue": "Journal of Information Systems Education",
+    "url": "/journal_publication/deepfake-jise/",
+    "date": "2026-03-01",
+    "abstract": "This teaching case examines a deepfake video call scam that targeted Pan-Asia Trading, illustrating the emerging cybersecurity threats posed by AI-generated synthetic media. The case provides students with a hands-on opportunity to analyze the attack vectors, organizational vulnerabilities, and defensive strategies against deepfake-enabled social engineering attacks."
+  }
+]
