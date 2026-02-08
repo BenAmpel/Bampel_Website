@@ -72,9 +72,11 @@ def build_front_matter(pub, section):
     abstract = pub.get("abstract", "")
     doi = pub.get("doi", "") or ""
 
+    escaped_title = title.replace('"', '\\"')
+    
     lines = [
         "---",
-        f'title: "{title.replace("\"", "\\\"")}"',
+        f'title: "{escaped_title}"',
         "",
         "authors:",
     ]
