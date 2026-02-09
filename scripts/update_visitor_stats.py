@@ -14,7 +14,8 @@ from google.oauth2 import service_account
 OUTPUT_FILE = "static/data/visitor_stats.json"
 PROPERTY_ID = os.environ.get("GA4_PROPERTY_ID")
 KEY_JSON_STR = os.environ.get("GA4_KEY_JSON")
-EARLIEST_DATE = os.environ.get("2015-08-14")
+EARLIEST_DATE = (os.environ.get("GA4_EARLIEST_DATE") or "").strip() or "2015-08-14"
+assert EARLIEST_DATE, "EARLIEST_DATE resolved to empty; check GA4_EARLIEST_DATE env var"
 
 def fetch_analytics():
     if not PROPERTY_ID or not KEY_JSON_STR:
