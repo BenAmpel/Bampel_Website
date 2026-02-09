@@ -6,115 +6,505 @@
     },
     {
       "month": "202602",
-      "visitors": 26
+      "visitors": 90
     }
   ],
   "top_locations": [
     {
       "city": "Lanzhou",
+      "region": "Gansu",
       "country": "China",
-      "visitors": 29
+      "visitors": 75
     },
     {
       "city": "(not set)",
-      "country": "United States",
-      "visitors": 4
-    },
-    {
-      "city": "(not set)",
+      "region": "(not set)",
       "country": "China",
-      "visitors": 3
+      "visitors": 5
     },
     {
       "city": "Arlington",
+      "region": "Virginia",
       "country": "United States",
       "visitors": 3
     },
     {
       "city": "Boardman",
+      "region": "Oregon",
       "country": "United States",
       "visitors": 3
     },
     {
       "city": "(not set)",
+      "region": "(not set)",
       "country": "(not set)",
       "visitors": 2
     },
     {
+      "city": "(not set)",
+      "region": "Virginia",
+      "country": "United States",
+      "visitors": 2
+    },
+    {
+      "city": "Ashburn",
+      "region": "Virginia",
+      "country": "United States",
+      "visitors": 2
+    },
+    {
       "city": "Hanoi",
+      "region": "Hanoi",
       "country": "Vietnam",
       "visitors": 2
     },
     {
+      "city": "Phoenix",
+      "region": "Arizona",
+      "country": "United States",
+      "visitors": 2
+    },
+    {
+      "city": "Singapore",
+      "region": "(not set)",
+      "country": "Singapore",
+      "visitors": 2
+    },
+    {
       "city": "Sulaymaniyah",
+      "region": "(not set)",
       "country": "Iraq",
       "visitors": 2
     },
     {
       "city": "(not set)",
+      "region": "(not set)",
+      "country": "United States",
+      "visitors": 1
+    },
+    {
+      "city": "(not set)",
+      "region": "Florida",
+      "country": "United States",
+      "visitors": 1
+    },
+    {
+      "city": "(not set)",
+      "region": "Kandal Province",
       "country": "Cambodia",
       "visitors": 1
     },
     {
-      "city": "Ashburn",
+      "city": "Albany",
+      "region": "New York",
+      "country": "United States",
+      "visitors": 1
+    },
+    {
+      "city": "Arlington",
+      "region": "Texas",
       "country": "United States",
       "visitors": 1
     },
     {
       "city": "Atlanta",
+      "region": "Georgia",
       "country": "United States",
+      "visitors": 1
+    },
+    {
+      "city": "Bainbridge",
+      "region": "Georgia",
+      "country": "United States",
+      "visitors": 1
+    },
+    {
+      "city": "Cambridge",
+      "region": "England",
+      "country": "United Kingdom",
       "visitors": 1
     },
     {
       "city": "College Park",
+      "region": "Georgia",
       "country": "United States",
       "visitors": 1
+    }
+  ],
+  "top_locations_30": [
+    {
+      "city": "Lanzhou",
+      "region": "Gansu",
+      "country": "China",
+      "visitors": 75
     },
     {
-      "city": "Ha Long",
+      "city": "(not set)",
+      "region": "(not set)",
+      "country": "China",
+      "visitors": 5
+    },
+    {
+      "city": "Arlington",
+      "region": "Virginia",
+      "country": "United States",
+      "visitors": 3
+    },
+    {
+      "city": "Boardman",
+      "region": "Oregon",
+      "country": "United States",
+      "visitors": 3
+    },
+    {
+      "city": "(not set)",
+      "region": "(not set)",
+      "country": "(not set)",
+      "visitors": 2
+    },
+    {
+      "city": "(not set)",
+      "region": "Virginia",
+      "country": "United States",
+      "visitors": 2
+    },
+    {
+      "city": "Ashburn",
+      "region": "Virginia",
+      "country": "United States",
+      "visitors": 2
+    },
+    {
+      "city": "Hanoi",
+      "region": "Hanoi",
       "country": "Vietnam",
-      "visitors": 1
-    },
-    {
-      "city": "Johns Creek",
-      "country": "United States",
-      "visitors": 1
-    },
-    {
-      "city": "Jupiter",
-      "country": "United States",
-      "visitors": 1
-    },
-    {
-      "city": "Kanawha",
-      "country": "United States",
-      "visitors": 1
-    },
-    {
-      "city": "Madrid",
-      "country": "Spain",
-      "visitors": 1
-    },
-    {
-      "city": "Manama",
-      "country": "Bahrain",
-      "visitors": 1
+      "visitors": 2
     },
     {
       "city": "Phoenix",
+      "region": "Arizona",
+      "country": "United States",
+      "visitors": 2
+    },
+    {
+      "city": "Singapore",
+      "region": "(not set)",
+      "country": "Singapore",
+      "visitors": 2
+    },
+    {
+      "city": "Sulaymaniyah",
+      "region": "(not set)",
+      "country": "Iraq",
+      "visitors": 2
+    },
+    {
+      "city": "(not set)",
+      "region": "(not set)",
       "country": "United States",
       "visitors": 1
     },
     {
-      "city": "Quito",
-      "country": "Ecuador",
+      "city": "(not set)",
+      "region": "Florida",
+      "country": "United States",
+      "visitors": 1
+    },
+    {
+      "city": "(not set)",
+      "region": "Kandal Province",
+      "country": "Cambodia",
+      "visitors": 1
+    },
+    {
+      "city": "Albany",
+      "region": "New York",
+      "country": "United States",
+      "visitors": 1
+    },
+    {
+      "city": "Arlington",
+      "region": "Texas",
+      "country": "United States",
+      "visitors": 1
+    },
+    {
+      "city": "Atlanta",
+      "region": "Georgia",
+      "country": "United States",
+      "visitors": 1
+    },
+    {
+      "city": "Bainbridge",
+      "region": "Georgia",
+      "country": "United States",
+      "visitors": 1
+    },
+    {
+      "city": "Cambridge",
+      "region": "England",
+      "country": "United Kingdom",
+      "visitors": 1
+    },
+    {
+      "city": "College Park",
+      "region": "Georgia",
+      "country": "United States",
+      "visitors": 1
+    }
+  ],
+  "top_locations_90": [
+    {
+      "city": "Lanzhou",
+      "region": "Gansu",
+      "country": "China",
+      "visitors": 75
+    },
+    {
+      "city": "(not set)",
+      "region": "(not set)",
+      "country": "China",
+      "visitors": 5
+    },
+    {
+      "city": "Arlington",
+      "region": "Virginia",
+      "country": "United States",
+      "visitors": 3
+    },
+    {
+      "city": "Boardman",
+      "region": "Oregon",
+      "country": "United States",
+      "visitors": 3
+    },
+    {
+      "city": "(not set)",
+      "region": "(not set)",
+      "country": "(not set)",
+      "visitors": 2
+    },
+    {
+      "city": "(not set)",
+      "region": "Virginia",
+      "country": "United States",
+      "visitors": 2
+    },
+    {
+      "city": "Ashburn",
+      "region": "Virginia",
+      "country": "United States",
+      "visitors": 2
+    },
+    {
+      "city": "Hanoi",
+      "region": "Hanoi",
+      "country": "Vietnam",
+      "visitors": 2
+    },
+    {
+      "city": "Phoenix",
+      "region": "Arizona",
+      "country": "United States",
+      "visitors": 2
+    },
+    {
+      "city": "Singapore",
+      "region": "(not set)",
+      "country": "Singapore",
+      "visitors": 2
+    },
+    {
+      "city": "Sulaymaniyah",
+      "region": "(not set)",
+      "country": "Iraq",
+      "visitors": 2
+    },
+    {
+      "city": "(not set)",
+      "region": "(not set)",
+      "country": "United States",
+      "visitors": 1
+    },
+    {
+      "city": "(not set)",
+      "region": "Florida",
+      "country": "United States",
+      "visitors": 1
+    },
+    {
+      "city": "(not set)",
+      "region": "Kandal Province",
+      "country": "Cambodia",
+      "visitors": 1
+    },
+    {
+      "city": "Albany",
+      "region": "New York",
+      "country": "United States",
+      "visitors": 1
+    },
+    {
+      "city": "Arlington",
+      "region": "Texas",
+      "country": "United States",
+      "visitors": 1
+    },
+    {
+      "city": "Atlanta",
+      "region": "Georgia",
+      "country": "United States",
+      "visitors": 1
+    },
+    {
+      "city": "Bainbridge",
+      "region": "Georgia",
+      "country": "United States",
+      "visitors": 1
+    },
+    {
+      "city": "Cambridge",
+      "region": "England",
+      "country": "United Kingdom",
+      "visitors": 1
+    },
+    {
+      "city": "College Park",
+      "region": "Georgia",
+      "country": "United States",
+      "visitors": 1
+    }
+  ],
+  "top_locations_all": [
+    {
+      "city": "Lanzhou",
+      "region": "Gansu",
+      "country": "China",
+      "visitors": 75
+    },
+    {
+      "city": "(not set)",
+      "region": "(not set)",
+      "country": "China",
+      "visitors": 5
+    },
+    {
+      "city": "Arlington",
+      "region": "Virginia",
+      "country": "United States",
+      "visitors": 3
+    },
+    {
+      "city": "Boardman",
+      "region": "Oregon",
+      "country": "United States",
+      "visitors": 3
+    },
+    {
+      "city": "(not set)",
+      "region": "(not set)",
+      "country": "(not set)",
+      "visitors": 2
+    },
+    {
+      "city": "(not set)",
+      "region": "Virginia",
+      "country": "United States",
+      "visitors": 2
+    },
+    {
+      "city": "Ashburn",
+      "region": "Virginia",
+      "country": "United States",
+      "visitors": 2
+    },
+    {
+      "city": "Hanoi",
+      "region": "Hanoi",
+      "country": "Vietnam",
+      "visitors": 2
+    },
+    {
+      "city": "Phoenix",
+      "region": "Arizona",
+      "country": "United States",
+      "visitors": 2
+    },
+    {
+      "city": "Singapore",
+      "region": "(not set)",
+      "country": "Singapore",
+      "visitors": 2
+    },
+    {
+      "city": "Sulaymaniyah",
+      "region": "(not set)",
+      "country": "Iraq",
+      "visitors": 2
+    },
+    {
+      "city": "(not set)",
+      "region": "(not set)",
+      "country": "United States",
+      "visitors": 1
+    },
+    {
+      "city": "(not set)",
+      "region": "Florida",
+      "country": "United States",
+      "visitors": 1
+    },
+    {
+      "city": "(not set)",
+      "region": "Kandal Province",
+      "country": "Cambodia",
+      "visitors": 1
+    },
+    {
+      "city": "Albany",
+      "region": "New York",
+      "country": "United States",
+      "visitors": 1
+    },
+    {
+      "city": "Arlington",
+      "region": "Texas",
+      "country": "United States",
+      "visitors": 1
+    },
+    {
+      "city": "Atlanta",
+      "region": "Georgia",
+      "country": "United States",
+      "visitors": 1
+    },
+    {
+      "city": "Bainbridge",
+      "region": "Georgia",
+      "country": "United States",
+      "visitors": 1
+    },
+    {
+      "city": "Cambridge",
+      "region": "England",
+      "country": "United Kingdom",
+      "visitors": 1
+    },
+    {
+      "city": "College Park",
+      "region": "Georgia",
+      "country": "United States",
       "visitors": 1
     }
   ],
   "top_pages": [
     {
       "path": "/",
-      "views": 113
+      "views": 204
+    },
+    {
+      "path": "/journal_publication/deepfake-jise/",
+      "views": 7
     },
     {
       "path": "/event/",
@@ -125,8 +515,20 @@
       "views": 4
     },
     {
+      "path": "/journal_publication/voice-phishing-misq/",
+      "views": 4
+    },
+    {
       "path": "/publication_types/2/",
       "views": 4
+    },
+    {
+      "path": "/conference_publication/phi-hacker-hicss-2026/",
+      "views": 3
+    },
+    {
+      "path": "/conference_publication/phishing-spw-2025/",
+      "views": 3
     },
     {
       "path": "/tags/ai-security/",
@@ -135,34 +537,18 @@
     {
       "path": "/tags/text-analytics",
       "views": 3
-    },
-    {
-      "path": "/journal_publication/voice-phishing-misq/",
-      "views": 2
-    },
-    {
-      "path": "/publication/ampel-2025-voice-phishing/",
-      "views": 2
-    },
-    {
-      "path": "/publication/page/2/",
-      "views": 2
-    },
-    {
-      "path": "/conference_publication/ai4cyber-kdd-2024/",
-      "views": 1
     }
   ],
   "devices": [
     {
       "device": "desktop",
-      "users": 52
+      "users": 114
     },
     {
       "device": "mobile",
-      "users": 5
+      "users": 6
     }
   ],
-  "total_last_30_days": 60,
-  "lifetime_total": 57
+  "total_last_30_days": 120,
+  "lifetime_total": 120
 }
