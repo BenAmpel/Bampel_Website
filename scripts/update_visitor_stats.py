@@ -14,6 +14,7 @@ from google.oauth2 import service_account
 OUTPUT_FILE = "static/data/visitor_stats.json"
 PROPERTY_ID = os.environ.get("GA4_PROPERTY_ID")
 KEY_JSON_STR = os.environ.get("GA4_KEY_JSON")
+EARLIEST_DATE = os.environ.get("GA4_EARLIEST_DATE", "2015-08-13")
 
 def fetch_analytics():
     if not PROPERTY_ID or not KEY_JSON_STR:
@@ -22,7 +23,7 @@ def fetch_analytics():
 
     try:
         info = json.loads(KEY_JSON_STR)
-        credentials = service_account.Credentials.from_service_account_info(info)
+        credentials = service_account.Credentials.from_service_account_info(info, scopes=["https://www.googleapis.com/auth/analytics.readonly"])
         client = BetaAnalyticsDataClient(credentials=credentials)
     except Exception as e:
         print(f"Auth Error: {e}")
@@ -46,7 +47,8 @@ def fetch_analytics():
             dimensions=[Dimension(name="city"), Dimension(name="region"), Dimension(name="country")],
             metrics=[Metric(name="totalUsers")],
             date_ranges=[DateRange(start_date=start_date, end_date=end_date)],
-            limit=limit
+            limit=limit,
+            order_bys=[OrderBy(metric=OrderBy.MetricOrderBy(metric_name="totalUsers"), desc=True)],
         )
         resp = client.run_report(req)
         return [
@@ -61,7 +63,7 @@ def fetch_analytics():
 
     location_data_30 = fetch_locations("30daysAgo")
     location_data_90 = fetch_locations("90daysAgo")
-    location_data_all = fetch_locations("2000-01-01")
+    location_data_all = fetch_locations(EARLIEST_DATE)
 
     # 3. Top Pages (FIXED: Moved desc=True to OrderBy parent)
     page_req = RunReportRequest(
@@ -105,7 +107,7 @@ def fetch_analytics():
     lifetime_req = RunReportRequest(
         property=f"properties/{PROPERTY_ID}",
         metrics=[Metric(name="totalUsers")],
-        date_ranges=[DateRange(start_date="2000-01-01", end_date="today")]
+        date_ranges=[DateRange(start_date=EARLIEST_DATE, end_date="today")]
     )
     lifetime_resp = client.run_report(lifetime_req)
     lifetime_total = 0
