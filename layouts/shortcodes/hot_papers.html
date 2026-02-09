@@ -1,0 +1,29 @@
+{{- $data := dict "lastUpdated" "" "papers" (slice) -}}
+{{- if fileExists "static/data/hot_papers.json" -}}
+  {{- $data = readFile "static/data/hot_papers.json" | transform.Unmarshal -}}
+{{- end -}}
+
+<div class="hot-papers-section" style="margin: 2rem 0;">
+  <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 1rem; border-bottom: 2px solid var(--primary-color); padding-bottom: 0.5rem;">
+    <h3 style="margin: 0; font-size: 1.25rem;">🔥 Trending Research</h3>
+    <span style="font-size: 0.8rem; color: var(--text-muted);">Updated: {{ $data.lastUpdated }}</span>
+  </div>
+
+  <div class="grid-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+    {{ range $data.papers }}
+    <a href="{{ .url }}" class="card-simple" style="display: block; text-decoration: none; color: inherit; padding: 1.5rem; border: 1px solid var(--border-color); border-radius: 8px; transition: all 0.2s ease-in-out; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+      
+      <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--primary-color); margin-bottom: 0.5rem;">
+        {{ .venue }} {{ if .year }}• {{ .year }}{{ end }}
+      </div>
+      
+      <h4 style="margin: 0 0 0.75rem 0; font-size: 1.1rem; line-height: 1.4;">{{ .title }}</h4>
+      
+      <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--text-muted); background: var(--light-gray); padding: 0.25rem 0.5rem; border-radius: 4px; width: fit-content;">
+        <span style="font-weight: bold; color: #28a745;">▲ {{ .metrics.monthly }}</span>
+        <span>citations this month</span>
+      </div>
+    </a>
+    {{ end }}
+  </div>
+</div>
