@@ -25,7 +25,7 @@ jobs:
       
       - name: Install dependencies
         run: |
-          pip install google-search-results google-analytics-data google-auth networkx matplotlib requests pyyaml
+          pip install google-search-results google-analytics-data google-auth networkx matplotlib requests pyyaml reportlab
 
       - name: Fetch Website Analytics
         env:
@@ -54,6 +54,9 @@ jobs:
         env:
           SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
         run: python scripts/update_scholar_metrics.py
+
+      - name: Generate Research Summary PDF
+        run: python scripts/generate_research_summary_pdf.py
 
       - name: Build Dashboard Network Metrics
         run: python scripts/build_dashboard_metrics.py
