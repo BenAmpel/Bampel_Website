@@ -27,6 +27,12 @@ jobs:
         run: |
           pip install google-search-results google-analytics-data google-auth networkx matplotlib requests pyyaml
 
+      - name: Fetch Website Analytics
+        env:
+          GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
+          GA4_KEY_JSON: ${{ secrets.GA4_KEY_JSON }}
+        run: python scripts/update_visitor_stats.py
+
       - name: Update Publications Index
         run: python scripts/build_publications_json.py
 
@@ -54,12 +60,6 @@ jobs:
 
       - name: Generate Impact Dashboard Images
         run: python scripts/generate_dashboard.py
-      
-      - name: Fetch Website Analytics
-        env:
-          GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
-          GA4_KEY_JSON: ${{ secrets.GA4_KEY_JSON }}
-        run: python scripts/update_visitor_stats.py
       
       - name: Commit and push changes
         run: |
