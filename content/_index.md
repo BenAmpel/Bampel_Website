@@ -19,6 +19,8 @@ sections:
       text: |
         {{< impact_stats >}}
 
+        {{< hot_papers >}}
+
         {{< featured_publication >}}
         
         **Selected Venues:** MISQ • JMIS • ACM TMIS • ISF • IEEE ISI • HICSS • AMCIS • ICIS • ACM KDD
