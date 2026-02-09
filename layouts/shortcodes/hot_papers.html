@@ -5,7 +5,7 @@
 
 <div class="hot-papers-section" style="margin: 2rem 0;">
   <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 1rem; border-bottom: 2px solid var(--primary-color); padding-bottom: 0.5rem;">
-    <h3 style="margin: 0; font-size: 1.25rem;">🔥 Trending Research</h3>
+    <h3 style="margin: 0; font-size: 1.25rem;">Trending Research (Last Two Months)</h3>
     <span style="font-size: 0.8rem; color: var(--text-muted);">Updated: {{ $data.lastUpdated }}</span>
   </div>
 
@@ -21,7 +21,7 @@
       
       <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--text-muted); background: var(--light-gray); padding: 0.25rem 0.5rem; border-radius: 4px; width: fit-content;">
         <span style="font-weight: bold; color: #28a745;">▲ {{ .metrics.monthly }}</span>
-        <span>citations (prior 4 weeks)</span>
+        <span>citations</span>
       </div>
     </a>
     {{ end }}

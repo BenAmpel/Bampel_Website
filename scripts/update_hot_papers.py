@@ -21,8 +21,8 @@ OUTPUT_FILE = SCRIPT_DIR.parent / "static" / "data" / "hot_papers.json"
 
 # Number of top papers by rolling citation growth to include
 TOP_N = 3
-# Rolling window: citations in the prior 4 weeks (latest snapshot minus 4 weeks ago)
-ROLLING_WEEKS = 4
+# Rolling window: citations in the prior 8 weeks (latest snapshot minus 8 weeks ago)
+ROLLING_WEEKS = 8
 
 # Date column pattern (YYYY-MM-DD, optional trailing space)
 DATE_COL_RE = re.compile(r"^\s*(\d{4}-\d{2}-\d{2})\s*$")
