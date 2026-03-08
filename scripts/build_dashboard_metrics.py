@@ -10,6 +10,7 @@ Outputs:
 from __future__ import annotations
 
 import json
+import networkx as nx
 import re
 from collections import defaultdict
 from datetime import datetime
@@ -123,7 +124,8 @@ def compute_centrality(publications):
             'maxLinks': {'topic': 1, 'venue': 1, 'author': 1}
         }
 
-    adj = [[] for _ in range(n)]
+    graph = nx.Graph()
+    graph.add_nodes_from(range(n))
     degrees = [0] * n
     topic_links = [0] * n
     venue_links = [0] * n
@@ -161,82 +163,29 @@ def compute_centrality(publications):
                 author_links[j] += common_authors
 
             if weight > 0.5:
-                adj[i].append(j)
-                adj[j].append(i)
+                graph.add_edge(i, j, weight=weight)
                 degrees[i] += 1
                 degrees[j] += 1
 
-    def compute_eigen():
-        scores = [1.0] * n
-        for _ in range(10):
-            next_scores = [0.0] * n
-            for i in range(n):
-                for nbr in adj[i]:
-                    next_scores[i] += scores[nbr]
-            max_val = max(next_scores) or 1
-            scores = [v / max_val for v in next_scores]
-        return scores
-
-    eigen_scores = compute_eigen()
-
-    betweenness = [0] * n
-    for s in range(n):
-        queue = [s]
-        preds = [[] for _ in range(n)]
-        levels = [-1] * n
-        levels[s] = 0
-        while queue:
-            v = queue.pop(0)
-            for w in adj[v]:
-                if levels[w] == -1:
-                    levels[w] = levels[v] + 1
-                    queue.append(w)
-                if levels[w] == levels[v] + 1:
-                    preds[w].append(v)
-        for i in range(n):
-            if i != s and levels[i] > 0:
-                for p in preds[i]:
-                    betweenness[p] += 1
-
-    edge_count = sum(degrees) / 2
-    density = (2 * edge_count) / (n * (n - 1)) if n > 1 else 0
-
-    total_dist = 0
-    total_pairs = 0
-    for i in range(n):
-        dist = [-1] * n
-        dist[i] = 0
-        queue = [i]
-        while queue:
-            v = queue.pop(0)
-            for w in adj[v]:
-                if dist[w] == -1:
-                    dist[w] = dist[v] + 1
-                    queue.append(w)
-        for j in range(i + 1, n):
-            if dist[j] > 0:
-                total_dist += dist[j]
-                total_pairs += 1
-
-    avg_path = (total_dist / total_pairs) if total_pairs else 0
-
-    adj_sets = [set(lst) for lst in adj]
-    total_cluster = 0
-    cluster_count = 0
-    for i in range(n):
-        neighbors = adj[i]
-        k = len(neighbors)
-        if k < 2:
-            continue
-        links = 0
-        for a in range(k):
-            for b in range(a + 1, k):
-                if neighbors[b] in adj_sets[neighbors[a]]:
-                    links += 1
-        total_cluster += (2 * links) / (k * (k - 1))
-        cluster_count += 1
-
-    clustering_coeff = (total_cluster / cluster_count) if cluster_count else 0
+    if graph.number_of_edges():
+        try:
+            eigen_map = nx.eigenvector_centrality_numpy(graph, weight="weight")
+        except Exception:
+            eigen_map = nx.eigenvector_centrality(graph, max_iter=500, weight="weight")
+        betweenness_map = nx.betweenness_centrality(graph, normalized=False, weight=None)
+        density = nx.density(graph)
+        clustering_coeff = nx.average_clustering(graph)
+        largest_component = max(nx.connected_components(graph), key=len)
+        if len(largest_component) > 1:
+            avg_path = nx.average_shortest_path_length(graph.subgraph(largest_component))
+        else:
+            avg_path = 0
+    else:
+        eigen_map = {index: 0 for index in range(n)}
+        betweenness_map = {index: 0 for index in range(n)}
+        density = 0
+        clustering_coeff = 0
+        avg_path = 0
 
     centrality_info = []
     for i, pub in enumerate(publications):
@@ -246,8 +195,8 @@ def compute_centrality(publications):
             'year': ensure_int(pub.get('year')),
             'venue': pub.get('venue'),
             'citations': int(pub.get('citations') or 0),
-            'eigen': eigen_scores[i],
-            'between': betweenness[i],
+            'eigen': float(eigen_map.get(i, 0)),
+            'between': float(betweenness_map.get(i, 0)),
             'degree': degrees[i],
             'topicLinks': topic_links[i],
             'venueLinks': venue_links[i],

@@ -61,6 +61,9 @@ jobs:
       - name: Build Dashboard Network Metrics
         run: python scripts/build_dashboard_metrics.py
 
+      - name: Build Dashboard Payload
+        run: python scripts/build_dashboard_payload.py
+
       - name: Generate Impact Dashboard Images
         run: python scripts/generate_dashboard.py
 
@@ -73,7 +76,7 @@ jobs:
           git config --local user.name "github-actions[bot]"
           
           # Stage the specific metric files
-          git add static/data/publications.json static/data/scholar-metrics.json static/data/visitor_stats.json static/data/altmetric.json static/data/dashboard_network.json static/data/hot_papers.json
+          git add static/data/publications.json static/data/scholar-metrics.json static/data/visitor_stats.json static/data/altmetric.json static/data/dashboard_network.json static/data/dashboard_payload.json static/data/hot_papers.json
           git add content/journal_publication content/conference_publication content/workshop_publication
           git add static/images/impact-dashboard.png static/images/impact-dashboard-dark.png
           

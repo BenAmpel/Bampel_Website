@@ -1,303 +1,141 @@
 (function () {
-  const root = document.querySelector('[data-impact-stats]');
+  const root = document.querySelector("[data-impact-stats]");
   if (!root) return;
 
-  const cards = Array.from(root.querySelectorAll('.impact-card'));
-  const updatedEl = root.querySelector('[data-impact-updated]');
-  const latestYearEl = root.querySelector('[data-impact-latest-year]');
-  const latestYearFilterEl = root.querySelector('[data-impact-latest-filter]');
-  const latestYearCountEl = root.querySelector('[data-impact-latest-count]');
-  const baseUrl = root.getAttribute('data-baseurl') || '/';
+  const cards = Array.from(root.querySelectorAll(".impact-card"));
+  const updatedEl = root.querySelector("[data-impact-updated]");
+  const latestYearEl = root.querySelector("[data-impact-latest-year]");
+  const latestYearFilterEl = root.querySelector("[data-impact-latest-filter]");
+  const latestYearCountEl = root.querySelector("[data-impact-latest-count]");
+  const baseUrl = root.getAttribute("data-baseurl") || "/";
   const prefersReducedMotion = window.matchMedia
-    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
     : false;
+
   const normalizeBase = (value) => {
-    if (!value) return '/';
-    if (!value.endsWith('/')) return `${value}/`;
-    return value;
+    if (!value) return "/";
+    return value.endsWith("/") ? value : `${value}/`;
   };
+
   const base = normalizeBase(baseUrl);
 
   const safeFetch = (url) =>
-    fetch(url)
-      .then((r) => (r.ok ? r.json() : null))
+    fetch(url, { cache: "force-cache" })
+      .then((response) => (response.ok ? response.json() : null))
       .catch(() => null);
-
-  const normalize = (value) => (value || '').toString().toLowerCase();
-
-  const cleanVenueName = (value) => {
-    if (!value) return '';
-    let v = value.split(',')[0].trim();
-    v = v.replace(/\s+forthcoming$/i, '').trim();
-    v = v.replace(/\s+in press$/i, '').trim();
-    v = v.replace(/\s+\d+(\s*\(\d+\))?.*$/i, '').trim();
-    v = v.replace(/management information systems quarterly\s*\(misq\)/i, 'MIS Quarterly');
-    v = v.replace(/management information systems quarterly/i, 'MIS Quarterly');
-    return v;
-  };
-
-  const toKey = (value) =>
-    normalize(cleanVenueName(value)).replace(/[^a-z0-9]+/g, ' ').trim();
-
-  const unique = (items) => Array.from(new Set(items));
-
-  const flattenJournalList = (list) => {
-    if (!list) return [];
-    const entries = Array.isArray(list) ? list : list.journals || [];
-    return entries.flatMap((item) => {
-      if (typeof item === 'string') return [item];
-      const aliases = Array.isArray(item.aliases) ? item.aliases : [];
-      return [item.name, ...aliases].filter(Boolean);
-    });
-  };
-
-  const matchesList = (venue, list) => {
-    const venueKey = toKey(venue);
-    if (!venueKey) return false;
-    return list.some((alias) => {
-      const aliasKey = toKey(alias);
-      if (!aliasKey) return false;
-      if (venueKey === aliasKey) return true;
-      const pattern = new RegExp(`(^|\\\\s)${aliasKey.replace(/\\s+/g, '\\\\s+')}(\\\\s|$)`);
-      return pattern.test(venueKey);
-    });
-  };
-
-  const countByType = (pubs, type) =>
-    pubs.filter((pub) => normalize(pub.type) === type).length;
-
-  const countByVenue = (pubs, list) => {
-    const matches = pubs.filter(
-      (pub) =>
-        normalize(pub.type) === 'journal' &&
-        matchesList(pub.venue || pub.publication || '', list)
-    );
-    return {
-      count: matches.length,
-      venues: unique(
-        matches
-          .map((pub) => cleanVenueName(pub.venue || pub.publication || ''))
-          .filter(Boolean)
-      )
-    };
-  };
 
   const animateValue = (el, value) => {
     if (prefersReducedMotion) {
-      el.textContent = value.toString();
+      el.textContent = String(value);
       return;
     }
+
     const duration = 900;
     const start = performance.now();
-
     const tick = (now) => {
       const progress = Math.min((now - start) / duration, 1);
-      const current = Math.round(value * progress);
-      el.textContent = current.toString();
-      if (progress < 1) {
-        requestAnimationFrame(tick);
-      }
+      el.textContent = String(Math.round(value * progress));
+      if (progress < 1) requestAnimationFrame(tick);
     };
-
     requestAnimationFrame(tick);
   };
 
-  const setProgress = (card, value, base) => {
-    const bar = card.querySelector('[data-progress]');
+  const setProgress = (card, value, total) => {
+    const bar = card.querySelector("[data-progress]");
     if (!bar) return;
-    const ratio = base > 0 ? Math.min(value / base, 1) : 0;
+    const ratio = total > 0 ? Math.min(value / total, 1) : 0;
     bar.style.transform = `scaleX(${ratio})`;
   };
 
   const triggerFilter = (detail) => {
     if (!detail) return;
-    const payload = typeof detail === 'string' ? { type: detail } : detail;
-    const target = document.getElementById('publications');
-    if (target) {
-      target.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
+    const publications = document.getElementById("publications");
+    if (publications) {
+      publications.scrollIntoView({
+        behavior: prefersReducedMotion ? "auto" : "smooth",
+        block: "start",
+      });
     }
-    window.dispatchEvent(new CustomEvent('pub-filter:apply', { detail: payload }));
+    window.dispatchEvent(new CustomEvent("pub-filter:apply", { detail }));
+  };
+
+  const updateCard = (metricKey, metric) => {
+    const card = cards.find((item) => item.dataset.metric === metricKey);
+    if (!card || !metric) return;
+
+    const valueEl = card.querySelector("[data-value]");
+    const metaEl = card.querySelector("[data-meta]");
+    if (valueEl && !card.dataset.animated) {
+      animateValue(valueEl, metric.value || 0);
+      card.dataset.animated = "true";
+    }
+    if (metaEl) metaEl.textContent = metric.meta || "";
+    if (metric.tooltip) card.dataset.tooltip = metric.tooltip;
+    setProgress(card, metric.value || 0, metric.base || 1);
   };
 
   cards.forEach((card) => {
     const filterType = card.dataset.filterType;
-    const labelText = card.querySelector('.impact-label')
-      ? card.querySelector('.impact-label').textContent.trim()
-      : 'Impact metric';
+    const labelText = card.querySelector(".impact-label")
+      ? card.querySelector(".impact-label").textContent.trim()
+      : "Impact metric";
     const tooltip = card.dataset.tooltip;
-    const actionHint = filterType ? 'Press Enter to filter publications.' : '';
-    const ariaLabel = [labelText, tooltip, actionHint].filter(Boolean).join(' ');
-    card.setAttribute('aria-label', ariaLabel);
+    const actionHint = filterType ? "Press Enter to filter publications." : "";
+    card.setAttribute("aria-label", [labelText, tooltip, actionHint].filter(Boolean).join(" "));
+
     if (!filterType) {
-      card.setAttribute('role', 'group');
+      card.setAttribute("role", "group");
       return;
     }
-    card.setAttribute('role', 'button');
-    card.addEventListener('click', () => triggerFilter({ type: filterType }));
-    card.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter' || event.key === ' ') {
+
+    card.setAttribute("role", "button");
+    card.addEventListener("click", () => triggerFilter({ type: filterType }));
+    card.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
         triggerFilter({ type: filterType });
       }
     });
   });
 
-  const updateCard = (metric, data) => {
-    const card = cards.find((item) => item.dataset.metric === metric);
-    if (!card) return;
+  safeFetch(`${base}data/dashboard_payload.json`).then((payload) => {
+    if (!payload || !payload.impactStats) return;
 
-    const valueEl = card.querySelector('[data-value]');
-    const metaEl = card.querySelector('[data-meta]');
-    if (valueEl && !card.dataset.animated) {
-      animateValue(valueEl, data.value);
-      card.dataset.animated = 'true';
-    }
-    if (metaEl) metaEl.textContent = data.meta || '';
-    if (data.tooltip) card.dataset.tooltip = data.tooltip;
-    setProgress(card, data.value, data.base || 1);
-  };
+    const stats = payload.impactStats;
+    if (updatedEl) updatedEl.textContent = `Updated ${stats.updatedLabel || "Recent"}`;
+    if (latestYearEl) latestYearEl.textContent = stats.latestYear ? String(stats.latestYear) : "--";
 
-  Promise.all([
-    safeFetch(`${base}data/publications.json`),
-    safeFetch(`${base}data/awards.json`),
-    safeFetch(`${base}data/scholar-metrics.json`),
-    safeFetch(`${base}data/journal_lists/q1.json`),
-    safeFetch(`${base}data/journal_lists/ft50.json`),
-    safeFetch(`${base}data/journal_lists/utd24.json`)
-  ]).then(([pubData, awardsData, scholarData, q1ListRaw, ft50ListRaw, utd24ListRaw]) => {
-    const pubs = Array.isArray(pubData) ? pubData : (pubData && pubData.publications) || [];
-    const awards = Array.isArray(awardsData) ? awardsData : [];
-    const scholarPubs = (scholarData && scholarData.individualPublications) || [];
-
-    const q1List = flattenJournalList(q1ListRaw);
-    const ft50List = flattenJournalList(ft50ListRaw);
-    const utd24List = flattenJournalList(utd24ListRaw);
-    const combinedTopList = unique([...q1List, ...ft50List, ...utd24List]).filter(Boolean);
-
-    const journals = countByType(pubs, 'journal');
-    const conferences = countByType(pubs, 'conference');
-    const workshops = countByType(pubs, 'workshop');
-    const total = journals + conferences + workshops || pubs.length;
-    const latestYear = pubs.reduce((max, pub) => {
-      if (!pub.year) return max;
-      return Math.max(max, pub.year);
-    }, 0);
-
-    const bestPaperAwards = awards.filter((award) => /best paper/i.test(award.title || '')).length;
-    const bestPaperYears = unique(
-      awards
-        .filter((award) => /best paper/i.test(award.title || ''))
-        .map((award) => award.year)
-        .filter(Boolean)
-    ).sort((a, b) => a - b);
-
-    const topListPubs = (() => {
-      const seen = new Set();
-      const merged = [];
-      const add = (pub) => {
-        const titleKey = normalize(pub.title).replace(/[^a-z0-9]+/g, '');
-        if (!titleKey || seen.has(titleKey)) return;
-        seen.add(titleKey);
-        merged.push(pub);
-      };
-
-      pubs.forEach(add);
-      scholarPubs.forEach((pub) => {
-        if (!matchesList(pub.venue || '', combinedTopList)) return;
-        add({ title: pub.title || '', venue: pub.venue || '', type: 'journal' });
-      });
-
-      return merged;
-    })();
-
-    const q1 = countByVenue(topListPubs, q1List);
-    const ft50 = countByVenue(topListPubs, ft50List);
-    const utd24 = countByVenue(topListPubs, utd24List);
-
-    const awardTotal = awards.length || 1;
-
-    if (updatedEl) {
-      const updatedLabel = (scholarData && scholarData.lastUpdated) ? scholarData.lastUpdated : 'Recent';
-      updatedEl.textContent = `Updated ${updatedLabel}`;
-    }
-    const latestYearPublications = latestYear
-      ? pubs.filter((pub) => Number(pub.year) === Number(latestYear)).length
-      : 0;
-
-    if (latestYearEl) {
-      latestYearEl.textContent = latestYear ? String(latestYear) : '--';
-    }
     if (latestYearCountEl) {
-      if (latestYearPublications > 0) {
+      if (stats.latestYearCount) {
         latestYearCountEl.hidden = false;
-        latestYearCountEl.textContent = `${latestYearPublications} paper${latestYearPublications === 1 ? '' : 's'}`;
+        latestYearCountEl.textContent = `${stats.latestYearCount} paper${stats.latestYearCount === 1 ? "" : "s"}`;
       } else {
         latestYearCountEl.hidden = true;
       }
     }
+
     if (latestYearFilterEl) {
-      if (latestYear && latestYearPublications > 0) {
+      if (stats.latestYear) {
         latestYearFilterEl.disabled = false;
-        latestYearFilterEl.setAttribute('aria-disabled', 'false');
-        latestYearFilterEl.title = `Filter publications to ${latestYear}`;
-        latestYearFilterEl.addEventListener('click', () => {
-          triggerFilter({ year: Number(latestYear) });
+        latestYearFilterEl.setAttribute("aria-disabled", "false");
+        latestYearFilterEl.title = `Filter publications to ${stats.latestYear}`;
+        latestYearFilterEl.addEventListener("click", () => {
+          triggerFilter({ year: Number(stats.latestYear) });
         });
       } else {
         latestYearFilterEl.disabled = true;
-        latestYearFilterEl.setAttribute('aria-disabled', 'true');
+        latestYearFilterEl.setAttribute("aria-disabled", "true");
       }
     }
 
-    updateCard('journals', {
-      value: journals,
-      base: total,
-      meta: total ? `${journals} of ${total} total publications` : '',
-      tooltip: 'Peer-reviewed journal articles.'
-    });
-
-    updateCard('conferences', {
-      value: conferences,
-      base: total,
-      meta: total ? `${conferences} of ${total} total publications` : '',
-      tooltip: 'Conference papers and proceedings.'
-    });
-
-    updateCard('workshops', {
-      value: workshops,
-      base: total,
-      meta: total ? `${workshops} of ${total} total publications` : '',
-      tooltip: 'Workshop and pre-conference papers.'
-    });
-
-    updateCard('best-paper', {
-      value: bestPaperAwards,
-      base: awardTotal,
-      meta: awardTotal ? `${bestPaperAwards} of ${awardTotal} awards` : '',
-      tooltip: bestPaperYears.length
-        ? `Best Paper Awards in ${bestPaperYears.join(', ')}`
-        : 'Best Paper Awards'
-    });
-
-    updateCard('q1', {
-      value: q1.count,
-      base: Math.max(journals, 1),
-      meta: journals ? `${q1.count} of ${journals} journal pubs` : '',
-      tooltip: q1.venues.length ? `Q1 venues: ${q1.venues.join(', ')}` : 'Q1 journal venues'
-    });
-
-    updateCard('ft50', {
-      value: ft50.count,
-      base: Math.max(journals, 1),
-      meta: journals ? `${ft50.count} of ${journals} journal pubs` : '',
-      tooltip: ft50.venues.length ? `FT50 venues: ${ft50.venues.join(', ')}` : 'FT50 journal venues'
-    });
-
-    updateCard('utd24', {
-      value: utd24.count,
-      base: Math.max(journals, 1),
-      meta: journals ? `${utd24.count} of ${journals} journal pubs` : '',
-      tooltip: utd24.venues.length ? `UTD24 venues: ${utd24.venues.join(', ')}` : 'UTD24 journal venues'
-    });
+    [
+      "journals",
+      "conferences",
+      "workshops",
+      "best-paper",
+      "q1",
+      "ft50",
+      "utd24",
+    ].forEach((metricKey) => updateCard(metricKey, stats[metricKey]));
   });
 })();

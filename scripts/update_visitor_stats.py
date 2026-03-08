@@ -2,6 +2,7 @@ import os
 import json
 from google.analytics.data_v1beta import BetaAnalyticsDataClient
 from google.analytics.data_v1beta.types import (
+    BatchRunReportsRequest,
     RunReportRequest,
     DateRange,
     Metric,
@@ -30,28 +31,78 @@ def fetch_analytics():
         print(f"Auth Error: {e}")
         return None
 
-    # 1. Monthly Trend (Existing)
-    monthly_req = RunReportRequest(
-        property=f"properties/{PROPERTY_ID}",
-        dimensions=[Dimension(name="yearMonth")],
-        metrics=[Metric(name="activeUsers")],
-        date_ranges=[DateRange(start_date="365daysAgo", end_date="today")],
-        order_bys=[OrderBy(dimension=OrderBy.DimensionOrderBy(dimension_name="yearMonth"))]
-    )
-    monthly_resp = client.run_report(monthly_req)
-    monthly_data = [{"month": r.dimension_values[0].value, "visitors": int(r.metric_values[0].value)} for r in monthly_resp.rows]
+    property_name = f"properties/{PROPERTY_ID}"
 
-    # 2. Locations (City, Region, Country) across ranges
-    def fetch_locations(start_date, end_date="today", limit=20):
-        req = RunReportRequest(
-            property=f"properties/{PROPERTY_ID}",
+    def build_request(**kwargs):
+        return RunReportRequest(
+            property=property_name,
+            **kwargs
+        )
+
+    def build_location_request(start_date, end_date="today", limit=20):
+        return build_request(
             dimensions=[Dimension(name="city"), Dimension(name="region"), Dimension(name="country")],
             metrics=[Metric(name="totalUsers")],
             date_ranges=[DateRange(start_date=start_date, end_date=end_date)],
             limit=limit,
             order_bys=[OrderBy(metric=OrderBy.MetricOrderBy(metric_name="totalUsers"), desc=True)],
         )
-        resp = client.run_report(req)
+
+    requests = [
+        # 1. Monthly Trend
+        build_request(
+        dimensions=[Dimension(name="yearMonth")],
+        metrics=[Metric(name="activeUsers")],
+        date_ranges=[DateRange(start_date="365daysAgo", end_date="today")],
+        order_bys=[OrderBy(dimension=OrderBy.DimensionOrderBy(dimension_name="yearMonth"))]
+        ),
+        # 2. Locations
+        build_location_request("30daysAgo"),
+        build_location_request("90daysAgo"),
+        build_location_request(EARLIEST_DATE),
+        # 3. Top Pages
+        build_request(
+            dimensions=[Dimension(name="pagePath")],
+            metrics=[Metric(name="screenPageViews")],
+            date_ranges=[DateRange(start_date="30daysAgo", end_date="today")],
+            limit=10,
+            order_bys=[
+                OrderBy(
+                    metric=OrderBy.MetricOrderBy(metric_name="screenPageViews"),
+                    desc=True
+                )
+            ]
+        ),
+        # 4. Device Category
+        build_request(
+            dimensions=[Dimension(name="deviceCategory")],
+            metrics=[Metric(name="totalUsers")],
+            date_ranges=[DateRange(start_date="30daysAgo", end_date="today")]
+        ),
+        # 5. Total Visitors (Last 30 Days)
+        build_request(
+            metrics=[Metric(name="totalUsers")],
+            date_ranges=[DateRange(start_date="30daysAgo", end_date="today")]
+        ),
+        # 6. Lifetime Total Visitors
+        build_request(
+            metrics=[Metric(name="totalUsers")],
+            date_ranges=[DateRange(start_date=EARLIEST_DATE, end_date="today")]
+        )
+    ]
+
+    responses = client.batch_run_reports(
+        BatchRunReportsRequest(
+            property=property_name,
+            requests=requests
+        )
+    ).reports
+
+    monthly_resp = responses[0]
+    monthly_data = [{"month": r.dimension_values[0].value, "visitors": int(r.metric_values[0].value)} for r in monthly_resp.rows]
+
+    # 2. Locations (City, Region, Country) across ranges
+    def parse_locations(resp):
         return [
             {
                 "city": r.dimension_values[0].value,
@@ -62,55 +113,26 @@ def fetch_analytics():
             for r in resp.rows
         ]
 
-    location_data_30 = fetch_locations("30daysAgo")
-    location_data_90 = fetch_locations("90daysAgo")
-    location_data_all = fetch_locations(EARLIEST_DATE)
+    location_data_30 = parse_locations(responses[1])
+    location_data_90 = parse_locations(responses[2])
+    location_data_all = parse_locations(responses[3])
 
-    # 3. Top Pages (FIXED: Moved desc=True to OrderBy parent)
-    page_req = RunReportRequest(
-        property=f"properties/{PROPERTY_ID}",
-        dimensions=[Dimension(name="pagePath")],
-        metrics=[Metric(name="screenPageViews")],
-        date_ranges=[DateRange(start_date="30daysAgo", end_date="today")],
-        limit=10,
-        order_bys=[
-            OrderBy(
-                metric=OrderBy.MetricOrderBy(metric_name="screenPageViews"),
-                desc=True
-            )
-        ]
-    )
-    page_resp = client.run_report(page_req)
+    # 3. Top Pages
+    page_resp = responses[4]
     page_data = [{"path": r.dimension_values[0].value, "views": int(r.metric_values[0].value)} for r in page_resp.rows]
 
     # 4. Device Category (Mobile vs Desktop)
-    device_req = RunReportRequest(
-        property=f"properties/{PROPERTY_ID}",
-        dimensions=[Dimension(name="deviceCategory")],
-        metrics=[Metric(name="totalUsers")],
-        date_ranges=[DateRange(start_date="30daysAgo", end_date="today")]
-    )
-    device_resp = client.run_report(device_req)
+    device_resp = responses[5]
     device_data = [{"device": r.dimension_values[0].value, "users": int(r.metric_values[0].value)} for r in device_resp.rows]
 
     # 5. Total Visitors (Last 30 Days)
-    last30_req = RunReportRequest(
-        property=f"properties/{PROPERTY_ID}",
-        metrics=[Metric(name="totalUsers")],
-        date_ranges=[DateRange(start_date="30daysAgo", end_date="today")]
-    )
-    last30_resp = client.run_report(last30_req)
+    last30_resp = responses[6]
     total_last_30_days = 0
     if last30_resp.rows:
         total_last_30_days = int(last30_resp.rows[0].metric_values[0].value)
 
     # 6. Lifetime Total Visitors (All-time)
-    lifetime_req = RunReportRequest(
-        property=f"properties/{PROPERTY_ID}",
-        metrics=[Metric(name="totalUsers")],
-        date_ranges=[DateRange(start_date=EARLIEST_DATE, end_date="today")]
-    )
-    lifetime_resp = client.run_report(lifetime_req)
+    lifetime_resp = responses[7]
     lifetime_total = 0
     if lifetime_resp.rows:
         lifetime_total = int(lifetime_resp.rows[0].metric_values[0].value)
