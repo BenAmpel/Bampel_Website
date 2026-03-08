@@ -1,0 +1,169 @@
+<div class="cae-root" id="cae-root">
+<div class="cae-hdr">
+<div>
+<h3 class="cae-title">Authorship &amp; Collaboration Evolution</h3>
+<p class="cae-sub">From mentee to PI — how authorship position and collaboration structure shifted across career stages.</p>
+</div>
+</div>
+<div class="cae-panels">
+<div class="cae-panel">
+<div class="cae-panel-title">First-Authorship Rate</div>
+<div class="cae-panel-sub">% of papers where you are first or sole author</div>
+<div class="cae-bars" id="cae-bars"><div class="cae-loading">Loading…</div></div>
+</div>
+<div class="cae-panel">
+<div class="cae-panel-title">Collaboration Network Growth</div>
+<div class="cae-panel-sub">New co-authors per year · colors indicate relationship</div>
+<div class="cae-collab" id="cae-collab"><div class="cae-loading">Loading…</div></div>
+<div class="cae-collab-legend">
+<span class="cae-cl"><span class="cae-clsq cae-mentor"></span>Mentor</span>
+<span class="cae-cl"><span class="cae-clsq cae-peer"></span>Peer / Collaborator</span>
+<span class="cae-cl"><span class="cae-clsq cae-mentee"></span>Student / Mentee</span>
+</div>
+</div>
+</div>
+<div class="cae-insight" id="cae-insight"></div>
+</div>
+
+<style>
+.cae-root { margin:24px 0; padding:24px; border-radius:16px; border:1px solid var(--card-border,#2a2a2a); background:linear-gradient(135deg,rgba(0,0,0,0.55),rgba(0,0,0,0.15)); box-shadow:0 12px 30px rgba(0,0,0,0.25); }
+.cae-title { margin:0 0 6px; font-size:1.1rem; color:#00ff41; text-transform:uppercase; letter-spacing:0.08em; }
+.cae-sub { margin:0; font-size:0.82rem; opacity:0.7; line-height:1.4; }
+.cae-hdr { margin-bottom:20px; }
+.cae-loading { opacity:0.5; font-size:0.85rem; padding:10px 0; }
+.cae-panels { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.cae-panel { display:flex; flex-direction:column; gap:8px; }
+.cae-panel-title { font-size:0.75rem; text-transform:uppercase; letter-spacing:0.07em; color:#00e5ff; }
+.cae-panel-sub   { font-size:0.7rem; opacity:0.55; margin-top:-4px; }
+.cae-bars { display:flex; flex-direction:column; gap:6px; }
+.cae-bar-row { display:grid; grid-template-columns:36px 1fr 32px; gap:6px; align-items:center; }
+.cae-bar-yr  { font-size:0.7rem; opacity:0.75; text-align:right; }
+.cae-bar-track { height:18px; border-radius:4px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); overflow:hidden; }
+.cae-bar-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,#00ff41,#00e5ff); transition:width 0.5s ease; }
+.cae-bar-pct { font-size:0.7rem; opacity:0.7; text-align:right; }
+.cae-collab { display:flex; flex-direction:column; gap:8px; }
+.cae-collab-yr { display:grid; grid-template-columns:36px 1fr; gap:6px; align-items:flex-start; }
+.cae-collab-yr-lbl { font-size:0.7rem; opacity:0.75; text-align:right; padding-top:3px; }
+.cae-chips { display:flex; flex-wrap:wrap; gap:4px; }
+.cae-chip { font-size:0.62rem; padding:2px 7px; border-radius:999px; letter-spacing:0.03em; }
+.cae-mentor  { background:rgba(0,229,255,0.15); border:1px solid rgba(0,229,255,0.4); color:#00e5ff; }
+.cae-peer    { background:rgba(255,183,0,0.12); border:1px solid rgba(255,183,0,0.35); color:#ffb300; }
+.cae-mentee  { background:rgba(0,255,65,0.12); border:1px solid rgba(0,255,65,0.35); color:#00ff41; }
+.cae-collab-legend { display:flex; gap:12px; flex-wrap:wrap; margin-top:6px; }
+.cae-cl { display:flex; align-items:center; gap:4px; font-size:0.68rem; opacity:0.75; }
+.cae-clsq { width:8px; height:8px; border-radius:50%; display:inline-block; }
+.cae-clsq.cae-mentor  { background:#00e5ff; }
+.cae-clsq.cae-peer    { background:#ffb300; }
+.cae-clsq.cae-mentee  { background:#00ff41; }
+.cae-insight { margin-top:16px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.06); font-size:0.75rem; opacity:0.65; font-style:italic; }
+body:not(.dark) .cae-root { background:rgba(255,255,255,0.95); border-color:#ddd; }
+body:not(.dark) .cae-bar-track { background:rgba(0,0,0,0.04); border-color:rgba(0,0,0,0.1); }
+body:not(.dark) .cae-insight { border-top-color:rgba(0,0,0,0.1); }
+@media (max-width:700px) { .cae-panels { grid-template-columns:1fr; } }
+</style>
+
+<script>
+(() => {
+  const barsEl    = document.getElementById('cae-bars');
+  const collabEl  = document.getElementById('cae-collab');
+  const insightEl = document.getElementById('cae-insight');
+  if (!barsEl || !collabEl) return;
+
+  const MENTORS = ['chen','samtani','nunamaker','yang','hashim'];
+  const MENTEES = ['otto','marx','gao','wagner','zhang','dacosta','reyes'];
+
+  const classifyAuthor = name => {
+    const nl = name.toLowerCase();
+    if (nl.includes('ampel')) return 'self';
+    if (MENTORS.some(m => nl.includes(m))) return 'mentor';
+    if (MENTEES.some(m => nl.includes(m))) return 'mentee';
+    return 'peer';
+  };
+
+  // Normalize name to "First Last" for deduplication (strip middle initials and suffixes)
+  const normalizeName = name => {
+    const parts = name.trim().split(/\s+/).filter(p => !/^[A-Z]\.$/.test(p) && !/^(Jr|Sr|II|III)\.?$/i.test(p));
+    return parts.length >= 2 ? (parts[0] + ' ' + parts[parts.length - 1]).toLowerCase() : name.toLowerCase();
+  };
+
+  fetch('/data/publications.json')
+    .then(r => r.json())
+    .then(pubs => {
+      const byYear = {};
+      pubs.forEach(p => {
+        const yr = String(p.year);
+        if (!byYear[yr]) byYear[yr] = [];
+        byYear[yr].push(p);
+      });
+      const years = Object.keys(byYear).sort();
+
+      barsEl.innerHTML = '';
+      const firstRates = {};
+      years.forEach(yr => {
+        const yrPubs = byYear[yr];
+        const firstCount = yrPubs.filter(p => {
+          const auths = p.authors || [];
+          return auths.length > 0 && auths[0].toLowerCase().includes('ampel');
+        }).length;
+        const rate = Math.round((firstCount / yrPubs.length) * 100);
+        firstRates[yr] = rate;
+
+        const row = document.createElement('div');
+        row.className = 'cae-bar-row';
+        row.innerHTML = '<div class="cae-bar-yr">' + yr + '</div>'
+          + '<div class="cae-bar-track"><div class="cae-bar-fill" style="width:' + rate + '%"></div></div>'
+          + '<div class="cae-bar-pct">' + rate + '%</div>';
+        barsEl.appendChild(row);
+      });
+
+      collabEl.innerHTML = '';
+      const seenCollabs = new Set();
+
+      years.forEach(yr => {
+        const newThisYear = [];
+        byYear[yr].forEach(p => {
+          (p.authors || []).forEach(a => {
+            if (a.toLowerCase().includes('ampel')) return;
+            const key = normalizeName(a);
+            if (!seenCollabs.has(key)) {
+              seenCollabs.add(key);
+              newThisYear.push(a);
+            }
+          });
+        });
+
+        if (!newThisYear.length) return;
+
+        const row = document.createElement('div');
+        row.className = 'cae-collab-yr';
+        const lbl = document.createElement('div');
+        lbl.className = 'cae-collab-yr-lbl';
+        lbl.textContent = yr;
+        row.appendChild(lbl);
+
+        const chips = document.createElement('div');
+        chips.className = 'cae-chips';
+        newThisYear.forEach(name => {
+          const rel = classifyAuthor(name);
+          if (rel === 'self') return;
+          const chip = document.createElement('span');
+          chip.className = 'cae-chip cae-' + rel;
+          // Display last name, skipping "Jr." suffix
+          const parts = name.trim().split(/\s+/).filter(p => !/^(Jr|Sr|II|III)\.?$/i.test(p));
+          chip.textContent = parts[parts.length - 1];
+          chip.title = name;
+          chips.appendChild(chip);
+        });
+        row.appendChild(chips);
+        collabEl.appendChild(row);
+      });
+
+      const early  = years.filter(y => y <= '2021');
+      const recent = years.filter(y => y >= '2024');
+      const avg = yrs => Math.round(yrs.reduce((s, y) => s + (firstRates[y] || 0), 0) / (yrs.length || 1));
+      const menteeCount = [...seenCollabs].filter(n => MENTEES.some(m => n.includes(m))).length;
+      insightEl.textContent = 'First-author rate: ' + avg(early) + '% (2019–21) → ' + avg(recent) + '% (2024–26). ' + menteeCount + ' PhD students joined the collaboration network since 2021.';
+    })
+    .catch(() => { barsEl.innerHTML = '<div class="cae-loading">Could not load data.</div>'; });
+})();
+</script>

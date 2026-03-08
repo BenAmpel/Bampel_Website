@@ -1,0 +1,175 @@
+<div class="tdrift-root" id="topic-drift-root">
+  <div class="tdrift-hdr">
+    <div>
+      <h3 class="tdrift-title">Research Topic Evolution</h3>
+      <p class="tdrift-sub">How the focus of each paper shifted across three career phases — derived from title &amp; abstract analysis.</p>
+    </div>
+  </div>
+  <div class="tdrift-phases-hdr" id="tdrift-phases-hdr"></div>
+  <div class="tdrift-table" id="tdrift-table">
+    <div class="tdrift-loading">Loading…</div>
+  </div>
+  <div class="tdrift-legend">
+    <span class="tdrift-li"><span class="tdrift-sq tdrift-sq-rise"></span>Growing focus</span>
+    <span class="tdrift-li"><span class="tdrift-sq tdrift-sq-fall"></span>Past focus</span>
+    <span class="tdrift-li"><span class="tdrift-sq tdrift-sq-stable"></span>Steady presence</span>
+  </div>
+</div>
+
+<style>
+.tdrift-root { margin:24px 0; padding:24px; border-radius:16px; border:1px solid var(--card-border,#2a2a2a); background:linear-gradient(135deg,rgba(0,0,0,0.55),rgba(0,0,0,0.15)); box-shadow:0 12px 30px rgba(0,0,0,0.25); }
+.tdrift-title { margin:0 0 6px; font-size:1.1rem; color:#00ff41; text-transform:uppercase; letter-spacing:0.08em; }
+.tdrift-sub { margin:0; font-size:0.82rem; opacity:0.7; line-height:1.4; }
+.tdrift-hdr { margin-bottom:18px; }
+.tdrift-loading { opacity:0.5; font-size:0.85rem; padding:20px 0; }
+
+/* Phase header */
+.tdrift-phases-hdr { display:grid; grid-template-columns:120px repeat(3,1fr); gap:0 12px; margin-bottom:10px; }
+.tdrift-ph-lbl { font-size:0.68rem; text-transform:uppercase; letter-spacing:0.07em; opacity:0.55; text-align:center; }
+.tdrift-ph-lbl span { display:block; font-size:0.6rem; opacity:0.7; font-style:italic; margin-top:2px; }
+
+/* Table */
+.tdrift-table { display:flex; flex-direction:column; gap:6px; }
+.tdrift-row { display:grid; grid-template-columns:120px repeat(3,1fr); gap:0 12px; align-items:center; }
+.tdrift-term { font-size:0.75rem; font-weight:600; opacity:0.85; text-align:right; padding-right:8px; letter-spacing:0.01em; }
+.tdrift-cell { height:22px; border-radius:4px; overflow:hidden; }
+.tdrift-bar { height:100%; border-radius:4px; display:flex; align-items:center; padding-left:6px; font-size:0.62rem; letter-spacing:0.04em; opacity:0.9; transition:width 0.5s ease; min-width:0; white-space:nowrap; overflow:hidden; }
+
+/* Colors by trend */
+.tdrift-rise { background:rgba(0,255,65,0.25); border:1px solid rgba(0,255,65,0.4); color:#00ff41; }
+.tdrift-fall { background:rgba(224,64,251,0.18); border:1px solid rgba(224,64,251,0.35); color:#e040fb; }
+.tdrift-stable { background:rgba(0,229,255,0.15); border:1px solid rgba(0,229,255,0.3); color:#00e5ff; }
+.tdrift-empty  { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); }
+
+/* Legend */
+.tdrift-legend { display:flex; gap:14px; flex-wrap:wrap; margin-top:16px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.06); }
+.tdrift-li { display:flex; align-items:center; gap:5px; font-size:0.72rem; opacity:0.75; }
+.tdrift-sq { width:10px; height:10px; border-radius:2px; }
+.tdrift-sq-rise   { background:rgba(0,255,65,0.4); border:1px solid rgba(0,255,65,0.6); }
+.tdrift-sq-fall   { background:rgba(224,64,251,0.35); border:1px solid rgba(224,64,251,0.6); }
+.tdrift-sq-stable { background:rgba(0,229,255,0.3); border:1px solid rgba(0,229,255,0.5); }
+
+body:not(.dark) .tdrift-root { background:rgba(255,255,255,0.95); border-color:#ddd; }
+body:not(.dark) .tdrift-legend { border-top-color:rgba(0,0,0,0.1); }
+body:not(.dark) .tdrift-rise   { background:rgba(0,150,0,0.12); border-color:rgba(0,150,0,0.35); color:#2e7d32; }
+body:not(.dark) .tdrift-fall   { background:rgba(150,0,180,0.1); border-color:rgba(150,0,180,0.35); color:#7b1fa2; }
+body:not(.dark) .tdrift-stable { background:rgba(0,100,180,0.1); border-color:rgba(0,100,180,0.3); color:#0277bd; }
+body:not(.dark) .tdrift-empty  { background:rgba(0,0,0,0.03); }
+
+@media (max-width:600px) {
+  .tdrift-phases-hdr,.tdrift-row { grid-template-columns:90px repeat(3,1fr); gap:0 6px; }
+  .tdrift-term { font-size:0.65rem; padding-right:4px; }
+  .tdrift-bar { font-size:0; }
+}
+</style>
+
+<script>
+(() => {
+  const root  = document.getElementById('topic-drift-root');
+  const hdr   = document.getElementById('tdrift-phases-hdr');
+  const table = document.getElementById('tdrift-table');
+  if (!root || !table) return;
+
+  // Research terms: [label, regex]
+  const TERMS = [
+    ['LLM / GenAI',        /large language model|\bllm\b|llms\b|foundation model|generative ai|gpt/i],
+    ['Multi-Agent',        /multi.agent|agentic|multi-agent/i],
+    ['Deep Learning',      /deep learning|deep transfer|deep neural|cnn|convolutional/i],
+    ['Phishing',           /phishing|vishing|voice phish/i],
+    ['Threat Intel',       /threat intelligence|\bcti\b|proactive cyber/i],
+    ['Hacker / Dark Web',  /hacker|dark web|darknet|hacker forum|underground/i],
+    ['Exploit Analysis',   /exploit|malware|ransomware|paste site/i],
+    ['Graph Embedding',    /graph embedding|graph neural|graph learning|graph-based/i],
+    ['Transformers/BERT',  /transformer|\bbert\b|self-distillation|knowledge distill/i],
+    ['Vulnerability',      /vulnerabilit|cvss|cve\b|cyberinfrastructure/i],
+    ['ATT&CK / MITRE',     /att.ck|mitre|attacker technique|tactic/i],
+    ['Adversarial / RL',   /adversarial|reinforcement learning|\brl\b|red team|evasion/i],
+    ['Blockchain',         /blockchain|bitcoin|ethereum|consensus algorithm/i],
+    ['Deepfake / Audio',   /deepfake|synthetic media|audio model|vishing\b/i],
+  ];
+
+  const PHASES = [
+    { label:'Foundations', sub:'2019 – 2021', min:2019, max:2021 },
+    { label:'Diversification', sub:'2022 – 2023', min:2022, max:2023 },
+    { label:'AI-Centric', sub:'2024 – 2026', min:2024, max:2099 },
+  ];
+
+  fetch('/data/publications.json')
+    .then(r => r.json())
+    .then(pubs => {
+      // Group pubs by phase
+      const phPubs = PHASES.map(ph => pubs.filter(p => p.year >= ph.min && p.year <= ph.max));
+
+      // Count term hits per phase (title + abstract)
+      const counts = TERMS.map(([lbl, rx]) =>
+        phPubs.map(pp => {
+          const total = pp.length || 1;
+          const hits  = pp.filter(p => rx.test((p.title||'') + ' ' + (p.abstract||''))).length;
+          return hits / total; // normalized frequency
+        })
+      );
+
+      // Classify trend: compare phase[0] vs phase[2]
+      const trend = idx => {
+        const [a,,c] = counts[idx];
+        if (c > a + 0.05) return 'rise';
+        if (a > c + 0.05) return 'fall';
+        return 'stable';
+      };
+
+      // Filter: only show terms that appear in at least one phase with freq >= 0.05
+      const visible = TERMS
+        .map((t, i) => ({ term:t[0], trend:trend(i), vals:counts[i], i }))
+        .filter(r => r.vals.some(v => v >= 0.05))
+        .sort((a, b) => {
+          // Rising terms first, then falling, then stable; within group sort by phase2 desc
+          const order = { rise:0, fall:1, stable:2 };
+          if (order[a.trend] !== order[b.trend]) return order[a.trend] - order[b.trend];
+          return b.vals[2] - a.vals[2];
+        });
+
+      const maxVal = Math.max(...visible.flatMap(r => r.vals));
+
+      // Build phase header
+      hdr.innerHTML = '<div></div>';
+      PHASES.forEach(ph => {
+        const d = document.createElement('div');
+        d.className = 'tdrift-ph-lbl';
+        d.innerHTML = `${ph.label}<span>${ph.sub}</span>`;
+        hdr.appendChild(d);
+      });
+
+      // Build rows
+      table.innerHTML = '';
+      visible.forEach(r => {
+        const row = document.createElement('div');
+        row.className = 'tdrift-row';
+
+        const termEl = document.createElement('div');
+        termEl.className = 'tdrift-term';
+        termEl.textContent = r.term;
+        row.appendChild(termEl);
+
+        r.vals.forEach((v, pi) => {
+          const cell = document.createElement('div');
+          cell.className = 'tdrift-cell';
+          if (v < 0.01) {
+            cell.innerHTML = `<div class="tdrift-bar tdrift-empty" style="width:100%"></div>`;
+          } else {
+            const pct = Math.round((v / maxVal) * 100);
+            const cls = pi === 0 && r.trend === 'fall' ? 'tdrift-fall'
+                      : pi === 2 && r.trend === 'rise' ? 'tdrift-rise'
+                      : r.trend === 'stable' ? 'tdrift-stable'
+                      : 'tdrift-stable';
+            const label = Math.round(v * 100) + '%';
+            cell.innerHTML = `<div class="tdrift-bar ${cls}" style="width:${pct}%" title="${Math.round(v*100)}% of papers in this phase">${label}</div>`;
+          }
+          row.appendChild(cell);
+        });
+
+        table.appendChild(row);
+      });
+    })
+    .catch(() => { table.innerHTML = '<div class="tdrift-loading">Could not load data.</div>'; });
+})();
+</script>

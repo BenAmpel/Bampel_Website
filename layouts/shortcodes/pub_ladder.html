@@ -1,0 +1,174 @@
+<div class="pll-root" id="pub-ladder-root">
+  <div class="pll-header">
+    <div>
+      <h3 class="pll-title">Publication Quality Trajectory</h3>
+      <p class="pll-desc">Each dot is a paper — hover for details. The upward migration toward premier venues marks growing research maturity.</p>
+    </div>
+  </div>
+  <div class="pll-body" id="pll-body">
+    <div class="pll-loader">Loading…</div>
+  </div>
+  <div class="pll-footer">
+    <div class="pll-legend">
+      <span class="pll-li pll-li-1"><span class="pll-sq"></span>Workshop</span>
+      <span class="pll-li pll-li-2"><span class="pll-sq"></span>Conference</span>
+      <span class="pll-li pll-li-3"><span class="pll-sq"></span>Journal</span>
+      <span class="pll-li pll-li-4"><span class="pll-sq"></span>Premier Journal</span>
+    </div>
+    <div class="pll-insight" id="pll-insight"></div>
+  </div>
+  <div class="pll-tip" id="pll-tip" aria-hidden="true"></div>
+</div>
+
+<style>
+.pll-root { margin:24px 0; padding:24px; border-radius:16px; border:1px solid var(--card-border,#2a2a2a); background:linear-gradient(135deg,rgba(0,0,0,0.55),rgba(0,0,0,0.15)); box-shadow:0 12px 30px rgba(0,0,0,0.25); position:relative; overflow:hidden; }
+.pll-title { margin:0 0 6px; font-size:1.1rem; color:#00ff41; text-transform:uppercase; letter-spacing:0.08em; }
+.pll-desc { margin:0; font-size:0.82rem; opacity:0.7; line-height:1.4; }
+.pll-header { margin-bottom:20px; }
+.pll-loader { opacity:0.5; padding:20px 0; font-size:0.85rem; }
+.pll-grid { display:grid; grid-template-columns:48px repeat(4,1fr); gap:6px 10px; align-items:center; }
+.pll-cell-head { font-size:0.62rem; text-transform:uppercase; letter-spacing:0.06em; opacity:0.6; text-align:center; padding-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.08); }
+.pll-cell-yr { font-size:0.75rem; font-weight:600; opacity:0.8; text-align:right; padding-right:8px; letter-spacing:0.02em; }
+.pll-cell-dots { min-height:32px; display:flex; flex-wrap:wrap; gap:5px; align-items:center; justify-content:center; padding:5px 6px; border-radius:8px; border:1px solid transparent; }
+.pll-cell-dots:not(:empty) { background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.06); }
+.pll-dot { width:11px; height:11px; border-radius:50%; cursor:pointer; transition:transform 0.15s, box-shadow 0.15s; flex-shrink:0; }
+.pll-dot:hover { transform:scale(1.7); box-shadow:0 0 8px currentColor; position:relative; z-index:2; }
+.pll-d1 { background:#e040fb; color:#e040fb; }
+.pll-d2 { background:#00e5ff; color:#00e5ff; }
+.pll-d3 { background:#00b0ff; color:#00b0ff; }
+.pll-d4 { background:#00ff41; color:#00ff41; box-shadow:0 0 5px rgba(0,255,65,0.4); }
+.pll-h1 { color:#e040fb; }
+.pll-h2 { color:#00e5ff; }
+.pll-h3 { color:#00b0ff; }
+.pll-h4 { color:#00ff41; }
+.pll-footer { margin-top:16px; display:flex; align-items:center; flex-wrap:wrap; gap:12px; justify-content:space-between; }
+.pll-legend { display:flex; gap:12px; flex-wrap:wrap; }
+.pll-li { display:flex; align-items:center; gap:5px; font-size:0.72rem; opacity:0.8; }
+.pll-sq { width:9px; height:9px; border-radius:50%; display:inline-block; }
+.pll-li-1 .pll-sq { background:#e040fb; }
+.pll-li-2 .pll-sq { background:#00e5ff; }
+.pll-li-3 .pll-sq { background:#00b0ff; }
+.pll-li-4 .pll-sq { background:#00ff41; }
+.pll-insight { font-size:0.75rem; opacity:0.65; font-style:italic; }
+.pll-tip { display:none; position:absolute; pointer-events:none; background:rgba(10,10,10,0.96); border:1px solid rgba(0,229,255,0.4); border-radius:8px; padding:8px 12px; font-size:0.78rem; max-width:280px; line-height:1.45; color:#e8e8e8; z-index:100; box-shadow:0 4px 16px rgba(0,0,0,0.5); }
+body:not(.dark) .pll-root { background:rgba(255,255,255,0.95); border-color:#ddd; }
+body:not(.dark) .pll-cell-dots:not(:empty) { background:rgba(0,0,0,0.03); border-color:rgba(0,0,0,0.08); }
+body:not(.dark) .pll-cell-head { border-bottom-color:rgba(0,0,0,0.1); }
+body:not(.dark) .pll-tip { background:rgba(255,255,255,0.98); color:#222; border-color:rgba(0,100,180,0.4); }
+@media (max-width:560px) {
+  .pll-grid { grid-template-columns:36px repeat(4,1fr); gap:4px 5px; }
+  .pll-dot { width:8px; height:8px; }
+  .pll-cell-head { font-size:0.5rem; }
+  .pll-cell-yr { font-size:0.65rem; padding-right:4px; }
+}
+</style>
+
+<script>
+(() => {
+  const root = document.getElementById('pub-ladder-root');
+  const body = document.getElementById('pll-body');
+  const tip  = document.getElementById('pll-tip');
+  const insight = document.getElementById('pll-insight');
+  if (!root || !body) return;
+
+  const TIER = v => {
+    if (!v) return 1;
+    const vl = v.toLowerCase();
+    if (/mis quarterly|^misq$/.test(vl)) return 4;
+    if (/journal of management information systems|^jmis$/.test(vl)) return 4;
+    if (/transactions on management information systems|tmis/.test(vl)) return 3;
+    if (/information systems frontiers|^isf$/.test(vl)) return 3;
+    if (/digital threats|^dtrap$/.test(vl)) return 3;
+    if (/information systems education|^jise$/.test(vl)) return 3;
+    if (/replication research|^trr$/.test(vl)) return 3;
+    if (/ieee isi|hicss|icis\b|acm kdd|^kdd$|amcis|ieee spw/.test(vl)) return 2;
+    return 1;
+  };
+
+  const TIER_LABEL = ['','Workshop','Conference','Journal','Premier'];
+  const TIER_DOT   = ['','pll-d1','pll-d2','pll-d3','pll-d4'];
+  const TIER_HEAD  = ['','pll-h1','pll-h2','pll-h3','pll-h4'];
+
+  const moveTip = e => {
+    const rect = root.getBoundingClientRect();
+    let x = e.clientX - rect.left + 14;
+    let y = e.clientY - rect.top  - 44;
+    if (x + 300 > rect.width) x = e.clientX - rect.left - 300;
+    if (y < 0) y = 0;
+    tip.style.left = x + 'px';
+    tip.style.top  = y + 'px';
+  };
+  root.addEventListener('mousemove', moveTip);
+
+  fetch('/data/publications.json')
+    .then(r => r.json())
+    .then(pubs => {
+      const byYear = {};
+      pubs.forEach(p => {
+        const yr = String(p.year);
+        const t  = TIER(p.venue);
+        if (!byYear[yr]) byYear[yr] = {1:[],2:[],3:[],4:[]};
+        byYear[yr][t].push(p);
+      });
+
+      const years = Object.keys(byYear).sort();
+      const grid  = document.createElement('div');
+      grid.className = 'pll-grid';
+
+      // Header row
+      const blank = document.createElement('div');
+      blank.className = 'pll-cell-head';
+      grid.appendChild(blank);
+      for (let t = 1; t <= 4; t++) {
+        const h = document.createElement('div');
+        h.className = `pll-cell-head ${TIER_HEAD[t]}`;
+        h.textContent = TIER_LABEL[t];
+        grid.appendChild(h);
+      }
+
+      // Year rows
+      years.forEach(yr => {
+        const yrEl = document.createElement('div');
+        yrEl.className = 'pll-cell-yr';
+        yrEl.textContent = yr;
+        grid.appendChild(yrEl);
+
+        for (let t = 1; t <= 4; t++) {
+          const cell = document.createElement('div');
+          cell.className = 'pll-cell-dots';
+          (byYear[yr][t] || []).forEach(p => {
+            const dot = document.createElement('span');
+            dot.className = `pll-dot ${TIER_DOT[t]}`;
+            dot.setAttribute('role', 'button');
+            dot.setAttribute('aria-label', p.title);
+            dot.addEventListener('mouseenter', () => {
+              tip.innerHTML = `<strong>${p.title}</strong><br><span style="opacity:0.65">${p.venue} · ${p.year}</span>`;
+              tip.style.display = 'block';
+            });
+            dot.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+            cell.appendChild(dot);
+          });
+          grid.appendChild(cell);
+        }
+      });
+
+      body.innerHTML = '';
+      body.appendChild(grid);
+
+      // Derive insight: journal/premier share early vs recent
+      const share = yrs => {
+        const total = yrs.reduce((s,y) => s + Object.values(byYear[y]||{}).flat().length, 0);
+        const jCount = yrs.reduce((s,y) => s + ((byYear[y]||{})[3]||[]).length + ((byYear[y]||{})[4]||[]).length, 0);
+        return total ? Math.round((jCount / total) * 100) : 0;
+      };
+      const earlyYrs  = years.filter(y => y <= '2021');
+      const recentYrs = years.filter(y => y >= '2024');
+      if (earlyYrs.length && recentYrs.length) {
+        const ep = share(earlyYrs);
+        const rp = share(recentYrs);
+        insight.textContent = `Journal & premier publications: ${ep}% in 2019–21 → ${rp}% in 2024–26`;
+      }
+    })
+    .catch(() => { body.innerHTML = '<div class="pll-loader">Could not load data.</div>'; });
+})();
+</script>

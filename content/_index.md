@@ -39,6 +39,18 @@ sections:
         {{< research_storylines >}}
         {{< /spoiler >}}
 
+        {{< spoiler text="📈 Publication Quality Trajectory" >}}
+        {{< pub_ladder >}}
+        {{< /spoiler >}}
+
+        {{< spoiler text="🔬 Research Topic Evolution" >}}
+        {{< topic_drift >}}
+        {{< /spoiler >}}
+
+        {{< spoiler text="🤝 Authorship & Collaboration Evolution" >}}
+        {{< coauthor_evolution >}}
+        {{< /spoiler >}}
+
     design:
       columns: '1'
 
