@@ -91,12 +91,13 @@ def fetch_analytics():
         )
     ]
 
-    responses = client.batch_run_reports(
-        BatchRunReportsRequest(
-            property=property_name,
-            requests=requests
-        )
-    ).reports
+    # GA4 batch API limit is 5 requests per call — split into two calls.
+    responses = []
+    for chunk in [requests[:5], requests[5:]]:
+        if chunk:
+            responses += client.batch_run_reports(
+                BatchRunReportsRequest(property=property_name, requests=chunk)
+            ).reports
 
     monthly_resp = responses[0]
     monthly_data = [{"month": r.dimension_values[0].value, "visitors": int(r.metric_values[0].value)} for r in monthly_resp.rows]
