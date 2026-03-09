@@ -1,6 +1,26 @@
 {
-  "refresh_date": "2026-03-08",
+  "refresh_date": "2026-03-09",
   "papers": [
+    {
+      "id": "https://openalex.org/W4399083018",
+      "title": "Intelligent Clinical Documentation: Harnessing Generative AI for Patient-Centric Clinical Note Generation",
+      "authors": [
+        "Anjanava Biswas",
+        "Wrick Talukdar"
+      ],
+      "year": 2024,
+      "venue": "International Journal of Innovative Science and Research Technology (IJISRT)",
+      "doi": "10.38124/ijisrt/ijisrt24may1483",
+      "cited_by_count": 1011,
+      "topics": [
+        "Documentation",
+        "Health care",
+        "Generative grammar",
+        "Confidentiality"
+      ],
+      "url": "https://doi.org/10.38124/ijisrt/ijisrt24may1483",
+      "abstract": "Comprehensive clinical documentation is crucial for effective healthcare delivery, yet it poses a significant burden on healthcare professionals, leading to burnout, increased medical errors, and compromised patient safety. This paper explores the potential of generative AI (Artificial Intelligence)"
+    },
     {
       "id": "https://openalex.org/W4393065402",
       "title": "A survey on large language model based autonomous agents",
@@ -13,7 +33,7 @@
       "year": 2024,
       "venue": "Frontiers of Computer Science",
       "doi": "10.1007/s11704-024-40231-1",
-      "cited_by_count": 856,
+      "cited_by_count": 866,
       "topics": [
         "Computer science"
       ],
@@ -32,14 +52,14 @@
       "year": 2024,
       "venue": "High-Confidence Computing",
       "doi": "10.1016/j.hcc.2024.100211",
-      "cited_by_count": 733,
+      "cited_by_count": 740,
       "topics": [
         "Internet privacy",
         "Computer security",
         "Computer science"
       ],
       "url": "https://doi.org/10.1016/j.hcc.2024.100211",
-      "abstract": ""
+      "abstract": "Large Language Models (LLMs), such as ChatGPT and Bard, have revolutionized natural language understanding and generation. They possess deep language comprehension, human-like text generation capabilities, contextual awareness, and robust problem-solving skills, making them invaluable in various dom"
     },
     {
       "id": "https://openalex.org/W4391855109",
@@ -53,7 +73,7 @@
       "year": 2024,
       "venue": "IEEE Access",
       "doi": "10.1109/access.2024.3365742",
-      "cited_by_count": 576,
+      "cited_by_count": 579,
       "topics": [
         "Computer science",
         "Open research",
@@ -74,7 +94,7 @@
       "year": 2024,
       "venue": "IEEE Access",
       "doi": "10.1109/access.2024.3389497",
-      "cited_by_count": 467,
+      "cited_by_count": 468,
       "topics": [
         "Computer science",
         "Transformer",
@@ -96,7 +116,7 @@
       "year": 2024,
       "venue": "ACM Transactions on Knowledge Discovery from Data",
       "doi": "10.1145/3649506",
-      "cited_by_count": 429,
+      "cited_by_count": 431,
       "topics": [
         "Power (physics)"
       ],
@@ -113,7 +133,7 @@
       "year": 2024,
       "venue": "Applied Sciences",
       "doi": "10.3390/app14020675",
-      "cited_by_count": 417,
+      "cited_by_count": 419,
       "topics": [
         "Health care",
         "Autonomy",
@@ -135,7 +155,7 @@
       "year": 2024,
       "venue": "Journal Of Big Data",
       "doi": "10.1186/s40537-023-00876-4",
-      "cited_by_count": 407,
+      "cited_by_count": 408,
       "topics": [
         "Computer science",
         "Python (programming language)",
@@ -156,7 +176,7 @@
       "year": 2024,
       "venue": "Information",
       "doi": "10.3390/info15090517",
-      "cited_by_count": 364,
+      "cited_by_count": 365,
       "topics": [
         "Recurrent neural network",
         "Computer science",
@@ -197,7 +217,7 @@
       "year": 2024,
       "venue": "ACM Computing Surveys",
       "doi": "10.1145/3691338",
-      "cited_by_count": 311,
+      "cited_by_count": 313,
       "topics": [
         "Anomaly detection",
         "Computer science",
@@ -206,6 +226,28 @@
       ],
       "url": "https://doi.org/10.1145/3691338",
       "abstract": "Time series anomaly detection is important for a wide range of research fields and applications, including financial markets, economics, earth sciences, manufacturing, and healthcare. The presence of anomalies can indicate novel or unexpected events, such as production faults, system defects, and he"
+    },
+    {
+      "id": "https://openalex.org/W4393147129",
+      "title": "Benchmarking Large Language Models in Retrieval-Augmented Generation",
+      "authors": [
+        "Jiawei Chen",
+        "Hongyu Lin",
+        "Xianpei Han",
+        "Le Sun"
+      ],
+      "year": 2024,
+      "venue": "Proceedings of the AAAI Conference on Artificial Intelligence",
+      "doi": "10.1609/aaai.v38i16.29728",
+      "cited_by_count": 284,
+      "topics": [
+        "Benchmarking",
+        "Computer science",
+        "Natural language processing",
+        "Information retrieval"
+      ],
+      "url": "https://doi.org/10.1609/aaai.v38i16.29728",
+      "abstract": "Retrieval-Augmented Generation (RAG) is a promising approach for mitigating the hallucination of large language models (LLMs). However, existing research lacks rigorous evaluation of the impact of retrieval-augmented generation on different large language models, which make it challenging to identif"
     },
     {
       "id": "https://openalex.org/W4393855718",
@@ -228,28 +270,6 @@
       ],
       "url": "https://doi.org/10.38124/ijisrt/ijisrt24mar1231",
       "abstract": "The Internet of Medical Things (IoMT) has begun functioning like this: improved patient monitoring and an easily accessible digital data warehouse. Despite that, this methodology of the internet will potentially have a counter balance which risks for patient data might involve hacking, data theft, a"
-    },
-    {
-      "id": "https://openalex.org/W4393147129",
-      "title": "Benchmarking Large Language Models in Retrieval-Augmented Generation",
-      "authors": [
-        "Jiawei Chen",
-        "Hongyu Lin",
-        "Xianpei Han",
-        "Le Sun"
-      ],
-      "year": 2024,
-      "venue": "Proceedings of the AAAI Conference on Artificial Intelligence",
-      "doi": "10.1609/aaai.v38i16.29728",
-      "cited_by_count": 281,
-      "topics": [
-        "Benchmarking",
-        "Computer science",
-        "Natural language processing",
-        "Information retrieval"
-      ],
-      "url": "https://doi.org/10.1609/aaai.v38i16.29728",
-      "abstract": "Retrieval-Augmented Generation (RAG) is a promising approach for mitigating the hallucination of large language models (LLMs). However, existing research lacks rigorous evaluation of the impact of retrieval-augmented generation on different large language models, which make it challenging to identif"
     },
     {
       "id": "https://openalex.org/W4392599656",
@@ -283,7 +303,7 @@
       "year": 2024,
       "venue": "World Wide Web",
       "doi": "10.1007/s11280-024-01276-1",
-      "cited_by_count": 248,
+      "cited_by_count": 250,
       "topics": [
         "Personalization",
         "Computer science",
@@ -327,7 +347,7 @@
       "year": 2024,
       "venue": "npj Mental Health Research",
       "doi": "10.1038/s44184-024-00056-z",
-      "cited_by_count": 227,
+      "cited_by_count": 229,
       "topics": [
         "Health care",
         "Psychology"
@@ -347,7 +367,7 @@
       "year": 2024,
       "venue": "Diagnostic Pathology",
       "doi": "10.1186/s13000-024-01464-7",
-      "cited_by_count": 221,
+      "cited_by_count": 226,
       "topics": [
         "Interpretability",
         "Context (archaeology)",
@@ -399,7 +419,7 @@
         "Confirmatory factor analysis"
       ],
       "url": "https://doi.org/10.1038/s41598-024-52549-8",
-      "abstract": "Artificial intelligence models, like ChatGPT, have the potential to revolutionize higher education when implemented properly. This study aimed to investigate the factors influencing university students' attitudes and usage of ChatGPT in Arab countries. The survey instrument \"TAME-ChatGPT\" was admini"
+      "abstract": ""
     },
     {
       "id": "https://openalex.org/W4391582407",
@@ -413,7 +433,7 @@
       "year": 2024,
       "venue": "IEEE Access",
       "doi": "10.1109/access.2024.3363469",
-      "cited_by_count": 194,
+      "cited_by_count": 195,
       "topics": [
         "Computer science",
         "Deep learning",
@@ -456,7 +476,7 @@
       "year": 2025,
       "venue": "ACM Computing Surveys",
       "doi": "10.1145/3712001",
-      "cited_by_count": 184,
+      "cited_by_count": 189,
       "topics": [
         "Computer science",
         "Computer security"
@@ -476,7 +496,7 @@
       "year": 2024,
       "venue": "IEEE Access",
       "doi": "10.1109/access.2024.3381611",
-      "cited_by_count": 180,
+      "cited_by_count": 181,
       "topics": [
         "Computer science",
         "Computer security",
@@ -498,7 +518,7 @@
       "year": 2024,
       "venue": "IEEE Access",
       "doi": "10.1109/access.2024.3355547",
-      "cited_by_count": 163,
+      "cited_by_count": 164,
       "topics": [
         "Computer science",
         "Artificial intelligence",
@@ -610,28 +630,6 @@
       ],
       "url": "https://doi.org/10.1038/s41598-024-51578-7",
       "abstract": ""
-    },
-    {
-      "id": "https://openalex.org/W4405181600",
-      "title": "\"Do Anything Now\": Characterizing and Evaluating In-The-Wild Jailbreak Prompts on Large Language Models",
-      "authors": [
-        "Xinyue Shen",
-        "Zeyuan Chen",
-        "Michael Backes",
-        "Yun Shen"
-      ],
-      "year": 2024,
-      "venue": "",
-      "doi": "10.1145/3658644.3670388",
-      "cited_by_count": 118,
-      "topics": [
-        "Harm",
-        "Set (abstract data type)",
-        "Adversarial system",
-        "Privilege (computing)"
-      ],
-      "url": "https://doi.org/10.1145/3658644.3670388",
-      "abstract": "The misuse of large language models (LLMs) has drawn significant attention from the general public and LLM vendors. One particular type of adversarial prompt, known as jailbreak prompt, has emerged as the main attack vector to bypass the safeguards and elicit harmful content from LLMs. In this paper"
     }
   ]
 }
