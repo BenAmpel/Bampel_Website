@@ -194,7 +194,8 @@ def matches_list(venue: str, aliases) -> bool:
             continue
         if venue_key == alias_key:
             return True
-        pattern = re.compile(rf"(^|\s){re.sub(r'\s+', r'\\s+', alias_key)}(\s|$)")
+        alias_pat = re.sub(r'\s+', r'\\s+', alias_key)
+        pattern = re.compile(rf"(^|\s){alias_pat}(\s|$)")
         if pattern.search(venue_key):
             return True
     return False
