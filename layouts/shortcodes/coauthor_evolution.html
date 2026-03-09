@@ -69,14 +69,17 @@ body:not(.dark) .cae-insight { border-top-color:rgba(0,0,0,0.1); }
   const insightEl = document.getElementById('cae-insight');
   if (!barsEl || !collabEl) return;
 
-  const MENTORS = ['chen','samtani','nunamaker','yang','hashim'];
-  const MENTEES = ['otto','marx','gao','wagner','zhang','dacosta','reyes'];
+  const MENTORS = ['chen','samtani','nunamaker'];
+  const PEERS   = ['hashim'];
+  const MENTEES = ['otto','marx','gao','wagner','zhang','dacosta','reyes','vahedi','yang','hu'];
 
+  const matchTerm = (text, term) => new RegExp('\\b' + term + '\\b').test(text);
   const classifyAuthor = name => {
     const nl = name.toLowerCase();
     if (nl.includes('ampel')) return 'self';
-    if (MENTORS.some(m => nl.includes(m))) return 'mentor';
-    if (MENTEES.some(m => nl.includes(m))) return 'mentee';
+    if (MENTEES.some(m => matchTerm(nl, m))) return 'mentee';
+    if (PEERS.some(m => matchTerm(nl, m))) return 'peer';
+    if (MENTORS.some(m => matchTerm(nl, m))) return 'mentor';
     return 'peer';
   };
 

@@ -54,6 +54,26 @@ sections:
     design:
       columns: '1'
 
+  # ---------- RESEARCH INTELLIGENCE ----------
+  - block: markdown
+    id: intelligence
+    content:
+      title: Research Intelligence
+      text: |
+        {{< spoiler text="🔭 arXiv Research Radar" >}}
+        {{< arxiv_radar >}}
+        {{< /spoiler >}}
+
+        {{< spoiler text="💰 NSF Grant Opportunities" >}}
+        {{< nsf_grants >}}
+        {{< /spoiler >}}
+
+        {{< spoiler text="🔗 Semantic Scholar: Citations & Recommendations" >}}
+        {{< semantic_scholar >}}
+        {{< /spoiler >}}
+    design:
+      columns: '1'
+
   # ---------- PUBLICATIONS ----------
   - block: markdown
     id: publications

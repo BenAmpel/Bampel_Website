@@ -1,0 +1,115 @@
+<div class="nsfg-root" id="nsfg-root">
+  <div class="nsfg-header">
+    <div>
+      <h3 class="nsfg-title">NSF Grant Opportunities</h3>
+      <p class="nsfg-desc">Recent NSF awards aligned with your research domains — AI security, threat intelligence, and cybersecurity.</p>
+    </div>
+  </div>
+  <div class="nsfg-body" id="nsfg-body">
+    <div class="nsfg-loader">Loading grant data…</div>
+  </div>
+  <div class="nsfg-footer" id="nsfg-footer"></div>
+</div>
+
+<style>
+.nsfg-root { margin:24px 0; padding:24px; border-radius:16px; border:1px solid var(--card-border,#2a2a2a); background:linear-gradient(135deg,rgba(0,0,0,0.55),rgba(0,0,0,0.15)); box-shadow:0 12px 30px rgba(0,0,0,0.25); }
+.nsfg-header { margin-bottom:18px; }
+.nsfg-title { margin:0 0 6px; font-size:1.1rem; color:#00ff41; text-transform:uppercase; letter-spacing:0.08em; }
+.nsfg-desc { margin:0; font-size:0.82rem; opacity:0.7; line-height:1.4; }
+.nsfg-loader { opacity:0.5; padding:32px 0; font-size:0.85rem; text-align:center; }
+.nsfg-error { color:#e040fb; padding:24px 0; text-align:center; font-size:0.85rem; }
+.nsfg-empty { opacity:0.55; padding:24px 0; text-align:center; font-size:0.85rem; line-height:1.6; }
+.nsfg-empty code { background:rgba(255,255,255,0.08); padding:1px 6px; border-radius:4px; font-size:0.82em; }
+.nsfg-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(360px,1fr)); gap:14px; }
+.nsfg-card { background:rgba(255,255,255,0.025); border:1px solid rgba(255,255,255,0.07); border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:9px; transition:border-color 0.15s,background 0.15s; }
+.nsfg-card:hover { border-color:rgba(0,255,65,0.28); background:rgba(255,255,255,0.04); }
+.nsfg-card-top { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+.nsfg-card-title { font-size:0.87rem; font-weight:600; line-height:1.38; flex:1; color:#e4e4e4; }
+.nsfg-amt { flex-shrink:0; font-size:0.88rem; font-weight:800; color:#00ff41; white-space:nowrap; padding-top:1px; text-shadow:0 0 8px rgba(0,255,65,0.3); }
+.nsfg-meta { display:flex; flex-wrap:wrap; gap:5px; align-items:center; }
+.nsfg-chip { font-size:0.63rem; padding:2px 8px; border-radius:10px; }
+.nsfg-chip-kw { background:rgba(0,229,255,0.08); border:1px solid rgba(0,229,255,0.2); color:#00e5ff; }
+.nsfg-chip-date { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#aaa; }
+.nsfg-pi { font-size:0.73rem; color:#aaa; }
+.nsfg-abstract { font-size:0.78rem; color:#bbb; line-height:1.52; border-top:1px solid rgba(255,255,255,0.05); padding-top:8px; }
+.nsfg-link { display:inline-block; margin-top:2px; font-size:0.72rem; color:#00e5ff; text-decoration:none; border:1px solid rgba(0,229,255,0.3); border-radius:6px; padding:3px 10px; transition:background 0.15s; }
+.nsfg-link:hover { background:rgba(0,229,255,0.1); }
+.nsfg-footer { margin-top:14px; font-size:0.7rem; opacity:0.45; text-align:right; }
+
+body:not(.dark) .nsfg-root { background:rgba(255,255,255,0.96); border-color:#ddd; color:#222; }
+body:not(.dark) .nsfg-card { background:#f8f8f8; border-color:#e0e0e0; }
+body:not(.dark) .nsfg-card:hover { border-color:#00aa44; }
+body:not(.dark) .nsfg-card-title { color:#222; }
+body:not(.dark) .nsfg-pi,.nsfg-abstract { color:#555; }
+body:not(.dark) .nsfg-chip-date { color:#666; }
+</style>
+
+<script>
+(function () {
+  'use strict';
+
+  const bodyEl   = document.getElementById('nsfg-body');
+  const footerEl = document.getElementById('nsfg-footer');
+
+  function fmtAmt(raw) {
+    const n = parseInt(raw, 10) || 0;
+    if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
+    if (n >= 1_000)     return `$${Math.round(n / 1_000)}K`;
+    return `$${n}`;
+  }
+
+  function fmtDateRange(start, end) {
+    if (!start && !end) return '';
+    const fmt = s => {
+      if (!s) return '';
+      // NSF format: MM/DD/YYYY
+      const parts = s.split('/');
+      if (parts.length === 3) {
+        const d = new Date(`${parts[2]}-${parts[0].padStart(2,'0')}-${parts[1].padStart(2,'0')}`);
+        return d.toLocaleDateString('en-US', { month:'short', year:'numeric' });
+      }
+      return s;
+    };
+    return `${fmt(start)} – ${fmt(end)}`;
+  }
+
+  function truncate(text, max) {
+    if (!text) return '';
+    text = text.replace(/\s+/g, ' ').trim();
+    return text.length <= max ? text : text.slice(0, max).replace(/\s\S*$/, '') + '…';
+  }
+
+  function renderCard(g) {
+    const keywords = (g.keywords || []).map(kw =>
+      `<span class="nsfg-chip nsfg-chip-kw">${kw}</span>`
+    ).join('');
+    const dateRange = fmtDateRange(g.startDate, g.expDate);
+    const piLine = [g.piName, g.institution].filter(Boolean).join(' · ');
+    return `<div class="nsfg-card">
+      <div class="nsfg-card-top">
+        <div class="nsfg-card-title">${g.title || 'Untitled Award'}</div>
+        ${g.estimatedTotalAmt ? `<div class="nsfg-amt">${fmtAmt(g.estimatedTotalAmt)}</div>` : ''}
+      </div>
+      <div class="nsfg-meta">
+        ${keywords}
+        ${dateRange ? `<span class="nsfg-chip nsfg-chip-date">${dateRange}</span>` : ''}
+      </div>
+      ${piLine ? `<div class="nsfg-pi">${piLine}</div>` : ''}
+      ${g.abstractText ? `<div class="nsfg-abstract">${truncate(g.abstractText, 160)}</div>` : ''}
+      ${g.nsf_url ? `<a class="nsfg-link" href="${g.nsf_url}" target="_blank" rel="noopener noreferrer">View NSF Award →</a>` : ''}
+    </div>`;
+  }
+
+  fetch('/data/nsf_grants.json')
+    .then(r => r.ok ? r.json() : null)
+    .catch(() => null)
+    .then(data => {
+      if (!data || !Array.isArray(data.grants) || !data.grants.length) {
+        bodyEl.innerHTML = '<div class="nsfg-empty">No grant data yet.<br>Run <code>python scripts/fetch_nsf_grants.py</code> to populate, then redeploy.</div>';
+        return;
+      }
+      bodyEl.innerHTML = `<div class="nsfg-grid">${data.grants.map(renderCard).join('')}</div>`;
+      footerEl.textContent = `${data.grants.length} awards · Refreshed ${data.refresh_date || 'recently'} via fetch_nsf_grants.py`;
+    });
+})();
+</script>

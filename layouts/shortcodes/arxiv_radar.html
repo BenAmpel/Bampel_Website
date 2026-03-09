@@ -1,0 +1,176 @@
+<div class="arxr-root" id="arxr-root">
+  <div class="arxr-header">
+    <div>
+      <h3 class="arxr-title">arXiv Research Radar</h3>
+      <p class="arxr-desc">Recent preprints matching your research domains — scored by relevance to your publication portfolio.</p>
+    </div>
+    <div class="arxr-controls">
+      <select class="arxr-select" id="arxr-range">
+        <option value="7">Last 7 days</option>
+        <option value="30" selected>Last 30 days</option>
+        <option value="60">Last 60 days</option>
+      </select>
+    </div>
+  </div>
+  <div class="arxr-tags" id="arxr-tags"></div>
+  <div class="arxr-body" id="arxr-body">
+    <div class="arxr-loader">Loading papers…</div>
+  </div>
+  <div class="arxr-footer" id="arxr-footer"></div>
+</div>
+
+<style>
+.arxr-root { margin:24px 0; padding:24px; border-radius:16px; border:1px solid var(--card-border,#2a2a2a); background:linear-gradient(135deg,rgba(0,0,0,0.55),rgba(0,0,0,0.15)); box-shadow:0 12px 30px rgba(0,0,0,0.25); }
+.arxr-header { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:14px; }
+.arxr-title { margin:0 0 6px; font-size:1.1rem; color:#00ff41; text-transform:uppercase; letter-spacing:0.08em; }
+.arxr-desc { margin:0; font-size:0.82rem; opacity:0.7; line-height:1.4; max-width:560px; }
+.arxr-controls { display:flex; gap:8px; align-items:center; flex-shrink:0; }
+.arxr-select { background:#111; color:#ccc; border:1px solid #333; border-radius:6px; padding:5px 10px; font-size:0.8rem; cursor:pointer; }
+.arxr-select:focus { outline:none; border-color:#00e5ff; }
+.arxr-tags { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px; }
+.arxr-tag { font-size:0.66rem; padding:3px 9px; border-radius:12px; background:rgba(0,229,255,0.07); border:1px solid rgba(0,229,255,0.18); color:#00e5ff; letter-spacing:0.04em; }
+.arxr-loader { opacity:0.5; padding:32px 0; font-size:0.85rem; text-align:center; }
+.arxr-error { color:#e040fb; padding:24px 0; text-align:center; font-size:0.85rem; }
+.arxr-empty { opacity:0.55; padding:24px 0; text-align:center; font-size:0.85rem; line-height:1.6; }
+.arxr-empty code { background:rgba(255,255,255,0.08); padding:1px 6px; border-radius:4px; font-size:0.82em; }
+.arxr-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:14px; }
+.arxr-card { background:rgba(255,255,255,0.025); border:1px solid rgba(255,255,255,0.07); border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:8px; transition:border-color 0.15s,background 0.15s; }
+.arxr-card:hover { border-color:rgba(0,255,65,0.3); background:rgba(255,255,255,0.04); }
+.arxr-card-top { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+.arxr-card-title { font-size:0.87rem; font-weight:600; line-height:1.37; flex:1; }
+.arxr-card-title a { color:#e4e4e4; text-decoration:none; }
+.arxr-card-title a:hover { color:#00ff41; }
+.arxr-score-wrap { flex-shrink:0; display:flex; flex-direction:column; align-items:center; gap:2px; padding-top:2px; }
+.arxr-score-bar { width:5px; border-radius:3px; background:linear-gradient(to top,#00ff41,#00e5ff); min-height:6px; box-shadow:0 0 8px rgba(0,255,65,0.4); }
+.arxr-score-val { font-size:0.6rem; color:#00ff41; font-weight:700; }
+.arxr-meta { display:flex; flex-wrap:wrap; gap:5px; align-items:center; }
+.arxr-chip { font-size:0.63rem; padding:2px 7px; border-radius:10px; }
+.arxr-chip-cat { background:rgba(224,64,251,0.1); border:1px solid rgba(224,64,251,0.22); color:#e040fb; }
+.arxr-chip-date { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#aaa; }
+.arxr-authors { font-size:0.72rem; color:#aaa; line-height:1.3; }
+.arxr-abstract { font-size:0.78rem; color:#bbb; line-height:1.52; border-top:1px solid rgba(255,255,255,0.05); padding-top:8px; }
+.arxr-footer { margin-top:14px; font-size:0.7rem; opacity:0.45; text-align:right; }
+
+body:not(.dark) .arxr-root { background:rgba(255,255,255,0.96); border-color:#ddd; color:#222; }
+body:not(.dark) .arxr-card { background:#f8f8f8; border-color:#e0e0e0; }
+body:not(.dark) .arxr-card:hover { border-color:#00aa44; }
+body:not(.dark) .arxr-card-title a { color:#222; }
+body:not(.dark) .arxr-select { background:#fff; color:#333; border-color:#ccc; }
+body:not(.dark) .arxr-tag { background:rgba(0,130,180,0.07); color:#0077aa; border-color:rgba(0,130,180,0.2); }
+</style>
+
+<script>
+(function () {
+  'use strict';
+
+  const KEYWORDS = [
+    { label: 'LLM / GenAI',    terms: ['large language model','llm','generative ai','gpt','llama'] },
+    { label: 'Cybersecurity',  terms: ['cybersecurity','cyber security','information security'] },
+    { label: 'Phishing',       terms: ['phishing','spear phishing','email fraud','vishing'] },
+    { label: 'Dark Web',       terms: ['dark web','darknet','hacker forum','underground forum'] },
+    { label: 'Threat Intel',   terms: ['threat intelligence','threat detection','mitre att&ck','threat hunting'] },
+    { label: 'Vulnerability',  terms: ['vulnerability','exploit','cve','zero-day','patch management'] },
+    { label: 'Malware',        terms: ['malware','ransomware','botnet','trojan','spyware'] },
+    { label: 'Multi-Agent AI', terms: ['multi-agent','agentic ai','autonomous agent','ai agent'] },
+  ];
+  const ALL_TERMS = KEYWORDS.flatMap(k => k.terms);
+
+  const bodyEl   = document.getElementById('arxr-body');
+  const footerEl = document.getElementById('arxr-footer');
+  const tagsEl   = document.getElementById('arxr-tags');
+  const rangeEl  = document.getElementById('arxr-range');
+
+  // Render keyword tags
+  KEYWORDS.forEach(k => {
+    const t = document.createElement('span');
+    t.className = 'arxr-tag';
+    t.textContent = k.label;
+    tagsEl.appendChild(t);
+  });
+
+  function scoreText(text) {
+    const lower = text.toLowerCase();
+    return ALL_TERMS.reduce((s, t) => s + (lower.includes(t) ? 1 : 0), 0);
+  }
+  function scoreEntry(e) {
+    return scoreText(e.title) * 3 + scoreText(e.summary);
+  }
+
+  function daysAgo(n) {
+    const d = new Date();
+    d.setDate(d.getDate() - n);
+    return d;
+  }
+
+  function fmtDate(iso) {
+    return new Date(iso).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+  }
+
+  function truncate(text, max) {
+    text = (text || '').replace(/\s+/g, ' ').trim();
+    return text.length <= max ? text : text.slice(0, max).replace(/\s\S*$/, '') + '…';
+  }
+
+  function barHeight(score, maxScore) {
+    return Math.max(8, Math.round((score / Math.max(maxScore, 1)) * 52));
+  }
+
+  function renderCard(e, maxScore) {
+    const h = barHeight(e.score, maxScore);
+    const cat = (e.cats || [])[0] || 'cs.CR';
+    const authors = e.authors || [];
+    const authStr = authors.slice(0,3).join(', ') + (authors.length > 3 ? ` +${authors.length - 3}` : '');
+    return `<div class="arxr-card">
+      <div class="arxr-card-top">
+        <div class="arxr-card-title"><a href="${e.link}" target="_blank" rel="noopener noreferrer">${e.title}</a></div>
+        <div class="arxr-score-wrap">
+          <div class="arxr-score-bar" style="height:${h}px" title="Relevance score: ${e.score}"></div>
+          <span class="arxr-score-val">${e.score}</span>
+        </div>
+      </div>
+      <div class="arxr-meta">
+        <span class="arxr-chip arxr-chip-cat">${cat}</span>
+        <span class="arxr-chip arxr-chip-date">${fmtDate(e.published)}</span>
+      </div>
+      <div class="arxr-authors">${authStr || 'Unknown authors'}</div>
+      <div class="arxr-abstract">${truncate(e.summary, 145)}</div>
+    </div>`;
+  }
+
+  function render(papers, days) {
+    const cutoff = daysAgo(days);
+    const scored = papers
+      .filter(e => e.published && new Date(e.published) >= cutoff)
+      .map(e => ({ ...e, score: scoreEntry(e) }))
+      .filter(e => e.score > 0)
+      .sort((a, b) => b.score - a.score);
+
+    if (!scored.length) {
+      bodyEl.innerHTML = `<div class="arxr-empty">No matching papers in the last ${days} days.<br>Try expanding the date range, or run <code>python scripts/fetch_arxiv_papers.py</code> to refresh.</div>`;
+      footerEl.textContent = '';
+      return;
+    }
+
+    const maxScore = Math.max(...scored.map(e => e.score));
+    const shown = scored.slice(0, 12);
+    bodyEl.innerHTML = `<div class="arxr-grid">${shown.map(e => renderCard(e, maxScore)).join('')}</div>`;
+    footerEl.textContent = `Showing ${shown.length} of ${scored.length} relevant papers · arXiv · refreshed via fetch_arxiv_papers.py`;
+  }
+
+  fetch('/data/arxiv_papers.json')
+    .then(r => r.ok ? r.json() : null)
+    .catch(() => null)
+    .then(data => {
+      if (!data || !Array.isArray(data.papers) || !data.papers.length) {
+        bodyEl.innerHTML = '<div class="arxr-empty">No paper data yet.<br>Run <code>python scripts/fetch_arxiv_papers.py</code> to populate, then redeploy.</div>';
+        footerEl.textContent = '';
+        return;
+      }
+      rangeEl.addEventListener('change', () => render(data.papers, +rangeEl.value));
+      render(data.papers, +rangeEl.value);
+      // Update footer with refresh date
+      const days = +rangeEl.value;
+      footerEl.textContent = `Refreshed ${data.refresh_date || 'recently'} · ${data.papers.length} papers in index · showing last ${days} days · fetch_arxiv_papers.py`;
+    });
+})();
+</script>
