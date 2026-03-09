@@ -33,6 +33,11 @@ jobs:
           GA4_KEY_JSON: ${{ secrets.GA4_KEY_JSON }}
         run: python scripts/update_visitor_stats.py
 
+      - name: Sync New Scholar Publications
+        env:
+          SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
+        run: python scripts/sync_scholar_publications.py
+
       - name: Update Publications Index
         run: python scripts/build_publications_json.py
 
