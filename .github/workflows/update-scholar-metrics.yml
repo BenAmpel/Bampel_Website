@@ -38,6 +38,15 @@ jobs:
           SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
         run: python scripts/sync_scholar_publications.py
 
+      - name: Expand Stub Author Names
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          SMTP_FROM: ${{ secrets.SMTP_FROM }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SMTP_TO: ${{ secrets.SMTP_TO }}
+        run: python scripts/expand_stub_authors.py
+
       - name: Update Publications Index
         run: python scripts/build_publications_json.py
 
