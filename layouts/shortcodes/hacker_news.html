@@ -1,0 +1,150 @@
+<div class="hn-root" id="hn-root">
+  <div class="hn-header">
+    <div class="hn-header-left">
+      <h3 class="hn-title">Hacker News: Research Community Pulse</h3>
+      <p class="hn-desc">Top tech community discussions on cybersecurity, AI security, and related topics — live from Hacker News.</p>
+    </div>
+    <div class="hn-controls">
+      <select class="hn-select" id="hn-topic-select">
+        <option value="cybersecurity">Cybersecurity</option>
+        <option value="phishing">Phishing</option>
+        <option value="LLM security">LLM Security</option>
+        <option value="threat intelligence">Threat Intel</option>
+        <option value="dark web">Dark Web</option>
+        <option value="vulnerability">Vulnerability</option>
+      </select>
+      <button class="hn-btn" id="hn-refresh-btn">↺ Refresh</button>
+    </div>
+  </div>
+  <div class="hn-body" id="hn-body">
+    <div class="hn-loader">Loading stories…</div>
+  </div>
+  <div class="hn-footer" id="hn-footer"></div>
+</div>
+
+<style>
+.hn-root { margin:24px 0; padding:24px; border-radius:16px; border:1px solid var(--card-border,#2a2a2a); background:linear-gradient(135deg,rgba(0,0,0,0.55),rgba(0,0,0,0.15)); box-shadow:0 12px 30px rgba(0,0,0,0.25); }
+.hn-header { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; margin-bottom:18px; }
+.hn-header-left { flex:1; min-width:200px; }
+.hn-title { margin:0 0 6px; font-size:1.1rem; color:#00ff41; text-transform:uppercase; letter-spacing:0.08em; }
+.hn-desc { margin:0; font-size:0.82rem; opacity:0.7; line-height:1.4; }
+.hn-controls { display:flex; gap:8px; align-items:center; flex-shrink:0; }
+.hn-select { background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.15); border-radius:8px; color:#ddd; font-size:0.78rem; padding:5px 10px; cursor:pointer; }
+.hn-btn { background:transparent; border:1px solid rgba(0,229,255,0.4); border-radius:8px; color:#00e5ff; font-size:0.78rem; padding:5px 12px; cursor:pointer; transition:background 0.15s; }
+.hn-btn:hover { background:rgba(0,229,255,0.1); }
+.hn-loader { opacity:0.5; padding:32px 0; font-size:0.85rem; text-align:center; }
+.hn-error,.hn-empty { padding:24px 0; text-align:center; font-size:0.85rem; opacity:0.6; }
+.hn-error { color:#e040fb; }
+.hn-list { display:flex; flex-direction:column; gap:10px; }
+.hn-card { background:rgba(255,255,255,0.025); border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:14px; display:flex; gap:14px; align-items:flex-start; transition:border-color 0.15s,background 0.15s; }
+.hn-card:hover { border-color:rgba(0,255,65,0.25); background:rgba(255,255,255,0.04); }
+.hn-rank { font-size:1.0rem; font-weight:800; color:#555; min-width:28px; text-align:right; padding-top:1px; }
+.hn-body-inner { flex:1; min-width:0; }
+.hn-card-title { font-size:0.87rem; font-weight:600; line-height:1.38; color:#e4e4e4; margin:0 0 6px; }
+.hn-card-title a { color:inherit; text-decoration:none; }
+.hn-card-title a:hover { color:#00ff41; }
+.hn-meta-row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.hn-chip { font-size:0.63rem; padding:2px 8px; border-radius:10px; }
+.hn-chip-pts { background:rgba(224,64,251,0.1); border:1px solid rgba(224,64,251,0.3); color:#e040fb; font-weight:700; }
+.hn-chip-cmts { background:rgba(0,229,255,0.08); border:1px solid rgba(0,229,255,0.2); color:#00e5ff; }
+.hn-chip-age { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#aaa; }
+.hn-domain { font-size:0.7rem; color:#888; }
+.hn-discuss { font-size:0.7rem; color:#00e5ff; text-decoration:none; margin-left:auto; }
+.hn-discuss:hover { text-decoration:underline; }
+.hn-footer { margin-top:14px; font-size:0.7rem; opacity:0.45; text-align:right; }
+
+body:not(.dark) .hn-root { background:rgba(255,255,255,0.96); border-color:#ddd; color:#222; }
+body:not(.dark) .hn-card { background:#f8f8f8; border-color:#e0e0e0; }
+body:not(.dark) .hn-card:hover { border-color:#00aa44; }
+body:not(.dark) .hn-card-title { color:#222; }
+body:not(.dark) .hn-select { background:#fff; border-color:#ccc; color:#222; }
+body:not(.dark) .hn-rank { color:#aaa; }
+</style>
+
+<script>
+(function () {
+  'use strict';
+
+  const bodyEl   = document.getElementById('hn-body');
+  const footerEl = document.getElementById('hn-footer');
+  const selectEl = document.getElementById('hn-topic-select');
+  const refreshBtn = document.getElementById('hn-refresh-btn');
+
+  const ALGOLIA = 'https://hn.algolia.com/api/v1/search';
+  const CACHE   = {};  // topic → {data, ts}
+  const TTL     = 15 * 60 * 1000; // 15 min
+
+  function relativeTime(ts) {
+    const now = Date.now();
+    const diff = Math.floor((now - ts * 1000) / 60000); // minutes
+    if (diff < 60)  return `${diff}m ago`;
+    if (diff < 1440) return `${Math.floor(diff/60)}h ago`;
+    return `${Math.floor(diff/1440)}d ago`;
+  }
+
+  function renderCard(hit, idx) {
+    const url     = hit.url || `https://news.ycombinator.com/item?id=${hit.objectID}`;
+    const hnUrl   = `https://news.ycombinator.com/item?id=${hit.objectID}`;
+    const domain  = hit.url ? (new URL(hit.url).hostname.replace(/^www\./, '')) : 'news.ycombinator.com';
+    const pts     = hit.points || 0;
+    const cmts    = hit.num_comments || 0;
+    const age     = hit.created_at_i ? relativeTime(hit.created_at_i) : '';
+
+    return `<div class="hn-card">
+      <div class="hn-rank">${idx + 1}</div>
+      <div class="hn-body-inner">
+        <div class="hn-card-title">
+          <a href="${url}" target="_blank" rel="noopener noreferrer">${hit.title || 'Untitled'}</a>
+        </div>
+        <div class="hn-meta-row">
+          <span class="hn-chip hn-chip-pts">▲ ${pts}</span>
+          <span class="hn-chip hn-chip-cmts">💬 ${cmts}</span>
+          ${age ? `<span class="hn-chip hn-chip-age">${age}</span>` : ''}
+          <span class="hn-domain">${domain}</span>
+          <a class="hn-discuss" href="${hnUrl}" target="_blank" rel="noopener noreferrer">Discuss →</a>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function load(topic, force) {
+    const cached = CACHE[topic];
+    if (!force && cached && (Date.now() - cached.ts < TTL)) {
+      render(cached.data, topic);
+      return;
+    }
+
+    bodyEl.innerHTML = '<div class="hn-loader">Loading stories…</div>';
+    footerEl.textContent = '';
+
+    const url = `${ALGOLIA}?query=${encodeURIComponent(topic)}&tags=story&hitsPerPage=15`;
+    fetch(url)
+      .then(r => r.ok ? r.json() : null)
+      .catch(() => null)
+      .then(data => {
+        if (!data || !Array.isArray(data.hits)) {
+          bodyEl.innerHTML = '<div class="hn-error">Failed to load stories — check network.</div>';
+          return;
+        }
+        CACHE[topic] = { data, ts: Date.now() };
+        render(data, topic);
+      });
+  }
+
+  function render(data, topic) {
+    const hits = (data.hits || []).filter(h => h.title && h.points > 0);
+    if (!hits.length) {
+      bodyEl.innerHTML = '<div class="hn-empty">No recent stories found for this topic.</div>';
+      footerEl.textContent = '';
+      return;
+    }
+    bodyEl.innerHTML = `<div class="hn-list">${hits.map(renderCard).join('')}</div>`;
+    footerEl.textContent = `${hits.length} stories · Live from Hacker News · Topic: ${topic}`;
+  }
+
+  selectEl.addEventListener('change', () => load(selectEl.value, false));
+  refreshBtn.addEventListener('click', () => load(selectEl.value, true));
+
+  load(selectEl.value, false);
+})();
+</script>

@@ -1,0 +1,86 @@
+<div class="oc-root" id="oc-root">
+  <div class="oc-header">
+    <div>
+      <h3 class="oc-title">OpenCitations: Who Is Citing Your Work</h3>
+      <p class="oc-desc">Papers citing Dr. Ampel's publications, sourced from the open OpenCitations index + CrossRef metadata.</p>
+    </div>
+  </div>
+  <div class="oc-body" id="oc-body">
+    <div class="oc-loader">Loading citation data…</div>
+  </div>
+  <div class="oc-footer" id="oc-footer"></div>
+</div>
+
+<style>
+.oc-root { margin:24px 0; padding:24px; border-radius:16px; border:1px solid var(--card-border,#2a2a2a); background:linear-gradient(135deg,rgba(0,0,0,0.55),rgba(0,0,0,0.15)); box-shadow:0 12px 30px rgba(0,0,0,0.25); }
+.oc-header { margin-bottom:18px; }
+.oc-title { margin:0 0 6px; font-size:1.1rem; color:#00ff41; text-transform:uppercase; letter-spacing:0.08em; }
+.oc-desc { margin:0; font-size:0.82rem; opacity:0.7; line-height:1.4; }
+.oc-loader { opacity:0.5; padding:32px 0; font-size:0.85rem; text-align:center; }
+.oc-error,.oc-empty { padding:24px 0; text-align:center; font-size:0.85rem; opacity:0.6; }
+.oc-error { color:#e040fb; }
+.oc-empty code { background:rgba(255,255,255,0.08); padding:1px 6px; border-radius:4px; font-size:0.82em; }
+.oc-list { display:flex; flex-direction:column; gap:10px; }
+.oc-card { background:rgba(255,255,255,0.025); border:1px solid rgba(255,255,255,0.07); border-radius:12px; padding:14px 16px; display:flex; flex-direction:column; gap:7px; transition:border-color 0.15s,background 0.15s; }
+.oc-card:hover { border-color:rgba(0,255,65,0.25); background:rgba(255,255,255,0.04); }
+.oc-card-top { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+.oc-card-title { font-size:0.87rem; font-weight:600; line-height:1.38; flex:1; color:#e4e4e4; }
+.oc-card-title a { color:inherit; text-decoration:none; }
+.oc-card-title a:hover { color:#00ff41; }
+.oc-year { flex-shrink:0; font-size:0.85rem; font-weight:700; color:#e040fb; padding-top:1px; }
+.oc-meta { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+.oc-chip { font-size:0.63rem; padding:2px 8px; border-radius:10px; }
+.oc-chip-cites { background:rgba(0,229,255,0.08); border:1px solid rgba(0,229,255,0.2); color:#00e5ff; max-width:340px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.oc-chip-venue { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#aaa; }
+.oc-authors { font-size:0.72rem; color:#999; }
+.oc-footer { margin-top:14px; font-size:0.7rem; opacity:0.45; text-align:right; }
+
+body:not(.dark) .oc-root { background:rgba(255,255,255,0.96); border-color:#ddd; color:#222; }
+body:not(.dark) .oc-card { background:#f8f8f8; border-color:#e0e0e0; }
+body:not(.dark) .oc-card:hover { border-color:#00aa44; }
+body:not(.dark) .oc-card-title { color:#222; }
+body:not(.dark) .oc-authors { color:#555; }
+</style>
+
+<script>
+(function () {
+  'use strict';
+
+  const bodyEl   = document.getElementById('oc-body');
+  const footerEl = document.getElementById('oc-footer');
+
+  function renderCard(c) {
+    const authorsStr = (c.authors || []).join(', ') + (c.authors && c.authors.length >= 4 ? ' et al.' : '');
+    const url = c.url || (c.doi ? `https://doi.org/${c.doi}` : '');
+    const citesLabel = c.cites_paper ? `Cites: ${c.cites_paper.slice(0, 55)}${c.cites_paper.length > 55 ? '…' : ''}` : '';
+    const alsoLabel  = c.also_cites ? `Also cites: ${c.also_cites.slice(0, 45)}…` : '';
+
+    return `<div class="oc-card">
+      <div class="oc-card-top">
+        <div class="oc-card-title">
+          ${url ? `<a href="${url}" target="_blank" rel="noopener noreferrer">${c.title || 'Untitled'}</a>` : (c.title || 'Untitled')}
+        </div>
+        ${c.year ? `<div class="oc-year">${c.year}</div>` : ''}
+      </div>
+      <div class="oc-meta">
+        ${citesLabel ? `<span class="oc-chip oc-chip-cites" title="${citesLabel}">📖 ${citesLabel}</span>` : ''}
+        ${alsoLabel ? `<span class="oc-chip oc-chip-cites" title="${alsoLabel}">📖 ${alsoLabel}</span>` : ''}
+        ${c.venue ? `<span class="oc-chip oc-chip-venue">${c.venue}</span>` : ''}
+      </div>
+      ${authorsStr ? `<div class="oc-authors">${authorsStr}</div>` : ''}
+    </div>`;
+  }
+
+  fetch('/data/opencitations.json')
+    .then(r => r.ok ? r.json() : null)
+    .catch(() => null)
+    .then(data => {
+      if (!data || !Array.isArray(data.citations) || !data.citations.length) {
+        bodyEl.innerHTML = '<div class="oc-empty">No data yet.<br>Run <code>python scripts/fetch_opencitations.py</code> to populate, then redeploy.</div>';
+        return;
+      }
+      bodyEl.innerHTML = `<div class="oc-list">${data.citations.map(renderCard).join('')}</div>`;
+      footerEl.textContent = `${data.citations.length} citing papers across ${data.total_dois_checked || '?'} publications · Refreshed ${data.refresh_date || 'recently'}`;
+    });
+})();
+</script>

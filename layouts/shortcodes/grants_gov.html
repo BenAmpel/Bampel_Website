@@ -1,0 +1,105 @@
+<div class="ggov-root" id="ggov-root">
+  <div class="ggov-header">
+    <div>
+      <h3 class="ggov-title">Grants.gov: Open Funding Opportunities</h3>
+      <p class="ggov-desc">Active federal grant opportunities aligned with AI security, cybersecurity, and threat intelligence research.</p>
+    </div>
+  </div>
+  <div class="ggov-body" id="ggov-body">
+    <div class="ggov-loader">Loading opportunities…</div>
+  </div>
+  <div class="ggov-footer" id="ggov-footer"></div>
+</div>
+
+<style>
+.ggov-root { margin:24px 0; padding:24px; border-radius:16px; border:1px solid var(--card-border,#2a2a2a); background:linear-gradient(135deg,rgba(0,0,0,0.55),rgba(0,0,0,0.15)); box-shadow:0 12px 30px rgba(0,0,0,0.25); }
+.ggov-header { margin-bottom:18px; }
+.ggov-title { margin:0 0 6px; font-size:1.1rem; color:#00ff41; text-transform:uppercase; letter-spacing:0.08em; }
+.ggov-desc { margin:0; font-size:0.82rem; opacity:0.7; line-height:1.4; }
+.ggov-loader { opacity:0.5; padding:32px 0; font-size:0.85rem; text-align:center; }
+.ggov-error,.ggov-empty { padding:24px 0; text-align:center; font-size:0.85rem; opacity:0.6; }
+.ggov-error { color:#e040fb; }
+.ggov-empty code { background:rgba(255,255,255,0.08); padding:1px 6px; border-radius:4px; font-size:0.82em; }
+.ggov-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(360px,1fr)); gap:14px; }
+.ggov-card { background:rgba(255,255,255,0.025); border:1px solid rgba(255,255,255,0.07); border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:9px; transition:border-color 0.15s,background 0.15s; }
+.ggov-card:hover { border-color:rgba(0,255,65,0.28); background:rgba(255,255,255,0.04); }
+.ggov-card-top { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+.ggov-card-title { font-size:0.87rem; font-weight:600; line-height:1.38; flex:1; color:#e4e4e4; }
+.ggov-status { flex-shrink:0; font-size:0.7rem; font-weight:700; padding:3px 9px; border-radius:10px; }
+.ggov-status.open { background:rgba(0,255,65,0.1); border:1px solid rgba(0,255,65,0.3); color:#00ff41; }
+.ggov-status.forecast { background:rgba(0,229,255,0.1); border:1px solid rgba(0,229,255,0.3); color:#00e5ff; }
+.ggov-meta { display:flex; flex-wrap:wrap; gap:5px; align-items:center; }
+.ggov-chip { font-size:0.63rem; padding:2px 8px; border-radius:10px; }
+.ggov-chip-agency { background:rgba(224,64,251,0.08); border:1px solid rgba(224,64,251,0.2); color:#e040fb; }
+.ggov-chip-date { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#aaa; }
+.ggov-opp-num { font-size:0.7rem; color:#777; font-family:monospace; }
+.ggov-link { display:inline-block; margin-top:2px; font-size:0.72rem; color:#00e5ff; text-decoration:none; border:1px solid rgba(0,229,255,0.3); border-radius:6px; padding:3px 10px; transition:background 0.15s; }
+.ggov-link:hover { background:rgba(0,229,255,0.1); }
+.ggov-footer { margin-top:14px; font-size:0.7rem; opacity:0.45; text-align:right; }
+
+body:not(.dark) .ggov-root { background:rgba(255,255,255,0.96); border-color:#ddd; color:#222; }
+body:not(.dark) .ggov-card { background:#f8f8f8; border-color:#e0e0e0; }
+body:not(.dark) .ggov-card:hover { border-color:#00aa44; }
+body:not(.dark) .ggov-card-title { color:#222; }
+body:not(.dark) .ggov-chip-date { color:#666; }
+</style>
+
+<script>
+(function () {
+  'use strict';
+
+  const bodyEl   = document.getElementById('ggov-body');
+  const footerEl = document.getElementById('ggov-footer');
+
+  function fmtDate(raw) {
+    if (!raw) return '';
+    const parts = raw.split('/');
+    if (parts.length === 3) {
+      const d = new Date(`${parts[2]}-${parts[0].padStart(2,'0')}-${parts[1].padStart(2,'0')}`);
+      return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+    }
+    return raw;
+  }
+
+  function deadlineBadge(closeDate) {
+    if (!closeDate) return '';
+    const parts = closeDate.split('/');
+    if (parts.length !== 3) return '';
+    const d = new Date(`${parts[2]}-${parts[0].padStart(2,'0')}-${parts[1].padStart(2,'0')}`);
+    const daysLeft = Math.ceil((d - Date.now()) / 86400000);
+    if (daysLeft < 0) return '<span class="ggov-chip ggov-chip-date">Closed</span>';
+    if (daysLeft < 30) return `<span class="ggov-chip" style="background:rgba(255,100,0,0.12);border:1px solid rgba(255,100,0,0.4);color:#ff8c42">⚡ ${daysLeft}d left</span>`;
+    return `<span class="ggov-chip ggov-chip-date">Closes ${fmtDate(closeDate)}</span>`;
+  }
+
+  function renderCard(o) {
+    const statusClass = o.status === 'forecasted' ? 'forecast' : 'open';
+    const statusLabel = o.status === 'forecasted' ? 'Forecast' : 'Open';
+    return `<div class="ggov-card">
+      <div class="ggov-card-top">
+        <div class="ggov-card-title">${o.title || 'Untitled Opportunity'}</div>
+        <span class="ggov-status ${statusClass}">${statusLabel}</span>
+      </div>
+      <div class="ggov-meta">
+        ${o.agency ? `<span class="ggov-chip ggov-chip-agency">${o.agency}</span>` : ''}
+        ${deadlineBadge(o.closeDate)}
+        ${o.openDate ? `<span class="ggov-chip ggov-chip-date">Opens ${fmtDate(o.openDate)}</span>` : ''}
+      </div>
+      ${o.oppNumber ? `<div class="ggov-opp-num">Opp. # ${o.oppNumber}</div>` : ''}
+      ${o.url ? `<a class="ggov-link" href="${o.url}" target="_blank" rel="noopener noreferrer">View on Grants.gov →</a>` : ''}
+    </div>`;
+  }
+
+  fetch('/data/grants_gov.json')
+    .then(r => r.ok ? r.json() : null)
+    .catch(() => null)
+    .then(data => {
+      if (!data || !Array.isArray(data.opportunities) || !data.opportunities.length) {
+        bodyEl.innerHTML = '<div class="ggov-empty">No data yet.<br>Run <code>python scripts/fetch_grants_gov.py</code> to populate, then redeploy.</div>';
+        return;
+      }
+      bodyEl.innerHTML = `<div class="ggov-grid">${data.opportunities.map(renderCard).join('')}</div>`;
+      footerEl.textContent = `${data.opportunities.length} opportunities · Refreshed ${data.refresh_date || 'recently'} via fetch_grants_gov.py`;
+    });
+})();
+</script>

@@ -93,6 +93,20 @@ jobs:
       - name: Fetch Semantic Scholar Data
         run: python scripts/fetch_semantic_scholar.py
 
+      - name: Fetch OpenAlex Papers
+        run: python scripts/fetch_openalex.py
+
+      - name: Fetch Grants.gov Opportunities
+        run: python scripts/fetch_grants_gov.py
+
+      - name: Fetch OpenCitations Data
+        run: python scripts/fetch_opencitations.py
+
+      - name: Fetch GitHub Research Repos
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/fetch_github_research.py
+
       - name: Commit and push changes
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
@@ -101,6 +115,7 @@ jobs:
           # Stage the specific metric files
           git add static/data/publications.json static/data/scholar-metrics.json static/data/visitor_stats.json static/data/altmetric.json static/data/dashboard_network.json static/data/dashboard_payload.json static/data/hot_papers.json
           git add static/data/arxiv_papers.json static/data/nsf_grants.json static/data/semantic_scholar.json
+          git add static/data/openalex.json static/data/grants_gov.json static/data/opencitations.json static/data/github_research.json
           git add content/journal_publication content/conference_publication content/workshop_publication
           git add static/images/impact-dashboard.png static/images/impact-dashboard-dark.png
           

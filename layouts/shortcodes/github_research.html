@@ -1,0 +1,98 @@
+<div class="gh-root" id="gh-root">
+  <div class="gh-header">
+    <div>
+      <h3 class="gh-title">GitHub: Research Tools & Code</h3>
+      <p class="gh-desc">Trending open-source repositories in cybersecurity, threat intelligence, and AI security — tools your research community builds.</p>
+    </div>
+  </div>
+  <div class="gh-body" id="gh-body">
+    <div class="gh-loader">Loading repositories…</div>
+  </div>
+  <div class="gh-footer" id="gh-footer"></div>
+</div>
+
+<style>
+.gh-root { margin:24px 0; padding:24px; border-radius:16px; border:1px solid var(--card-border,#2a2a2a); background:linear-gradient(135deg,rgba(0,0,0,0.55),rgba(0,0,0,0.15)); box-shadow:0 12px 30px rgba(0,0,0,0.25); }
+.gh-header { margin-bottom:18px; }
+.gh-title { margin:0 0 6px; font-size:1.1rem; color:#00ff41; text-transform:uppercase; letter-spacing:0.08em; }
+.gh-desc { margin:0; font-size:0.82rem; opacity:0.7; line-height:1.4; }
+.gh-loader { opacity:0.5; padding:32px 0; font-size:0.85rem; text-align:center; }
+.gh-error,.gh-empty { padding:24px 0; text-align:center; font-size:0.85rem; opacity:0.6; }
+.gh-error { color:#e040fb; }
+.gh-empty code { background:rgba(255,255,255,0.08); padding:1px 6px; border-radius:4px; font-size:0.82em; }
+.gh-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:14px; }
+.gh-card { background:rgba(255,255,255,0.025); border:1px solid rgba(255,255,255,0.07); border-radius:12px; padding:15px; display:flex; flex-direction:column; gap:8px; transition:border-color 0.15s,background 0.15s; }
+.gh-card:hover { border-color:rgba(0,255,65,0.28); background:rgba(255,255,255,0.04); }
+.gh-card-top { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+.gh-card-name { font-size:0.87rem; font-weight:700; line-height:1.38; flex:1; }
+.gh-card-name a { color:#00e5ff; text-decoration:none; }
+.gh-card-name a:hover { color:#00ff41; }
+.gh-stars { flex-shrink:0; font-size:0.82rem; font-weight:700; color:#e040fb; white-space:nowrap; text-shadow:0 0 8px rgba(224,64,251,0.3); }
+.gh-desc-text { font-size:0.78rem; color:#bbb; line-height:1.48; }
+.gh-meta { display:flex; flex-wrap:wrap; gap:5px; align-items:center; }
+.gh-chip { font-size:0.63rem; padding:2px 8px; border-radius:10px; }
+.gh-chip-topic { background:rgba(0,229,255,0.08); border:1px solid rgba(0,229,255,0.2); color:#00e5ff; }
+.gh-chip-lang { background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); color:#ccc; }
+.gh-chip-date { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); color:#888; font-size:0.6rem; }
+.gh-forks { font-size:0.7rem; color:#777; }
+.gh-footer { margin-top:14px; font-size:0.7rem; opacity:0.45; text-align:right; }
+
+body:not(.dark) .gh-root { background:rgba(255,255,255,0.96); border-color:#ddd; color:#222; }
+body:not(.dark) .gh-card { background:#f8f8f8; border-color:#e0e0e0; }
+body:not(.dark) .gh-card:hover { border-color:#00aa44; }
+body:not(.dark) .gh-desc-text { color:#444; }
+body:not(.dark) .gh-forks { color:#888; }
+</style>
+
+<script>
+(function () {
+  'use strict';
+
+  const bodyEl   = document.getElementById('gh-body');
+  const footerEl = document.getElementById('gh-footer');
+
+  function fmtStars(n) {
+    if (n >= 1000) return `⭐ ${(n/1000).toFixed(1)}k`;
+    return `⭐ ${n}`;
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return '';
+    const d = new Date(iso + 'T00:00:00Z');
+    return d.toLocaleDateString('en-US', { month:'short', year:'numeric' });
+  }
+
+  function renderCard(r) {
+    const topics = (r.topics || []).slice(0, 4).map(t =>
+      `<span class="gh-chip gh-chip-topic">${t}</span>`
+    ).join('');
+    return `<div class="gh-card">
+      <div class="gh-card-top">
+        <div class="gh-card-name">
+          <a href="${r.url}" target="_blank" rel="noopener noreferrer">${r.full_name || r.name}</a>
+        </div>
+        <div class="gh-stars">${fmtStars(r.stars || 0)}</div>
+      </div>
+      ${r.description ? `<div class="gh-desc-text">${r.description}</div>` : ''}
+      <div class="gh-meta">
+        ${topics}
+        ${r.language ? `<span class="gh-chip gh-chip-lang">${r.language}</span>` : ''}
+        ${r.pushed_at ? `<span class="gh-chip gh-chip-date">Updated ${fmtDate(r.pushed_at)}</span>` : ''}
+      </div>
+      ${r.forks ? `<div class="gh-forks">🍴 ${r.forks} forks</div>` : ''}
+    </div>`;
+  }
+
+  fetch('/data/github_research.json')
+    .then(r => r.ok ? r.json() : null)
+    .catch(() => null)
+    .then(data => {
+      if (!data || !Array.isArray(data.repos) || !data.repos.length) {
+        bodyEl.innerHTML = '<div class="gh-empty">No data yet.<br>Run <code>python scripts/fetch_github_research.py</code> to populate, then redeploy.</div>';
+        return;
+      }
+      bodyEl.innerHTML = `<div class="gh-grid">${data.repos.map(renderCard).join('')}</div>`;
+      footerEl.textContent = `${data.repos.length} repos · Refreshed ${data.refresh_date || 'recently'} via fetch_github_research.py`;
+    });
+})();
+</script>
