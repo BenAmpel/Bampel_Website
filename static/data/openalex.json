@@ -1,5 +1,5 @@
 {
-  "refresh_date": "2026-03-09",
+  "refresh_date": "2026-03-16",
   "papers": [
     {
       "id": "https://openalex.org/W4399083018",
@@ -33,7 +33,7 @@
       "year": 2024,
       "venue": "Frontiers of Computer Science",
       "doi": "10.1007/s11704-024-40231-1",
-      "cited_by_count": 866,
+      "cited_by_count": 881,
       "topics": [
         "Computer science"
       ],
@@ -52,14 +52,14 @@
       "year": 2024,
       "venue": "High-Confidence Computing",
       "doi": "10.1016/j.hcc.2024.100211",
-      "cited_by_count": 740,
+      "cited_by_count": 746,
       "topics": [
         "Internet privacy",
         "Computer security",
         "Computer science"
       ],
       "url": "https://doi.org/10.1016/j.hcc.2024.100211",
-      "abstract": "Large Language Models (LLMs), such as ChatGPT and Bard, have revolutionized natural language understanding and generation. They possess deep language comprehension, human-like text generation capabilities, contextual awareness, and robust problem-solving skills, making them invaluable in various dom"
+      "abstract": ""
     },
     {
       "id": "https://openalex.org/W4391855109",
@@ -73,7 +73,7 @@
       "year": 2024,
       "venue": "IEEE Access",
       "doi": "10.1109/access.2024.3365742",
-      "cited_by_count": 579,
+      "cited_by_count": 586,
       "topics": [
         "Computer science",
         "Open research",
@@ -94,7 +94,7 @@
       "year": 2024,
       "venue": "IEEE Access",
       "doi": "10.1109/access.2024.3389497",
-      "cited_by_count": 468,
+      "cited_by_count": 476,
       "topics": [
         "Computer science",
         "Transformer",
@@ -103,6 +103,26 @@
       ],
       "url": "https://doi.org/10.1109/access.2024.3389497",
       "abstract": "The Generative Pre-trained Transformer (GPT) represents a notable breakthrough in the domain of natural language processing, which is propelling us toward the development of machines that can understand and communicate using language in a manner that closely resembles that of humans. GPT is based on"
+    },
+    {
+      "id": "https://openalex.org/W4406779522",
+      "title": "Can Open Large Language Models Catch Vulnerabilities?",
+      "authors": [
+        "DeepSeek-AI",
+        "Daya Guo",
+        "Dejian Yang",
+        "Haowei Zhang"
+      ],
+      "year": 2025,
+      "venue": "ArXiv.org",
+      "doi": "10.4230/oasics.icpec.2025.4",
+      "cited_by_count": 455,
+      "topics": [
+        "Reinforcement learning",
+        "Reinforcement"
+      ],
+      "url": "https://doi.org/10.4230/oasics.icpec.2025.4",
+      "abstract": "As Large Language Models (LLMs) become increasingly integrated into secure software development workflows, a critical question remains unanswered: can these models not only detect insecure code but also reliably classify vulnerabilities according to standardized taxonomies? In this work, we conduct "
     },
     {
       "id": "https://openalex.org/W4392240262",
@@ -116,7 +136,7 @@
       "year": 2024,
       "venue": "ACM Transactions on Knowledge Discovery from Data",
       "doi": "10.1145/3649506",
-      "cited_by_count": 431,
+      "cited_by_count": 434,
       "topics": [
         "Power (physics)"
       ],
@@ -133,7 +153,7 @@
       "year": 2024,
       "venue": "Applied Sciences",
       "doi": "10.3390/app14020675",
-      "cited_by_count": 419,
+      "cited_by_count": 421,
       "topics": [
         "Health care",
         "Autonomy",
@@ -155,7 +175,7 @@
       "year": 2024,
       "venue": "Journal Of Big Data",
       "doi": "10.1186/s40537-023-00876-4",
-      "cited_by_count": 408,
+      "cited_by_count": 411,
       "topics": [
         "Computer science",
         "Python (programming language)",
@@ -163,7 +183,29 @@
         "Graph"
       ],
       "url": "https://doi.org/10.1186/s40537-023-00876-4",
-      "abstract": "Abstract Deep learning has seen significant growth recently and is now applied to a wide range of conventional use cases, including graphs. Graph data provides relational information between elements and is a standard data format for various machine learning and deep learning tasks. Models that can "
+      "abstract": ""
+    },
+    {
+      "id": "https://openalex.org/W4393251580",
+      "title": "Embracing cancer complexity: Hallmarks of systemic disease",
+      "authors": [
+        "Charles Swanton",
+        "Elsa Bernard",
+        "Chris Abbosh",
+        "Fabrice André"
+      ],
+      "year": 2024,
+      "venue": "Cell",
+      "doi": "10.1016/j.cell.2024.02.009",
+      "cited_by_count": 392,
+      "topics": [
+        "Biology",
+        "Cancer",
+        "Disease",
+        "Carcinogenesis"
+      ],
+      "url": "https://doi.org/10.1016/j.cell.2024.02.009",
+      "abstract": ""
     },
     {
       "id": "https://openalex.org/W4401889742",
@@ -176,7 +218,7 @@
       "year": 2024,
       "venue": "Information",
       "doi": "10.3390/info15090517",
-      "cited_by_count": 365,
+      "cited_by_count": 375,
       "topics": [
         "Recurrent neural network",
         "Computer science",
@@ -195,7 +237,7 @@
       "year": 2024,
       "venue": "Implementation Science",
       "doi": "10.1186/s13012-024-01357-9",
-      "cited_by_count": 357,
+      "cited_by_count": 360,
       "topics": [
         "Health care",
         "Health informatics",
@@ -217,7 +259,7 @@
       "year": 2024,
       "venue": "ACM Computing Surveys",
       "doi": "10.1145/3691338",
-      "cited_by_count": 313,
+      "cited_by_count": 318,
       "topics": [
         "Anomaly detection",
         "Computer science",
@@ -228,26 +270,47 @@
       "abstract": "Time series anomaly detection is important for a wide range of research fields and applications, including financial markets, economics, earth sciences, manufacturing, and healthcare. The presence of anomalies can indicate novel or unexpected events, such as production faults, system defects, and he"
     },
     {
-      "id": "https://openalex.org/W4393147129",
-      "title": "Benchmarking Large Language Models in Retrieval-Augmented Generation",
+      "id": "https://openalex.org/W4395483946",
+      "title": "Generative AI and the future of higher education: a threat to academic integrity or reformation? Evidence from multicultural perspectives",
       "authors": [
-        "Jiawei Chen",
-        "Hongyu Lin",
-        "Xianpei Han",
-        "Le Sun"
+        "Abdullahi Yusuf",
+        "Nasrin Pervin",
+        "‪Marcos Román-González‬"
       ],
       "year": 2024,
-      "venue": "Proceedings of the AAAI Conference on Artificial Intelligence",
-      "doi": "10.1609/aaai.v38i16.29728",
-      "cited_by_count": 284,
+      "venue": "International Journal of Educational Technology in Higher Education",
+      "doi": "10.1186/s41239-024-00453-6",
+      "cited_by_count": 308,
       "topics": [
-        "Benchmarking",
-        "Computer science",
-        "Natural language processing",
-        "Information retrieval"
+        "Multiculturalism",
+        "Higher education",
+        "Academic integrity",
+        "Generative grammar"
       ],
-      "url": "https://doi.org/10.1609/aaai.v38i16.29728",
-      "abstract": "Retrieval-Augmented Generation (RAG) is a promising approach for mitigating the hallucination of large language models (LLMs). However, existing research lacks rigorous evaluation of the impact of retrieval-augmented generation on different large language models, which make it challenging to identif"
+      "url": "https://doi.org/10.1186/s41239-024-00453-6",
+      "abstract": "Abstract In recent years, higher education (HE) globally has witnessed extensive adoption of technology, particularly in teaching and research. The emergence of generative Artificial Intelligence (GenAI) further accelerates this trend. However, the increasing sophistication of GenAI tools has raised"
+    },
+    {
+      "id": "https://openalex.org/W4399367032",
+      "title": "Discovery of antimicrobial peptides in the global microbiome with machine learning",
+      "authors": [
+        "Célio Dias Santos Júnior",
+        "Marcelo D. T. Torres",
+        "Yiqian Duan",
+        "Álvaro Rodríguez del Río"
+      ],
+      "year": 2024,
+      "venue": "Cell",
+      "doi": "10.1016/j.cell.2024.05.013",
+      "cited_by_count": 282,
+      "topics": [
+        "Biology",
+        "Antimicrobial peptides",
+        "Computational biology",
+        "Microbiome"
+      ],
+      "url": "https://doi.org/10.1016/j.cell.2024.05.013",
+      "abstract": ""
     },
     {
       "id": "https://openalex.org/W4393855718",
@@ -272,6 +335,25 @@
       "abstract": "The Internet of Medical Things (IoMT) has begun functioning like this: improved patient monitoring and an easily accessible digital data warehouse. Despite that, this methodology of the internet will potentially have a counter balance which risks for patient data might involve hacking, data theft, a"
     },
     {
+      "id": "https://openalex.org/W4401386758",
+      "title": "Large Language Models in Healthcare and Medical Domain: A Review",
+      "authors": [
+        "Zabir Al Nazi",
+        "Wei Peng"
+      ],
+      "year": 2024,
+      "venue": "Informatics",
+      "doi": "10.3390/informatics11030057",
+      "cited_by_count": 280,
+      "topics": [
+        "Health care",
+        "Domain (mathematical analysis)",
+        "Computer science"
+      ],
+      "url": "https://doi.org/10.3390/informatics11030057",
+      "abstract": "The deployment of large language models (LLMs) within the healthcare sector has sparked both enthusiasm and apprehension. These models exhibit the remarkable ability to provide proficient responses to free-text queries, demonstrating a nuanced understanding of professional medical knowledge. This co"
+    },
+    {
       "id": "https://openalex.org/W4392599656",
       "title": "Generative AI in Medical Practice: In-Depth Exploration of Privacy and Security Challenges",
       "authors": [
@@ -292,92 +374,6 @@
       "abstract": "As advances in artificial intelligence (AI) continue to transform and revolutionize the field of medicine, understanding the potential uses of generative AI in health care becomes increasingly important. Generative AI, including models such as generative adversarial networks and large language model"
     },
     {
-      "id": "https://openalex.org/W4400118952",
-      "title": "When large language models meet personalization: perspectives of challenges and opportunities",
-      "authors": [
-        "Jing Chen",
-        "Zheng Liu",
-        "Xu Huang",
-        "Chenwang Wu"
-      ],
-      "year": 2024,
-      "venue": "World Wide Web",
-      "doi": "10.1007/s11280-024-01276-1",
-      "cited_by_count": 250,
-      "topics": [
-        "Personalization",
-        "Computer science",
-        "Function (biology)",
-        "Scope (computer science)"
-      ],
-      "url": "https://doi.org/10.1007/s11280-024-01276-1",
-      "abstract": ""
-    },
-    {
-      "id": "https://openalex.org/W4394745423",
-      "title": "Using an LLM to Help With Code Understanding",
-      "authors": [
-        "Daye Nam",
-        "Andrew Macvean",
-        "Vincent J. Hellendoorn",
-        "Bogdan Vasilescu"
-      ],
-      "year": 2024,
-      "venue": "",
-      "doi": "10.1145/3597503.3639187",
-      "cited_by_count": 241,
-      "topics": [
-        "Plug-in",
-        "Computer science",
-        "Code (set theory)",
-        "Documentation"
-      ],
-      "url": "https://doi.org/10.1145/3597503.3639187",
-      "abstract": "Understanding code is challenging, especially when working in new and complex development environments. Code comments and documentation can help, but are typically scarce or hard to navigate. Large language models (LLMs) are revolutionizing the process of writing code. Can they do the same for helpi"
-    },
-    {
-      "id": "https://openalex.org/W4393397034",
-      "title": "Large language models could change the future of behavioral healthcare: a proposal for responsible development and evaluation",
-      "authors": [
-        "Elizabeth Cameron Stade",
-        "Shannon Wiltsey Stirman",
-        "Lyle Ungar",
-        "Cody L. Boland"
-      ],
-      "year": 2024,
-      "venue": "npj Mental Health Research",
-      "doi": "10.1038/s44184-024-00056-z",
-      "cited_by_count": 229,
-      "topics": [
-        "Health care",
-        "Psychology"
-      ],
-      "url": "https://doi.org/10.1038/s44184-024-00056-z",
-      "abstract": ""
-    },
-    {
-      "id": "https://openalex.org/W4392193191",
-      "title": "Challenges and barriers of using large language models (LLM) such as ChatGPT for diagnostic medicine with a focus on digital pathology – a recent scoping review",
-      "authors": [
-        "Ehsan Ullah",
-        "Anil V. Parwani",
-        "Mirza Mansoor Baig",
-        "Rajendra Singh"
-      ],
-      "year": 2024,
-      "venue": "Diagnostic Pathology",
-      "doi": "10.1186/s13000-024-01464-7",
-      "cited_by_count": 226,
-      "topics": [
-        "Interpretability",
-        "Context (archaeology)",
-        "Medicine",
-        "Health care"
-      ],
-      "url": "https://doi.org/10.1186/s13000-024-01464-7",
-      "abstract": ""
-    },
-    {
       "id": "https://openalex.org/W4390561469",
       "title": "Machine learning techniques for IoT security: Current research and future vision with generative AI and large language models",
       "authors": [
@@ -389,7 +385,7 @@
       "year": 2024,
       "venue": "Internet of Things and Cyber-Physical Systems",
       "doi": "10.1016/j.iotcps.2023.12.003",
-      "cited_by_count": 210,
+      "cited_by_count": 211,
       "topics": [
         "Computer science",
         "Internet of Things",
@@ -397,7 +393,7 @@
         "Software deployment"
       ],
       "url": "https://doi.org/10.1016/j.iotcps.2023.12.003",
-      "abstract": ""
+      "abstract": "Despite providing unparalleled connectivity and convenience, the exponential growth of the Internet of Things (IoT) ecosystem has triggered significant cybersecurity concerns. These concerns stem from various factors, including the heterogeneity of IoT devices, widespread deployment, and inherent co"
     },
     {
       "id": "https://openalex.org/W4391137578",
@@ -411,7 +407,7 @@
       "year": 2024,
       "venue": "Scientific Reports",
       "doi": "10.1038/s41598-024-52549-8",
-      "cited_by_count": 204,
+      "cited_by_count": 206,
       "topics": [
         "Residence",
         "Psychology",
@@ -420,6 +416,50 @@
       ],
       "url": "https://doi.org/10.1038/s41598-024-52549-8",
       "abstract": ""
+    },
+    {
+      "id": "https://openalex.org/W4392029839",
+      "title": "Machine learning-based network intrusion detection for big and imbalanced data using oversampling, stacking feature embedding and feature extraction",
+      "authors": [
+        "Md. Alamin Talukder",
+        "Md. Manowarul Islam",
+        "Md. Ashraf Uddin",
+        "Khondokar Fida Hasan"
+      ],
+      "year": 2024,
+      "venue": "Journal Of Big Data",
+      "doi": "10.1186/s40537-024-00886-w",
+      "cited_by_count": 197,
+      "topics": [
+        "Computer science",
+        "Oversampling",
+        "Stacking",
+        "Feature (linguistics)"
+      ],
+      "url": "https://doi.org/10.1186/s40537-024-00886-w",
+      "abstract": "Abstract Cybersecurity has emerged as a critical global concern. Intrusion Detection Systems (IDS) play a critical role in protecting interconnected networks by detecting malicious actors and activities. Machine Learning (ML)-based behavior analysis within the IDS has considerable potential for dete"
+    },
+    {
+      "id": "https://openalex.org/W4401509761",
+      "title": "Ethical Challenges and Solutions of Generative AI: An Interdisciplinary Perspective",
+      "authors": [
+        "Mousa Al-kfairy",
+        "Dheya Mustafa",
+        "Nir Kshetri",
+        "Mazen Insiew"
+      ],
+      "year": 2024,
+      "venue": "Informatics",
+      "doi": "10.3390/informatics11030058",
+      "cited_by_count": 196,
+      "topics": [
+        "Perspective (graphical)",
+        "Generative grammar",
+        "Engineering ethics",
+        "Epistemology"
+      ],
+      "url": "https://doi.org/10.3390/informatics11030058",
+      "abstract": "This paper conducts a systematic review and interdisciplinary analysis of the ethical challenges of generative AI technologies (N = 37), highlighting significant concerns such as privacy, data protection, copyright infringement, misinformation, biases, and societal inequalities. The ability of gener"
     },
     {
       "id": "https://openalex.org/W4391582407",
@@ -444,28 +484,6 @@
       "abstract": "The field of Natural Language Processing (NLP) is currently undergoing a revolutionary transformation driven by the power of pre-trained Large Language Models (LLMs) based on groundbreaking Transformer architectures. As the frequency and diversity of cybersecurity attacks continue to rise, the impor"
     },
     {
-      "id": "https://openalex.org/W4392029839",
-      "title": "Machine learning-based network intrusion detection for big and imbalanced data using oversampling, stacking feature embedding and feature extraction",
-      "authors": [
-        "Md. Alamin Talukder",
-        "Md. Manowarul Islam",
-        "Md. Ashraf Uddin",
-        "Khondokar Fida Hasan"
-      ],
-      "year": 2024,
-      "venue": "Journal Of Big Data",
-      "doi": "10.1186/s40537-024-00886-w",
-      "cited_by_count": 193,
-      "topics": [
-        "Computer science",
-        "Oversampling",
-        "Stacking",
-        "Feature (linguistics)"
-      ],
-      "url": "https://doi.org/10.1186/s40537-024-00886-w",
-      "abstract": ""
-    },
-    {
       "id": "https://openalex.org/W4406302454",
       "title": "Security and Privacy Challenges of Large Language Models: A Survey",
       "authors": [
@@ -476,35 +494,13 @@
       "year": 2025,
       "venue": "ACM Computing Surveys",
       "doi": "10.1145/3712001",
-      "cited_by_count": 189,
+      "cited_by_count": 194,
       "topics": [
         "Computer science",
         "Computer security"
       ],
       "url": "https://doi.org/10.1145/3712001",
       "abstract": "Large language models (LLMs) have demonstrated extraordinary capabilities and contributed to multiple fields, such as generating and summarizing text, language translation, and question-answering. Today, LLMs have become quite popular tools in natural language processing tasks, with the capability t"
-    },
-    {
-      "id": "https://openalex.org/W4393170828",
-      "title": "Privacy and Security Concerns in Generative AI: A Comprehensive Survey",
-      "authors": [
-        "Abenezer Golda",
-        "Kidus Abebe Mekonen",
-        "Amit Pandey",
-        "Anushka Singh"
-      ],
-      "year": 2024,
-      "venue": "IEEE Access",
-      "doi": "10.1109/access.2024.3381611",
-      "cited_by_count": 181,
-      "topics": [
-        "Computer science",
-        "Computer security",
-        "Internet privacy",
-        "Information privacy"
-      ],
-      "url": "https://doi.org/10.1109/access.2024.3381611",
-      "abstract": "Generative Artificial Intelligence (GAI) has sparked a transformative wave across various domains, including machine learning, healthcare, business, and entertainment, owing to its remarkable ability to generate lifelike data. This comprehensive survey offers a meticulous examination of the privacy "
     },
     {
       "id": "https://openalex.org/W4390970201",
@@ -518,7 +514,7 @@
       "year": 2024,
       "venue": "IEEE Access",
       "doi": "10.1109/access.2024.3355547",
-      "cited_by_count": 164,
+      "cited_by_count": 165,
       "topics": [
         "Computer science",
         "Artificial intelligence",
@@ -529,26 +525,24 @@
       "abstract": "Given the continually rising frequency of cyberattacks, the adoption of artificial intelligence methods, particularly Machine Learning (ML), Deep Learning (DL), and Reinforcement Learning (RL), has become essential in the realm of cybersecurity. These techniques have proven to be effective in detect"
     },
     {
-      "id": "https://openalex.org/W4391724785",
-      "title": "Large Language Model guided Protocol Fuzzing",
+      "id": "https://openalex.org/W4402901320",
+      "title": "Large language models empowered agent-based modeling and simulation: a survey and perspectives",
       "authors": [
-        "Ruijie Meng",
-        "Мартин Мирчев",
-        "Marcel Böhme",
-        "Abhik Roychoudhury"
+        "Chen Gao",
+        "Xiaochong Lan",
+        "Nian Li",
+        "Yuan Yuan"
       ],
       "year": 2024,
-      "venue": "",
-      "doi": "10.14722/ndss.2024.24556",
-      "cited_by_count": 155,
+      "venue": "Humanities and Social Sciences Communications",
+      "doi": "10.1057/s41599-024-03611-3",
+      "cited_by_count": 159,
       "topics": [
-        "Fuzz testing",
         "Computer science",
-        "Protocol (science)",
-        "Programming language"
+        "Management science"
       ],
-      "url": "https://doi.org/10.14722/ndss.2024.24556",
-      "abstract": "How to find security flaws in a protocol implementation without a machine-readable specification of the protocol?Facing the internet, protocol implementations are particularly security-critical software systems where inputs must adhere to a specific structure and order that is often informally speci"
+      "url": "https://doi.org/10.1057/s41599-024-03611-3",
+      "abstract": ""
     },
     {
       "id": "https://openalex.org/W4392058134",
@@ -559,7 +553,7 @@
       "year": 2024,
       "venue": "Journal of Computational Social Science",
       "doi": "10.1007/s42001-024-00250-1",
-      "cited_by_count": 149,
+      "cited_by_count": 152,
       "topics": [
         "Humanity",
         "Generative grammar",
@@ -568,6 +562,46 @@
       ],
       "url": "https://doi.org/10.1007/s42001-024-00250-1",
       "abstract": "Abstract Generative Artificial Intelligence (GenAI) and Large Language Models (LLMs) are marvels of technology; celebrated for their prowess in natural language processing and multimodal content generation, they promise a transformative future. But as with all powerful tools, they come with their sh"
+    },
+    {
+      "id": "https://openalex.org/W4402230126",
+      "title": "A Systematic Review of Synthetic Data Generation Techniques Using Generative AI",
+      "authors": [
+        "Mandeep Goyal",
+        "Qusay H. Mahmoud"
+      ],
+      "year": 2024,
+      "venue": "Electronics",
+      "doi": "10.3390/electronics13173509",
+      "cited_by_count": 149,
+      "topics": [
+        "Generative grammar",
+        "Computer science",
+        "Synthetic data"
+      ],
+      "url": "https://doi.org/10.3390/electronics13173509",
+      "abstract": "Synthetic data are increasingly being recognized for their potential to address serious real-world challenges in various domains. They provide innovative solutions to combat the data scarcity, privacy concerns, and algorithmic biases commonly used in machine learning applications. Synthetic data pre"
+    },
+    {
+      "id": "https://openalex.org/W4395667411",
+      "title": "A multimodal approach to cross-lingual sentiment analysis with ensemble of transformer and LLM",
+      "authors": [
+        "Md Saef Ullah Miah",
+        "Md. Mohsin Kabir",
+        "Talha Bin Sarwar",
+        "Mejdl Safran"
+      ],
+      "year": 2024,
+      "venue": "Scientific Reports",
+      "doi": "10.1038/s41598-024-60210-7",
+      "cited_by_count": 131,
+      "topics": [
+        "Computer science",
+        "Transformer",
+        "Sentiment analysis"
+      ],
+      "url": "https://doi.org/10.1038/s41598-024-60210-7",
+      "abstract": ""
     },
     {
       "id": "https://openalex.org/W4392151675",
@@ -579,7 +613,7 @@
       "year": 2024,
       "venue": "IEEE Access",
       "doi": "10.1109/access.2024.3369906",
-      "cited_by_count": 122,
+      "cited_by_count": 123,
       "topics": [
         "Insider threat",
         "Computer science",
@@ -588,48 +622,6 @@
       ],
       "url": "https://doi.org/10.1109/access.2024.3369906",
       "abstract": "Insider threat detection has become a paramount concern in modern times where organizations strive to safeguard their sensitive information and critical assets from malicious actions by individuals with privileged access. This survey paper provides a comprehensive overview of insider threat detectio"
-    },
-    {
-      "id": "https://openalex.org/W4394822945",
-      "title": "A Critical Review of Artificial Intelligence Based Approaches in Intrusion Detection: A Comprehensive Analysis",
-      "authors": [
-        "Salman Muneer",
-        "Umer Farooq",
-        "Atifa Athar",
-        "Muhammad Ahsan Raza"
-      ],
-      "year": 2024,
-      "venue": "Journal of Engineering",
-      "doi": "10.1155/2024/3909173",
-      "cited_by_count": 121,
-      "topics": [
-        "Computer science",
-        "Interpretability",
-        "Strengths and weaknesses",
-        "Artificial intelligence"
-      ],
-      "url": "https://doi.org/10.1155/2024/3909173",
-      "abstract": "Intrusion detection (ID) is critical in securing computer networks against various malicious attacks. Recent advancements in machine learning (ML), deep learning (DL), federated learning (FL), and explainable artificial intelligence (XAI) have drawn significant attention as potential approaches for "
-    },
-    {
-      "id": "https://openalex.org/W4390732526",
-      "title": "Blockchain security enhancement: an approach towards hybrid consensus algorithms and machine learning techniques",
-      "authors": [
-        "K. Venkatesan",
-        "Syarifah Bahiyah Rahayu"
-      ],
-      "year": 2024,
-      "venue": "Scientific Reports",
-      "doi": "10.1038/s41598-024-51578-7",
-      "cited_by_count": 120,
-      "topics": [
-        "Computer science",
-        "Scalability",
-        "Byzantine fault tolerance",
-        "Robustness (evolution)"
-      ],
-      "url": "https://doi.org/10.1038/s41598-024-51578-7",
-      "abstract": ""
     }
   ]
 }
