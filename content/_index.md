@@ -64,6 +64,15 @@ sections:
         {{< arxiv_radar >}}
         {{< /spoiler >}}
 
+        {{< spoiler text="💼 Grant Experience" >}}
+
+        | Year | Funding Source | Grant Title | Amount | Role | Duration |
+        |------|----------------|-------------|--------|------|----------|
+        | 2026 | Robinson College of Business | AI-Powered Prosody Training for Vishing Defense | $12,500 | PI | 2026-2027 |
+        | 2024 | TSMC | AI4BI Academic Program | $27,000 | Co-PI | 2024-2025 |
+
+        {{< /spoiler >}}
+
         {{< spoiler text="💰 NSF Grant Opportunities" >}}
         {{< nsf_grants >}}
         {{< /spoiler >}}
