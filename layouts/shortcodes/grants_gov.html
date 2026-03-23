@@ -5,7 +5,7 @@
       <p class="ggov-desc">Active federal grant opportunities aligned with AI security, cybersecurity, and threat intelligence research.</p>
     </div>
   </div>
-  <div class="ggov-body" id="ggov-body">
+  <div class="ggov-body" id="ggov-body" aria-live="polite" aria-atomic="false">
     <div class="ggov-loader">Loading opportunities…</div>
   </div>
   <div class="ggov-footer" id="ggov-footer"></div>
@@ -35,6 +35,7 @@
 .ggov-opp-num { font-size:0.7rem; color:#777; font-family:monospace; }
 .ggov-link { display:inline-block; margin-top:2px; font-size:0.72rem; color:#00e5ff; text-decoration:none; border:1px solid rgba(0,229,255,0.3); border-radius:6px; padding:3px 10px; transition:background 0.15s; }
 .ggov-link:hover { background:rgba(0,229,255,0.1); }
+.ggov-link:focus-visible { outline:2px solid #00e5ff; outline-offset:2px; }
 .ggov-footer { margin-top:14px; font-size:0.7rem; opacity:0.45; text-align:right; }
 
 body:not(.dark) .ggov-root { background:rgba(255,255,255,0.96); border-color:#ddd; color:#222; }

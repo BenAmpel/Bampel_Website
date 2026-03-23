@@ -201,7 +201,6 @@ html, body {
 body {
   font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
   background: linear-gradient(180deg, #0a0a0a 0%, #0d1117 50%, #161b22 100%) !important;
-  background-attachment: fixed !important;
   color: #c9d1d9 !important;
   min-height: 100vh;
 }
@@ -5346,6 +5345,26 @@ textarea:focus-visible {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+// Ensure focus is visible in Windows High Contrast Mode where box-shadow is hidden
+@media (forced-colors: active) {
+  :focus-visible {
+    outline: 3px solid ButtonText !important;
+    outline-offset: 2px !important;
+  }
+  // Restore visibility for elements that remove outline and rely on box-shadow only
+  input:focus,
+  button:focus-visible,
+  [role="button"]:focus-visible,
+  [role="tab"]:focus-visible,
+  .bio-explorer-tab:focus,
+  .bio-chip:focus-visible,
+  .impact-card:focus-visible {
+    outline: 3px solid ButtonText !important;
+    outline-offset: 2px !important;
+    box-shadow: none !important;
   }
 }
 

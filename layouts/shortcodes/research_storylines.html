@@ -19,15 +19,15 @@
 <div class="storylines-progress" data-storylines-progress>1 / 1</div>
 </div>
 
-<div class="storylines-tabs" role="tablist">{{- range $index, $track := $storylines -}}
-<button class="storylines-tab{{ if eq $index 0 }} is-active{{ end }}" type="button" role="tab" data-track="{{ $track.id }}" aria-selected="{{ if eq $index 0 }}true{{ else }}false{{ end }}">
+<div class="storylines-tabs" role="tablist" aria-label="Research storyline tracks">{{- range $index, $track := $storylines -}}
+<button class="storylines-tab{{ if eq $index 0 }} is-active{{ end }}" type="button" role="tab" id="storylines-tab-{{ $track.id }}" data-track="{{ $track.id }}" aria-selected="{{ if eq $index 0 }}true{{ else }}false{{ end }}" aria-controls="storylines-panel-{{ $track.id }}"{{ if ne $index 0 }} tabindex="-1"{{ end }}>
 {{ $track.title }}
 </button>
 {{- end -}}</div>
 
 <div class="storylines-body">
 <div class="storylines-steps" data-storylines-steps>{{- range $tindex, $track := $storylines -}}
-<div class="storylines-track{{ if eq $tindex 0 }} is-active{{ end }}" data-track="{{ $track.id }}" role="tabpanel">
+<div class="storylines-track{{ if eq $tindex 0 }} is-active{{ end }}" data-track="{{ $track.id }}" role="tabpanel" id="storylines-panel-{{ $track.id }}" aria-labelledby="storylines-tab-{{ $track.id }}"{{ if ne $tindex 0 }} aria-hidden="true"{{ end }}>
 <div class="storylines-track-head">
 <div>
 <div class="storylines-track-title">{{ $track.title }}</div>
@@ -133,10 +133,12 @@ tabs.forEach(tab => {
 const isActive = tab.dataset.track === trackId;
 tab.classList.toggle('is-active', isActive);
 tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+tab.setAttribute('tabindex', isActive ? '0' : '-1');
 });
 tracks.forEach(track => {
 const isActive = track.dataset.track === trackId;
 track.classList.toggle('is-active', isActive);
+track.setAttribute('aria-hidden', isActive ? 'false' : 'true');
 if (isActive) {
 const steps = Array.from(track.querySelectorAll('.storylines-step'));
 const cards = Array.from(track.querySelectorAll('.storylines-card'));
@@ -189,6 +191,21 @@ activateStep(track, nextIndex);
 tabs.forEach(tab => {
 tab.addEventListener('click', () => activateTrack(tab.dataset.track));
 });
+
+const tablistEl = root.querySelector('[role="tablist"]');
+if (tablistEl) {
+  tablistEl.addEventListener('keydown', e => {
+    const idx = tabs.indexOf(document.activeElement);
+    if (idx === -1) return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault(); tabs[(idx + 1) % tabs.length].focus();
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault(); tabs[(idx - 1 + tabs.length) % tabs.length].focus();
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault(); activateTrack(tabs[idx].dataset.track);
+    }
+  });
+}
 
 tracks.forEach(track => {
 track.addEventListener('click', (event) => {

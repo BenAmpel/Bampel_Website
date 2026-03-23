@@ -5,11 +5,11 @@
       <p class="s2sc-desc">Papers recently citing your work and recommended reads based on your publication portfolio.</p>
     </div>
   </div>
-  <div class="s2sc-tabs" id="s2sc-tabs">
-    <button class="s2sc-tab s2sc-tab-active" data-tab="citations">📖 Recent Citations</button>
-    <button class="s2sc-tab" data-tab="recommendations">💡 Recommended Papers</button>
+  <div class="s2sc-tabs" id="s2sc-tabs" role="tablist" aria-label="Semantic Scholar views">
+    <button class="s2sc-tab s2sc-tab-active" data-tab="citations" role="tab" id="s2sc-tab-citations" aria-selected="true" aria-controls="s2sc-panel"><span aria-hidden="true">📖</span> Recent Citations</button>
+    <button class="s2sc-tab" data-tab="recommendations" role="tab" id="s2sc-tab-recommendations" aria-selected="false" aria-controls="s2sc-panel" tabindex="-1"><span aria-hidden="true">💡</span> Recommended Papers</button>
   </div>
-  <div class="s2sc-body" id="s2sc-body">
+  <div class="s2sc-body" id="s2sc-panel" role="tabpanel" aria-labelledby="s2sc-tab-citations" aria-live="polite" aria-atomic="false">
     <div class="s2sc-loader">Loading Semantic Scholar data…</div>
   </div>
   <div class="s2sc-footer" id="s2sc-footer"></div>
@@ -21,8 +21,9 @@
 .s2sc-title { margin:0 0 6px; font-size:1.1rem; color:#00ff41; text-transform:uppercase; letter-spacing:0.08em; }
 .s2sc-desc { margin:0; font-size:0.82rem; opacity:0.7; line-height:1.4; }
 .s2sc-tabs { display:flex; gap:6px; margin-bottom:18px; flex-wrap:wrap; }
-.s2sc-tab { background:transparent; color:#aaa; border:1px solid rgba(255,255,255,0.12); border-radius:8px; padding:7px 16px; font-size:0.82rem; cursor:pointer; transition:all 0.15s; }
+.s2sc-tab { background:transparent; color:#aaa; border:1px solid rgba(255,255,255,0.12); border-radius:8px; padding:7px 16px; font-size:0.82rem; cursor:pointer; transition:color 0.15s, background 0.15s, border-color 0.15s; }
 .s2sc-tab:hover { border-color:rgba(0,229,255,0.4); color:#00e5ff; }
+.s2sc-tab:focus-visible { outline:2px solid #00e5ff; outline-offset:2px; }
 .s2sc-tab-active { background:rgba(0,229,255,0.1); border-color:rgba(0,229,255,0.5); color:#00e5ff; }
 .s2sc-loader { opacity:0.5; padding:32px 0; font-size:0.85rem; text-align:center; }
 .s2sc-error { color:#e040fb; padding:24px 0; text-align:center; font-size:0.85rem; }
@@ -43,6 +44,7 @@
 .s2sc-context strong { color:#00ff41; font-weight:600; }
 .s2sc-link { display:inline-block; margin-top:2px; font-size:0.72rem; color:#00e5ff; text-decoration:none; border:1px solid rgba(0,229,255,0.3); border-radius:6px; padding:3px 10px; transition:background 0.15s; }
 .s2sc-link:hover { background:rgba(0,229,255,0.1); }
+.s2sc-link:focus-visible { outline:2px solid #00e5ff; outline-offset:2px; }
 .s2sc-footer { margin-top:14px; font-size:0.7rem; opacity:0.45; text-align:right; }
 
 body:not(.dark) .s2sc-root { background:rgba(255,255,255,0.96); border-color:#ddd; color:#222; }
@@ -51,14 +53,15 @@ body:not(.dark) .s2sc-tab-active { background:rgba(0,130,180,0.08); border-color
 body:not(.dark) .s2sc-card { background:#f8f8f8; border-color:#e0e0e0; }
 body:not(.dark) .s2sc-card:hover { border-color:#0099cc; }
 body:not(.dark) .s2sc-card-title { color:#222; }
-body:not(.dark) .s2sc-authors,.s2sc-context { color:#555; }
+body:not(.dark) .s2sc-authors,
+body:not(.dark) .s2sc-context { color:#555; }
 </style>
 
 <script>
 (function () {
   'use strict';
 
-  const bodyEl   = document.getElementById('s2sc-body');
+  const bodyEl   = document.getElementById('s2sc-panel');
   const footerEl = document.getElementById('s2sc-footer');
   const tabsEl   = document.getElementById('s2sc-tabs');
 
@@ -86,7 +89,7 @@ body:not(.dark) .s2sc-authors,.s2sc-context { color:#555; }
       </div>
       ${authStr ? `<div class="s2sc-authors">${authStr}</div>` : ''}
       ${c.cited_paper ? `<div class="s2sc-context">Cites: <strong>${truncate(c.cited_paper, 80)}</strong></div>` : ''}
-      ${c.url ? `<a class="s2sc-link" href="${c.url}" target="_blank" rel="noopener noreferrer">View Paper →</a>` : ''}
+      ${c.url ? `<a class="s2sc-link" href="${c.url}" target="_blank" rel="noopener noreferrer" aria-label="View paper: ${(c.title||'').replace(/"/g,'&quot;')} (opens in new tab)">View Paper <span aria-hidden="true">→</span></a>` : ''}
     </div>`;
   }
 
@@ -104,7 +107,7 @@ body:not(.dark) .s2sc-authors,.s2sc-context { color:#555; }
         ${r.venue ? `<span class="s2sc-chip s2sc-chip-venue">${truncate(r.venue, 40)}</span>` : ''}
       </div>
       ${authStr ? `<div class="s2sc-authors">${authStr}</div>` : ''}
-      ${r.url ? `<a class="s2sc-link" href="${r.url}" target="_blank" rel="noopener noreferrer">View Paper →</a>` : ''}
+      ${r.url ? `<a class="s2sc-link" href="${r.url}" target="_blank" rel="noopener noreferrer" aria-label="View paper: ${(r.title||'').replace(/"/g,'&quot;')} (opens in new tab)">View Paper <span aria-hidden="true">→</span></a>` : ''}
     </div>`;
   }
 
@@ -121,15 +124,40 @@ body:not(.dark) .s2sc-authors,.s2sc-context { color:#555; }
     bodyEl.innerHTML = `<div class="s2sc-grid">${cards.join('')}</div>`;
   }
 
-  // Tab switching
-  tabsEl.addEventListener('click', e => {
-    const btn = e.target.closest('.s2sc-tab');
+  function activateTab(btn) {
     if (!btn) return;
     activeTab = btn.dataset.tab;
-    tabsEl.querySelectorAll('.s2sc-tab').forEach(t =>
-      t.classList.toggle('s2sc-tab-active', t.dataset.tab === activeTab)
-    );
+    tabsEl.querySelectorAll('.s2sc-tab').forEach(t => {
+      const isActive = t.dataset.tab === activeTab;
+      t.classList.toggle('s2sc-tab-active', isActive);
+      t.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      t.setAttribute('tabindex', isActive ? '0' : '-1');
+    });
+    bodyEl.setAttribute('aria-labelledby', `s2sc-tab-${activeTab}`);
     renderTab(activeTab);
+  }
+
+  // Tab switching — click
+  tabsEl.addEventListener('click', e => {
+    const btn = e.target.closest('.s2sc-tab');
+    activateTab(btn);
+  });
+
+  // Tab switching — arrow keys
+  tabsEl.addEventListener('keydown', e => {
+    const tabs = Array.from(tabsEl.querySelectorAll('.s2sc-tab'));
+    const idx = tabs.indexOf(document.activeElement);
+    if (idx === -1) return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      tabs[(idx + 1) % tabs.length].focus();
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      tabs[(idx - 1 + tabs.length) % tabs.length].focus();
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      activateTab(tabs[idx]);
+    }
   });
 
   fetch('/data/semantic_scholar.json')

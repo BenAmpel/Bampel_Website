@@ -145,6 +145,10 @@
       const payload = detail || {};
       if (!payload.type && !payload.year) return;
 
+      // Ensure the wrapping <details> spoiler is open so results are visible
+      const details = root.closest('details');
+      if (details) details.open = true;
+
       clearState();
 
       if (payload.type) {

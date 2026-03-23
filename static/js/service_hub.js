@@ -122,7 +122,7 @@
       activeCategory = category;
       categoriesEl.querySelectorAll('.service-category').forEach((button) => {
         button.classList.toggle('active', button.dataset.category === category);
-        button.setAttribute('aria-selected', button.dataset.category === category ? 'true' : 'false');
+        button.setAttribute('aria-pressed', button.dataset.category === category ? 'true' : 'false');
       });
       renderGrid();
     };
@@ -130,7 +130,7 @@
     categoriesEl.innerHTML = categories.map((category) => {
       const count = categoryCounts.get(category) || 0;
       return `
-        <button class="service-category" type="button" data-category="${category}" aria-selected="false">
+        <button class="service-category" type="button" data-category="${category}" aria-pressed="false">
           <span>${category}</span>
           <span class="count">${count}</span>
         </button>

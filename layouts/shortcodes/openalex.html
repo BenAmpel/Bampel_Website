@@ -5,7 +5,7 @@
       <p class="oa-desc">Recent high-citation works in cybersecurity, threat intelligence, and AI security from 250M+ scholarly works.</p>
     </div>
   </div>
-  <div class="oa-body" id="oa-body">
+  <div class="oa-body" id="oa-body" aria-live="polite" aria-atomic="false">
     <div class="oa-loader">Loading papers…</div>
   </div>
   <div class="oa-footer" id="oa-footer"></div>
@@ -26,6 +26,7 @@
 .oa-card-title { font-size:0.87rem; font-weight:600; line-height:1.38; flex:1; color:#e4e4e4; }
 .oa-card-title a { color:inherit; text-decoration:none; }
 .oa-card-title a:hover { color:#00ff41; }
+.oa-card-title a:focus-visible { outline:2px solid #00e5ff; outline-offset:2px; }
 .oa-cites { flex-shrink:0; font-size:0.8rem; font-weight:700; color:#e040fb; white-space:nowrap; padding-top:1px; text-shadow:0 0 8px rgba(224,64,251,0.3); }
 .oa-meta { display:flex; flex-wrap:wrap; gap:5px; align-items:center; }
 .oa-chip { font-size:0.63rem; padding:2px 8px; border-radius:10px; }
@@ -40,7 +41,9 @@ body:not(.dark) .oa-root { background:rgba(255,255,255,0.96); border-color:#ddd;
 body:not(.dark) .oa-card { background:#f8f8f8; border-color:#e0e0e0; }
 body:not(.dark) .oa-card:hover { border-color:#00aa44; }
 body:not(.dark) .oa-card-title { color:#222; }
-body:not(.dark) .oa-authors,.oa-venue,.oa-abstract { color:#555; }
+body:not(.dark) .oa-authors,
+body:not(.dark) .oa-venue,
+body:not(.dark) .oa-abstract { color:#555; }
 </style>
 
 <script>

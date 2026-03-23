@@ -5,7 +5,7 @@
       <p class="nsfg-desc">Recent NSF awards aligned with your research domains — AI security, threat intelligence, and cybersecurity.</p>
     </div>
   </div>
-  <div class="nsfg-body" id="nsfg-body">
+  <div class="nsfg-body" id="nsfg-body" aria-live="polite" aria-atomic="false">
     <div class="nsfg-loader">Loading grant data…</div>
   </div>
   <div class="nsfg-footer" id="nsfg-footer"></div>
@@ -34,13 +34,15 @@
 .nsfg-abstract { font-size:0.78rem; color:#bbb; line-height:1.52; border-top:1px solid rgba(255,255,255,0.05); padding-top:8px; }
 .nsfg-link { display:inline-block; margin-top:2px; font-size:0.72rem; color:#00e5ff; text-decoration:none; border:1px solid rgba(0,229,255,0.3); border-radius:6px; padding:3px 10px; transition:background 0.15s; }
 .nsfg-link:hover { background:rgba(0,229,255,0.1); }
+.nsfg-link:focus-visible { outline:2px solid #00e5ff; outline-offset:2px; }
 .nsfg-footer { margin-top:14px; font-size:0.7rem; opacity:0.45; text-align:right; }
 
 body:not(.dark) .nsfg-root { background:rgba(255,255,255,0.96); border-color:#ddd; color:#222; }
 body:not(.dark) .nsfg-card { background:#f8f8f8; border-color:#e0e0e0; }
 body:not(.dark) .nsfg-card:hover { border-color:#00aa44; }
 body:not(.dark) .nsfg-card-title { color:#222; }
-body:not(.dark) .nsfg-pi,.nsfg-abstract { color:#555; }
+body:not(.dark) .nsfg-pi,
+body:not(.dark) .nsfg-abstract { color:#555; }
 body:not(.dark) .nsfg-chip-date { color:#666; }
 </style>
 

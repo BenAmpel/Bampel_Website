@@ -5,7 +5,7 @@
       <p class="oc-desc">Papers citing Dr. Ampel's publications, sourced from the open OpenCitations index + CrossRef metadata.</p>
     </div>
   </div>
-  <div class="oc-body" id="oc-body">
+  <div class="oc-body" id="oc-body" aria-live="polite" aria-atomic="false">
     <div class="oc-loader">Loading citation data…</div>
   </div>
   <div class="oc-footer" id="oc-footer"></div>
@@ -27,6 +27,7 @@
 .oc-card-title { font-size:0.87rem; font-weight:600; line-height:1.38; flex:1; color:#e4e4e4; }
 .oc-card-title a { color:inherit; text-decoration:none; }
 .oc-card-title a:hover { color:#00ff41; }
+.oc-card-title a:focus-visible { outline:2px solid #00e5ff; outline-offset:2px; }
 .oc-year { flex-shrink:0; font-size:0.85rem; font-weight:700; color:#e040fb; padding-top:1px; }
 .oc-meta { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
 .oc-chip { font-size:0.63rem; padding:2px 8px; border-radius:10px; }

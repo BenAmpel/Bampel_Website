@@ -5,7 +5,7 @@
       <p class="gh-desc">Trending open-source repositories in cybersecurity, threat intelligence, and AI security — tools your research community builds.</p>
     </div>
   </div>
-  <div class="gh-body" id="gh-body">
+  <div class="gh-body" id="gh-body" aria-live="polite" aria-atomic="false">
     <div class="gh-loader">Loading repositories…</div>
   </div>
   <div class="gh-footer" id="gh-footer"></div>
@@ -27,6 +27,8 @@
 .gh-card-name { font-size:0.87rem; font-weight:700; line-height:1.38; flex:1; }
 .gh-card-name a { color:#00e5ff; text-decoration:none; }
 .gh-card-name a:hover { color:#00ff41; }
+.gh-card-name a:focus-visible { outline:2px solid #00e5ff; outline-offset:2px; }
+.sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 .gh-stars { flex-shrink:0; font-size:0.82rem; font-weight:700; color:#e040fb; white-space:nowrap; text-shadow:0 0 8px rgba(224,64,251,0.3); }
 .gh-desc-text { font-size:0.78rem; color:#bbb; line-height:1.48; }
 .gh-meta { display:flex; flex-wrap:wrap; gap:5px; align-items:center; }
@@ -52,8 +54,8 @@ body:not(.dark) .gh-forks { color:#888; }
   const footerEl = document.getElementById('gh-footer');
 
   function fmtStars(n) {
-    if (n >= 1000) return `⭐ ${(n/1000).toFixed(1)}k`;
-    return `⭐ ${n}`;
+    const val = n >= 1000 ? `${(n/1000).toFixed(1)}k` : `${n}`;
+    return `<span aria-hidden="true">⭐</span><span class="sr-only">Stars:</span> ${val}`;
   }
 
   function fmtDate(iso) {
@@ -79,7 +81,7 @@ body:not(.dark) .gh-forks { color:#888; }
         ${r.language ? `<span class="gh-chip gh-chip-lang">${r.language}</span>` : ''}
         ${r.pushed_at ? `<span class="gh-chip gh-chip-date">Updated ${fmtDate(r.pushed_at)}</span>` : ''}
       </div>
-      ${r.forks ? `<div class="gh-forks">🍴 ${r.forks} forks</div>` : ''}
+      ${r.forks ? `<div class="gh-forks"><span aria-hidden="true">🍴</span><span class="sr-only">Forks:</span> ${r.forks}</div>` : ''}
     </div>`;
   }
 

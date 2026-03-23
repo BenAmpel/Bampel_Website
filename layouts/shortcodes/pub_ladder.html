@@ -5,7 +5,7 @@
       <p class="pll-desc">Each dot is a paper — hover for details. The upward migration toward premier venues marks growing research maturity.</p>
     </div>
   </div>
-  <div class="pll-body" id="pll-body">
+  <div class="pll-body" id="pll-body" aria-live="polite" aria-atomic="false">
     <div class="pll-loader">Loading…</div>
   </div>
   <div class="pll-footer">
@@ -32,7 +32,8 @@
 .pll-cell-dots { min-height:32px; display:flex; flex-wrap:wrap; gap:5px; align-items:center; justify-content:center; padding:5px 6px; border-radius:8px; border:1px solid transparent; }
 .pll-cell-dots:not(:empty) { background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.06); }
 .pll-dot { width:11px; height:11px; border-radius:50%; cursor:pointer; transition:transform 0.15s, box-shadow 0.15s; flex-shrink:0; }
-.pll-dot:hover { transform:scale(1.7); box-shadow:0 0 8px currentColor; position:relative; z-index:2; }
+.pll-dot:hover, .pll-dot:focus-visible { transform:scale(1.7); box-shadow:0 0 8px currentColor; position:relative; z-index:2; outline:none; }
+.pll-dot:focus-visible { outline:2px solid #00e5ff; outline-offset:3px; }
 .pll-d1 { background:#e040fb; color:#e040fb; }
 .pll-d2 { background:#00e5ff; color:#00e5ff; }
 .pll-d3 { background:#00b0ff; color:#00b0ff; }
@@ -140,12 +141,21 @@ body:not(.dark) .pll-tip { background:rgba(255,255,255,0.98); color:#222; border
             const dot = document.createElement('span');
             dot.className = `pll-dot ${TIER_DOT[t]}`;
             dot.setAttribute('role', 'button');
-            dot.setAttribute('aria-label', p.title);
-            dot.addEventListener('mouseenter', () => {
+            dot.setAttribute('tabindex', '0');
+            dot.setAttribute('aria-label', `${p.title} · ${p.venue} · ${p.year}`);
+            const showTip = () => {
               tip.innerHTML = `<strong>${p.title}</strong><br><span style="opacity:0.65">${p.venue} · ${p.year}</span>`;
               tip.style.display = 'block';
+            };
+            const hideTip = () => { tip.style.display = 'none'; };
+            dot.addEventListener('mouseenter', showTip);
+            dot.addEventListener('mouseleave', hideTip);
+            dot.addEventListener('focus', showTip);
+            dot.addEventListener('blur', hideTip);
+            dot.addEventListener('keydown', e => {
+              if (e.key === 'Enter' || e.key === ' ') { showTip(); e.preventDefault(); }
+              if (e.key === 'Escape') { hideTip(); }
             });
-            dot.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
             cell.appendChild(dot);
           });
           grid.appendChild(cell);

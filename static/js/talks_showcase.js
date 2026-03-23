@@ -78,7 +78,7 @@
       activeYear = year;
       yearsEl.querySelectorAll('.talks-year').forEach((button) => {
         button.classList.toggle('active', Number(button.dataset.year) === year);
-        button.setAttribute('aria-selected', Number(button.dataset.year) === year ? 'true' : 'false');
+        button.setAttribute('aria-pressed', Number(button.dataset.year) === year ? 'true' : 'false');
       });
       renderCards();
     };
@@ -87,7 +87,7 @@
       activeTag = tag;
       tagsEl.querySelectorAll('.talks-tag').forEach((button) => {
         button.classList.toggle('active', button.dataset.tag === tag);
-        button.setAttribute('aria-selected', button.dataset.tag === tag ? 'true' : 'false');
+        button.setAttribute('aria-pressed', button.dataset.tag === tag ? 'true' : 'false');
       });
       renderCards();
     };
@@ -127,7 +127,7 @@
     yearsEl.innerHTML = years.map((year) => {
       const count = yearCounts.get(year) || 0;
       return `
-        <button class="talks-year" type="button" data-year="${year}" aria-selected="false">
+        <button class="talks-year" type="button" data-year="${year}" aria-pressed="false">
           <span>${year}</span>
           <span class="count">${count}</span>
         </button>
@@ -140,7 +140,7 @@
 
     const tagButtons = ['All', ...tags];
     tagsEl.innerHTML = tagButtons.map((tag) => (
-      `<button class="talks-tag" type="button" data-tag="${tag}" aria-selected="false">${tag}</button>`
+      `<button class="talks-tag" type="button" data-tag="${tag}" aria-pressed="false">${tag}</button>`
     )).join('');
 
     tagsEl.querySelectorAll('.talks-tag').forEach((button) => {
