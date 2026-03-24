@@ -20,6 +20,15 @@
     </div>
   </details>
 
+  {{ with .wcBlock.content.intelligence }}
+  <details class="spoiler">
+    <summary>Research Intelligence</summary>
+    <div class="spoiler-content">
+      {{ . | emojify | $.wcPage.RenderString }}
+    </div>
+  </details>
+  {{ end }}
+
   <details class="spoiler">
     <summary>More Research Impact</summary>
     <div class="spoiler-content">

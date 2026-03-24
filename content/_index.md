@@ -16,46 +16,7 @@ sections:
     id: stats
     content:
       title: Research Impact
-      body: |
-        **Selected Venues:** MISQ • JMIS • ACM TMIS • ISF • IEEE ISI • HICSS • AMCIS • ICIS • ACM KDD
-        
-        [📄 Download Research Summary (PDF) →](/uploads/research-summary.pdf)
-        
-        [📖 View Google Scholar Profile →](https://scholar.google.com/citations?user=XDdwaZUAAAAJ&hl=en)
-        
-        ---
-        
-        {{< spoiler text="📊 Research Dashboard" >}}
-        {{< research_dashboard >}}
-        {{< /spoiler >}}   
-
-        {{< spoiler text="🧭 Research Storylines" >}}
-        {{< research_storylines >}}
-        {{< /spoiler >}}
-
-        {{< spoiler text="📈 Publication Quality Trajectory" >}}
-        {{< pub_ladder >}}
-        {{< /spoiler >}}
-
-        {{< spoiler text="🔬 Research Topic Evolution" >}}
-        {{< topic_drift >}}
-        {{< /spoiler >}}
-
-        {{< spoiler text="🤝 Authorship & Collaboration Evolution" >}}
-        {{< coauthor_evolution >}}
-        {{< /spoiler >}}
-
-    design:
-      columns: '1'
-
-  # ---------- RESEARCH INTELLIGENCE ----------
-  - block: markdown
-    id: intelligence
-    content:
-      title: Research Intelligence
-      text: |
-        {{< spoiler text="Research Intelligence" >}}
-
+      intelligence: |
         {{< spoiler text="🔭 arXiv Research Radar" >}}
         {{< arxiv_radar >}}
         {{< /spoiler >}}
@@ -97,7 +58,35 @@ sections:
         {{< github_research >}}
         {{< /spoiler >}}
 
+      body: |
+        **Selected Venues:** MISQ • JMIS • ACM TMIS • ISF • IEEE ISI • HICSS • AMCIS • ICIS • ACM KDD
+        
+        [📄 Download Research Summary (PDF) →](/uploads/research-summary.pdf)
+        
+        [📖 View Google Scholar Profile →](https://scholar.google.com/citations?user=XDdwaZUAAAAJ&hl=en)
+        
+        ---
+        
+        {{< spoiler text="📊 Research Dashboard" >}}
+        {{< research_dashboard >}}
+        {{< /spoiler >}}   
+
+        {{< spoiler text="🧭 Research Storylines" >}}
+        {{< research_storylines >}}
         {{< /spoiler >}}
+
+        {{< spoiler text="📈 Publication Quality Trajectory" >}}
+        {{< pub_ladder >}}
+        {{< /spoiler >}}
+
+        {{< spoiler text="🔬 Research Topic Evolution" >}}
+        {{< topic_drift >}}
+        {{< /spoiler >}}
+
+        {{< spoiler text="🤝 Authorship & Collaboration Evolution" >}}
+        {{< coauthor_evolution >}}
+        {{< /spoiler >}}
+
     design:
       columns: '1'
 
