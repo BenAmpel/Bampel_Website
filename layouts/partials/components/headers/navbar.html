@@ -13,79 +13,21 @@
   {{ $logo = (partial "functions/get_logo" (dict "constraint" "max_height" "size" 70)) }}
 {{ end }}
 
-<style>
-  .navbar-brand-group {
-    align-items: center;
-    display: inline-flex;
-    gap: 0.75rem;
-  }
-
-  .navbar-support-link {
-    align-items: center;
-    background: #050705;
-    border: 1px solid rgba(0, 255, 65, 0.5);
-    border-radius: 999px;
-    box-shadow: 0 0 14px rgba(0, 255, 65, 0.16);
-    color: #d7ffe3;
-    display: inline-flex;
-    font-size: 0.76rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    line-height: 1;
-    padding: 0.48rem 0.82rem;
-    text-decoration: none;
-    text-transform: uppercase;
-    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, transform 0.2s ease;
-    white-space: nowrap;
-  }
-
-  .navbar-support-link:hover,
-  .navbar-support-link:focus {
-    background: #0a110a;
-    border-color: rgba(0, 255, 65, 0.85);
-    box-shadow: 0 0 18px rgba(0, 255, 65, 0.28);
-    color: #ffffff;
-    text-decoration: none;
-    transform: translateY(-1px);
-  }
-
-  .navbar-support-link--mobile {
-    font-size: 0.68rem;
-    padding: 0.4rem 0.68rem;
-  }
-
-  body:not(.dark) .navbar-support-link {
-    background: #0b120c;
-    color: #f4fff6;
-  }
-
-  @media (max-width: 991.98px) {
-    .navbar-brand-group {
-      gap: 0.55rem;
-    }
-  }
-</style>
-
 <header>
   <nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id="navbar-main">
     <div class="container-xl">
 
       {{if $show_logo}}
       <div class="d-none d-lg-inline-flex">
-        <div class="navbar-brand-group">
-          <a class="navbar-brand" href="{{ site.Home.RelPermalink }}">
-            {{- if $has_logo -}}
-              <img src="{{ $logo.RelPermalink }}" alt="{{ site.Title }}"
-              {{with site.Params.header.image.width}}width="{{.}}"{{end}}
-              {{with site.Params.header.image.height}}height="{{.}}"{{end}}>
-            {{- else -}}
-              {{- site.Title -}}
-            {{- end -}}
-          </a>
-          <a class="navbar-support-link" href="https://buymeacoffee.com/BAmpel" target="_blank" rel="noopener" aria-label="Support Benjamin Ampel on Buy Me a Coffee">
-            Support
-          </a>
-        </div>
+        <a class="navbar-brand" href="{{ site.Home.RelPermalink }}">
+          {{- if $has_logo -}}
+            <img src="{{ $logo.RelPermalink }}" alt="{{ site.Title }}"
+            {{with site.Params.header.image.width}}width="{{.}}"{{end}}
+            {{with site.Params.header.image.height}}height="{{.}}"{{end}}>
+          {{- else -}}
+            {{- site.Title -}}
+          {{- end -}}
+        </a>
       </div>
       {{end}}
 
@@ -98,20 +40,15 @@
 
       {{if $show_logo}}
       <div class="navbar-brand-mobile-wrapper d-inline-flex d-lg-none">
-        <div class="navbar-brand-group">
-          <a class="navbar-brand" href="{{ site.Home.RelPermalink }}">
-          {{- if $has_logo -}}
-            <img src="{{ $logo.RelPermalink }}" alt="{{ site.Title }}"
-            {{with site.Params.header.image.width}}width="{{.}}"{{end}}
-            {{with site.Params.header.image.height}}height="{{.}}"{{end}}>
-          {{- else -}}
-            {{- site.Title -}}
-          {{- end -}}
-          </a>
-          <a class="navbar-support-link navbar-support-link--mobile" href="https://buymeacoffee.com/BAmpel" target="_blank" rel="noopener" aria-label="Support Benjamin Ampel on Buy Me a Coffee">
-            Support
-          </a>
-        </div>
+        <a class="navbar-brand" href="{{ site.Home.RelPermalink }}">
+        {{- if $has_logo -}}
+          <img src="{{ $logo.RelPermalink }}" alt="{{ site.Title }}"
+          {{with site.Params.header.image.width}}width="{{.}}"{{end}}
+          {{with site.Params.header.image.height}}height="{{.}}"{{end}}>
+        {{- else -}}
+          {{- site.Title -}}
+        {{- end -}}
+        </a>
       </div>
       {{end}}
 

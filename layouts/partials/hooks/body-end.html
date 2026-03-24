@@ -80,3 +80,118 @@
       document.getElementById('visitor-details').innerHTML = '<span style="font-size: 0.75rem; opacity: 0.6;">Check back soon for visitor insights!</span>';
     });
 </script>
+
+<script
+  data-name="BMC-Widget"
+  data-cfasync="false"
+  src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js"
+  data-id="BAmpel"
+  data-description="Support me on Buy me a coffee!"
+  data-color="#00FF41"
+  data-position="Right"
+  data-x_margin="18"
+  data-y_margin="18">
+</script>
+
+<style>
+  .bmc-hover-note {
+    position: fixed;
+    right: 68px;
+    bottom: 18px;
+    max-width: 280px;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid rgba(0, 255, 65, 0.4);
+    border-radius: 12px;
+    background: rgba(5, 7, 5, 0.96);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35), 0 0 20px rgba(0, 255, 65, 0.12);
+    color: #d7ffe3;
+    font-size: 0.78rem;
+    line-height: 1.45;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(8px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    z-index: 2147483646;
+  }
+
+  .bmc-hover-note.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .bmc-hover-note strong {
+    color: #ffffff !important;
+  }
+
+  body:not(.dark) .bmc-hover-note {
+    background: rgba(255, 255, 255, 0.97);
+    border-color: rgba(11, 107, 44, 0.22);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.12);
+    color: #20402a;
+  }
+
+  @media (max-width: 768px) {
+    .bmc-hover-note {
+      right: 18px;
+      bottom: 68px;
+      max-width: min(260px, calc(100vw - 36px));
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    const noteId = 'bmc-hover-note';
+    const noteHtml = '<strong>Support development</strong><br>If you like my applications or extensions, you can help cover their development costs here.';
+
+    function ensureNote() {
+      let note = document.getElementById(noteId);
+      if (!note) {
+        note = document.createElement('div');
+        note.id = noteId;
+        note.className = 'bmc-hover-note';
+        note.innerHTML = noteHtml;
+        note.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(note);
+      }
+      return note;
+    }
+
+    function bindHover(target) {
+      if (!target || target.dataset.bmcHoverBound === 'true') return;
+      target.dataset.bmcHoverBound = 'true';
+      const note = ensureNote();
+
+      const show = () => note.classList.add('is-visible');
+      const hide = () => note.classList.remove('is-visible');
+
+      target.addEventListener('mouseenter', show);
+      target.addEventListener('mouseleave', hide);
+      target.addEventListener('focus', show, true);
+      target.addEventListener('blur', hide, true);
+      target.addEventListener('touchstart', () => {
+        note.classList.add('is-visible');
+        window.clearTimeout(window.__bmcHoverHideTimer);
+        window.__bmcHoverHideTimer = window.setTimeout(() => note.classList.remove('is-visible'), 2200);
+      }, { passive: true });
+    }
+
+    function wireWidgetHover() {
+      const img = document.querySelector('img[src*="coffee%20cup.svg"], img[src*="coffee cup.svg"]');
+      const iframe = document.getElementById('bmc-iframe');
+      if (img) bindHover(img);
+      if (iframe) bindHover(iframe);
+    }
+
+    const observer = new MutationObserver(wireWidgetHover);
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', wireWidgetHover, { once: true });
+    } else {
+      wireWidgetHover();
+    }
+
+    window.addEventListener('load', wireWidgetHover);
+  })();
+</script>
