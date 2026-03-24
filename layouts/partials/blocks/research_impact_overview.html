@@ -1,0 +1,29 @@
+<div class="col-12">
+  <details class="spoiler">
+    <summary>Impact Snapshot</summary>
+    <div class="spoiler-content">
+      {{ partial "impact/impact_stats.html" . }}
+    </div>
+  </details>
+
+  <details class="spoiler">
+    <summary>Trending Research</summary>
+    <div class="spoiler-content">
+      {{ partial "impact/hot_papers.html" . }}
+    </div>
+  </details>
+
+  <details class="spoiler">
+    <summary>Latest Paper</summary>
+    <div class="spoiler-content">
+      {{ partial "impact/featured_publication.html" . }}
+    </div>
+  </details>
+
+  <details class="spoiler">
+    <summary>More Research Impact</summary>
+    <div class="spoiler-content">
+      {{ .wcBlock.content.body | emojify | .wcPage.RenderString }}
+    </div>
+  </details>
+</div>

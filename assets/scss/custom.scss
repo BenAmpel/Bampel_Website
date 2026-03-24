@@ -5466,3 +5466,36 @@ body:not(.dark) .featured-link {
   border-color: rgba(11, 122, 62, 0.4);
   background: rgba(11, 122, 62, 0.08);
 }
+
+// Reduce oversized vertical whitespace between homepage sections.
+.home-section {
+  padding: 1.75rem 0 !important;
+}
+
+.home-section:first-of-type {
+  padding-top: 2.25rem !important;
+}
+
+.home-section .container,
+section .container {
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+  padding-top: 1.5rem !important;
+  padding-bottom: 1.5rem !important;
+}
+
+@media (max-width: 768px) {
+  .home-section {
+    padding: 1.1rem 0 !important;
+  }
+
+  .home-section:first-of-type {
+    padding-top: 1.5rem !important;
+  }
+
+  .home-section .container,
+  section .container {
+    padding-top: 1.1rem !important;
+    padding-bottom: 1.1rem !important;
+  }
+}

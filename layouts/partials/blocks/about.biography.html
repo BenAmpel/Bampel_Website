@@ -99,74 +99,79 @@
     <div class="bio-tagline">{{ . | markdownify | emojify }}</div>
     {{ end }}
 
-    {{ $bio_modes := $person.bio_modes }}
-    {{ $bio_explorer := $person.bio_explorer }}
-    {{ if $bio_modes }}
-    <div class="bio-explorer" data-bio-explorer{{ with $bio_explorer.default_mode }} data-default-mode="{{ . }}"{{ end }}>
-      <div class="bio-explorer-header">
-        <div class="bio-explorer-kicker">{{ with $bio_explorer.kicker }}{{ . }}{{ else }}Bio Console{{ end }}</div>
-        <div class="bio-explorer-title">{{ with $bio_explorer.title }}{{ . }}{{ else }}Choose a track to explore{{ end }}</div>
-      </div>
-      <div class="bio-explorer-controls" role="tablist" aria-label="Biography explorer"></div>
-      <div class="bio-explorer-panel" role="tabpanel" tabindex="0" aria-live="polite">
-        <div class="bio-explorer-summary" id="bio-explorer-summary"></div>
-        <ul class="bio-explorer-highlights" id="bio-explorer-highlights"></ul>
-        <a class="bio-explorer-cta" id="bio-explorer-cta" href="#"></a>
-      </div>
-      <script type="application/json" data-bio-modes>{{ $bio_modes | jsonify | safeHTML }}</script>
-    </div>
-    <script src="/js/bio_explorer.js" defer></script>
-    {{ end }}
-
-    {{ with $person.bio_quicklinks }}
-    <div class="bio-quicklinks" aria-label="Biography quick links">
-      {{ range . }}
-      <a class="bio-quicklink" href="{{ .href }}">{{ .label }}</a>
-      {{ end }}
-    </div>
-    {{ end }}
-
-    {{ with $person_page.Content }}
-    <details class="spoiler bio-story">
+    <details class="spoiler bio-overview">
       <summary>Biography</summary>
-      <div class="bio-story-progress" aria-hidden="true">
-        <span class="bio-story-progress-bar" data-bio-progress-bar></span>
-      </div>
       <div class="spoiler-content">
-        {{ $bio_tldr := $person.bio_tldr }}
-        <div class="bio-story-mode" data-story-mode>
-          <div class="bio-story-header">
-            <div class="bio-story-title">Story Mode</div>
-            <div class="bio-story-toggle" role="group" aria-label="Biography story mode">
-              <button type="button" class="bio-story-btn is-active" data-mode="scan" aria-pressed="true">Quick scan</button>
-              <button type="button" class="bio-story-btn" data-mode="deep" aria-pressed="false">Deep dive</button>
+        {{ $bio_modes := $person.bio_modes }}
+        {{ $bio_explorer := $person.bio_explorer }}
+        {{ if $bio_modes }}
+        <div class="bio-explorer" data-bio-explorer{{ with $bio_explorer.default_mode }} data-default-mode="{{ . }}"{{ end }}>
+          <div class="bio-explorer-header">
+            <div class="bio-explorer-kicker">{{ with $bio_explorer.kicker }}{{ . }}{{ else }}Biography{{ end }}</div>
+            <div class="bio-explorer-title">{{ with $bio_explorer.title }}{{ . }}{{ else }}Choose a track to explore{{ end }}</div>
+          </div>
+          <div class="bio-explorer-controls" role="tablist" aria-label="Biography explorer"></div>
+          <div class="bio-explorer-panel" role="tabpanel" tabindex="0" aria-live="polite">
+            <div class="bio-explorer-summary" id="bio-explorer-summary"></div>
+            <ul class="bio-explorer-highlights" id="bio-explorer-highlights"></ul>
+            <a class="bio-explorer-cta" id="bio-explorer-cta" href="#"></a>
+          </div>
+          <script type="application/json" data-bio-modes>{{ $bio_modes | jsonify | safeHTML }}</script>
+        </div>
+        <script src="/js/bio_explorer.js" defer></script>
+        {{ end }}
+
+        {{ with $person.bio_quicklinks }}
+        <div class="bio-quicklinks" aria-label="Biography quick links">
+          {{ range . }}
+          <a class="bio-quicklink" href="{{ .href }}">{{ .label }}</a>
+          {{ end }}
+        </div>
+        {{ end }}
+
+        {{ with $person_page.Content }}
+        <details class="spoiler bio-story">
+          <summary>Full Biography</summary>
+          <div class="bio-story-progress" aria-hidden="true">
+            <span class="bio-story-progress-bar" data-bio-progress-bar></span>
+          </div>
+          <div class="spoiler-content">
+            {{ $bio_tldr := $person.bio_tldr }}
+            <div class="bio-story-mode" data-story-mode>
+              <div class="bio-story-header">
+                <div class="bio-story-title">Story Mode</div>
+                <div class="bio-story-toggle" role="group" aria-label="Biography story mode">
+                  <button type="button" class="bio-story-btn is-active" data-mode="scan" aria-pressed="true">Quick scan</button>
+                  <button type="button" class="bio-story-btn" data-mode="deep" aria-pressed="false">Deep dive</button>
+                </div>
+              </div>
+              {{ if $bio_tldr }}
+              <div class="bio-story-tldr">{{ $bio_tldr | markdownify | emojify }}</div>
+              {{ else }}
+              <div class="bio-story-tldr">AI-enabled cybersecurity researcher focused on LLM-driven threat intelligence, phishing detection, and early warning signals from hacker communities.</div>
+              {{ end }}
+              {{ with $person.bio_highlights }}
+              <div class="bio-highlight-chips" data-bio-chips>
+                {{ range . }}
+                {{ $tooltip := .tooltip | default (printf "Jump to %s" .label) }}
+                <button type="button" class="bio-chip" data-target="{{ .target }}" data-tooltip="{{ $tooltip }}" aria-label="{{ $tooltip }}">{{ .label }}</button>
+                {{ end }}
+              </div>
+              {{ end }}
+            </div>
+            <div class="article-style">
+              <div class="bio-story-full" data-story-full>
+                {{ . }}
+              </div>
             </div>
           </div>
-          {{ if $bio_tldr }}
-          <div class="bio-story-tldr">{{ $bio_tldr | markdownify | emojify }}</div>
-          {{ else }}
-          <div class="bio-story-tldr">AI-enabled cybersecurity researcher focused on LLM-driven threat intelligence, phishing detection, and early warning signals from hacker communities.</div>
-          {{ end }}
-          {{ with $person.bio_highlights }}
-          <div class="bio-highlight-chips" data-bio-chips>
-            {{ range . }}
-            {{ $tooltip := .tooltip | default (printf "Jump to %s" .label) }}
-            <button type="button" class="bio-chip" data-target="{{ .target }}" data-tooltip="{{ $tooltip }}" aria-label="{{ $tooltip }}">{{ .label }}</button>
-            {{ end }}
-          </div>
-          {{ end }}
-        </div>
-        <div class="article-style">
-          <div class="bio-story-full" data-story-full>
-            {{ . }}
-          </div>
-        </div>
+        </details>
+        <script src="/js/bio_story_mode.js" defer></script>
+        <script src="/js/bio_highlight_chips.js" defer></script>
+        <script src="/js/bio_reading_pulse.js" defer></script>
+        {{ end }}
       </div>
     </details>
-    <script src="/js/bio_story_mode.js" defer></script>
-    <script src="/js/bio_highlight_chips.js" defer></script>
-    <script src="/js/bio_reading_pulse.js" defer></script>
-    {{ end }}
 
     <div class="row">
 

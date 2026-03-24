@@ -12,17 +12,11 @@ sections:
       username: admin
 
   # ---------- RESEARCH IMPACT ----------
-  - block: markdown
+  - block: research_impact_overview
     id: stats
     content:
       title: Research Impact
-      text: |
-        {{< impact_stats >}}
-
-        {{< hot_papers >}}
-
-        {{< featured_publication >}}
-        
+      body: |
         **Selected Venues:** MISQ • JMIS • ACM TMIS • ISF • IEEE ISI • HICSS • AMCIS • ICIS • ACM KDD
         
         [📄 Download Research Summary (PDF) →](/uploads/research-summary.pdf)
@@ -60,6 +54,8 @@ sections:
     content:
       title: Research Intelligence
       text: |
+        {{< spoiler text="Research Intelligence" >}}
+
         {{< spoiler text="🔭 arXiv Research Radar" >}}
         {{< arxiv_radar >}}
         {{< /spoiler >}}
@@ -99,6 +95,8 @@ sections:
 
         {{< spoiler text="💻 GitHub: Research Tools & Code" >}}
         {{< github_research >}}
+        {{< /spoiler >}}
+
         {{< /spoiler >}}
     design:
       columns: '1'
@@ -185,23 +183,18 @@ sections:
       columns: '1'
 
   # ---------- SERVICE ----------
-  - block: markdown
+  - block: service_engagement
     id: service
     content:
       title: Professional Service
-      text: |
-        {{< service_hub >}}
     design:
       columns: '1'
   
  # ---------- MEDIA ----------
-  - block: markdown
+  - block: media_engagement
     id: media
     content:
       title: Public Engagement & Media Coverage
-      text: |
-        {{< altmetric_summary >}}
-        {{< media_spotlight >}}
     design:
       columns: '1'
 
