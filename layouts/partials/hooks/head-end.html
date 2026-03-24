@@ -13,11 +13,15 @@
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6407975157274256"
      crossorigin="anonymous"></script>
 
-<!-- tsParticles for animated background -->
-<script src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js"></script>
+<!-- Preconnect to external CDN origins to reduce DNS/TCP latency -->
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://d1bxh8uas1mnw7.cloudfront.net" crossorigin>
 
-<!-- Typed.js for terminal typing effect -->
-<script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.16/dist/typed.umd.js"></script>
+<!-- tsParticles for animated background (defer: init runs on DOMContentLoaded) -->
+<script defer src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js"></script>
+
+<!-- Typed.js for terminal typing effect (defer: init runs on DOMContentLoaded) -->
+<script defer src="https://cdn.jsdelivr.net/npm/typed.js@2.0.16/dist/typed.umd.js"></script>
 
 <!-- Altmetric Badge Script for publication pages -->
 <script type="text/javascript" src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
@@ -30,6 +34,66 @@
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
+}
+
+.navbar-brand-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.navbar-support-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.34rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 255, 65, 0.35);
+  background: rgba(0, 0, 0, 0.82);
+  color: #00ff41 !important;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+  text-decoration: none !important;
+  box-shadow: 0 0 0 1px rgba(0, 255, 65, 0.08), 0 0 18px rgba(0, 255, 65, 0.14);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+}
+
+.navbar-support-link:hover,
+.navbar-support-link:focus {
+  color: #03140a !important;
+  background: #00ff41;
+  border-color: #00ff41;
+  box-shadow: 0 0 0 1px rgba(0, 255, 65, 0.12), 0 0 24px rgba(0, 255, 65, 0.32);
+  transform: translateY(-1px);
+}
+
+.navbar-support-link:focus-visible {
+  outline: 2px solid rgba(0, 255, 65, 0.55);
+  outline-offset: 2px;
+}
+
+.navbar-support-link--mobile {
+  padding: 0.28rem 0.62rem;
+  font-size: 0.65rem;
+  margin-left: 0.55rem;
+}
+
+body:not(.dark) .navbar-support-link {
+  background: rgba(255, 255, 255, 0.96);
+  color: #0b6b2c !important;
+  border-color: rgba(11, 107, 44, 0.18);
+  box-shadow: 0 8px 20px rgba(8, 40, 18, 0.08);
+}
+
+body:not(.dark) .navbar-support-link:hover,
+body:not(.dark) .navbar-support-link:focus {
+  background: #0b6b2c;
+  color: #f5fff8 !important;
+  border-color: #0b6b2c;
+  box-shadow: 0 10px 24px rgba(11, 107, 44, 0.2);
 }
 
 /* ===== GLITCH EFFECT ===== */
@@ -144,7 +208,7 @@ section#about h1.article-title,
 .article-title.glitch-text {
   position: relative;
   display: inline-block;
-  transition: all 0.3s ease;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
 }
 
 /* Subtle cyber glow on section headers - dark mode only */
@@ -281,7 +345,7 @@ section[id="skills"] .feature-item,
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   padding: 20px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   text-align: center;
 }
 
@@ -1702,6 +1766,28 @@ function runEnhancements() {
       headerName.classList.add('glitch-text');
       headerName.setAttribute('data-text', headerName.textContent.trim());
     }
+
+    const supportHref = 'https://buymeacoffee.com/BAmpel';
+    const attachSupportButton = (brand, mobile = false) => {
+      if (!brand || brand.parentElement?.querySelector('.navbar-support-link')) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'navbar-brand-group';
+      brand.parentNode.insertBefore(wrapper, brand);
+      wrapper.appendChild(brand);
+
+      const button = document.createElement('a');
+      button.className = `navbar-support-link${mobile ? ' navbar-support-link--mobile' : ''}`;
+      button.href = supportHref;
+      button.target = '_blank';
+      button.rel = 'noopener';
+      button.textContent = 'Support';
+      button.setAttribute('aria-label', 'Support Benjamin Ampel on Buy Me a Coffee');
+      wrapper.appendChild(button);
+    };
+
+    attachSupportButton(document.querySelector('.d-none.d-lg-inline-flex .navbar-brand'));
+    attachSupportButton(document.querySelector('.navbar-brand-mobile-wrapper .navbar-brand'), true);
   }
   
   // Initialize glitch effect

@@ -1,10 +1,9 @@
 {{/* Research Intelligence Dashboard - Safe Injection Method */}}
-<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-
 <div id="dashboard-root" style="min-height: 450px;"></div>
 
 <script type="text/javascript">
 (function() {
+  function init() {
     var root = document.getElementById('dashboard-root');
 
     // --- 1. CONSTRUCT HTML (Bypasses Hugo) ---
@@ -186,5 +185,17 @@
             });
         }
     }
+  }
+  if (typeof echarts !== 'undefined') {
+    init();
+  } else if (window.__echartsLoading) {
+    window.__echartsLoading.push(init);
+  } else {
+    window.__echartsLoading = [init];
+    var s = document.createElement('script');
+    s.src = '/vendor/echarts/echarts.min.js';
+    s.onload = function() { window.__echartsLoading.forEach(function(fn) { fn(); }); window.__echartsLoading = null; };
+    document.head.appendChild(s);
+  }
 })();
 </script>

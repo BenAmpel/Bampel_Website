@@ -1,13 +1,12 @@
 {{/* Interactive Research Network - Usage: {{< research_network >}} */}}
 
-<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-
 {{ $seed := "abcdefghijklmnopqrstuvwxyz" }}
 {{ $uniqueID := delimit (shuffle (split $seed "")) "" }}
 <div id="network-{{ $uniqueID }}" style="width: 100%; min-height: 700px; height: 700px; border: 1px solid #eee; border-radius: 8px; overflow: hidden; position: relative;" role="img" aria-label="Collaboration network graph of co-authorship connections" tabindex="0"></div>
 
 <script type="text/javascript">
 (function() {
+  function init() {
     var domID = "network-{{ $uniqueID }}";
     var myName = "Benjamin Ampel"; // The center node
     const prefersReducedMotion = window.matchMedia
@@ -226,5 +225,17 @@
             themeButton.addEventListener('click', () => setTimeout(updateChart, 100));
         }
     });
+  }
+  if (typeof echarts !== 'undefined') {
+    init();
+  } else if (window.__echartsLoading) {
+    window.__echartsLoading.push(init);
+  } else {
+    window.__echartsLoading = [init];
+    var s = document.createElement('script');
+    s.src = '/vendor/echarts/echarts.min.js';
+    s.onload = function() { window.__echartsLoading.forEach(function(fn) { fn(); }); window.__echartsLoading = null; };
+    document.head.appendChild(s);
+  }
 })();
 </script>
