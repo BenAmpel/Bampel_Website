@@ -14,7 +14,7 @@ status:
 superuser: true
 
 # Role/position/tagline
-role: Assistant Professor in Computer Information Systems
+role: Assistant Professor in Computer Information Systems and Director, Center for CyberAI Research (CCAIR)
 
 # Organizations/Affiliations to show in About widget
 organizations:
@@ -178,7 +178,7 @@ email: 'bampel@gsu.edu'
 highlight_name: true
 ---
 
-Dr. Benjamin M. Ampel is an Assistant Professor in Computer Information Systems at Georgia State University's J. Mack Robinson School of Business. <span class="bio-annotated">He earned his Ph.D. from the University of Arizona under Dr. Hsinchun Chen, and his dissertation *Securing Cyberspace: AI-Enabled Cyber-Adversary Defense* received the **ACM SIGMIS Doctoral Dissertation Award** at ICIS 2024.<span class="bio-sidenote">Dissertation Award</span></span>
+Dr. Benjamin M. Ampel is an Assistant Professor in Computer Information Systems at Georgia State University's J. Mack Robinson School of Business and Director of the Center for CyberAI Research (CCAIR). <span class="bio-annotated">He earned his Ph.D. from the University of Arizona under Dr. Hsinchun Chen, and his dissertation *Securing Cyberspace: AI-Enabled Cyber-Adversary Defense* received the **ACM SIGMIS Doctoral Dissertation Award** at ICIS 2024.<span class="bio-sidenote">Dissertation Award</span></span>
 
 His research program builds <span id="bio-threat-intel"></span>AI-enabled cyber threat intelligence that turns adversary chatter into actionable defense. He <span id="bio-hacker-communities"></span>mines hacker communities, <span id="bio-phishing"></span>analyzes phishing content, and develops <span id="bio-llms"></span>Large Language Model applications for cybersecurity. <span class="bio-annotated">His work appears in *MIS Quarterly*, *Journal of Management Information Systems (JMIS)*, *ACM TMIS*, *Information Systems Frontiers*, and *IEEE ISI*, receiving **Best Paper Awards** at IEEE ISI 2020 and IEEE ISI 2023.<span class="bio-sidenote">Best Paper Awards</span></span>
 

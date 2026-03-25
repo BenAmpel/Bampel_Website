@@ -1,0 +1,45 @@
+{{- $grants := sort site.Data.grants "year" "desc" -}}
+{{- $total := 0 -}}
+{{- range $grants -}}
+  {{- $total = add $total (int .amount) -}}
+{{- end -}}
+{{- $sources := slice -}}
+{{- range $grants -}}
+  {{- $sources = $sources | append .funding_source -}}
+{{- end -}}
+{{- $sources = uniq $sources -}}
+{{- $totalFormatted := printf "%d" $total -}}
+{{- range seq 1 10 -}}
+  {{- $totalFormatted = replaceRE "^(-?\\d+)(\\d{3})" "${1},${2}" $totalFormatted -}}
+{{- end -}}
+
+<p><strong>Dr. Ampel has received ${{ $totalFormatted }} in funding from {{ delimit $sources ", " ", and " }}.</strong></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Year</th>
+      <th>Funding Source</th>
+      <th>Grant Title</th>
+      <th>Amount</th>
+      <th>Role</th>
+      <th>Duration</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{- range $grants }}
+    {{- $amountFormatted := printf "%d" (int .amount) -}}
+    {{- range seq 1 10 -}}
+      {{- $amountFormatted = replaceRE "^(-?\\d+)(\\d{3})" "${1},${2}" $amountFormatted -}}
+    {{- end -}}
+    <tr>
+      <td>{{ .year }}</td>
+      <td>{{ .funding_source }}</td>
+      <td>{{ .grant_title }}</td>
+      <td>${{ $amountFormatted }}</td>
+      <td>{{ .role }}</td>
+      <td>{{ .duration }}</td>
+    </tr>
+    {{- end }}
+  </tbody>
+</table>
