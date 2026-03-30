@@ -1,5 +1,5 @@
 {
-  "refresh_date": "2026-03-23",
+  "refresh_date": "2026-03-30",
   "grants": [
     {
       "title": "Travel: NSF Student Travel Grants for VehicleSec '26 and USENIX Security '26",
@@ -16,6 +16,28 @@
       "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2621306",
       "keywords": [
         "Cybersecurity"
+      ]
+    },
+    {
+      "title": "CAREER: Towards Automated Vulnerability Management: Vulnerability Discovery, Localization, and Continuous Monitoring",
+      "awardId": "2543926",
+      "piName": "Xueqing Liu",
+      "institution": "Stevens Institute of Technology",
+      "estimatedTotalAmt": "624660",
+      "startDate": "07/01/2026",
+      "expDate": "06/30/2031",
+      "abstractText": "Open-source software security vulnerabilities lead to severe impacts, e.g., stolen personal data, financial losses, and disrupted services. Due to the significant growth of vulnerabilities in recent years, it has become increasingly challenging for developers to efficiently manage security vulnerabilities, leading to supply-chain delays and prolonged security risks. While artificial intelligence tools are increasingly adopted in software development, it remains unclear whether they can reliably assist vulnerability management. This project builds tools that leverage AI to assist vulnerability management in open-source software and continuously monitors the security behaviors of AI agents in software development. The project's novelties are the combination of AI with program analysis on vulnerability localization, a new recommender system for prioritizing and discovering vulnerabilities, and novel testing methodologies for auditing the security behaviors of AI agents. The project's broader significance and importance are the strengthening of open-source software supply chain which supports modern software infrastructure, the training of next generation security researchers and software developers, including summer research camps in New Jersey, and the public release of benchmarks and tools that improve security research.\r\n\r\nThe project's objectives are divided into three research thrusts: (1) using program analysis and graph neural networks to enhance patch localization and vulnerable code localization; (2) constructing a novel benchmark and recommender system for vulnerability discovery and prioritization based on a major bug bounty platform; (3) monitoring the security behaviors of AI agents for code review and generation by detecting security failures and inconsistency with user expectation. The project seamlessly integrates various methodologies and disciplines, including program analysis, large language models, natural language processing, software testing, and AI agents. Key deliverables include prototype tools, benchmarks, and monitoring workflows, which are easily adoptable through platforms such as GitHub. This research fosters a comprehensive approach for vulnerability management, contributing to a more secure and trustworthy software ecosystem.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002930DB NSF RESEARCH & RELATED ACTIVIT",
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT",
+        "01003031DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2543926",
+      "keywords": [
+        "LLM / GenAI",
+        "Vulnerability",
+        "Deep Learning",
+        "NLP"
       ]
     },
     {

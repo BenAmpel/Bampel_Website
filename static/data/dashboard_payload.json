@@ -51,7 +51,7 @@
       "url": "/conference_publication/dtlel-isi/",
       "date": "2020-11-01",
       "abstract": "With the rapid development of new technologies, vulnerabilities are at an all-time high. Companies are investing in developing Cyber Threat Intelligence (CTI) to counteract these new vulnerabilities. However, this CTI is generally reactive based on internal data. Hacker forums can provide proactive CTI value through automated analysis of new trends and exploits. One way to identify exploits is by analyzing the source code that is posted on these forums. These source code snippets are often noisy and unlabeled, making standard data labeling techniques ineffective. This study aims to design a novel framework for the automated collection and categorization of hacker forum exploit source code. We propose a deep transfer learning framework, the Deep Transfer Learning for Exploit Labeling (DTL-EL). DTL-EL leverages the learned representation from professional labeled exploits to better generalize to hacker forum exploits. This model classifies the collected hacker forum exploits into eight predefined categories for proactive and timely CTI. The results of this study indicate that DTL-EL outperforms other prominent models in hacker forum literature.",
-      "citations": 51,
+      "citations": 53,
       "topic": "AI / Deep Learning"
     },
     {
@@ -557,7 +557,7 @@
       {
         "id": 2,
         "name": "Labeling Hacker Exploits for Proactive Cyber Threat Intelligence: A Deep Transfer Learning Approach",
-        "value": 51,
+        "value": 53,
         "year": 2020,
         "authors": [
           "Benjamin M. Ampel",
@@ -569,7 +569,7 @@
         "venue": "IEEE ISI",
         "type": "conference",
         "topic": "AI / Deep Learning",
-        "symbolSize": 35.732627221969096
+        "symbolSize": 36.06599866709224
       },
       {
         "id": 3,
@@ -1023,7 +1023,7 @@
       {
         "source": 0,
         "target": 2,
-        "value": 11.774508458422215,
+        "value": 11.790812966777569,
         "reason": "Same Venue, 1 Co-Authors",
         "types": {
           "topic": false,
@@ -1295,7 +1295,7 @@
       {
         "source": 1,
         "target": 2,
-        "value": 19.60650442742505,
+        "value": 19.641800173540343,
         "reason": "Same Venue, 4 Co-Authors",
         "types": {
           "topic": false,
@@ -1695,7 +1695,7 @@
       {
         "source": 2,
         "target": 3,
-        "value": 6.971279007008789,
+        "value": 7.024856130911907,
         "reason": "2 Keywords",
         "types": {
           "topic": true,
@@ -1711,7 +1711,7 @@
       {
         "source": 2,
         "target": 4,
-        "value": 19.33302209223412,
+        "value": 19.375278407684164,
         "reason": "Same Venue, 4 Co-Authors",
         "types": {
           "topic": false,
@@ -1727,7 +1727,7 @@
       {
         "source": 2,
         "target": 5,
-        "value": 11.15098080672772,
+        "value": 11.19860385419959,
         "reason": "1 Keywords, Same Venue, 1 Co-Authors",
         "types": {
           "topic": true,
@@ -1743,7 +1743,7 @@
       {
         "source": 2,
         "target": 6,
-        "value": 16.050943744979712,
+        "value": 16.101796072493233,
         "reason": "Same Venue, 3 Co-Authors",
         "types": {
           "topic": false,
@@ -1759,7 +1759,7 @@
       {
         "source": 2,
         "target": 7,
-        "value": 13.395968390882668,
+        "value": 13.436511399464548,
         "reason": "Same Venue, 2 Co-Authors",
         "types": {
           "topic": false,
@@ -1775,7 +1775,7 @@
       {
         "source": 2,
         "target": 8,
-        "value": 15.307038929086449,
+        "value": 15.32926155776416,
         "reason": "3 Co-Authors",
         "types": {
           "topic": false,
@@ -1791,7 +1791,7 @@
       {
         "source": 2,
         "target": 10,
-        "value": 11.101796072493233,
+        "value": 11.15098080672772,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -1807,7 +1807,7 @@
       {
         "source": 2,
         "target": 11,
-        "value": 16.07658539501866,
+        "value": 16.12659002542005,
         "reason": "Same Venue, 3 Co-Authors",
         "types": {
           "topic": false,
@@ -1823,7 +1823,7 @@
       {
         "source": 2,
         "target": 12,
-        "value": 9.024856130911907,
+        "value": 9.076585395018661,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
           "topic": true,
@@ -1839,7 +1839,7 @@
       {
         "source": 2,
         "target": 13,
-        "value": 11.915717099488266,
+        "value": 11.971279007008789,
         "reason": "1 Keywords, 2 Co-Authors",
         "types": {
           "topic": true,
@@ -1855,7 +1855,7 @@
       {
         "source": 2,
         "target": 14,
-        "value": 13.076585395018661,
+        "value": 13.126590025420048,
         "reason": "Same Venue, 2 Co-Authors",
         "types": {
           "topic": false,
@@ -1871,7 +1871,7 @@
       {
         "source": 2,
         "target": 16,
-        "value": 7.915717099488265,
+        "value": 7.971279007008789,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -1887,7 +1887,7 @@
       {
         "source": 2,
         "target": 17,
-        "value": 22.588540140854978,
+        "value": 22.624256113895555,
         "reason": "8 Keywords, 3 Co-Authors",
         "types": {
           "topic": true,
@@ -1903,7 +1903,7 @@
       {
         "source": 2,
         "target": 18,
-        "value": 15.926865577872142,
+        "value": 15.955437870328183,
         "reason": "1 Keywords, 3 Co-Authors",
         "types": {
           "topic": true,
@@ -1919,7 +1919,7 @@
       {
         "source": 2,
         "target": 19,
-        "value": 14.943755299006494,
+        "value": 14.998306765262805,
         "reason": "1 Keywords, 3 Co-Authors",
         "types": {
           "topic": true,
@@ -1935,7 +1935,7 @@
       {
         "source": 2,
         "target": 20,
-        "value": 7.915717099488265,
+        "value": 7.971279007008789,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -1951,7 +1951,7 @@
       {
         "source": 2,
         "target": 21,
-        "value": 8.943755299006494,
+        "value": 8.998306765262805,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
           "topic": true,
@@ -1967,7 +1967,7 @@
       {
         "source": 2,
         "target": 22,
-        "value": 8.852959004361967,
+        "value": 8.882960004421971,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -1983,7 +1983,7 @@
       {
         "source": 2,
         "target": 23,
-        "value": 7.915717099488265,
+        "value": 7.971279007008789,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -1999,7 +1999,7 @@
       {
         "source": 2,
         "target": 24,
-        "value": 7.943755299006494,
+        "value": 7.9983067652628055,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -2015,7 +2015,7 @@
       {
         "source": 2,
         "target": 25,
-        "value": 7.915717099488265,
+        "value": 7.971279007008789,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -2031,7 +2031,7 @@
       {
         "source": 2,
         "target": 27,
-        "value": 7.915717099488265,
+        "value": 7.971279007008789,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -2047,7 +2047,7 @@
       {
         "source": 2,
         "target": 28,
-        "value": 8.915717099488266,
+        "value": 8.971279007008789,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
           "topic": true,
@@ -2063,7 +2063,7 @@
       {
         "source": 2,
         "target": 29,
-        "value": 10.943755299006494,
+        "value": 10.998306765262805,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -5137,11 +5137,11 @@
   "scholar": {
     "lastUpdated": "March 2026",
     "metrics": {
-      "citations": 508,
+      "citations": 510,
       "hIndex": 9,
       "i10Index": 9,
       "publications": 30,
-      "citationVelocity": 39,
+      "citationVelocity": 40,
       "interests": [
         "Framework",
         "Hacker",
@@ -5174,11 +5174,11 @@
       },
       {
         "year": "2025",
-        "citations": 146
+        "citations": 147
       },
       {
         "year": "2026",
-        "citations": 39
+        "citations": 40
       }
     ]
   },
@@ -5241,42 +5241,38 @@
       },
       {
         "month": "202603",
-        "visitors": 197
+        "visitors": 225
       }
     ],
     "devices": [
       {
         "device": "desktop",
-        "users": 204
+        "users": 199
       },
       {
         "device": "mobile",
-        "users": 56
+        "users": 36
       }
     ],
     "topPages": [
       {
         "path": "/",
-        "views": 225
-      },
-      {
-        "path": "/conference_publication/ransomware-bitcoin-isi-2023/",
-        "views": 9
-      },
-      {
-        "path": "/conference_publication/phishing-spw-2025/",
-        "views": 8
-      },
-      {
-        "path": "/conference_publication/mitre-attandck-isi-2023/",
-        "views": 7
+        "views": 305
       },
       {
         "path": "/conference_publication/phi-hacker-hicss-2026/",
         "views": 7
       },
       {
-        "path": "/journal_publication/hacker-communities-isf/",
+        "path": "/conference_publication/phishing-spw-2025/",
+        "views": 7
+      },
+      {
+        "path": "/conference_publication/mitre-attandck-isi-2023/",
+        "views": 6
+      },
+      {
+        "path": "/publication_types/paper-conference/",
         "views": 6
       },
       {
@@ -5284,20 +5280,24 @@
         "views": 6
       },
       {
+        "path": "/conference_publication/ai4cyber-kdd-2024/",
+        "views": 5
+      },
+      {
+        "path": "/journal_publication/hacker-communities-isf/",
+        "views": 5
+      },
+      {
+        "path": "/tags/text-analytics",
+        "views": 5
+      },
+      {
         "path": "/workshop_publication/adversarial-phishing-wds-2023/",
-        "views": 6
-      },
-      {
-        "path": "/workshop_publication/cve-attandck-kdd-2021/",
-        "views": 6
-      },
-      {
-        "path": "/authors/kaeli-otto/",
         "views": 5
       }
     ],
-    "totalLast30Days": 260,
-    "lifetimeTotal": 469,
+    "totalLast30Days": 234,
+    "lifetimeTotal": 497,
     "ranges": {
       "30": {
         "locations": [
@@ -5306,7 +5306,7 @@
             "region": "",
             "country": "Singapore",
             "countryRaw": "Singapore",
-            "visitors": 64,
+            "visitors": 59,
             "display": "Singapore, —, Singapore",
             "lat": 1.3521,
             "lng": 103.8198
@@ -5316,7 +5316,7 @@
             "region": "GA",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 39,
+            "visitors": 33,
             "display": "Atlanta, GA, USA",
             "lat": 33.749,
             "lng": -84.388
@@ -5326,7 +5326,7 @@
             "region": "Gansu",
             "country": "China",
             "countryRaw": "China",
-            "visitors": 34,
+            "visitors": 32,
             "display": "Lanzhou, Gansu, China",
             "lat": 36.0611,
             "lng": 103.8343
@@ -5336,7 +5336,7 @@
             "region": "",
             "country": "Iran",
             "countryRaw": "Iran",
-            "visitors": 7,
+            "visitors": 5,
             "display": "Tehran, —, Iran",
             "lat": 35.6892,
             "lng": 51.389
@@ -5352,12 +5352,38 @@
             "lng": 105.8342
           },
           {
-            "city": "Chamblee",
-            "region": "GA",
+            "city": "Arlington",
+            "region": "TX",
             "country": "USA",
             "countryRaw": "United States",
             "visitors": 2,
-            "display": "Chamblee, GA, USA"
+            "display": "Arlington, TX, USA",
+            "lat": 38.8816,
+            "lng": -77.091
+          },
+          {
+            "city": "Aspen",
+            "region": "CO",
+            "country": "USA",
+            "countryRaw": "United States",
+            "visitors": 2,
+            "display": "Aspen, CO, USA"
+          },
+          {
+            "city": "Bogota",
+            "region": "Bogota",
+            "country": "Colombia",
+            "countryRaw": "Colombia",
+            "visitors": 2,
+            "display": "Bogota, Bogota, Colombia"
+          },
+          {
+            "city": "Dallas",
+            "region": "TX",
+            "country": "USA",
+            "countryRaw": "United States",
+            "visitors": 2,
+            "display": "Dallas, TX, USA"
           },
           {
             "city": "Dhaka",
@@ -5374,28 +5400,10 @@
             "countryRaw": "United States",
             "visitors": 2,
             "display": "Forest City, NC, USA"
-          },
-          {
-            "city": "New York",
-            "region": "NY",
-            "country": "USA",
-            "countryRaw": "United States",
-            "visitors": 2,
-            "display": "New York, NY, USA",
-            "lat": 40.7128,
-            "lng": -74.006
-          },
-          {
-            "city": "San Antonio",
-            "region": "TX",
-            "country": "USA",
-            "countryRaw": "United States",
-            "visitors": 2,
-            "display": "San Antonio, TX, USA"
           }
         ],
-        "usPct": 30,
-        "intlPct": 70,
+        "usPct": 28,
+        "intlPct": 72,
         "topRegion": "Singapore",
         "topThreeWithCoords": [
           {
@@ -5403,7 +5411,7 @@
             "region": "",
             "country": "Singapore",
             "countryRaw": "Singapore",
-            "visitors": 64,
+            "visitors": 59,
             "display": "Singapore, —, Singapore",
             "lat": 1.3521,
             "lng": 103.8198
@@ -5413,7 +5421,7 @@
             "region": "GA",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 39,
+            "visitors": 33,
             "display": "Atlanta, GA, USA",
             "lat": 33.749,
             "lng": -84.388
@@ -5423,7 +5431,7 @@
             "region": "Gansu",
             "country": "China",
             "countryRaw": "China",
-            "visitors": 34,
+            "visitors": 32,
             "display": "Lanzhou, Gansu, China",
             "lat": 36.0611,
             "lng": 103.8343
@@ -5447,7 +5455,7 @@
             "region": "",
             "country": "Singapore",
             "countryRaw": "Singapore",
-            "visitors": 70,
+            "visitors": 73,
             "display": "Singapore, —, Singapore",
             "lat": 1.3521,
             "lng": 103.8198
@@ -5457,7 +5465,7 @@
             "region": "GA",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 42,
+            "visitors": 48,
             "display": "Atlanta, GA, USA",
             "lat": 33.749,
             "lng": -84.388
@@ -5493,6 +5501,16 @@
             "lng": -77.091
           },
           {
+            "city": "Boardman",
+            "region": "OR",
+            "country": "USA",
+            "countryRaw": "United States",
+            "visitors": 4,
+            "display": "Boardman, OR, USA",
+            "lat": 45.8399,
+            "lng": -119.7011
+          },
+          {
             "city": "New York",
             "region": "NY",
             "country": "USA",
@@ -5503,14 +5521,20 @@
             "lng": -74.006
           },
           {
-            "city": "Boardman",
-            "region": "OR",
-            "country": "USA",
-            "countryRaw": "United States",
+            "city": "Bengaluru",
+            "region": "Karnataka",
+            "country": "India",
+            "countryRaw": "India",
             "visitors": 3,
-            "display": "Boardman, OR, USA",
-            "lat": 45.8399,
-            "lng": -119.7011
+            "display": "Bengaluru, Karnataka, India"
+          },
+          {
+            "city": "Bogota",
+            "region": "Bogota",
+            "country": "Colombia",
+            "countryRaw": "Colombia",
+            "visitors": 3,
+            "display": "Bogota, Bogota, Colombia"
           },
           {
             "city": "Hong Kong",
@@ -5541,8 +5565,8 @@
             "lng": 50.5876
           }
         ],
-        "usPct": 20,
-        "intlPct": 80,
+        "usPct": 21,
+        "intlPct": 79,
         "topRegion": "Gansu, China",
         "topThreeWithCoords": [
           {
@@ -5560,7 +5584,7 @@
             "region": "",
             "country": "Singapore",
             "countryRaw": "Singapore",
-            "visitors": 70,
+            "visitors": 73,
             "display": "Singapore, —, Singapore",
             "lat": 1.3521,
             "lng": 103.8198
@@ -5570,7 +5594,7 @@
             "region": "GA",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 42,
+            "visitors": 48,
             "display": "Atlanta, GA, USA",
             "lat": 33.749,
             "lng": -84.388
@@ -5594,7 +5618,7 @@
             "region": "",
             "country": "Singapore",
             "countryRaw": "Singapore",
-            "visitors": 70,
+            "visitors": 73,
             "display": "Singapore, —, Singapore",
             "lat": 1.3521,
             "lng": 103.8198
@@ -5604,7 +5628,7 @@
             "region": "GA",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 42,
+            "visitors": 48,
             "display": "Atlanta, GA, USA",
             "lat": 33.749,
             "lng": -84.388
@@ -5640,6 +5664,16 @@
             "lng": -77.091
           },
           {
+            "city": "Boardman",
+            "region": "OR",
+            "country": "USA",
+            "countryRaw": "United States",
+            "visitors": 4,
+            "display": "Boardman, OR, USA",
+            "lat": 45.8399,
+            "lng": -119.7011
+          },
+          {
             "city": "New York",
             "region": "NY",
             "country": "USA",
@@ -5650,14 +5684,20 @@
             "lng": -74.006
           },
           {
-            "city": "Boardman",
-            "region": "OR",
-            "country": "USA",
-            "countryRaw": "United States",
+            "city": "Bengaluru",
+            "region": "Karnataka",
+            "country": "India",
+            "countryRaw": "India",
             "visitors": 3,
-            "display": "Boardman, OR, USA",
-            "lat": 45.8399,
-            "lng": -119.7011
+            "display": "Bengaluru, Karnataka, India"
+          },
+          {
+            "city": "Bogota",
+            "region": "Bogota",
+            "country": "Colombia",
+            "countryRaw": "Colombia",
+            "visitors": 3,
+            "display": "Bogota, Bogota, Colombia"
           },
           {
             "city": "Hong Kong",
@@ -5688,8 +5728,8 @@
             "lng": 50.5876
           }
         ],
-        "usPct": 20,
-        "intlPct": 80,
+        "usPct": 21,
+        "intlPct": 79,
         "topRegion": "Gansu, China",
         "topThreeWithCoords": [
           {
@@ -5707,7 +5747,7 @@
             "region": "",
             "country": "Singapore",
             "countryRaw": "Singapore",
-            "visitors": 70,
+            "visitors": 73,
             "display": "Singapore, —, Singapore",
             "lat": 1.3521,
             "lng": 103.8198
@@ -5717,7 +5757,7 @@
             "region": "GA",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 42,
+            "visitors": 48,
             "display": "Atlanta, GA, USA",
             "lat": 33.749,
             "lng": -84.388
@@ -5888,7 +5928,7 @@
           "title": "Labeling Hacker Exploits for Proactive Cyber Threat Intelligence: A Deep Transfer Learning Approach",
           "year": 2020,
           "venue": "IEEE ISI",
-          "citations": 51,
+          "citations": 53,
           "eigen": 0.3139741255094252,
           "between": 77.32728937728938,
           "degree": 12,
