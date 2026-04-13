@@ -1,362 +1,322 @@
 {
-  "refresh_date": "2026-04-06",
+  "refresh_date": "2026-04-13",
   "days_back": 60,
   "papers": [
     {
-      "title": "Council Mode: Mitigating Hallucination and Bias in LLMs via Multi-Agent Consensus",
-      "summary": "Large Language Models (LLMs), particularly those employing Mixture-of-Experts (MoE) architectures, have achieved remarkable capabilities across diverse natural language processing tasks. However, these models frequently suffer from hallucinations -- generating plausible but factually incorrect content -- and exhibit systematic biases that are amplified by uneven expert activation during inference. In this paper, we propose the Council Mode, a novel multi-agent consensus framework that addresses these limitations by dispatching queries to multiple heterogeneous frontier LLMs in parallel and synthesizing their outputs through a dedicated consensus model. The Council pipeline operates in three phases: (1) an intelligent triage classifier that routes queries based on complexity, (2) parallel expert generation across architecturally diverse models, and (3) a structured consensus synthesis that explicitly identifies agreement, disagreement, and unique findings before producing the final response. We implement and evaluate this architecture within an open-source AI workspace. Our comprehensive evaluation across multiple benchmarks demonstrates that the Council Mode achieves a 35.9% relative reduction in hallucination rates on the HaluEval benchmark and a 7.8-point improvement on TruthfulQA compared to the best-performing individual model, while maintaining significantly lower bias variance across domains. We provide the mathematical formulation of the consensus mechanism, detail the system architecture, and present extensive empirical results with ablation studies.",
-      "published": "2026-04-03T09:40:43Z",
-      "link": "https://arxiv.org/abs/2604.02923v1",
+      "title": "ChatGPT, is this real? The influence of generative AI on writing style in top-tier cybersecurity papers",
+      "summary": "With the release of ChatGPT in 2022, generative AI has significantly lowered the cost of polishing and rewriting text. Due to its widespread usage, conference organizers instated specific requirements researchers need to adhere to when using GenAI. When asked to rewrite text, GenAI can introduce stylistic changes, often concentrated to a handful of ``marker words`` commonly associated with AI usage. Prior large-scale studies in preprints and biomedical science report post-2022 discontinuities of those marker words and broad linguistic features.   This paper investigates whether similar patterns appear in top-tier cybersecurity conference papers (NDSS, USENIX Security, IEEE S\\&P, and ACM CCS) over the period 2000-2025. Using text extracted from paper PDFs, we compute lexical and syntactic metrics and track curated marker-word usage. Our findings reveal a gradual long-run drift toward higher lexical complexity and a pronounced post-2022 increase in marker-word usage across all venues showing an emerging trend towards more complex language in cybersecurity papers possibly hindering accessibility.",
+      "published": "2026-04-10T13:34:34Z",
+      "link": "https://arxiv.org/abs/2604.09316v1",
       "authors": [
-        "Shuai Wu",
-        "Xue Li",
-        "Yanna Feng",
-        "Yufang Li",
-        "Zhijun Wang"
+        "Daan Vansteenhuyse"
       ],
       "cats": [
-        "cs.CL",
-        "cs.AI"
+        "cs.CR"
       ]
     },
     {
-      "title": "Improving Role Consistency in Multi-Agent Collaboration via Quantitative Role Clarity",
-      "summary": "In large language model (LLM)-driven multi-agent systems, disobey role specification (failure to adhere to the defined responsibilities and constraints of an assigned role, potentially leading to an agent behaving like another) is a major failure mode \\cite{DBLP:journals/corr/abs-2503-13657}. To address this issue, in the present paper, we propose a quantitative role clarity to improve role consistency. Firstly, we construct a role assignment matrix $S(\u03c6)=[s_{ij}(\u03c6)]$, where $s_{ij}(\u03c6)$ is the semantic similarity between the $i$-th agent's behavior trajectory and the $j$-th agent's role description. Then we define role clarity matrix $M(\u03c6)$ as $\\text{softmax}(S(\u03c6))-I$, where $\\text{softmax}(S(\u03c6))$ is a row-wise softmax of $S(\u03c6)$ and $I$ is the identity matrix. The Frobenius norm of $M(\u03c6)$ quantifies the alignment between agents' role descriptions and their behaviors trajectory. Moreover, we employ the role clarity matrix as a regularizer during lightweight fine-tuning to improve role consistency, thereby improving end-to-end task performance. Experiments on the ChatDev multi-agent system show that our method substantially improves role consistency and task performance: with Qwen and Llama, the role overstepping rate decreases from $46.4\\%$ to $8.4\\%$ and from $43.4\\%$ to $0.2\\%$, respectively, and the role clarity score increases from $0.5328$ to $0.9097$ and from $0.5007$ to $0.8530$, respectively, the task success rate increases from $0.6769$ to $0.6909$ and from $0.6174$ to $0.6763$, respectively.",
-      "published": "2026-04-03T06:28:59Z",
-      "link": "https://arxiv.org/abs/2604.02770v1",
+      "title": "From Reasoning to Agentic: Credit Assignment in Reinforcement Learning for Large Language Models",
+      "summary": "Reinforcement learning (RL) for large language models (LLMs) increasingly relies on sparse, outcome-level rewards -- yet determining which actions within a long trajectory caused the outcome remains difficult. This credit assignment (CA) problem manifests in two regimes: reasoning RL, where credit must be distributed across tokens and steps within a single chain-of-thought generation (500--30K+ tokens); and agentic RL, where multi-turn environment interaction introduces stochastic transitions, partial observability, and horizons of 100+ turns (100K--1M tokens), making episode-level credit increasingly uninformative.   We survey 47 CA methods (41 core, 6 adjacent enablers) published between 2024 and early 2026, organizing them in a two-dimensional taxonomy by assignment granularity (token, segment, step, turn, multi-agent) and methodology (Monte Carlo, temporal difference, model-based, game-theoretic, information-theoretic). Beyond the survey itself, we contribute three reusable resources: (1) a structured, machine-readable paper inventory with taxonomy labels, baseline families, and evidence levels; (2) a reporting checklist for future CA papers, validated against the reviewed literature to identify systematic methodological gaps; and (3) a benchmark protocol specification with task families, metadata requirements, and controlled bifurcation tasks, accompanied by a method selection decision tree.   Our synthesis suggests that the shift from reasoning to agentic RL complicates and reshapes the credit assignment landscape: reasoning CA is maturing around process reward models and critic-free group comparison, while agentic CA is driving genuinely new approaches -- hindsight counterfactual analysis, privileged asymmetric critics, and turn-level MDP reformulations -- that have no direct precedent in reasoning RL.",
+      "published": "2026-04-10T16:17:44Z",
+      "link": "https://arxiv.org/abs/2604.09459v1",
       "authors": [
-        "Guoling Zhou",
-        "Wenpei Han",
-        "Fengqin Yang",
-        "Li Wang",
-        "Yingcong Zhou",
-        "Zhiguo Fu"
-      ],
-      "cats": [
-        "cs.AI"
-      ]
-    },
-    {
-      "title": "ChatSVA: Bridging SVA Generation for Hardware Verification via Task-Specific LLMs",
-      "summary": "Functional verification consumes over 50% of the IC development lifecycle, where SystemVerilog Assertions (SVAs) are indispensable for formal property verification and enhanced simulation-based debugging. However, manual SVA authoring is labor-intensive and error-prone. While Large Language Models (LLMs) show promise, their direct deployment is hindered by low functional accuracy and a severe scarcity of domain-specific data. To address these challenges, we introduce ChatSVA, an end-to-end SVA generation system built upon a multi-agent framework. At its core, the AgentBridge platform enables this multi-agent approach by systematically generating high-purity datasets, overcoming the data scarcity inherent to few-shot scenarios. Evaluated on 24 RTL designs, ChatSVA achieves 98.66% syntax and 96.12% functional pass rates, generating 139.5 SVAs per design with 82.50% function coverage. This represents a 33.3 percentage point improvement in functional correctness and an over 11x enhancement in function coverage compared to the previous state-of-the-art (SOTA). ChatSVA not only sets a new SOTA in automated SVA generation but also establishes a robust framework for solving long-chain reasoning problems in few-shot, domain-specific scenarios. An online service has been publicly released at https://www.nctieda.com/CHATDV.html.",
-      "published": "2026-04-03T07:24:14Z",
-      "link": "https://arxiv.org/abs/2604.02811v1",
-      "authors": [
-        "Lik Tung Fu",
-        "Jie Zhou",
-        "Shaokai Ren",
-        "Mengli Zhang",
-        "Jia Xiong",
-        "Hugo Jiang",
-        "Nan Guan",
-        "Xi Wang",
-        "Jun Yang"
-      ],
-      "cats": [
-        "cs.AR",
-        "cs.AI"
-      ]
-    },
-    {
-      "title": "BAS: A Decision-Theoretic Approach to Evaluating Large Language Model Confidence",
-      "summary": "Large language models (LLMs) often produce confident but incorrect answers in settings where abstention would be safer. Standard evaluation protocols, however, require a response and do not account for how confidence should guide decisions under different risk preferences. To address this gap, we introduce the Behavioral Alignment Score (BAS), a decision-theoretic metric for evaluating how well LLM confidence supports abstention-aware decision making. BAS is derived from an explicit answer-or-abstain utility model and aggregates realized utility across a continuum of risk thresholds, yielding a measure of decision-level reliability that depends on both the magnitude and ordering of confidence. We show theoretically that truthful confidence estimates uniquely maximize expected BAS utility, linking calibration to decision-optimal behavior. BAS is related to proper scoring rules such as log loss, but differs structurally: log loss penalizes underconfidence and overconfidence symmetrically, whereas BAS imposes an asymmetric penalty that strongly prioritizes avoiding overconfident errors. Using BAS alongside widely used metrics such as ECE and AURC, we then construct a benchmark of self-reported confidence reliability across multiple LLMs and tasks. Our results reveal substantial variation in decision-useful confidence, and while larger and more accurate models tend to achieve higher BAS, even frontier models remain prone to severe overconfidence. Importantly, models with similar ECE or AURC can exhibit very different BAS due to highly overconfident errors, highlighting limitations of standard metrics. We further show that simple interventions, such as top-$k$ confidence elicitation and post-hoc calibration, can meaningfully improve confidence reliability. Overall, our work provides both a principled metric and a comprehensive benchmark for evaluating LLM confidence reliability.",
-      "published": "2026-04-03T17:44:32Z",
-      "link": "https://arxiv.org/abs/2604.03216v1",
-      "authors": [
-        "Sean Wu",
-        "Fredrik K. Gustafsson",
-        "Edward Phillips",
-        "Boyan Gao",
-        "Anshul Thakur",
-        "David A. Clifton"
+        "Chenchen Zhang"
       ],
       "cats": [
         "cs.CL"
       ]
     },
     {
-      "title": "Beyond the Parameters: A Technical Survey of Contextual Enrichment in Large Language Models: From In-Context Prompting to Causal Retrieval-Augmented Generation",
-      "summary": "Large language models (LLMs) encode vast world knowledge in their parameters, yet they remain fundamentally limited by static knowledge, finite context windows, and weakly structured causal reasoning. This survey provides a unified account of augmentation strategies along a single axis: the degree of structured context supplied at inference time. We cover in-context learning and prompt engineering, Retrieval-Augmented Generation (RAG), GraphRAG, and CausalRAG. Beyond conceptual comparison, we provide a transparent literature-screening protocol, a claim-audit framework, and a structured cross-paper evidence synthesis that distinguishes higher-confidence findings from emerging results. The paper concludes with a deployment-oriented decision framework and concrete research priorities for trustworthy retrieval-augmented NLP.",
-      "published": "2026-04-03T16:49:09Z",
-      "link": "https://arxiv.org/abs/2604.03174v1",
+      "title": "E3-TIR: Enhanced Experience Exploitation for Tool-Integrated Reasoning",
+      "summary": "While Large Language Models (LLMs) have demonstrated significant potential in Tool-Integrated Reasoning (TIR), existing training paradigms face significant limitations: Zero-RL suffers from inefficient exploration and mode degradation due to a lack of prior guidance, while SFT-then-RL is limited by high data costs and capability plateaus caused by low-entropy collapse. To address these challenges, we propose E3-TIR (Enhanced Experience Exploitation), a warm-up paradigm for the early stages of agent training. Specifically, we formulate training as the dynamic integration of three experience types: Expert Prefixes, Expert Guided, and Self-Exploration. By executing diverse branching exploration around expert \"anchors\" and employing a mix policy optimization mechanism, we effectively mitigate distribution shifts and resolve optimization conflicts arising from shared prefixes. Our method dynamically adapts the model's knowledge boundaries, effectively balancing exploration diversity with training efficiency.Experimental results demonstrate that E3-TIR achieves a 6 performance improvement over traditional paradigms on tool-use tasks, while requiring less than 10 of the synthetic data. Furthermore, in terms of ROI, a comprehensive metric integrating performance, data cost, and training efficiency we achieve a 1.46x gain compared to baselines. Code is available at https://github.com/yuki-younai/E3-TIR.",
+      "published": "2026-04-10T16:14:48Z",
+      "link": "https://arxiv.org/abs/2604.09455v1",
       "authors": [
-        "Prakhar Bansal",
-        "Shivangi Agarwal"
+        "Weiyang Guo",
+        "Zesheng Shi",
+        "Liye Zhao",
+        "Jiayuan Ma",
+        "Zeen Zhu",
+        "Junxian He",
+        "Min Zhang",
+        "Jing Li"
       ],
       "cats": [
-        "cs.CL",
         "cs.AI"
       ]
     },
     {
-      "title": "Detecting and Correcting Reference Hallucinations in Commercial LLMs and Deep Research Agents",
-      "summary": "Large language models and deep research agents supply citation URLs to support their claims, yet the reliability of these citations has not been systematically measured. We address six research questions about citation URL validity using 10 models and agents on DRBench (53,090 URLs) and 3 models on ExpertQA (168,021 URLs across 32 academic fields). We find that 3--13\\% of citation URLs are hallucinated -- they have no record in the Wayback Machine and likely never existed -- while 5--18\\% are non-resolving overall. Deep research agents generate substantially more citations per query than search-augmented LLMs but hallucinate URLs at higher rates. Domain effects are pronounced: non-resolving rates range from 5.4\\% (Business) to 11.4\\% (Theology), with per-model effects even larger. Decomposing failures reveals that some models fabricate every non-resolving URL, while others show substantial link-rot fractions indicating genuine retrieval. As a solution, we release urlhealth, an open-source tool for URL liveness checking and stale-vs-hallucinated classification using the Wayback Machine. In agentic self-correction experiments, models equipped with urlhealth reduce non-resolving citation URLs by $6\\textrm{--}79\\times$ to under 1\\%, though effectiveness depends on the model's tool-use competence. The tool and all data are publicly available. Our characterization findings, failure taxonomy, and open-source tooling establish that citation URL validity is both measurable at scale and correctable in practice.",
-      "published": "2026-04-03T16:49:02Z",
-      "link": "https://arxiv.org/abs/2604.03173v1",
+      "title": "The nextAI Solution to the NeurIPS 2023 LLM Efficiency Challenge",
+      "summary": "The rapid evolution of Large Language Models (LLMs) has significantly impacted the field of natural language processing, but their growing complexity raises concerns about resource usage and transparency. Addressing these challenges, we participated in the NeurIPS LLM Efficiency Challenge, aiming to fine-tune a foundation model within stringent constraints. Our focus was the LLaMa2 70 billion model, optimized on a single A100 40GB GPU within a 24-hour limit. Our methodology hinged on a custom dataset, carefully assembled from diverse open-source resources and benchmark tests, aligned with the challenge's open-source ethos. Our approach leveraged Quantized-Low Rank Adaptation (QLoRA) Fine tuning, integrated with advanced attention mechanisms like Flash Attention 2. We experimented with various configurations of the LoRA technique, optimizing the balance between computational efficiency and model accuracy. Our fine-tuning strategy was underpinned by the creation and iterative testing of multiple dataset compositions, leading to the selection of a version that demonstrated robust performance across diverse tasks and benchmarks. The culmination of our efforts was an efficiently fine-tuned LLaMa2 70B model that operated within the constraints of a single GPU, showcasing not only a significant reduction in resource utilization but also high accuracy across a range of QA benchmarks. Our study serves as a testament to the feasibility of optimizing large-scale models in resource-constrained environments, emphasizing the potential of LLMs in real-world applications.",
+      "published": "2026-04-10T06:52:58Z",
+      "link": "https://arxiv.org/abs/2604.09034v1",
       "authors": [
-        "Delip Rao",
-        "Eric Wong",
-        "Chris Callison-Burch"
+        "Gyuwon Park",
+        "DongIl Shin",
+        "SolGil Oh",
+        "SangGi Ryu",
+        "Byung-Hak Kim"
       ],
       "cats": [
-        "cs.CL"
+        "cs.LG"
       ]
     },
     {
-      "title": "Valence-Arousal Subspace in LLMs: Circular Emotion Geometry and Multi-Behavioral Control",
-      "summary": "We present a method to identify a valence-arousal (VA) subspace within large language model representations. From 211k emotion-labeled texts, we derive emotion steering vectors, then learn VA axes as linear combinations of their top PCA components via ridge regression on the model's self-reported valence-arousal scores. The resulting VA subspace exhibits circular geometry consistent with established models of human emotion perception. Projections along our recovered VA subspace correlate with human-crowdsourced VA ratings across 44k lexical items. Furthermore, steering generation along these axes produces monotonic shifts in the corresponding affective dimensions of model outputs. Steering along these directions also induces near-monotonic bidirectional control over refusal and sycophancy: increasing arousal decreases refusal and increases sycophancy, and vice versa. These effects replicate across Llama-3.1-8B, Qwen3-8B, and Qwen3-14B, demonstrating cross-architecture generality. We provide a mechanistic account for these effects and prior emotionally-framed controls: refusal-associated tokens (\"I can't,\" \"sorry\") occupy low-arousal, negative-valence regions, so VA steering directly modulates their emission probability.",
-      "published": "2026-04-03T16:08:05Z",
-      "link": "https://arxiv.org/abs/2604.03147v1",
+      "title": "Large Language Models Generate Harmful Content Using a Distinct, Unified Mechanism",
+      "summary": "Large language models (LLMs) undergo alignment training to avoid harmful behaviors, yet the resulting safeguards remain brittle: jailbreaks routinely bypass them, and fine-tuning on narrow domains can induce ``emergent misalignment'' that generalizes broadly. Whether this brittleness reflects a fundamental lack of coherent internal organization for harmfulness remains unclear. Here we use targeted weight pruning as a causal intervention to probe the internal organization of harmfulness in LLMs. We find that harmful content generation depends on a compact set of weights that are general across harm types and distinct from benign capabilities. Aligned models exhibit a greater compression of harm generation weights than unaligned counterparts, indicating that alignment reshapes harmful representations internally--despite the brittleness of safety guardrails at the surface level. This compression explains emergent misalignment: if weights of harmful capabilities are compressed, fine-tuning that engages these weights in one domain can trigger broad misalignment. Consistent with this, pruning harm generation weights in a narrow domain substantially reduces emergent misalignment. Notably, LLMs harmful generation capability is dissociated from how they recognize and explain such content. Together, these results reveal a coherent internal structure for harmfulness in LLMs that may serve as a foundation for more principled approaches to safety.",
+      "published": "2026-04-10T17:58:31Z",
+      "link": "https://arxiv.org/abs/2604.09544v1",
       "authors": [
-        "Lihao Sun",
-        "Lewen Yan",
-        "Xiaoya Lu",
-        "Andrew Lee",
-        "Jie Zhang",
-        "Jing Shao"
+        "Hadas Orgad",
+        "Boyi Wei",
+        "Kaden Zheng",
+        "Martin Wattenberg",
+        "Peter Henderson",
+        "Seraphina Goldfarb-Tarrant",
+        "Yonatan Belinkov"
       ],
       "cats": [
         "cs.CL",
         "cs.AI",
-        "cs.CY"
+        "cs.LG"
       ]
     },
     {
-      "title": "Beyond Precision: Importance-Aware Recall for Factuality Evaluation in Long-Form LLM Generation",
-      "summary": "Evaluating the factuality of long-form output generated by large language models (LLMs) remains challenging, particularly when responses are open-ended and contain many fine-grained factual statements. Existing evaluation methods primarily focus on precision: they decompose a response into atomic claims and verify each claim against external knowledge sources such as Wikipedia. However, this overlooks an equally important dimension of factuality: recall, whether the generated response covers the relevant facts that should be included. We propose a comprehensive factuality evaluation framework that jointly measures precision and recall. Our method leverages external knowledge sources to construct reference facts and determine whether they are captured in generated text. We further introduce an importance-aware weighting scheme based on relevance and salience. Our analysis reveals that current LLMs perform substantially better on precision than on recall, suggesting that factual incompleteness remains a major limitation of long-form generation and that models are generally better at covering highly important facts than the full set of relevant facts.",
-      "published": "2026-04-03T16:03:56Z",
-      "link": "https://arxiv.org/abs/2604.03141v1",
+      "title": "Event-Driven Temporal Graph Networks for Asynchronous Multi-Agent Cyber Defense in NetForge_RL",
+      "summary": "The transition of Multi-Agent Reinforcement Learning (MARL) policies from simulated cyber wargames to operational Security Operations Centers (SOCs) is fundamentally bottlenecked by the Sim2Real gap. Legacy simulators abstract away network protocol physics, rely on synchronous ticks, and provide clean state vectors rather than authentic, noisy telemetry. To resolve these limitations, we introduce NetForge_RL: a high-fidelity cyber operations simulator that reformulates network defense as an asynchronous, continuous-time Partially Observable Semi-Markov Decision Process (POSMDP). NetForge enforces Zero-Trust Network Access (ZTNA) constraints and requires defenders to process NLP-encoded SIEM telemetry. Crucially, NetForge bridges the Sim2Real gap natively via a dual-mode engine, allowing high-throughput MARL training in a mock hypervisor and zero-shot evaluation against live exploits in a Docker hypervisor. To navigate this continuous-time POSMDP, we propose Continuous-Time Graph MARL (CT-GMARL), utilizing fixed-step Neural Ordinary Differential Equations (ODEs) to process irregularly sampled alerts. We evaluate our framework against discrete baselines (R-MAPPO, QMIX). Empirical results demonstrate that CT-GMARL achieves a converged median Blue reward of 57,135 - a 2.0x improvement over R-MAPPO and 2.1x over QMIX. Critically, CT-GMARL restores 12x more compromised services than the strongest baseline by avoiding the \"scorched earth\" failure mode of trivially minimizing risk by destroying network utility. On zero-shot transfer to the live Docker environment, CT-GMARL policies achieve a median reward of 98,026, validating the Sim2Real bridge.",
+      "published": "2026-04-10T17:44:29Z",
+      "link": "https://arxiv.org/abs/2604.09523v1",
       "authors": [
-        "Nazanin Jafari",
-        "James Allan",
-        "Mohit Iyyer"
+        "Igor Jankowski"
       ],
       "cats": [
-        "cs.CL"
-      ]
-    },
-    {
-      "title": "An Independent Safety Evaluation of Kimi K2.5",
-      "summary": "Kimi K2.5 is an open-weight LLM that rivals closed models across coding, multimodal, and agentic benchmarks, but was released without an accompanying safety evaluation. In this work, we conduct a preliminary safety assessment of Kimi K2.5 focusing on risks likely to be exacerbated by powerful open-weight models. Specifically, we evaluate the model for CBRNE misuse risk, cybersecurity risk, misalignment, political censorship, bias, and harmlessness, in both agentic and non-agentic settings. We find that Kimi K2.5 shows similar dual-use capabilities to GPT 5.2 and Claude Opus 4.5, but with significantly fewer refusals on CBRNE-related requests, suggesting it may uplift malicious actors in weapon creation. On cyber-related tasks, we find that Kimi K2.5 demonstrates competitive cybersecurity performance, but it does not appear to possess frontier-level autonomous cyberoffensive capabilities such as vulnerability discovery and exploitation. We further find that Kimi K2.5 shows concerning levels of sabotage ability and self-replication propensity, although it does not appear to have long-term malicious goals. In addition, Kimi K2.5 exhibits narrow censorship and political bias, especially in Chinese, and is more compliant with harmful requests related to spreading disinformation and copyright infringement. Finally, we find the model refuses to engage in user delusions and generally has low over-refusal rates. While preliminary, our findings highlight how safety risks exist in frontier open-weight models and may be amplified by the scale and accessibility of open-weight releases. Therefore, we strongly urge open-weight model developers to conduct and release more systematic safety evaluations required for responsible deployment.",
-      "published": "2026-04-03T15:45:35Z",
-      "link": "https://arxiv.org/abs/2604.03121v1",
-      "authors": [
-        "Zheng-Xin Yong",
-        "Parv Mahajan",
-        "Andy Wang",
-        "Ida Caspary",
-        "Yernat Yestekov",
-        "Zora Che",
-        "Mosh Levy",
-        "Elle Najt",
-        "Dennis Murphy",
-        "Prashant Kulkarni",
-        "Lev McKinney",
-        "Kei Nishimura-Gasparian",
-        "Ram Potham",
-        "Aengus Lynch",
-        "Michael L. Chen"
-      ],
-      "cats": [
-        "cs.CR",
-        "cs.AI",
-        "cs.CL"
-      ]
-    },
-    {
-      "title": "Credential Leakage in LLM Agent Skills: A Large-Scale Empirical Study",
-      "summary": "Third-party skills extend LLM agents with powerful capabilities but often handle sensitive credentials in privileged environments, making leakage risks poorly understood. We present the first large-scale empirical study of this problem, analyzing 17,022 skills (sampled from 170,226 on SkillsMP) using static analysis, sandbox testing, and manual inspection. We identify 520 vulnerable skills with 1,708 issues and derive a taxonomy of 10 leakage patterns (4 accidental and 6 adversarial). We find that (1) leakage is fundamentally cross-modal: 76.3% require joint analysis of code and natural language, while 3.1% arise purely from prompt injection; (2) debug logging is the primary vector, with print and console.log causing 73.5% of leaks due to stdout exposure to LLMs; and (3) leaked credentials are both exploitable (89.6% without privileges) and persistent, as forks retain secrets even after upstream fixes. After disclosure, all malicious skills were removed and 91.6% of hardcoded credentials were fixed. We release our dataset, taxonomy, and detection pipeline to support future research.",
-      "published": "2026-04-03T14:50:16Z",
-      "link": "https://arxiv.org/abs/2604.03070v1",
-      "authors": [
-        "Zhihao Chen",
-        "Ying Zhang",
-        "Yi Liu",
-        "Gelei Deng",
-        "Yuekang Li",
-        "Yanjun Zhang",
-        "Jianting Ning",
-        "Leo Yu Zhang",
-        "Lei Ma",
-        "Zhiqiang Li"
-      ],
-      "cats": [
-        "cs.CR",
-        "cs.AI"
-      ]
-    },
-    {
-      "title": "Prompt Compression in the Wild: Measuring Latency, Rate Adherence, and Quality for Faster LLM Inference",
-      "summary": "With the wide adoption of language models for IR -- and specifically RAG systems -- the latency of the underlying LLM becomes a crucial bottleneck, since the long contexts of retrieved passages lead large prompts and therefore, compute increase. Prompt compression, which reduces the size of input prompts while aiming to preserve performance on downstream tasks, has established itself as a cost-effective and low-latency method for accelerating inference in large language models. However, its usefulness depends on whether the additional preprocessing time during generation is offset by faster decoding. We present the first systematic, large-scale study of this trade-off, with thousands of runs and 30,000 queries across several open-source LLMs and three GPU classes. Our evaluation separates compression overhead from decoding latency while tracking output quality and memory usage. LLMLingua achieves up to 18% end-to-end speed-ups, when prompt length, compression ratio, and hardware capacity are well matched, with response quality remaining statistically unchanged across summarization, code generation, and question answering tasks. Outside this operating window, however, the compression step dominates and cancels out the gains. We also show that effective compression can reduce memory usage enough to offload workloads from data center GPUs to commodity cards, with only a 0.3s increase in latency. Our open-source profiler predicts the latency break-even point for each model-hardware setup, providing practical guidance on when prompt compression delivers real-world benefits.",
-      "published": "2026-04-03T11:41:53Z",
-      "link": "https://arxiv.org/abs/2604.02985v1",
-      "authors": [
-        "Cornelius Kummer",
-        "Lena Jurkschat",
-        "Michael F\u00e4rber",
-        "Sahar Vahdati"
-      ],
-      "cats": [
-        "cs.IR",
-        "cs.AI",
-        "cs.CL"
-      ]
-    },
-    {
-      "title": "Analysis of Optimality of Large Language Models on Planning Problems",
-      "summary": "Classic AI planning problems have been revisited in the Large Language Model (LLM) era, with a focus of recent benchmarks on success rates rather than plan efficiency. We examine the degree to which frontier models reason optimally versus relying on simple, heuristic, and possibly inefficient strategies. We focus on the Blocksworld domain involving towers of labeled blocks which have to be moved from an initial to a goal configuration via a set of primitive actions. We also study a formally equivalent task, the generalized Path-Star ($P^*$) graph, in order to isolate true topological reasoning from semantic priors. We systematically manipulate problem depth (the height of block towers), width (the number of towers), and compositionality (the number of goal blocks). Reasoning-enhanced LLMs significantly outperform traditional satisficing planners (e.g., LAMA) in complex, multi-goal configurations. Although classical search algorithms hit a wall as the search space expands, LLMs track theoretical optimality limits with near-perfect precision, even when domain-specific semantic hints are stripped away. To explain these surprising findings, we consider (and find evidence to support) two hypotheses: an active Algorithmic Simulation executed via reasoning tokens and a Geometric Memory that allows models to represent the $P^*$ topology as a navigable global geometry, effectively bypassing exponential combinatorial complexity.",
-      "published": "2026-04-03T09:27:16Z",
-      "link": "https://arxiv.org/abs/2604.02910v1",
-      "authors": [
-        "Bernd Bohnet",
-        "Michael C. Mozer",
-        "Kevin Swersky",
-        "Wil Cunningham",
-        "Aaron Parisi",
-        "Kathleen Kenealy",
-        "Noah Fiedel"
-      ],
-      "cats": [
-        "cs.AI",
-        "cs.CL"
-      ]
-    },
-    {
-      "title": "LLM+Graph@VLDB'2025 Workshop Summary",
-      "summary": "The integration of large language models (LLMs) with graph-structured data has become a pivotal and fast evolving research frontier, drawing strong interest from both academia and industry. The 2nd LLM+Graph Workshop, co-located with the 51st International Conference on Very Large Data Bases (VLDB 2025) in London, focused on advancing algorithms and systems that bridge LLMs, graph data management, and graph machine learning for practical applications. This report highlights the key research directions, challenges, and innovative solutions presented by the workshop's speakers.",
-      "published": "2026-04-03T08:27:54Z",
-      "link": "https://arxiv.org/abs/2604.02861v1",
-      "authors": [
-        "Yixiang Fang",
-        "Arijit Khan",
-        "Tianxing Wu",
-        "Da Yan",
-        "Shu Wang"
-      ],
-      "cats": [
-        "cs.DB",
-        "cs.AI"
-      ]
-    },
-    {
-      "title": "QAPruner: Quantization-Aware Vision Token Pruning for Multimodal Large Language Models",
-      "summary": "Multimodal Large Language Models (MLLMs) have shown strong reasoning ability, but their high computational and memory costs hinder deployment in resource-constrained settings. While Post-Training Quantization (PTQ) and vision token pruning are standard compression techniques, they are usually treated as independent optimizations. In this paper, we show that these two techniques are strongly coupled: naively applying semantic-based token pruning to PTQ-optimized MLLMs can discard activation outliers that are important for numerical stability and thus worsen quantization errors in low-bit regimes (\\textit{e.g.}, W4A4). To address this issue, we propose a quantization-aware vision token pruning framework. Our method introduces a lightweight hybrid sensitivity metric that combines simulated group-wise quantization error with outlier intensity. By combining this metric with standard semantic relevance scores, the method retains tokens that are both semantically informative and robust to quantization. Experiments on standard LLaVA architectures show that our method consistently outperforms naive integration baselines. At an aggressive pruning ratio that retains only 12.5\\% of visual tokens, our framework improves accuracy by 2.24\\% over the baseline and even surpasses dense quantization without pruning. To the best of our knowledge, this is the first method that explicitly co-optimizes vision token pruning and PTQ for accurate low-bit MLLM inference.",
-      "published": "2026-04-03T07:32:07Z",
-      "link": "https://arxiv.org/abs/2604.02816v1",
-      "authors": [
-        "Xinhao Wang",
-        "Zhonyu Xia",
-        "Zhiwei Lin",
-        "Zhe Li",
-        "Yongtao Wang"
-      ],
-      "cats": [
-        "cs.CV",
-        "cs.AI"
-      ]
-    },
-    {
-      "title": "SentinelAgent: Intent-Verified Delegation Chains for Securing Federal Multi-Agent AI Systems",
-      "summary": "When Agent A delegates to Agent B, which invokes Tool C on behalf of User X, no existing framework can answer: whose authorization chain led to this action, and where did it violate policy? This paper introduces SentinelAgent, a formal framework for verifiable delegation chains in federal multi-agent AI systems. The Delegation Chain Calculus (DCC) defines seven properties - six deterministic (authority narrowing, policy preservation, forensic reconstructibility, cascade containment, scope-action conformance, output schema conformance) and one probabilistic (intent preservation) - with four meta-theorems and one proposition establishing the practical infeasibility of deterministic intent verification. The Intent-Preserving Delegation Protocol (IPDP) enforces all seven properties at runtime through a non-LLM Delegation Authority Service. A three-point verification lifecycle achieves 100% combined TPR at 0% FPR on DelegationBench v4 (516 scenarios, 10 attack categories, 13 federal domains). Under black-box adversarial conditions, the DAS blocks 30/30 attacks with 0 false positives. Deterministic properties are unbreakable under adversarial stress testing; intent verification degrades to 13% against sophisticated paraphrasing. Fine-tuning the NLI model on 190 government delegation examples improves P2 from 1.7% to 88.3% TPR (5-fold cross-validated, F1=82.1%). Properties P1, P3-P7 are mechanically verified via TLA+ model checking across 2.7 million states with zero violations. Even when intent verification is evaded, the remaining six properties constrain the adversary to permitted API calls, conformant outputs, traceable actions, bounded cascades, and compliant behavior.",
-      "published": "2026-04-03T06:25:18Z",
-      "link": "https://arxiv.org/abs/2604.02767v1",
-      "authors": [
-        "KrishnaSaiReddy Patil"
-      ],
-      "cats": [
-        "cs.CR",
-        "cs.AI",
+        "cs.LG",
         "cs.MA"
       ]
     },
     {
-      "title": "Aligning Progress and Feasibility: A Neuro-Symbolic Dual Memory Framework for Long-Horizon LLM Agents",
-      "summary": "Large language models (LLMs) have demonstrated strong potential in long-horizon decision-making tasks, such as embodied manipulation and web interaction. However, agents frequently struggle with endless trial-and-error loops or deviate from the main objective in complex environments. We attribute these failures to two fundamental errors: global Progress Drift and local Feasibility Violation. Existing methods typically attempt to address both issues simultaneously using a single paradigm. However, these two challenges are fundamentally distinct: the former relies on fuzzy semantic planning, while the latter demands strict logical constraints and state validation. The inherent limitations of such a single-paradigm approach pose a fundamental challenge for existing models in handling long-horizon tasks. Motivated by this insight, we propose a Neuro-Symbolic Dual Memory Framework that explicitly decouples semantic progress guidance from logical feasibility verification. Specifically, during the inference phase, the framework invokes both memory mechanisms synchronously: on one hand, a neural-network-based Progress Memory extracts semantic blueprints from successful trajectories to guide global task advancement; on the other hand, a symbolic-logic-based Feasibility Memory utilizes executable Python verification functions synthesized from failed transitions to perform strict logical validation. Experiments demonstrate that this method significantly outperforms existing competitive baselines on ALFWorld, WebShop, and TextCraft, while drastically reducing the invalid action rate and average trajectory length.",
-      "published": "2026-04-03T05:11:19Z",
-      "link": "https://arxiv.org/abs/2604.02734v1",
+      "title": "BERT-as-a-Judge: A Robust Alternative to Lexical Methods for Efficient Reference-Based LLM Evaluation",
+      "summary": "Accurate evaluation is central to the large language model (LLM) ecosystem, guiding model selection and downstream adoption across diverse use cases. In practice, however, evaluating generative outputs typically relies on rigid lexical methods to extract and assess answers, which can conflate a model's true problem-solving ability with its compliance with predefined formatting guidelines. While recent LLM-as-a-Judge approaches mitigate this issue by assessing semantic correctness rather than strict structural conformity, they also introduce substantial computational overhead, making evaluation costly. In this work, we first systematically investigate the limitations of lexical evaluation through a large-scale empirical study spanning 36 models and 15 downstream tasks, demonstrating that such methods correlate poorly with human judgments. To address this limitation, we introduce BERT-as-a-Judge, an encoder-driven approach for assessing answer correctness in reference-based generative settings, robust to variations in output phrasing, and requiring only lightweight training on synthetically annotated question-candidate-reference triplets. We show that it consistently outperforms the lexical baseline while matching the performance of much larger LLM judges, providing a compelling tradeoff between the two and enabling reliable, scalable evaluation. Finally, through extensive experimentation, we provide detailed insights into BERT-as-a-Judge's performance to offer practical guidance for practitioners, and release all project artifacts to foster downstream adoption.",
+      "published": "2026-04-10T17:08:40Z",
+      "link": "https://arxiv.org/abs/2604.09497v1",
       "authors": [
-        "Bin Wen",
-        "Ruoxuan Zhang",
-        "Yang Chen",
-        "Hongxia Xie",
-        "Lan-Zhe Guo"
+        "Hippolyte Gisserot-Boukhlef",
+        "Nicolas Boizard",
+        "Emmanuel Malherbe",
+        "C\u00e9line Hudelot",
+        "Pierre Colombo"
       ],
       "cats": [
+        "cs.CL",
         "cs.AI"
       ]
     },
     {
-      "title": "V2X-QA: A Comprehensive Reasoning Dataset and Benchmark for Multimodal Large Language Models in Autonomous Driving Across Ego, Infrastructure, and Cooperative Views",
-      "summary": "Multimodal large language models (MLLMs) have shown strong potential for autonomous driving, yet existing benchmarks remain largely ego-centric and therefore cannot systematically assess model performance in infrastructure-centric and cooperative driving conditions. In this work, we introduce V2X-QA, a real-world dataset and benchmark for evaluating MLLMs across vehicle-side, infrastructure-side, and cooperative viewpoints. V2X-QA is built around a view-decoupled evaluation protocol that enables controlled comparison under vehicle-only, infrastructure-only, and cooperative driving conditions within a unified multiple-choice question answering (MCQA) framework. The benchmark is organized into a twelve-task taxonomy spanning perception, prediction, and reasoning and planning, and is constructed through expert-verified MCQA annotation to enable fine-grained diagnosis of viewpoint-dependent capabilities. Benchmark results across ten representative state-of-the-art proprietary and open-source models show that viewpoint accessibility substantially affects performance, and infrastructure-side reasoning supports meaningful macroscopic traffic understanding. Results also indicate that cooperative reasoning remains challenging since it requires cross-view alignment and evidence integration rather than simply additional visual input. To address these challenges, we introduce V2X-MoE, a benchmark-aligned baseline with explicit view routing and viewpoint-specific LoRA experts. The strong performance of V2X-MoE further suggests that explicit viewpoint specialization is a promising direction for multi-view reasoning in autonomous driving. Overall, V2X-QA provides a foundation for studying multi-perspective reasoning, reliability, and cooperative physical intelligence in connected autonomous driving. The dataset and V2X-MoE resources are publicly available at: https://github.com/junwei0001/V2X-QA.",
-      "published": "2026-04-03T04:07:35Z",
-      "link": "https://arxiv.org/abs/2604.02710v1",
+      "title": "Many-Tier Instruction Hierarchy in LLM Agents",
+      "summary": "Large language model agents receive instructions from many sources-system messages, user prompts, tool outputs, and more-each carrying different levels of trust and authority. When these instructions conflict, models must reliably follow the highest-privilege instruction to remain safe and effective. The dominant paradigm, instruction hierarchy (IH), assumes a fixed, small set of privilege levels (typically fewer than five) defined by rigid role labels (e.g., system > user). This is inadequate for real-world agentic settings, where conflicts can arise across far more sources and contexts. In this work, we propose Many-Tier Instruction Hierarchy (ManyIH), a paradigm for resolving instruction conflicts among instructions with arbitrarily many privilege levels. We introduce ManyIH-Bench, the first benchmark for ManyIH. ManyIH-Bench requires models to navigate up to 12 levels of conflicting instructions with varying privileges, comprising 853 agentic tasks (427 coding and 426 instruction-following). ManyIH-Bench composes constraints developed by LLMs and verified by humans to create realistic and difficult test cases spanning 46 real-world agents. Our experiments show that even the current frontier models perform poorly (~40% accuracy) when instruction conflict scales. This work underscores the urgent need for methods that explicitly target fine-grained, scalable instruction conflict resolution in agentic settings.",
+      "published": "2026-04-10T16:00:04Z",
+      "link": "https://arxiv.org/abs/2604.09443v1",
       "authors": [
-        "Junwei You",
-        "Pei Li",
-        "Zhuoyu Jiang",
-        "Weizhe Tang",
-        "Zilin Huang",
-        "Rui Gan",
-        "Jiaxi Liu",
-        "Yan Zhao",
-        "Sikai Chen",
-        "Bin Ran"
+        "Jingyu Zhang",
+        "Tianjian Li",
+        "William Jurayj",
+        "Hongyuan Zhan",
+        "Benjamin Van Durme",
+        "Daniel Khashabi"
       ],
       "cats": [
-        "cs.RO",
-        "cs.AI",
-        "cs.CV"
-      ]
-    },
-    {
-      "title": "Efficient3D: A Unified Framework for Adaptive and Debiased Token Reduction in 3D MLLMs",
-      "summary": "Recent advances in Multimodal Large Language Models (MLLMs) have expanded reasoning capabilities into 3D domains, enabling fine-grained spatial understanding. However, the substantial size of 3D MLLMs and the high dimensionality of input features introduce considerable inference overhead, which limits practical deployment on resource constrained platforms. To overcome this limitation, this paper presents Efficient3D, a unified framework for visual token pruning that accelerates 3D MLLMs while maintaining competitive accuracy. The proposed framework introduces a Debiased Visual Token Importance Estimator (DVTIE) module, which considers the influence of shallow initial layers during attention aggregation, thereby producing more reliable importance predictions for visual tokens. In addition, an Adaptive Token Rebalancing (ATR) strategy is developed to dynamically adjust pruning strength based on scene complexity, preserving semantic completeness and maintaining balanced attention across layers. Together, they enable context-aware token reduction that maintains essential semantics with lower computation. Comprehensive experiments conducted on five representative 3D vision and language benchmarks, including ScanRefer, Multi3DRefer, Scan2Cap, ScanQA, and SQA3D, demonstrate that Efficient3D achieves superior performance compared with unpruned baselines, with a +2.57% CIDEr improvement on the Scan2Cap dataset. Therefore, Efficient3D provides a scalable and effective solution for efficient inference in 3D MLLMs. The code is released at: https://github.com/sol924/Efficient3D",
-      "published": "2026-04-03T03:32:55Z",
-      "link": "https://arxiv.org/abs/2604.02689v1",
-      "authors": [
-        "Yuhui Lin",
-        "Siyue Yu",
-        "Yuxing Yang",
-        "Guangliang Cheng",
-        "Jimin Xiao"
-      ],
-      "cats": [
-        "cs.CV",
+        "cs.CL",
         "cs.AI"
       ]
     },
     {
-      "title": "Coupled Control, Structured Memory, and Verifiable Action in Agentic AI (SCRAT -- Stochastic Control with Retrieval and Auditable Trajectories): A Comparative Perspective from Squirrel Locomotion and Scatter-Hoarding",
-      "summary": "Agentic AI is increasingly judged not by fluent output alone but by whether it can act, remember, and verify under partial observability, delay, and strategic observation. Existing research often studies these demands separately: robotics emphasizes control, retrieval systems emphasize memory, and alignment or assurance work emphasizes checking and oversight. This article argues that squirrel ecology offers a sharp comparative case because arboreal locomotion, scatter-hoarding, and audience-sensitive caching couple all three demands in one organism. We synthesize evidence from fox, eastern gray, and, in one field comparison, red squirrels, and impose an explicit inference ladder: empirical observation, minimal computational inference, and AI design conjecture. We introduce a minimal hierarchical partially observed control model with latent dynamics, structured episodic memory, observer-belief state, option-level actions, and delayed verifier signals. This motivates three hypotheses: (H1) fast local feedback plus predictive compensation improves robustness under hidden dynamics shifts; (H2) memory organized for future control improves delayed retrieval under cue conflict and load; and (H3) verifiers and observer models inside the action-memory loop reduce silent failure and information leakage while remaining vulnerable to misspecification. A downstream conjecture is that role-differentiated proposer/executor/checker/adversary systems may reduce correlated error under asymmetric information and verification burden. The contribution is a comparative perspective and benchmark agenda: a disciplined program of falsifiable claims about the coupling of control, memory, and verifiable action.",
-      "published": "2026-04-03T17:25:05Z",
-      "link": "https://arxiv.org/abs/2604.03201v1",
+      "title": "Automated Instruction Revision (AIR): A Structured Comparison of Task Adaptation Strategies for LLM",
+      "summary": "This paper studies Automated Instruction Revision (AIR), a rule-induction-based method for adapting large language models (LLMs) to downstream tasks using limited task-specific examples. We position AIR within the broader landscape of adaptation strategies, including prompt optimization, retrieval-based methods, and fine-tuning. We then compare these approaches across a diverse benchmark suite designed to stress different task requirements, such as knowledge injection, structured extraction, label remapping, and logical reasoning. The paper argues that adaptation performance is strongly task-dependent: no single method dominates across all settings. Across five benchmarks, AIR was strongest or near-best on label-remapping classification, while KNN retrieval performed best on closed-book QA, and fine-tuning dominated structured extraction and event-order reasoning. AIR is most promising when task behavior can be captured by compact, interpretable instruction rules, while retrieval and fine-tuning remain stronger in tasks dominated by source-specific knowledge or dataset-specific annotation regularities.",
+      "published": "2026-04-10T15:28:05Z",
+      "link": "https://arxiv.org/abs/2604.09418v1",
       "authors": [
-        "Maximiliano Armesto",
-        "Christophe Kolb"
+        "Solomiia Bilyk",
+        "Volodymyr Getmanskyi",
+        "Taras Firman"
       ],
       "cats": [
+        "cs.CL",
+        "cs.LG"
+      ]
+    },
+    {
+      "title": "Task-Aware LLM Routing with Multi-Level Task-Profile-Guided Data Synthesis for Cold-Start Scenarios",
+      "summary": "Large language models (LLMs) exhibit substantial variability in performance and computational cost across tasks and queries, motivating routing systems that select models to meet user-specific cost-performance trade-offs. However, existing routers generalize poorly in cold-start scenarios where in-domain training data is unavailable. We address this limitation with a multi-level task-profile-guided data synthesis framework that constructs a hierarchical task taxonomy and produces diverse question-answer pairs to approximate the test-time query distribution. Building on this, we introduce TRouter, a task-type-aware router approach that models query-conditioned cost and performance via latent task-type variables, with prior regularization derived from the synthesized task taxonomy. This design enhances TRouter's routing utility under both cold-start and in-domain settings. Across multiple benchmarks, we show that our synthesis framework alleviates cold-start issues and that TRouter delivers effective LLM routing.",
+      "published": "2026-04-10T14:46:20Z",
+      "link": "https://arxiv.org/abs/2604.09377v1",
+      "authors": [
+        "Hui Liu",
+        "Bin Zou",
+        "Kecheng Chen",
+        "Jie Liu",
+        "Wenya Wang",
+        "Haoliang Li"
+      ],
+      "cats": [
+        "cs.CL"
+      ]
+    },
+    {
+      "title": "LLM-Rosetta: A Hub-and-Spoke Intermediate Representation for Cross-Provider LLM API Translation",
+      "summary": "The rapid proliferation of Large Language Model (LLM) providers--each exposing proprietary API formats--has created a fragmented ecosystem where applications become tightly coupled to individual vendors. Switching or bridging providers requires $O(N^2)$ bilateral adapters, impeding portability and multi-provider architectures. We observe that despite substantial syntactic divergence, the major LLM APIs share a common semantic core: the practical challenge is the combinatorial surface of syntactic variations, not deep semantic incompatibility. Based on this finding, we present LLM-Rosetta, an open-source translation framework built on a hub-and-spoke Intermediate Representation (IR) that captures the shared semantic core--messages, content parts, tool calls, reasoning traces, and generation controls--in a 9-type content model and 10-type stream event schema. A modular Ops-composition converter architecture enables each API standard to be added independently. LLM-Rosetta supports bidirectional conversion (provider-to-IR-to-provider) for both request and response payloads, including chunk-level streaming with stateful context management. We implement converters for four API standards (OpenAI Chat Completions, OpenAI Responses, Anthropic Messages, and Google GenAI), covering the vast majority of commercial providers. Empirical evaluation demonstrates lossless round-trip fidelity, correct streaming behavior, and sub-100 microsecond conversion overhead--competitive with LiteLLM's single-pass approach while providing bidirectionality and provider neutrality. LLM-Rosetta passes the Open Responses compliance suite and is deployed in production at Argonne National Laboratory. Code is available at https://github.com/Oaklight/llm-rosetta.",
+      "published": "2026-04-10T14:31:32Z",
+      "link": "https://arxiv.org/abs/2604.09360v1",
+      "authors": [
+        "Peng Ding"
+      ],
+      "cats": [
+        "cs.SE",
         "cs.AI"
       ]
     },
     {
-      "title": "Supply-Chain Poisoning Attacks Against LLM Coding Agent Skill Ecosystems",
-      "summary": "LLM-based coding agents extend their capabilities via third-party agent skills distributed through open marketplaces without mandatory security review. Unlike traditional packages, these skills are executed as operational directives with system-level privileges, so a single malicious skill can compromise the host. Prior work has not examined whether supply-chain attacks can directly hijack an agent's action space, such as file writes, shell commands, and network requests, despite existing safeguards. We introduce Document-Driven Implicit Payload Execution (DDIPE), which embeds malicious logic in code examples and configuration templates within skill documentation. Because agents reuse these examples during normal tasks, the payload executes without explicit prompts. Using an LLM-driven pipeline, we generate 1,070 adversarial skills from 81 seeds across 15 MITRE ATTACK categories. Across four frameworks and five models, DDIPE achieves 11.6% to 33.5% bypass rates, while explicit instruction attacks achieve 0% under strong defenses. Static analysis detects most cases, but 2.5% evade both detection and alignment. Responsible disclosure led to four confirmed vulnerabilities and two fixes.",
-      "published": "2026-04-03T14:58:58Z",
-      "link": "https://arxiv.org/abs/2604.03081v1",
+      "title": "DiffHLS: Differential Learning for High-Level Synthesis QoR Prediction with GNNs and LLM Code Embeddings",
+      "summary": "High-Level Synthesis (HLS) compiles C/C++ into RTL, but exploring pragma-driven optimization choices remains expensive because each design point requires time-consuming synthesis. We propose \\textbf{\\DiffHLS}, a differential learning framework for HLS Quality-of-Result (QoR) prediction that learns from kernel--design pairs: a kernel baseline and a pragma-inserted design variant. \\DiffHLS~encodes kernel and design intermediate-representation graphs with dedicated graph neural network (GNN) branches, and augments the delta pathway with code embeddings from a pretrained code large language model (LLM). Instead of regressing absolute targets directly, we jointly predict the kernel baseline and the design-induced delta, and compose them to obtain the design prediction. On PolyBench, \\DiffHLS~attains lower average MAPE than GNN baselines under four GNN backbones, and LLM code embeddings consistently improve over a GNN-only ablation. We further validate scalability on the ForgeHLS dataset.",
+      "published": "2026-04-10T11:54:56Z",
+      "link": "https://arxiv.org/abs/2604.09240v1",
       "authors": [
-        "Yubin Qu",
-        "Yi Liu",
-        "Tongcheng Geng",
-        "Gelei Deng",
-        "Yuekang Li",
-        "Leo Yu Zhang",
-        "Ying Zhang",
-        "Lei Ma"
+        "Zedong Peng",
+        "Zeju Li",
+        "Qiang Xu",
+        "Jieru Zhao"
+      ],
+      "cats": [
+        "cs.LG"
+      ]
+    },
+    {
+      "title": "GRM: Utility-Aware Jailbreak Attacks on Audio LLMs via Gradient-Ratio Masking",
+      "summary": "Audio large language models (ALLMs) enable rich speech-text interaction, but they also introduce jailbreak vulnerabilities in the audio modality. Existing audio jailbreak methods mainly optimize jailbreak success while overlooking utility preservation, as reflected in transcription quality and question answering performance. In practice, stronger attacks often come at the cost of degraded utility. To study this trade-off, we revisit existing attacks by varying their perturbation coverage in the frequency domain, from partial-band to full-band, and find that broader frequency coverage does not necessarily improve jailbreak performance, while utility consistently deteriorates. This suggests that concentrating perturbation on a subset of bands can yield a better attack-utility trade-off than indiscriminate full-band coverage. Based on this insight, we propose GRM, a utility-aware frequency-selective jailbreak framework. It ranks Mel bands by their attack contribution relative to utility sensitivity, perturbs only a selected subset of bands, and learns a reusable universal perturbation under a semantic-preservation objective. Experiments on four representative ALLMs show that GRM achieves an average Jailbreak Success Rate (JSR) of 88.46% while providing a better attack-utility trade-off than representative baselines. These results highlight the potential of frequency-selective perturbation for better balancing attack effectiveness and utility preservation in audio jailbreak. Content Warning: This paper includes harmful query examples and unsafe model responses.",
+      "published": "2026-04-10T11:27:25Z",
+      "link": "https://arxiv.org/abs/2604.09222v1",
+      "authors": [
+        "Yunqiang Wang",
+        "Hengyuan Na",
+        "Di Wu",
+        "Miao Hu",
+        "Guocong Quan"
+      ],
+      "cats": [
+        "cs.SD",
+        "cs.AI"
+      ]
+    },
+    {
+      "title": "Structuring versus Problematizing: How LLM-based Agents Scaffold Learning in Diagnostic Reasoning",
+      "summary": "Supporting students in developing diagnostic reasoning is a key challenge across educational domains. Novices often face cognitive biases such as premature closure and over-reliance on heuristics, and they struggle to transfer diagnostic strategies to new cases. Scenario-based learning (SBL) enhanced by Learning Analytics (LA) and large language models (LLM) offers a promising approach by combining realistic case experiences with personalized scaffolding. Yet, how different scaffolding approaches shape reasoning processes remains insufficiently explored. This study introduces PharmaSim Switch, an SBL environment for pharmacy technician training, extended with an LA- and LLM-powered pharmacist agent that implements pedagogical conversations rooted in two theory-driven scaffolding approaches: \\emph{structuring} and \\emph{problematizing}, as well as a student learning trajectory. In a between-groups experiment, 63 vocational students completed a learning scenario, a near-transfer scenario, and a far-transfer scenario under one of the two scaffolding conditions. Results indicate that both scaffolding approaches were effective in supporting the use of diagnostic strategies. Performance outcomes were primarily influenced by scenario complexity rather than students' prior knowledge or the scaffolding approach used. The structuring approach was associated with more accurate Active and Interactive participation, whereas problematizing elicited more Constructive engagement. These findings underscore the value of combining scaffolding approaches when designing LA- and LLM-based systems to effectively foster diagnostic reasoning.",
+      "published": "2026-04-10T09:43:17Z",
+      "link": "https://arxiv.org/abs/2604.09158v1",
+      "authors": [
+        "Fatma Bet\u00fcl G\u00fcre\u015f",
+        "Tanya Nazaretsky",
+        "Seyed Parsa Neshaei",
+        "Tanja K\u00e4ser"
+      ],
+      "cats": [
+        "cs.HC",
+        "cs.AI"
+      ]
+    },
+    {
+      "title": "Conversations Risk Detection LLMs in Financial Agents via Multi-Stage Generative Rollout",
+      "summary": "With the rapid adoption of large language models (LLMs) in financial service scenarios, dialogue security detection under high regulatory risk presents significant challenges. Existing methods mainly rely on single-dimensional semantic judgments or fixed rules, making them inadequate for handling multi-turn semantic evolution and complex regulatory clauses; moreover, they lack models specifically designed for financial security detection. To address these issues, this paper proposes FinSec, a four-tier security detection framework for financial agent. FinSec enables structured, interpretable, and end-to-end identification of actual financial risks, incorporating suspicious behavior pattern analysis, delayed risk and adversarial inference, semantic security analysis, and integrated risk-based decision-making. Notably, FinSec significantly enhances the robustness of high-risk dialogue detection while maintaining model utility. Experimental results demonstrate FinSec's leading performance. In terms of overall detection capability, FinSec achieves an F1 score of 90.13%, improving upon baseline models by 6--14 percentage points; its ASR is reduced to 9.09%, markedly lowering the probability of unsafe outputs; and the AUPRC increases to 0.9189 -- an approximate 9.7% gain over general frameworks. Additionally, in balancing utility and safety, FinSec obtains a composite score of 0.9098, delivering robust and efficient protection for financial agent dialogues.",
+      "published": "2026-04-10T07:29:39Z",
+      "link": "https://arxiv.org/abs/2604.09056v1",
+      "authors": [
+        "Xiaotong Jiang",
+        "Jun Wu"
       ],
       "cats": [
         "cs.CR",
+        "cs.CE"
+      ]
+    },
+    {
+      "title": "Watt Counts: Energy-Aware Benchmark for Sustainable LLM Inference on Heterogeneous GPU Architectures",
+      "summary": "While the large energy consumption of Large Language Models (LLMs) is recognized by the community, system operators lack guidance for energy-efficient LLM inference deployments that leverage energy trade-offs of heterogeneous hardware due to a lack of energy-aware benchmarks and data. In this work we address this gap with Watt Counts: the largest open-access dataset of energy consumption of LLMs, with over 5,000 experiments for 50 LLMs across 10 NVIDIA Graphics Processing Units (GPUs) in batch and server scenarios along with a reproducible, open-source benchmark that enables community submissions to expand this dataset. Leveraging this dataset, we conduct a system-level study of LLM inference across heterogeneous GPU architectures and show that GPU selection is crucial for energy efficiency outcomes and that optimal hardware choices vary significantly across models and deployment scenarios, demonstrating the critical importance of hardware-aware deployment in heterogeneous LLM systems. Guided by our data and insights, we show that practitioners can reduce energy consumption by up to 70% in server scenarios with negligible impact on user experience, and by up to 20% in batch scenarios.",
+      "published": "2026-04-10T07:15:58Z",
+      "link": "https://arxiv.org/abs/2604.09048v1",
+      "authors": [
+        "Mauricio Fadel Argerich",
+        "Jonathan F\u00fcrst",
+        "Marta Pati\u00f1o-Mart\u00ednez"
+      ],
+      "cats": [
+        "cs.DC",
+        "cs.AI"
+      ]
+    },
+    {
+      "title": "CONDESION-BENCH: Conditional Decision-Making of Large Language Models in Compositional Action Space",
+      "summary": "Large language models have been widely explored as decision-support tools in high-stakes domains due to their contextual understanding and reasoning capabilities. However, existing decision-making benchmarks rely on two simplifying assumptions: actions are selected from a finite set of pre-defined candidates, and explicit conditions restricting action feasibility are not incorporated into the decision-making process. These assumptions fail to capture the compositional structure of real-world actions and the explicit conditions that constrain their validity. To address these limitations, we introduce CONDESION-BENCH, a benchmark designed to evaluate conditional decision-making in compositional action space. In CONDESION-BENCH, actions are defined as allocations to decision variables and are restricted by explicit conditions at the variable, contextual, and allocation levels. By employing oracle-based evaluation of both decision quality and condition adherence, we provide a more rigorous assessment of LLMs as decision-support tools.",
+      "published": "2026-04-10T06:47:09Z",
+      "link": "https://arxiv.org/abs/2604.09029v1",
+      "authors": [
+        "Yeonjun Hwang",
+        "Sungyong Park",
+        "Minju Kim",
+        "Dongha Lee",
+        "Jinyoung Yeo"
+      ],
+      "cats": [
+        "cs.CL",
+        "cs.AI"
+      ]
+    },
+    {
+      "title": "Leave My Images Alone: Preventing Multi-Modal Large Language Models from Analyzing Images via Visual Prompt Injection",
+      "summary": "Multi-modal large language models (MLLMs) have emerged as powerful tools for analyzing Internet-scale image data, offering significant benefits but also raising critical safety and societal concerns. In particular, open-weight MLLMs may be misused to extract sensitive information from personal images at scale, such as identities, locations, or other private details. In this work, we propose ImageProtector, a user-side method that proactively protects images before sharing by embedding a carefully crafted, nearly imperceptible perturbation that acts as a visual prompt injection attack on MLLMs. As a result, when an adversary analyzes a protected image with an MLLM, the MLLM is consistently induced to generate a refusal response such as \"I'm sorry, I can't help with that request.\" We empirically demonstrate the effectiveness of ImageProtector across six MLLMs and four datasets. Additionally, we evaluate three potential countermeasures, Gaussian noise, DiffPure, and adversarial training, and show that while they partially mitigate the impact of ImageProtector, they simultaneously degrade model accuracy and/or efficiency. Our study focuses on the practically important setting of open-weight MLLMs and large-scale automated image analysis, and highlights both the promise and the limitations of perturbation-based privacy protection.",
+      "published": "2026-04-10T06:37:46Z",
+      "link": "https://arxiv.org/abs/2604.09024v1",
+      "authors": [
+        "Zedian Shao",
+        "Hongbin Liu",
+        "Yuepeng Hu",
+        "Neil Zhenqiang Gong"
+      ],
+      "cats": [
+        "cs.CV",
         "cs.AI",
-        "cs.CL"
+        "cs.CR",
+        "cs.LG"
+      ]
+    },
+    {
+      "title": "Noise-Aware In-Context Learning for Hallucination Mitigation in ALLMs",
+      "summary": "Auditory large language models (ALLMs) have demonstrated strong general capabilities in audio understanding and reasoning tasks. However, their reliability is still undermined by hallucination issues. Existing hallucination evaluation methods are formulated as binary classification tasks, which are insufficient to characterize the more complex hallucination patterns that arise in generative tasks. Moreover, current hallucination mitigation strategies rely on fine-tuning, resulting in high computational costs. To address the above limitations, we propose a plug-and-play Noise-Aware In-Context Learning (NAICL) method. Specifically, we construct a noise prior library, retrieve noise examples relevant to the input audio, and incorporate them as contextual priors, thereby guiding the model to reduce speculative associations when acoustic evidence is insufficient and to adopt a more conservative generation strategy. In addition, we establish a hallucination benchmark for audio caption tasks including the construction of the Clotho-1K multi-event benchmark dataset, the definition of four types of auditory hallucinations, and the introduction of metrics such as hallucination type distribution to support fine-grained analysis. Experimental results show that all evaluated ALLMs exhibit same hallucination behaviors. Moreover, the proposed NAICL method reduces the overall hallucination rate from 26.53% to 16.98%.",
+      "published": "2026-04-10T06:35:46Z",
+      "link": "https://arxiv.org/abs/2604.09021v1",
+      "authors": [
+        "Qixuan Huang",
+        "Khalid Zaman",
+        "Masashi Unoki"
+      ],
+      "cats": [
+        "cs.SD",
+        "cs.AI"
+      ]
+    },
+    {
+      "title": "Strategic Algorithmic Monoculture:Experimental Evidence from Coordination Games",
+      "summary": "AI agents increasingly operate in multi-agent environments where outcomes depend on coordination. We distinguish primary algorithmic monoculture -- baseline action similarity -- from strategic algorithmic monoculture, whereby agents adjust similarity in response to incentives. We implement a simple experimental design that cleanly separates these forces, and deploy it on human and large language model (LLM) subjects. LLMs exhibit high levels of baseline similarity (primary monoculture) and, like humans, they regulate it in response to coordination incentives (strategic monoculture). While LLMs coordinate extremely well on similar actions, they lag behind humans in sustaining heterogeneity when divergence is rewarded.",
+      "published": "2026-04-10T17:14:46Z",
+      "link": "https://arxiv.org/abs/2604.09502v1",
+      "authors": [
+        "Gonzalo Ballestero",
+        "Hadi Hosseini",
+        "Samarth Khanna",
+        "Ran I. Shorrer"
+      ],
+      "cats": [
+        "cs.AI",
+        "cs.GT",
+        "cs.MA",
+        "econ.TH"
       ]
     }
   ]
