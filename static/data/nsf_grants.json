@@ -1,23 +1,6 @@
 {
-  "refresh_date": "2026-04-13",
+  "refresh_date": "2026-04-20",
   "grants": [
-    {
-      "title": "Travel: NSF Student Travel Grant for 2026 ACM Conference on Computer and Communications Security (CCS)",
-      "awardId": "2622357",
-      "piName": "Kun Sun",
-      "institution": "George Mason University",
-      "estimatedTotalAmt": "15000",
-      "startDate": "07/01/2026",
-      "expDate": "06/30/2027",
-      "abstractText": "The ACM Conference on Computer and Communications Security (CCS) is the flagship annual conference of the ACM Special Interest Group on Security, Audit and Control (SIGSAC) and is widely recognized as one of the top four venues in computer and information security. Since its inception in 1993, CCS has served as a premier international forum for researchers, practitioners, and policymakers to present and discuss advances across the full spectrum of cybersecurity, including software and systems security, network security, applied cryptography, privacy, and emerging areas such as machine learning security and cyber-physical systems. With a highly selective acceptance rate (15\u201320%) and global participation, CCS consistently showcases cutting-edge, high-impact research that shapes the future of secure computing. The conference directly aligns with U.S. national priorities in cybersecurity and privacy by fostering innovation, advancing trustworthy and resilient systems, and strengthening the nation's capacity to address evolving cyber threats that impact critical infrastructure, economic security, and national defense.\r\n\r\nThis project requests NSF support to provide travel grants for approximately 15 U.S.-based graduate students to attend ACM CCS 2026. The funding will be used to offset travel and participation costs, enabling students, particularly those with limited institutional resources, to engage in this premier research venue. Participation will allow students to present their work, gain exposure to state-of-the-art research, and interact with leading experts, thereby enhancing their technical expertise, professional development, and integration into the cybersecurity research community. The project helps to strengthen the domestic talent pipeline in cybersecurity and contribute to workforce development.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
-      "primaryProgram": [
-        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
-      ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2622357",
-      "keywords": [
-        "Cybersecurity"
-      ]
-    },
     {
       "title": "CAREER: Designing Domain Knowledge-Guided Learning Architectures towards Wireless Network Security: Enabling Effective and Efficient Attacks and Countermeasures",
       "awardId": "2544044",
@@ -37,6 +20,24 @@
         "LLM / GenAI",
         "Cybersecurity",
         "Multi-Agent AI"
+      ]
+    },
+    {
+      "title": "REU Site: Cybersecurity Research of Unmanned Aerial Vehicles",
+      "awardId": "2548278",
+      "piName": "Laxima Niure Kandel",
+      "institution": "Embry-Riddle Aeronautical University",
+      "estimatedTotalAmt": "449465",
+      "startDate": "10/01/2026",
+      "expDate": "09/30/2029",
+      "abstractText": "This award supports a Research Experience for Undergraduates (REU) Site at Embry-Riddle Aeronautical University (ERAU), Daytona Beach, Florida. Each summer, ten motivated undergraduates from universities across the United States participate in a rigorous 10-week Unmanned Aerial Vehicles (UAV) cybersecurity research program. The program combines faculty-mentored research with professional development activities designed to prepare students for careers in cybersecurity and/or graduate school. The project's novelties include vulnerability assessment and the development and testing of new cyber-resilient algorithms to safeguard UAVs. More broadly, the Site advances UAV security research while equipping students with essential research skills through structured faculty mentorships. The training is designed to prepare students with skills and tools to thrive in graduate school and future careers in the cybersecurity field.\r\n\r\nThe REU Site focuses on enhancing UAV security through faculty-guided research projects. Participants investigate cyber-resilient UAV operation and simulations; secure navigation including Global Positioning System (GPS) spoofing detection and mitigation; and AI-based anomaly and intrusion detection. The research process includes systematic literature reviews, hypothesis development, testbed creation for data collection, data processing, technical seminars, and workshops in Artificial Intelligence (AI) and cybersecurity. Throughout the program, students gain valuable experience presenting their findings, with mid-term results showcased at the Daytona Museum of Arts and Sciences (MOAS) and final outcomes at the ERAU Summer Symposium. The key objectives of this Site are: (1) Increase the number of high-quality cybersecurity professionals, (2) Broaden STEM participation by enhancing recruitment efforts for veterans, individuals with diverse socioeconomical backgrounds and under-resources institutions, (3) Inspire and empower undergraduates to confidently pursue graduate degrees, and (4) Provide undergraduates with professional skills for their future careers. By leveraging Embry-Riddle\u2019s state-of-the-art facilities, research labs, and faculty expertise, the program cultivates interest in cybersecurity and develops the research skills of undergraduate students, contributing to cybersecurity education, training, and workforce development.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2548278",
+      "keywords": [
+        "Cybersecurity",
+        "Vulnerability"
       ]
     },
     {
@@ -80,6 +81,62 @@
       ]
     },
     {
+      "title": "Collaborative Research: RI: Building Knowledgeable, Reliable, and Proactive Language Models for Accurate Health Information",
+      "awardId": "2554007",
+      "piName": "Yulia Tsvetkov",
+      "institution": "University of Washington",
+      "estimatedTotalAmt": "600000",
+      "startDate": "09/15/2026",
+      "expDate": "08/31/2029",
+      "abstractText": "Large language models (LLM) are increasingly used by the public to seek health information, but current LLM-based systems can still generate inaccurate information due to the well-known problem of LLM hallucinations, while expressing it with high confidence. The issue of confidently representing erroneous data creates risks in high-stakes settings. This project addresses that problem by developing artificial intelligence methods that reduce hallucinations and improve the reliability, transparency, uncertainty estimation, and information-seeking behavior of large language models. The project focuses on women\u2019s health as an application area because it provides a testbed for a broad range of conditions, including breast cancer, osteoporosis, cardiovascular disease, autoimmune disorders, and mental health. By improving the ability of language models to reduce hallucinations, communicate uncertainty, and ask clarifications questions, the project aims to accelerate the adoption of AI technologies in high-risk domains that require stable LLM behavior such as the medical domain and law, among many others. \r\n\r\nThis project develops new multilingual natural language processing methods for language models operating in high-stakes environments. First, it will create methods to curate and structure evidence from heterogeneous sources into an evidence-aligned, reliability-scored knowledge repository in English, Spanish, and French, together with dynamic benchmarks that test reasoning, attribution, abstention, and clarification under evolving conditions. Second, it will develop new model training and inference methods for long-form non-hallucinating generation, fine-grained attribution, calibrated uncertainty estimation, abstention when confidence is low, and proactive follow-up questioning when user queries are ambiguous or incomplete. Third, it will establish a staged validation framework for deployment in health applications, including retrospective evaluation, expert review, user pilot studies, and continuous monitoring. The resulting methods, datasets, benchmarks, and evaluation protocols will advance the science of stable behavior of language modeling and support safe deployment of language models in health and other high-stakes domains.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2554007",
+      "keywords": [
+        "LLM / GenAI",
+        "NLP"
+      ]
+    },
+    {
+      "title": "Collaborative Research: RI: Building Knowledgeable, Reliable, and Proactive Language Models for Accurate Health Information",
+      "awardId": "2554008",
+      "piName": "Emma Pierson",
+      "institution": "University of California-Berkeley",
+      "estimatedTotalAmt": "300000",
+      "startDate": "09/15/2026",
+      "expDate": "08/31/2029",
+      "abstractText": "Large language models (LLM) are increasingly used by the public to seek health information, but current LLM-based systems can still generate inaccurate information due to the well-known problem of LLM hallucinations, while expressing it with high confidence. The issue of confidently representing erroneous data creates risks in high-stakes settings. This project addresses that problem by developing artificial intelligence methods that reduce hallucinations and improve the reliability, transparency, uncertainty estimation, and information-seeking behavior of large language models. The project focuses on women\u2019s health as an application area because it provides a testbed for a broad range of conditions, including breast cancer, osteoporosis, cardiovascular disease, autoimmune disorders, and mental health. By improving the ability of language models to reduce hallucinations, communicate uncertainty, and ask clarifications questions, the project aims to accelerate the adoption of AI technologies in high-risk domains that require stable LLM behavior such as the medical domain and law, among many others. \r\n\r\nThis project develops new multilingual natural language processing methods for language models operating in high-stakes environments. First, it will create methods to curate and structure evidence from heterogeneous sources into an evidence-aligned, reliability-scored knowledge repository in English, Spanish, and French, together with dynamic benchmarks that test reasoning, attribution, abstention, and clarification under evolving conditions. Second, it will develop new model training and inference methods for long-form non-hallucinating generation, fine-grained attribution, calibrated uncertainty estimation, abstention when confidence is low, and proactive follow-up questioning when user queries are ambiguous or incomplete. Third, it will establish a staged validation framework for deployment in health applications, including retrospective evaluation, expert review, user pilot studies, and continuous monitoring. The resulting methods, datasets, benchmarks, and evaluation protocols will advance the science of stable behavior of language modeling and support safe deployment of language models in health and other high-stakes domains.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2554008",
+      "keywords": [
+        "LLM / GenAI",
+        "NLP"
+      ]
+    },
+    {
+      "title": "CAREER: Robust, Platform-Agnostic Defense Against VPN Misconfiguration Abuse in Malware Campaigns",
+      "awardId": "2541237",
+      "piName": "Afsah Anwar",
+      "institution": "University of New Mexico",
+      "estimatedTotalAmt": "562356",
+      "startDate": "07/01/2026",
+      "expDate": "06/30/2031",
+      "abstractText": "Malware threats have become increasingly sophisticated, often using techniques that often enable evasion, and are quite often persistent. The growing use of Virtual Private Networks (VPNs) and the encrypted VPN traffic allow attackers to potentially bypass current network defense techniques. The project\u2019s novelties include the creation of new approaches to detect and mitigate protocol misconfiguration which could be exploited as an attack surface and to prevent threat actors from exploiting VPN weaknesses through malicious scripts, authentication bypass, covert access, and related techniques. The project's broader significance lies in helping cultivating VPN security expertise at both undergraduate and graduate levels through hands-on modules, and empowering VPN providers and IT organizations to adopt secure VPN practices.\r\n\r\nThe project takes a comprehensive, cross-layered approach to securing VPN ecosystems through three tightly integrated thrusts: Thrust I introduces the first platform- and version-aware knowledge graph for OpenVPN, enabling interpretable reasoning over directive semantics, dependencies, and mis-configurations. Thrust II advances the field by developing a sandboxed VPN ecosystem to estimate the impact of VPN mis-configurations across stakeholders and to map observed behaviors to the CIA triad and MITRE ATT&CK tactics for structured risk assessment. Thrust III builds a hybrid detection system that combines directive signatures with host behavior, enabling early and interpretable detection of malicious VPNs. This facilitates platform-agnostic, timely, and robust malware defense. Altogether, these thrusts provide a novel, explainable, and scalable foundation to identify, understand and mitigate VPN-based threats across diverse platforms.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01003031DB NSF RESEARCH & RELATED ACTIVIT",
+        "01002930DB NSF RESEARCH & RELATED ACTIVIT",
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2541237",
+      "keywords": [
+        "Vulnerability",
+        "Malware"
+      ]
+    },
+    {
       "title": "CAREER: Reasoning-Centered AI for Scientific Discovery",
       "awardId": "2542238",
       "piName": "Daniel Khashabi",
@@ -114,6 +171,23 @@
       "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2447670",
       "keywords": [
         "LLM / GenAI"
+      ]
+    },
+    {
+      "title": "REU Site: Integrative Challenges in Cybersecurity-Deception, Remediation, and Resilient Systems",
+      "awardId": "2548335",
+      "piName": "M Abdullah Canbaz",
+      "institution": "SUNY at Albany",
+      "estimatedTotalAmt": "464622",
+      "startDate": "10/01/2026",
+      "expDate": "09/30/2029",
+      "abstractText": "Cybersecurity threats increasingly disrupt critical services such as healthcare, energy, and financial systems, affecting everyday life and national stability. These threats are no longer isolated technical problems; they involve complex interactions among digital systems, human decisions, and organizational responses. This project addresses these challenges by advancing a unified approach to understanding and improving how systems detect, respond to, and recover from cyber incidents. The project's novelties are the integration of intelligent deception techniques, automated system recovery, and human-centered decision analysis into a single, coordinated framework. The project's broader significance and importance are in strengthening the resilience of essential infrastructure, supporting national security, and expanding opportunities for undergraduate students to participate in advanced research. As a Research Experiences for Undergraduates (REU) Site hosted at the University at Albany, State University of New York, the project combines education with hands-on discovery, contributing to workforce development and promoting scientific progress that benefits society at large.\r\n\r\nThe project develops an interconnected set of research activities that examine cybersecurity from multiple perspectives. It creates adaptive digital environments that interact with attackers and collect detailed behavioral data, enabling deeper understanding of evolving threats. It constructs realistic simulated attack scenarios for industrial control systems to generate high-quality datasets for experimentation and evaluation. It incorporates methods to ensure that artificial intelligence systems used in defense are reliable, transparent, and resistant to misuse. In addition, it analyzes how decisions made by organizations and leaders influence the outcomes of cyber incidents, linking technical events with broader social and strategic factors.These activities are integrated through complementary research components and consistent evaluation frameworks across the project. The project advances knowledge of how intelligent and adaptive defense systems improve resilience, while producing open datasets, reusable tools, and trained participants who contribute to a stronger and more secure digital infrastructure.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2548335",
+      "keywords": [
+        "Cybersecurity"
       ]
     },
     {
@@ -155,39 +229,20 @@
       ]
     },
     {
-      "title": "CAREER: In-network GPU Integration for Vision-inspired Generative Inference",
-      "awardId": "2542128",
-      "piName": "Rhongho Jang",
-      "institution": "Wayne State University",
-      "estimatedTotalAmt": "599998",
-      "startDate": "05/01/2026",
-      "expDate": "04/30/2031",
-      "abstractText": "This project aims to transform the capabilities of modern Internet infrastructure by integrating high-performance computing directly into the network\u2019s core. Currently, network routers are designed primarily to move data, leaving complex data analysis to be handled by remote cloud servers, which introduces significant delays. This research explores how to embed Graphics Processing Units (GPUs) directly into routers, allowing the network to analyze information in real-time as data passes through. By building this intelligence into the fabric of the network, the project seeks to create a more efficient and responsive network infrastructure capable of supporting the next generation of data-intensive applications.\r\n\r\nThis project advances network intelligence by integrating GPUs directly into routers to overcome traditional computing limitations. The research follows three technical thrusts. The first thrust develops optimized memory management techniques between routers and GPUs to enable high-throughput Artificial Intelligence inference at the network core. The second thrust introduces a vision-based sketching approach to transform network traffic into vectorized formats at line rate, improving data processing efficiency. The third thrust implements specialized generative models that utilize these sketches and hardware integration for advanced threat detection. This framework will serve as a foundation for proactive network defense against complex and evolving security risks.\r\n\r\nThe research goals are paired with an educational mission to train a specialized workforce in practical artificial intelligence design and secure networking under realistic computing constraints. The project will release open-source designs, tools, and workloads that bridge AI and network infrastructure, making it easier for the academic community to build deployable intelligent systems beyond simulation.\r\n\r\nThis project maintains a dedicated repository at https://github.com/NIDS-LAB/Core-NI/ to provide public access to research artifacts, including network datasets, open-source code, hardware configuration files, etc. The project commits to hosting the repository for a minimum of five years, ensuring long-term availability of project outcomes and fostering a collaborative environment to advance core network intelligence.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
-      "primaryProgram": [
-        "01003031DB NSF RESEARCH & RELATED ACTIVIT",
-        "01002930DB NSF RESEARCH & RELATED ACTIVIT",
-        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
-      ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2542128",
-      "keywords": [
-        "Threat Intel"
-      ]
-    },
-    {
-      "title": "CAREER: Securing and Optimizing Quantum-Resilient Cryptography for Versatile Computing Architectures",
-      "awardId": "2541979",
-      "piName": "Qian Wang",
-      "institution": "University of California - Merced",
-      "estimatedTotalAmt": "600610",
-      "startDate": "07/01/2026",
-      "expDate": "06/30/2031",
-      "abstractText": "The rapidly advancing quantum computers challenge the cryptographic systems that are protecting today's digital infrastructure, including banking, healthcare, government services, and cloud platforms. As the new standardized post-quantum cryptographic (PQC) algorithms are slower and more complex than current cryptographic methods, the deployment of PQC algorithms become challenging. This project improves both the performance and security of the new PQC algorithms, enabling their wide adoption in real systems. The project's novelties include a unified approach that jointly optimizes speed and security across common computing platforms, and a systematic evaluation of hardware-level vulnerabilities that may arise during acceleration. The project's broader significance and importance are enabling a smooth and secure transition to quantum-resistant infrastructure, protecting critical data and services, and strengthening national cybersecurity readiness. The outcome of this project supports broader adoption of quantum-resistant cryptography, promote open-source dissemination of secure implementations, and contribute to workforce development for the quantum era.\r\n\r\nThe project studies the standardized PQC algorithms, including hash-based, lattice-based, and code-based schemes, and optimize them across versatile platforms, including Central Processing Units (CPUs), Graphics Processing Units (GPUs), and embedded systems such as microcontrollers and Field-Programmable Gate Arrays (FPGAs).  It applies parallel processing, instruction-level tuning, and hardware-software co-design to accelerate key operations such as hashing and polynomial transforms while preserving constant-time behavior. This project also analyzes timing, cache, power, and fault-based side-channels and develops defense mechanism such as masking, randomized scheduling, and redundant computation. The optimized implementations are integrated into practical systems, including secure network protocols, vehicular communication platforms, secure boot processes, and confidential computing environments.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "title": "CAREER: Towards Secure and Reliable Cloud-Based Quantum Computers",
+      "awardId": "2542385",
+      "piName": "Samah Saeed",
+      "institution": "CUNY City College",
+      "estimatedTotalAmt": "562986",
+      "startDate": "06/01/2026",
+      "expDate": "05/31/2031",
+      "abstractText": "Applications such as chemical simulations and optimization problems demand intensive computation, which will benefit from near-term quantum computers. With the growth of the quantum computing industry, quantum computing vendors provide cloud-based access to meet the increasing demand of quantum computers. However, executing quantum circuits on cloud-based quantum computers introduces new security risks. Malicious quantum developers, adversarial users, or insiders at the quantum computing vendors or cloud providers may compromise quantum computations, potentially leaking sensitive information or producing incorrect results. This project addresses these fundamental challenges by developing practical security solutions that cope with the engineering challenges of quantum computers. The novelty of this project includes the unique attack vectors in quantum computing and the development of new attack detection mechanisms and quantum circuit design strategies against different threat models to ensure trustworthy and reliable cloud-based quantum computing. This work advances the national interest by strengthening secure quantum computing that supports national defense, economic competitiveness, and critical applications. The education program, which spans from high school to graduate level, includes new curriculum development, course modules, and summer research. Research-based practices and competition-based activities are used to effectively integrate research and education.\r\n\r\nThis project bridges the gap in cyber security between theoretical foundations of secure quantum computing and the limitations of near-term quantum computers. It enhances the integrity and the confidentiality of quantum circuits executed on cloud-based quantum computers. This research identifies novel Trojan designs that leverage recent advancements in quantum hardware control. The project also provides runtime techniques using a combination of machine learning and heuristic approaches to detect and mitigate malicious circuit executions. The security-aware quantum circuit synthesis techniques developed in this project can obscure the quantum circuit structure and thus protect sensitive information. Collectively, this project establishes foundational methods and tools for secure and reliable cloud-based quantum computing.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
       "primaryProgram": [
         "01002627DB NSF RESEARCH & RELATED ACTIVIT",
-        "01003031DB NSF RESEARCH & RELATED ACTIVIT",
-        "01002930DB NSF RESEARCH & RELATED ACTIVIT"
+        "01002930DB NSF RESEARCH & RELATED ACTIVIT",
+        "01003031DB NSF RESEARCH & RELATED ACTIVIT"
       ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2541979",
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2542385",
       "keywords": [
         "Cybersecurity"
       ]
