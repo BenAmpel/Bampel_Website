@@ -1,6 +1,24 @@
 {
-  "refresh_date": "2026-04-20",
+  "refresh_date": "2026-04-27",
   "grants": [
+    {
+      "title": "REU Site: Hands-On Research in Federated Learning Security through Red Team vs. Blue Team Exercises",
+      "awardId": "2548041",
+      "piName": "Junggab Son",
+      "institution": "University of Nevada Las Vegas",
+      "estimatedTotalAmt": "460922",
+      "startDate": "10/01/2026",
+      "expDate": "09/30/2029",
+      "abstractText": "This Research Experiences for Undergraduates Site at the University of Nevada, Las Vegas supports 10 students each year in a 10-week summer research program on the security of federated learning, a way for many devices or organizations to train a shared artificial intelligence model without exchanging their raw data. This approach can help protect privacy, but it also creates new security risks because attackers may try to corrupt the training process, steal information from the model, or reduce system reliability. The project\u2019s novelties are the integration of hands-on attack-and-defense research across the full federated learning process and the use of Red Team versus Blue Team exercises to study these problems in realistic settings. The project's broader significance and importance are that it advances safer privacy-preserving artificial intelligence, expands access to advanced undergraduate research opportunities, and helps prepare the future artificial intelligence and cybersecurity workforce. The project contributes to a stronger national capacity for building trustworthy data-driven systems.\r\n\r\nThe research project focuses on threats and defenses in the data collection, training, and inference stages of federated learning. Students and mentors investigate representative attacks including botnet-style disruption, poisoning, backdoor insertion, privacy leakage, membership inference, and data reconstruction, and they evaluate defenses such as robust aggregation, anomaly detection, and differential privacy. The work uses a dedicated federated learning cybersecurity range, realistic datasets from computer vision, language, and network traffic applications, and distributed computing resources for controlled experimentation. Through iterative Red Team and Blue Team studies, the project produces software, tutorials, datasets, and empirical results that improve understanding of secure and privacy-preserving distributed learning. The anticipated outcome is stronger technical foundations for trustworthy artificial intelligence and a broader pipeline of students prepared for research and professional practice in cybersecurity and artificial intelligence.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2548041",
+      "keywords": [
+        "Cybersecurity",
+        "Malware"
+      ]
+    },
     {
       "title": "CAREER: Designing Domain Knowledge-Guided Learning Architectures towards Wireless Network Security: Enabling Effective and Efficient Attacks and Countermeasures",
       "awardId": "2544044",
@@ -82,24 +100,6 @@
     },
     {
       "title": "Collaborative Research: RI: Building Knowledgeable, Reliable, and Proactive Language Models for Accurate Health Information",
-      "awardId": "2554007",
-      "piName": "Yulia Tsvetkov",
-      "institution": "University of Washington",
-      "estimatedTotalAmt": "600000",
-      "startDate": "09/15/2026",
-      "expDate": "08/31/2029",
-      "abstractText": "Large language models (LLM) are increasingly used by the public to seek health information, but current LLM-based systems can still generate inaccurate information due to the well-known problem of LLM hallucinations, while expressing it with high confidence. The issue of confidently representing erroneous data creates risks in high-stakes settings. This project addresses that problem by developing artificial intelligence methods that reduce hallucinations and improve the reliability, transparency, uncertainty estimation, and information-seeking behavior of large language models. The project focuses on women\u2019s health as an application area because it provides a testbed for a broad range of conditions, including breast cancer, osteoporosis, cardiovascular disease, autoimmune disorders, and mental health. By improving the ability of language models to reduce hallucinations, communicate uncertainty, and ask clarifications questions, the project aims to accelerate the adoption of AI technologies in high-risk domains that require stable LLM behavior such as the medical domain and law, among many others. \r\n\r\nThis project develops new multilingual natural language processing methods for language models operating in high-stakes environments. First, it will create methods to curate and structure evidence from heterogeneous sources into an evidence-aligned, reliability-scored knowledge repository in English, Spanish, and French, together with dynamic benchmarks that test reasoning, attribution, abstention, and clarification under evolving conditions. Second, it will develop new model training and inference methods for long-form non-hallucinating generation, fine-grained attribution, calibrated uncertainty estimation, abstention when confidence is low, and proactive follow-up questioning when user queries are ambiguous or incomplete. Third, it will establish a staged validation framework for deployment in health applications, including retrospective evaluation, expert review, user pilot studies, and continuous monitoring. The resulting methods, datasets, benchmarks, and evaluation protocols will advance the science of stable behavior of language modeling and support safe deployment of language models in health and other high-stakes domains.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
-      "primaryProgram": [
-        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
-      ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2554007",
-      "keywords": [
-        "LLM / GenAI",
-        "NLP"
-      ]
-    },
-    {
-      "title": "Collaborative Research: RI: Building Knowledgeable, Reliable, and Proactive Language Models for Accurate Health Information",
       "awardId": "2554008",
       "piName": "Emma Pierson",
       "institution": "University of California-Berkeley",
@@ -111,6 +111,24 @@
         "01002627DB NSF RESEARCH & RELATED ACTIVIT"
       ],
       "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2554008",
+      "keywords": [
+        "LLM / GenAI",
+        "NLP"
+      ]
+    },
+    {
+      "title": "Collaborative Research: RI: Building Knowledgeable, Reliable, and Proactive Language Models for Accurate Health Information",
+      "awardId": "2554007",
+      "piName": "Yulia Tsvetkov",
+      "institution": "University of Washington",
+      "estimatedTotalAmt": "600000",
+      "startDate": "09/15/2026",
+      "expDate": "08/31/2029",
+      "abstractText": "Large language models (LLM) are increasingly used by the public to seek health information, but current LLM-based systems can still generate inaccurate information due to the well-known problem of LLM hallucinations, while expressing it with high confidence. The issue of confidently representing erroneous data creates risks in high-stakes settings. This project addresses that problem by developing artificial intelligence methods that reduce hallucinations and improve the reliability, transparency, uncertainty estimation, and information-seeking behavior of large language models. The project focuses on women\u2019s health as an application area because it provides a testbed for a broad range of conditions, including breast cancer, osteoporosis, cardiovascular disease, autoimmune disorders, and mental health. By improving the ability of language models to reduce hallucinations, communicate uncertainty, and ask clarifications questions, the project aims to accelerate the adoption of AI technologies in high-risk domains that require stable LLM behavior such as the medical domain and law, among many others. \r\n\r\nThis project develops new multilingual natural language processing methods for language models operating in high-stakes environments. First, it will create methods to curate and structure evidence from heterogeneous sources into an evidence-aligned, reliability-scored knowledge repository in English, Spanish, and French, together with dynamic benchmarks that test reasoning, attribution, abstention, and clarification under evolving conditions. Second, it will develop new model training and inference methods for long-form non-hallucinating generation, fine-grained attribution, calibrated uncertainty estimation, abstention when confidence is low, and proactive follow-up questioning when user queries are ambiguous or incomplete. Third, it will establish a staged validation framework for deployment in health applications, including retrospective evaluation, expert review, user pilot studies, and continuous monitoring. The resulting methods, datasets, benchmarks, and evaluation protocols will advance the science of stable behavior of language modeling and support safe deployment of language models in health and other high-stakes domains.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2554007",
       "keywords": [
         "LLM / GenAI",
         "NLP"
@@ -137,40 +155,20 @@
       ]
     },
     {
-      "title": "CAREER: Reasoning-Centered AI for Scientific Discovery",
-      "awardId": "2542238",
-      "piName": "Daniel Khashabi",
-      "institution": "Johns Hopkins University",
-      "estimatedTotalAmt": "600000",
-      "startDate": "08/15/2026",
-      "expDate": "07/31/2031",
-      "abstractText": "Many scientific breakthroughs happen when a researcher notices that a technique from one field could solve a problem in another \u2014 a discovery in materials science, for example, might share a deep structural similarity with a finding in a different field. Yet with hundreds of new papers appearing each month even within narrow specialties, no individual can read broadly enough to spot these cross-cutting connections reliably. This project develops artificial intelligence systems that help researchers uncover such hidden connections across the scientific literature \u2014 systems that can recognize structural parallels between ideas in different domains. Critically, creative reasoning by AI carries risks: a connection that looks insightful may turn out to be unfounded. To address this, the systems developed in this project are designed to be transparent, showing researchers the evidence behind every suggestion so they can verify claims and distinguish well-supported insights from speculation. This project serves the national interest by promoting the progress of science. By helping researchers identify promising new directions more quickly this work has the potential to accelerate discoveries that directly improve quality of life. All tools and datasets will be released publicly, and in partnership with major research conferences, these tools will be integrated into the peer-review process to support real-world scientific evaluation. The project also includes substantial educational efforts: paid summer research internships for Baltimore high school students, a new AI literacy course for pre-college students, integration of research tools into undergraduate teaching, and inclusive workshops and mentoring to broaden participation in computing and artificial intelligence.\r\n\r\nThis project develops interpretable, large language model (LLM)-based frameworks that support creative scientific discovery while ensuring transparency and grounding in evidence. The research is organized around four interconnected thrusts. The first thrust develops a general-purpose formalism for analogical retrieval over large scientific corpora. This uses an iterative approach to create a retrieval-and-reasoning loop, akin to exploration-exploitation, that enables applications including cross-domain hypothesis generation and tabular summarization of related literature. The second thrust advances temporal reasoning in scientific domains. It begins by systematically evaluating how reliably LLMs encode scientific knowledge over time, analyzing how factors such as publication age, citation impact, and controversy influence what models have memorized. Building on these findings, the thrust develops methods to mine the scientific genealogy of research papers, tracing chains of intellectual influence through recursive analogical retrieval to produce interpretable graphs of how ideas emerge, evolve, and connect. The third thrust creates a principled framework for grounded, verifiable generation. The core innovation is a \"myopic\" verifier, a secondary model that simulates a time-constrained human fact-checker, assessing each claim using only a narrow excerpt from the cited source. Models are trained via reinforcement learning to produce only claims that are immediately and explicitly verifiable. This approach extends to incorporating verbatim quotations from cited evidence, further reducing the cognitive burden of verification. The fourth thrust builds publicly available scientific tools and evaluation benchmarks, including retrospective analogy benchmarks, grounding evaluation protocols, and a peer-review co-pilot to be deployed at major research conferences. The resulting methods are developed in collaboration with domain experts at the National Institutes of Health, but are broadly applicable to any domain requiring structured, cross-domain reasoning.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "title": "REU Site: Cryptography, Coding Theory and Quantum Computing at the USF",
+      "awardId": "2548160",
+      "piName": "Jean-Francois Biasse",
+      "institution": "University of South Florida",
+      "estimatedTotalAmt": "471375",
+      "startDate": "10/01/2026",
+      "expDate": "09/30/2029",
+      "abstractText": "This Research Experiences for Undergraduates (REU) Site award funds a renewal of a site focused on cryptography, coding theory, and quantum computing at the University of South Florida. Modern life depends on the secure movement, storage, and processing of digital information. Cryptography protects the confidentiality, integrity, and authenticity of data, while coding theory helps preserve data when noise, transmission errors, or equipment failures occur. These areas are increasingly shaped by the rise of quantum technologies, which create both new opportunities and new threats to digital security. The project\u2019s novelties are the integration of cryptography, coding theory, and quantum computing within a single undergraduate research program, the use of research teams that pair undergraduates with faculty and near-peer mentors, and an expanded scope that connects foundational mathematics with applications to national security, secure communication, and privacy in emerging technologies. The project's broader significance and importance are that it helps prepare a future workforce with the technical depth needed to address pressing challenges in cybersecurity, quantum information, and trustworthy data-driven systems. For each of three summers, this REU Site offers 10 undergraduate students the opportunity to perform research for 10 weeks under the mentorship of an interdisciplinary team with expertise spanning mathematics, computer science, engineering, and physics.\r\n\r\nThis REU Site focuses on active and interdisciplinary research problems in post-quantum cryptography, quantum error correction, and related areas of coding theory and quantum information. Students investigate cryptographic constructions based on code equivalence and lattice isomorphism, including algorithms, security analysis, and implementation issues relevant to future quantum-resistant systems. Additional projects study quantum low-density parity-check codes and decoding failure mechanisms, the design of highly nonlinear functions for block ciphers, locally recoverable codes for distributed storage, physical models for reliable qubit implementation, and privacy-preserving methods for collaborative training of artificial intelligence models. The site combines these research activities with technical training, mentoring in computational tools, workshops on intellectual property and graduate school applications, and a summer symposium in which participants present their results.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
       "primaryProgram": [
-        "01002930DB NSF RESEARCH & RELATED ACTIVIT",
-        "01003031DB NSF RESEARCH & RELATED ACTIVIT",
         "01002627DB NSF RESEARCH & RELATED ACTIVIT"
       ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2542238",
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2548160",
       "keywords": [
-        "LLM / GenAI",
-        "Vulnerability"
-      ]
-    },
-    {
-      "title": "REU Site: Advancing Data Science in the Public Interest",
-      "awardId": "2447670",
-      "piName": "Monnie McGee",
-      "institution": "Southern Methodist University",
-      "estimatedTotalAmt": "408578",
-      "startDate": "12/01/2025",
-      "expDate": "11/30/2028",
-      "abstractText": "This REU Site trains college students in data science methods and tools. The objectives of the program are to: 1) equip students with expertise in data science methods and tools, 2) increase interest in data science, and 3) increase the number of students pursuing graduate studies in a data science or quantitative social science fields. Students work with university researchers on a multidisciplinary set of research projects of societal importance. They will get hands-on experience with computer tools and data from sources like maps, surveys, and public records. They will also learn various data science methods including causal modeling, simulation, geocoding of addresses, map visualizations, machine learning, and web scraping.  This REU site also includes workshops to help students build confidence, learn about careers, and share their research findings. This program is committed to cultivating the next generation of data scientists through rigorous training and applied research.\r\n\r\nThe program begins with a two-week Data Science Boot Camp, where students learn computer programming, statistics, mapping, and responsible research practices. After this training, students join research teams to investigate important questions using large datasets. All students will contribute to applied research with societal impact. Students will be prepared to engage with generative AI and large language models, apply AI methods to societal challenges, and confront emerging frontiers in biomedical data science. This program prepares the next generation of data scientists by providing the analytical and computational training necessary to address complex, emerging societal challenges.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
-      "primaryProgram": [
-        "01002526DB NSF RESEARCH & RELATED ACTIVIT"
-      ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2447670",
-      "keywords": [
-        "LLM / GenAI"
+        "Cybersecurity"
       ]
     },
     {
