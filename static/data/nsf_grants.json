@@ -1,5 +1,5 @@
 {
-  "refresh_date": "2026-05-04",
+  "refresh_date": "2026-05-11",
   "grants": [
     {
       "title": "REU Site: Hands-On Research in Federated Learning Security through Red Team vs. Blue Team Exercises",
@@ -82,24 +82,6 @@
     },
     {
       "title": "Collaborative Research: RI: Building Knowledgeable, Reliable, and Proactive Language Models for Accurate Health Information",
-      "awardId": "2554008",
-      "piName": "Emma Pierson",
-      "institution": "University of California-Berkeley",
-      "estimatedTotalAmt": "300000",
-      "startDate": "09/15/2026",
-      "expDate": "08/31/2029",
-      "abstractText": "Large language models (LLM) are increasingly used by the public to seek health information, but current LLM-based systems can still generate inaccurate information due to the well-known problem of LLM hallucinations, while expressing it with high confidence. The issue of confidently representing erroneous data creates risks in high-stakes settings. This project addresses that problem by developing artificial intelligence methods that reduce hallucinations and improve the reliability, transparency, uncertainty estimation, and information-seeking behavior of large language models. The project focuses on women\u2019s health as an application area because it provides a testbed for a broad range of conditions, including breast cancer, osteoporosis, cardiovascular disease, autoimmune disorders, and mental health. By improving the ability of language models to reduce hallucinations, communicate uncertainty, and ask clarifications questions, the project aims to accelerate the adoption of AI technologies in high-risk domains that require stable LLM behavior such as the medical domain and law, among many others. \r\n\r\nThis project develops new multilingual natural language processing methods for language models operating in high-stakes environments. First, it will create methods to curate and structure evidence from heterogeneous sources into an evidence-aligned, reliability-scored knowledge repository in English, Spanish, and French, together with dynamic benchmarks that test reasoning, attribution, abstention, and clarification under evolving conditions. Second, it will develop new model training and inference methods for long-form non-hallucinating generation, fine-grained attribution, calibrated uncertainty estimation, abstention when confidence is low, and proactive follow-up questioning when user queries are ambiguous or incomplete. Third, it will establish a staged validation framework for deployment in health applications, including retrospective evaluation, expert review, user pilot studies, and continuous monitoring. The resulting methods, datasets, benchmarks, and evaluation protocols will advance the science of stable behavior of language modeling and support safe deployment of language models in health and other high-stakes domains.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
-      "primaryProgram": [
-        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
-      ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2554008",
-      "keywords": [
-        "LLM / GenAI",
-        "NLP"
-      ]
-    },
-    {
-      "title": "Collaborative Research: RI: Building Knowledgeable, Reliable, and Proactive Language Models for Accurate Health Information",
       "awardId": "2554007",
       "piName": "Yulia Tsvetkov",
       "institution": "University of Washington",
@@ -111,6 +93,24 @@
         "01002627DB NSF RESEARCH & RELATED ACTIVIT"
       ],
       "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2554007",
+      "keywords": [
+        "LLM / GenAI",
+        "NLP"
+      ]
+    },
+    {
+      "title": "Collaborative Research: RI: Building Knowledgeable, Reliable, and Proactive Language Models for Accurate Health Information",
+      "awardId": "2554008",
+      "piName": "Emma Pierson",
+      "institution": "University of California-Berkeley",
+      "estimatedTotalAmt": "300000",
+      "startDate": "09/15/2026",
+      "expDate": "08/31/2029",
+      "abstractText": "Large language models (LLM) are increasingly used by the public to seek health information, but current LLM-based systems can still generate inaccurate information due to the well-known problem of LLM hallucinations, while expressing it with high confidence. The issue of confidently representing erroneous data creates risks in high-stakes settings. This project addresses that problem by developing artificial intelligence methods that reduce hallucinations and improve the reliability, transparency, uncertainty estimation, and information-seeking behavior of large language models. The project focuses on women\u2019s health as an application area because it provides a testbed for a broad range of conditions, including breast cancer, osteoporosis, cardiovascular disease, autoimmune disorders, and mental health. By improving the ability of language models to reduce hallucinations, communicate uncertainty, and ask clarifications questions, the project aims to accelerate the adoption of AI technologies in high-risk domains that require stable LLM behavior such as the medical domain and law, among many others. \r\n\r\nThis project develops new multilingual natural language processing methods for language models operating in high-stakes environments. First, it will create methods to curate and structure evidence from heterogeneous sources into an evidence-aligned, reliability-scored knowledge repository in English, Spanish, and French, together with dynamic benchmarks that test reasoning, attribution, abstention, and clarification under evolving conditions. Second, it will develop new model training and inference methods for long-form non-hallucinating generation, fine-grained attribution, calibrated uncertainty estimation, abstention when confidence is low, and proactive follow-up questioning when user queries are ambiguous or incomplete. Third, it will establish a staged validation framework for deployment in health applications, including retrospective evaluation, expert review, user pilot studies, and continuous monitoring. The resulting methods, datasets, benchmarks, and evaluation protocols will advance the science of stable behavior of language modeling and support safe deployment of language models in health and other high-stakes domains.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2554008",
       "keywords": [
         "LLM / GenAI",
         "NLP"
@@ -152,6 +152,25 @@
       "keywords": [
         "LLM / GenAI",
         "Deep Learning"
+      ]
+    },
+    {
+      "title": "CAREER: A Safety-Aware Learning Framework for Identifying and Mitigating Risks in Human-LLM Interactions in Healthcare",
+      "awardId": "2541748",
+      "piName": "Chenguang Wang",
+      "institution": "University of California-Santa Cruz",
+      "estimatedTotalAmt": "499821",
+      "startDate": "10/01/2026",
+      "expDate": "09/30/2031",
+      "abstractText": "Large language models are increasingly used in healthcare applications such as virtual assistants and decision support tools, offering new opportunities to improve access to care and patient outcomes. However, these systems can introduce new kinds of risks that arise not from the model alone, but from how people interact with it. For example, patients may rely too heavily on automated advice, receive responses shaped by harmful preconceptions or be unintentionally influenced toward unsafe decisions. These risks are especially concerning in sensitive settings such as mental health and addiction recovery, where errors can have serious consequences. This project addresses these challenges by developing new methods to make interactions between people and artificial intelligence systems safer and more trustworthy. The work aims to improve the reliability of healthcare technologies, support safer patient experiences, and contribute to the broader goal of responsible artificial intelligence. Educational activities include developing interdisciplinary coursework and engaging students from diverse backgrounds in research at the intersection of artificial intelligence and health.\r\n\r\nThis project develops a unified, safety-aware learning framework for identifying and mitigating risks in human-large language model interactions in healthcare. The research investigates three integrated thrusts. First, it develops predictive models to detect fundamental and emerging interaction risks, such as overreliance, stereotyping, manipulation, and privacy violations, using supervised and contrastive learning techniques with interpretable outputs. Second, it introduces robust learning methods to mitigate these risks by incorporating user intent, clinical context, and interaction dynamics, including adversarial training and personalized reinforcement learning algorithms. Third, it designs an adaptive, closed-loop method that jointly optimizes risk identification and mitigation through self-supervised and continual learning, enabling generalization to evolving risks over time. The framework is evaluated using realistic digital simulation environments for addiction recovery and mental health support. The expected outcomes include new machine learning methodologies for AI safety, insights into safe deployment of AI in healthcare, and generalizable techniques for trustworthy human-AI interaction in high-stakes domains.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01003031DB NSF RESEARCH & RELATED ACTIVIT",
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT",
+        "01002930DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2541748",
+      "keywords": [
+        "LLM / GenAI"
       ]
     },
     {
