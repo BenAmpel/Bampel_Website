@@ -8,7 +8,9 @@ Fetches papers from the last 60 days and scores them by keyword relevance.
 arXiv API docs: https://info.arxiv.org/help/api/index.html
 """
 import json
+import socket
 import time
+import urllib.error
 import urllib.request
 import urllib.parse
 import xml.etree.ElementTree as ET
@@ -31,6 +33,8 @@ SEARCH_QUERY = (
 MAX_RESULTS  = 60    # fetch this many, then score + filter
 DAYS_BACK    = 60    # only include papers from the last N days
 TOP_N        = 20    # final papers to keep
+FETCH_RETRIES = 3
+FETCH_TIMEOUT = 45
 
 # Relevance keyword groups matching Dr. Ampel's research
 KEYWORD_GROUPS = [
@@ -69,8 +73,23 @@ def fetch_arxiv():
     url = f"{ARXIV_API}?{params}"
     print(f"Fetching: {url[:100]}...")
     req = urllib.request.Request(url, headers={"User-Agent": "BampelWebsite/1.0"})
-    with urllib.request.urlopen(req, timeout=30) as resp:
-        return resp.read()
+    last_error = None
+    for attempt in range(1, FETCH_RETRIES + 1):
+        try:
+            with urllib.request.urlopen(req, timeout=FETCH_TIMEOUT) as resp:
+                return resp.read()
+        except (TimeoutError, socket.timeout, urllib.error.URLError) as exc:
+            last_error = exc
+            if attempt == FETCH_RETRIES:
+                break
+            wait_seconds = attempt * 10
+            print(
+                f"arXiv fetch failed on attempt {attempt}/{FETCH_RETRIES}: {exc}. "
+                f"Retrying in {wait_seconds}s..."
+            )
+            time.sleep(wait_seconds)
+
+    raise RuntimeError(f"arXiv fetch failed after {FETCH_RETRIES} attempts: {last_error}")
 
 
 def parse_arxiv_xml(xml_bytes):
@@ -125,7 +144,25 @@ def parse_arxiv_xml(xml_bytes):
 
 def main():
     print("=== Fetch arXiv Papers ===")
-    xml_bytes = fetch_arxiv()
+    try:
+        xml_bytes = fetch_arxiv()
+    except RuntimeError as exc:
+        print(f"WARNING: {exc}")
+        if OUTPUT_FILE.exists():
+            print(f"Keeping existing arXiv data at {OUTPUT_FILE}")
+            return
+
+        OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
+        with open(OUTPUT_FILE, "w") as f:
+            json.dump({
+                "refresh_date": datetime.now().strftime("%Y-%m-%d"),
+                "days_back": DAYS_BACK,
+                "papers": [],
+                "error": str(exc),
+            }, f, indent=2)
+        print(f"Wrote empty fallback arXiv data to {OUTPUT_FILE}")
+        return
+
     entries   = parse_arxiv_xml(xml_bytes)
     print(f"Parsed {len(entries)} entries within last {DAYS_BACK} days.")
 
