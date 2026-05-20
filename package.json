@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "scripts": {
+    "build:ccair": "node scripts/build-ccair.js"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}

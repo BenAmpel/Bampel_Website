@@ -23,17 +23,17 @@
 <style>
 .arxr-root { margin:24px 0; padding:24px; border-radius:16px; border:1px solid var(--card-border,#2a2a2a); background:linear-gradient(135deg,rgba(0,0,0,0.55),rgba(0,0,0,0.15)); box-shadow:0 12px 30px rgba(0,0,0,0.25); }
 .arxr-header { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:14px; }
-.arxr-title { margin:0 0 6px; font-size:1.1rem; color:#00ff41; text-transform:uppercase; letter-spacing:0.08em; }
+.arxr-title { margin:0 0 6px; font-size:1.1rem; color:var(--clr-green); text-transform:uppercase; letter-spacing:0.08em; }
 .arxr-desc { margin:0; font-size:0.82rem; opacity:0.7; line-height:1.4; max-width:560px; }
 .arxr-controls { display:flex; gap:8px; align-items:center; flex-shrink:0; }
 .arxr-select { background:#111; color:#ccc; border:1px solid #333; border-radius:6px; padding:5px 10px; font-size:0.8rem; cursor:pointer; }
-.arxr-select:focus-visible { outline:2px solid #00e5ff; outline-offset:2px; border-color:#00e5ff; }
-.arxr-card-title a:focus-visible { outline:2px solid #00e5ff; outline-offset:2px; }
-.sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+.arxr-select:focus-visible { outline:2px solid var(--clr-cyan); outline-offset:2px; border-color:var(--clr-cyan); }
+.arxr-card-title a:focus-visible { outline:2px solid var(--clr-cyan); outline-offset:2px; }
+
 .arxr-tags { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px; }
-.arxr-tag { font-size:0.66rem; padding:3px 9px; border-radius:12px; background:rgba(0,229,255,0.07); border:1px solid rgba(0,229,255,0.18); color:#00e5ff; letter-spacing:0.04em; }
+.arxr-tag { font-size:0.66rem; padding:3px 9px; border-radius:12px; background:rgba(0,229,255,0.07); border:1px solid rgba(0,229,255,0.18); color:var(--clr-cyan); letter-spacing:0.04em; }
 .arxr-loader { opacity:0.5; padding:32px 0; font-size:0.85rem; text-align:center; }
-.arxr-error { color:#e040fb; padding:24px 0; text-align:center; font-size:0.85rem; }
+.arxr-error { color:var(--clr-magenta); padding:24px 0; text-align:center; font-size:0.85rem; }
 .arxr-empty { opacity:0.55; padding:24px 0; text-align:center; font-size:0.85rem; line-height:1.6; }
 .arxr-empty code { background:rgba(255,255,255,0.08); padding:1px 6px; border-radius:4px; font-size:0.82em; }
 .arxr-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:14px; }
@@ -42,17 +42,17 @@
 .arxr-card-top { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
 .arxr-card-title { font-size:0.87rem; font-weight:600; line-height:1.37; flex:1; }
 .arxr-card-title a { color:#e4e4e4; text-decoration:none; }
-.arxr-card-title a:hover { color:#00ff41; }
+.arxr-card-title a:hover { color:var(--clr-green); }
 .arxr-score-wrap { flex-shrink:0; display:flex; flex-direction:column; align-items:center; gap:2px; padding-top:2px; }
-.arxr-score-bar { width:5px; border-radius:3px; background:linear-gradient(to top,#00ff41,#00e5ff); min-height:6px; box-shadow:0 0 8px rgba(0,255,65,0.4); }
-.arxr-score-val { font-size:0.6rem; color:#00ff41; font-weight:700; }
+.arxr-score-bar { width:5px; border-radius:3px; background:linear-gradient(to top,var(--clr-green),var(--clr-cyan)); min-height:6px; box-shadow:0 0 8px rgba(0,255,65,0.4); }
+.arxr-score-val { font-size:0.6rem; color:var(--clr-green); font-weight:700; }
 .arxr-meta { display:flex; flex-wrap:wrap; gap:5px; align-items:center; }
 .arxr-chip { font-size:0.63rem; padding:2px 7px; border-radius:10px; }
-.arxr-chip-cat { background:rgba(224,64,251,0.1); border:1px solid rgba(224,64,251,0.22); color:#e040fb; }
+.arxr-chip-cat { background:rgba(224,64,251,0.1); border:1px solid rgba(224,64,251,0.22); color:var(--clr-magenta); }
 .arxr-chip-date { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#aaa; }
 .arxr-authors { font-size:0.72rem; color:#aaa; line-height:1.3; }
 .arxr-abstract { font-size:0.78rem; color:#bbb; line-height:1.52; border-top:1px solid rgba(255,255,255,0.05); padding-top:8px; }
-.arxr-footer { margin-top:14px; font-size:0.7rem; opacity:0.45; text-align:right; }
+.arxr-footer { margin-top:14px; font-size:0.7rem; opacity:0.65; text-align:right; }
 
 body:not(.dark) .arxr-root { background:rgba(255,255,255,0.96); border-color:#ddd; color:#222; }
 body:not(.dark) .arxr-card { background:#f8f8f8; border-color:#e0e0e0; }
@@ -77,6 +77,8 @@ body:not(.dark) .arxr-tag { background:rgba(0,229,255,0.07); color:#007a8c; bord
     { label: 'Multi-Agent AI', terms: ['multi-agent','agentic ai','autonomous agent','ai agent'] },
   ];
   const ALL_TERMS = KEYWORDS.flatMap(k => k.terms);
+
+  function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
   const bodyEl   = document.getElementById('arxr-body');
   const footerEl = document.getElementById('arxr-footer');
@@ -120,12 +122,12 @@ body:not(.dark) .arxr-tag { background:rgba(0,229,255,0.07); color:#007a8c; bord
 
   function renderCard(e, maxScore) {
     const h = barHeight(e.score, maxScore);
-    const cat = (e.cats || [])[0] || 'cs.CR';
+    const cat = esc((e.cats || [])[0] || 'cs.CR');
     const authors = e.authors || [];
-    const authStr = authors.slice(0,3).join(', ') + (authors.length > 3 ? ` +${authors.length - 3}` : '');
+    const authStr = authors.slice(0,3).map(a => esc(a)).join(', ') + (authors.length > 3 ? ` +${authors.length - 3}` : '');
     return `<div class="arxr-card">
       <div class="arxr-card-top">
-        <div class="arxr-card-title"><a href="${e.link}" target="_blank" rel="noopener noreferrer">${e.title}</a></div>
+        <div class="arxr-card-title"><a href="${e.link}" target="_blank" rel="noopener noreferrer">${esc(e.title)}</a></div>
         <div class="arxr-score-wrap">
           <div class="arxr-score-bar" style="height:${h}px" role="img" aria-label="Relevance score: ${e.score}"></div>
           <span class="arxr-score-val">${e.score}</span>
@@ -136,7 +138,7 @@ body:not(.dark) .arxr-tag { background:rgba(0,229,255,0.07); color:#007a8c; bord
         <span class="arxr-chip arxr-chip-date">${fmtDate(e.published)}</span>
       </div>
       <div class="arxr-authors">${authStr || 'Unknown authors'}</div>
-      <div class="arxr-abstract">${truncate(e.summary, 145)}</div>
+      <div class="arxr-abstract">${esc(truncate(e.summary, 145))}</div>
     </div>`;
   }
 

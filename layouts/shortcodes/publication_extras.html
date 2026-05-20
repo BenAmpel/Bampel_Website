@@ -223,7 +223,7 @@
 .pub-extras { margin-top: 2rem; }
 .pub-extras-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:16px; }
 .pub-extras-card { border:1px solid var(--card-border, #333); border-radius:14px; padding:16px; background:var(--card-bg, rgba(0,0,0,0.25)); box-shadow:0 8px 20px rgba(0,0,0,0.12); }
-.pub-extras-card h3 { margin:0 0 10px; font-size:0.9rem; text-transform:uppercase; letter-spacing:0.08em; color:#00ff41; }
+.pub-extras-card h3 { margin:0 0 10px; font-size:0.9rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--clr-green); }
 .pub-extras-card ul { margin:0; padding-left:18px; }
 .pub-extras-card li { margin-bottom:6px; font-size:0.82rem; line-height:1.4; }
 .pub-muted { font-size:0.8rem; opacity:0.7; }
@@ -231,13 +231,13 @@
 .pub-chip { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; padding:6px 10px; border-radius:999px; border:1px solid rgba(0,229,255,0.35); color:#bde8ff; background:rgba(0,229,255,0.1); text-decoration:none; }
 .pub-related { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px; }
 .pub-related li { display:flex; flex-direction:column; gap:2px; }
-.pub-related a { color:#00e5ff; text-decoration:none; font-size:0.82rem; }
+.pub-related a { color:var(--clr-cyan); text-decoration:none; font-size:0.82rem; }
 .pub-related span { font-size:0.72rem; opacity:0.7; }
 .pub-citation { display:flex; flex-direction:column; gap:10px; }
 .pub-citation-text { font-size:0.8rem; line-height:1.4; background:rgba(0,0,0,0.35); border-radius:10px; padding:10px; border:1px solid rgba(0,255,65,0.2); }
 .pub-citation-actions { display:flex; flex-wrap:wrap; gap:8px; }
-.pub-copy { align-self:flex-start; border-radius:999px; border:1px solid rgba(0,255,65,0.4); color:#00ff41; background:rgba(0,255,65,0.12); padding:6px 12px; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; cursor:pointer; }
-.pub-copy.copied { color:#111; background:#00ff41; }
+.pub-copy { align-self:flex-start; border-radius:999px; border:1px solid rgba(0,255,65,0.4); color:var(--clr-green); background:rgba(0,255,65,0.12); padding:6px 12px; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; cursor:pointer; }
+.pub-copy.copied { color:#111; background:var(--clr-green); }
 
 body:not(.dark) .pub-extras-card { background:rgba(255,255,255,0.92); }
 body:not(.dark) .pub-extras-card h3 { color:#0b7a2f; }

@@ -27,18 +27,18 @@
 .hn-root { margin:24px 0; padding:24px; border-radius:16px; border:1px solid var(--card-border,#2a2a2a); background:linear-gradient(135deg,rgba(0,0,0,0.55),rgba(0,0,0,0.15)); box-shadow:0 12px 30px rgba(0,0,0,0.25); }
 .hn-header { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; margin-bottom:18px; }
 .hn-header-left { flex:1; min-width:200px; }
-.hn-title { margin:0 0 6px; font-size:1.1rem; color:#00ff41; text-transform:uppercase; letter-spacing:0.08em; }
+.hn-title { margin:0 0 6px; font-size:1.1rem; color:var(--clr-green); text-transform:uppercase; letter-spacing:0.08em; }
 .hn-desc { margin:0; font-size:0.82rem; opacity:0.7; line-height:1.4; }
 .hn-controls { display:flex; gap:8px; align-items:center; flex-shrink:0; }
 .hn-select { background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.15); border-radius:8px; color:#ddd; font-size:0.78rem; padding:5px 10px; cursor:pointer; }
-.hn-select:focus-visible { outline:2px solid #00e5ff; outline-offset:2px; }
-.hn-btn { background:transparent; border:1px solid rgba(0,229,255,0.4); border-radius:8px; color:#00e5ff; font-size:0.78rem; padding:5px 12px; cursor:pointer; transition:background 0.15s; }
+.hn-select:focus-visible { outline:2px solid var(--clr-cyan); outline-offset:2px; }
+.hn-btn { background:transparent; border:1px solid rgba(0,229,255,0.4); border-radius:8px; color:var(--clr-cyan); font-size:0.78rem; padding:5px 12px; cursor:pointer; transition:background 0.15s; }
 .hn-btn:hover { background:rgba(0,229,255,0.1); }
-.hn-btn:focus-visible { outline:2px solid #00e5ff; outline-offset:2px; }
-.sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+.hn-btn:focus-visible { outline:2px solid var(--clr-cyan); outline-offset:2px; }
+
 .hn-loader { opacity:0.5; padding:32px 0; font-size:0.85rem; text-align:center; }
 .hn-error,.hn-empty { padding:24px 0; text-align:center; font-size:0.85rem; opacity:0.6; }
-.hn-error { color:#e040fb; }
+.hn-error { color:var(--clr-magenta); }
 .hn-list { display:flex; flex-direction:column; gap:10px; }
 .hn-card { background:rgba(255,255,255,0.025); border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:14px; display:flex; gap:14px; align-items:flex-start; transition:border-color 0.15s,background 0.15s; }
 .hn-card:hover { border-color:rgba(0,255,65,0.25); background:rgba(255,255,255,0.04); }
@@ -46,16 +46,16 @@
 .hn-body-inner { flex:1; min-width:0; }
 .hn-card-title { font-size:0.87rem; font-weight:600; line-height:1.38; color:#e4e4e4; margin:0 0 6px; }
 .hn-card-title a { color:inherit; text-decoration:none; }
-.hn-card-title a:hover { color:#00ff41; }
+.hn-card-title a:hover { color:var(--clr-green); }
 .hn-meta-row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
 .hn-chip { font-size:0.63rem; padding:2px 8px; border-radius:10px; }
-.hn-chip-pts { background:rgba(224,64,251,0.1); border:1px solid rgba(224,64,251,0.3); color:#e040fb; font-weight:700; }
-.hn-chip-cmts { background:rgba(0,229,255,0.08); border:1px solid rgba(0,229,255,0.2); color:#00e5ff; }
+.hn-chip-pts { background:rgba(224,64,251,0.1); border:1px solid rgba(224,64,251,0.3); color:var(--clr-magenta); font-weight:700; }
+.hn-chip-cmts { background:rgba(0,229,255,0.08); border:1px solid rgba(0,229,255,0.2); color:var(--clr-cyan); }
 .hn-chip-age { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#aaa; }
 .hn-domain { font-size:0.7rem; color:#888; }
-.hn-discuss { font-size:0.7rem; color:#00e5ff; text-decoration:none; margin-left:auto; }
+.hn-discuss { font-size:0.7rem; color:var(--clr-cyan); text-decoration:none; margin-left:auto; }
 .hn-discuss:hover { text-decoration:underline; }
-.hn-footer { margin-top:14px; font-size:0.7rem; opacity:0.45; text-align:right; }
+.hn-footer { margin-top:14px; font-size:0.7rem; opacity:0.65; text-align:right; }
 
 body:not(.dark) .hn-root { background:rgba(255,255,255,0.96); border-color:#ddd; color:#222; }
 body:not(.dark) .hn-card { background:#f8f8f8; border-color:#e0e0e0; }
@@ -78,6 +78,12 @@ body:not(.dark) .hn-rank { color:#aaa; }
   const CACHE   = {};  // topic → {data, ts}
   const TTL     = 15 * 60 * 1000; // 15 min
 
+  function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+  function safeUrl(u) {
+    try { const p = new URL(u); return (p.protocol === 'http:' || p.protocol === 'https:') ? u : ''; } catch(_) { return ''; }
+  }
+
   function relativeTime(ts) {
     const now = Date.now();
     const diff = Math.floor((now - ts * 1000) / 60000); // minutes
@@ -87,9 +93,10 @@ body:not(.dark) .hn-rank { color:#aaa; }
   }
 
   function renderCard(hit, idx) {
-    const url     = hit.url || `https://news.ycombinator.com/item?id=${hit.objectID}`;
+    const rawUrl  = hit.url ? safeUrl(hit.url) : '';
+    const url     = rawUrl || `https://news.ycombinator.com/item?id=${hit.objectID}`;
     const hnUrl   = `https://news.ycombinator.com/item?id=${hit.objectID}`;
-    const domain  = hit.url ? (new URL(hit.url).hostname.replace(/^www\./, '')) : 'news.ycombinator.com';
+    const domain  = rawUrl ? esc(new URL(rawUrl).hostname.replace(/^www\./, '')) : 'news.ycombinator.com';
     const pts     = hit.points || 0;
     const cmts    = hit.num_comments || 0;
     const age     = hit.created_at_i ? relativeTime(hit.created_at_i) : '';
@@ -98,7 +105,7 @@ body:not(.dark) .hn-rank { color:#aaa; }
       <div class="hn-rank">${idx + 1}</div>
       <div class="hn-body-inner">
         <div class="hn-card-title">
-          <a href="${url}" target="_blank" rel="noopener noreferrer">${hit.title || 'Untitled'}</a>
+          <a href="${url}" target="_blank" rel="noopener noreferrer">${esc(hit.title) || 'Untitled'}</a>
         </div>
         <div class="hn-meta-row">
           <span class="hn-chip hn-chip-pts">▲ ${pts}</span>

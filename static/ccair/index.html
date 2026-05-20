@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CCAIR — Center for CyberAI Research</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Manrope', sans-serif; background: var(--bg-base); color: var(--text-primary); line-height: 1.6; overflow-x: hidden; }
+    #root { min-height: 100vh; }
+
+    :root, [data-color="teal"] {
+      --bg-base: #050a15; --bg-surface: #0a1628; --bg-elevated: #0f1f3a;
+      --bg-card: rgba(15, 31, 58, 0.6); --bg-card-solid: #0f1f3a;
+      --accent: #00ddb3; --accent-rgb: 0,221,179;
+      --accent-dim: rgba(0,221,179,0.10); --accent-glow: rgba(0,221,179,0.25);
+      --accent2: #2d8cf0; --accent2-rgb: 45,140,240;
+      --text-primary: #e8edf5; --text-secondary: #8b9ab8; --text-muted: #4a5a78;
+      --border: rgba(0,221,179,0.10); --border-subtle: rgba(255,255,255,0.05);
+    }
+    [data-color="blue"] {
+      --accent: #3b82f6; --accent-rgb: 59,130,246; --accent-dim: rgba(59,130,246,0.10);
+      --accent-glow: rgba(59,130,246,0.25); --accent2: #818cf8; --accent2-rgb: 129,140,248;
+      --border: rgba(59,130,246,0.10);
+    }
+    [data-color="purple"] {
+      --accent: #a78bfa; --accent-rgb: 167,139,250; --accent-dim: rgba(167,139,250,0.10);
+      --accent-glow: rgba(167,139,250,0.25); --accent2: #f472b6; --accent2-rgb: 244,114,182;
+      --border: rgba(167,139,250,0.10);
+    }
+    [data-color="amber"] {
+      --accent: #f59e0b; --accent-rgb: 245,158,11; --accent-dim: rgba(245,158,11,0.10);
+      --accent-glow: rgba(245,158,11,0.25); --accent2: #ef4444; --accent2-rgb: 239,68,68;
+      --border: rgba(245,158,11,0.10);
+    }
+
+    h1,h2,h3,h4,h5,h6 { font-family: 'Manrope', sans-serif; font-weight: 700; color: var(--text-primary); line-height: 1.15; }
+    .mono { font-family: 'Space Mono', monospace; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    @keyframes fadeInUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+    @keyframes float1 { 0%,100% { transform:translate(0,0) scale(1); } 50% { transform:translate(40px,-35px) scale(1.08); } }
+    @keyframes float2 { 0%,100% { transform:translate(0,0) scale(1); } 50% { transform:translate(-30px,40px) scale(0.95); } }
+    @keyframes pulse { 0%,100% { opacity:.35; } 50% { opacity:.6; } }
+    @keyframes scan { 0% { top: -4px; } 100% { top: 100%; } }
+
+    .stagger-1 { animation-delay: 0.05s; } .stagger-2 { animation-delay: 0.1s; }
+    .stagger-3 { animation-delay: 0.15s; } .stagger-4 { animation-delay: 0.2s; }
+    .stagger-5 { animation-delay: 0.25s; } .stagger-6 { animation-delay: 0.3s; }
+
+    ::-webkit-scrollbar { width: 7px; }
+    ::-webkit-scrollbar-track { background: var(--bg-base); }
+    ::-webkit-scrollbar-thumb { background: rgba(var(--accent-rgb),0.25); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(var(--accent-rgb),0.45); }
+    ::selection { background: rgba(var(--accent-rgb),0.3); color: var(--text-primary); }
+    button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .grid-bg { position: relative; }
+    .grid-bg::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+      background-image: linear-gradient(rgba(var(--accent-rgb),0.018) 1px, transparent 1px),
+                         linear-gradient(90deg, rgba(var(--accent-rgb),0.018) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    .no-grid::before { display: none; }
+  </style>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
+  <script src="dist/tweaks-panel.js"></script>
+  <script src="dist/ccair-components.js"></script>
+  <script src="dist/ccair-pages.js"></script>
+  <script src="dist/ccair-app.js"></script>
+</head>
+<body>
+  <a href="#main-content" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:9999;padding:8px 16px;background:var(--accent);color:var(--bg-base);font-weight:600;font-size:14px;border-radius:0 0 8px 0;text-decoration:none" onfocus="this.style.left='0';this.style.width='auto';this.style.height='auto'" onblur="this.style.left='-9999px';this.style.width='1px';this.style.height='1px'">Skip to content</a>
+  <div id="root"></div>
+  <script>
+    var TWEAK_DEFAULTS = {"colorScheme":"teal","cardStyle":"glass","heroStyle":"full","showGrid":true};
+    window.__TWEAK_DEFAULTS = TWEAK_DEFAULTS;
+    ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(CCAIRApp));
+  </script>
+</body>
+</html>

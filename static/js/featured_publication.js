@@ -31,7 +31,7 @@
     return clipped.endsWith('.') ? clipped : `${clipped}.`;
   };
 
-  safeFetch(`${base}data/publications.json`).then((raw) => {
+  (typeof loadPublications === 'function' ? loadPublications() : safeFetch(`${base}data/publications.json`)).then((raw) => {
     const items = Array.isArray(raw) ? raw : (raw && raw.publications) || [];
     if (!items.length) return;
 

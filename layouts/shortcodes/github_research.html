@@ -14,30 +14,30 @@
 <style>
 .gh-root { margin:24px 0; padding:24px; border-radius:16px; border:1px solid var(--card-border,#2a2a2a); background:linear-gradient(135deg,rgba(0,0,0,0.55),rgba(0,0,0,0.15)); box-shadow:0 12px 30px rgba(0,0,0,0.25); }
 .gh-header { margin-bottom:18px; }
-.gh-title { margin:0 0 6px; font-size:1.1rem; color:#00ff41; text-transform:uppercase; letter-spacing:0.08em; }
+.gh-title { margin:0 0 6px; font-size:1.1rem; color:var(--clr-green); text-transform:uppercase; letter-spacing:0.08em; }
 .gh-desc { margin:0; font-size:0.82rem; opacity:0.7; line-height:1.4; }
 .gh-loader { opacity:0.5; padding:32px 0; font-size:0.85rem; text-align:center; }
 .gh-error,.gh-empty { padding:24px 0; text-align:center; font-size:0.85rem; opacity:0.6; }
-.gh-error { color:#e040fb; }
+.gh-error { color:var(--clr-magenta); }
 .gh-empty code { background:rgba(255,255,255,0.08); padding:1px 6px; border-radius:4px; font-size:0.82em; }
 .gh-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:14px; }
 .gh-card { background:rgba(255,255,255,0.025); border:1px solid rgba(255,255,255,0.07); border-radius:12px; padding:15px; display:flex; flex-direction:column; gap:8px; transition:border-color 0.15s,background 0.15s; }
 .gh-card:hover { border-color:rgba(0,255,65,0.28); background:rgba(255,255,255,0.04); }
 .gh-card-top { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
 .gh-card-name { font-size:0.87rem; font-weight:700; line-height:1.38; flex:1; }
-.gh-card-name a { color:#00e5ff; text-decoration:none; }
-.gh-card-name a:hover { color:#00ff41; }
-.gh-card-name a:focus-visible { outline:2px solid #00e5ff; outline-offset:2px; }
-.sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
-.gh-stars { flex-shrink:0; font-size:0.82rem; font-weight:700; color:#e040fb; white-space:nowrap; text-shadow:0 0 8px rgba(224,64,251,0.3); }
+.gh-card-name a { color:var(--clr-cyan); text-decoration:none; }
+.gh-card-name a:hover { color:var(--clr-green); }
+.gh-card-name a:focus-visible { outline:2px solid var(--clr-cyan); outline-offset:2px; }
+
+.gh-stars { flex-shrink:0; font-size:0.82rem; font-weight:700; color:var(--clr-magenta); white-space:nowrap; text-shadow:0 0 8px rgba(224,64,251,0.3); }
 .gh-desc-text { font-size:0.78rem; color:#bbb; line-height:1.48; }
 .gh-meta { display:flex; flex-wrap:wrap; gap:5px; align-items:center; }
 .gh-chip { font-size:0.63rem; padding:2px 8px; border-radius:10px; }
-.gh-chip-topic { background:rgba(0,229,255,0.08); border:1px solid rgba(0,229,255,0.2); color:#00e5ff; }
+.gh-chip-topic { background:rgba(0,229,255,0.08); border:1px solid rgba(0,229,255,0.2); color:var(--clr-cyan); }
 .gh-chip-lang { background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); color:#ccc; }
 .gh-chip-date { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); color:#888; font-size:0.6rem; }
 .gh-forks { font-size:0.7rem; color:#777; }
-.gh-footer { margin-top:14px; font-size:0.7rem; opacity:0.45; text-align:right; }
+.gh-footer { margin-top:14px; font-size:0.7rem; opacity:0.65; text-align:right; }
 
 body:not(.dark) .gh-root { background:rgba(255,255,255,0.96); border-color:#ddd; color:#222; }
 body:not(.dark) .gh-card { background:#f8f8f8; border-color:#e0e0e0; }

@@ -18,7 +18,7 @@
   };
 
   Promise.all([
-    safeFetch('/data/publications.json'),
+    (typeof loadPublications === 'function' ? loadPublications() : safeFetch('/data/publications.json')),
     safeFetch('/data/scholar-metrics.json'),
   ]).then(([pubData, scholarData]) => {
     const pubs = Array.isArray(pubData) ? pubData : (pubData && pubData.publications) || [];

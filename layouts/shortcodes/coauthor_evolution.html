@@ -27,34 +27,34 @@
 
 <style>
 .cae-root { margin:24px 0; padding:24px; border-radius:16px; border:1px solid var(--card-border,#2a2a2a); background:linear-gradient(135deg,rgba(0,0,0,0.55),rgba(0,0,0,0.15)); box-shadow:0 12px 30px rgba(0,0,0,0.25); }
-.cae-title { margin:0 0 6px; font-size:1.1rem; color:#00ff41; text-transform:uppercase; letter-spacing:0.08em; }
+.cae-title { margin:0 0 6px; font-size:1.1rem; color:var(--clr-green); text-transform:uppercase; letter-spacing:0.08em; }
 .cae-sub { margin:0; font-size:0.82rem; opacity:0.7; line-height:1.4; }
 .cae-hdr { margin-bottom:20px; }
 .cae-loading { opacity:0.5; font-size:0.85rem; padding:10px 0; }
 .cae-panels { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
 .cae-panel { display:flex; flex-direction:column; gap:8px; }
-.cae-panel-title { font-size:0.75rem; text-transform:uppercase; letter-spacing:0.07em; color:#00e5ff; }
-.cae-panel-sub   { font-size:0.7rem; opacity:0.55; margin-top:-4px; }
+.cae-panel-title { font-size:0.75rem; text-transform:uppercase; letter-spacing:0.07em; color:var(--clr-cyan); }
+.cae-panel-sub   { font-size:0.7rem; opacity:0.7; margin-top:-4px; }
 .cae-bars { display:flex; flex-direction:column; gap:6px; }
 .cae-bar-row { display:grid; grid-template-columns:36px 1fr 32px; gap:6px; align-items:center; }
 .cae-bar-yr  { font-size:0.7rem; opacity:0.75; text-align:right; }
 .cae-bar-track { height:18px; border-radius:4px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); overflow:hidden; }
-.cae-bar-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,#00ff41,#00e5ff); transition:width 0.5s ease; }
+.cae-bar-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,var(--clr-green),var(--clr-cyan)); transition:width 0.5s ease; }
 .cae-bar-pct { font-size:0.7rem; opacity:0.7; text-align:right; }
 .cae-collab { display:flex; flex-direction:column; gap:8px; }
 .cae-collab-yr { display:grid; grid-template-columns:36px 1fr; gap:6px; align-items:flex-start; }
 .cae-collab-yr-lbl { font-size:0.7rem; opacity:0.75; text-align:right; padding-top:3px; }
 .cae-chips { display:flex; flex-wrap:wrap; gap:4px; }
 .cae-chip { font-size:0.62rem; padding:2px 7px; border-radius:999px; letter-spacing:0.03em; }
-.cae-mentor  { background:rgba(0,229,255,0.15); border:1px solid rgba(0,229,255,0.4); color:#00e5ff; }
-.cae-peer    { background:rgba(224,64,251,0.12); border:1px solid rgba(224,64,251,0.35); color:#e040fb; }
-.cae-mentee  { background:rgba(0,255,65,0.12); border:1px solid rgba(0,255,65,0.35); color:#00ff41; }
+.cae-mentor  { background:rgba(0,229,255,0.15); border:1px solid rgba(0,229,255,0.4); color:var(--clr-cyan); }
+.cae-peer    { background:rgba(224,64,251,0.12); border:1px solid rgba(224,64,251,0.35); color:var(--clr-magenta); }
+.cae-mentee  { background:rgba(0,255,65,0.12); border:1px solid rgba(0,255,65,0.35); color:var(--clr-green); }
 .cae-collab-legend { display:flex; gap:12px; flex-wrap:wrap; margin-top:6px; }
 .cae-cl { display:flex; align-items:center; gap:4px; font-size:0.68rem; opacity:0.75; }
 .cae-clsq { width:8px; height:8px; border-radius:50%; display:inline-block; }
-.cae-clsq.cae-mentor  { background:#00e5ff; }
-.cae-clsq.cae-peer    { background:#e040fb; }
-.cae-clsq.cae-mentee  { background:#00ff41; }
+.cae-clsq.cae-mentor  { background:var(--clr-cyan); }
+.cae-clsq.cae-peer    { background:var(--clr-magenta); }
+.cae-clsq.cae-mentee  { background:var(--clr-green); }
 .cae-insight { margin-top:16px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.06); font-size:0.75rem; opacity:0.65; font-style:italic; }
 body:not(.dark) .cae-root { background:rgba(255,255,255,0.95); border-color:#ddd; }
 body:not(.dark) .cae-bar-track { background:rgba(0,0,0,0.04); border-color:rgba(0,0,0,0.1); }
@@ -89,8 +89,7 @@ body:not(.dark) .cae-insight { border-top-color:rgba(0,0,0,0.1); }
     return parts.length >= 2 ? (parts[0] + ' ' + parts[parts.length - 1]).toLowerCase() : name.toLowerCase();
   };
 
-  fetch('/data/publications.json')
-    .then(r => r.json())
+  loadPublications()
     .then(pubs => {
       const byYear = {};
       pubs.forEach(p => {

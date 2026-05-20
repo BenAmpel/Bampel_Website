@@ -1,6 +1,6 @@
 <!-- Dashboard assets are lazy-loaded when the Research Dashboard spoiler opens. -->
 
-<div id="dashboard-wrapper" data-baseurl="{{ "/" | relURL }}" style="min-height:1300px; margin:30px 0; font-family:sans-serif;">
+<div id="dashboard-wrapper" data-baseurl="{{ "/" | relURL }}" style="min-height:1300px; margin:30px 0;">
 <div style="display:grid; grid-template-columns:1fr 1fr; grid-template-rows:auto 600px 600px 300px; gap:0; border:1px solid var(--card-border, #333); border-radius:12px; overflow:hidden; background:var(--card-bg, rgba(255,255,255,0.02)); box-shadow:0 4px 20px rgba(0,0,0,0.1);">
 
 <div style="grid-column:1; grid-row:1; padding:20px; border-right:1px solid var(--card-border, #333); border-bottom:1px solid var(--card-border, #333);">
@@ -11,9 +11,9 @@
 
 <div style="grid-column:2; grid-row:1; padding:25px; border-bottom:1px solid var(--card-border, #333); display:flex; flex-direction:column;">
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:20px;">
-        <div><div style="font-size:0.75rem; opacity:0.6;">Primary Focus</div><div id="dash-metric-focus" style="font-size:1rem; font-weight:800; color:#00ff41; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">...</div></div>
-        <div><div style="font-size:0.75rem; opacity:0.6;">Emerging Focus</div><div id="dash-metric-trend" style="font-size:1rem; font-weight:800; color:#00e5ff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">...</div></div>
-        <div><div style="font-size:0.75rem; opacity:0.6;">Total Citations</div><div id="dash-metric-cites" style="font-size:1.4rem; font-weight:800; color:#e040fb;">0</div></div>
+        <div><div style="font-size:0.75rem; opacity:0.6;">Primary Focus</div><div id="dash-metric-focus" style="font-size:1rem; font-weight:800; color:var(--clr-green); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">...</div></div>
+        <div><div style="font-size:0.75rem; opacity:0.6;">Emerging Focus</div><div id="dash-metric-trend" style="font-size:1rem; font-weight:800; color:var(--clr-cyan); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">...</div></div>
+        <div><div style="font-size:0.75rem; opacity:0.6;">Total Citations</div><div id="dash-metric-cites" style="font-size:1.4rem; font-weight:800; color:var(--clr-magenta);">0</div></div>
         <div><div style="font-size:0.75rem; opacity:0.6;">h-index</div><div id="dash-metric-hindex" style="font-size:1.4rem; font-weight:800; opacity:0.9;">0</div></div>
     </div>
     <div style="flex-grow:1; border-top:1px solid var(--card-border, #333); padding-top:15px; position:relative;">
@@ -123,7 +123,7 @@
         </div>
     </div>
     <div class="footprint-legend" id="footprint-legend">
-        <div class="legend-row"><span class="footprint-legend-dot" style="--legend-color:#00ff41;"></span><span>Conference</span></div>
+        <div class="legend-row"><span class="footprint-legend-dot" style="--legend-color:var(--clr-green);"></span><span>Conference</span></div>
         <div class="legend-row"><span class="footprint-legend-dot" style="--legend-color:#00bfff;"></span><span>Collaboration</span></div>
         <div class="legend-row"><span class="footprint-legend-dot" style="--legend-color:#ff6b35;"></span><span>Institution</span></div>
     </div>
@@ -139,11 +139,11 @@
         <div style="flex:0 0 100px; display:flex; flex-direction:column; justify-content:center;">
             <div style="margin-bottom:15px;">
                 <div style="font-size:0.7rem; opacity:0.6;">Total Visitors</div>
-                <div id="dash-visit-total" style="font-size:1.4rem; font-weight:800; color:#00ff41;">0</div>
+                <div id="dash-visit-total" style="font-size:1.4rem; font-weight:800; color:var(--clr-green);">0</div>
             </div>
             <div>
                 <div style="font-size:0.7rem; opacity:0.6;">Last 30 Days</div>
-                <div id="dash-visit-month" style="font-size:1.4rem; font-weight:800; color:#00e5ff;">0</div>
+                <div id="dash-visit-month" style="font-size:1.4rem; font-weight:800; color:var(--clr-cyan);">0</div>
             </div>
         </div>
         <div style="flex-grow:1; position:relative;">

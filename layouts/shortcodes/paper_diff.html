@@ -71,10 +71,10 @@ Paper B
 <style>
 .paper-diff { margin: 30px 0; padding: 24px; border-radius: 16px; border:1px solid var(--card-border, #333); background:linear-gradient(135deg, rgba(0,0,0,0.55), rgba(0,0,0,0.15)); box-shadow: 0 12px 30px rgba(0,0,0,0.25); }
 .paper-diff-header { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:16px; }
-.paper-diff-header h3 { margin:0; font-size:1.1rem; color:#00ff41; text-transform:uppercase; letter-spacing:0.08em; }
+.paper-diff-header h3 { margin:0; font-size:1.1rem; color:var(--clr-green); text-transform:uppercase; letter-spacing:0.08em; }
 .paper-diff-header p { margin:6px 0 0; font-size:0.85rem; opacity:0.7; }
 .paper-diff-controls { display:flex; gap:8px; }
-.paper-diff-btn { border:1px solid rgba(0,229,255,0.35); background:rgba(0,229,255,0.1); color:#00e5ff; padding:6px 12px; border-radius:999px; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; cursor:pointer; }
+.paper-diff-btn { border:1px solid rgba(0,229,255,0.35); background:rgba(0,229,255,0.1); color:var(--clr-cyan); padding:6px 12px; border-radius:999px; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; cursor:pointer; }
 
 .paper-diff-selects { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-bottom:18px; }
 .paper-diff-selects label { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; color:#b9f6ca; display:flex; flex-direction:column; gap:6px; }
@@ -85,12 +85,12 @@ Paper B
 .paper-diff-card-top { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
 .paper-diff-card h4 { margin:0 0 6px; font-size:1rem; }
 .paper-diff-meta { font-size:0.75rem; opacity:0.7; }
-.paper-diff-link { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; color:#00e5ff; text-decoration:none; border:1px solid rgba(0,229,255,0.35); padding:6px 10px; border-radius:999px; }
+.paper-diff-link { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--clr-cyan); text-decoration:none; border:1px solid rgba(0,229,255,0.35); padding:6px 10px; border-radius:999px; }
 .paper-diff-section { display:flex; flex-direction:column; gap:8px; }
 .paper-diff-label { font-size:0.65rem; text-transform:uppercase; letter-spacing:0.08em; opacity:0.7; }
 .paper-diff-chips { display:flex; flex-wrap:wrap; gap:6px; }
 .paper-diff-chip { font-size:0.65rem; text-transform:uppercase; letter-spacing:0.06em; padding:4px 8px; border-radius:999px; border:1px solid rgba(0,255,65,0.3); background:rgba(0,255,65,0.1); color:#b9f6ca; }
-.paper-diff-chip.is-unique { border-color:rgba(224,64,251,0.4); background:rgba(224,64,251,0.15); color:#e040fb; }
+.paper-diff-chip.is-unique { border-color:rgba(224,64,251,0.4); background:rgba(224,64,251,0.15); color:var(--clr-magenta); }
 .paper-diff-chip.is-muted { border-color:rgba(255,255,255,0.15); background:rgba(255,255,255,0.08); color:#cfd8dc; }
 
 body:not(.dark) .paper-diff { background:rgba(255,255,255,0.95); }
@@ -153,7 +153,7 @@ return sorted[idx];
 };
 
 Promise.all([
-fetch(buildUrl('data/publications.json')).then(r => r.ok ? r.json() : []),
+loadPublications(),
 fetch(buildUrl('data/dashboard_network.json')).then(r => r.ok ? r.json() : null)
 ]).then(([pubData, network]) => {
 if (pubData && pubData.individualPublications) pubData = pubData.individualPublications;

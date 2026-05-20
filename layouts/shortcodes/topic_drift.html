@@ -18,7 +18,7 @@
 
 <style>
 .tdrift-root { margin:24px 0; padding:24px; border-radius:16px; border:1px solid var(--card-border,#2a2a2a); background:linear-gradient(135deg,rgba(0,0,0,0.55),rgba(0,0,0,0.15)); box-shadow:0 12px 30px rgba(0,0,0,0.25); }
-.tdrift-title { margin:0 0 6px; font-size:1.1rem; color:#00ff41; text-transform:uppercase; letter-spacing:0.08em; }
+.tdrift-title { margin:0 0 6px; font-size:1.1rem; color:var(--clr-green); text-transform:uppercase; letter-spacing:0.08em; }
 .tdrift-sub { margin:0; font-size:0.82rem; opacity:0.7; line-height:1.4; }
 .tdrift-hdr { margin-bottom:18px; }
 .tdrift-loading { opacity:0.5; font-size:0.85rem; padding:20px 0; }
@@ -36,9 +36,9 @@
 .tdrift-bar { height:100%; border-radius:4px; display:flex; align-items:center; padding-left:6px; font-size:0.62rem; letter-spacing:0.04em; opacity:0.9; transition:width 0.5s ease; min-width:0; white-space:nowrap; overflow:hidden; }
 
 /* Colors by trend */
-.tdrift-rise { background:rgba(0,255,65,0.25); border:1px solid rgba(0,255,65,0.4); color:#00ff41; }
-.tdrift-fall { background:rgba(224,64,251,0.18); border:1px solid rgba(224,64,251,0.35); color:#e040fb; }
-.tdrift-stable { background:rgba(0,229,255,0.15); border:1px solid rgba(0,229,255,0.3); color:#00e5ff; }
+.tdrift-rise { background:rgba(0,255,65,0.25); border:1px solid rgba(0,255,65,0.4); color:var(--clr-green); }
+.tdrift-fall { background:rgba(224,64,251,0.18); border:1px solid rgba(224,64,251,0.35); color:var(--clr-magenta); }
+.tdrift-stable { background:rgba(0,229,255,0.15); border:1px solid rgba(0,229,255,0.3); color:var(--clr-cyan); }
 .tdrift-empty  { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); }
 
 /* Legend */
@@ -94,8 +94,7 @@ body:not(.dark) .tdrift-empty  { background:rgba(0,0,0,0.03); }
     { label:'AI-Centric', sub:'2024 – 2026', min:2024, max:2099 },
   ];
 
-  fetch('/data/publications.json')
-    .then(r => r.json())
+  loadPublications()
     .then(pubs => {
       // Group pubs by phase
       const phPubs = PHASES.map(ph => pubs.filter(p => p.year >= ph.min && p.year <= ph.max));
