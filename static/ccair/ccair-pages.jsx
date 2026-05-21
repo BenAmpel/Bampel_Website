@@ -173,7 +173,7 @@ function HomePage({ onNavigate, tweaks }) {
 
 function ResearchPage() {
   const [filter, setFilter] = usePageState('All');
-  const types = ['All', 'journal', 'conference', 'workshop', 'dissertation'];
+  const types = ['All', 'journal', 'conference', 'workshop'];
   const filtered = filter === 'All' ? PUBLICATIONS : PUBLICATIONS.filter(p => p.type === filter);
 
   return (
