@@ -1,60 +1,6 @@
 /* CCAIR Pages — all page content */
 const { useState: usePageState } = React;
 
-const PUBLICATIONS = [
-  { title: "A Computational Design Framework for Targeted Disruption of Hacker Communities", authors: "Ampel, B.M.", venue: "Information Systems Frontiers", year: 2026, type: "journal" },
-  { title: "Automatically Detecting Voice Phishing: A Large Audio Model Approach", authors: "Ampel, B.M., Samtani, S., Chen, H.", venue: "MIS Quarterly", year: 2026, type: "journal" },
-  { title: "Seeing Is Not Believing: A Deepfake Video Call Scam at Pan-Asia Trading", authors: "Ampel, B.M.", venue: "Journal of Information Systems Education", year: 2026, type: "journal" },
-  { title: "Large Language Models for Conducting Advanced Text Analytics Information Systems Research", authors: "Ampel, B.M., Yang, C., Hu, J., Chen, H.", venue: "ACM Transactions on Management Information Systems", year: 2025, type: "journal" },
-  { title: "Creating Proactive Cyber Threat Intelligence with Hacker Exploit Labels: A Deep Transfer Learning Approach", authors: "Ampel, B.M., Samtani, S., Zhu, H., Chen, H.", venue: "MIS Quarterly", year: 2024, type: "journal" },
-  { title: "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach", authors: "Ampel, B.M., Samtani, S., Zhu, H., Chen, H., Nunamaker, J.F.", venue: "Journal of Management Information Systems", year: 2024, type: "journal" },
-  { title: "Evading Anti-Phishing Models: A Field Note Documenting an Experience in the ML Security Evasion Competition 2022", authors: "Gao, Y., Ampel, B.M., Samtani, S.", venue: "ACM Digital Threats: Research and Practice", year: 2024, type: "journal" },
-  { title: "Why Following Friends Can Hurt You: A Replication Study", authors: "Ampel, B.M., Ullman, S.", venue: "AIS Transactions on Replication Research", year: 2023, type: "journal" },
-  { title: "Automatic Extraction of Protected Health Information from Multilingual Hacker Communities", authors: "Dacosta, C., Ampel, B.M., Hashim, M., Chen, H.", venue: "HICSS", year: 2026, type: "conference" },
-  { title: "A Domain-Adaptive Soft Prompting Framework for Multi-Type Bias Detection in News", authors: "Zhang, C., Ampel, B.M., Samtani, S.", venue: "HICSS", year: 2026, type: "conference" },
-  { title: "Examining the Robustness of ML-based Phishing Website Detection: Action-Masked Reinforcement Learning for Automated Red Teaming", authors: "Gao, Y., Ampel, B.M., Samtani, S.", venue: "IEEE Security and Privacy Workshops", year: 2025, type: "conference" },
-  { title: "The 4th Workshop on AI-enabled Cybersecurity Analytics", authors: "Ullman, S., Ampel, B.M., Samtani, S., Yang, S., Chen, H.", venue: "ACM SIGKDD", year: 2024, type: "conference" },
-  { title: "Mapping Exploit Code on Paste Sites to the MITRE ATT&CK Framework: A Multi-label Transformer Approach", authors: "Ampel, B.M., Vahedi, T., Samtani, S., Chen, H.", venue: "IEEE ISI — Best Paper Award", year: 2023, type: "conference" },
-  { title: "Disrupting Ransomware Actors on the Bitcoin Blockchain: A Graph Embedding Approach", authors: "Ampel, B.M., Otto, K., Samtani, S., Zhu, H., Chen, H.", venue: "IEEE ISI", year: 2023, type: "conference" },
-  { title: "Benchmarking the Robustness of Phishing Email Detection Systems", authors: "Ampel, B.M., Gao, Y., Hu, J., Samtani, S., Chen, H.", venue: "AMCIS", year: 2023, type: "conference" },
-  { title: "Identifying and Categorizing Malicious Content on Paste Sites: A Neural Topic Modeling Approach", authors: "Vahedi, T., Ampel, B.M., Samtani, S., Chen, H.", venue: "IEEE ISI", year: 2021, type: "conference" },
-  { title: "Exploring the Evolution of Exploit-Sharing Hackers: An Unsupervised Graph Embedding Approach", authors: "Otto, K., Ampel, B.M., Samtani, S., Zhu, H., Chen, H.", venue: "IEEE ISI", year: 2021, type: "conference" },
-  { title: "Distilling Contextual Embeddings Into a Static Word Embedding for Improving Hacker Forum Analytics", authors: "Ampel, B.M., Chen, H.", venue: "IEEE ISI", year: 2021, type: "conference" },
-  { title: "Labeling Hacker Exploits for Proactive Cyber Threat Intelligence: A Deep Transfer Learning Approach", authors: "Ampel, B.M., Samtani, S., Zhu, H., Ullman, S., Chen, H.", venue: "IEEE ISI — Best Paper Award", year: 2020, type: "conference" },
-  { title: "Performance Modeling of Hyperledger Sawtooth Blockchain", authors: "Ampel, B.M., Patton, M., Chen, H.", venue: "IEEE ISI", year: 2019, type: "conference" },
-  { title: "Large Language Models for Infrastructure as Code Vulnerability Remediation", authors: "Reyes, R., Ampel, B.M., Chen, H.", venue: "WISP", year: 2025, type: "workshop" },
-  { title: "Email Phishing Prevention: An Explainable Nudging Approach", authors: "Wagner, M., Ampel, B.M., Hashim, M., Chen, H.", venue: "WISP", year: 2025, type: "workshop" },
-  { title: "Multi-Agent Systems for Information Systems Research: A Framework for Collaborative AI-Augmented Inquiry", authors: "Ampel, B.M., Ullman, S.", venue: "Pre-ICIS SIG Services Workshop", year: 2025, type: "workshop" },
-  { title: "Linking Common Vulnerabilities and Exposures to the MITRE ATT&CK Framework: A Self-Distillation Approach", authors: "Ampel, B.M., Samtani, S., Ullman, S., Chen, H.", venue: "ACM KDD AI4Cyber Workshop", year: 2021, type: "workshop" },
-];
-
-const DATASETS = [
-  { title: "Hacker Forum Intelligence Corpus", description: "Longitudinal text data from adversarial online communities, capturing threat signals, knowledge diffusion, and evolving jargon over multi-year periods.", status: "In Development", tags: ["NLP", "CTI", "Forum Data", "Longitudinal"], icon: "⬡" },
-  { title: "Phishing Campaign Benchmark", description: "Multi-modal evaluation set for phishing detection spanning email, SMS, web clones, and audio-based social engineering attacks.", status: "Coming 2026", tags: ["Phishing", "Benchmark", "Multi-modal"], icon: "◈" },
-  { title: "Exploit Maturation Dataset", description: "Tracks proof-of-concept exploits from initial disclosure through operational weaponization, capturing code evolution and actor behavior.", status: "Planning", tags: ["Exploits", "Temporal", "Code Analysis"], icon: "◆" },
-  { title: "Agentic Threat Simulation Traces", description: "Synthetic interaction logs from AI-driven adversarial agent simulations used to evaluate autonomous defense systems.", status: "Planning", tags: ["Simulation", "Agents", "Synthetic"], icon: "△" },
-];
-
-const TOOLS = [
-  { title: "CyberSense Pipeline", description: "End-to-end CTI extraction and analysis pipeline leveraging fine-tuned LLMs for threat signal classification and prioritization.", status: "In Development", tags: ["LLM", "Pipeline", "Python", "CTI"], icon: "⟐" },
-  { title: "ThreatScope Simulator", description: "Controlled agentic threat simulation environment where AI systems generate, detect, and respond to adversarial behavior.", status: "Planning", tags: ["Simulation", "Agents", "Defense", "Training"], icon: "⬢" },
-  { title: "Scholar Utility Belt", description: "Chrome extension used by 1,000+ researchers daily to enhance Google Scholar workflows with better search, filtering, and citation tools.", status: "Released", tags: ["Chrome", "Scholar", "Productivity"], icon: "⊕" },
-];
-
-const BENCHMARKS = [
-  { title: "CTI-Bench", description: "Task-specific benchmarks for evaluating detection, robustness, and reasoning in cyber threat intelligence scenarios under realistic adversarial conditions.", status: "Planning", tags: ["Evaluation", "CTI", "Robustness"], icon: "◎" },
-  { title: "Deception-Resilience Suite", description: "Stress-testing framework for ML models under adversarial label manipulation, input perturbation, and concept drift.", status: "Planning", tags: ["Adversarial ML", "Robustness", "Testing"], icon: "⊘" },
-];
-
-const TEAM = {
-  director: { name: "Benjamin M. Ampel", role: "Director & Assistant Professor", dept: "Computer Information Systems, Georgia State University", areas: ["AI-enabled Cybersecurity", "Cyber Threat Intelligence", "LLMs", "Phishing Detection", "Hacker Communities"] },
-  affiliates: [
-    { name: "Balasubramaniam Ramesh", role: "Department Chair, CIS", dept: "Georgia State University", areas: ["Design Science", "Agile Methods", "Knowledge Management"], synergy: "Advocacy for CCAIR resources and institutional positioning" },
-    { name: "Arun Rai", role: "Director, Center for Digital Innovation", dept: "Georgia State University", areas: ["Digital Transformation", "AI Strategy", "Platform Economics"], synergy: "Theory-driven collaboration on AI-enabled systems" },
-    { name: "Anu Bourgeois", role: "Principal Investigator, CHAI Center", dept: "Georgia State University & Duke University", areas: ["Human–AI Interaction", "Trustworthy AI", "Cybersecurity"], synergy: "Human–AI collaboration and security teaming" },
-  ],
-};
-
 const RESEARCH_PORTFOLIO = [
   { tier: 'Core', risk: 'Low risk, high coherence', color: '#22c55e', areas: [
     { name: 'Proactive Cyber Threat Intelligence', desc: 'Mining pre-attack signals from hacker forums, paste sites, and adversarial ecosystems' },
@@ -78,38 +24,6 @@ const CONSTRUCTS = [
   { name: 'Human–AI Sensemaking', desc: 'How analysts and AI systems co-produce (or fail to co-produce) actionable intelligence, including drift from deception and miscalibrated trust.' },
 ];
 
-const PARTNERS = [
-  { name: 'Amazon', program: 'Research Awards (ARA)', focus: 'AI for Information Security', type: 'industry' },
-  { name: 'Google', program: 'Research Scholar Program', focus: 'Early-career AI research', type: 'industry' },
-  { name: 'Microsoft', program: 'Research Fellowship', focus: 'Trustworthy AI & disinformation', type: 'industry' },
-  { name: 'NVIDIA', program: 'Academic Grant Program', focus: 'GPU compute & AI infrastructure', type: 'industry' },
-  { name: 'Cisco', program: 'Research Awards', focus: 'Security for GenAI & AI for Security', type: 'industry' },
-  { name: 'Sony', program: 'Focused Research Award', focus: 'Content protection & AI safety', type: 'industry' },
-  { name: 'NSF', program: 'CAREER, SaTC, Future CoRe, REU, MRI', focus: 'Foundational CyberAI research', type: 'federal' },
-  { name: 'DARPA', program: 'Young Faculty Award', focus: 'Agentic defense systems', type: 'federal' },
-  { name: 'DOE', program: 'ASCR', focus: 'Scalable AI for national security', type: 'federal' },
-  { name: 'IARPA', program: 'BENGAL, DECIPHER', focus: 'LLM threats & adversarial linguistics', type: 'intelligence' },
-];
-
-const FUNDING_TIMELINE = [
-  { date: "Jan 2026", title: "DARPA YFA", source: "DoD / DARPA", priority: "High", details: "Young Faculty Award for agentic defense systems. Base $500K + Director's Fellowship option for total up to $1.35M." },
-  { date: "Jan 2026", title: "NSF CICI (IPAAI)", source: "NSF", priority: "High", details: "Integrity, Provenance, and Authenticity for AI-Ready Data. Up to $900K over 3 years." },
-  { date: "Feb 2026", title: "NSF Future CoRe", source: "NSF CISE", priority: "High", details: "Foundational research in IIS and cybersecurity. Awards up to $1M for 4 years." },
-  { date: "Feb 2026", title: "CRA/Microsoft Fellowship", source: "Industry", priority: "Moderate", details: "Trustworthy AI Research Fellowship for early-career scholars. 12-month program with $17K stipend." },
-  { date: "Mar 2026", title: "AFOSR/ONR YIP Outreach", source: "DoD", priority: "Moderate", details: "Initiate program officer contact for Young Investigator white papers. AFOSR: $450K/3yr, ONR: $750K/3yr." },
-  { date: "May 2026", title: "Amazon ARA", source: "Industry", priority: "High", details: "AI for Information Security CFP. Unrestricted funds ~$80K plus AWS credits." },
-  { date: "Jul 2026", title: "NSF CAREER", source: "NSF", priority: "Maximum", details: "Cornerstone award: $400K–$500K over 5 years. Integrated research-education plan in proactive CyberAI." },
-  { date: "Aug 2026", title: "NSF REU Site", source: "NSF", priority: "High", details: "Undergraduate research cohort site for CyberAI. Up to $500K over 3 years." },
-  { date: "Sep 2026", title: "Sloan Fellowship", source: "Foundation", priority: "High", details: "Sloan Research Fellowship nomination for early-career faculty in science and engineering." },
-  { date: "Sep 2026", title: "NSF SaTC 2.0", source: "NSF CISE", priority: "High", details: "RES designation for large-scale hacker community evolution study. Up to $1.2M for 4 years." },
-  { date: "Sep 2026", title: "Sony Research Award", source: "Industry", priority: "High", details: "Focused Research Award on content protection and AI safety. Up to $150K/year." },
-  { date: "Oct 2026", title: "DARPA YFA (2027 cycle)", source: "DoD / DARPA", priority: "Moderate", details: "Executive summary for the next cycle. Maintains continuous DoD engagement." },
-  { date: "Nov 2026", title: "NSF MRI Track 2", source: "NSF", priority: "High", details: "Lab instrumentation for secure compute and GPU cluster. Up to $4M." },
-  { date: "Rolling", title: "NSF CDSE", source: "NSF", priority: "Moderate", details: "Computational and Data-Enabled Science. Scalable data pipelines and large-scale representation learning." },
-  { date: "Rolling", title: "Cisco Research", source: "Industry", priority: "Moderate", details: "Rolling proposals on AI for Security and Security for AI. Unrestricted research gifts." },
-  { date: "Rolling", title: "NVIDIA Academic Grant", source: "Industry", priority: "Moderate", details: "Quarterly deadlines for GPU compute access, cloud resources, and hardware grants." },
-];
-
 const PIPELINE = [
   { level: "K–12", description: "Early exposure to CyberAI concepts through local school partnerships and outreach programs.", programs: ["NSF STEM K-12", "NSF CAMEL", "Community Partnerships"] },
   { level: "Undergraduate", description: "Course-embedded research experiences and summer cohorts with sanitized center data.", programs: ["NSF REU Site", "CyberAI Fundamentals", "Ethical Awareness"] },
@@ -117,22 +31,9 @@ const PIPELINE = [
   { level: "Doctoral", description: "PhD students lead CCAIR research with dissertations contributing durable center artifacts.", programs: ["Dissertation Research", "Center Publications", "Conference Leadership"] },
 ];
 
-const COURSES = [
-  { code: "CIS 8684", title: "Cyber Threat Intelligence", level: "Graduate", rating: "4.9/5" },
-  { code: "CIS 4730", title: "Deep Learning for Business", level: "Undergraduate", rating: "New" },
-  { code: "CIS 8080", title: "IS Security and Privacy", level: "Graduate", rating: "4.9/5" },
-  { code: "CIS 3620", title: "Career Pathways", level: "Undergraduate", rating: "5.0/5" },
-  { code: "CIS 4680", title: "Intro to Security", level: "Undergraduate", rating: "4.7/5" },
-];
-
-const NEWS = [
-  { date: "Spring 2026", title: "CCAIR launches at Georgia State University", tag: "Launch" },
-  { date: "Spring 2026", title: "New course: CIS 4730 Deep Learning for Business", tag: "Teaching" },
-  { date: "2025", title: "Robinson College IS Cybersecurity Graduate Program Top Professor", tag: "Award" },
-  { date: "2024", title: "ACM SIGMIS Doctoral Dissertation Award at ICIS", tag: "Award" },
-];
-
 function HomePage({ onNavigate, tweaks }) {
+  const { publications, people, news, courses } = useData();
+
   return (
     <div>
       <div className={tweaks.showGrid ? 'grid-bg' : ''} style={{
@@ -161,10 +62,10 @@ function HomePage({ onNavigate, tweaks }) {
 
         {tweaks.heroStyle === 'full' && (
           <div style={{ position: 'relative', zIndex: 1, marginTop: 60, display: 'flex', gap: 'clamp(30px,5vw,60px)', animation: 'fadeInUp 1s ease 0.2s both' }}>
-            <StatCard value={PUBLICATIONS.length} label="Publications" />
+            <StatCard value={publications.length} label="Publications" />
             <StatCard value={3} label="Research Pillars" />
-            <StatCard value={14} suffix="+" label="Courses Taught" />
-            <StatCard value={5} suffix="+" label="Collaborators" />
+            <StatCard value={courses.length} suffix="+" label="Courses Taught" />
+            <StatCard value={people.affiliates.length + 1} suffix="+" label="Collaborators" />
           </div>
         )}
       </div>
@@ -190,7 +91,7 @@ function HomePage({ onNavigate, tweaks }) {
 
       <PageSection title="Latest" accent="// updates">
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
-          {NEWS.map((n, i) => (
+          {news.map((n, i) => (
             <GlassCard key={i} style={{ padding: 20 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
                 <span className="mono" style={{ fontSize: 11, color: 'var(--text-muted)' }}>{n.date}</span>
@@ -221,9 +122,10 @@ function HomePage({ onNavigate, tweaks }) {
 }
 
 function ResearchPage() {
+  const { publications } = useData();
   const [filter, setFilter] = usePageState('All');
   const types = ['All', 'journal', 'conference', 'workshop'];
-  const filtered = filter === 'All' ? PUBLICATIONS : PUBLICATIONS.filter(p => p.type === filter);
+  const filtered = filter === 'All' ? publications : publications.filter(p => p.type === filter);
 
   return (
     <div style={{ paddingTop: 64 }}>
@@ -310,7 +212,7 @@ function ResearchPage() {
           {filtered.map((p) => <PublicationCard key={p.title} {...p} />)}
         </div>
         <div className="mono" style={{ color: 'var(--text-muted)', fontSize: 12, marginTop: 20, textAlign: 'center' }}>
-          Showing {filtered.length} of {PUBLICATIONS.length} publications
+          Showing {filtered.length} of {publications.length} publications
         </div>
       </PageSection>
     </div>
@@ -318,16 +220,18 @@ function ResearchPage() {
 }
 
 function PeoplePage() {
+  const { people } = useData();
+
   return (
     <div style={{ paddingTop: 64 }}>
       <h1 className="sr-only">People — CCAIR</h1>
       <PageSection title="Director" accent="// leadership">
-        <PersonCard {...TEAM.director} isDirector />
+        <PersonCard name={people.director.name} role={people.director.title} dept={people.director.dept} areas={people.director.areas} isDirector />
       </PageSection>
 
       <PageSection title="Faculty Affiliates" accent="// collaborators" subtitle="Internal and external faculty contributing to shared CCAIR artifacts across research primitives.">
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 }}>
-          {TEAM.affiliates.map((a) => (
+          {people.affiliates.map((a) => (
             <GlassCard key={a.name} style={{ padding: 22 }}>
               <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
                 <div style={{
@@ -336,7 +240,7 @@ function PeoplePage() {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 16, fontWeight: 700, color: 'var(--accent2)',
                   border: '1px solid rgba(var(--accent2-rgb),0.15)',
-                }}>{a.name.split(' ').map(w => w[0]).join('').slice(0, 2)}</div>
+                }}>{a.initials}</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 2 }}>{a.name}</div>
                   <div style={{ color: 'var(--accent2)', fontSize: 12.5, fontWeight: 600, marginBottom: 2 }}>{a.role}</div>
@@ -396,7 +300,10 @@ function PeoplePage() {
 }
 
 function ResourcesPage() {
+  const { resources } = useData();
   const [tab, setTab] = usePageState('datasets');
+  const byCategory = (cat) => resources.filter(r => r.category === cat.slice(0, -1));
+
   return (
     <div style={{ paddingTop: 64 }}>
       <h1 className="sr-only">Resources — CCAIR</h1>
@@ -404,9 +311,7 @@ function ResourcesPage() {
         <FilterBar filters={['datasets', 'benchmarks', 'tools']} active={tab} onFilter={setTab} label="View:" />
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
-          {tab === 'datasets' && DATASETS.map((d, i) => <ResourceCard key={i} {...d} />)}
-          {tab === 'benchmarks' && BENCHMARKS.map((b, i) => <ResourceCard key={i} {...b} />)}
-          {tab === 'tools' && TOOLS.map((t, i) => <ResourceCard key={i} {...t} />)}
+          {byCategory(tab).map((r) => <ResourceCard key={r.title} {...r} />)}
         </div>
       </PageSection>
 
@@ -430,6 +335,8 @@ function ResourcesPage() {
 }
 
 function AboutPage({ onNavigate }) {
+  const { funding, courses } = useData();
+
   return (
     <div style={{ paddingTop: 64 }}>
       <h1 className="sr-only">About — CCAIR</h1>
@@ -441,7 +348,7 @@ function AboutPage({ onNavigate }) {
 
       <PageSection title="Courses" accent="// curriculum">
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
-          {COURSES.map((c, i) => (
+          {courses.map((c, i) => (
             <GlassCard key={i} style={{ padding: 18 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
@@ -459,14 +366,14 @@ function AboutPage({ onNavigate }) {
       </PageSection>
 
       <PageSection title="Funding Roadmap" accent="// 2026 strategy" subtitle="A strategic approach balancing immediate student support with long-term pursuit of center-scale awards.">
-        <Timeline items={FUNDING_TIMELINE} />
+        <Timeline items={funding.timeline} />
       </PageSection>
 
       <PageSection title="Funding & Partners" accent="// ecosystem" subtitle="CCAIR pursues synergistic funding across federal agencies, defense, and industry partnerships.">
         <div style={{ marginBottom: 24 }}>
           <div className="mono" style={{ color: 'var(--accent)', fontSize: 12, fontWeight: 700, letterSpacing: 1, marginBottom: 14 }}>FEDERAL & DEFENSE</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 10 }}>
-            {PARTNERS.filter(p => p.type !== 'industry').map((p) => (
+            {funding.partners.filter(p => p.type !== 'industry').map((p) => (
               <div key={p.name} style={{ padding: '12px 16px', borderRadius: 8, border: '1px solid rgba(var(--accent-rgb),0.10)', background: 'rgba(var(--accent-rgb),0.03)' }}>
                 <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 2 }}>{p.name}</div>
                 <div className="mono" style={{ fontSize: 11, color: 'var(--accent)', marginBottom: 4 }}>{p.program}</div>
@@ -478,7 +385,7 @@ function AboutPage({ onNavigate }) {
         <div>
           <div className="mono" style={{ color: 'var(--accent2)', fontSize: 12, fontWeight: 700, letterSpacing: 1, marginBottom: 14 }}>INDUSTRY</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 10 }}>
-            {PARTNERS.filter(p => p.type === 'industry').map((p) => (
+            {funding.partners.filter(p => p.type === 'industry').map((p) => (
               <div key={p.name} style={{ padding: '12px 16px', borderRadius: 8, border: '1px solid rgba(var(--accent2-rgb),0.10)', background: 'rgba(var(--accent2-rgb),0.03)' }}>
                 <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 2 }}>{p.name}</div>
                 <div className="mono" style={{ fontSize: 11, color: 'var(--accent2)', marginBottom: 4 }}>{p.program}</div>
@@ -544,9 +451,7 @@ function AboutPage({ onNavigate }) {
 window.CCAIR = window.CCAIR || {};
 Object.assign(window.CCAIR, {
   HomePage, ResearchPage, PeoplePage, ResourcesPage, AboutPage,
-  PUBLICATIONS, DATASETS, TOOLS, BENCHMARKS, TEAM, FUNDING_TIMELINE, PIPELINE, COURSES, NEWS,
 });
 Object.assign(window, {
   HomePage, ResearchPage, PeoplePage, ResourcesPage, AboutPage,
-  PUBLICATIONS, DATASETS, TOOLS, BENCHMARKS, TEAM, FUNDING_TIMELINE, PIPELINE, COURSES, NEWS,
 });

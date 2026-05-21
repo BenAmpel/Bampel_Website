@@ -1,0 +1,32 @@
+{
+  "timeline": [
+    { "date": "Jan 2026", "title": "DARPA YFA", "source": "DoD / DARPA", "priority": "High", "details": "Young Faculty Award for agentic defense systems. Base $500K + Director's Fellowship option for total up to $1.35M." },
+    { "date": "Jan 2026", "title": "NSF CICI (IPAAI)", "source": "NSF", "priority": "High", "details": "Integrity, Provenance, and Authenticity for AI-Ready Data. Up to $900K over 3 years." },
+    { "date": "Feb 2026", "title": "NSF Future CoRe", "source": "NSF CISE", "priority": "High", "details": "Foundational research in IIS and cybersecurity. Awards up to $1M for 4 years." },
+    { "date": "Feb 2026", "title": "CRA/Microsoft Fellowship", "source": "Industry", "priority": "Moderate", "details": "Trustworthy AI Research Fellowship for early-career scholars. 12-month program with $17K stipend." },
+    { "date": "Mar 2026", "title": "AFOSR/ONR YIP Outreach", "source": "DoD", "priority": "Moderate", "details": "Initiate program officer contact for Young Investigator white papers. AFOSR: $450K/3yr, ONR: $750K/3yr." },
+    { "date": "May 2026", "title": "Amazon ARA", "source": "Industry", "priority": "High", "details": "AI for Information Security CFP. Unrestricted funds ~$80K plus AWS credits." },
+    { "date": "Jul 2026", "title": "NSF CAREER", "source": "NSF", "priority": "Maximum", "details": "Cornerstone award: $400K–$500K over 5 years. Integrated research-education plan in proactive CyberAI." },
+    { "date": "Aug 2026", "title": "NSF REU Site", "source": "NSF", "priority": "High", "details": "Undergraduate research cohort site for CyberAI. Up to $500K over 3 years." },
+    { "date": "Sep 2026", "title": "Sloan Fellowship", "source": "Foundation", "priority": "High", "details": "Sloan Research Fellowship nomination for early-career faculty in science and engineering." },
+    { "date": "Sep 2026", "title": "NSF SaTC 2.0", "source": "NSF CISE", "priority": "High", "details": "RES designation for large-scale hacker community evolution study. Up to $1.2M for 4 years." },
+    { "date": "Sep 2026", "title": "Sony Research Award", "source": "Industry", "priority": "High", "details": "Focused Research Award on content protection and AI safety. Up to $150K/year." },
+    { "date": "Oct 2026", "title": "DARPA YFA (2027 cycle)", "source": "DoD / DARPA", "priority": "Moderate", "details": "Executive summary for the next cycle. Maintains continuous DoD engagement." },
+    { "date": "Nov 2026", "title": "NSF MRI Track 2", "source": "NSF", "priority": "High", "details": "Lab instrumentation for secure compute and GPU cluster. Up to $4M." },
+    { "date": "Rolling", "title": "NSF CDSE", "source": "NSF", "priority": "Moderate", "details": "Computational and Data-Enabled Science. Scalable data pipelines and large-scale representation learning." },
+    { "date": "Rolling", "title": "Cisco Research", "source": "Industry", "priority": "Moderate", "details": "Rolling proposals on AI for Security and Security for AI. Unrestricted research gifts." },
+    { "date": "Rolling", "title": "NVIDIA Academic Grant", "source": "Industry", "priority": "Moderate", "details": "Quarterly deadlines for GPU compute access, cloud resources, and hardware grants." }
+  ],
+  "partners": [
+    { "name": "Amazon", "program": "Research Awards (ARA)", "focus": "AI for Information Security", "type": "industry" },
+    { "name": "Google", "program": "Research Scholar Program", "focus": "Early-career AI research", "type": "industry" },
+    { "name": "Microsoft", "program": "Research Fellowship", "focus": "Trustworthy AI & disinformation", "type": "industry" },
+    { "name": "NVIDIA", "program": "Academic Grant Program", "focus": "GPU compute & AI infrastructure", "type": "industry" },
+    { "name": "Cisco", "program": "Research Awards", "focus": "Security for GenAI & AI for Security", "type": "industry" },
+    { "name": "Sony", "program": "Focused Research Award", "focus": "Content protection & AI safety", "type": "industry" },
+    { "name": "NSF", "program": "CAREER, SaTC, Future CoRe, REU, MRI", "focus": "Foundational CyberAI research", "type": "federal" },
+    { "name": "DARPA", "program": "Young Faculty Award", "focus": "Agentic defense systems", "type": "federal" },
+    { "name": "DOE", "program": "ASCR", "focus": "Scalable AI for national security", "type": "federal" },
+    { "name": "IARPA", "program": "BENGAL, DECIPHER", "focus": "LLM threats & adversarial linguistics", "type": "intelligence" }
+  ]
+}
