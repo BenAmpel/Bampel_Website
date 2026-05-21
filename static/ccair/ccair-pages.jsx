@@ -227,6 +227,7 @@ function ResearchPage() {
 
   return (
     <div style={{ paddingTop: 64 }}>
+      <h1 className="sr-only">Research — CCAIR</h1>
       <PageSection title="Research Primitives" accent="// core agenda" subtitle="All center activities, proposals, and artifacts map to at least one of these foundational primitives.">
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
           {[
@@ -301,7 +302,12 @@ function ResearchPage() {
       <PageSection title="Publications" accent="// selected works">
         <FilterBar filters={types} active={filter} onFilter={setFilter} label="Filter:" />
         <div style={{ display: 'grid', gap: 12 }}>
-          {filtered.map((p, i) => <PublicationCard key={i} {...p} />)}
+          {filtered.length === 0 && (
+            <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-secondary)', fontSize: 14 }}>
+              No publications match this filter.
+            </div>
+          )}
+          {filtered.map((p) => <PublicationCard key={p.title} {...p} />)}
         </div>
         <div className="mono" style={{ color: 'var(--text-muted)', fontSize: 12, marginTop: 20, textAlign: 'center' }}>
           Showing {filtered.length} of {PUBLICATIONS.length} publications
@@ -314,6 +320,7 @@ function ResearchPage() {
 function PeoplePage() {
   return (
     <div style={{ paddingTop: 64 }}>
+      <h1 className="sr-only">People — CCAIR</h1>
       <PageSection title="Director" accent="// leadership">
         <PersonCard {...TEAM.director} isDirector />
       </PageSection>
@@ -392,6 +399,7 @@ function ResourcesPage() {
   const [tab, setTab] = usePageState('datasets');
   return (
     <div style={{ paddingTop: 64 }}>
+      <h1 className="sr-only">Resources — CCAIR</h1>
       <PageSection title="Research Assets" accent="// resources" subtitle="Persistent artifacts designed to outlive individual grants and serve as shared infrastructure for the CyberAI community.">
         <FilterBar filters={['datasets', 'benchmarks', 'tools']} active={tab} onFilter={setTab} label="View:" />
 
@@ -424,6 +432,7 @@ function ResourcesPage() {
 function AboutPage({ onNavigate }) {
   return (
     <div style={{ paddingTop: 64 }}>
+      <h1 className="sr-only">About — CCAIR</h1>
       <PageSection title="Talent Pipeline" accent="// education" subtitle="A multi-stage pipeline spanning K–12 through doctoral research, building technically sophisticated and theoretically grounded CyberAI professionals.">
         <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
           {PIPELINE.map((p, i) => <PipelineStep key={i} {...p} index={i} total={PIPELINE.length} />)}
@@ -532,6 +541,11 @@ function AboutPage({ onNavigate }) {
   );
 }
 
+window.CCAIR = window.CCAIR || {};
+Object.assign(window.CCAIR, {
+  HomePage, ResearchPage, PeoplePage, ResourcesPage, AboutPage,
+  PUBLICATIONS, DATASETS, TOOLS, BENCHMARKS, TEAM, FUNDING_TIMELINE, PIPELINE, COURSES, NEWS,
+});
 Object.assign(window, {
   HomePage, ResearchPage, PeoplePage, ResourcesPage, AboutPage,
   PUBLICATIONS, DATASETS, TOOLS, BENCHMARKS, TEAM, FUNDING_TIMELINE, PIPELINE, COURSES, NEWS,

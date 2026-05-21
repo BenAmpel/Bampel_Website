@@ -14,12 +14,20 @@ class ErrorBoundary extends React.Component {
   }
 }
 
+const VALID_PAGES = ['home', 'research', 'people', 'resources', 'about'];
+
+function pageFromHash() {
+  const h = window.location.hash.replace('#/', '').replace('#', '');
+  return VALID_PAGES.includes(h) ? h : 'home';
+}
+
 function CCAIRApp() {
   const [tweaks, setTweak] = useTweaks(window.__TWEAK_DEFAULTS);
-  const [currentPage, setCurrentPage] = useState('home');
+  const [currentPage, setCurrentPage] = useState(pageFromHash);
   const [transitioning, setTransitioning] = useState(false);
-  const [displayPage, setDisplayPage] = useState('home');
+  const [displayPage, setDisplayPage] = useState(pageFromHash);
   const timerRef = useRef(null);
+  const skipHashUpdate = useRef(false);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-color', tweaks.colorScheme);
@@ -35,8 +43,24 @@ function CCAIRApp() {
     document.title = titles[displayPage] || 'CCAIR — Center for CyberAI Research';
   }, [displayPage]);
 
+  useEffect(() => {
+    const onHash = () => {
+      if (skipHashUpdate.current) { skipHashUpdate.current = false; return; }
+      const page = pageFromHash();
+      if (page !== currentPage) {
+        setCurrentPage(page);
+        setDisplayPage(page);
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }
+    };
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, [currentPage]);
+
   const navigate = useCallback((page) => {
     if (page === currentPage) return;
+    skipHashUpdate.current = true;
+    window.location.hash = page === 'home' ? '/' : '/' + page;
     clearTimeout(timerRef.current);
     setTransitioning(true);
     timerRef.current = setTimeout(() => {
@@ -110,4 +134,6 @@ function CCAIRApp() {
   );
 }
 
+window.CCAIR = window.CCAIR || {};
+Object.assign(window.CCAIR, { CCAIRApp });
 Object.assign(window, { CCAIRApp });

@@ -49,12 +49,15 @@ const NetworkCanvas = memo(function NetworkCanvas({ scheme = 'teal' }) {
   const canvasRef = useRef(null);
   const nodesRef = useRef([]);
   const animRef = useRef(null);
+  const visibleRef = useRef(true);
 
   useEffect(() => {
     const canvas = canvasRef.current; if (!canvas) return;
     const ctx = canvas.getContext('2d');
     const NUM = 55;
     let w, h;
+
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     function resize() {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -73,6 +76,7 @@ const NetworkCanvas = memo(function NetworkCanvas({ scheme = 'teal' }) {
     }
 
     function draw() {
+      if (!visibleRef.current) return;
       const rgb = ACCENT_RGB[scheme] || ACCENT_RGB.teal;
       ctx.clearRect(0, 0, w, h);
       const nodes = nodesRef.current;
@@ -98,16 +102,32 @@ const NetworkCanvas = memo(function NetworkCanvas({ scheme = 'teal' }) {
       animRef.current = requestAnimationFrame(draw);
     }
 
-    init(); draw();
+    init();
+    if (prefersReduced) {
+      draw(); cancelAnimationFrame(animRef.current);
+    } else {
+      draw();
+    }
+
+    const obs = new IntersectionObserver(([e]) => {
+      visibleRef.current = e.isIntersecting;
+      if (e.isIntersecting && !prefersReduced) {
+        cancelAnimationFrame(animRef.current);
+        animRef.current = requestAnimationFrame(draw);
+      }
+    }, { threshold: 0 });
+    obs.observe(canvas);
+
     window.addEventListener('resize', resize);
-    return () => { cancelAnimationFrame(animRef.current); window.removeEventListener('resize', resize); };
+    return () => { cancelAnimationFrame(animRef.current); obs.disconnect(); window.removeEventListener('resize', resize); };
   }, [scheme]);
 
-  return <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} />;
+  return <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} aria-hidden="true" />;
 });
 
 function CCAIRNav({ currentPage, onNavigate }) {
   const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', fn, { passive: true }); return () => window.removeEventListener('scroll', fn);
@@ -119,6 +139,8 @@ function CCAIRNav({ currentPage, onNavigate }) {
     { id: 'about', label: 'About' },
   ];
 
+  const handleNav = (id) => { onNavigate(id); setMobileOpen(false); };
+
   const navStyle = {
     position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
     background: scrolled ? 'rgba(5,10,21,0.92)' : 'rgba(5,10,21,0.5)',
@@ -128,26 +150,46 @@ function CCAIRNav({ currentPage, onNavigate }) {
     display: 'flex', alignItems: 'center', transition: 'all 0.3s ease',
   };
 
+  const btnStyle = (active) => ({
+    background: active ? 'var(--accent-dim)' : 'none',
+    border: 'none', cursor: 'pointer', padding: '8px 14px', borderRadius: 6,
+    fontFamily: "'Manrope', sans-serif", fontSize: 13.5, fontWeight: 600,
+    color: active ? 'var(--accent)' : 'var(--text-secondary)',
+    transition: 'all 0.2s', width: '100%', textAlign: 'left',
+  });
+
   return (
     <nav style={navStyle} aria-label="Main navigation">
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={() => onNavigate('home')}>
-        <img src="uploads/CCAIR.png" alt="CCAIR" style={{ height: 34, borderRadius: 4 }} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={() => handleNav('home')}>
+        <img src="uploads/CCAIR.png" alt="" style={{ height: 34, borderRadius: 4 }} />
         <span className="mono" style={{ fontWeight: 700, fontSize: 15, color: 'var(--accent)', letterSpacing: 1 }}>CCAIR</span>
       </div>
       <div style={{ flex: 1 }}></div>
-      <div style={{ display: 'flex', gap: 6 }}>
+      <div className="ccair-nav-links" style={{ display: 'flex', gap: 6 }}>
         {pages.map(p => (
-          <button key={p.id} onClick={() => onNavigate(p.id)} aria-current={currentPage === p.id ? 'page' : undefined} style={{
-            background: currentPage === p.id ? 'var(--accent-dim)' : 'none',
-            border: 'none', cursor: 'pointer', padding: '6px 14px', borderRadius: 6,
-            fontFamily: "'Manrope', sans-serif", fontSize: 13.5, fontWeight: 600,
-            color: currentPage === p.id ? 'var(--accent)' : 'var(--text-secondary)',
-            transition: 'all 0.2s',
-          }}>
+          <button key={p.id} onClick={() => handleNav(p.id)} aria-current={currentPage === p.id ? 'page' : undefined} style={btnStyle(currentPage === p.id)}>
             {p.label}
           </button>
         ))}
       </div>
+      <button className="ccair-hamburger" onClick={() => setMobileOpen(!mobileOpen)}
+        aria-label={mobileOpen ? 'Close menu' : 'Open menu'} aria-expanded={mobileOpen}
+        style={{ display: 'none', alignItems: 'center', justifyContent: 'center', width: 44, height: 44, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', fontSize: 22 }}>
+        {mobileOpen ? '✕' : '☰'}
+      </button>
+      {mobileOpen && (
+        <div className="ccair-mobile-menu" style={{
+          display: 'none', flexDirection: 'column', position: 'absolute', top: 64, left: 0, right: 0,
+          background: 'rgba(5,10,21,0.96)', backdropFilter: 'blur(20px)', padding: '8px 20px 16px',
+          borderBottom: '1px solid var(--border)',
+        }}>
+          {pages.map(p => (
+            <button key={p.id} onClick={() => handleNav(p.id)} aria-current={currentPage === p.id ? 'page' : undefined} style={btnStyle(currentPage === p.id)}>
+              {p.label}
+            </button>
+          ))}
+        </div>
+      )}
     </nav>
   );
 }
@@ -243,7 +285,7 @@ function StatusDot({ status }) {
 function PersonCard({ name, role, dept, areas = [], isDirector }) {
   const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2);
   return (
-    <GlassCard glow={isDirector} style={isDirector ? { gridColumn: 'span 2' } : {}}>
+    <GlassCard glow={isDirector}>
       <div style={{ display: 'flex', gap: 20, alignItems: isDirector ? 'flex-start' : 'center' }}>
         <div style={{
           width: isDirector ? 80 : 56, height: isDirector ? 80 : 56, borderRadius: 12,
@@ -268,7 +310,7 @@ function PersonCard({ name, role, dept, areas = [], isDirector }) {
 }
 
 function PublicationCard({ title, authors, venue, year, type }) {
-  const typeColors = { journal: '#22c55e', conference: '#3b82f6', workshop: '#a78bfa', dissertation: '#f59e0b' };
+  const typeColors = { journal: '#22c55e', conference: '#3b82f6', workshop: '#a78bfa' };
   return (
     <GlassCard style={{ padding: 22 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 8 }}>
@@ -434,6 +476,13 @@ function CCAIRFooter() {
   );
 }
 
+window.CCAIR = window.CCAIR || {};
+Object.assign(window.CCAIR, {
+  TweakCtx, useTweakCtx, ACCENT_RGB, useCounter, useInView,
+  NetworkCanvas, CCAIRNav, PageSection, GlassCard, StatCard, Badge, StatusDot,
+  PersonCard, PublicationCard, ResourceCard, Timeline, FilterBar, PipelineStep,
+  CButton, CCAIRFooter,
+});
 Object.assign(window, {
   TweakCtx, useTweakCtx, ACCENT_RGB, useCounter, useInView,
   NetworkCanvas, CCAIRNav, PageSection, GlassCard, StatCard, Badge, StatusDot,

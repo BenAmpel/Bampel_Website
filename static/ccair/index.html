@@ -19,7 +19,7 @@
       --accent: #00ddb3; --accent-rgb: 0,221,179;
       --accent-dim: rgba(0,221,179,0.10); --accent-glow: rgba(0,221,179,0.25);
       --accent2: #2d8cf0; --accent2-rgb: 45,140,240;
-      --text-primary: #e8edf5; --text-secondary: #8b9ab8; --text-muted: #4a5a78;
+      --text-primary: #e8edf5; --text-secondary: #8b9ab8; --text-muted: #7288ab;
       --border: rgba(0,221,179,0.10); --border-subtle: rgba(255,255,255,0.05);
     }
     [data-color="blue"] {
@@ -69,22 +69,40 @@
       background-size: 60px 60px;
     }
     .no-grid::before { display: none; }
+
+    .sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+    }
+
+    @media (max-width: 768px) {
+      .ccair-nav-links { display: none !important; }
+      .ccair-hamburger { display: flex !important; }
+      .ccair-mobile-menu { display: flex !important; }
+    }
+    @media (min-width: 769px) {
+      .ccair-hamburger { display: none !important; }
+      .ccair-mobile-menu { display: none !important; }
+    }
   </style>
 
   <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
-  <script src="dist/tweaks-panel.js"></script>
-  <script src="dist/ccair-components.js"></script>
-  <script src="dist/ccair-pages.js"></script>
-  <script src="dist/ccair-app.js"></script>
 </head>
 <body>
   <a href="#main-content" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:9999;padding:8px 16px;background:var(--accent);color:var(--bg-base);font-weight:600;font-size:14px;border-radius:0 0 8px 0;text-decoration:none" onfocus="this.style.left='0';this.style.width='auto';this.style.height='auto'" onblur="this.style.left='-9999px';this.style.width='1px';this.style.height='1px'">Skip to content</a>
   <div id="root"></div>
-  <script>
+  <script src="dist/tweaks-panel.js" defer></script>
+  <script src="dist/ccair-components.js" defer></script>
+  <script src="dist/ccair-pages.js" defer></script>
+  <script src="dist/ccair-app.js" defer></script>
+  <script defer>
     var TWEAK_DEFAULTS = {"colorScheme":"teal","cardStyle":"glass","heroStyle":"full","showGrid":true};
     window.__TWEAK_DEFAULTS = TWEAK_DEFAULTS;
-    ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(CCAIRApp));
+    window.addEventListener('DOMContentLoaded', function() {
+      ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(CCAIRApp));
+    });
   </script>
 </body>
 </html>
