@@ -237,13 +237,46 @@ function PeoplePage() {
         <PersonCard {...TEAM.director} isDirector />
       </PageSection>
 
-      <PageSection>
-        <GlassCard style={{ textAlign: 'center', padding: 36, background: 'linear-gradient(135deg, rgba(var(--accent-rgb),0.05), rgba(var(--accent2-rgb),0.03))' }}>
-          <div style={{ fontWeight: 700, fontSize: 20, marginBottom: 8 }}>Join CCAIR</div>
-          <p style={{ color: 'var(--text-secondary)', fontSize: 14, maxWidth: 500, margin: '0 auto 20px', lineHeight: 1.7 }}>
-            We are looking for motivated PhD and MS students interested in AI-enabled cybersecurity, LLMs, and proactive threat intelligence.
+      <PageSection title="Join CCAIR" accent="// open positions">
+        <GlassCard style={{ padding: 36, background: 'linear-gradient(135deg, rgba(var(--accent-rgb),0.05), rgba(var(--accent2-rgb),0.03))' }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.8, marginBottom: 24 }}>
+            CCAIR is recruiting motivated <strong style={{ color: 'var(--accent)' }}>PhD students</strong> and <strong style={{ color: 'var(--accent)' }}>MS students</strong> to join our research group at Georgia State University. We value curiosity, persistence, and a willingness to work at the intersection of AI and cybersecurity.
           </p>
-          <CButton primary href="mailto:bampel@gsu.edu">Contact Dr. Ampel →</CButton>
+
+          <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--accent2)', marginBottom: 12, fontFamily: "'Fira Code', monospace", letterSpacing: 1 }}>RESEARCH AREAS</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12, marginBottom: 28 }}>
+            {[
+              { area: 'LLM Security & Robustness', desc: 'Adversarial attacks, jailbreaking, alignment for security applications' },
+              { area: 'Cyber Threat Intelligence', desc: 'Automated collection and analysis of threat data from dark web and hacker communities' },
+              { area: 'Phishing & Social Engineering', desc: 'AI-driven detection and generation analysis of phishing campaigns' },
+              { area: 'Proactive Threat Hunting', desc: 'Predictive models and early-warning systems for emerging cyber threats' },
+              { area: 'Human–AI Collaboration', desc: 'Designing AI tools that augment analyst decision-making in SOC environments' },
+              { area: 'Generative AI for Security', desc: 'Leveraging LLMs for vulnerability analysis, code auditing, and threat modeling' },
+            ].map(({ area, desc }) => (
+              <div key={area} style={{ padding: '14px 16px', borderRadius: 8, border: '1px solid rgba(var(--accent-rgb),0.12)', background: 'rgba(var(--accent-rgb),0.03)' }}>
+                <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--accent)', marginBottom: 4, fontFamily: "'Fira Code', monospace" }}>{area}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>{desc}</div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--accent2)', marginBottom: 12, fontFamily: "'Fira Code', monospace", letterSpacing: 1 }}>IDEAL CANDIDATES</div>
+          <ul style={{ color: 'var(--text-secondary)', fontSize: 13, lineHeight: 2, paddingLeft: 20, marginBottom: 28 }}>
+            <li>Background in computer science, information systems, cybersecurity, or a related field</li>
+            <li>Interest in applied machine learning / NLP for security problems</li>
+            <li>Programming experience in Python; familiarity with PyTorch or HuggingFace a plus</li>
+            <li>Strong writing skills and interest in publishing at top venues</li>
+          </ul>
+
+          <div style={{ textAlign: 'center', borderTop: '1px solid rgba(var(--accent-rgb),0.1)', paddingTop: 24 }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 12 }}>
+              Interested? Reach out with your CV and a brief description of your research interests.
+            </p>
+            <CButton primary href="mailto:bampel@gsu.edu">Contact Dr. Ampel →</CButton>
+            <div style={{ marginTop: 12, fontSize: 13, color: 'var(--text-secondary)', fontFamily: "'Fira Code', monospace" }}>
+              bampel@gsu.edu
+            </div>
+          </div>
         </GlassCard>
       </PageSection>
     </div>
