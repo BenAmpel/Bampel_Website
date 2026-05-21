@@ -15,6 +15,8 @@ Promise.all(
       target: 'es2020',
       minify: true,
       bundle: false,
+      banner: { js: '(function(){' },
+      footer: { js: '})();' },
     })
   )
 )
