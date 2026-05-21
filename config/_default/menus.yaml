@@ -4,6 +4,9 @@
 #   The weight parameter defines the order that the links will appear in.
 
 main:
+  - name: CCAIR
+    url: '/ccair/'
+    weight: 10
   - name: Research
     url: '#stats'
     weight: 15
