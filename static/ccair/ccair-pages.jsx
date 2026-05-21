@@ -48,17 +48,66 @@ const BENCHMARKS = [
 
 const TEAM = {
   director: { name: "Benjamin M. Ampel", role: "Director & Assistant Professor", dept: "Computer Information Systems, Georgia State University", areas: ["AI-enabled Cybersecurity", "Cyber Threat Intelligence", "LLMs", "Phishing Detection", "Hacker Communities"] },
+  affiliates: [
+    { name: "Balasubramaniam Ramesh", role: "Department Chair, CIS", dept: "Georgia State University", areas: ["Design Science", "Agile Methods", "Knowledge Management"], synergy: "Advocacy for CCAIR resources and institutional positioning" },
+    { name: "Arun Rai", role: "Director, Center for Digital Innovation", dept: "Georgia State University", areas: ["Digital Transformation", "AI Strategy", "Platform Economics"], synergy: "Theory-driven collaboration on AI-enabled systems" },
+    { name: "Anu Bourgeois", role: "Principal Investigator, CHAI Center", dept: "Georgia State University & Duke University", areas: ["Human–AI Interaction", "Trustworthy AI", "Cybersecurity"], synergy: "Human–AI collaboration and security teaming" },
+  ],
 };
+
+const RESEARCH_PORTFOLIO = [
+  { tier: 'Core', risk: 'Low risk, high coherence', color: '#22c55e', areas: [
+    { name: 'Proactive Cyber Threat Intelligence', desc: 'Mining pre-attack signals from hacker forums, paste sites, and adversarial ecosystems' },
+    { name: 'Dark Web Analytics', desc: 'Longitudinal analysis of underground communities, jargon evolution, and knowledge diffusion' },
+    { name: 'Human–AI Collaboration', desc: 'How analysts and AI systems co-produce actionable intelligence in security workflows' },
+  ]},
+  { tier: 'Strategic', risk: 'Medium risk, high upside', color: '#3b82f6', areas: [
+    { name: 'Agentic Defense Systems', desc: 'Autonomous AI agents that detect, adapt to, and mitigate adversarial behavior in real time' },
+    { name: 'LLM Security & Robustness', desc: 'Adversarial attacks, jailbreaking, alignment evaluation, and defense for large language models' },
+    { name: 'Multimodal Threat Modeling', desc: 'Integrating text, code, audio, and infrastructure signals for cross-modal threat inference' },
+  ]},
+  { tier: 'Exploratory', risk: 'High risk, high variance', color: '#a78bfa', areas: [
+    { name: 'Attacker–AI Co-evolution', desc: 'Modeling how adversaries adapt when defenders deploy AI-enabled countermeasures' },
+    { name: 'Emergent Misuse of Autonomous Systems', desc: 'Anticipating novel attack surfaces created by widespread AI agent deployment' },
+  ]},
+];
+
+const CONSTRUCTS = [
+  { name: 'Signal Legibility & Deception', desc: 'How pre-attack signals become (or remain) interpretable under adversarial signaling and intentional obfuscation.' },
+  { name: 'Intent Opacity & Ambiguity Limits', desc: 'Boundary conditions under which adversarial intent remains irreducibly ambiguous, and when additional sensing yields diminishing returns.' },
+  { name: 'Human–AI Sensemaking', desc: 'How analysts and AI systems co-produce (or fail to co-produce) actionable intelligence, including drift from deception and miscalibrated trust.' },
+];
+
+const PARTNERS = [
+  { name: 'Amazon', program: 'Research Awards (ARA)', focus: 'AI for Information Security', type: 'industry' },
+  { name: 'Google', program: 'Research Scholar Program', focus: 'Early-career AI research', type: 'industry' },
+  { name: 'Microsoft', program: 'Research Fellowship', focus: 'Trustworthy AI & disinformation', type: 'industry' },
+  { name: 'NVIDIA', program: 'Academic Grant Program', focus: 'GPU compute & AI infrastructure', type: 'industry' },
+  { name: 'Cisco', program: 'Research Awards', focus: 'Security for GenAI & AI for Security', type: 'industry' },
+  { name: 'Sony', program: 'Focused Research Award', focus: 'Content protection & AI safety', type: 'industry' },
+  { name: 'NSF', program: 'CAREER, SaTC, Future CoRe, REU, MRI', focus: 'Foundational CyberAI research', type: 'federal' },
+  { name: 'DARPA', program: 'Young Faculty Award', focus: 'Agentic defense systems', type: 'federal' },
+  { name: 'DOE', program: 'ASCR', focus: 'Scalable AI for national security', type: 'federal' },
+  { name: 'IARPA', program: 'BENGAL, DECIPHER', focus: 'LLM threats & adversarial linguistics', type: 'intelligence' },
+];
 
 const FUNDING_TIMELINE = [
   { date: "Jan 2026", title: "DARPA YFA", source: "DoD / DARPA", priority: "High", details: "Young Faculty Award for agentic defense systems. Base $500K + Director's Fellowship option for total up to $1.35M." },
+  { date: "Jan 2026", title: "NSF CICI (IPAAI)", source: "NSF", priority: "High", details: "Integrity, Provenance, and Authenticity for AI-Ready Data. Up to $900K over 3 years." },
   { date: "Feb 2026", title: "NSF Future CoRe", source: "NSF CISE", priority: "High", details: "Foundational research in IIS and cybersecurity. Awards up to $1M for 4 years." },
+  { date: "Feb 2026", title: "CRA/Microsoft Fellowship", source: "Industry", priority: "Moderate", details: "Trustworthy AI Research Fellowship for early-career scholars. 12-month program with $17K stipend." },
+  { date: "Mar 2026", title: "AFOSR/ONR YIP Outreach", source: "DoD", priority: "Moderate", details: "Initiate program officer contact for Young Investigator white papers. AFOSR: $450K/3yr, ONR: $750K/3yr." },
   { date: "May 2026", title: "Amazon ARA", source: "Industry", priority: "High", details: "AI for Information Security CFP. Unrestricted funds ~$80K plus AWS credits." },
   { date: "Jul 2026", title: "NSF CAREER", source: "NSF", priority: "Maximum", details: "Cornerstone award: $400K–$500K over 5 years. Integrated research-education plan in proactive CyberAI." },
   { date: "Aug 2026", title: "NSF REU Site", source: "NSF", priority: "High", details: "Undergraduate research cohort site for CyberAI. Up to $500K over 3 years." },
+  { date: "Sep 2026", title: "Sloan Fellowship", source: "Foundation", priority: "High", details: "Sloan Research Fellowship nomination for early-career faculty in science and engineering." },
   { date: "Sep 2026", title: "NSF SaTC 2.0", source: "NSF CISE", priority: "High", details: "RES designation for large-scale hacker community evolution study. Up to $1.2M for 4 years." },
   { date: "Sep 2026", title: "Sony Research Award", source: "Industry", priority: "High", details: "Focused Research Award on content protection and AI safety. Up to $150K/year." },
+  { date: "Oct 2026", title: "DARPA YFA (2027 cycle)", source: "DoD / DARPA", priority: "Moderate", details: "Executive summary for the next cycle. Maintains continuous DoD engagement." },
   { date: "Nov 2026", title: "NSF MRI Track 2", source: "NSF", priority: "High", details: "Lab instrumentation for secure compute and GPU cluster. Up to $4M." },
+  { date: "Rolling", title: "NSF CDSE", source: "NSF", priority: "Moderate", details: "Computational and Data-Enabled Science. Scalable data pipelines and large-scale representation learning." },
+  { date: "Rolling", title: "Cisco Research", source: "Industry", priority: "Moderate", details: "Rolling proposals on AI for Security and Security for AI. Unrestricted research gifts." },
+  { date: "Rolling", title: "NVIDIA Academic Grant", source: "Industry", priority: "Moderate", details: "Quarterly deadlines for GPU compute access, cloud resources, and hardware grants." },
 ];
 
 const PIPELINE = [
@@ -201,6 +250,38 @@ function ResearchPage() {
         </div>
       </PageSection>
 
+      <PageSection title="Research Portfolio" accent="// strategic positions" subtitle="CCAIR organizes research investments into three tiers based on risk and expected coherence with the center thesis.">
+        <div style={{ display: 'grid', gap: 20 }}>
+          {RESEARCH_PORTFOLIO.map((tier) => (
+            <GlassCard key={tier.tier} style={{ borderLeft: `3px solid ${tier.color}` }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                <div className="mono" style={{ fontWeight: 700, fontSize: 14, color: tier.color }}>{tier.tier}</div>
+                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{tier.risk}</span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12 }}>
+                {tier.areas.map((a) => (
+                  <div key={a.name} style={{ padding: '12px 14px', borderRadius: 8, background: `${tier.color}08`, border: `1px solid ${tier.color}18` }}>
+                    <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 4 }}>{a.name}</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>{a.desc}</div>
+                  </div>
+                ))}
+              </div>
+            </GlassCard>
+          ))}
+        </div>
+      </PageSection>
+
+      <PageSection title="Theoretical Constructs" accent="// foundations" subtitle="Provisional constructs designed to be empirically observable, computationally operationalizable, and stable enough to accumulate evidence across projects.">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
+          {CONSTRUCTS.map((c) => (
+            <GlassCard key={c.name} style={{ padding: 22 }}>
+              <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 8, color: 'var(--accent)' }}>{c.name}</div>
+              <div style={{ color: 'var(--text-secondary)', fontSize: 13, lineHeight: 1.7 }}>{c.desc}</div>
+            </GlassCard>
+          ))}
+        </div>
+      </PageSection>
+
       <PageSection title="Center Outputs" accent="// artifacts" subtitle="Persistent, reusable artifacts that outlive individual grants.">
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
           {[
@@ -235,6 +316,30 @@ function PeoplePage() {
     <div style={{ paddingTop: 64 }}>
       <PageSection title="Director" accent="// leadership">
         <PersonCard {...TEAM.director} isDirector />
+      </PageSection>
+
+      <PageSection title="Faculty Affiliates" accent="// collaborators" subtitle="Internal and external faculty contributing to shared CCAIR artifacts across research primitives.">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 }}>
+          {TEAM.affiliates.map((a) => (
+            <GlassCard key={a.name} style={{ padding: 22 }}>
+              <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+                <div style={{
+                  width: 48, height: 48, borderRadius: 10, flexShrink: 0,
+                  background: 'linear-gradient(135deg, rgba(var(--accent2-rgb),0.2), rgba(var(--accent-rgb),0.1))',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 16, fontWeight: 700, color: 'var(--accent2)',
+                  border: '1px solid rgba(var(--accent2-rgb),0.15)',
+                }}>{a.name.split(' ').map(w => w[0]).join('').slice(0, 2)}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 2 }}>{a.name}</div>
+                  <div style={{ color: 'var(--accent2)', fontSize: 12.5, fontWeight: 600, marginBottom: 2 }}>{a.role}</div>
+                  <div style={{ color: 'var(--text-muted)', fontSize: 12, marginBottom: 8 }}>{a.dept}</div>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: 12, lineHeight: 1.5, fontStyle: 'italic' }}>{a.synergy}</div>
+                </div>
+              </div>
+            </GlassCard>
+          ))}
+        </div>
       </PageSection>
 
       <PageSection title="Join CCAIR" accent="// open positions">
@@ -346,6 +451,33 @@ function AboutPage({ onNavigate }) {
 
       <PageSection title="Funding Roadmap" accent="// 2026 strategy" subtitle="A strategic approach balancing immediate student support with long-term pursuit of center-scale awards.">
         <Timeline items={FUNDING_TIMELINE} />
+      </PageSection>
+
+      <PageSection title="Funding & Partners" accent="// ecosystem" subtitle="CCAIR pursues synergistic funding across federal agencies, defense, and industry partnerships.">
+        <div style={{ marginBottom: 24 }}>
+          <div className="mono" style={{ color: 'var(--accent)', fontSize: 12, fontWeight: 700, letterSpacing: 1, marginBottom: 14 }}>FEDERAL & DEFENSE</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 10 }}>
+            {PARTNERS.filter(p => p.type !== 'industry').map((p) => (
+              <div key={p.name} style={{ padding: '12px 16px', borderRadius: 8, border: '1px solid rgba(var(--accent-rgb),0.10)', background: 'rgba(var(--accent-rgb),0.03)' }}>
+                <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 2 }}>{p.name}</div>
+                <div className="mono" style={{ fontSize: 11, color: 'var(--accent)', marginBottom: 4 }}>{p.program}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{p.focus}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div>
+          <div className="mono" style={{ color: 'var(--accent2)', fontSize: 12, fontWeight: 700, letterSpacing: 1, marginBottom: 14 }}>INDUSTRY</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 10 }}>
+            {PARTNERS.filter(p => p.type === 'industry').map((p) => (
+              <div key={p.name} style={{ padding: '12px 16px', borderRadius: 8, border: '1px solid rgba(var(--accent2-rgb),0.10)', background: 'rgba(var(--accent2-rgb),0.03)' }}>
+                <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 2 }}>{p.name}</div>
+                <div className="mono" style={{ fontSize: 11, color: 'var(--accent2)', marginBottom: 4 }}>{p.program}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{p.focus}</div>
+              </div>
+            ))}
+          </div>
+        </div>
       </PageSection>
 
       <PageSection title="Governance" accent="// structure">
