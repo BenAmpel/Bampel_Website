@@ -2,14 +2,30 @@
 const { useState: usePageState } = React;
 
 const PUBLICATIONS = [
-  { title: "Proactive Cyber Threat Intelligence via Large Language Model Pipelines", authors: "Ampel, B.M., et al.", venue: "MIS Quarterly", year: 2025, type: "journal" },
-  { title: "Securing Cyberspace: AI-Enabled Cyber-Adversary Defense", authors: "Ampel, B.M.", venue: "ICIS 2024 — ACM SIGMIS Doctoral Dissertation Award", year: 2024, type: "dissertation" },
-  { title: "Adversarial Signal Emergence in Underground Hacker Communities", authors: "Ampel, B.M., Chen, H.", venue: "Journal of Management Information Systems", year: 2024, type: "journal" },
-  { title: "Deep Phishing: Multi-Modal Detection of Social Engineering Attacks", authors: "Ampel, B.M., et al.", venue: "IEEE ISI — Best Paper Award", year: 2023, type: "conference" },
-  { title: "Ambiguity-Aware Classification Under Adversarial Label Noise", authors: "Ampel, B.M., et al.", venue: "ACM TMIS", year: 2023, type: "journal" },
-  { title: "LLM-Driven Exploit Maturation Analysis", authors: "Ampel, B.M., et al.", venue: "ACM KDD AI4Cyber Workshop", year: 2023, type: "workshop" },
-  { title: "Hacker Forum Intelligence Mining for Early Warning Signals", authors: "Ampel, B.M., Chen, H.", venue: "Information Systems Frontiers", year: 2022, type: "journal" },
-  { title: "Automated Cyber Threat Intelligence with Neural Language Models", authors: "Ampel, B.M., et al.", venue: "IEEE ISI — Best Paper Award", year: 2020, type: "conference" },
+  { title: "A Computational Design Framework for Targeted Disruption of Hacker Communities", authors: "Ampel, B.M.", venue: "Information Systems Frontiers", year: 2026, type: "journal" },
+  { title: "Automatically Detecting Voice Phishing: A Large Audio Model Approach", authors: "Ampel, B.M., Samtani, S., Chen, H.", venue: "MIS Quarterly", year: 2026, type: "journal" },
+  { title: "Seeing Is Not Believing: A Deepfake Video Call Scam at Pan-Asia Trading", authors: "Ampel, B.M.", venue: "Journal of Information Systems Education", year: 2026, type: "journal" },
+  { title: "Large Language Models for Conducting Advanced Text Analytics Information Systems Research", authors: "Ampel, B.M., Yang, C., Hu, J., Chen, H.", venue: "ACM Transactions on Management Information Systems", year: 2025, type: "journal" },
+  { title: "Creating Proactive Cyber Threat Intelligence with Hacker Exploit Labels: A Deep Transfer Learning Approach", authors: "Ampel, B.M., Samtani, S., Zhu, H., Chen, H.", venue: "MIS Quarterly", year: 2024, type: "journal" },
+  { title: "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach", authors: "Ampel, B.M., Samtani, S., Zhu, H., Chen, H., Nunamaker, J.F.", venue: "Journal of Management Information Systems", year: 2024, type: "journal" },
+  { title: "Evading Anti-Phishing Models: A Field Note Documenting an Experience in the ML Security Evasion Competition 2022", authors: "Gao, Y., Ampel, B.M., Samtani, S.", venue: "ACM Digital Threats: Research and Practice", year: 2024, type: "journal" },
+  { title: "Why Following Friends Can Hurt You: A Replication Study", authors: "Ampel, B.M., Ullman, S.", venue: "AIS Transactions on Replication Research", year: 2023, type: "journal" },
+  { title: "Automatic Extraction of Protected Health Information from Multilingual Hacker Communities", authors: "Dacosta, C., Ampel, B.M., Hashim, M., Chen, H.", venue: "HICSS", year: 2026, type: "conference" },
+  { title: "A Domain-Adaptive Soft Prompting Framework for Multi-Type Bias Detection in News", authors: "Zhang, C., Ampel, B.M., Samtani, S.", venue: "HICSS", year: 2026, type: "conference" },
+  { title: "Examining the Robustness of ML-based Phishing Website Detection: Action-Masked Reinforcement Learning for Automated Red Teaming", authors: "Gao, Y., Ampel, B.M., Samtani, S.", venue: "IEEE Security and Privacy Workshops", year: 2025, type: "conference" },
+  { title: "The 4th Workshop on AI-enabled Cybersecurity Analytics", authors: "Ullman, S., Ampel, B.M., Samtani, S., Yang, S., Chen, H.", venue: "ACM SIGKDD", year: 2024, type: "conference" },
+  { title: "Mapping Exploit Code on Paste Sites to the MITRE ATT&CK Framework: A Multi-label Transformer Approach", authors: "Ampel, B.M., Vahedi, T., Samtani, S., Chen, H.", venue: "IEEE ISI — Best Paper Award", year: 2023, type: "conference" },
+  { title: "Disrupting Ransomware Actors on the Bitcoin Blockchain: A Graph Embedding Approach", authors: "Ampel, B.M., Otto, K., Samtani, S., Zhu, H., Chen, H.", venue: "IEEE ISI", year: 2023, type: "conference" },
+  { title: "Benchmarking the Robustness of Phishing Email Detection Systems", authors: "Ampel, B.M., Gao, Y., Hu, J., Samtani, S., Chen, H.", venue: "AMCIS", year: 2023, type: "conference" },
+  { title: "Identifying and Categorizing Malicious Content on Paste Sites: A Neural Topic Modeling Approach", authors: "Vahedi, T., Ampel, B.M., Samtani, S., Chen, H.", venue: "IEEE ISI", year: 2021, type: "conference" },
+  { title: "Exploring the Evolution of Exploit-Sharing Hackers: An Unsupervised Graph Embedding Approach", authors: "Otto, K., Ampel, B.M., Samtani, S., Zhu, H., Chen, H.", venue: "IEEE ISI", year: 2021, type: "conference" },
+  { title: "Distilling Contextual Embeddings Into a Static Word Embedding for Improving Hacker Forum Analytics", authors: "Ampel, B.M., Chen, H.", venue: "IEEE ISI", year: 2021, type: "conference" },
+  { title: "Labeling Hacker Exploits for Proactive Cyber Threat Intelligence: A Deep Transfer Learning Approach", authors: "Ampel, B.M., Samtani, S., Zhu, H., Ullman, S., Chen, H.", venue: "IEEE ISI — Best Paper Award", year: 2020, type: "conference" },
+  { title: "Performance Modeling of Hyperledger Sawtooth Blockchain", authors: "Ampel, B.M., Patton, M., Chen, H.", venue: "IEEE ISI", year: 2019, type: "conference" },
+  { title: "Large Language Models for Infrastructure as Code Vulnerability Remediation", authors: "Reyes, R., Ampel, B.M., Chen, H.", venue: "WISP", year: 2025, type: "workshop" },
+  { title: "Email Phishing Prevention: An Explainable Nudging Approach", authors: "Wagner, M., Ampel, B.M., Hashim, M., Chen, H.", venue: "WISP", year: 2025, type: "workshop" },
+  { title: "Multi-Agent Systems for Information Systems Research: A Framework for Collaborative AI-Augmented Inquiry", authors: "Ampel, B.M., Ullman, S.", venue: "Pre-ICIS SIG Services Workshop", year: 2025, type: "workshop" },
+  { title: "Linking Common Vulnerabilities and Exposures to the MITRE ATT&CK Framework: A Self-Distillation Approach", authors: "Ampel, B.M., Samtani, S., Ullman, S., Chen, H.", venue: "ACM KDD AI4Cyber Workshop", year: 2021, type: "workshop" },
 ];
 
 const DATASETS = [
@@ -32,16 +48,6 @@ const BENCHMARKS = [
 
 const TEAM = {
   director: { name: "Benjamin M. Ampel", role: "Director & Assistant Professor", dept: "Computer Information Systems, Georgia State University", areas: ["AI-enabled Cybersecurity", "Cyber Threat Intelligence", "LLMs", "Phishing Detection", "Hacker Communities"] },
-  affiliates: [
-    { name: "Balasubramaniam Ramesh", role: "Faculty Affiliate", dept: "Department Chair, CIS", areas: ["Software Engineering", "Requirements"] },
-    { name: "Arun Rai", role: "Faculty Affiliate", dept: "Director, Center for Digital Innovation", areas: ["Digital Innovation", "IS Theory"] },
-    { name: "Anu Bourgeois", role: "Faculty Affiliate", dept: "PI, CHAI Center (GSU + Duke)", areas: ["Human-AI Collaboration", "Security"] },
-  ],
-  students: [
-    { name: "Open Position", role: "PhD Student", dept: "CCAIR", areas: ["Adversarial Signal Analysis"] },
-    { name: "Open Position", role: "PhD Student", dept: "CCAIR", areas: ["LLM Security & Robustness"] },
-    { name: "Open Position", role: "MS Researcher", dept: "CCAIR", areas: ["Phishing Detection"] },
-  ],
 };
 
 const FUNDING_TIMELINE = [
@@ -106,7 +112,7 @@ function HomePage({ onNavigate, tweaks }) {
 
         {tweaks.heroStyle === 'full' && (
           <div style={{ position: 'relative', zIndex: 1, marginTop: 60, display: 'flex', gap: 'clamp(30px,5vw,60px)', animation: 'fadeInUp 1s ease 0.2s both' }}>
-            <StatCard value={30} suffix="+" label="Publications" />
+            <StatCard value={PUBLICATIONS.length} label="Publications" />
             <StatCard value={3} label="Research Pillars" />
             <StatCard value={14} suffix="+" label="Courses Taught" />
             <StatCard value={5} suffix="+" label="Collaborators" />
@@ -231,35 +237,14 @@ function PeoplePage() {
         <PersonCard {...TEAM.director} isDirector />
       </PageSection>
 
-      <PageSection title="Faculty Affiliates" accent="// collaborators" subtitle="Internal and external faculty who contribute to shared CCAIR artifacts.">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
-          {TEAM.affiliates.map((p, i) => <PersonCard key={i} {...p} />)}
-        </div>
-      </PageSection>
-
-      <PageSection title="Graduate Researchers" accent="// open positions" subtitle="CCAIR is actively recruiting PhD and MS students.">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-          {TEAM.students.map((p, i) => <PersonCard key={i} {...p} />)}
-        </div>
-        <GlassCard style={{ marginTop: 24, textAlign: 'center', padding: 36, background: 'linear-gradient(135deg, rgba(var(--accent-rgb),0.05), rgba(var(--accent2-rgb),0.03))' }}>
+      <PageSection>
+        <GlassCard style={{ textAlign: 'center', padding: 36, background: 'linear-gradient(135deg, rgba(var(--accent-rgb),0.05), rgba(var(--accent2-rgb),0.03))' }}>
           <div style={{ fontWeight: 700, fontSize: 20, marginBottom: 8 }}>Join CCAIR</div>
           <p style={{ color: 'var(--text-secondary)', fontSize: 14, maxWidth: 500, margin: '0 auto 20px', lineHeight: 1.7 }}>
             We are looking for motivated PhD and MS students interested in AI-enabled cybersecurity, LLMs, and proactive threat intelligence.
           </p>
           <CButton primary href="mailto:bampel@gsu.edu">Contact Dr. Ampel →</CButton>
         </GlassCard>
-      </PageSection>
-
-      <PageSection title="External Advisory Council" accent="// planned" subtitle="A small advisory group of senior academics, industry researchers, and government partners providing annual feedback.">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
-          {['Academic Advisors', 'Government Advisors', 'Industry Advisors'].map(type => (
-            <GlassCard key={type} style={{ textAlign: 'center', padding: 32 }}>
-              <div style={{ fontSize: 28, marginBottom: 12, opacity: 0.3 }}>◇</div>
-              <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--text-muted)' }}>{type}</div>
-              <div className="mono" style={{ fontSize: 11, color: 'var(--accent)', marginTop: 6, opacity: 0.5 }}>To be announced</div>
-            </GlassCard>
-          ))}
-        </div>
       </PageSection>
     </div>
   );
