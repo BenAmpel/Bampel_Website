@@ -1,5 +1,5 @@
 {
-  "refresh_date": "2026-05-25",
+  "refresh_date": "2026-06-01",
   "grants": [
     {
       "title": "REU Site: Hands-On Research in Federated Learning Security through Red Team vs. Blue Team Exercises",
@@ -17,27 +17,6 @@
       "keywords": [
         "Cybersecurity",
         "Malware"
-      ]
-    },
-    {
-      "title": "CAREER: Designing Domain Knowledge-Guided Learning Architectures towards Wireless Network Security: Enabling Effective and Efficient Attacks and Countermeasures",
-      "awardId": "2544044",
-      "piName": "Shangqing Zhao",
-      "institution": "University of Oklahoma Norman Campus",
-      "estimatedTotalAmt": "500000",
-      "startDate": "10/01/2026",
-      "expDate": "09/30/2031",
-      "abstractText": "Modern wireless networks have become increasingly complex and densely populated and can create a massive volume of operation data. As a result, extensive efforts from both academia and industry have focused on leveraging artificial intelligence (AI) in wireless network security related tasks such as (i) adversarial inference, (ii) adversarial generation, and (iii) data transformation. This project will focus on exploring new directions for incorporating additional domain knowledge to improve the efficiency of machine learning architecture design. The project's novelties are (i) investigating the wireless-domain knowledge used in mobile network design across different protocol layers and classifying this knowledge based on how it can be deterministically incorporated into learning model design; and (ii) designing specialized learning architectures that translate this domain knowledge into AI-friendly representations to improve both learning efficiency and performance. The project's broader significance and importance are advancing the state of the art in wireless network security, enhancing undergraduate student training opportunities, openly disseminating training materials, and carrying out outreach activities.\r\n\r\nThis project targets three major categories of learning models: (i) typical centralized learning models, (ii) decentralized learning models, and (iii) large language models, and explores the incorporation of wireless-domain knowledge into each class to address different security tasks. Specifically, the project outlines three research thrusts based on both system design and practical evaluations: (i) creating a new training-efficient, wireless-specific learning model as a surrogate model for resource allocation attacks; (ii) developing a new large language model-powered multi-agent framework to enable attacks in cooperative spectrum sensing; (iii) designing a novel client-to-server parameter sharing strategy in federated learning to defend against membership inference attacks. This project will also perform comprehensive evaluations based on real-world wireless experiments to validate and improve the proposed designs.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
-      "primaryProgram": [
-        "01003031DB NSF RESEARCH & RELATED ACTIVIT",
-        "01002930DB NSF RESEARCH & RELATED ACTIVIT",
-        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
-      ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2544044",
-      "keywords": [
-        "LLM / GenAI",
-        "Cybersecurity",
-        "Multi-Agent AI"
       ]
     },
     {
@@ -95,24 +74,6 @@
     },
     {
       "title": "Collaborative Research: SaTC 2.0: RES: AIGIS: Securing the Deep Learning Model Supply Chain",
-      "awardId": "2526622",
-      "piName": "Vasileios Kemerlis",
-      "institution": "Brown University",
-      "estimatedTotalAmt": "400000",
-      "startDate": "10/01/2026",
-      "expDate": "09/30/2030",
-      "abstractText": "Pre-trained AI models shared through open online repositories are becoming essential infrastructure for research, industry, and government. But this growing reliance also creates an important cybersecurity concern: just as traditional software can be attacked to include viruses or access backdoors, AI models can also be tampered with. This can lead to security breaches and errors in systems that rely on these pre-trained models. This project will develop methods and tools to help users verify whether a pre-trained AI model is trustworthy before it is incorporated into scientific workflows, operational systems, or other important computing environments. By improving the security of this emerging AI infrastructure, the project will help strengthen the U.S. research enterprise, support economic competitiveness, and improve the resilience of AI-enabled systems. The project will also advance education and workforce development by training students, providing research opportunities, and fostering collaboration among universities, industry, and other stakeholders.\r\n\r\nThis project develops a novel approach to address three major security challenges in the machine learning (ML) model supply chain. The research integrates software engineering principles with machine learning techniques to systematically mitigate vulnerabilities during model selection, loading, and management. First, the team of researchers will tackle model spoofing, where adversaries upload malicious models using deceptive names. The project relies on novel anomaly detection schemes for naming conventions and architectural signatures to identify these threats. Second, the investigators will secure the model deserialization process. Because frameworks often use formats vulnerable to arbitrary code execution, the research will develop automated, least privilege deserialization mechanisms and define safe subsets for model loading runtimes. Third, the project will establish robust model lineage tracking to manage the risks of reusing models. The team will create a lineage graph data structure that combines static and dynamic analysis to trace model evolution and detect illicit modifications. By integrating these methods, the project provides a comprehensive defense system that enhances trust, integrity, and oversight in the open source model ecosystem.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
-      "primaryProgram": [
-        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
-      ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2526622",
-      "keywords": [
-        "Cybersecurity",
-        "Deep Learning"
-      ]
-    },
-    {
-      "title": "Collaborative Research: SaTC 2.0: RES: AIGIS: Securing the Deep Learning Model Supply Chain",
       "awardId": "2526621",
       "piName": "James Davis",
       "institution": "Purdue University",
@@ -124,6 +85,24 @@
         "01002627DB NSF RESEARCH & RELATED ACTIVIT"
       ],
       "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2526621",
+      "keywords": [
+        "Cybersecurity",
+        "Deep Learning"
+      ]
+    },
+    {
+      "title": "Collaborative Research: SaTC 2.0: RES: AIGIS: Securing the Deep Learning Model Supply Chain",
+      "awardId": "2526622",
+      "piName": "Vasileios Kemerlis",
+      "institution": "Brown University",
+      "estimatedTotalAmt": "400000",
+      "startDate": "10/01/2026",
+      "expDate": "09/30/2030",
+      "abstractText": "Pre-trained AI models shared through open online repositories are becoming essential infrastructure for research, industry, and government. But this growing reliance also creates an important cybersecurity concern: just as traditional software can be attacked to include viruses or access backdoors, AI models can also be tampered with. This can lead to security breaches and errors in systems that rely on these pre-trained models. This project will develop methods and tools to help users verify whether a pre-trained AI model is trustworthy before it is incorporated into scientific workflows, operational systems, or other important computing environments. By improving the security of this emerging AI infrastructure, the project will help strengthen the U.S. research enterprise, support economic competitiveness, and improve the resilience of AI-enabled systems. The project will also advance education and workforce development by training students, providing research opportunities, and fostering collaboration among universities, industry, and other stakeholders.\r\n\r\nThis project develops a novel approach to address three major security challenges in the machine learning (ML) model supply chain. The research integrates software engineering principles with machine learning techniques to systematically mitigate vulnerabilities during model selection, loading, and management. First, the team of researchers will tackle model spoofing, where adversaries upload malicious models using deceptive names. The project relies on novel anomaly detection schemes for naming conventions and architectural signatures to identify these threats. Second, the investigators will secure the model deserialization process. Because frameworks often use formats vulnerable to arbitrary code execution, the research will develop automated, least privilege deserialization mechanisms and define safe subsets for model loading runtimes. Third, the project will establish robust model lineage tracking to manage the risks of reusing models. The team will create a lineage graph data structure that combines static and dynamic analysis to trace model evolution and detect illicit modifications. By integrating these methods, the project provides a comprehensive defense system that enhances trust, integrity, and oversight in the open source model ecosystem.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2526622",
       "keywords": [
         "Cybersecurity",
         "Deep Learning"
@@ -149,6 +128,24 @@
       ]
     },
     {
+      "title": "TTP-T: Accelerating Breakthrough Innovations: An End-to-End Platform for Large-Scale Discovery",
+      "awardId": "2553034",
+      "piName": "Nikolas Martelaro",
+      "institution": "Carnegie Mellon University",
+      "estimatedTotalAmt": "1200000",
+      "startDate": "06/01/2026",
+      "expDate": "05/31/2029",
+      "abstractText": "This project is funded through the NSF Translation to Practice (TTP) program, which supports efforts to turn research discoveries into practical tools that benefit communities, industry, and society. Despite record spending on research and development (R&D), breakthrough discoveries are becoming rarer and harder to achieve. A key reason is that experts often get stuck thinking within their own field, missing solutions that already exist in other domains. History shows that some of the most transformative innovations come from borrowing ideas across fields. Today, these kinds of creative leaps happen mostly by luck, leaving organizations trapped in incremental improvements and rising R&D costs with diminishing returns. With this TTP project, an artificial intelligence (AI) platform will be developed that makes cross-domain discovery systematic and repeatable, giving R&D teams in industries such as automotive, consumer goods, and advanced manufacturing a way to generate more novel ideas, create stronger intellectual property, and move promising concepts to market faster. By increasing the effectiveness of existing R&D investments, the platform directly strengthens competitiveness of the United States in critical technology sectors. The platform will be tested and refined through structured pilots with corporate R&D partners, with the goal of launching a self-sustaining commercial enterprise. Beyond its commercial potential, the project trains the next generation of innovators by integrating the platform into university courses in design, business, and human-computer interaction, and it aims to make powerful innovation tools accessible to startups, nonprofits, and academic labs.\r\n\r\nThis project creates an end-to-end, human\u2013AI collaborative engine for solving complex research and development problems at scale by mining evidence-backed analogies from assorted domains. The system uses a novel agentic AI workflow to dynamically abstract a problem into its core structural components, searches millions of multimodal sources across the open web for analogous scenarios that address similar underlying challenges, and translates those discoveries into concrete, ranked \"idea sparks\" that are evaluated for novelty, impact, and feasibility. Unlike standard large language model prompting, which tends to produce repetitive and homogeneous ideas and rely on surface similarity, this approach optimizes for novelty and variety by finding and transferring underlying structural mechanisms across multiple domains. A key technical contribution is bridging the gap from raw inspiration to actionable concepts through automated de-risking, where multi-agent workflows synthesize evidence from patents, scientific literature, and market data to evaluate feasibility and surface trade-offs. The project also advances human-AI interaction by developing interactive tools that enable domain experts to navigate thousands of candidate solutions and steer the AI's analysis. The platform will be validated through structured pilots with industry partners, user studies with professional research and development professionals, and innovation challenges, measuring impact via expert-rated novelty, value, and feasibility of generated concepts alongside usability and creativity support metrics.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2553034",
+      "keywords": [
+        "LLM / GenAI",
+        "Multi-Agent AI"
+      ]
+    },
+    {
       "title": "CAREER: Robust, Platform-Agnostic Defense Against VPN Misconfiguration Abuse in Malware Campaigns",
       "awardId": "2541237",
       "piName": "Afsah Anwar",
@@ -169,23 +166,20 @@
       ]
     },
     {
-      "title": "CAREER: Detecting Extremely Rare Physics Events in the Era of AI for Science",
-      "awardId": "2542832",
-      "piName": "Aobo Li",
-      "institution": "University of California-San Diego",
-      "estimatedTotalAmt": "693430",
-      "startDate": "05/15/2026",
-      "expDate": "04/30/2031",
-      "abstractText": "Why is the universe dominated by matter, while antimatter is virtually absent? Why does visible matter constitute only 15% of all matter, while the vast 85% majority\u2014Dark Matter\u2014has not been detected by any experiment on Earth as of today? Answering these questions requires detecting extremely rare physics events, a challenge that has driven physics for over four decades. This CAREER project aims to transform rare event search by developing Artificial Intelligence (AI) algorithms for two world-leading experiments: KamLAND-Zen and XLZD. The PI\u2019s team will develop Large Language Model (LLM) powered AI agents to aid KamLAND-Zen in deciphering the secret of matter-antimatter asymmetry, while creating AI-accelerated simulations to optimize the design of the XLZD Dark Matter detector. To cultivate an interdisciplinary AI workforce to go beyond disciplinary silos, this project aims to train \u201cData Physicists\u201d by teaching AI to physics students and sparking the interest of data science students in physics research. This will be achieved through the Rare AI for Science Ecosystem (RAISE), a student-led platform that features popular science stories and LLM-assisted AI tutorials.\r\n\r\nTechnically, this project aims to leverage surrogate models and LLM to secure the scientific success of world-leading rare event search experiments over the next decade. In the near term, as the KamLAND-Zen experiment concludes its data taking, the PI proposes to integrate KamNet, a spatiotemporal neural network, into the final analysis to deliver world-leading limits on neutrinoless double-beta decay, a process that could explain the universe's matter-antimatter asymmetry. In the medium term, to support the construction of the next-generation KamLAND2-Zen detector, the PI\u2019s team will design, test, and deploy a hardware-accelerated dual-agent AI system. This architecture leverages real-time AI for sub-millisecond event reconstruction at the detector front-end, while using LLM agents at the back-end to autonomously operate the detector and identify anomalies that eluded human\u2019s attention. In the long term, as the ultimate Generation-3 dark matter experiment XLZD begins its simulation and design campaign, the PI proposes to develop next-generation Rare Event Surrogate Models to systematically optimize the detector's design for maximum sensitivity and discovery potential.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "title": "Frameworks: An Ecosystem of Services for Multi-Messenger and Time Domain Science",
+      "awardId": "2608397",
+      "piName": "Rachel Street",
+      "institution": "Las Cumbres Observatory Global Telescope Network",
+      "estimatedTotalAmt": "1352523",
+      "startDate": "10/01/2026",
+      "expDate": "09/30/2029",
+      "abstractText": "Science has an unprecedented opportunity to explore astronomical and astrophysical phenomena through the complementary capabilities of multiple groundbreaking survey facilities.  These include the Legacy Survey of Space and Time (LSST) at the Vera C. Reuben observatory, neutrino detectors like IceCube, and the gravitational wave detecting network formed by the Laser Interferometer Gravitational-Wave Observatory (LIGO) and related instruments in Europe and Japan.  Modern surveys now provide a wealth of real-time discoveries from electromagnetic, gravitational wave and neutrino detectors, disseminated via high-throughput streaming services.  These petabyte-scale survey data products are useful only if downstream researchers can characterize the discoveries. To enable the scientific community to realize the full scientific potential of these surveys, the project team has produced the Target and Observation Manager (TOM) Toolkit, which is web-based cyberinfrastructure that enables communities of scientists to analyze data from multiple sources. The toolkit further enables scientists to coordinate follow-up observations that are necessary to fully characterize the discoveries.  Building on prior work, this project improves the usability and capabilities of the TOM Toolkit by upgrading it to support the increased scale needed to handle interactions with LSST data sources; by improving toolkit data analysis pipelines using modern machine learning methods; and by streamlining deployments on commercial clouds and NSF-funded computing systems. The project will support and grow the toolkit\u2019s professional and citizen science user community through updated documentation, tutorials, and community support.\r\n\r\nIn order to achieve the wealth of science that is possible through the current and future generations of astronomical and astrophysical survey instruments, researchers need to collate and analyze information rapidly, at scale, and continuously.  Since survey data alone are often insufficient to fully understand the underlying physics, researchers need to orchestrate follow-up observations in a timely manner using a range of telescope facilities.  This project provides science teams with modern, scalable, customizable, and extensible cyberinfrastructure to manage their data and analysis, with Application Programming Interfaces (APIs) to key external services such as alert brokers, data archives and telescope facilities.    This project delivers a software framework designed to make it easy for science users to create and customize a database-driven web application to orchestrate their research program.  The package provides a fully functional Django-based web application with browser-based data exploration and visualization tools to enable a wide range of science, plus a range of interfaces to essential external services.  This project extends the core package to integrate user data analysis workflows and advanced data analysis tools such as Large Language Models. The project will add APIs to enable researchers to create and manage citizen science programs through the Zooniverse platform.  \r\n\r\nThis award by the Office of Advanced Cyberinfrastructure is jointly supported by the Physics at the Information Frontier Program within the Physics Section of the Directorate for Mathematical and Physical Sciences.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
       "primaryProgram": [
-        "01002627DB NSF RESEARCH & RELATED ACTIVIT",
-        "01003031DB NSF RESEARCH & RELATED ACTIVIT",
-        "01002930DB NSF RESEARCH & RELATED ACTIVIT"
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
       ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2542832",
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2608397",
       "keywords": [
-        "LLM / GenAI",
-        "Deep Learning"
+        "LLM / GenAI"
       ]
     },
     {
@@ -203,6 +197,76 @@
         "01003031DB NSF RESEARCH & RELATED ACTIVIT"
       ],
       "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2541822",
+      "keywords": [
+        "LLM / GenAI"
+      ]
+    },
+    {
+      "title": "Collaborative Research: Frameworks: Cloud Conversations: AI-Augmented Interfaces to Research Infrastructure",
+      "awardId": "2609115",
+      "piName": "Katarzyna Keahey",
+      "institution": "University of Chicago",
+      "estimatedTotalAmt": "2540265",
+      "startDate": "10/01/2026",
+      "expDate": "09/30/2029",
+      "abstractText": "Cloud computing is essential to a growing number of science use cases, but configuring scientific environments for deployment in the cloud can be challenging given that it often requires specialized knowledge in system administration, networking, security, and involves numerous configuration settings. Furthermore, many scientific workloads depend on tightly coupled virtual clusters, specialized hardware, fast interconnects, accelerators, and custom drivers. Managing this complexity consumes valuable time and attention that researchers could otherwise devote to science. This project develops an AI-based conversational assistant for configuring scientific computing environments that lets researchers describe what they need in everyday language and then creates the environment and verifies its integrity on shared research cloud infrastructure. The benefits of this approach range from increasing scientific productivity and lowering the cost of using cloud computing to enabling practical reproducibility of computational experimentation. \r\n\r\nThe project designs and deploys an AI-based agent framework that can plan, provision, and validate scientific computing environments on open research computing infrastructure, such as Chameleon and Jetstream2. The framework combines large language models running on open, high-performance academic hardware with a set of software tools exposed through standard interfaces that include cloud-based services for resource provisioning, hardware and software environment templates, correctness checks, as well as validation benchmark suite. Key components include planning modules with built-in checks on resource limits, timing, and hardware compatibility; state and error handling modules that track multi-step workflows and summarize system events; and search pipelines that organize information from a wide variety of sources, including documentation, logs, help desk tickets, and environment artifacts into a searchable knowledge base.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2609115",
+      "keywords": [
+        "LLM / GenAI"
+      ]
+    },
+    {
+      "title": "Collaborative Research: Frameworks: Cloud Conversations: AI-Augmented Interfaces to Research Infrastructure",
+      "awardId": "2609116",
+      "piName": "Niall Gaffney",
+      "institution": "University of Texas at Austin",
+      "estimatedTotalAmt": "300000",
+      "startDate": "10/01/2026",
+      "expDate": "09/30/2029",
+      "abstractText": "Cloud computing is essential to a growing number of science use cases, but configuring scientific environments for deployment in the cloud can be challenging given that it often requires specialized knowledge in system administration, networking, security, and involves numerous configuration settings. Furthermore, many scientific workloads depend on tightly coupled virtual clusters, specialized hardware, fast interconnects, accelerators, and custom drivers. Managing this complexity consumes valuable time and attention that researchers could otherwise devote to science. This project develops an AI-based conversational assistant for configuring scientific computing environments that lets researchers describe what they need in everyday language and then creates the environment and verifies its integrity on shared research cloud infrastructure. The benefits of this approach range from increasing scientific productivity and lowering the cost of using cloud computing to enabling practical reproducibility of computational experimentation. \r\n\r\nThe project designs and deploys an AI-based agent framework that can plan, provision, and validate scientific computing environments on open research computing infrastructure, such as Chameleon and Jetstream2. The framework combines large language models running on open, high-performance academic hardware with a set of software tools exposed through standard interfaces that include cloud-based services for resource provisioning, hardware and software environment templates, correctness checks, as well as validation benchmark suite. Key components include planning modules with built-in checks on resource limits, timing, and hardware compatibility; state and error handling modules that track multi-step workflows and summarize system events; and search pipelines that organize information from a wide variety of sources, including documentation, logs, help desk tickets, and environment artifacts into a searchable knowledge base.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2609116",
+      "keywords": [
+        "LLM / GenAI"
+      ]
+    },
+    {
+      "title": "CAREER: Structure-Aware Learning from Weak Supervision for Knowledge Acquisition",
+      "awardId": "2541536",
+      "piName": "Yu Meng",
+      "institution": "University of Virginia Main Campus",
+      "estimatedTotalAmt": "769711",
+      "startDate": "10/01/2026",
+      "expDate": "09/30/2031",
+      "abstractText": "Knowledge acquisition\u2014the ability of artificial intelligence (AI) systems to extract actionable insights from vast amounts of unstructured text\u2014is critical for advancements in healthcare, education, and scientific discovery. While Large Language Models (LLMs) have shown impressive capabilities, their reliability depends heavily on massive, perfectly curated datasets, which are expensive and often unavailable in specialized domains. This CAREER project addresses this bottleneck by developing a new paradigm called \u201cstructure-aware weak supervision.\u201d Instead of relying on perfect human annotations, the project enables AI systems to learn autonomously from incomplete, noisy, and ambiguous data by discovering and utilizing underlying semantic structures, such as concept hierarchies and retrieval pathways. By reducing the dependency on expensive labeled data, this research democratizes the development of highly accurate, domain-specific AI tools for resource-constrained environments, such as public health agencies and community organizations. The project also integrates these research outcomes into new undergraduate and graduate curricula, open-source educational toolkits, and targeted K-12 outreach programs designed to broaden participation in computing and teach the next generation how to build reliable, human-centered AI systems.\r\n\r\nThis project proposes a unified framework for learning under weak supervision by bridging unstructured language data with structured, interpretable knowledge representations. The research is organized into three synergistic thrusts. Thrust 1 tackles incomplete supervision by inducing latent ontologies from unlabeled corpora via a novel Spherical Hierarchical Expectation-Maximization (SHEM) algorithm, enabling scalable information extraction and classification without predefined schemas. Thrust 2 addresses noisy supervision by designing a Denoising Retrieval-Augmented Generation (DeRAG) framework. It integrates symbolic reasoning over the induced ontologies with Structure-Aware Contrastive Retrieval (SACRet) to actively filter distractors and reliably ground language model outputs. Thrust 3 tackles ambiguous supervision by modeling complex, multi-faceted human preferences. It introduces a Tree of Reward Models (TreeRM) and Hierarchical Dirichlet Thompson Sampling (HDTS) to capture both shared foundational values (e.g., safety, factuality) and personalized user preferences (e.g., tone), ensuring robust AI alignment. Together, these contributions advance the theoretical foundations and practical methodologies of knowledge-centric AI, creating systems that autonomously construct knowledge, dynamically adapt to supervision gaps, and reliably align with hierarchical human values.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT",
+        "01002930DB NSF RESEARCH & RELATED ACTIVIT",
+        "01003031DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2541536",
+      "keywords": [
+        "LLM / GenAI"
+      ]
+    },
+    {
+      "title": "Collaborative Research: Frameworks: Cloud Conversations: AI-Augmented Interfaces to Research Infrastructure",
+      "awardId": "2609117",
+      "piName": "David Hancock",
+      "institution": "Indiana University",
+      "estimatedTotalAmt": "149588",
+      "startDate": "10/01/2026",
+      "expDate": "09/30/2029",
+      "abstractText": "Cloud computing is essential to a growing number of science use cases, but configuring scientific environments for deployment in the cloud can be challenging given that it often requires specialized knowledge in system administration, networking, security, and involves numerous configuration settings. Furthermore, many scientific workloads depend on tightly coupled virtual clusters, specialized hardware, fast interconnects, accelerators, and custom drivers. Managing this complexity consumes valuable time and attention that researchers could otherwise devote to science. This project develops an AI-based conversational assistant for configuring scientific computing environments that lets researchers describe what they need in everyday language and then creates the environment and verifies its integrity on shared research cloud infrastructure. The benefits of this approach range from increasing scientific productivity and lowering the cost of using cloud computing to enabling practical reproducibility of computational experimentation. \r\n\r\nThe project designs and deploys an AI-based agent framework that can plan, provision, and validate scientific computing environments on open research computing infrastructure, such as Chameleon and Jetstream2. The framework combines large language models running on open, high-performance academic hardware with a set of software tools exposed through standard interfaces that include cloud-based services for resource provisioning, hardware and software environment templates, correctness checks, as well as validation benchmark suite. Key components include planning modules with built-in checks on resource limits, timing, and hardware compatibility; state and error handling modules that track multi-step workflows and summarize system events; and search pipelines that organize information from a wide variety of sources, including documentation, logs, help desk tickets, and environment artifacts into a searchable knowledge base.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2609117",
       "keywords": [
         "LLM / GenAI"
       ]
@@ -242,40 +306,6 @@
       ]
     },
     {
-      "title": "RET Site: Empowering High School Teachers through Research Experiences on Quantum and Cybersecurity to Prepare the Future Workforce",
-      "awardId": "2601338",
-      "piName": "Jun Dai",
-      "institution": "Worcester Polytechnic Institute",
-      "estimatedTotalAmt": "600000",
-      "startDate": "10/01/2026",
-      "expDate": "09/30/2029",
-      "abstractText": "This project establishes a three-year, fully online Research Experiences for Teachers (RET) Site focused on quantum computing and cybersecurity education. The project prepares high school teachers from across the United States to bring emerging topics in quantum information science and cybersecurity into their classrooms. As quantum technologies continue to develop, future workers will need new knowledge and skills to understand how quantum computing affects digital security. However, most high schools do not currently have the resources or training to teach these topics. This project addresses this need by engaging teachers in summer research experiences and supporting them throughout the academic year as they develop and use new classroom materials. By preparing teacher-leaders and providing accessible instructional resources, the project expands access to emerging science and engineering topics, supports national workforce development in cybersecurity and quantum information science.\r\n\r\n\r\nThe project engages teachers in educational research focused on developing and evaluating classroom instructional units that teach cybersecurity concepts in the context of quantum computing using game-based and technology-supported learning approaches. Each summer, participating teachers complete a six-week online research experience in which they work with university researchers to develop standards-aligned lesson plans, classroom activities, and laboratory exercises. During the academic year, teachers participate in follow-up activities including biweekly meetings, classroom implementation, curriculum refinement, and sharing of instructional materials and research results. Teachers and students use an online platform that provides access to a browser-based quantum circuit simulator, automated assessment tools, and artificial intelligence (AI) learning support. The project studies how game-based learning and interactive tools can help make complex quantum cybersecurity concepts accessible at the high school level and produces classroom-ready instructional materials that can be adopted nationwide.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
-      "primaryProgram": [
-        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
-      ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2601338",
-      "keywords": [
-        "Cybersecurity"
-      ]
-    },
-    {
-      "title": "REU Site: Integrative Challenges in Cybersecurity-Deception, Remediation, and Resilient Systems",
-      "awardId": "2548335",
-      "piName": "M Abdullah Canbaz",
-      "institution": "SUNY at Albany",
-      "estimatedTotalAmt": "464622",
-      "startDate": "10/01/2026",
-      "expDate": "09/30/2029",
-      "abstractText": "Cybersecurity threats increasingly disrupt critical services such as healthcare, energy, and financial systems, affecting everyday life and national stability. These threats are no longer isolated technical problems; they involve complex interactions among digital systems, human decisions, and organizational responses. This project addresses these challenges by advancing a unified approach to understanding and improving how systems detect, respond to, and recover from cyber incidents. The project's novelties are the integration of intelligent deception techniques, automated system recovery, and human-centered decision analysis into a single, coordinated framework. The project's broader significance and importance are in strengthening the resilience of essential infrastructure, supporting national security, and expanding opportunities for undergraduate students to participate in advanced research. As a Research Experiences for Undergraduates (REU) Site hosted at the University at Albany, State University of New York, the project combines education with hands-on discovery, contributing to workforce development and promoting scientific progress that benefits society at large.\r\n\r\nThe project develops an interconnected set of research activities that examine cybersecurity from multiple perspectives. It creates adaptive digital environments that interact with attackers and collect detailed behavioral data, enabling deeper understanding of evolving threats. It constructs realistic simulated attack scenarios for industrial control systems to generate high-quality datasets for experimentation and evaluation. It incorporates methods to ensure that artificial intelligence systems used in defense are reliable, transparent, and resistant to misuse. In addition, it analyzes how decisions made by organizations and leaders influence the outcomes of cyber incidents, linking technical events with broader social and strategic factors.These activities are integrated through complementary research components and consistent evaluation frameworks across the project. The project advances knowledge of how intelligent and adaptive defense systems improve resilience, while producing open datasets, reusable tools, and trained participants who contribute to a stronger and more secure digital infrastructure.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
-      "primaryProgram": [
-        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
-      ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2548335",
-      "keywords": [
-        "Cybersecurity"
-      ]
-    },
-    {
       "title": "REU Site: Cryptography, Coding Theory and Quantum Computing at the USF",
       "awardId": "2548160",
       "piName": "Jean-Francois Biasse",
@@ -293,58 +323,39 @@
       ]
     },
     {
-      "title": "CAREER: A Safety-Aware Learning Framework for Identifying and Mitigating Risks in Human-LLM Interactions in Healthcare",
-      "awardId": "2541748",
-      "piName": "Chenguang Wang",
-      "institution": "University of California-Santa Cruz",
-      "estimatedTotalAmt": "499821",
+      "title": "CAREER: OPENALIGN: Towards Open-World Preference Alignment for Large Language Models",
+      "awardId": "2544599",
+      "piName": "Kaize Ding",
+      "institution": "Northwestern University at Chicago",
+      "estimatedTotalAmt": "599999",
       "startDate": "10/01/2026",
       "expDate": "09/30/2031",
-      "abstractText": "Large language models are increasingly used in healthcare applications such as virtual assistants and decision support tools, offering new opportunities to improve access to care and patient outcomes. However, these systems can introduce new kinds of risks that arise not from the model alone, but from how people interact with it. For example, patients may rely too heavily on automated advice, receive responses shaped by harmful preconceptions or be unintentionally influenced toward unsafe decisions. These risks are especially concerning in sensitive settings such as mental health and addiction recovery, where errors can have serious consequences. This project addresses these challenges by developing new methods to make interactions between people and artificial intelligence systems safer and more trustworthy. The work aims to improve the reliability of healthcare technologies, support safer patient experiences, and contribute to the broader goal of responsible artificial intelligence. Educational activities include developing interdisciplinary coursework and engaging students from diverse backgrounds in research at the intersection of artificial intelligence and health.\r\n\r\nThis project develops a unified, safety-aware learning framework for identifying and mitigating risks in human-large language model interactions in healthcare. The research investigates three integrated thrusts. First, it develops predictive models to detect fundamental and emerging interaction risks, such as overreliance, stereotyping, manipulation, and privacy violations, using supervised and contrastive learning techniques with interpretable outputs. Second, it introduces robust learning methods to mitigate these risks by incorporating user intent, clinical context, and interaction dynamics, including adversarial training and personalized reinforcement learning algorithms. Third, it designs an adaptive, closed-loop method that jointly optimizes risk identification and mitigation through self-supervised and continual learning, enabling generalization to evolving risks over time. The framework is evaluated using realistic digital simulation environments for addiction recovery and mental health support. The expected outcomes include new machine learning methodologies for AI safety, insights into safe deployment of AI in healthcare, and generalizable techniques for trustworthy human-AI interaction in high-stakes domains.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "abstractText": "As artificial intelligence (AI) systems are increasingly deployed in critical domains such as healthcare, scientific discovery, and autonomous decision-making, ensuring that foundation AI models such as large language models (LLMs) align with human values and preferences has become essential for their safe and beneficial deployment. However, most existing approaches rely on large amounts of high-quality labeled preference data and assume clean, stable, well-controlled environments. These assumptions are often violated in real-world scenarios, where data may be limited, noisy, or subject to change over time. This project addresses the fundamental problem of aligning LLMs with human preferences under such real or open-world settings. \r\nThe outcomes are expected to improve the data efficiency and reliability of LLMs in high-impact applications, including medical diagnosis and molecular discovery, while also contributing to education and workforce development through the integration of research and training activities.\r\n\r\nThe project focuses on three key aspects of aligning LLMs with human preferences in open-world settings. First, it develops novel data-efficient preference alignment algorithms that enable LLMs to maintain effective alignment in open-world environments with limited human-annotated preference data. Specifically, when LLMs encounter new tasks or domains, the proposed algorithms can strategically minimize reliance on extensive human or AI annotation while maximizing alignment performance across different low-data scenarios. Secondly, this project aims to enhance the reliability of LLM-based AI systems to maintain safe and robust alignment with human preferences when confronted with unreliable inputs. We will develop algorithmic solutions that can mitigate various forms of data-quality issues (e.g., distribution shifts, label noise, and human value shifts) while preserving alignment performance across different open-world environments. Lastly, this project will demonstrate successful deployment in high-stakes domains, including biochemistry and public health, and will reveal fundamental principles about domain-specific preference alignment while maintaining efficiency and reliability guarantees. This cross-interdisciplinary validation will open new research avenues for LLM alignment with human preferences in interdisciplinary research. Overall, the transition from closed-world to open-world preference alignment represents a fundamental\r\nparadigm shift that will provide critical insights about real-world deployment challenges, benefiting the entire AI community.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
       "primaryProgram": [
         "01003031DB NSF RESEARCH & RELATED ACTIVIT",
-        "01002627DB NSF RESEARCH & RELATED ACTIVIT",
-        "01002930DB NSF RESEARCH & RELATED ACTIVIT"
+        "01002930DB NSF RESEARCH & RELATED ACTIVIT",
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
       ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2541748",
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2544599",
       "keywords": [
         "LLM / GenAI"
       ]
     },
     {
-      "title": "REU SITE: WAVE SURF: Workforce Advancement in Verification and Emulation of Semiconductor Chips -- Undergraduate Research Fellowships",
-      "awardId": "2548388",
-      "piName": "Jiang Hu",
-      "institution": "Texas A&M Engineering Experiment Station",
-      "estimatedTotalAmt": "480300",
+      "title": "RET Site: Empowering High School Teachers through Research Experiences on Quantum and Cybersecurity to Prepare the Future Workforce",
+      "awardId": "2601338",
+      "piName": "Jun Dai",
+      "institution": "Worcester Polytechnic Institute",
+      "estimatedTotalAmt": "600000",
       "startDate": "10/01/2026",
       "expDate": "09/30/2029",
-      "abstractText": "Semiconductor chips power nearly every aspect of modern life, from smartphones and medical devices to national defense systems and critical infrastructure. As these chips grow more complex, verifying that they function correctly and securely has become one of the most costly and time-consuming stages of development. At the same time, the United States faces a critical shortage of engineers trained in chip verification, a gap that threatens both economic competitiveness and national security. This project establishes a Research Experiences for Undergraduates (REU) Site at Texas A&M University to train the next generation of verification engineers and semiconductor researchers. Each summer, ten undergraduate students will participate in a ten-week immersive research program focused on chip verification and the application of artificial intelligence (AI) to semiconductor design evaluation. The project specifically targets students from community colleges, regional universities, and institutions with limited research infrastructure, with emphasis on first-generation college students, veterans, and students with no prior research experience. Participants will receive layered mentorship from faculty, graduate students, and industry professionals, along with professional development training in scientific communication, ethics, and career readiness. Industry partners will contribute guest lectures, mentorship, and site visits, connecting students directly to career pathways in the semiconductor workforce. By combining cutting-edge research training with inclusive recruitment and sustained post-program engagement, this project addresses a pressing national workforce need while broadening participation in a strategically vital field.\r\n\r\nThis project engages undergraduate researchers in four interconnected themes spanning hardware security, performance analysis, design automation, and functional verification. The first theme develops scalable security verification frameworks that adapt fuzzing, formal analysis, and symbolic execution to detect vulnerabilities in hardware designs described at the register-transfer level and prototyped on field-programmable gate arrays. The second theme applies machine learning (ML) to processor performance debugging, training models to automatically detect and localize performance anomalies using hardware counter data, estimate fine-grained performance breakdowns from limited counter sets, and accelerate design simulation through early-run inference. The third theme investigates the use of large language models to automate chip design tasks, including hardware description language code generation, physical synthesis using open-source tool flows, and timing optimization. The fourth theme targets ML-driven functional verification, developing techniques for automated testbench generation, structure-aware coverage acceleration, multimodal failure triage that combines text and waveform data, and closed-loop testbench correction guided by dynamic bug mutation analysis. Students will work with commercial electronic design automation tools and open-source processor platforms, producing weekly progress reports, final presentations, and potential conference submissions. The program integrates structured mentorship, professional skills training, and industry exposure through site visits and seminars with engineers from leading semiconductor companies. An external evaluator will conduct formative and summative assessments, and participants will be tracked for five years to measure long-term impact on graduate school enrollment, research productivity, and career outcomes.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "abstractText": "This project establishes a three-year, fully online Research Experiences for Teachers (RET) Site focused on quantum computing and cybersecurity education. The project prepares high school teachers from across the United States to bring emerging topics in quantum information science and cybersecurity into their classrooms. As quantum technologies continue to develop, future workers will need new knowledge and skills to understand how quantum computing affects digital security. However, most high schools do not currently have the resources or training to teach these topics. This project addresses this need by engaging teachers in summer research experiences and supporting them throughout the academic year as they develop and use new classroom materials. By preparing teacher-leaders and providing accessible instructional resources, the project expands access to emerging science and engineering topics, supports national workforce development in cybersecurity and quantum information science.\r\n\r\n\r\nThe project engages teachers in educational research focused on developing and evaluating classroom instructional units that teach cybersecurity concepts in the context of quantum computing using game-based and technology-supported learning approaches. Each summer, participating teachers complete a six-week online research experience in which they work with university researchers to develop standards-aligned lesson plans, classroom activities, and laboratory exercises. During the academic year, teachers participate in follow-up activities including biweekly meetings, classroom implementation, curriculum refinement, and sharing of instructional materials and research results. Teachers and students use an online platform that provides access to a browser-based quantum circuit simulator, automated assessment tools, and artificial intelligence (AI) learning support. The project studies how game-based learning and interactive tools can help make complex quantum cybersecurity concepts accessible at the high school level and produces classroom-ready instructional materials that can be adopted nationwide.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
       "primaryProgram": [
         "01002627DB NSF RESEARCH & RELATED ACTIVIT"
       ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2548388",
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2601338",
       "keywords": [
-        "LLM / GenAI"
-      ]
-    },
-    {
-      "title": "CAREER: ProTrain: Enabling Efficient Large Language Model Training via Performance, Energy, and Reliability Co-optimizations",
-      "awardId": "2540555",
-      "piName": "Jieyang Chen",
-      "institution": "University of Oregon Eugene",
-      "estimatedTotalAmt": "533628",
-      "startDate": "09/01/2026",
-      "expDate": "08/31/2031",
-      "abstractText": "The rapid growth of large language models (LLMs) has enabled major advances in artificial intelligence (AI), including systems that assist with writing, coding, education, and decision-making. However, training these models demands enormous computing resources, creating significant challenges across multiple dimensions, including model quality, training time, energy efficiency, and reliability. Although many optimization techniques have been proposed, most focus on only one or a few aspects of training, leaving their overall impact on total training efficiency unclear. This project addresses this gap by developing a systematic understanding of the trade-offs among existing optimization strategies and by delivering a quantitative efficiency model that enables informed, cost-aware decision making for LLM training. In addition, the project advances optimization methods in underexplored areas, particularly energy efficiency and reliability. The anticipated outcomes will promote more sustainable computing practices, strengthen national competitiveness in AI, and support applications that advance economic growth, education, national security, and public services. The project also establishes an integrated education program to support workforce development and expand participation in advanced computing and the AI industry.\r\n\r\nThis project develops a unified framework for analyzing and optimizing LLM training efficiency across performance, energy consumption, reliability, and model quality, addressing the growing gap between the unprecedented resource demands of LLM training and the limitations of existing optimization approaches. The research comprises three primary components. First, it develops a novel efficiency model that integrates performance, energy, reliability, and quality optimizations to enable holistic decision making for large-scale training systems. Second, it designs a mathematically grounded, checkpoint-free fault tolerance mechanism that improves error detection and correction while reducing end-to-end training costs and mitigating failure-related interruptions. Third, it develops a knowledge-driven energy optimization approach that enhances the energy efficiency of large-scale LLM training and expands the performance-energy trade-off space to meet diverse cost constraints. The resulting techniques will be integrated into leading large-scale training frameworks and evaluated using state-of-the-art workloads to demonstrate improvements in scalability, robustness, and cost efficiency.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
-      "primaryProgram": [
-        "01002627DB NSF RESEARCH & RELATED ACTIVIT",
-        "01003031DB NSF RESEARCH & RELATED ACTIVIT",
-        "01002930DB NSF RESEARCH & RELATED ACTIVIT"
-      ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2540555",
-      "keywords": [
-        "LLM / GenAI"
+        "Cybersecurity"
       ]
     }
   ]
