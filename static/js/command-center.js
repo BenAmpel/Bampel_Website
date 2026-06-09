@@ -17,9 +17,10 @@ export function relativeTime(iso, now = new Date()) {
   if (days <= 0) return 'today';
   if (days === 1) return '1 day ago';
   if (days < 30) return `${days} days ago`;
-  const months = Math.floor(days / 30);
-  if (months === 1) return '1 month ago';
-  if (months < 12) return `${months} months ago`;
+  if (days < 365) {
+    const months = Math.max(1, Math.floor(days / 30));
+    return months === 1 ? '1 month ago' : `${months} months ago`;
+  }
   const years = Math.floor(days / 365);
   return years === 1 ? '1 year ago' : `${years} years ago`;
 }
@@ -175,12 +176,26 @@ export async function loadFeeds() {
 
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 
+export function safeURL(u) {
+  if (!u) return '';
+  try {
+    const p = new URL(u, 'https://bampel.com/');
+    return /^https?:$/.test(p.protocol) ? u : '';
+  } catch (_) {
+    return '';
+  }
+}
+
 function cardHTML(it) {
   const date = relativeTime(it.dateISO);
   const meta = [it.metaPrimary, it.metaSecondary].filter(Boolean).map(esc).join(' · ');
+  const href = safeURL(it.url);
+  const titleHTML = href
+    ? `<a class="cc-title" href="${esc(href)}" target="_blank" rel="noopener">${esc(it.title)}</a>`
+    : `<span class="cc-title">${esc(it.title)}</span>`;
   return `<li class="cc-card" data-lens="${it.lens}">
     <div class="cc-card-head"><span class="cc-badge">${esc(it.sourceLabel)}</span>${date ? `<span class="cc-date">${esc(date)}</span>` : ''}</div>
-    <a class="cc-title" href="${esc(it.url)}" target="_blank" rel="noopener">${esc(it.title)}</a>
+    ${titleHTML}
     ${it.summary ? `<p class="cc-summary">${esc(it.summary.slice(0, 180))}</p>` : ''}
     ${meta ? `<div class="cc-meta">${meta}</div>` : ''}
   </li>`;
@@ -205,7 +220,7 @@ export function mountCommandCenter(root) {
 
   root.innerHTML = `
     <div class="cc-bar">
-      <div class="cc-status" id="cc-status">Syncing intelligence feeds…</div>
+      <div class="cc-status" id="cc-status" aria-live="polite">Syncing intelligence feeds…</div>
       <div class="cc-controls">
         <input id="cc-search" class="cc-search" type="search" role="searchbox" aria-label="Search all research intelligence" placeholder="Search everything…">
         <select id="cc-sort" class="cc-sort" aria-label="Sort results">
@@ -219,7 +234,7 @@ export function mountCommandCenter(root) {
     <div class="cc-lenses" role="group" aria-label="Filter by category">
       ${LENSES.map((l) => `<button class="cc-chip" type="button" data-lens="${l.id}" aria-pressed="true">${l.icon} ${l.label} <span class="cc-count" data-count="${l.id}">0</span></button>`).join('')}
     </div>
-    <ul class="cc-stream" id="cc-stream" aria-live="polite">
+    <ul class="cc-stream" id="cc-stream">
       ${Array.from({ length: 6 }).map(() => '<li class="cc-skeleton"></li>').join('')}
     </ul>`;
 

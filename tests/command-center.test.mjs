@@ -67,7 +67,16 @@ test('normalize tolerates missing optional fields', () => {
   assert.deepEqual(item.topics, []);
 });
 
-import { applyState } from '../static/js/command-center.js';
+import { applyState, safeURL } from '../static/js/command-center.js';
+
+test('safeURL blocks javascript/data URLs and allows http(s)', () => {
+  assert.equal(safeURL('javascript:alert(1)'), '');
+  assert.equal(safeURL('data:text/html,<script>x</script>'), '');
+  assert.equal(safeURL('https://x.com/a'), 'https://x.com/a');
+  assert.equal(safeURL('http://x.com'), 'http://x.com');
+  assert.equal(safeURL(''), '');
+  assert.equal(safeURL(null), '');
+});
 
 const ITEMS = [
   { id: '1', lens: 'papers', title: 'LLM phishing', summary: 'about phishing', topics: ['nlp'], dateISO: '2026-01-01', score: 5 },
@@ -98,4 +107,10 @@ test('applyState sort=score orders by descending score', () => {
 test('applyState with empty lens set returns nothing', () => {
   const out = applyState(ITEMS, { activeLenses: new Set(), query: '', sort: 'newest' });
   assert.deepEqual(out, []);
+});
+
+test('relativeTime never returns 0 years for sub-year spans', () => {
+  const now = new Date('2027-06-09T00:00:00Z');
+  // ~359 days earlier
+  assert.equal(relativeTime('2026-06-15T00:00:00Z', now), '11 months ago');
 });
