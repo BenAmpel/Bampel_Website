@@ -66,3 +66,36 @@ test('normalize tolerates missing optional fields', () => {
   assert.equal(item.metaPrimary, '⭐ 0');
   assert.deepEqual(item.topics, []);
 });
+
+import { applyState } from '../static/js/command-center.js';
+
+const ITEMS = [
+  { id: '1', lens: 'papers', title: 'LLM phishing', summary: 'about phishing', topics: ['nlp'], dateISO: '2026-01-01', score: 5 },
+  { id: '2', lens: 'funding', title: 'NSF grant', summary: '', topics: [], dateISO: '2026-05-01', score: 1000 },
+  { id: '3', lens: 'community', title: 'repo', summary: 'security tool', topics: ['security'], dateISO: '2026-03-01', score: 900 },
+];
+
+test('applyState filters by active lenses', () => {
+  const out = applyState(ITEMS, { activeLenses: new Set(['funding']), query: '', sort: 'newest' });
+  assert.deepEqual(out.map((i) => i.id), ['2']);
+});
+
+test('applyState searches title, summary, and topics (case-insensitive)', () => {
+  const out = applyState(ITEMS, { activeLenses: new Set(['papers', 'funding', 'community']), query: 'PHISHING', sort: 'newest' });
+  assert.deepEqual(out.map((i) => i.id), ['1']);
+});
+
+test('applyState sorts by newest date by default', () => {
+  const out = applyState(ITEMS, { activeLenses: new Set(['papers', 'funding', 'community']), query: '', sort: 'newest' });
+  assert.deepEqual(out.map((i) => i.id), ['2', '3', '1']);
+});
+
+test('applyState sort=score orders by descending score', () => {
+  const out = applyState(ITEMS, { activeLenses: new Set(['papers', 'funding', 'community']), query: '', sort: 'score' });
+  assert.deepEqual(out.map((i) => i.id), ['2', '3', '1']);
+});
+
+test('applyState with empty lens set returns nothing', () => {
+  const out = applyState(ITEMS, { activeLenses: new Set(), query: '', sort: 'newest' });
+  assert.deepEqual(out, []);
+});

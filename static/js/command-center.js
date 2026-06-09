@@ -101,3 +101,26 @@ export function normalize(sourceKey, raw) {
     lens: base.lens,
   };
 }
+
+export function applyState(items, state) {
+  const { activeLenses, query, sort } = state;
+  const q = (query || '').trim().toLowerCase();
+  let out = items.filter((it) => activeLenses.has(it.lens));
+  if (q) {
+    out = out.filter((it) => {
+      const hay = `${it.title} ${it.summary} ${(it.topics || []).join(' ')}`.toLowerCase();
+      return hay.includes(q);
+    });
+  }
+  const byDateDesc = (a, b) => (b.dateISO || '').localeCompare(a.dateISO || '');
+  if (sort === 'score') {
+    out = out.slice().sort((a, b) => (b.score || 0) - (a.score || 0) || byDateDesc(a, b));
+  } else if (sort === 'relevance' && q) {
+    const rank = (it) => (it.title.toLowerCase().includes(q) ? 2 : 0)
+      + ((it.topics || []).join(' ').toLowerCase().includes(q) ? 1 : 0);
+    out = out.slice().sort((a, b) => rank(b) - rank(a) || byDateDesc(a, b));
+  } else {
+    out = out.slice().sort(byDateDesc);
+  }
+  return out;
+}
