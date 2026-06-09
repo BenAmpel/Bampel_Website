@@ -1,0 +1,41 @@
+{{/* Research Command Center: unified, filterable intelligence feed.
+     Logic lives in /static/js/command-center.js (ES module, unit-tested). */}}
+<div id="research-command-center" class="cc-root" data-cc></div>
+
+<style>
+.cc-root { margin: 1rem 0; font-family: 'Fira Code', 'Roboto Mono', monospace; }
+.cc-bar { display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.cc-status { font-size:0.78rem; color: var(--clr-cyan, #00e5ff); opacity:0.9; }
+.cc-controls { display:flex; gap:8px; flex-wrap:wrap; }
+.cc-search { background: rgba(0,0,0,0.5); border:1px solid rgba(0,229,255,0.35); color: var(--clr-text, #c9d1d9); border-radius:999px; padding:6px 14px; font:inherit; font-size:0.8rem; min-width:200px; }
+.cc-sort, .cc-refresh { background: rgba(0,0,0,0.5); border:1px solid rgba(0,255,65,0.35); color: var(--clr-green, #00ff41); border-radius:999px; padding:6px 12px; font:inherit; font-size:0.78rem; cursor:pointer; }
+.cc-lenses { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+.cc-chip { background: rgba(0,229,255,0.08); border:1px solid rgba(0,229,255,0.3); color:#bde8ff; border-radius:999px; padding:6px 12px; font:inherit; font-size:0.74rem; cursor:pointer; transition: background .15s, border-color .15s; }
+.cc-chip[aria-pressed="false"] { opacity:0.45; background:transparent; }
+.cc-chip:focus-visible { outline:2px solid var(--clr-cyan,#00e5ff); outline-offset:2px; }
+.cc-count { opacity:0.7; margin-left:4px; }
+.cc-stream { list-style:none; padding:0; margin:0; display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:14px; }
+.cc-card { border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:14px; background: rgba(0,0,0,0.28); display:flex; flex-direction:column; gap:6px; transition: transform .2s, border-color .2s; }
+.cc-card:hover { transform: translateY(-3px); border-color: rgba(0,255,65,0.4); }
+.cc-card-head { display:flex; justify-content:space-between; align-items:center; }
+.cc-badge { font-size:0.62rem; text-transform:uppercase; letter-spacing:0.08em; color: var(--clr-green,#00ff41); border:1px solid rgba(0,255,65,0.3); border-radius:999px; padding:2px 8px; }
+.cc-date { font-size:0.68rem; opacity:0.6; color: var(--clr-text,#c9d1d9); }
+.cc-title { color: var(--clr-cyan,#00e5ff); text-decoration:none; font-size:0.9rem; line-height:1.35; }
+.cc-title:hover { text-decoration:underline; }
+.cc-summary { font-size:0.76rem; line-height:1.45; color: var(--clr-text,#c9d1d9); opacity:0.85; margin:0; }
+.cc-meta { font-size:0.72rem; color: var(--clr-text,#c9d1d9); opacity:0.7; margin-top:auto; }
+.cc-empty { grid-column:1/-1; text-align:center; opacity:0.6; padding:24px; font-size:0.8rem; }
+.cc-skeleton { height:120px; border-radius:12px; background: linear-gradient(100deg, rgba(255,255,255,0.04), rgba(255,255,255,0.09), rgba(255,255,255,0.04)); background-size:200% 100%; animation: cc-shimmer 1.4s infinite; }
+@keyframes cc-shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+.cc-reduced .cc-skeleton { animation:none; }
+.cc-reduced .cc-card { transition:none; }
+body:not(.dark) .cc-card { background: rgba(255,255,255,0.92); border-color:#e2e8f0; }
+body:not(.dark) .cc-title { color:#0b6b80; }
+body:not(.dark) .cc-summary, body:not(.dark) .cc-date, body:not(.dark) .cc-meta { color:#1a2a33; }
+@media (max-width:600px){ .cc-stream { grid-template-columns:1fr; } .cc-controls { width:100%; } .cc-search { flex:1; } }
+</style>
+
+<script type="module">
+  import { mountCommandCenter } from '/js/command-center.js';
+  mountCommandCenter(document.getElementById('research-command-center'));
+</script>

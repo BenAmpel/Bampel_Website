@@ -17,41 +17,11 @@ sections:
     content:
       title: Research Impact
       intelligence: |
-        {{< spoiler text="🔭 arXiv Research Radar" >}}
-        {{< arxiv_radar >}}
-        {{< /spoiler >}}
+        {{< research_command_center >}}
 
         {{< spoiler text="💼 Grant Experience" >}}
         {{< grant_experience >}}
 
-        {{< /spoiler >}}
-
-        {{< spoiler text="💰 NSF Grant Opportunities" >}}
-        {{< nsf_grants >}}
-        {{< /spoiler >}}
-
-        {{< spoiler text="🔗 Semantic Scholar: Citations & Recommendations" >}}
-        {{< semantic_scholar >}}
-        {{< /spoiler >}}
-
-        {{< spoiler text="📚 OpenAlex: High-Impact Papers in Your Field" >}}
-        {{< openalex >}}
-        {{< /spoiler >}}
-
-        {{< spoiler text="🗞️ Hacker News: Research Community Pulse" >}}
-        {{< hacker_news >}}
-        {{< /spoiler >}}
-
-        {{< spoiler text="🏛️ Grants.gov: Open Funding Opportunities" >}}
-        {{< grants_gov >}}
-        {{< /spoiler >}}
-
-        {{< spoiler text="🔍 OpenCitations: Who Is Citing Your Work" >}}
-        {{< opencitations >}}
-        {{< /spoiler >}}
-
-        {{< spoiler text="💻 GitHub: Research Tools & Code" >}}
-        {{< github_research >}}
         {{< /spoiler >}}
 
       body: |
