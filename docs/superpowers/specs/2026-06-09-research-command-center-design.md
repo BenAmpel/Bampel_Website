@@ -37,6 +37,13 @@ lowest-risk because it reorganizes data and widgets that already exist.
 - **Replace** the 8 existing spoilers entirely (single unified section; cleaner UX).
 - **Client-side only** compute. Only network calls are the same ones the current
   widgets already make (static JSON fetches + the live HN Algolia call).
+- **Four lenses** (Papers / Citing my work / Funding / Community) are the filter
+  facets, not the raw 8 sources — simpler mental model; the source badge on each
+  card still identifies the exact origin.
+- **Keep the now-unused individual feed shortcodes** (`arxiv_radar.html`, etc.) in
+  the repo rather than deleting them. They are unwired from `_index.md` but
+  retained for reuse by the future Explorer feature. Zero runtime cost (not
+  referenced). The metrics workflow and its data scripts are untouched.
 
 ## Architecture
 
@@ -150,8 +157,8 @@ consumers of it.
 
 ## Risks / open considerations
 
-- The individual feed shortcodes (`arxiv_radar.html`, etc.) become unused once the
-  spoilers are removed. Decide during implementation whether to delete them or
-  keep them as dead code for possible reuse in the future Explorer feature.
 - Field availability varies by feed refresh; normalization must tolerate missing
   optional fields (defensive defaults).
+- The individual feed shortcodes become unused (unwired) but are retained per the
+  decision above; ensure nothing else in the codebase still references them before
+  considering future cleanup.
