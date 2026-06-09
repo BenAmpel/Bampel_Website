@@ -68,11 +68,20 @@ the relevant `sections:` blocks) into the new page files unless noted as NEW.
 - `about.biography` block (hero: photo, name, title, bio) — unchanged.
 - NEW compact **highlights** block — a dedicated `markdown` block (NOT the dense
   `research_impact_overview` block, which is being broken up): a one-line key-metrics
-  strip (papers, citations, awards), 3 featured/recent publications, a 2–3 sentence
-  research-focus blurb, and primary call-to-action buttons (Download CV, Google
-  Scholar, CCAIR, Research page). No widget stacks. Metrics may be sourced from the
-  existing `/static/data/scholar-metrics.json` if a lightweight display shortcode is
-  warranted; otherwise hard-coded current values are acceptable for v1.
+  strip, 3 featured publications, a 2–3 sentence research-focus blurb, and primary
+  call-to-action buttons (Download CV, Google Scholar, CCAIR, Research page). No
+  widget stacks.
+- **Metrics are LIVE**, read client-side from `/data/scholar-metrics.json`:
+  - Key-metrics strip uses `metrics.citations`, `metrics.hIndex`,
+    `metrics.publications` (and optionally `metrics.i10Index`), plus a "last
+    updated" note from `lastUpdated`.
+  - 3 featured publications from `individualPublications[]` (sorted by
+    `citations` desc, take top 3; each links via `.link`).
+  - Reuse the existing impact partials/shortcodes that already consume this file
+    (`layouts/partials/impact/impact_stats.html`,
+    `layouts/partials/impact/featured_publication.html`) rather than writing a new
+    fetch — wrap them in a small `home_highlights` shortcode if a shortcode entry
+    point is needed. No hard-coded metric values.
 - Remove all other blocks from Home (they move to the pages below).
 
 **Research — `content/research/_index.md`** (NEW, `type: landing`)
