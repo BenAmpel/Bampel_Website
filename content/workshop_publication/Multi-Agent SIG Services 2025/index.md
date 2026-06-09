@@ -28,5 +28,6 @@ tags:
 featured: false
 
 url_pdf: ''
+plain_summary: "This workshop paper proposes a framework for using teams of specialized AI agents to assist with information systems research. It describes how multiple agents can collaborate across stages of the research process while keeping humans in control and preserving scholarly rigor, outlining design principles such as clear agent roles and coordination protocols."
 ---
 {{< publication_extras >}}

@@ -18,7 +18,7 @@ publication_types: ['1']
 publication: In *Proceedings of the 59th Hawaii International Conference on System Sciences (HICSS)*
 publication_short: In *HICSS*
 
-abstract: Protected Health Information (PHI, e.g., electronic health records, insurance information) is increasingly stolen in data breaches by malicious actors with the intent to sell to others in hacker communities. These actors often protect themselves by describing the content and availability of PHI data using encrypted messaging platforms (e.g., Telegram & Discord). In this research, we propose a Named Entity Recognition Framework for PHI (NERF-PHI) to systematically analyze PHI-related hacker conversations. We collected more than three million multilingual hacker posts from Discord servers and Telegram groups. Utilizing open-source machine translation tools, we translated conversations to English and extracted information related to vulnerable individuals and medical entities. Results suggest that encoder-based Large Language Models show significant promise for extracting PHI-related information from hacker communities.
+abstract: "Protected Health Information (PHI, e.g., electronic health records, insurance information) is increasingly stolen in data breaches by malicious actors with the intent to sell to others in hacker communities. These actors often protect themselves by describing the content and availability of PHI data using encrypted messaging platforms (e.g., Telegram & Discord). In this research, we propose a Named Entity Recognition Framework for PHI (NERF-PHI) to systematically analyze PHI-related hacker conversations. We collected more than three million multilingual hacker posts from Discord servers and Telegram groups. Utilizing open-source machine translation tools, we translated conversations to English and extracted information related to vulnerable individuals and medical entities. Results suggest that encoder-based Large Language Models show significant promise for extracting PHI-related information from hacker communities."
 
 tags:
 - Protected Health Information
@@ -31,6 +31,7 @@ featured: false
 
 
 url_pdf: 'https://hdl.handle.net/10125/111453'
+plain_summary: "This research tackles the theft and resale of stolen health records discussed in hacker channels on encrypted platforms like Telegram and Discord. The authors build NERF-PHI, a named-entity-recognition system that, after machine-translating over three million multilingual hacker posts into English, automatically pulls out mentions of victims and medical data. They find that encoder-based language models are highly effective at surfacing this protected health information for investigators."
 ---
 {{< altmetric doi="10.24251/HICSS.2026.063" >}}
 

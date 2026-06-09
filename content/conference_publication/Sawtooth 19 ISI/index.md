@@ -26,7 +26,7 @@ publication_types: ['1']
 publication: In *2019 IEEE International Conference on Intelligence and Security Informatics (ISI)*
 publication_short: In *IEEE ISI*
 
-abstract: With the rapid development of blockchain platforms, it is important that different implementations are tested and analyzed for comparative purposes. One such implementation is Hyperledger Sawtooth, a new member of the Hyperledger family. Sawtooth blockchain is a permissioned implementation developed in part by Intel. While research has been done on Hyperledger Fabric, research on Sawtooth is not well documented. Using the Hyperledger Caliper benchmarking tool, we aim to test the performance of the blockchain and identify potential issues.
+abstract: "With the rapid development of blockchain platforms, it is important that different implementations are tested and analyzed for comparative purposes. One such implementation is Hyperledger Sawtooth, a new member of the Hyperledger family. Sawtooth blockchain is a permissioned implementation developed in part by Intel. While research has been done on Hyperledger Fabric, research on Sawtooth is not well documented. Using the Hyperledger Caliper benchmarking tool, we aim to test the performance of the blockchain and identify potential issues."
 # Summary. An optional shortened abstract.
 #summary: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis posuere tellus ac convallis placerat. Proin tincidunt magna sed ex sollicitudin condimentum.
 
@@ -59,6 +59,7 @@ url_pdf: 'https://par.nsf.gov/servlets/purl/10172683'
 #   E.g. `slides: "example"` references `content/slides/example/index.md`.
 #   Otherwise, set `slides: ""`.
 # slides: example
+plain_summary: "Hyperledger Sawtooth is a permissioned blockchain platform (co-developed by Intel) that had received little performance study compared to its sibling, Fabric. This paper benchmarks Sawtooth using the Hyperledger Caliper tool to measure how it performs and to surface potential issues."
 ---
 {{< altmetric doi="10.1109/ISI.2019.8823238" >}}
 

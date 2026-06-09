@@ -17,7 +17,7 @@ publication_types: ['1']
 publication: In *Proceedings of the 59th Hawaii International Conference on System Sciences (HICSS)*
 publication_short: In *HICSS*
 
-abstract: Advances in Large Language Models (LLMs) have enabled new opportunities to automate media analysis and improve collaborative social cybersecurity. A key task is bias detection in news reporting, which is essential for promoting information fairness and reducing polarization. However, existing approaches often rely on supervised fine-tuning with labeled datasets and fail to capture domain-specific linguistic patterns, limiting scalability and generalization. To address this, we propose a lightweight, modular framework that combines domain-adaptive pretraining (DAP) with Masked Language Modeling (MLM) and soft prompt tuning to detect six types of media bias (framing, group, semantic properties, connotation, informational spin, and phrasing). Our framework leverages 401,000+ New York Times articles from 2000 to 2024 to pretrain five LLMs, followed by bias prompting with small labeled data. The approach improves F1 by 7.6% and precision by 6.8% over hard prompts on average across the six types of biases.
+abstract: "Advances in Large Language Models (LLMs) have enabled new opportunities to automate media analysis and improve collaborative social cybersecurity. A key task is bias detection in news reporting, which is essential for promoting information fairness and reducing polarization. However, existing approaches often rely on supervised fine-tuning with labeled datasets and fail to capture domain-specific linguistic patterns, limiting scalability and generalization. To address this, we propose a lightweight, modular framework that combines domain-adaptive pretraining (DAP) with Masked Language Modeling (MLM) and soft prompt tuning to detect six types of media bias (framing, group, semantic properties, connotation, informational spin, and phrasing). Our framework leverages 401,000+ New York Times articles from 2000 to 2024 to pretrain five LLMs, followed by bias prompting with small labeled data. The approach improves F1 by 7.6% and precision by 6.8% over hard prompts on average across the six types of biases."
 
 tags:
 - Bias Detection
@@ -31,6 +31,7 @@ featured: false
 
 
 url_pdf: 'https://hdl.handle.net/10125/111610'
+plain_summary: "This paper introduces a method to automatically detect six different kinds of bias in news articles using large language models. Rather than relying on large hand-labeled datasets, the approach first adapts the model to news-style language and then uses \"soft prompting\" that needs only a small amount of labeled data. Tested on over 400,000 New York Times articles, it detects bias more accurately than standard prompting methods."
 ---
 {{< altmetric doi="10.24251/HICSS.2026.218" >}}
 

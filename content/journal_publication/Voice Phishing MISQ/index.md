@@ -15,7 +15,7 @@ url: "/journal_publication/voice-phishing-misq/"
 publication: "*Management Information Systems Quarterly (MISQ)*, Forthcoming"
 publication_short: ""
 
-abstract: Voice phishing (vishing) attacks have become increasingly sophisticated, exploiting audio-based communication channels to deceive victims. This paper presents a large audio model approach for automatically detecting voice phishing calls, advancing the field of AI-enabled cybersecurity defense against emerging audio-based threats.
+abstract: "Phishing attacks remain one of the most prevalent and pervasive cybersecurity concerns. Voice phishing (i.e., vishing) is an emerging type of phishing attack where malicious actors use audio channels to steal sensitive information from victims. However, vishing detection is a challenging task due to its real-time nature and the limited availability of datasets. To help address the concern of vishing detection, this study proposes the vishing generative pretrained transformer (VishGPT). VishGPT adopts the computational design paradigm and incorporates novel reinforcement learning-based large language model fine-tuning and synthetic data model pretraining to automatically detect vishing attempts in real time. We evaluated VishGPT using a series of benchmark experiments, where we empirically demonstrated its improvement over state-of-the-art vishing detection and audio classification models. The results suggest that our proposed VishGPT achieved state-of-the-art performance in terms of accuracy (86.18%), precision (90.63%), recall (85.02%), and F1-score (87.74%). VishGPT offers practical value to cybersecurity professionals, end users, and academia. Additionally, VishGPT provides important design principles in the form of a custom proximal policy optimization (PPO) reward function and synthetic pretraining to the information systems knowledge base."
 
 tags:
 - Voice Phishing
@@ -26,6 +26,7 @@ tags:
 featured: true
 
 url_pdf: ''
+plain_summary: "Voice phishing (\"vishing\") scams trick people over phone or audio channels and are hard to catch in real time. The authors built VishGPT, an AI system that listens to calls and flags vishing attempts as they happen, trained partly on synthetic data to overcome the shortage of real examples. It detected scams more accurately than existing methods (about 86% accuracy), offering a practical defense for users and security teams."
 ---
 {{< altmetric doi="10.25300/MISQ/2025/19532" >}}
 

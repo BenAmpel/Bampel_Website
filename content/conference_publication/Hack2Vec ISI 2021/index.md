@@ -25,7 +25,7 @@ publication_types: ['1']
 publication: In *2021 IEEE International Conference on Intelligence and Security Informatics (ISI)*
 publication_short: In *IEEE ISI*
 
-abstract: Hacker forums provide malicious actors with a large database of tutorials, goods, and assets to leverage for cyber-attacks. Careful research of these forums can provide tremendous benefit to the cybersecurity community through trend identification and exploit categorization. This study aims to provide a novel static word embedding, Hack2Vec, to improve performance on hacker forum classification tasks. Our proposed Hack2Vec model distills contextual representations from the seminal pre-trained language model BERT to a continuous bag-of-words model to create a highly targeted hacker forum static word embedding. The results of our experimental design indicate that Hack2Vec improves performance over prominent embeddings in accuracy, precision, recall, and F1-score for a benchmark hacker forum classification task.
+abstract: "Hacker forums provide malicious actors with a large database of tutorials, goods, and assets to leverage for cyber-attacks. Careful research of these forums can provide tremendous benefit to the cybersecurity community through trend identification and exploit categorization. This study aims to provide a novel static word embedding, Hack2Vec, to improve performance on hacker forum classification tasks. Our proposed Hack2Vec model distills contextual representations from the seminal pre-trained language model BERT to a continuous bag-of-words model to create a highly targeted hacker forum static word embedding. The results of our experimental design indicate that Hack2Vec improves performance over prominent embeddings in accuracy, precision, recall, and F1-score for a benchmark hacker forum classification task."
 
 # Summary. An optional shortened abstract.
 #summary: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis posuere tellus ac convallis placerat. Proin tincidunt magna sed ex sollicitudin condimentum.
@@ -61,6 +61,7 @@ url_pdf: 'https://par.nsf.gov/servlets/purl/10344545'
 #   E.g. `slides: "example"` references `content/slides/example/index.md`.
 #   Otherwise, set `slides: ""`.
 # slides: example
+plain_summary: "This paper introduces Hack2Vec, a specialized way of converting hacker-forum text into numerical representations that machine-learning models can use. It transfers knowledge from the powerful BERT language model into a lightweight, forum-specific word embedding tailored to hacker language. On a standard forum classification task, Hack2Vec outperforms other widely used embedding methods across accuracy and related metrics."
 ---
 {{< altmetric doi="10.1109/ISI53945.2021.9624848" >}}
 

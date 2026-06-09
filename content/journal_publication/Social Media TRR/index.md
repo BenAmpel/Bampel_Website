@@ -21,7 +21,7 @@ publication_types: ["2"]
 publication: "*Transactions on Replication Research, 9*(1)"
 publication_short: ""
 
-abstract: This study is a methodological replication of the work originally published in Information Systems Research by Krasnova et al. (2015). The original work studied the effects of envy in the context of Social Network Sites (SNSs) among college-age users. We adapt the constructs and measurement items of the original survey but change the context of the SNS to Instagram instead of Facebook. We also target a sample of college-age students from the United States instead of from Germany. The results of our replication support six of the seven hypotheses from the original paper. Confirming these results reinforce the model proposed by Krasnova et al. (2015). However, our replication did not find a strong mediation effect from envy on an SNS between the intensity of social information consumption on an SNS and users’ cognitive well-being. The results suggest that the difference in population, SNS, or time has led to a change in this effect, inviting further replications and new studies.
+abstract: "This study is a methodological replication of the work originally published in Information Systems Research by Krasnova, Widjaja, Buxmann, Wenninger, and Benbasat (2015). The original work studied the effects of envy in the context of Social Network Sites (SNSs) among college-age users. We adapt the constructs and measurement items of the original survey but change the context of the SNS to Instagram instead of Facebook. We also target a sample of college-age students from the United States instead of from Germany. The results of our replication support six of the seven hypotheses from the original paper. Confirming these results reinforce the model proposed by Krasnova et al. (2015). However, our replication did not find a strong mediation effect from envy on an SNS between the intensity of social information consumption on an SNS and users' cognitive well-being. The results suggest that the difference in population, SNS, or time has led to a change in this effect inviting further replications and new studies."
 # Summary. An optional shortened abstract.
 #summary: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis posuere tellus ac convallis placerat. Proin tincidunt magna sed ex sollicitudin condimentum.
 
@@ -62,5 +62,6 @@ image:
 #   E.g. `slides: "example"` references `content/slides/example/index.md`.
 #   Otherwise, set `slides: ""`.
 #slides: example
+plain_summary: "The authors re-ran a well-known 2015 study on how envy on social media affects well-being, this time using Instagram and U.S. college students instead of the original's Facebook and German sample. Most of the original findings held up, supporting the idea that consuming others' posts can fuel envy. One link, however, was weaker than before, suggesting the effect may shift across platforms, populations, or time, and inviting further study."
 ---
 {{< publication_extras >}}

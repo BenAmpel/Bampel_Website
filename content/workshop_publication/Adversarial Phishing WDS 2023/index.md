@@ -30,5 +30,6 @@ tags:
 featured: false
 
 url_pdf: ''
+plain_summary: "This workshop paper studies how attackers could automatically create phishing websites designed to slip past machine learning detectors. Using a reinforcement learning approach, the authors generate adversarial phishing pages to expose weak spots in current anti-phishing defenses and motivate the design of more robust detection systems."
 ---
 {{< publication_extras >}}

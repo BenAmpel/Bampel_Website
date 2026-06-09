@@ -1,0 +1,65 @@
+{{/*
+  Academic SEO for publication pages.
+  Emits Google Scholar "Highwire Press" citation_* meta tags and a
+  schema.org ScholarlyArticle JSON-LD block. The bundled wowchemy-seo
+  module only emits these for pages whose Type == "publication"; this
+  site uses custom sections (journal_publication / conference_publication
+  / workshop_publication), so without this partial publication pages ship
+  with no structured data and are invisible to Google Scholar.
+*/}}
+{{ $sections := slice "journal_publication" "conference_publication" "workshop_publication" }}
+{{ if and .IsPage (in $sections .Section) }}
+  {{ $page := . }}
+
+  {{/* Resolve author folder usernames (e.g. "admin") to full display names. */}}
+  {{ $authors := slice }}
+  {{ range $page.Params.authors }}
+    {{ $name := . }}
+    {{ with $.Site.GetPage (printf "/authors/%s" .) }}{{ $name = .Title }}{{ end }}
+    {{ $authors = $authors | append $name }}
+  {{ end }}
+
+  {{ $venue := $page.Params.publication | default $page.Params.publication_short | default "" }}
+  {{ $venuePlain := trim (replaceRE "^In\\s+" "" (replaceRE "\\*" "" (plainify $venue))) " " }}
+  {{ $doi := "" }}{{ with $page.Params.doi }}{{ if ne . "" }}{{ $doi = . }}{{ end }}{{ end }}
+  {{ $abstract := trim (replaceRE "\\s+" " " (plainify ($page.Params.abstract | default ""))) " " }}
+
+  {{ $pdf := "" }}
+  {{ with $page.Params.url_pdf }}{{ if ne . "" }}
+    {{ $pdf = cond (hasPrefix . "http") . (printf "%s%s" $page.Site.BaseURL (strings.TrimPrefix "/" .)) }}
+  {{ end }}{{ end }}
+
+  {{ $isJournal := eq $page.Section "journal_publication" }}
+
+  {{/* ---------- Highwire Press citation_* meta tags ---------- */}}
+  <meta name="citation_title" content="{{ $page.Title }}">
+  {{ range $authors }}<meta name="citation_author" content="{{ . }}">
+  {{ end }}
+  <meta name="citation_publication_date" content="{{ $page.Date.Format "2006/01/02" }}">
+  {{ with $venuePlain }}
+    {{ if $isJournal }}<meta name="citation_journal_title" content="{{ . }}">
+    {{ else }}<meta name="citation_conference_title" content="{{ . }}">{{ end }}
+  {{ end }}
+  {{ with $doi }}<meta name="citation_doi" content="{{ . }}">{{ end }}
+  <meta name="citation_abstract_html_url" content="{{ $page.Permalink }}">
+  {{ with $pdf }}<meta name="citation_pdf_url" content="{{ . }}">{{ end }}
+
+  {{/* ---------- schema.org ScholarlyArticle JSON-LD ---------- */}}
+  {{ $authorObjs := slice }}
+  {{ range $authors }}{{ $authorObjs = $authorObjs | append (dict "@type" "Person" "name" .) }}{{ end }}
+  {{ $sameAs := slice }}{{ with $doi }}{{ $sameAs = slice (printf "https://doi.org/%s" .) }}{{ end }}
+  {{ $ld := dict
+      "@context" "https://schema.org"
+      "@type" "ScholarlyArticle"
+      "headline" $page.Title
+      "name" $page.Title
+      "author" $authorObjs
+      "datePublished" ($page.Date.Format "2006-01-02")
+      "url" $page.Permalink
+      "mainEntityOfPage" $page.Permalink
+  }}
+  {{ with $abstract }}{{ $ld = merge $ld (dict "abstract" . "description" .) }}{{ end }}
+  {{ with $venuePlain }}{{ $ld = merge $ld (dict "isPartOf" (dict "@type" (cond $isJournal "Periodical" "PublicationEvent") "name" .)) }}{{ end }}
+  {{ with $doi }}{{ $ld = merge $ld (dict "sameAs" $sameAs "identifier" (dict "@type" "PropertyValue" "propertyID" "doi" "value" .)) }}{{ end }}
+  <script type="application/ld+json">{{ $ld | jsonify (dict "indent" "  ") | safeJS }}</script>
+{{ end }}

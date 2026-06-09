@@ -1,0 +1,20 @@
+{{/*
+  custom_head.html — supported Wowchemy injection point, loaded by the
+  module's site_head.html via `templates.Exists "partials/custom_head.html"`.
+  Use this for <head> additions that must load on every page (unlike the
+  hooks/*.html files, which the current module only loads from hook
+  *directories* such as hooks/head-end/, not single files).
+*/}}
+
+{{/* Google Scholar citation_* meta tags + ScholarlyArticle JSON-LD on publication pages. */}}
+{{ partial "hooks/academic_seo.html" . }}
+
+{{/*
+  Site-wide custom layer (animated background, hero/glitch effects, scroll
+  progress, dashboard/timeline/skill styling, Scholar widget, Altmetric loader,
+  pub-loader.js, enhancement JS). These live in hooks/head-end.html, but the
+  current Wowchemy module only auto-loads hooks from *directories* (hooks/head-end/),
+  so the single file was silently dropped in production. Loading it explicitly
+  here — the supported custom_head injection point — restores it.
+*/}}
+{{ partial "hooks/head-end.html" . }}

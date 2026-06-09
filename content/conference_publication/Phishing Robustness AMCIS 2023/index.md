@@ -19,7 +19,7 @@ publication_types: ['1']
 publication: In *Proceedings of the 29th Americas Conference on Information Systems (AMCIS)*
 publication_short: In *AMCIS*
 
-abstract: Phishing emails have emerged as one of the most common forms of social engineering attacks inflicting organizations. To combat this ever-present threat, organizations are turning toward AI-enabled phishing email detection systems (PEDS). However, the robustness of AI-enabled PEDS against adversarial text perturbations is currently unclear. In this study, we benchmark the robustness of prevailing AI-enabled PEDS against character, word, sentence, and multi-level adversarial text perturbations to quantitatively demonstrate how these systems respond to specific types of text-based attacks.
+abstract: "Social engineering attacks are currently the most cited cybersecurity threat to organizations. Phishing emails are the most salient form of social engineering attacks. Organizations are increasingly implementing AI-enabled systems to detect phishing emails. However, AI-enabled systems are often susceptible to textual perturbations, where an adversary makes a small change to cause a misclassification. In this study, we sought to identify the performance of prevailing phishing email detection systems (PEDS) against character, word, sentence, and multi-level adversarial text perturbations. Through a principled benchmarking framework, we quantitatively demonstrated the lack of robustness prevailing PEDS have to specific types of text-based adversarial perturbations (e.g., character, word, sentence, multi-level). The results of this study provide new insights into the robustness of AI-based PEDS and highlight the need for organizations to adopt a multi-layered approach to phishing protection. Additionally, organizations can implement our benchmark framework to test their PEDS against adversarial perturbations."
 
 tags:
 - Phishing
@@ -31,5 +31,6 @@ tags:
 featured: false
 
 url_pdf: 'https://aisel.aisnet.org/amcis2023/sig_sec/sig_sec/11/'
+plain_summary: "Companies increasingly rely on AI to catch phishing emails, but attackers can fool these systems by making tiny tweaks to the text. This study systematically tests popular AI phishing detectors against such manipulations and shows they are often easily evaded, arguing for layered defenses and offering a benchmark organizations can use to stress-test their own tools."
 ---
 {{< publication_extras >}}

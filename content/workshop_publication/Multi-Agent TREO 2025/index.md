@@ -28,5 +28,6 @@ tags:
 featured: false
 
 url_pdf: ''
+plain_summary: "This ICIS TREO talk raises provocative questions about how teams of AI agents might reshape information systems scholarship. It weighs both the promise and the risks of AI-augmented research, considering how role-differentiated agents could work alongside human researchers without compromising rigor or ethics."
 ---
 {{< publication_extras >}}

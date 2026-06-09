@@ -26,7 +26,7 @@ publication_types: ['1']
 publication: In *International Conference on Information Systems*
 publication_short: In *ICIS 2021*
 
-abstract: The increasing complexity of managerial decision-making for digital innovation activities accelerates cognitive biases like escalation of commitment (EoC). Decision aids (e.g., AI agents) can assist managers in avoiding EoC scenarios. However, how AI-based decision aids affect EoC in this context remains a critical yet understudied topic. To address this gap, we develop a theoretical model and propose a randomized controlled post-test vignette experiment with a fictive decision-making simulation to study the de-escalating effect of an AI-based decision aid in the digital innovation context. Our model accounts for moderating (AI familiarity, personality traits) and mediating (decision aid reliance) factors. By entangling the de-escalating effect of AI agent decision aid in decision-making scenarios about digital innovation projects we contribute to the digital innovation, AI agent, and the EoC literature. The future implementation of the proposed research design lays the foundation for designing AI agent decision support systems that de-bias managerial decision-making.
+abstract: "The increasing complexity of managerial decision-making for digital innovation activities accelerates cognitive biases like escalation of commitment (EoC). Decision aids (e.g., AI agents) can assist managers in avoiding EoC scenarios. However, how AI-based decision aids affect EoC in this context remains a critical yet understudied topic. To address this gap, we develop a theoretical model and propose a randomized controlled post-test vignette experiment with a fictive decision-making simulation to study the de-escalating effect of an AI-based decision aid in the digital innovation context. Our model accounts for moderating (AI familiarity, personality traits) and mediating (decision aid reliance) factors. By entangling the de-escalating effect of AI agent decision aid in decision-making scenarios about digital innovation projects we contribute to the digital innovation, AI agent, and the EoC literature. The future implementation of the proposed research design lays the foundation for designing AI agent decision support systems that de-bias managerial decision-making."
 # Summary. An optional shortened abstract.
 #summary: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis posuere tellus ac convallis placerat. Proin tincidunt magna sed ex sollicitudin condimentum.
 
@@ -62,5 +62,6 @@ url_pdf: 'https://aisel.aisnet.org/cgi/viewcontent.cgi?article=1375&context=icis
 #   E.g. `slides: "example"` references `content/slides/example/index.md`.
 #   Otherwise, set `slides: ""`.
 # slides: example
+plain_summary: "When managers keep pouring resources into a failing project rather than cutting their losses, that's a bias called escalation of commitment. This paper proposes a study design using an AI advisor to help managers recognize and back away from doomed digital innovation projects, and lays out an experiment to test whether such AI assistance actually reduces the bias."
 ---
 {{< publication_extras >}}

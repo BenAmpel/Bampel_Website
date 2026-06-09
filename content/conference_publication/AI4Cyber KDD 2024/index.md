@@ -19,7 +19,7 @@ publication_types: ['1']
 publication: In *Proceedings of the 30th ACM SIGKDD Conference on Knowledge Discovery and Data Mining*
 publication_short: In *ACM KDD*
 
-abstract: The 4th Workshop on Artificial Intelligence-enabled Cybersecurity Analytics (AI4Cyber) brings together researchers and practitioners to discuss the latest advances in applying AI and machine learning techniques to cybersecurity challenges, including threat detection, vulnerability analysis, and proactive defense mechanisms.
+abstract: "Cybersecurity remains a grand societal challenge. Large and constantly changing attack surfaces are non-trivial to protect against malicious actors. Entities like the United States and the European Union have recently emphasized the value of Artificial Intelligence (AI) for advancing cybersecurity. For example, the National Science Foundation has called for AI systems that can enhance cyber threat intelligence, detect new and evolving threats, and analyze massive troves of cybersecurity data. The 4th Workshop on Artificial Intelligence-enabled Cybersecurity Analytics (co-located with ACM KDD) sought to make significant and novel contributions within these relevant topics. Submissions were reviewed by highly qualified AI for cybersecurity researchers and practitioners spanning academia and private industry firms."
 
 tags:
 - Artificial Intelligence
@@ -32,6 +32,7 @@ featured: false
 
 
 url_pdf: 'https://ai4cyber-kdd.com/'
+plain_summary: "This is the introduction to a workshop, co-located with the ACM KDD conference, focused on using artificial intelligence to improve cybersecurity. It frames why AI matters for defending against fast-changing cyber threats and describes how the workshop solicited and vetted new research in the area. It serves as an overview of the workshop rather than a standalone research study."
 ---
 {{< altmetric doi="10.1145/3637528.3671494" >}}
 
