@@ -1,0 +1,4 @@
+{{- /* Outputs a field from data/extension.yaml. Usage: {{< extension_stat "users" >}}
+       or {{< extension_stat "rating" >}}. Single source of truth for the Chrome
+       extension's manually-maintained metrics. */ -}}
+{{- index site.Data.extension (.Get 0) -}}

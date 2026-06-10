@@ -184,7 +184,7 @@ His research program builds <span id="bio-threat-intel"></span>AI-enabled cyber 
 
 From 2018-2021, he served as an **NSF CyberCorps Scholarship-for-Service Fellow**. <span class="bio-annotated">He currently serves as Associate Editor for *ACM Digital Threats: Research and Practice (DTRAP)* and on the Editorial Board of *Journal of Information Systems Education (JISE)*.<span class="bio-sidenote">Editorial Roles</span></span> He has co-chaired the AI4Cyber Workshop at ACM KDD and the HICSS Junior Faculty Consortium. <span class="bio-annotated">In 2025, he was recognized as the Robinson College of Business **IS Cybersecurity Graduate Program Top Professor**.<span class="bio-sidenote">Teaching Honor</span></span>
 
-He is also the creator of the [Scholar Utility Belt](https://chromewebstore.google.com/detail/scholar-utility-belt/omcogfcgldfmihfogbffflbocdbjockn), a Chrome extension used by over 1,000 people daily to make Google Scholar workflows faster and more useful.
+He is also the creator of the [Scholar Utility Belt](https://chromewebstore.google.com/detail/scholar-utility-belt/omcogfcgldfmihfogbffflbocdbjockn), a Chrome extension used by over {{< extension_stat "users" >}} people daily to make Google Scholar workflows faster and more useful.
 
 {{< spoiler text="Career timeline" >}}
 {{< career-timeline >}}
