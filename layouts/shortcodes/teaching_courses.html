@@ -1,0 +1,22 @@
+{{- /* Renders one collapsible section per institution from static/data/teaching.json,
+       with a LIVE course count in each summary. Single source of truth — replaces the
+       previously hard-coded tables and "(N courses)" labels. */ -}}
+{{- $rows := os.ReadFile "static/data/teaching.json" | transform.Unmarshal -}}
+{{- $institutions := slice -}}
+{{- range $rows }}{{ if not (in $institutions .institution) }}{{ $institutions = $institutions | append .institution }}{{ end }}{{ end -}}
+{{- range $inst := $institutions }}
+{{- $courses := where $rows "institution" $inst }}
+<details class="spoiler">
+  <summary>🎓 {{ $inst }} ({{ len $courses }} courses)</summary>
+  <div class="spoiler-content">
+    <table>
+      <thead><tr><th>Course</th><th>Title</th><th>Term</th><th>Evaluation</th></tr></thead>
+      <tbody>
+      {{- range $courses }}
+        <tr><td>{{ .course }}</td><td>{{ .title }}</td><td>{{ .term }}</td><td>{{ with .evaluation }}{{ if eq . "-" }}—{{ else }}{{ . }}{{ end }}{{ else }}—{{ end }}</td></tr>
+      {{- end }}
+      </tbody>
+    </table>
+  </div>
+</details>
+{{- end -}}

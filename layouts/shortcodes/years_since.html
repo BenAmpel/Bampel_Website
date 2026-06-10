@@ -1,0 +1,4 @@
+{{- /* Outputs the whole number of years since the given start year, computed at
+       build time. The site rebuilds at least weekly (Scholar workflow), so this
+       stays current. Usage: {{< years_since 2024 >}} */ -}}
+{{- sub now.Year (int (.Get 0)) -}}
