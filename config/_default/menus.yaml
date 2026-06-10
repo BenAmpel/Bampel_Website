@@ -4,27 +4,21 @@
 #   The weight parameter defines the order that the links will appear in.
 
 main:
-  - name: CCAIR
-    url: '/ccair/'
+  - name: Home
+    url: '/'
     weight: 10
   - name: Research
-    url: '#stats'
-    weight: 15
-  - name: Publications
-    url: '#publications'
+    url: '/research/'
     weight: 20
-  - name: Teaching
-    url: '#teaching'
+  - name: Publications
+    url: '/publications/'
     weight: 30
-  - name: Invited Talks
-    url: '#talks'
+  - name: Teaching
+    url: '/teaching/'
     weight: 40
-  - name: Awards
-    url: '#awards'
+  - name: CV
+    url: '/cv/'
     weight: 50
-  - name: Service
-    url: '#service'
-    weight: 55
-  - name: Media
-    url: '#media'
-    weight: 57
+  - name: CCAIR
+    url: '/ccair/'
+    weight: 60
