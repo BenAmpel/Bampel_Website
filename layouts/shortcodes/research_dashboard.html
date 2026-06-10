@@ -1,186 +1,56 @@
 <!-- Dashboard assets are lazy-loaded when the Research Dashboard spoiler opens. -->
+<!-- Slimmed to a focused "Impact at a Glance": key metrics + citation velocity + Impact Map.
+     The dashboard JS (assets/js/research_dashboard.js) null-guards every panel, so the
+     removed panels (topics, network centrality, collaboration, footprint, traffic, audience)
+     simply no-op — they are covered by the dedicated Topic Evolution, Publication Trajectory,
+     and Authorship & Collaboration widgets elsewhere on the Research page. -->
 
-<div id="dashboard-wrapper" data-baseurl="{{ "/" | relURL }}" style="min-height:1300px; margin:30px 0;">
-<div style="display:grid; grid-template-columns:1fr 1fr; grid-template-rows:auto 600px 600px 300px; gap:0; border:1px solid var(--card-border, #333); border-radius:12px; overflow:hidden; background:var(--card-bg, rgba(255,255,255,0.02)); box-shadow:0 4px 20px rgba(0,0,0,0.1);">
+<div id="dashboard-wrapper" data-baseurl="{{ "/" | relURL }}" style="margin:30px 0;">
+<div style="display:grid; grid-template-columns:1fr; gap:0; border:1px solid var(--card-border, #333); border-radius:12px; overflow:hidden; background:var(--card-bg, rgba(255,255,255,0.02)); box-shadow:0 4px 20px rgba(0,0,0,0.1);">
 
-<div style="grid-column:1; grid-row:1; padding:20px; border-right:1px solid var(--card-border, #333); border-bottom:1px solid var(--card-border, #333);">
-    <h4 style="margin:0 0 10px; opacity:0.7; text-align:center; text-transform:uppercase; font-size:0.8rem;">Research Profile Topics</h4>
-    <div id="dashboard-topics" class="profile-topics" role="list" aria-label="Research topic cards"></div>
-    <div class="profile-topics-note">Topic model inferred from academic outputs in the CV.</div>
-</div>
-
-<div style="grid-column:2; grid-row:1; padding:25px; border-bottom:1px solid var(--card-border, #333); display:flex; flex-direction:column;">
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:20px;">
-        <div><div style="font-size:0.75rem; opacity:0.6;">Primary Focus</div><div id="dash-metric-focus" style="font-size:1rem; font-weight:800; color:var(--clr-green); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">...</div></div>
-        <div><div style="font-size:0.75rem; opacity:0.6;">Emerging Focus</div><div id="dash-metric-trend" style="font-size:1rem; font-weight:800; color:var(--clr-cyan); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">...</div></div>
-        <div><div style="font-size:0.75rem; opacity:0.6;">Total Citations</div><div id="dash-metric-cites" style="font-size:1.4rem; font-weight:800; color:var(--clr-magenta);">0</div></div>
-        <div><div style="font-size:0.75rem; opacity:0.6;">h-index</div><div id="dash-metric-hindex" style="font-size:1.4rem; font-weight:800; opacity:0.9;">0</div></div>
+  <!-- Impact at a glance: metrics + citation velocity -->
+  <div style="padding:25px; border-bottom:1px solid var(--card-border, #333); display:flex; flex-direction:column;">
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:18px; margin-bottom:20px;">
+      <div><div style="font-size:0.75rem; opacity:0.6;">Primary Focus</div><div id="dash-metric-focus" style="font-size:1rem; font-weight:800; color:var(--clr-green); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">...</div></div>
+      <div><div style="font-size:0.75rem; opacity:0.6;">Emerging Focus</div><div id="dash-metric-trend" style="font-size:1rem; font-weight:800; color:var(--clr-cyan); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">...</div></div>
+      <div><div style="font-size:0.75rem; opacity:0.6;">Total Citations</div><div id="dash-metric-cites" style="font-size:1.4rem; font-weight:800; color:var(--clr-magenta);">0</div></div>
+      <div><div style="font-size:0.75rem; opacity:0.6;">h-index</div><div id="dash-metric-hindex" style="font-size:1.4rem; font-weight:800; opacity:0.9;">0</div></div>
     </div>
-    <div style="flex-grow:1; border-top:1px solid var(--card-border, #333); padding-top:15px; position:relative;">
-        <h4 style="margin:0 0 5px; font-size:0.7rem; opacity:0.5; text-transform:uppercase;">Citation Velocity</h4>
-        <div id="dashboard-timeline" style="width:100%; height:160px;" role="img" aria-label="Citation velocity by year chart" tabindex="0"></div>
+    <div style="border-top:1px solid var(--card-border, #333); padding-top:15px; position:relative;">
+      <h4 style="margin:0 0 5px; font-size:0.7rem; opacity:0.5; text-transform:uppercase;">Citation Velocity</h4>
+      <div id="dashboard-timeline" style="width:100%; height:180px;" role="img" aria-label="Citation velocity by year chart" tabindex="0"></div>
     </div>
-</div>
+  </div>
 
-<div style="grid-column:1; grid-row:2; padding:0; border-right:1px solid var(--card-border, #333); border-bottom:1px solid var(--card-border, #333); position:relative; height:100%;">
+  <!-- Impact Map -->
+  <div style="position:relative; height:520px;">
     <div style="position:absolute; top:20px; left:20px; z-index:10; pointer-events:none;">
-        <h4 style="margin:0; font-size:0.8rem; opacity:0.7; text-transform:uppercase;">Impact Map</h4>
-        <p style="margin:0; font-size:0.65rem; opacity:0.5;">Connections by Topic, Venue & Co-authors</p>
+      <h4 style="margin:0; font-size:0.8rem; opacity:0.7; text-transform:uppercase;">Impact Map</h4>
+      <p style="margin:0; font-size:0.65rem; opacity:0.5;">Connections by Topic, Venue &amp; Co-authors</p>
     </div>
     <div class="impact-map-controls" aria-label="Impact map controls">
-        <div class="impact-control-group" role="group" aria-label="Color mode">
-            <button class="impact-toggle is-active" data-impact-color="topic" type="button">Color: Topic</button>
-            <button class="impact-toggle" data-impact-color="year" type="button">Color: Year</button>
-        </div>
-        <div class="impact-control-group" role="group" aria-label="Connection types">
-            <label class="impact-check"><input type="checkbox" data-impact-link="topic" checked> Topics</label>
-            <label class="impact-check"><input type="checkbox" data-impact-link="venue" checked> Venues</label>
-            <label class="impact-check"><input type="checkbox" data-impact-link="author" checked> Co-authors</label>
-        </div>
+      <div class="impact-control-group" role="group" aria-label="Color mode">
+        <button class="impact-toggle is-active" data-impact-color="topic" type="button">Color: Topic</button>
+        <button class="impact-toggle" data-impact-color="year" type="button">Color: Year</button>
+      </div>
+      <div class="impact-control-group" role="group" aria-label="Connection types">
+        <label class="impact-check"><input type="checkbox" data-impact-link="topic" checked> Topics</label>
+        <label class="impact-check"><input type="checkbox" data-impact-link="venue" checked> Venues</label>
+        <label class="impact-check"><input type="checkbox" data-impact-link="author" checked> Co-authors</label>
+      </div>
     </div>
     <div class="impact-map-legend" id="impact-map-legend"></div>
     <div class="impact-map-inspector" id="impact-map-inspector" aria-live="polite">
-        <div class="impact-inspector-title">Focus lens</div>
-        <div class="impact-inspector-body">Click a node to reveal context, then pin highlights you want to keep.</div>
-        <div class="impact-inspector-actions">
-            <button class="impact-action" type="button" data-impact-action="pin" disabled>Pin highlight</button>
-            <button class="impact-action" type="button" data-impact-action="clear" disabled>Clear focus</button>
-        </div>
-        <div class="impact-inspector-pins" id="impact-map-pins"></div>
+      <div class="impact-inspector-title">Focus lens</div>
+      <div class="impact-inspector-body">Click a node to reveal context, then pin highlights you want to keep.</div>
+      <div class="impact-inspector-actions">
+        <button class="impact-action" type="button" data-impact-action="pin" disabled>Pin highlight</button>
+        <button class="impact-action" type="button" data-impact-action="clear" disabled>Clear focus</button>
+      </div>
+      <div class="impact-inspector-pins" id="impact-map-pins"></div>
     </div>
     <div id="dashboard-impact-map" style="width:100%; height:100%;" role="img" aria-label="Impact map connecting papers by topic, venue, and co-authorship" tabindex="0"></div>
-</div>
-
-<div style="grid-column:2; grid-row:2; padding:25px; border-bottom:1px solid var(--card-border, #333); display:flex; flex-direction:column; height:100%; overflow:hidden;">
-    <div class="centrality-header">
-        <h4 style="font-size:0.8rem; opacity:0.7; text-transform:uppercase; margin:0;">Network Centrality Analysis</h4>
-        <div class="centrality-tabs" role="tablist">
-            <button class="centrality-tab is-active" data-centrality-tab="eigen" type="button" role="tab" aria-selected="true">Influence</button>
-            <button class="centrality-tab" data-centrality-tab="between" type="button" role="tab" aria-selected="false">Bridges</button>
-            <button class="centrality-tab" data-centrality-tab="degree" type="button" role="tab" aria-selected="false">Hubs</button>
-        </div>
-    </div>
-    <div class="centrality-metrics">
-        <div class="centrality-metric"><span>Density</span><strong id="centrality-density">--</strong></div>
-        <div class="centrality-metric"><span>Avg Path</span><strong id="centrality-path">--</strong></div>
-        <div class="centrality-metric"><span>Clustering</span><strong id="centrality-cluster">--</strong></div>
-    </div>
-    <div class="centrality-body">
-        <div class="centrality-list" id="centrality-list">
-            <span style="opacity:0.3;">Calculating...</span>
-        </div>
-        <div class="centrality-side">
-            <div class="centrality-side-title">Cohesion Radar</div>
-            <div id="centrality-radar" style="width:100%; height:160px;" role="img" aria-label="Cohesion radar for selected paper" tabindex="0"></div>
-            <div class="centrality-side-note" id="centrality-note">Hover a paper to see how it connects across topic, venue, and co-author links.</div>
-        </div>
-    </div>
-</div>
-
-<div style="grid-column:1; grid-row:3; padding:0; border-right:1px solid var(--card-border, #333); border-bottom:1px solid var(--card-border, #333); position:relative; height:100%;">
-    <div style="position:absolute; top:20px; left:20px; z-index:10; pointer-events:none;">
-        <h4 style="margin:0; font-size:0.8rem; opacity:0.7; text-transform:uppercase;">Collaboration Network</h4>
-        <p style="margin:0; font-size:0.65rem; opacity:0.5;">Co-authorship Connections</p>
-    </div>
-    <div class="collab-controls" aria-label="Collaboration filters">
-        <div class="collab-chip-row" role="group" aria-label="Year range">
-            <button class="collab-chip is-active" data-collab-range="all" type="button">All-time</button>
-            <button class="collab-chip" data-collab-range="5" type="button">Last 5 yrs</button>
-            <button class="collab-chip" data-collab-range="3" type="button">Last 3 yrs</button>
-            <button class="collab-chip" data-collab-range="2" type="button">Last 2 yrs</button>
-        </div>
-    </div>
-    <div class="collab-spotlight" id="collab-spotlight" aria-live="polite">
-        <div class="collab-spotlight-title">Collaborator spotlight</div>
-        <div class="collab-spotlight-body">Select a node to see their co-authorship footprint, top venues, and key connections.</div>
-        <div class="collab-spotlight-meta" id="collab-spotlight-meta"></div>
-    </div>
-    <div id="dashboard-collab-network" style="width:100%; height:100%;" role="img" aria-label="Collaboration network of co-authorship connections" tabindex="0"></div>
-</div>
-
-<div style="grid-column:2; grid-row:3; padding:0; border-bottom:1px solid var(--card-border, #333); position:relative; height:100%;">
-    <div style="position:absolute; top:20px; right:20px; z-index:400; pointer-events:none; text-align:right;">
-        <h4 style="margin:0; font-size:0.8rem; opacity:0.7; text-transform:uppercase; color:#333; text-shadow:0 0 5px white;">Research Footprint</h4>
-    </div>
-    <div class="footprint-controls" aria-label="Footprint controls">
-        <div class="footprint-group" role="group" aria-label="Categories">
-            <label class="footprint-check footprint-check-conference"><input type="checkbox" data-footprint-cat="Conference" checked><span class="footprint-check-dot"></span> Conferences</label>
-            <label class="footprint-check footprint-check-institution"><input type="checkbox" data-footprint-cat="Institution" checked><span class="footprint-check-dot"></span> Institutions</label>
-            <label class="footprint-check footprint-check-collaboration"><input type="checkbox" data-footprint-cat="Collaboration" checked><span class="footprint-check-dot"></span> Collaborations</label>
-        </div>
-        <div class="footprint-group footprint-key" aria-label="Category key">
-            <span class="footprint-key-item footprint-check-conference"><span class="footprint-check-dot"></span> Conference</span>
-            <span class="footprint-key-item footprint-check-collaboration"><span class="footprint-check-dot"></span> Collaboration</span>
-            <span class="footprint-key-item footprint-check-institution"><span class="footprint-check-dot"></span> Institution</span>
-        </div>
-        <div class="footprint-group" role="group" aria-label="Layers">
-            <label class="footprint-check"><input type="checkbox" data-footprint-layer="routes" checked> Routes</label>
-            <label class="footprint-check"><input type="checkbox" data-footprint-layer="clusters" checked> Clusters</label>
-        </div>
-        <div class="footprint-group footprint-timeline" role="group" aria-label="Timeline">
-            <span class="footprint-year-label" id="footprint-year-label">Up to —</span>
-            <input type="range" id="footprint-year-range" min="2018" max="2026" value="2026" step="1" />
-        </div>
-    </div>
-    <div class="footprint-legend" id="footprint-legend">
-        <div class="legend-row"><span class="footprint-legend-dot" style="--legend-color:var(--clr-green);"></span><span>Conference</span></div>
-        <div class="legend-row"><span class="footprint-legend-dot" style="--legend-color:#00bfff;"></span><span>Collaboration</span></div>
-        <div class="legend-row"><span class="footprint-legend-dot" style="--legend-color:#ff6b35;"></span><span>Institution</span></div>
-    </div>
-    <div id="dashboard-footprint-map" style="width:100%; height:100%; z-index:1;" role="img" aria-label="Research footprint map of conferences, collaborations, and institutions" tabindex="0"></div>
-</div>
-
-<div style="grid-column:1; grid-row:4; padding:25px; border-right:1px solid var(--card-border, #333); display:flex; flex-direction:column;">
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
-        <h4 style="font-size:0.8rem; opacity:0.7; text-transform:uppercase; margin:0;">Traffic Overview</h4>
-        <div id="dash-visit-momentum" class="dash-momentum">--</div>
-    </div>
-    <div style="display:flex; gap:20px; height:100%;">
-        <div style="flex:0 0 100px; display:flex; flex-direction:column; justify-content:center;">
-            <div style="margin-bottom:15px;">
-                <div style="font-size:0.7rem; opacity:0.6;">Total Visitors</div>
-                <div id="dash-visit-total" style="font-size:1.4rem; font-weight:800; color:var(--clr-green);">0</div>
-            </div>
-            <div>
-                <div style="font-size:0.7rem; opacity:0.6;">Last 30 Days</div>
-                <div id="dash-visit-month" style="font-size:1.4rem; font-weight:800; color:var(--clr-cyan);">0</div>
-            </div>
-        </div>
-        <div style="flex-grow:1; position:relative;">
-            <div id="dash-visit-trend" style="width:100%; height:100%;" role="img" aria-label="Traffic trend chart" tabindex="0"></div>
-        </div>
-    </div>
-</div>
-
-<div style="grid-column:2; grid-row:4; padding:25px; display:flex; flex-direction:column;">
-    <h4 style="font-size:0.8rem; opacity:0.7; text-transform:uppercase; margin-bottom:15px;">Audience & Reach</h4>
-    <div style="display:flex; gap:20px; height:100%;">
-        <div style="flex:1; display:flex; flex-direction:column; gap:12px;">
-            <div id="dash-visit-geo" class="dash-geo-mix" role="img" aria-label="Audience geographic distribution chart" tabindex="0"></div>
-            <div id="dash-visit-minimap" class="dash-mini-map" role="img" aria-label="Global footprint preview map" tabindex="0">
-                <div class="dash-mini-map-inner"></div>
-                <div class="dash-mini-map-fallback">Global footprint preview</div>
-            </div>
-        </div>
-        <div style="flex:1; overflow-y:auto; border-left:1px solid var(--card-border, #333); padding-left:15px; display:flex; flex-direction:column; gap:12px;">
-            <div style="display:flex; align-items:center; justify-content:space-between;">
-                <div style="font-size:0.7rem; font-weight:bold; opacity:0.8;">Top Locations</div>
-                <div id="dash-visit-region" class="dash-region-badge">Top Region: —</div>
-            </div>
-            <div class="dash-geo-controls">
-                <div class="dash-geo-tabs" role="tablist" aria-label="Geo trend range">
-                    <button class="dash-geo-tab is-active" data-geo-range="30" type="button" role="tab" aria-selected="true">Last 30 days</button>
-                    <button class="dash-geo-tab" data-geo-range="90" type="button" role="tab" aria-selected="false">Last 90 days</button>
-                    <button class="dash-geo-tab" data-geo-range="all" type="button" role="tab" aria-selected="false">All-time</button>
-                </div>
-                <div class="dash-geo-spark" id="dash-geo-spark" role="img" aria-label="Geo trend sparkline" tabindex="0"></div>
-            </div>
-            <div id="dash-visit-locations" class="dash-location-chips">
-                <span style="opacity:0.5;">Loading...</span>
-            </div>
-        </div>
-    </div>
-</div>
+  </div>
 
 </div>
 </div>
