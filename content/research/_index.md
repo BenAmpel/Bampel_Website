@@ -5,58 +5,39 @@ type: landing
 
 sections:
   - block: markdown
-    id: intelligence
+    id: research
     content:
-      title: Live Research Intelligence
+      title: Research
       text: |
+        Explore the lab's live intelligence feeds, funding, and research analytics. Expand any section below.
+
+        {{< spoiler text="🔭 Live Research Intelligence" >}}
         {{< research_command_center >}}
-    design:
-      columns: '1'
+        {{< /spoiler >}}
 
-  - block: markdown
-    id: grants
-    content:
-      title: Funding & Grants
-      text: |
+        {{< spoiler text="💼 Funding & Grants" >}}
         {{< grant_experience >}}
-    design:
-      columns: '1'
+        {{< /spoiler >}}
 
-  - block: markdown
-    id: dashboard
-    content:
-      title: Research Dashboard
-      text: |
+        {{< spoiler text="📊 Research Dashboard" >}}
         {{< research_dashboard >}}
-    design:
-      columns: '1'
+        {{< /spoiler >}}
 
-  - block: markdown
-    id: storylines
-    content:
-      title: Research Storylines
-      text: |
+        {{< spoiler text="🧭 Research Storylines" >}}
         {{< research_storylines >}}
-    design:
-      columns: '1'
+        {{< /spoiler >}}
 
-  - block: markdown
-    id: trajectory
-    content:
-      title: Publication Trajectory
-      text: |
+        {{< spoiler text="📈 Publication Trajectory" >}}
         {{< pub_ladder >}}
+        {{< /spoiler >}}
 
+        {{< spoiler text="🔬 Research Topic Evolution" >}}
         {{< topic_drift >}}
-    design:
-      columns: '1'
+        {{< /spoiler >}}
 
-  - block: markdown
-    id: collaboration
-    content:
-      title: Authorship & Collaboration
-      text: |
+        {{< spoiler text="🤝 Authorship & Collaboration" >}}
         {{< coauthor_evolution >}}
+        {{< /spoiler >}}
     design:
       columns: '1'
 ---
