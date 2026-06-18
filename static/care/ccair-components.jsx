@@ -161,7 +161,7 @@ function CCAIRNav({ currentPage, onNavigate }) {
   return (
     <nav style={navStyle} aria-label="Main navigation">
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={() => handleNav('home')}>
-        <img src="uploads/CCAIR.png" alt="" style={{ height: 34, borderRadius: 4 }} />
+        <img src="uploads/care-logo.png" alt="" style={{ height: 34, borderRadius: 4 }} />
         <span className="mono" style={{ fontWeight: 700, fontSize: 15, color: 'var(--accent)', letterSpacing: 1 }}>CARE</span>
       </div>
       <div style={{ flex: 1 }}></div>
@@ -461,7 +461,7 @@ function CCAIRFooter() {
       <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 20 }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-            <img src="uploads/CCAIR.png" alt="" style={{ height: 28, borderRadius: 3 }} />
+            <img src="uploads/care-logo.png" alt="" style={{ height: 28, borderRadius: 3 }} />
             <span className="mono" style={{ fontWeight: 700, color: 'var(--accent)', fontSize: 14 }}>CARE</span>
           </div>
           <div style={{ color: 'var(--text-muted)', fontSize: 12.5 }}>CyberAI Research and Education Center</div>
