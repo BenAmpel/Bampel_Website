@@ -2,7 +2,7 @@ const esbuild = require('esbuild');
 const path = require('path');
 
 const files = ['tweaks-panel', 'ccair-data', 'ccair-components', 'ccair-pages', 'ccair-app'];
-const ccairDir = path.join(__dirname, '..', 'static', 'ccair');
+const ccairDir = path.join(__dirname, '..', 'static', 'care');
 
 Promise.all(
   files.map((f) =>

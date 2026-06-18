@@ -6,3 +6,16 @@
   HUGO_VERSION = "0.148.2"
   HUGO_ENV = "production"
   HUGO_ENABLEGITINFO = "true"
+
+# Old CCAIR center URL -> new CARE URL (renamed June 2026)
+[[redirects]]
+  from = "/ccair/*"
+  to = "/care/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/ccair"
+  to = "/care/"
+  status = 301
+  force = true
