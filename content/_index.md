@@ -21,7 +21,7 @@ sections:
 
         [📄 Download CV (PDF) →](/uploads/cv.pdf) · [📖 Google Scholar →](https://scholar.google.com/citations?user=XDdwaZUAAAAJ&hl=en)
 
-        [🔬 Explore Research →](/research/) · [🧪 CyberAI Research Center →](/ccair/)
+        [🔬 Explore Research →](/research/) · [🧪 CARE — CyberAI Research and Education Center →](/ccair/)
     design:
       columns: '1'
 ---

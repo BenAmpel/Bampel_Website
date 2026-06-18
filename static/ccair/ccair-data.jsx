@@ -1,4 +1,4 @@
-/* CCAIR Data — context provider for JSON data loading */
+/* CARE Data — context provider for JSON data loading */
 const { createContext, useContext, useState: useDataState, useEffect: useDataEffect } = React;
 
 const DataCtx = createContext(null);
@@ -32,7 +32,7 @@ function DataProvider({ children }) {
   if (state.loading) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: 24 }}>
-        <img src="uploads/CCAIR.png" alt="CCAIR" style={{ height: 64, opacity: 0.6, animation: 'pulse 2s ease-in-out infinite' }} />
+        <img src="uploads/CCAIR.png" alt="CARE" style={{ height: 64, opacity: 0.6, animation: 'pulse 2s ease-in-out infinite' }} />
         <div className="mono" style={{ color: 'var(--text-muted)', fontSize: 13 }}>Loading data...</div>
       </div>
     );

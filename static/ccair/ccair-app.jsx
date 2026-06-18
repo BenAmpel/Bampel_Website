@@ -1,4 +1,4 @@
-/* CCAIR App — shell with routing, tweaks integration, page transitions */
+/* CARE App — shell with routing, tweaks integration, page transitions */
 const { useState, useEffect, useCallback, useRef } = React;
 
 class ErrorBoundary extends React.Component {
@@ -39,8 +39,8 @@ function CCAIRApp() {
   }, [tweaks.showGrid]);
 
   useEffect(() => {
-    const titles = { home: 'CCAIR — Center for CyberAI Research', research: 'Research — CCAIR', people: 'People — CCAIR', resources: 'Resources — CCAIR', about: 'About — CCAIR' };
-    document.title = titles[displayPage] || 'CCAIR — Center for CyberAI Research';
+    const titles = { home: 'CARE — CyberAI Research and Education Center', research: 'Research — CARE', people: 'People — CARE', resources: 'Resources — CARE', about: 'About — CARE' };
+    document.title = titles[displayPage] || 'CARE — CyberAI Research and Education Center';
   }, [displayPage]);
 
   useEffect(() => {
@@ -99,7 +99,7 @@ function CCAIRApp() {
         <CCAIRFooter />
       </DataProvider>
 
-      <TweaksPanel title="CCAIR Tweaks" tweaks={tweaks} setTweak={setTweak}>
+      <TweaksPanel title="CARE Tweaks" tweaks={tweaks} setTweak={setTweak}>
         <TweakSection label="Visual Direction">
           <TweakRadio
             label="Color Scheme"

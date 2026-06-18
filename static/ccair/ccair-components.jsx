@@ -1,4 +1,4 @@
-/* CCAIR Components — shared UI primitives and theme context */
+/* CARE Components — shared UI primitives and theme context */
 const { createContext, useContext, useState, useEffect, useRef, useCallback, memo } = React;
 
 const TweakCtx = createContext({});
@@ -162,7 +162,7 @@ function CCAIRNav({ currentPage, onNavigate }) {
     <nav style={navStyle} aria-label="Main navigation">
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={() => handleNav('home')}>
         <img src="uploads/CCAIR.png" alt="" style={{ height: 34, borderRadius: 4 }} />
-        <span className="mono" style={{ fontWeight: 700, fontSize: 15, color: 'var(--accent)', letterSpacing: 1 }}>CCAIR</span>
+        <span className="mono" style={{ fontWeight: 700, fontSize: 15, color: 'var(--accent)', letterSpacing: 1 }}>CARE</span>
       </div>
       <div style={{ flex: 1 }}></div>
       <div className="ccair-nav-links" style={{ display: 'flex', gap: 6 }}>
@@ -462,9 +462,9 @@ function CCAIRFooter() {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
             <img src="uploads/CCAIR.png" alt="" style={{ height: 28, borderRadius: 3 }} />
-            <span className="mono" style={{ fontWeight: 700, color: 'var(--accent)', fontSize: 14 }}>CCAIR</span>
+            <span className="mono" style={{ fontWeight: 700, color: 'var(--accent)', fontSize: 14 }}>CARE</span>
           </div>
-          <div style={{ color: 'var(--text-muted)', fontSize: 12.5 }}>Center for CyberAI Research</div>
+          <div style={{ color: 'var(--text-muted)', fontSize: 12.5 }}>CyberAI Research and Education Center</div>
           <div style={{ color: 'var(--text-muted)', fontSize: 12, marginTop: 2 }}>J. Mack Robinson School of Business, Georgia State University</div>
         </div>
         <div style={{ textAlign: 'right' }}>

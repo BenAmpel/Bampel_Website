@@ -1,4 +1,4 @@
-/* CCAIR Pages — all page content */
+/* CARE Pages — all page content */
 const { useState: usePageState } = React;
 
 const RESEARCH_PORTFOLIO = [
@@ -28,7 +28,7 @@ const PIPELINE = [
   { level: "K–12", description: "Early exposure to CyberAI concepts through local school partnerships and outreach programs.", programs: ["NSF STEM K-12", "NSF CAMEL", "Community Partnerships"] },
   { level: "Undergraduate", description: "Course-embedded research experiences and summer cohorts with sanitized center data.", programs: ["NSF REU Site", "CyberAI Fundamentals", "Ethical Awareness"] },
   { level: "Master's", description: "Bridge between instruction and research — students contribute to data curation and benchmarking.", programs: ["CIS 8684: CTI", "CIS 8080: Security", "NSF SFS Pipeline"] },
-  { level: "Doctoral", description: "PhD students lead CCAIR research with dissertations contributing durable center artifacts.", programs: ["Dissertation Research", "Center Publications", "Conference Leadership"] },
+  { level: "Doctoral", description: "PhD students lead CARE research with dissertations contributing durable center artifacts.", programs: ["Dissertation Research", "Center Publications", "Conference Leadership"] },
 ];
 
 function HomePage({ onNavigate, tweaks }) {
@@ -47,7 +47,7 @@ function HomePage({ onNavigate, tweaks }) {
         <NetworkCanvas scheme={tweaks.colorScheme} />
 
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 860, animation: 'fadeInUp 0.8s ease' }}>
-          <img src="uploads/CCAIR.png" alt="CCAIR" style={{ height: tweaks.heroStyle === 'full' ? 100 : 64, marginBottom: 24, filter: 'drop-shadow(0 0 30px rgba(var(--accent-rgb),0.2))' }} />
+          <img src="uploads/CCAIR.png" alt="CARE" style={{ height: tweaks.heroStyle === 'full' ? 100 : 64, marginBottom: 24, filter: 'drop-shadow(0 0 30px rgba(var(--accent-rgb),0.2))' }} />
           <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.8rem)', marginBottom: 16, lineHeight: 1.1 }}>
             Center for <span style={{ color: 'var(--accent)' }}>CyberAI</span> Research
           </h1>
@@ -56,7 +56,7 @@ function HomePage({ onNavigate, tweaks }) {
           </p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <CButton primary onClick={() => onNavigate('research')}>Explore Research →</CButton>
-            <CButton onClick={() => onNavigate('people')}>Join CCAIR</CButton>
+            <CButton onClick={() => onNavigate('people')}>Join CARE</CButton>
           </div>
         </div>
 
@@ -70,7 +70,7 @@ function HomePage({ onNavigate, tweaks }) {
         )}
       </div>
 
-      <PageSection title="Research Thesis" accent="// mission" subtitle="CCAIR investigates how intelligent systems can anticipate, interpret, and adapt to malicious behavior before exploitation — shifting the focus from reactive defense to proactive intelligence.">
+      <PageSection title="Research Thesis" accent="// mission" subtitle="CARE investigates how intelligent systems can anticipate, interpret, and adapt to malicious behavior before exploitation — shifting the focus from reactive defense to proactive intelligence.">
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20 }}>
           {[
             { n: '01', title: 'Adversarial Signal Emergence', desc: 'How malicious intent, capabilities, and tactics emerge across heterogeneous data sources prior to exploitation.' },
@@ -129,7 +129,7 @@ function ResearchPage() {
 
   return (
     <div style={{ paddingTop: 64 }}>
-      <h1 className="sr-only">Research — CCAIR</h1>
+      <h1 className="sr-only">Research — CARE</h1>
       <PageSection title="Research Primitives" accent="// core agenda" subtitle="All center activities, proposals, and artifacts map to at least one of these foundational primitives.">
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
           {[
@@ -153,7 +153,7 @@ function ResearchPage() {
         </div>
       </PageSection>
 
-      <PageSection title="Research Portfolio" accent="// strategic positions" subtitle="CCAIR organizes research investments into three tiers based on risk and expected coherence with the center thesis.">
+      <PageSection title="Research Portfolio" accent="// strategic positions" subtitle="CARE organizes research investments into three tiers based on risk and expected coherence with the center thesis.">
         <div style={{ display: 'grid', gap: 20 }}>
           {RESEARCH_PORTFOLIO.map((tier) => (
             <GlassCard key={tier.tier} style={{ borderLeft: `3px solid ${tier.color}` }}>
@@ -224,12 +224,12 @@ function PeoplePage() {
 
   return (
     <div style={{ paddingTop: 64 }}>
-      <h1 className="sr-only">People — CCAIR</h1>
+      <h1 className="sr-only">People — CARE</h1>
       <PageSection title="Director" accent="// leadership">
         <PersonCard name={people.director.name} role={people.director.title} dept={people.director.dept} areas={people.director.areas} isDirector />
       </PageSection>
 
-      <PageSection title="Faculty Affiliates" accent="// collaborators" subtitle="Internal and external faculty contributing to shared CCAIR artifacts across research primitives.">
+      <PageSection title="Faculty Affiliates" accent="// collaborators" subtitle="Internal and external faculty contributing to shared CARE artifacts across research primitives.">
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 }}>
           {people.affiliates.map((a) => (
             <GlassCard key={a.name} style={{ padding: 22 }}>
@@ -253,10 +253,10 @@ function PeoplePage() {
         </div>
       </PageSection>
 
-      <PageSection title="Join CCAIR" accent="// open positions">
+      <PageSection title="Join CARE" accent="// open positions">
         <GlassCard style={{ padding: 36, background: 'linear-gradient(135deg, rgba(var(--accent-rgb),0.05), rgba(var(--accent2-rgb),0.03))' }}>
           <p style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.8, marginBottom: 24 }}>
-            CCAIR is recruiting motivated <strong style={{ color: 'var(--accent)' }}>PhD students</strong> and <strong style={{ color: 'var(--accent)' }}>MS students</strong> to join our research group at Georgia State University. We value curiosity, persistence, and a willingness to work at the intersection of AI and cybersecurity.
+            CARE is recruiting motivated <strong style={{ color: 'var(--accent)' }}>PhD students</strong> and <strong style={{ color: 'var(--accent)' }}>MS students</strong> to join our research group at Georgia State University. We value curiosity, persistence, and a willingness to work at the intersection of AI and cybersecurity.
           </p>
 
           <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--accent2)', marginBottom: 12, fontFamily: "'Fira Code', monospace", letterSpacing: 1 }}>RESEARCH AREAS</div>
@@ -306,7 +306,7 @@ function ResourcesPage() {
 
   return (
     <div style={{ paddingTop: 64 }}>
-      <h1 className="sr-only">Resources — CCAIR</h1>
+      <h1 className="sr-only">Resources — CARE</h1>
       <PageSection title="Research Assets" accent="// resources" subtitle="Persistent artifacts designed to outlive individual grants and serve as shared infrastructure for the CyberAI community.">
         <FilterBar filters={['datasets', 'benchmarks', 'tools']} active={tab} onFilter={setTab} label="View:" />
 
@@ -315,7 +315,7 @@ function ResourcesPage() {
         </div>
       </PageSection>
 
-      <PageSection title="Data Governance" accent="// ethics" subtitle="CCAIR adopts a conservative governance posture for all data activities.">
+      <PageSection title="Data Governance" accent="// ethics" subtitle="CARE adopts a conservative governance posture for all data activities.">
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
           {[
             { title: 'Ethical Oversight', desc: 'All collection reviewed under IRB consultation. Clear separation between observational research and any facilitating activity.' },
@@ -339,7 +339,7 @@ function AboutPage({ onNavigate }) {
 
   return (
     <div style={{ paddingTop: 64 }}>
-      <h1 className="sr-only">About — CCAIR</h1>
+      <h1 className="sr-only">About — CARE</h1>
       <PageSection title="Talent Pipeline" accent="// education" subtitle="A multi-stage pipeline spanning K–12 through doctoral research, building technically sophisticated and theoretically grounded CyberAI professionals.">
         <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
           {PIPELINE.map((p, i) => <PipelineStep key={i} {...p} index={i} total={PIPELINE.length} />)}
@@ -369,7 +369,7 @@ function AboutPage({ onNavigate }) {
         <Timeline items={funding.timeline} />
       </PageSection>
 
-      <PageSection title="Funding & Partners" accent="// ecosystem" subtitle="CCAIR pursues synergistic funding across federal agencies, defense, and industry partnerships.">
+      <PageSection title="Funding & Partners" accent="// ecosystem" subtitle="CARE pursues synergistic funding across federal agencies, defense, and industry partnerships.">
         <div style={{ marginBottom: 24 }}>
           <div className="mono" style={{ color: 'var(--accent)', fontSize: 12, fontWeight: 700, letterSpacing: 1, marginBottom: 14 }}>FEDERAL & DEFENSE</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 10 }}>
@@ -412,7 +412,7 @@ function AboutPage({ onNavigate }) {
         </div>
       </PageSection>
 
-      <PageSection title="Strategic Environment" accent="// GSU ecosystem" subtitle="CCAIR operates within Georgia State University's interdisciplinary R1 environment.">
+      <PageSection title="Strategic Environment" accent="// GSU ecosystem" subtitle="CARE operates within Georgia State University's interdisciplinary R1 environment.">
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
           {[
             { name: 'CHAI Center', desc: 'Collaborative Human-AI center with GSU and Duke University leadership.' },
@@ -433,7 +433,7 @@ function AboutPage({ onNavigate }) {
           <div className="mono" style={{ color: 'var(--accent)', fontSize: 12, fontWeight: 700, letterSpacing: 2, marginBottom: 12 }}>// CONTACT</div>
           <h2 style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)', marginBottom: 12 }}>Get in Touch</h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: 15, maxWidth: 500, margin: '0 auto 8px', lineHeight: 1.7 }}>
-            Interested in collaboration, joining the lab, or learning more about CCAIR?
+            Interested in collaboration, joining the lab, or learning more about CARE?
           </p>
           <div style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 24 }}>
             J. Mack Robinson School of Business · 55 Park Place NW · Atlanta, GA 30303
