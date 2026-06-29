@@ -1,5 +1,414 @@
 {
-  "refreshed": "2026-06-22",
-  "citations": [],
-  "recommendations": []
+  "refreshed": "2026-06-29",
+  "citations": [
+    {
+      "title": "A design science approach to developing proportionate and Modular Security Operations Centers for government agencies",
+      "authors": [
+        "Aisyah Nuraeni",
+        "Yudhistira Nugraha",
+        "Muhamad Erza Aminanto"
+      ],
+      "year": 2026,
+      "venue": "Computers &amp; Security",
+      "url": "https://doi.org/10.1016/j.cose.2026.105002",
+      "cited_paper": "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach"
+    },
+    {
+      "title": "An integrated framework for information security risk management: A mixed-methods systematic literature review",
+      "authors": [
+        "Biju Varghese",
+        "Q. Bui"
+      ],
+      "year": 2026,
+      "venue": "Computers &amp; Security",
+      "url": "https://doi.org/10.1016/j.cose.2026.104957",
+      "cited_paper": "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach"
+    },
+    {
+      "title": "Enhancing RMF and ATT&CK Mapping Accuracy Through Integration of Sentence-BERT and Mitigation Parameters",
+      "authors": [
+        "Hanhee Lee",
+        "Sukjoon Yoon",
+        "Yun-kyung Lee",
+        "Jiwon Kang"
+      ],
+      "year": 2026,
+      "venue": "Electronics",
+      "url": "https://doi.org/10.3390/electronics15061248",
+      "cited_paper": "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach"
+    },
+    {
+      "title": "AI driven risk assessment frameworks for it projects: state of the art, challenges and future direction",
+      "authors": [
+        "Ashrafur Rahman Nabil",
+        "Kazi Rezwana Alam",
+        "Md. Ruhul Amin",
+        "Jesmin Ul Zannat Kabir"
+      ],
+      "year": 2026,
+      "venue": "Journal of Special Topics in Information Technology and Management",
+      "url": "https://doi.org/10.1007/s10799-026-00483-8",
+      "cited_paper": "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach"
+    },
+    {
+      "title": "Toward trustworthy web attack detection: An uncertainty-aware ensemble deep kernel learning model",
+      "authors": [
+        "Yonghang Zhou",
+        "Hongyi Zhu",
+        "Yidong Chai",
+        "Yezheng Liu"
+      ],
+      "year": 2026,
+      "venue": "Information Manager (The)",
+      "url": "https://doi.org/10.1016/j.im.2026.104325",
+      "cited_paper": "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach"
+    },
+    {
+      "title": "The Anatomy of a Good Concept: A Systematic Review on Cyber Supply Chain Risk Management",
+      "authors": [
+        "Yasmine Afifi Mohamed Afifi",
+        "Abd Elazez Abd Eltawab Hashem",
+        "Raghda Abulsaoud Ahmed Ahmed Younis"
+      ],
+      "year": 2026,
+      "venue": "Sustainability",
+      "url": "https://doi.org/10.3390/su18031151",
+      "cited_paper": "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach"
+    },
+    {
+      "title": "Design and Development of a Predictive Security Threat Management System Leveraging CWEs, CVEs, and CAPECs",
+      "authors": [
+        "Joaqu\u00edn Sierra-Granados",
+        "Jos\u00e9 L. Ruiz-Catal\u00e1n",
+        "D. Rosado",
+        "Manuel A. Serrano"
+      ],
+      "year": 2025,
+      "venue": "BDCAT",
+      "url": "https://doi.org/10.1145/3773276.3775245",
+      "cited_paper": "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach"
+    },
+    {
+      "title": "Trust Management in the Age of Zero trust: a comprehensive multi-method analysis from enterprise challenges",
+      "authors": [
+        "Ang\u00e9lica Pigola",
+        "F. Meirelles",
+        "Priscila Rezende da Costa"
+      ],
+      "year": 2025,
+      "venue": "Enterprise Information Systems",
+      "url": "https://doi.org/10.1080/17517575.2025.2588753",
+      "cited_paper": "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach"
+    },
+    {
+      "title": "A Computational Design Framework for Targeted Disruption of Hacker Communities",
+      "authors": [
+        "Benjamin Ampel"
+      ],
+      "year": 2025,
+      "venue": "Information Systems Frontiers",
+      "url": "https://doi.org/10.1007/s10796-025-10645-8",
+      "cited_paper": "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach"
+    },
+    {
+      "title": "Dependency Network Structure and Security Vulnerabilities in Software Supply Chains",
+      "authors": [
+        "Eunae Yoo",
+        "Christopher\u00a0W. Craighead",
+        "Sagar Samtani"
+      ],
+      "year": 2025,
+      "venue": "Journal of Management Information Systems",
+      "url": "https://doi.org/10.1080/07421222.2025.2561385",
+      "cited_paper": "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach"
+    },
+    {
+      "title": "Cyber Threat Detection and Mitigation on Social Media Using Large Language Models (LLMs): A Systematic Review",
+      "authors": [
+        "Ashwaq Almorjan",
+        "Mohammed Basheri",
+        "Miada Almasre",
+        "Mona Alkhozae"
+      ],
+      "year": 2025,
+      "venue": "SouthEast European Design Automation, Computer Engineering, Computer Networks and Social Media Conference",
+      "url": "https://doi.org/10.1109/SEEDA-CECNSM68644.2025.11329702",
+      "cited_paper": "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach"
+    },
+    {
+      "title": "A deep learning-based adaptive cyber disaster management framework",
+      "authors": [
+        "N. Neshenko",
+        "Elias Bou-Harb",
+        "B. Furht",
+        "M. Baghersad"
+      ],
+      "year": 2025,
+      "venue": "Journal of Big Data",
+      "url": "https://doi.org/10.1186/s40537-025-01241-3",
+      "cited_paper": "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach"
+    },
+    {
+      "title": "Mitigating the Proliferation of Fake Image-Text Reviews: A Two-Tier Intra- and Inter-Modal Fusion Framework",
+      "authors": [
+        "Wei Du",
+        "Jian-ling Li",
+        "Jilei Zhou",
+        "Qi Lu"
+      ],
+      "year": 2025,
+      "venue": "International Journal of Electronic Commerce",
+      "url": "https://doi.org/10.1080/10864415.2025.2471673",
+      "cited_paper": "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach"
+    },
+    {
+      "title": "Transformer-based knowledge distillation for explainable intrusion detection system",
+      "authors": [
+        "Nadiah AL-Nomasy",
+        "Abdulelah Alamri",
+        "Ahamed Aljuhani",
+        "Prabhat Kumar"
+      ],
+      "year": 2025,
+      "venue": "Computers & security",
+      "url": "https://doi.org/10.1016/j.cose.2025.104417",
+      "cited_paper": "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach"
+    },
+    {
+      "title": "Operations & supply chain management: principles and practice",
+      "authors": [
+        "F. Petropoulos",
+        "H. Akkermans",
+        "O. Z. Aksin",
+        "Imran Ali"
+      ],
+      "year": 2025,
+      "venue": "International Journal of Production Research",
+      "url": "https://doi.org/10.48550/arXiv.2503.05749",
+      "cited_paper": "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach"
+    },
+    {
+      "title": "Industry 5.0: a conceptual cybersecurity model for secured digital transformation of enterprises",
+      "authors": [
+        "Abhik Chaudhuri",
+        "J. R",
+        "Pradip Kumar Bala",
+        "Daniel Shoemaker"
+      ],
+      "year": 2025,
+      "venue": "EDPACS: The EDP Audit, Control, and Security Newsletter",
+      "url": "https://doi.org/10.1080/07366981.2024.2445413",
+      "cited_paper": "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach"
+    },
+    {
+      "title": "Factors impacting cybersecurity transformation: An Industry 5.0 perspective",
+      "authors": [
+        "Abhik Chaudhuri",
+        "Rajat Kumar Behera",
+        "P. Bala"
+      ],
+      "year": 2024,
+      "venue": "Computers & security",
+      "url": "https://doi.org/10.1016/j.cose.2024.104267",
+      "cited_paper": "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach"
+    },
+    {
+      "title": "Evolving Topics in Federated Learning: Trends, and Emerging Directions for IS",
+      "authors": [
+        "Md Raihan Uddin",
+        "G. Shankar",
+        "S. Mukta",
+        "Prabhat Kumar"
+      ],
+      "year": 2024,
+      "venue": "arXiv.org",
+      "url": "https://doi.org/10.48550/arXiv.2409.15773",
+      "cited_paper": "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach"
+    },
+    {
+      "title": "Interpretable Cyber Threat Detection for Enterprise Industrial Networks: A Computational Design Science Approach",
+      "authors": [
+        "Prabhat Kumar",
+        "Najmul Islam"
+      ],
+      "year": 2024,
+      "venue": "International Conference on Interaction Sciences",
+      "url": "https://doi.org/10.48550/arXiv.2409.03798",
+      "cited_paper": "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach"
+    },
+    {
+      "title": "Unraveling trust management in cybersecurity: insights from a systematic literature review",
+      "authors": [
+        "Ang\u00e9lica Pigola",
+        "Fernando de Souza Meirelles"
+      ],
+      "year": 2024,
+      "venue": "Journal of Special Topics in Information Technology and Management",
+      "url": "https://doi.org/10.1007/s10799-024-00438-x",
+      "cited_paper": "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach"
+    }
+  ],
+  "recommendations": [
+    {
+      "title": "Impact of AI in the Vulnerability management domain - Current research and product trends",
+      "authors": [
+        "Dereck Vicevich",
+        "Sethuraman Kuruvimalai",
+        "Shounak Palnitkar Jitendra"
+      ],
+      "year": 2026,
+      "venue": "2026 IEEE World AI IoT Congress (AIIoT)",
+      "url": "https://doi.org/10.1109/AIIoT68874.2026.11569590"
+    },
+    {
+      "title": "Proactive Cyber Defense: A Real-Time CTI Framework with ATT&CK\u2013D3FEND Mapping",
+      "authors": [
+        "Rino Jo",
+        "Han-Bin Lee",
+        "Jihun Han",
+        "Woong-Kyo Jung"
+      ],
+      "year": 2026,
+      "venue": "Systems",
+      "url": "https://doi.org/10.3390/systems14050575"
+    },
+    {
+      "title": "LLM-Based Advanced Persistent Threat Attribution: A Novel Framework for Enhanced Cyber Threat Intelligence",
+      "authors": [
+        "Adel Alshamrani"
+      ],
+      "year": 2026,
+      "venue": "Middle East and North Africa Communications Conference",
+      "url": "https://doi.org/10.1109/MENACOMM69507.2026.11532806"
+    },
+    {
+      "title": "AI-Driven Risk Management in Telecommunication Systems: Evaluating Cyber Defense, Vulnerability Prediction, and Response Strategies",
+      "authors": [
+        "Prashant Roy"
+      ],
+      "year": 2026,
+      "venue": "International Journal For Multidisciplinary Research",
+      "url": "https://doi.org/10.36948/ijfmr.2026.v08i03.80516"
+    },
+    {
+      "title": "PACT: An AI-Driven Framework for Organizational Cybersecurity Using LLM-Based Prediction, Risk Assessment, and Adaptive Training",
+      "authors": [
+        "S. Mehr",
+        "Saltuk Karahan"
+      ],
+      "year": 2026,
+      "venue": "2026 IEEE World AI IoT Congress (AIIoT)",
+      "url": "https://doi.org/10.1109/AIIoT68874.2026.11569584"
+    },
+    {
+      "title": "A Risk-Driven Cyber Threat Intelligence Framework using Graph-based Analysis and Zero- Trust Sharing",
+      "authors": [
+        "Sri Harsha Grandhi",
+        "Rudhrananth Baladhandapani",
+        "Bhanutheja Nagabhushana Reddy Kasinayakanahally",
+        "Biplov Paneru"
+      ],
+      "year": 2026,
+      "venue": "2026 6th International Conference on Pervasive Computing and Social Networking (ICPCSN)",
+      "url": "https://doi.org/10.1109/ICPCSN68523.2026.11543877"
+    },
+    {
+      "title": "Design and Implementation of an AI-Based Vulnerability Management Dashboard for Cybersecurity Operations",
+      "authors": [
+        "Manmath Behera",
+        "Mahaptra Saswat",
+        "E. Ray"
+      ],
+      "year": 2026,
+      "venue": "American Journal of Management and IOT Medical Computing",
+      "url": "https://doi.org/10.64751/ajmimc.2026.v5.n2(2).348"
+    },
+    {
+      "title": "AI-Driven Cloud Security: Threat Detection, Case Studies, and Digital Risk Management Framework",
+      "authors": [
+        "Vandana Verma"
+      ],
+      "year": 2026,
+      "venue": "International Journal of Innovations in Science, Engineering And Management",
+      "url": "https://doi.org/10.69968/ijisem.2026v5si1192-197"
+    },
+    {
+      "title": "An Integrated Framework for Ransomware Mitigation: A NIST-Aligned Defense Model Linking Cyber Insurance and Risk Management",
+      "authors": [
+        "Li Huang",
+        "Kimberly A. Cornell"
+      ],
+      "year": 2026,
+      "venue": "European Conference on Cyber Warfare and Security",
+      "url": "https://doi.org/10.34190/eccws.25.1.4650"
+    },
+    {
+      "title": "Structural Evolution and Quantitative Analysis of the Cyber Attack Lifecycle: A Multi-Framework Integration of the Cyber Kill Chain and the Unified Kill Chain",
+      "authors": [
+        "S. Mitra",
+        "Kaushik Paul",
+        "Debmalya Mukherjee",
+        "Ankita Sinha"
+      ],
+      "year": 2026,
+      "venue": "The Bioscan",
+      "url": "https://doi.org/10.63001/tbs.2026.v21.i02.s.i(2).pp588-601"
+    },
+    {
+      "title": "AI-Driven Cybersecurity Risk Management in Organizations: Threat Intelligence, Automation, and Resilience",
+      "authors": [
+        "Mahmoud Khalifa",
+        "Abdelnasser Taha"
+      ],
+      "year": 2026,
+      "venue": "World Research of Business Administration Journal",
+      "url": "https://doi.org/10.56830/wrba03202604"
+    },
+    {
+      "title": "Cognitive Threat Intelligence and Explainable Federated Security Analytics for distributed Infrastructure Systems",
+      "authors": [
+        "Md. Arifur Rahman\u00b9",
+        "Md. Iqbal B. M. Taslimul Haque\u00b2",
+        "Md. Serajul Hossan\u00b3",
+        "Kabir Chowdhury"
+      ],
+      "year": 2025,
+      "venue": "International Journal of Research &amp; Technology",
+      "url": "https://doi.org/10.64882/ijrt.v13.i1.1384"
+    },
+    {
+      "title": "Re-Engineering the Cybersecurity Paradigm: A Longitudinal Analysis of the Unified Kill Chain and AI-Augmented Defense Architectures",
+      "authors": [
+        "Kaushik Paul",
+        "Debmalya Mukherjee",
+        "Ankita Sinha",
+        "Ranjan Banerjee"
+      ],
+      "year": 2026,
+      "venue": "The Bioscan",
+      "url": "https://doi.org/10.63001/tbs.2026.v21.i02.s.i(2).pp572-587"
+    },
+    {
+      "title": "An Analytical Framework for Integrating Artificial Intelligence Into Cybersecurity Decision-Making",
+      "authors": [
+        "Afia Naeem Alam Din",
+        "Wael Elmedany"
+      ],
+      "year": 2026,
+      "venue": "Middle East and North Africa Communications Conference",
+      "url": "https://doi.org/10.1109/MENACOMM69507.2026.11532857"
+    },
+    {
+      "title": "AI-Driven Threat Detection and Automated Incident Response for Enhancing Network Security",
+      "authors": [
+        "Jibrilla Tanimu",
+        "G. Bendiab",
+        "Aikaterini Kanta",
+        "Stavros Shiaeles"
+      ],
+      "year": 2026,
+      "venue": "Network",
+      "url": "https://doi.org/10.3390/network6020032"
+    }
+  ]
 }
