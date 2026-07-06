@@ -284,7 +284,7 @@
       "url": "/journal_publication/social-media-trr/",
       "date": "2023-12-01",
       "abstract": "This study is a methodological replication of the work originally published in Information Systems Research by Krasnova, Widjaja, Buxmann, Wenninger, and Benbasat (2015). The original work studied the effects of envy in the context of Social Network Sites (SNSs) among college-age users. We adapt the constructs and measurement items of the original survey but change the context of the SNS to Instagram instead of Facebook. We also target a sample of college-age students from the United States instead of from Germany. The results of our replication support six of the seven hypotheses from the original paper. Confirming these results reinforce the model proposed by Krasnova et al. (2015). However, our replication did not find a strong mediation effect from envy on an SNS between the intensity of social information consumption on an SNS and users' cognitive well-being. The results suggest that the difference in population, SNS, or time has led to a change in this effect inviting further replications and new studies.",
-      "citations": 1,
+      "citations": 2,
       "topic": "Other"
     },
     {
@@ -319,7 +319,7 @@
       "url": "/journal_publication/attack-link-jmis/",
       "date": "2024-03-01",
       "abstract": "Cyberattacks have been increasing in volume and intensity, necessitating proactive measures. Cybersecurity risk management frameworks are deployed to provide actionable intelligence to mitigate potential threats by analyzing the available cybersecurity data. Existing frameworks, such as MITRE ATT&CK, provide timely mitigation strategies against attacker capabilities yet do not account for hacker data when developing cyber threat intelligence. Therefore, we developed a novel information technology artifact, ATT&CK-Link, which incorporates a novel transformer and multi-teacher knowledge distillation design, to link hacker threats to this broadly used framework. Here, we illustrated how hospital systems can use this framework to proactively protect their cyberinfrastructure against hacker threats. Our ATT&CK-Link framework has practical implications for cybersecurity professionals, who can implement our framework to generate strategic, operational, and tactical cyber threat intelligence. ATT&CK-Link also contributes to the information systems knowledge base by providing design principles to pursue targeted cybersecurity analytics, risk management, and broader text analytics research through simultaneous multi-modal (e.g., text and code) distillation and classification.",
-      "citations": 61,
+      "citations": 64,
       "topic": "Cybersecurity"
     },
     {
@@ -387,7 +387,7 @@
       "url": "/journal_publication/llm_tmis/",
       "date": "2025-02-07",
       "abstract": "The exponential growth of digital content has generated massive textual datasets, necessitating the use of advanced analytical approaches. Large Language Models (LLMs) have emerged as tools that are capable of processing and extracting insights from massive unstructured textual datasets. However, how to leverage LLMs for text analytics Information Systems (IS) research is currently unclear. To assist the IS community in understanding how to operationalize LLMs, we propose a Text Analytics for Information Systems Research (TAISR) framework. Our proposed framework provides detailed recommendations grounded in IS and LLM literature on how to conduct meaningful text analytics IS research for design science, behavioral, and econometric streams. We conducted three business intelligence case studies using our TAISR framework to demonstrate its application in several IS research contexts. We also outline the potential challenges and limitations of adopting LLMs for IS. By offering a systematic approach and evidence of its utility, our TAISR framework contributes to future IS research streams looking to incorporate powerful LLMs for text analytics.",
-      "citations": 53,
+      "citations": 54,
       "topic": "LLMs & NLP"
     },
     {
@@ -496,7 +496,7 @@
       "url": "/journal_publication/voice-phishing-misq/",
       "date": "2026-01-01",
       "abstract": "Phishing attacks remain one of the most prevalent and pervasive cybersecurity concerns. Voice phishing (i.e., vishing) is an emerging type of phishing attack where malicious actors use audio channels to steal sensitive information from victims. However, vishing detection is a challenging task due to its real-time nature and the limited availability of datasets. To help address the concern of vishing detection, this study proposes the vishing generative pretrained transformer (VishGPT). VishGPT adopts the computational design paradigm and incorporates novel reinforcement learning-based large language model fine-tuning and synthetic data model pretraining to automatically detect vishing attempts in real time. We evaluated VishGPT using a series of benchmark experiments, where we empirically demonstrated its improvement over state-of-the-art vishing detection and audio classification models. The results suggest that our proposed VishGPT achieved state-of-the-art performance in terms of accuracy (86.18%), precision (90.63%), recall (85.02%), and F1-score (87.74%). VishGPT offers practical value to cybersecurity professionals, end users, and academia. Additionally, VishGPT provides important design principles in the form of a custom proximal policy optimization (PPO) reward function and synthetic pretraining to the information systems knowledge base.",
-      "citations": 4,
+      "citations": 5,
       "topic": "Cybersecurity"
     },
     {
@@ -808,7 +808,7 @@
       {
         "id": 16,
         "name": "Why Following Friends Can Hurt You: A Replication Study",
-        "value": 1,
+        "value": 2,
         "year": 2023,
         "authors": [
           "Benjamin M. Ampel",
@@ -817,7 +817,7 @@
         "venue": "Transactions on Replication Research",
         "type": "journal",
         "topic": "Other",
-        "symbolSize": 10
+        "symbolSize": 12.476649250079015
       },
       {
         "id": 17,
@@ -838,7 +838,7 @@
       {
         "id": 18,
         "name": "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach",
-        "value": 61,
+        "value": 64,
         "year": 2024,
         "authors": [
           "Benjamin M. Ampel",
@@ -850,7 +850,7 @@
         "venue": "Journal of Management Information Systems",
         "type": "journal",
         "topic": "Cybersecurity",
-        "symbolSize": 37.28821253752379
+        "symbolSize": 37.70689267823783
       },
       {
         "id": 19,
@@ -903,7 +903,7 @@
       {
         "id": 22,
         "name": "Large Language Models for Conducting Advanced Text Analytics Information Systems Research",
-        "value": 53,
+        "value": 54,
         "year": 2025,
         "authors": [
           "Benjamin M. Ampel",
@@ -914,7 +914,7 @@
         "venue": "ACM Transactions on Management Information Systems",
         "type": "journal",
         "topic": "LLMs & NLP",
-        "symbolSize": 36.06599866709224
+        "symbolSize": 36.22816521661635
       },
       {
         "id": 23,
@@ -1006,7 +1006,7 @@
       {
         "id": 29,
         "name": "Automatically Detecting Voice Phishing: A Large Audio Model Approach",
-        "value": 4,
+        "value": 5,
         "year": 2026,
         "authors": [
           "Benjamin M. Ampel",
@@ -1016,7 +1016,7 @@
         "venue": "MIS Quarterly",
         "type": "journal",
         "topic": "Cybersecurity",
-        "symbolSize": 16.125835223052494
+        "symbolSize": 17.51319134149782
       },
       {
         "id": 30,
@@ -1239,7 +1239,7 @@
       {
         "source": 0,
         "target": 18,
-        "value": 9.885084822267064,
+        "value": 9.907755278982137,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -1287,7 +1287,7 @@
       {
         "source": 0,
         "target": 22,
-        "value": 9.822899751749546,
+        "value": 9.83081533740081,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -1335,7 +1335,7 @@
       {
         "source": 0,
         "target": 29,
-        "value": 9.37274286307404,
+        "value": 9.383419064727335,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -1543,7 +1543,7 @@
       {
         "source": 1,
         "target": 16,
-        "value": 7.376656098126419,
+        "value": 7.41665846874966,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -1575,7 +1575,7 @@
       {
         "source": 1,
         "target": 18,
-        "value": 14.822345696915157,
+        "value": 14.86803450814222,
         "reason": "3 Co-Authors",
         "types": {
           "topic": false,
@@ -1639,7 +1639,7 @@
       {
         "source": 1,
         "target": 22,
-        "value": 8.693233783758291,
+        "value": 8.70999373465548,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -1735,7 +1735,7 @@
       {
         "source": 1,
         "target": 29,
-        "value": 10.493598410330986,
+        "value": 10.530637329216544,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -1943,7 +1943,7 @@
       {
         "source": 2,
         "target": 16,
-        "value": 8.050943744979712,
+        "value": 8.076585395018661,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -1975,7 +1975,7 @@
       {
         "source": 2,
         "target": 18,
-        "value": 16.116306165858582,
+        "value": 16.153965047555193,
         "reason": "1 Keywords, 3 Co-Authors",
         "types": {
           "topic": true,
@@ -2039,7 +2039,7 @@
       {
         "source": 2,
         "target": 22,
-        "value": 9.010999777848706,
+        "value": 9.024574531128582,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -2135,7 +2135,7 @@
       {
         "source": 2,
         "target": 29,
-        "value": 11.126590025420048,
+        "value": 11.15098080672772,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -2199,7 +2199,7 @@
       {
         "source": 3,
         "target": 18,
-        "value": 7.174981318747381,
+        "value": 7.244761342199721,
         "reason": "2 Keywords",
         "types": {
           "topic": true,
@@ -2391,7 +2391,7 @@
       {
         "source": 4,
         "target": 16,
-        "value": 6.527062885745217,
+        "value": 6.596842909197556,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -2423,7 +2423,7 @@
       {
         "source": 4,
         "target": 18,
-        "value": 14.551952961168741,
+        "value": 14.606504427425053,
         "reason": "3 Co-Authors",
         "types": {
           "topic": false,
@@ -2487,7 +2487,7 @@
       {
         "source": 4,
         "target": 22,
-        "value": 8.395968390882668,
+        "value": 8.416376868966337,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -2583,7 +2583,7 @@
       {
         "source": 4,
         "target": 29,
-        "value": 9.727359974682,
+        "value": 9.788592966462383,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -2727,7 +2727,7 @@
       {
         "source": 5,
         "target": 18,
-        "value": 9.375278407684165,
+        "value": 9.436511399464548,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
           "topic": true,
@@ -2775,7 +2775,7 @@
       {
         "source": 5,
         "target": 22,
-        "value": 9.19860385419959,
+        "value": 9.221860134003538,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
           "topic": true,
@@ -2823,7 +2823,7 @@
       {
         "source": 5,
         "target": 29,
-        "value": 6.022354530813397,
+        "value": 6.119162312519753,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -2831,7 +2831,7 @@
           "author": true
         },
         "lineStyle": {
-          "width": 4.522354530813397,
+          "width": 4.619162312519753,
           "opacity": 0.45000000000000007,
           "curveness": 0.2
         }
@@ -2967,7 +2967,7 @@
       {
         "source": 6,
         "target": 18,
-        "value": 14.311438986055972,
+        "value": 14.375278407684165,
         "reason": "3 Co-Authors",
         "types": {
           "topic": false,
@@ -3031,7 +3031,7 @@
       {
         "source": 6,
         "target": 22,
-        "value": 8.126590025420048,
+        "value": 8.15098080672772,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -3095,7 +3095,7 @@
       {
         "source": 6,
         "target": 29,
-        "value": 8.687639203842082,
+        "value": 8.807703265352387,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -3239,7 +3239,7 @@
       {
         "source": 7,
         "target": 18,
-        "value": 11.606504427425053,
+        "value": 11.659141407141957,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -3303,7 +3303,7 @@
       {
         "source": 7,
         "target": 22,
-        "value": 8.456379239589578,
+        "value": 8.475987361940607,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -3367,7 +3367,7 @@
       {
         "source": 7,
         "target": 29,
-        "value": 9.904034528166576,
+        "value": 9.958585994422887,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -3479,7 +3479,7 @@
       {
         "source": 8,
         "target": 16,
-        "value": 8.693233783758291,
+        "value": 8.70999373465548,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -3511,7 +3511,7 @@
       {
         "source": 8,
         "target": 18,
-        "value": 12.46619868807827,
+        "value": 12.496100010429497,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -3575,7 +3575,7 @@
       {
         "source": 8,
         "target": 22,
-        "value": 9.383419064727335,
+        "value": 9.394019815561974,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -3671,7 +3671,7 @@
       {
         "source": 8,
         "target": 29,
-        "value": 11.742962094733642,
+        "value": 11.759178468889965,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -3799,7 +3799,7 @@
       {
         "source": 10,
         "target": 18,
-        "value": 11.354299044722055,
+        "value": 11.416376868966337,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -3863,7 +3863,7 @@
       {
         "source": 10,
         "target": 22,
-        "value": 12.174981318747381,
+        "value": 12.19860385419959,
         "reason": "1 Keywords, 2 Co-Authors",
         "types": {
           "topic": true,
@@ -3927,7 +3927,7 @@
       {
         "source": 10,
         "target": 29,
-        "value": 9.91886522358297,
+        "value": 10.022354530813397,
         "reason": "1 Keywords, 2 Co-Authors",
         "types": {
           "topic": true,
@@ -4023,7 +4023,7 @@
       {
         "source": 11,
         "target": 18,
-        "value": 14.311438986055972,
+        "value": 14.375278407684165,
         "reason": "3 Co-Authors",
         "types": {
           "topic": false,
@@ -4087,7 +4087,7 @@
       {
         "source": 11,
         "target": 22,
-        "value": 8.126590025420048,
+        "value": 8.15098080672772,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -4151,7 +4151,7 @@
       {
         "source": 11,
         "target": 29,
-        "value": 8.687639203842082,
+        "value": 8.807703265352387,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -4231,7 +4231,7 @@
       {
         "source": 12,
         "target": 18,
-        "value": 8.311438986055972,
+        "value": 8.375278407684165,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -4295,7 +4295,7 @@
       {
         "source": 12,
         "target": 29,
-        "value": 6.687639203842083,
+        "value": 6.807703265352387,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
           "topic": true,
@@ -4303,7 +4303,7 @@
           "author": true
         },
         "lineStyle": {
-          "width": 4.687639203842083,
+          "width": 4.807703265352387,
           "opacity": 0.55,
           "curveness": 0.2
         }
@@ -4359,7 +4359,7 @@
       {
         "source": 13,
         "target": 18,
-        "value": 11.174981318747381,
+        "value": 11.24476134219972,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -4423,7 +4423,7 @@
       {
         "source": 13,
         "target": 29,
-        "value": 5.647918433002165,
+        "value": 5.879144452743052,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
           "topic": true,
@@ -4431,7 +4431,7 @@
           "author": true
         },
         "lineStyle": {
-          "width": 3.6479184330021646,
+          "width": 3.879144452743052,
           "opacity": 0.55,
           "curveness": 0.2
         }
@@ -4471,7 +4471,7 @@
       {
         "source": 14,
         "target": 18,
-        "value": 11.375278407684165,
+        "value": 11.436511399464548,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -4535,7 +4535,7 @@
       {
         "source": 14,
         "target": 22,
-        "value": 8.19860385419959,
+        "value": 8.221860134003538,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -4599,7 +4599,7 @@
       {
         "source": 14,
         "target": 29,
-        "value": 9.022354530813397,
+        "value": 9.119162312519753,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -4631,22 +4631,6 @@
       {
         "source": 16,
         "target": 19,
-        "value": 4.039720770839918,
-        "reason": "1 Co-Authors",
-        "types": {
-          "topic": false,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 2.539720770839918,
-          "opacity": 0.45000000000000007,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 16,
-        "target": 24,
         "value": 4.374436097811232,
         "reason": "1 Co-Authors",
         "types": {
@@ -4662,8 +4646,8 @@
       },
       {
         "source": 16,
-        "target": 25,
-        "value": 3.6081976621622465,
+        "target": 24,
+        "value": 4.647918433002165,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -4671,7 +4655,23 @@
           "author": true
         },
         "lineStyle": {
-          "width": 2.1081976621622465,
+          "width": 3.1479184330021646,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 16,
+        "target": 25,
+        "value": 4.039720770839918,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 2.539720770839918,
           "opacity": 0.45000000000000007,
           "curveness": 0.2
         }
@@ -4679,7 +4679,7 @@
       {
         "source": 17,
         "target": 18,
-        "value": 15.86803450814222,
+        "value": 15.912372711504535,
         "reason": "1 Keywords, 3 Co-Authors",
         "types": {
           "topic": true,
@@ -4743,7 +4743,7 @@
       {
         "source": 17,
         "target": 22,
-        "value": 8.742962094733642,
+        "value": 8.759178468889965,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -4807,7 +4807,7 @@
       {
         "source": 17,
         "target": 29,
-        "value": 12.602079402700426,
+        "value": 12.636563680037474,
         "reason": "Same Venue, 2 Co-Authors",
         "types": {
           "topic": false,
@@ -4855,7 +4855,7 @@
       {
         "source": 18,
         "target": 19,
-        "value": 12.19860385419959,
+        "value": 12.267318158246532,
         "reason": "1 Keywords, 2 Co-Authors",
         "types": {
           "topic": true,
@@ -4871,7 +4871,7 @@
       {
         "source": 18,
         "target": 20,
-        "value": 8.174981318747381,
+        "value": 8.24476134219972,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -4887,7 +4887,7 @@
       {
         "source": 18,
         "target": 21,
-        "value": 8.19860385419959,
+        "value": 8.267318158246532,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -4903,7 +4903,7 @@
       {
         "source": 18,
         "target": 22,
-        "value": 9.090664515819629,
+        "value": 9.14151684333315,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -4919,7 +4919,7 @@
       {
         "source": 18,
         "target": 23,
-        "value": 8.19860385419959,
+        "value": 8.267318158246532,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -4935,7 +4935,7 @@
       {
         "source": 18,
         "target": 26,
-        "value": 7.174981318747381,
+        "value": 7.244761342199721,
         "reason": "2 Keywords",
         "types": {
           "topic": true,
@@ -4951,7 +4951,7 @@
       {
         "source": 18,
         "target": 27,
-        "value": 8.174981318747381,
+        "value": 8.24476134219972,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -4967,7 +4967,7 @@
       {
         "source": 18,
         "target": 28,
-        "value": 8.174981318747381,
+        "value": 8.24476134219972,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -4983,7 +4983,7 @@
       {
         "source": 18,
         "target": 29,
-        "value": 11.267318158246532,
+        "value": 11.354299044722055,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -4999,7 +4999,7 @@
       {
         "source": 18,
         "target": 30,
-        "value": 8.174981318747381,
+        "value": 8.24476134219972,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -5047,7 +5047,7 @@
       {
         "source": 19,
         "target": 22,
-        "value": 8.998306765262805,
+        "value": 9.024856130911907,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
           "topic": true,
@@ -5143,7 +5143,7 @@
       {
         "source": 19,
         "target": 29,
-        "value": 7.879144452743052,
+        "value": 8.079441541679836,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -5151,7 +5151,7 @@
           "author": true
         },
         "lineStyle": {
-          "width": 4.879144452743052,
+          "width": 5,
           "opacity": 0.7,
           "curveness": 0.2
         }
@@ -5175,7 +5175,7 @@
       {
         "source": 20,
         "target": 22,
-        "value": 7.971279007008789,
+        "value": 7.9983067652628055,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -5223,7 +5223,7 @@
       {
         "source": 20,
         "target": 29,
-        "value": 5.647918433002165,
+        "value": 5.879144452743052,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
           "topic": true,
@@ -5231,7 +5231,7 @@
           "author": true
         },
         "lineStyle": {
-          "width": 3.6479184330021646,
+          "width": 3.879144452743052,
           "opacity": 0.55,
           "curveness": 0.2
         }
@@ -5255,7 +5255,7 @@
       {
         "source": 21,
         "target": 29,
-        "value": 5.879144452743052,
+        "value": 6.079441541679836,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
           "topic": true,
@@ -5263,7 +5263,7 @@
           "author": true
         },
         "lineStyle": {
-          "width": 3.879144452743052,
+          "width": 4.079441541679836,
           "opacity": 0.55,
           "curveness": 0.2
         }
@@ -5287,7 +5287,7 @@
       {
         "source": 22,
         "target": 23,
-        "value": 10.998306765262805,
+        "value": 11.024856130911907,
         "reason": "3 Keywords, 1 Co-Authors",
         "types": {
           "topic": true,
@@ -5303,7 +5303,7 @@
       {
         "source": 22,
         "target": 24,
-        "value": 7.024856130911907,
+        "value": 7.050943744979711,
         "reason": "2 Keywords",
         "types": {
           "topic": true,
@@ -5319,7 +5319,7 @@
       {
         "source": 22,
         "target": 25,
-        "value": 6.971279007008789,
+        "value": 6.9983067652628055,
         "reason": "2 Keywords",
         "types": {
           "topic": true,
@@ -5335,7 +5335,7 @@
       {
         "source": 22,
         "target": 28,
-        "value": 8.971279007008789,
+        "value": 8.998306765262805,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
           "topic": true,
@@ -5351,7 +5351,7 @@
       {
         "source": 22,
         "target": 29,
-        "value": 9.076585395018661,
+        "value": 9.126590025420048,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
           "topic": true,
@@ -5383,7 +5383,7 @@
       {
         "source": 23,
         "target": 29,
-        "value": 5.879144452743052,
+        "value": 6.079441541679836,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
           "topic": true,
@@ -5391,7 +5391,7 @@
           "author": true
         },
         "lineStyle": {
-          "width": 3.879144452743052,
+          "width": 4.079441541679836,
           "opacity": 0.55,
           "curveness": 0.2
         }
@@ -5463,7 +5463,7 @@
       {
         "source": 27,
         "target": 29,
-        "value": 4.647918433002165,
+        "value": 4.879144452743052,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -5471,7 +5471,7 @@
           "author": true
         },
         "lineStyle": {
-          "width": 3.1479184330021646,
+          "width": 3.379144452743052,
           "opacity": 0.45000000000000007,
           "curveness": 0.2
         }
@@ -5495,7 +5495,7 @@
       {
         "source": 28,
         "target": 29,
-        "value": 4.647918433002165,
+        "value": 4.879144452743052,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -5503,7 +5503,7 @@
           "author": true
         },
         "lineStyle": {
-          "width": 3.1479184330021646,
+          "width": 3.379144452743052,
           "opacity": 0.45000000000000007,
           "curveness": 0.2
         }
@@ -5511,7 +5511,7 @@
       {
         "source": 29,
         "target": 30,
-        "value": 5.647918433002165,
+        "value": 5.879144452743052,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
           "topic": true,
@@ -5519,7 +5519,7 @@
           "author": true
         },
         "lineStyle": {
-          "width": 3.6479184330021646,
+          "width": 3.879144452743052,
           "opacity": 0.55,
           "curveness": 0.2
         }
@@ -5527,13 +5527,13 @@
     ]
   },
   "scholar": {
-    "lastUpdated": "June 2026",
+    "lastUpdated": "July 2026",
     "metrics": {
-      "citations": 563,
+      "citations": 569,
       "hIndex": 9,
       "i10Index": 9,
       "publications": 31,
-      "citationVelocity": 89,
+      "citationVelocity": 93,
       "interests": [
         "Hacker",
         "Framework",
@@ -5566,16 +5566,16 @@
       },
       {
         "year": "2025",
-        "citations": 151
+        "citations": 153
       },
       {
         "year": "2026",
-        "citations": 89
+        "citations": 93
       }
     ]
   },
   "impactStats": {
-    "updatedLabel": "June 2026",
+    "updatedLabel": "July 2026",
     "latestYear": 2026,
     "latestYearCount": 7,
     "journals": {
@@ -5645,63 +5645,67 @@
       },
       {
         "month": "202606",
-        "visitors": 231
+        "visitors": 254
+      },
+      {
+        "month": "202607",
+        "visitors": 69
       }
     ],
     "devices": [
       {
         "device": "desktop",
-        "users": 216
+        "users": 281
       },
       {
         "device": "mobile",
-        "users": 18
+        "users": 19
       }
     ],
     "topPages": [
       {
         "path": "/",
-        "views": 101
+        "views": 110
       },
       {
         "path": "/journal_publication/voice-phishing-misq/",
-        "views": 14
+        "views": 15
       },
       {
         "path": "/research/",
-        "views": 13
+        "views": 14
+      },
+      {
+        "path": "/project/pandas",
+        "views": 9
+      },
+      {
+        "path": "/publications/",
+        "views": 9
       },
       {
         "path": "/conference_publication/hackersignal-a-large-scale-multi-source-dataset-linking-hacker-communi/",
-        "views": 10
+        "views": 8
       },
       {
         "path": "/post/writing-technical-content/",
         "views": 8
       },
       {
-        "path": "/publications/",
+        "path": "/conference_publication/exploit-labeling-isi-2021/",
         "views": 7
       },
       {
-        "path": "/publication/marx-2021-role/",
-        "views": 6
+        "path": "/project/scikit",
+        "views": 7
       },
       {
-        "path": "/cv/",
-        "views": 5
-      },
-      {
-        "path": "/post/get-started/",
-        "views": 5
-      },
-      {
-        "path": "/project/pandas/",
-        "views": 5
+        "path": "/publication/ampel-2025-voice-phishing/",
+        "views": 7
       }
     ],
-    "totalLast30Days": 234,
-    "lifetimeTotal": 1093,
+    "totalLast30Days": 300,
+    "lifetimeTotal": 1184,
     "ranges": {
       "30": {
         "locations": [
@@ -5710,7 +5714,7 @@
             "region": "",
             "country": "Singapore",
             "countryRaw": "Singapore",
-            "visitors": 69,
+            "visitors": 92,
             "display": "Singapore, —, Singapore",
             "lat": 1.3521,
             "lng": 103.8198
@@ -5720,7 +5724,7 @@
             "region": "Ha Noi",
             "country": "Vietnam",
             "countryRaw": "Vietnam",
-            "visitors": 8,
+            "visitors": 10,
             "display": "Hanoi, Ha Noi, Vietnam",
             "lat": 21.0278,
             "lng": 105.8342
@@ -5730,7 +5734,7 @@
             "region": "Ho Chi Minh",
             "country": "Vietnam",
             "countryRaw": "Vietnam",
-            "visitors": 7,
+            "visitors": 6,
             "display": "Ho Chi Minh City, Ho Chi Minh, Vietnam"
           },
           {
@@ -5738,7 +5742,7 @@
             "region": "GA",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 4,
+            "visitors": 5,
             "display": "Atlanta, GA, USA",
             "lat": 33.749,
             "lng": -84.388
@@ -5748,7 +5752,7 @@
             "region": "Beijing",
             "country": "China",
             "countryRaw": "China",
-            "visitors": 3,
+            "visitors": 5,
             "display": "Beijing, Beijing, China"
           },
           {
@@ -5760,14 +5764,6 @@
             "display": "Cologne, North Rhine-Westphalia, Germany"
           },
           {
-            "city": "Guangzhou",
-            "region": "Guangdong Province",
-            "country": "China",
-            "countryRaw": "China",
-            "visitors": 3,
-            "display": "Guangzhou, Guangdong Province, China"
-          },
-          {
             "city": "Heidelberg",
             "region": "Baden-Wurttemberg",
             "country": "Germany",
@@ -5776,12 +5772,22 @@
             "display": "Heidelberg, Baden-Wurttemberg, Germany"
           },
           {
-            "city": "Hong Kong",
+            "city": "Singapore",
             "region": "",
-            "country": "Hong Kong",
-            "countryRaw": "Hong Kong",
+            "country": "Singapore",
+            "countryRaw": "Singapore",
             "visitors": 3,
-            "display": "Hong Kong, —, Hong Kong"
+            "display": "Singapore, —, Singapore",
+            "lat": 1.3521,
+            "lng": 103.8198
+          },
+          {
+            "city": "Urumqi",
+            "region": "Xinjiang",
+            "country": "China",
+            "countryRaw": "China",
+            "visitors": 3,
+            "display": "Urumqi, Xinjiang, China"
           },
           {
             "city": "Bogota",
@@ -5792,56 +5798,24 @@
             "display": "Bogota, Bogota, Colombia"
           },
           {
-            "city": "Dubai",
-            "region": "Dubai",
-            "country": "United Arab Emirates",
-            "countryRaw": "United Arab Emirates",
+            "city": "Caxias do Sul",
+            "region": "State of Rio Grande do Sul",
+            "country": "Brazil",
+            "countryRaw": "Brazil",
             "visitors": 2,
-            "display": "Dubai, Dubai, United Arab Emirates"
+            "display": "Caxias do Sul, State of Rio Grande do Sul, Brazil"
           },
           {
-            "city": "Istanbul",
-            "region": "Istanbul",
-            "country": "Türkiye",
-            "countryRaw": "Türkiye",
-            "visitors": 2,
-            "display": "Istanbul, Istanbul, Türkiye"
-          },
-          {
-            "city": "Kuala Lumpur",
-            "region": "Federal Territory of Kuala Lumpur",
-            "country": "Malaysia",
-            "countryRaw": "Malaysia",
-            "visitors": 2,
-            "display": "Kuala Lumpur, Federal Territory of Kuala Lumpur, Malaysia"
-          },
-          {
-            "city": "Kunming",
-            "region": "Yunnan",
+            "city": "Chengdu",
+            "region": "Sichuan",
             "country": "China",
             "countryRaw": "China",
             "visitors": 2,
-            "display": "Kunming, Yunnan, China"
-          },
-          {
-            "city": "Mammoth Lakes",
-            "region": "CA",
-            "country": "USA",
-            "countryRaw": "United States",
-            "visitors": 2,
-            "display": "Mammoth Lakes, CA, USA"
-          },
-          {
-            "city": "Sandy Springs",
-            "region": "GA",
-            "country": "USA",
-            "countryRaw": "United States",
-            "visitors": 2,
-            "display": "Sandy Springs, GA, USA"
+            "display": "Chengdu, Sichuan, China"
           }
         ],
-        "usPct": 7,
-        "intlPct": 93,
+        "usPct": 4,
+        "intlPct": 96,
         "topRegion": "Singapore",
         "topThreeWithCoords": [
           {
@@ -5849,7 +5823,7 @@
             "region": "",
             "country": "Singapore",
             "countryRaw": "Singapore",
-            "visitors": 69,
+            "visitors": 92,
             "display": "Singapore, —, Singapore",
             "lat": 1.3521,
             "lng": 103.8198
@@ -5859,7 +5833,7 @@
             "region": "Ha Noi",
             "country": "Vietnam",
             "countryRaw": "Vietnam",
-            "visitors": 8,
+            "visitors": 10,
             "display": "Hanoi, Ha Noi, Vietnam",
             "lat": 21.0278,
             "lng": 105.8342
@@ -5869,7 +5843,7 @@
             "region": "GA",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 4,
+            "visitors": 5,
             "display": "Atlanta, GA, USA",
             "lat": 33.749,
             "lng": -84.388
@@ -5883,7 +5857,7 @@
             "region": "",
             "country": "Singapore",
             "countryRaw": "Singapore",
-            "visitors": 195,
+            "visitors": 211,
             "display": "Singapore, —, Singapore",
             "lat": 1.3521,
             "lng": 103.8198
@@ -5893,10 +5867,28 @@
             "region": "GA",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 20,
+            "visitors": 21,
             "display": "Atlanta, GA, USA",
             "lat": 33.749,
             "lng": -84.388
+          },
+          {
+            "city": "Hanoi",
+            "region": "Ha Noi",
+            "country": "Vietnam",
+            "countryRaw": "Vietnam",
+            "visitors": 11,
+            "display": "Hanoi, Ha Noi, Vietnam",
+            "lat": 21.0278,
+            "lng": 105.8342
+          },
+          {
+            "city": "Shanghai",
+            "region": "Shanghai",
+            "country": "China",
+            "countryRaw": "China",
+            "visitors": 10,
+            "display": "Shanghai, Shanghai, China"
           },
           {
             "city": "Guangzhou",
@@ -5907,24 +5899,6 @@
             "display": "Guangzhou, Guangdong Province, China"
           },
           {
-            "city": "Hanoi",
-            "region": "Ha Noi",
-            "country": "Vietnam",
-            "countryRaw": "Vietnam",
-            "visitors": 9,
-            "display": "Hanoi, Ha Noi, Vietnam",
-            "lat": 21.0278,
-            "lng": 105.8342
-          },
-          {
-            "city": "Shanghai",
-            "region": "Shanghai",
-            "country": "China",
-            "countryRaw": "China",
-            "visitors": 9,
-            "display": "Shanghai, Shanghai, China"
-          },
-          {
             "city": "Ho Chi Minh City",
             "region": "Ho Chi Minh",
             "country": "Vietnam",
@@ -5933,38 +5907,36 @@
             "display": "Ho Chi Minh City, Ho Chi Minh, Vietnam"
           },
           {
-            "city": "Ashburn",
-            "region": "VA",
+            "city": "Los Angeles",
+            "region": "CA",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 5,
-            "display": "Ashburn, VA, USA",
-            "lat": 39.0438,
-            "lng": -77.4874
+            "visitors": 6,
+            "display": "Los Angeles, CA, USA"
           },
           {
             "city": "Qingdao",
             "region": "Shandong",
             "country": "China",
             "countryRaw": "China",
-            "visitors": 5,
+            "visitors": 6,
             "display": "Qingdao, Shandong, China"
           },
           {
-            "city": "Suginami City",
-            "region": "Tokyo",
-            "country": "Japan",
-            "countryRaw": "Japan",
+            "city": "Beijing",
+            "region": "Beijing",
+            "country": "China",
+            "countryRaw": "China",
             "visitors": 5,
-            "display": "Suginami City, Tokyo, Japan"
+            "display": "Beijing, Beijing, China"
           },
           {
-            "city": "Bogota",
-            "region": "Bogota",
-            "country": "Colombia",
-            "countryRaw": "Colombia",
-            "visitors": 4,
-            "display": "Bogota, Bogota, Colombia"
+            "city": "The Dalles",
+            "region": "OR",
+            "country": "USA",
+            "countryRaw": "United States",
+            "visitors": 5,
+            "display": "The Dalles, OR, USA"
           },
           {
             "city": "Grunstadt",
@@ -5975,6 +5947,14 @@
             "display": "Grunstadt, Rhineland-Palatinate, Germany"
           },
           {
+            "city": "Hangzhou",
+            "region": "Zhejiang",
+            "country": "China",
+            "countryRaw": "China",
+            "visitors": 4,
+            "display": "Hangzhou, Zhejiang, China"
+          },
+          {
             "city": "Hong Kong",
             "region": "",
             "country": "Hong Kong",
@@ -5983,20 +5963,20 @@
             "display": "Hong Kong, —, Hong Kong"
           },
           {
-            "city": "Los Angeles",
-            "region": "CA",
+            "city": "Sandy Springs",
+            "region": "GA",
             "country": "USA",
             "countryRaw": "United States",
             "visitors": 4,
-            "display": "Los Angeles, CA, USA"
+            "display": "Sandy Springs, GA, USA"
           },
           {
-            "city": "The Dalles",
-            "region": "OR",
-            "country": "USA",
-            "countryRaw": "United States",
+            "city": "Suginami City",
+            "region": "Tokyo",
+            "country": "Japan",
+            "countryRaw": "Japan",
             "visitors": 4,
-            "display": "The Dalles, OR, USA"
+            "display": "Suginami City, Tokyo, Japan"
           },
           {
             "city": "Vancouver",
@@ -6016,7 +5996,7 @@
             "region": "",
             "country": "Singapore",
             "countryRaw": "Singapore",
-            "visitors": 195,
+            "visitors": 211,
             "display": "Singapore, —, Singapore",
             "lat": 1.3521,
             "lng": 103.8198
@@ -6026,7 +6006,7 @@
             "region": "GA",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 20,
+            "visitors": 21,
             "display": "Atlanta, GA, USA",
             "lat": 33.749,
             "lng": -84.388
@@ -6036,7 +6016,7 @@
             "region": "Ha Noi",
             "country": "Vietnam",
             "countryRaw": "Vietnam",
-            "visitors": 9,
+            "visitors": 11,
             "display": "Hanoi, Ha Noi, Vietnam",
             "lat": 21.0278,
             "lng": 105.8342
@@ -6050,7 +6030,7 @@
             "region": "",
             "country": "Singapore",
             "countryRaw": "Singapore",
-            "visitors": 270,
+            "visitors": 295,
             "display": "Singapore, —, Singapore",
             "lat": 1.3521,
             "lng": 103.8198
@@ -6070,17 +6050,27 @@
             "region": "GA",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 66,
+            "visitors": 67,
             "display": "Atlanta, GA, USA",
             "lat": 33.749,
             "lng": -84.388
+          },
+          {
+            "city": "Hanoi",
+            "region": "Ha Noi",
+            "country": "Vietnam",
+            "countryRaw": "Vietnam",
+            "visitors": 11,
+            "display": "Hanoi, Ha Noi, Vietnam",
+            "lat": 21.0278,
+            "lng": 105.8342
           },
           {
             "city": "Shanghai",
             "region": "Shanghai",
             "country": "China",
             "countryRaw": "China",
-            "visitors": 10,
+            "visitors": 11,
             "display": "Shanghai, Shanghai, China"
           },
           {
@@ -6088,7 +6078,7 @@
             "region": "",
             "country": "Iran",
             "countryRaw": "Iran",
-            "visitors": 10,
+            "visitors": 11,
             "display": "Tehran, —, Iran",
             "lat": 35.6892,
             "lng": 51.389
@@ -6100,16 +6090,6 @@
             "countryRaw": "China",
             "visitors": 9,
             "display": "Guangzhou, Guangdong Province, China"
-          },
-          {
-            "city": "Hanoi",
-            "region": "Ha Noi",
-            "country": "Vietnam",
-            "countryRaw": "Vietnam",
-            "visitors": 9,
-            "display": "Hanoi, Ha Noi, Vietnam",
-            "lat": 21.0278,
-            "lng": 105.8342
           },
           {
             "city": "Ashburn",
@@ -6156,12 +6136,20 @@
             "display": "Hong Kong, —, Hong Kong"
           },
           {
-            "city": "Suginami City",
-            "region": "Tokyo",
-            "country": "Japan",
-            "countryRaw": "Japan",
+            "city": "Los Angeles",
+            "region": "CA",
+            "country": "USA",
+            "countryRaw": "United States",
             "visitors": 6,
-            "display": "Suginami City, Tokyo, Japan"
+            "display": "Los Angeles, CA, USA"
+          },
+          {
+            "city": "Qingdao",
+            "region": "Shandong",
+            "country": "China",
+            "countryRaw": "China",
+            "visitors": 6,
+            "display": "Qingdao, Shandong, China"
           }
         ],
         "usPct": 14,
@@ -6173,7 +6161,7 @@
             "region": "",
             "country": "Singapore",
             "countryRaw": "Singapore",
-            "visitors": 270,
+            "visitors": 295,
             "display": "Singapore, —, Singapore",
             "lat": 1.3521,
             "lng": 103.8198
@@ -6193,7 +6181,7 @@
             "region": "GA",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 66,
+            "visitors": 67,
             "display": "Atlanta, GA, USA",
             "lat": 33.749,
             "lng": -84.388
@@ -6628,7 +6616,7 @@
           "title": "Why Following Friends Can Hurt You: A Replication Study",
           "year": 2023,
           "venue": "Transactions on Replication Research",
-          "citations": 1,
+          "citations": 2,
           "eigen": 4.617530588297168e-19,
           "between": 0.0,
           "degree": 0,
@@ -6664,7 +6652,7 @@
           "title": "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach",
           "year": 2024,
           "venue": "Journal of Management Information Systems",
-          "citations": 61,
+          "citations": 64,
           "eigen": 0.060937633770274564,
           "between": 38.36501831501831,
           "degree": 6,
@@ -6741,7 +6729,7 @@
           "title": "Large Language Models for Conducting Advanced Text Analytics Information Systems Research",
           "year": 2025,
           "venue": "ACM Transactions on Management Information Systems",
-          "citations": 53,
+          "citations": 54,
           "eigen": 0.0032049985331439107,
           "between": 28.095512820512823,
           "degree": 3,
@@ -6865,7 +6853,7 @@
           "title": "Automatically Detecting Voice Phishing: A Large Audio Model Approach",
           "year": 2026,
           "venue": "MIS Quarterly",
-          "citations": 4,
+          "citations": 5,
           "eigen": 0.019202723600194475,
           "between": 8.733882783882784,
           "degree": 3,
