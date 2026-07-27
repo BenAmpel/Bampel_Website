@@ -410,6 +410,21 @@
     "abstract": "Advances in Large Language Models (LLMs) have enabled new opportunities to automate media analysis and improve collaborative social cybersecurity. A key task is bias detection in news reporting, which is essential for promoting information fairness and reducing polarization. However, existing approaches often rely on supervised fine-tuning with labeled datasets and fail to capture domain-specific linguistic patterns, limiting scalability and generalization. To address this, we propose a lightweight, modular framework that combines domain-adaptive pretraining (DAP) with Masked Language Modeling (MLM) and soft prompt tuning to detect six types of media bias (framing, group, semantic properties, connotation, informational spin, and phrasing). Our framework leverages 401,000+ New York Times articles from 2000 to 2024 to pretrain five LLMs, followed by bias prompting with small labeled data. The approach improves F1 by 7.6% and precision by 6.8% over hard prompts on average across the six types of biases."
   },
   {
+    "title": "A Multi-Dimensional Evaluation of Explainability in Media Bias Detection",
+    "authors": [
+      "T Chen",
+      "R Zhang",
+      "Benjamin M. Ampel",
+      "Sagar Samtani"
+    ],
+    "year": 2026,
+    "type": "conference",
+    "venue": "arXiv preprint arXiv:2607.19954",
+    "url": "/conference_publication/a-multi-dimensional-evaluation-of-explainability-in-media-bias-detecti/",
+    "date": "2026-01-01",
+    "abstract": null
+  },
+  {
     "title": "Automatic Extraction of Protected Health Information from Multilingual Hacker Communities",
     "authors": [
       "Cade Dacosta",

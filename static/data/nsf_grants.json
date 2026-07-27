@@ -1,24 +1,6 @@
 {
-  "refresh_date": "2026-07-20",
+  "refresh_date": "2026-07-27",
   "grants": [
-    {
-      "title": "REU Site: Hands-On Research in Federated Learning Security through Red Team vs. Blue Team Exercises",
-      "awardId": "2548041",
-      "piName": "Junggab Son",
-      "institution": "University of Nevada Las Vegas",
-      "estimatedTotalAmt": "460922",
-      "startDate": "10/01/2026",
-      "expDate": "09/30/2029",
-      "abstractText": "This Research Experiences for Undergraduates Site at the University of Nevada, Las Vegas supports 10 students each year in a 10-week summer research program on the security of federated learning, a way for many devices or organizations to train a shared artificial intelligence model without exchanging their raw data. This approach can help protect privacy, but it also creates new security risks because attackers may try to corrupt the training process, steal information from the model, or reduce system reliability. The project\u2019s novelties are the integration of hands-on attack-and-defense research across the full federated learning process and the use of Red Team versus Blue Team exercises to study these problems in realistic settings. The project's broader significance and importance are that it advances safer privacy-preserving artificial intelligence, expands access to advanced undergraduate research opportunities, and helps prepare the future artificial intelligence and cybersecurity workforce. The project contributes to a stronger national capacity for building trustworthy data-driven systems.\r\n\r\nThe research project focuses on threats and defenses in the data collection, training, and inference stages of federated learning. Students and mentors investigate representative attacks including botnet-style disruption, poisoning, backdoor insertion, privacy leakage, membership inference, and data reconstruction, and they evaluate defenses such as robust aggregation, anomaly detection, and differential privacy. The work uses a dedicated federated learning cybersecurity range, realistic datasets from computer vision, language, and network traffic applications, and distributed computing resources for controlled experimentation. Through iterative Red Team and Blue Team studies, the project produces software, tutorials, datasets, and empirical results that improve understanding of secure and privacy-preserving distributed learning. The anticipated outcome is stronger technical foundations for trustworthy artificial intelligence and a broader pipeline of students prepared for research and professional practice in cybersecurity and artificial intelligence.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
-      "primaryProgram": [
-        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
-      ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2548041",
-      "keywords": [
-        "Cybersecurity",
-        "Malware"
-      ]
-    },
     {
       "title": "REU Site: Cybersecurity Research of Unmanned Aerial Vehicles",
       "awardId": "2548278",
@@ -38,20 +20,22 @@
       ]
     },
     {
-      "title": "Conference: NSF Quantum Computing Security Workshop",
-      "awardId": "2629256",
-      "piName": "Trent Jaeger",
-      "institution": "University of California-Riverside",
-      "estimatedTotalAmt": "50000",
+      "title": "Conference: SaTC: US-Korea Joint Workshop on Cybersecurity Innovations",
+      "awardId": "2629019",
+      "piName": "David Mohaisen",
+      "institution": "The University of Central Florida Board of Trustees",
+      "estimatedTotalAmt": "100000",
       "startDate": "10/01/2026",
-      "expDate": "09/30/2027",
-      "abstractText": "Industry leaders are releasing quantum computing infrastructures, such as Quantum Computing as a Service (QCaaS), that are accessible to the general public.  Quantum computing presents both new challenges for cybersecurity as well as new opportunities to improve cybersecurity enforcement.  On one hand, quantum computing presents new threats to cryptographic algorithms, side channels, and quantum software security.  On the other hand, quantum algorithms may enable more secure key distribution, more effective software analysis, and more accurate intrusion detection.  The time has come to bring together the research community to discuss how the NSF and the broader research community should target needs for the future quantum security issues.\r\n\r\nThe proposed NSF Quantum Computing Security Workshop will bring together a myriad of researchers working actively in the quantum computing and cybersecurity spaces to share their insights and help the NSF prepare research plans for this critical emerging technology.  The proposed workshop will include keynotes from industrial and academic experts, presentations from leading researchers, and breakouts to discussion key questions in the future of quantum computing security research.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "expDate": "09/30/2028",
+      "abstractText": "This project strengthens research collaboration between the United States and the Republic of Korea researchers in cybersecurity through a coordinated series of international workshops that bring together researchers from academia, government, and industry from both sides. The workshops, in the US and the Republic of Korea, create opportunities to exchange ideas, identify emerging scientific challenges, and establish new research partnerships in areas of national interest. The project's novelties are the integration of complementary expertise from two research communities around the complementary themes of using artificial intelligence to improve cybersecurity and ensuring that artificial intelligence systems themselves are secure and trustworthy, together with a structured framework for sustained international engagement. The project's broader significance and importance are the advancement of long-term scientific collaboration, the development of future joint research activities, and the strengthening of international partnerships that contribute to more secure and trustworthy digital technologies.\r\n\r\nThe technical program of the workshops addresses research topics related to artificial intelligence for cybersecurity, security and privacy of artificial intelligence systems, trustworthy artificial intelligence, adversarial machine learning, artificial intelligence-assisted vulnerability discovery, software assurance, security of foundation models and large language models, cyber-physical systems security, resilient networks, critical infrastructure protection, and possibly others. The workshops combine invited presentations, lightning talks, panel discussions, and roundtable sessions to identify open research problems, emerging scientific directions, and opportunities for collaborative research. The project is expected to result in new research collaborations, influence future research directions, and contribute to the global effort to securing emerging cybersecurity technologies.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
       "primaryProgram": [
         "01002627DB NSF RESEARCH & RELATED ACTIVIT"
       ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2629256",
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2629019",
       "keywords": [
-        "Cybersecurity"
+        "LLM / GenAI",
+        "Cybersecurity",
+        "Vulnerability"
       ]
     },
     {
@@ -67,24 +51,6 @@
         "01002627DB NSF RESEARCH & RELATED ACTIVIT"
       ],
       "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2526620",
-      "keywords": [
-        "Cybersecurity",
-        "Deep Learning"
-      ]
-    },
-    {
-      "title": "Collaborative Research: SaTC 2.0: RES: AIGIS: Securing the Deep Learning Model Supply Chain",
-      "awardId": "2526622",
-      "piName": "Vasileios Kemerlis",
-      "institution": "Brown University",
-      "estimatedTotalAmt": "400000",
-      "startDate": "10/01/2026",
-      "expDate": "09/30/2030",
-      "abstractText": "Pre-trained AI models shared through open online repositories are becoming essential infrastructure for research, industry, and government. But this growing reliance also creates an important cybersecurity concern: just as traditional software can be attacked to include viruses or access backdoors, AI models can also be tampered with. This can lead to security breaches and errors in systems that rely on these pre-trained models. This project will develop methods and tools to help users verify whether a pre-trained AI model is trustworthy before it is incorporated into scientific workflows, operational systems, or other important computing environments. By improving the security of this emerging AI infrastructure, the project will help strengthen the U.S. research enterprise, support economic competitiveness, and improve the resilience of AI-enabled systems. The project will also advance education and workforce development by training students, providing research opportunities, and fostering collaboration among universities, industry, and other stakeholders.\r\n\r\nThis project develops a novel approach to address three major security challenges in the machine learning (ML) model supply chain. The research integrates software engineering principles with machine learning techniques to systematically mitigate vulnerabilities during model selection, loading, and management. First, the team of researchers will tackle model spoofing, where adversaries upload malicious models using deceptive names. The project relies on novel anomaly detection schemes for naming conventions and architectural signatures to identify these threats. Second, the investigators will secure the model deserialization process. Because frameworks often use formats vulnerable to arbitrary code execution, the research will develop automated, least privilege deserialization mechanisms and define safe subsets for model loading runtimes. Third, the project will establish robust model lineage tracking to manage the risks of reusing models. The team will create a lineage graph data structure that combines static and dynamic analysis to trace model evolution and detect illicit modifications. By integrating these methods, the project provides a comprehensive defense system that enhances trust, integrity, and oversight in the open source model ecosystem.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
-      "primaryProgram": [
-        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
-      ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2526622",
       "keywords": [
         "Cybersecurity",
         "Deep Learning"
@@ -109,57 +75,57 @@
       ]
     },
     {
-      "title": "REU Site: Applied Research in Deep Learning",
-      "awardId": "2548161",
-      "piName": "Mohammed Belkhouche",
-      "institution": "Missouri State University",
-      "estimatedTotalAmt": "489183",
+      "title": "Collaborative Research: SaTC 2.0: RES: AIGIS: Securing the Deep Learning Model Supply Chain",
+      "awardId": "2526622",
+      "piName": "Vasileios Kemerlis",
+      "institution": "Brown University",
+      "estimatedTotalAmt": "400000",
       "startDate": "10/01/2026",
-      "expDate": "09/30/2029",
-      "abstractText": "This project will provide undergraduate students with hands-on research experiences in the rapidly growing field of deep learning. Over three years, the program will engage 30 students from computer science, engineering, information technology, and related disciplines in meaningful research projects guided by faculty mentors. Participants will explore how deep learning techniques can be used to address real-world challenges in cybersecurity, robotics, hate speech in social media, and autonomous systems. Through these experiences, students will gain exposure to how deep learning technologies can be used to benefit society across a wide range of applications. In addition to research activities, the program will provide structured training to help students develop important professional skills, including scientific writing, oral communication, teamwork, and responsible research practices. By working in a collaborative and supportive environment, students will strengthen both their technical abilities and their confidence as emerging researchers. Overall, the program aims to inspire and prepare the next generation of scientists and engineers by giving them early, meaningful exposure to research in deep learning and its many beneficial uses.\r\n\r\nThis project establishes a structured, research-intensive undergraduate training program aimed at increasing student engagement in state-of-the-art deep learning methodologies and applications. Research activities will focus on the design, analysis, and application of modern deep learning techniques to address contemporary challenges in areas such as multimedia security, robotic motion planning, autonomous multi-agent coordination, and malicious network activity detection. Faculty-mentored projects will emphasize both methodological advances and applied system development, with students contributing to end-to-end research pipelines including data preprocessing, model design, training, evaluation, and deployment-oriented analysis. Key objectives include: (i) developing students\u2019 problem-solving and critical thinking skills in the context of deep learning research; (ii) building proficiency in contemporary deep learning frameworks and methodologies; (iii) training students in scholarly communication and research dissemination practices; and (iv) enhancing collaboration and teamwork. Collectively, this REU Site aims to cultivate a pipeline of well-prepared undergraduate researchers equipped for graduate study and careers in machine learning and artificial intelligence research.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "expDate": "09/30/2030",
+      "abstractText": "Pre-trained AI models shared through open online repositories are becoming essential infrastructure for research, industry, and government. But this growing reliance also creates an important cybersecurity concern: just as traditional software can be attacked to include viruses or access backdoors, AI models can also be tampered with. This can lead to security breaches and errors in systems that rely on these pre-trained models. This project will develop methods and tools to help users verify whether a pre-trained AI model is trustworthy before it is incorporated into scientific workflows, operational systems, or other important computing environments. By improving the security of this emerging AI infrastructure, the project will help strengthen the U.S. research enterprise, support economic competitiveness, and improve the resilience of AI-enabled systems. The project will also advance education and workforce development by training students, providing research opportunities, and fostering collaboration among universities, industry, and other stakeholders.\r\n\r\nThis project develops a novel approach to address three major security challenges in the machine learning (ML) model supply chain. The research integrates software engineering principles with machine learning techniques to systematically mitigate vulnerabilities during model selection, loading, and management. First, the team of researchers will tackle model spoofing, where adversaries upload malicious models using deceptive names. The project relies on novel anomaly detection schemes for naming conventions and architectural signatures to identify these threats. Second, the investigators will secure the model deserialization process. Because frameworks often use formats vulnerable to arbitrary code execution, the research will develop automated, least privilege deserialization mechanisms and define safe subsets for model loading runtimes. Third, the project will establish robust model lineage tracking to manage the risks of reusing models. The team will create a lineage graph data structure that combines static and dynamic analysis to trace model evolution and detect illicit modifications. By integrating these methods, the project provides a comprehensive defense system that enhances trust, integrity, and oversight in the open source model ecosystem.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
       "primaryProgram": [
         "01002627DB NSF RESEARCH & RELATED ACTIVIT"
       ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2548161",
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2526622",
       "keywords": [
         "Cybersecurity",
-        "Deep Learning",
+        "Deep Learning"
+      ]
+    },
+    {
+      "title": "Collaborative Research: HCC: Enabling Screen Reader Users to Navigate Deceptive Web Design Patterns",
+      "awardId": "2616891",
+      "piName": "Hae-Na Lee",
+      "institution": "Michigan State University",
+      "estimatedTotalAmt": "372611",
+      "startDate": "10/01/2026",
+      "expDate": "09/30/2029",
+      "abstractText": "The internet plays a central role in most areas of society, including, but not limited to communication, education, employment, healthcare, government services, and commerce. However, some websites use deceptive design practices, often called dark patterns, that manipulate users into making unintended decisions, sharing personal information, or spending money. These practices can pose unique challenges for people with visual impairments who rely on screen readers and other nonvisual technologies, because important visual and spatial cues may be inaccessible or misleading. This project seeks to make web interaction safer and more trustworthy by developing intelligent technologies that help people with visual impairments recognize, understand, and manage deceptive web designs. The project will benefit people with visual impairments by reducing risks, such as unintended purchases or privacy violations, and decrease cognitive burden during everyday online activities. The resulting knowledge and technologies will also contribute to more effective and ethical digital design practices, support the training of students in human-computer interaction and trustworthy artificial intelligence, and inform the development of digital tools and design practices that improve transparency, user protection, and trustworthiness across the broader Web.\r\n\r\nThis project investigates how artificial intelligence can be used to detect and mitigate deceptive web design patterns that disproportionately affect screen reader users. The research combines advances in large language model\u2013based agentic artificial intelligence, accessibility research, and human-centered design. First, the project will develop intelligent detection algorithms that automatically analyze webpage layouts, interaction workflows, user actions, and accessible navigation paths to identify deceptive patterns, including those that arise from mismatches between visual webpage structure and screen reader navigation. Second, the project will design and develop customizable nonvisual assistive interfaces that help users understand and manage detected deceptive patterns, with interface requirements and refinements informed through iterative studies involving people with visual impairments. Third, the project will integrate these technologies into a browser extension and evaluate their real world effectiveness, usability, privacy implications, cost, and latency through controlled experiments and user studies. More broadly, the project will investigate how intelligent agents can model screen reader navigation behavior to identify deceptive patterns, explain associated risks, and support informed user decision making under real-world constraints. The project will generate new knowledge on trustworthy artificial intelligence, accessible computing, and human-centered web technologies, while advancing methods for protecting users from online deception in real-world digital environments.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2616891",
+      "keywords": [
+        "LLM / GenAI",
         "Multi-Agent AI"
       ]
     },
     {
-      "title": "Collaborative Research: SaTC 2.0: RES: Achieving Reliable, Interpretable, and Efficient At-scale Machine Unlearning on Generative AI Models",
-      "awardId": "2555319",
-      "piName": "Bo Hui",
-      "institution": "University of Tulsa",
-      "estimatedTotalAmt": "500787",
+      "title": "Collaborative Research: HCC: Trustworthy Web Interaction for People with Visual Impairments through Intelligent Detection and Management of Deceptive Web Designs",
+      "awardId": "2616890",
+      "piName": "Vikas Ganjigunte Ashok",
+      "institution": "Old Dominion University Research Foundation",
+      "estimatedTotalAmt": "391332",
       "startDate": "10/01/2026",
       "expDate": "09/30/2029",
-      "abstractText": "Generative models like GPT and Stable Diffusion have significantly advanced the capabilities of artificial intelligence. Despite their impressive performance, these models can generate undesirable outputs, including private user data, copyrighted material, and inappropriate content. In response, machine unlearning approaches enable the removal of data influences and harmful concepts from pretrained models to comply with various regulations, including restrictions on NSFW content and the General Data Protection Regulation. However, significant challenges remain in machine unlearning, particularly regarding reliability and applicability. The project's novelties are developing a foundational understanding of the mechanisms of forgetting and establishing reliable criteria for regulating unlearning quality. The project's broader significance and importance are that the developed solutions shed light on key ethical concerns about generative models while informing the design of better unlearning methods. The project also seeks to deploy practical unlearning algorithms in real-world systems, including e-commerce and finance.\r\n\r\nBy establishing a formal and rigorous criterion for genuine forgetting and monitoring whether deleted knowledge re-emerges over time, this project creates a shared foundation for machine unlearning rooted in information theory and causal inference. Simultaneously, the research investigates the underlying mechanisms of forgetting in diffusion models and large language models. Inspired by research on the progression of Alzheimer's disease, the project introduces a novel task: dismantling high-level AI capabilities. This breakthrough approach offers a vital mechanism for steering future superintelligent systems. By bridging the gap between theory and practice, the project translates research advances into real-world applications. The implementation addresses the inefficiencies of frequent model updates by investigating batch processing, managing interdependence, and exploring in-context unlearning. Operationally, the system integrates advanced backend unlearning modules with an intuitive frontend visualization dashboard. This dual setup allows users to easily initiate data erasure requests and transparently track unlearning effects, thereby alleviating privacy and safety concerns associated with generative models.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "abstractText": "The internet plays a central role in most areas of society, including, but not limited to communication, education, employment, healthcare, government services, and commerce. However, some websites use deceptive design practices, often called dark patterns, that manipulate users into making unintended decisions, sharing personal information, or spending money. These practices can pose unique challenges for people with visual impairments who rely on screen readers and other nonvisual technologies, because important visual and spatial cues may be inaccessible or misleading. This project seeks to make web interaction safer and more trustworthy by developing intelligent technologies that help people with visual impairments recognize, understand, and manage deceptive web designs. The project will benefit people with visual impairments by reducing risks, such as unintended purchases or privacy violations, and decrease cognitive burden during everyday online activities. The resulting knowledge and technologies will also contribute to more effective and ethical digital design practices, support the training of students in human-computer interaction and trustworthy artificial intelligence, and inform the development of digital tools and design practices that improve transparency, user protection, and trustworthiness across the broader Web.\r\n\r\nThis project investigates how artificial intelligence can be used to detect and mitigate deceptive web design patterns that disproportionately affect screen reader users. The research combines advances in large language model\u2013based agentic artificial intelligence, accessibility research, and human-centered design. First, the project will develop intelligent detection algorithms that automatically analyze webpage layouts, interaction workflows, user actions, and accessible navigation paths to identify deceptive patterns, including those that arise from mismatches between visual webpage structure and screen reader navigation. Second, the project will design and develop customizable nonvisual assistive interfaces that help users understand and manage detected deceptive patterns, with interface requirements and refinements informed through iterative studies involving people with visual impairments. Third, the project will integrate these technologies into a browser extension and evaluate their real world effectiveness, usability, privacy implications, cost, and latency through controlled experiments and user studies. More broadly, the project will investigate how intelligent agents can model screen reader navigation behavior to identify deceptive patterns, explain associated risks, and support informed user decision making under real-world constraints. The project will generate new knowledge on trustworthy artificial intelligence, accessible computing, and human-centered web technologies, while advancing methods for protecting users from online deception in real-world digital environments.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
       "primaryProgram": [
         "01002627DB NSF RESEARCH & RELATED ACTIVIT"
       ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2555319",
-      "keywords": [
-        "LLM / GenAI"
-      ]
-    },
-    {
-      "title": "Collaborative Research: MFAI: Mathematical Foundations of Structure-Aware Adaptive Machine Learning Algorithms",
-      "awardId": "2601665",
-      "piName": "Shiqian Ma",
-      "institution": "William Marsh Rice University",
-      "estimatedTotalAmt": "500000",
-      "startDate": "10/01/2026",
-      "expDate": "09/30/2029",
-      "abstractText": "Recent years have witnessed rapid progress in computational algorithms for large-scale machine learning, but many advances remain segmented and disconnected. This project develops a unified mathematical framework for modern machine learning algorithms with emphasis on scalability, adaptivity, and structure-aware optimization and generalization. This framework will deepen understanding of the limitations of current machine learning algorithms and guide the design of more advanced methods with better performance, scalability, and generalization power. The outcomes of this project will broaden access to large-scale artificial intelligence (AI) by developing theory-guided methods for training under resource constraints, lowering barriers for researchers with limited computational budgets. The proposed research will be integrated into graduate-level courses on optimization and machine learning, providing new materials for educating the next generation of AI researchers. Software implementations will be released as open-source tools to facilitate adoption in academia, industry, and government labs. By linking efficiency, robustness, and generalization, the project will help make large-scale AI training more reliable, reproducible, and widely accessible.\r\n\r\nLarge-scale deep learning relies heavily on first-order algorithms such as Stochastic Gradient Descent (SGD), Adaptive Moment Estimation (Adam), and their variants, yet their remarkable empirical success is still only partially understood. We aim to bridge this gap by systematically studying how model structures (e.g., sparsity, low-rankness, manifold constraints), data structures (e.g., anisotropic gradient noise), and neural architectural structures (e.g., scaling laws, wide-network limits) affect optimization dynamics and generalization. Our analysis will leverage adaptive gradient methods viewed as extensions of mirror descent, nonlinear preconditioning, and Riemannian optimization. The project will pursue three thrusts: (i) structure-aware adaptive optimization techniques, (ii) adaptive learning rate schedules, and (iii) structure-dependent generalization. These thrusts will advance the mathematical foundations of machine learning by (i) establishing unified, structure-dependent convergence guarantees for adaptive algorithms such as Adam, Shampoo, and Muon, (ii) deriving scaling laws that remain valid under structural constraints and adaptive updates, and (iii) developing generalization bounds that depend explicitly on spectral properties of gradient noise. Novel contributions include a framework for analyzing model structures with time-varying potentials, effective learning rate schedules in stochastic optimization beyond isotropic noise models, and dimension-free generalization bounds under anisotropic gradients. Together, these results will provide principled mathematical theory and provably efficient algorithms that achieve both computational scalability and robust generalization, with direct implications for training large language models and other modern AI systems.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
-      "primaryProgram": [
-        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
-      ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2601665",
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2616890",
       "keywords": [
         "LLM / GenAI",
-        "Deep Learning"
+        "Multi-Agent AI"
       ]
     },
     {
@@ -178,23 +144,6 @@
       "keywords": [
         "LLM / GenAI",
         "Multi-Agent AI"
-      ]
-    },
-    {
-      "title": "CICI:IPAAI:CERTIFY:Contractual Integrity for Scientific AI-Ready Data Pipelines",
-      "awardId": "2613350",
-      "piName": "Charles Cao",
-      "institution": "University of Tennessee Knoxville",
-      "estimatedTotalAmt": "900000",
-      "startDate": "10/01/2026",
-      "expDate": "09/30/2029",
-      "abstractText": "Scientific artificial intelligence systems increasingly depend on datasets collected, cleaned, and transformed across multiple institutions. The integrity, provenance, and authenticity of these datasets determine whether scientific results are valid and reproducible. Current approaches such as logs, checksums, and anomaly detection provide useful evidence, but they do not guarantee that data transformations preserve the scientific properties required by downstream analyses.\r\n\r\nThe CERTIFY project creates a framework for verifiable integrity in artificial-intelligence-ready scientific data pipelines. The project enables scientific data objects to carry machine-checkable proofs that specified integrity and provenance requirements are satisfied. It also uses temporal contracts to describe required properties of data curation, cleaning, and transformation steps, and compiles those contracts into lightweight operating-system-level monitors that prevent buggy or compromised code from violating declared policies. Large language model-based agents help configure and manage these components, reducing the expertise required to apply formal verification methods in scientific workflows.\r\n\r\nThe project is evaluated through two science drivers: agricultural sensor networks used to study livestock health and crop yield, and electronic health records that require strong provenance and privacy safeguards. The project produces open-source software, documented example datasets, course modules, and training materials that help prepare researchers and students to secure AI-driven scientific workflows. This structure supports reproducible discovery while making integrity checks practical for collaborative, cross-institutional scientific teams. The results strengthen trust in data-intensive science by helping researchers verify where data came from, how it changed, and whether it remains suitable for scientific use.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
-      "primaryProgram": [
-        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
-      ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2613350",
-      "keywords": [
-        "LLM / GenAI"
       ]
     },
     {
@@ -232,25 +181,6 @@
       ]
     },
     {
-      "title": "CAREER: Adaptive Knowledge Synthesis for Language Model Reasoning",
-      "awardId": "2541822",
-      "piName": "Jiaxin Huang",
-      "institution": "Washington University",
-      "estimatedTotalAmt": "596521",
-      "startDate": "10/01/2026",
-      "expDate": "09/30/2031",
-      "abstractText": "Large Language Models (LLMs) have shown impressive performance on pure reasoning tasks like math questions and logic puzzles. However, Artificial Intelligent (AI) systems with such LLMs still struggle with complex tasks that require finding and combining information from multiple external sources. For instance, answering a complicated legal or scientific question often requires a step-by-step investigation where the answer to one question determines what to search for next. While current AI systems can perform multiple searches, they typically rely on a single, general-purpose model that struggles to form a structured plan or adapt its expertise to different phases when investigating a problem in depth. This project addresses this critical gap by creating a new way for AI systems to actively seek out and synthesize knowledge. By empowering models to formulate step-by-step research plans and adapt to each part of a problem, this project promotes the progress of science and advances national prosperity through the creation of highly reliable and transparent decision-making tools. These new capabilities will directly benefit evidence-based fields such as legal analysis and scientific discovery. In addition to these technological benefits, the project supports education by creating new university courses that teach students how to critically analyze AI systems. The investigator will also lead hands-on outreach activities for local school students to inspire the next generation of researchers.\r\n\r\nThe technical goal of this award is to establish a proactive, efficient, and transparent reasoning framework for knowledge-intensive tasks. The research activities are organized into three integrated thrusts. The first thrust develops the Adaptive Knowledge Synthesis framework, which trains LLMs to formulate structured reasoning plans through hypothesis-driven decomposition. Within this framework, a conductor model dynamically reconfigures a base LLM to create specialized experts tailored to specific sub-tasks, using confidence-guided routing to synthesize a final answer. Because this multi-step process generates long dialogue histories and extensive intermediate outputs, the second thrust develops scalable inference methods to reduce computational costs. On the input side, an activation-level integration will be introduced to effectively process long contexts. On the output side, the research team will develop compressed reasoning techniques and sample-efficient test-time scaling methods to streamline generation. Finally, the third thrust establishes a new generation of evaluation frameworks to rigorously measure both procedural correctness and computational efficiency. This involves building controllable benchmarks with systematically varying difficulty, robustness tests featuring multi-hop contradictions, and efficiency-aware metrics that evaluate the trade-off between reasoning accuracy and computational cost. All resulting models, algorithms, and evaluation frameworks will be released as open-source resources to benefit the broader research community.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
-      "primaryProgram": [
-        "01002627DB NSF RESEARCH & RELATED ACTIVIT",
-        "01002930DB NSF RESEARCH & RELATED ACTIVIT",
-        "01003031DB NSF RESEARCH & RELATED ACTIVIT"
-      ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2541822",
-      "keywords": [
-        "LLM / GenAI"
-      ]
-    },
-    {
       "title": "CAREER: Nature-Inspired, 3D-Architected Photonic Surfaces to Elucidate Structure and Disease in Fibrous Tissue",
       "awardId": "2544327",
       "piName": "Lisa Poulikakos",
@@ -266,23 +196,6 @@
       "keywords": [
         "LLM / GenAI",
         "Cybersecurity"
-      ]
-    },
-    {
-      "title": "REU Site: Undergraduate Research Experience in Edge Intelligence",
-      "awardId": "2548395",
-      "piName": "Rui Hu",
-      "institution": "Board of Regents, NSHE, obo University of Nevada, Reno",
-      "estimatedTotalAmt": "464400",
-      "startDate": "10/01/2026",
-      "expDate": "09/30/2029",
-      "abstractText": "This project establishes a Research Experiences for Undergraduates (REU) site at the University of Nevada, Reno, to provide undergraduate students nationwide with immersive research experiences in the field of edge intelligence. Edge intelligence, where data collection, processing, and analysis are performed close to the data source rather than on centralized cloud-based systems, is a rapidly advancing paradigm critical for applications such as autonomous vehicles, smart cities, industrial automation, and healthcare systems. However, deploying artificial intelligence (AI) on resource-limited edge devices presents substantial challenges in accuracy, efficiency, and robustness, with significant implications for public health, national security, and economic competitiveness. By engaging students in hands-on research and equipping them with the skills to address these challenges, this project aims to develop a highly skilled STEM workforce capable of advancing practical AI technologies. The program will foster sustained interest in research and encourage participants to pursue graduate studies and careers in STEM. Through the development of accurate, efficient, and trustworthy AI systems, the project will contribute to technological innovation, strengthen public trust in AI, and support societal well-being and national security.\r\n\r\nThis REU site develops undergraduate research capacity in edge intelligence by leveraging the interdisciplinary expertise of University of Nevada, Reno faculty in AI, robotics, and cyber-physical systems. The research is structured around three core thrusts in edge-based machine learning (ML) systems: (1) algorithms and architectures for resource-constrained devices, (2) scalable and robust learning in heterogeneous edge environments, and (3) resource management for energy-efficient and sustainable operation. Representative projects include accelerating federated learning in heterogeneous wireless networks, developing memory-efficient training of large language models for edge devices, designing decentralized federated learning with workload balancing, federated fine-tuning of vision models for wildfire detection, and collaborative multi-robot deep reinforcement learning. Guided by experienced faculty and graduate student mentors, students will engage in cutting-edge research and contribute to the development of ML systems for real-world applications such as smart Internet-of-Things devices, autonomous vehicles, and robotics. The program is complemented by training in research methodology, scientific communication, and career development, preparing participants for graduate study and careers in STEM fields.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
-      "primaryProgram": [
-        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
-      ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2548395",
-      "keywords": [
-        "LLM / GenAI"
       ]
     },
     {
@@ -303,18 +216,18 @@
       ]
     },
     {
-      "title": "CIF: Efficient Distributed Solutions for Problems in Computational Imaging and AI",
-      "awardId": "2552423",
-      "piName": "Namrata Vaswani",
-      "institution": "Iowa State University",
-      "estimatedTotalAmt": "699774",
+      "title": "REU Site: Undergraduate Research Experience in Edge Intelligence",
+      "awardId": "2548395",
+      "piName": "Rui Hu",
+      "institution": "Board of Regents, NSHE, obo University of Nevada, Reno",
+      "estimatedTotalAmt": "464400",
       "startDate": "10/01/2026",
-      "expDate": "09/30/2030",
-      "abstractText": "This project develops faster and more communication-efficient methods for solving large-scale data analysis problems that arise in computational imaging and artificial intelligence. In many modern applications, data are collected or processed across multiple machines or devices, making it important to design methods that reduce both computation and communication costs. Examples include dynamic magnetic resonance imaging, image and video compression, detection and tracking of moving objects for driverless cars, multi-target tracking in robotics, and efficient adaptation of large language models for specialized uses. A central challenge in these applications is to recover useful information from incomplete, corrupted, or distributed data while keeping the algorithms fast, reliable, and broadly usable across different data sets and measurement settings. The project will advance the foundations of efficient distributed learning and may enable practical improvements in areas such as near-real-time dynamic medical imaging and reliable artificial intelligence systems. The project will also support education and workforce development through the CyMath K-12 Math program which provides mathematics tutoring and mentoring. During this project, CyMath will be expanded into a multi-tier mathematics mentoring program that supports K-12 students, undergraduate tutors, and graduate student mentors, while also producing pilot evaluations of the program's educational impact.\r\n\r\nThe project studies fast distributed algorithms for two classes of robust low-rank matrix and tensor learning problems. The first class is low-rank plus sparse matrix recovery from missing or otherwise undersampled observed data, often called the low-rank plus sparse model. The second class is low-rank recovery from shuffled, column-wise undersampled measurements. These models are motivated by computational imaging, tracking, video analysis, and parameter-efficient adaptation of large language models, where changes in model parameters can often be represented using low-rank or low-rank plus sparse structures. The research will develop a generalized multi-block alternating gradient descent and minimization framework, called Multi-AltGDmin, for partly decoupled optimization problems. In such problems, some groups of variables can be updated very efficiently when the other variables are fixed, while other groups are more computationally expensive. The goal is to design algorithms that retain the low per-iteration cost of gradient descent while approaching the faster convergence behavior of alternating minimization. The project will analyze sample complexity, iteration complexity, communication efficiency, and resilience to Byzantine attacks in distributed settings. It will also address new algorithmic and proof challenges caused by multiple variable blocks, including the need to choose update sequences that respect problem assumptions and to design distributed updates when different blocks depend on differently partitioned data. If successful, the project will provide the first provably correct, efficient, and attack-resilient distributed Multi-AltGDmin methods for robust principal component analysis and related problems, as well as for shuffled low-rank column-wise sensing. The resulting proof techniques are expected to be useful for other distributed learning and optimization problems.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "expDate": "09/30/2029",
+      "abstractText": "This project establishes a Research Experiences for Undergraduates (REU) site at the University of Nevada, Reno, to provide undergraduate students nationwide with immersive research experiences in the field of edge intelligence. Edge intelligence, where data collection, processing, and analysis are performed close to the data source rather than on centralized cloud-based systems, is a rapidly advancing paradigm critical for applications such as autonomous vehicles, smart cities, industrial automation, and healthcare systems. However, deploying artificial intelligence (AI) on resource-limited edge devices presents substantial challenges in accuracy, efficiency, and robustness, with significant implications for public health, national security, and economic competitiveness. By engaging students in hands-on research and equipping them with the skills to address these challenges, this project aims to develop a highly skilled STEM workforce capable of advancing practical AI technologies. The program will foster sustained interest in research and encourage participants to pursue graduate studies and careers in STEM. Through the development of accurate, efficient, and trustworthy AI systems, the project will contribute to technological innovation, strengthen public trust in AI, and support societal well-being and national security.\r\n\r\nThis REU site develops undergraduate research capacity in edge intelligence by leveraging the interdisciplinary expertise of University of Nevada, Reno faculty in AI, robotics, and cyber-physical systems. The research is structured around three core thrusts in edge-based machine learning (ML) systems: (1) algorithms and architectures for resource-constrained devices, (2) scalable and robust learning in heterogeneous edge environments, and (3) resource management for energy-efficient and sustainable operation. Representative projects include accelerating federated learning in heterogeneous wireless networks, developing memory-efficient training of large language models for edge devices, designing decentralized federated learning with workload balancing, federated fine-tuning of vision models for wildfire detection, and collaborative multi-robot deep reinforcement learning. Guided by experienced faculty and graduate student mentors, students will engage in cutting-edge research and contribute to the development of ML systems for real-world applications such as smart Internet-of-Things devices, autonomous vehicles, and robotics. The program is complemented by training in research methodology, scientific communication, and career development, preparing participants for graduate study and careers in STEM fields.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
       "primaryProgram": [
         "01002627DB NSF RESEARCH & RELATED ACTIVIT"
       ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2552423",
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2548395",
       "keywords": [
         "LLM / GenAI"
       ]
@@ -337,20 +250,39 @@
       ]
     },
     {
-      "title": "Collaborative Research: CER: From Classroom to Career Readiness: Enhancing Undergraduate Computing Education Through Collaborative Research Experience in AI Security and Privacy",
-      "awardId": "2551964",
-      "piName": "Yingfei Dong",
-      "institution": "University of Hawaii",
-      "estimatedTotalAmt": "214246",
+      "title": "Collaborative Research: SaTC 2.0: RES: Modeling and Mitigating Reflective Backscatter Side-Channel Attacks (ReBac) in Everyday Devices",
+      "awardId": "2555492",
+      "piName": "Yu Luo",
+      "institution": "Mississippi State University",
+      "estimatedTotalAmt": "299999",
       "startDate": "10/01/2026",
       "expDate": "09/30/2029",
-      "abstractText": "Artificial Intelligence (AI) technologies are transforming daily life, but their rapid adoption has also introduced serious security and privacy challenges. Addressing these risks requires a workforce that can both advance AI innovation and safeguard its deployment. This project will help meet that need by strengthening undergraduate computing education through a curriculum-based research experience program that connects classroom learning with real world research experiences. The effort will integrate the latest AI security and privacy topics into existing computing courses while helping students build professional skills such as communication, teamwork, and leadership. By creating flexible learning modules that can be used across a range of undergraduate computing courses and institutions, the project will support workforce development and contribute to the secure, reliable, and responsible use of AI in society.\r\n\r\nThe project will establish a curriculum-based undergraduate research experience program focused on AI security and privacy across partner institutions. The research team will design, implement, and evaluate flexible educational modules including labs, tutorials, assignments, and research activities in computer vision, speech and audio, and network systems. These modules will address vulnerabilities across the AI lifecycle and will be designed for seamless integration into undergraduate computing courses. The instructional materials will also be aligned with the NICE (National Initiative for Cybersecurity Education) Cybersecurity Workforce Framework to strengthen career-relevant competencies. In parallel, the research team will study educational approaches that embed research into coursework, including project-based and competition-based learning, and evaluate their effects on student engagement, success, technical growth, and professional skill development. The project will generate transferable resources and evidence-based practices that can be adopted more broadly in computing education and shared with academic and community audiences.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "abstractText": "Everyday electronics, including keyboards, computer mice, game controllers, and smart home devices, are designed under the assumption that their physical enclosure protects the information transferred inside. This project investigates a newly identified class of vulnerabilities that challenges this assumption. By illuminating a device with a low-power radio signal from several meters away, an attacker can measure reflected signals that scatter from internal cables and Printed Circuit Board (PCB) traces. The amplitude of these reflections subtly changes in response to user activities, letting a remote eavesdropper recover what a person is typing or doing, even through walls and without a direct line of sight. Because billions of consumer and industrial products share this vulnerability, the work transforms how such devices are designed and developed, protecting personal privacy, economic security, and the integrity of information systems on which the public depends. The project also helps train the next generation of cybersecurity professionals through curriculum activities, strengthening cybersecurity workforce development.\r\n\r\n \r\nThe project establishes a scientific foundation for understanding and defending against reflective backscatter (ReBac) side-channel attacks, in which a compact transmitter illuminates a target device while a receiver decodes data-dependent reflections from internal interconnects such as flex cables and PCB traces. ReBac enables two attack capabilities: digital data exfiltration on serial buses and analog inference of usage patterns such as keyboard matrix scanning. Spanning both digital and analog variants, the team pursues three integrated objectives. First, the project develops a predictive theoretical framework that links victim-device parameters such as cable length, geometry, and communication protocol, environmental conditions including distance and physical obstacles, and attacker configuration such as transmit power, frequency, and receiver design, to overall attack feasibility. Second, the project conducts end-to-end demonstrations on commodity keyboards, mice, controllers, and Internet-of-Things (IoT) gadgets to quantify both digital and analog attacks under realistic operating conditions. Third, the project designs and evaluates low-cost defenses, including safe-length and layout guidelines for internal interconnects, lightweight shielding strategies, and data-randomization techniques suitable for industry adoption.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
       "primaryProgram": [
         "01002627DB NSF RESEARCH & RELATED ACTIVIT"
       ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2551964",
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2555492",
       "keywords": [
-        "Cybersecurity"
+        "Cybersecurity",
+        "Vulnerability"
+      ]
+    },
+    {
+      "title": "Collaborative Research: SaTC 2.0: RES: Modeling and Mitigating Reflective Backscatter Side-Channel Attacks (ReBac) in Everyday Devices",
+      "awardId": "2555491",
+      "piName": "Lina Pu",
+      "institution": "University of Alabama Tuscaloosa",
+      "estimatedTotalAmt": "300000",
+      "startDate": "10/01/2026",
+      "expDate": "09/30/2029",
+      "abstractText": "Everyday electronics, including keyboards, computer mice, game controllers, and smart home devices, are designed under the assumption that their physical enclosure protects the information transferred inside. This project investigates a newly identified class of vulnerabilities that challenges this assumption. By illuminating a device with a low-power radio signal from several meters away, an attacker can measure reflected signals that scatter from internal cables and Printed Circuit Board (PCB) traces. The amplitude of these reflections subtly changes in response to user activities, letting a remote eavesdropper recover what a person is typing or doing, even through walls and without a direct line of sight. Because billions of consumer and industrial products share this vulnerability, the work transforms how such devices are designed and developed, protecting personal privacy, economic security, and the integrity of information systems on which the public depends. The project also helps train the next generation of cybersecurity professionals through curriculum activities, strengthening cybersecurity workforce development.\r\n\r\n \r\nThe project establishes a scientific foundation for understanding and defending against reflective backscatter (ReBac) side-channel attacks, in which a compact transmitter illuminates a target device while a receiver decodes data-dependent reflections from internal interconnects such as flex cables and PCB traces. ReBac enables two attack capabilities: digital data exfiltration on serial buses and analog inference of usage patterns such as keyboard matrix scanning. Spanning both digital and analog variants, the team pursues three integrated objectives. First, the project develops a predictive theoretical framework that links victim-device parameters such as cable length, geometry, and communication protocol, environmental conditions including distance and physical obstacles, and attacker configuration such as transmit power, frequency, and receiver design, to overall attack feasibility. Second, the project conducts end-to-end demonstrations on commodity keyboards, mice, controllers, and Internet-of-Things (IoT) gadgets to quantify both digital and analog attacks under realistic operating conditions. Third, the project designs and evaluates low-cost defenses, including safe-length and layout guidelines for internal interconnects, lightweight shielding strategies, and data-randomization techniques suitable for industry adoption.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2555491",
+      "keywords": [
+        "Cybersecurity",
+        "Vulnerability"
       ]
     }
   ]
