@@ -55,7 +55,7 @@
 
     const PRESTIGE_VENUES = {
       'MIS Quarterly': ['FT50', 'UTD24'],
-      'Journal of Management Information Systems': ['FT50', 'UTD24'],
+      'Journal of Management Information Systems': ['FT50'],
     };
     const badgesFor = (pub) => {
       const chips = (PRESTIGE_VENUES[pub.venue] || []).map(
