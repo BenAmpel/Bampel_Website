@@ -2,17 +2,17 @@
 const { useState: usePageState } = React;
 
 const RESEARCH_PORTFOLIO = [
-  { tier: 'Core', risk: 'Low risk, high coherence', color: '#22c55e', areas: [
+  { tier: 'Core', risk: 'Established program', color: '#22c55e', areas: [
     { name: 'Proactive Cyber Threat Intelligence', desc: 'Mining pre-attack signals from hacker forums, paste sites, and adversarial ecosystems' },
     { name: 'Dark Web Analytics', desc: 'Longitudinal analysis of underground communities, jargon evolution, and knowledge diffusion' },
     { name: 'Human–AI Collaboration', desc: 'How analysts and AI systems co-produce actionable intelligence in security workflows' },
   ]},
-  { tier: 'Strategic', risk: 'Medium risk, high upside', color: '#3b82f6', areas: [
+  { tier: 'Strategic', risk: 'Active development', color: '#3b82f6', areas: [
     { name: 'Agentic Defense Systems', desc: 'Autonomous AI agents that detect, adapt to, and mitigate adversarial behavior in real time' },
     { name: 'LLM Security & Robustness', desc: 'Adversarial attacks, jailbreaking, alignment evaluation, and defense for large language models' },
     { name: 'Multimodal Threat Modeling', desc: 'Integrating text, code, audio, and infrastructure signals for cross-modal threat inference' },
   ]},
-  { tier: 'Exploratory', risk: 'High risk, high variance', color: '#a78bfa', areas: [
+  { tier: 'Exploratory', risk: 'Early-stage exploration', color: '#a78bfa', areas: [
     { name: 'Attacker–AI Co-evolution', desc: 'Modeling how adversaries adapt when defenders deploy AI-enabled countermeasures' },
     { name: 'Emergent Misuse of Autonomous Systems', desc: 'Anticipating novel attack surfaces created by widespread AI agent deployment' },
   ]},
@@ -25,9 +25,9 @@ const CONSTRUCTS = [
 ];
 
 const PIPELINE = [
-  { level: "K–12", description: "Early exposure to CyberAI concepts through local school partnerships and outreach programs.", programs: ["NSF STEM K-12", "NSF CAMEL", "Community Partnerships"] },
-  { level: "Undergraduate", description: "Course-embedded research experiences and summer cohorts with sanitized center data.", programs: ["NSF REU Site", "CyberAI Fundamentals", "Ethical Awareness"] },
-  { level: "Master's", description: "Bridge between instruction and research — students contribute to data curation and benchmarking.", programs: ["CIS 8684: CTI", "CIS 8080: Security", "NSF SFS Pipeline"] },
+  { level: "K–12", description: "Early exposure to CyberAI concepts through local school partnerships and outreach programs.", programs: ["School Outreach", "CyberAI Literacy", "Community Partnerships"] },
+  { level: "Undergraduate", description: "Course-embedded research experiences and summer cohorts with sanitized center data.", programs: ["Course-Embedded Research", "CyberAI Fundamentals", "Summer Research Cohorts"] },
+  { level: "Master's", description: "Bridge between instruction and research — students contribute to data curation and benchmarking.", programs: ["CIS 8684: CTI", "CIS 8080: Security", "CyberCorps SFS (via CRISP)"] },
   { level: "Doctoral", description: "PhD students lead CARE research with dissertations contributing durable center artifacts.", programs: ["Dissertation Research", "Center Publications", "Conference Leadership"] },
 ];
 
@@ -63,9 +63,9 @@ function HomePage({ onNavigate, tweaks }) {
         {tweaks.heroStyle === 'full' && (
           <div style={{ position: 'relative', zIndex: 1, marginTop: 60, display: 'flex', gap: 'clamp(30px,5vw,60px)', animation: 'fadeInUp 1s ease 0.2s both' }}>
             <StatCard value={publications.length} label="Publications" />
-            <StatCard value={3} label="Research Pillars" />
-            <StatCard value={courses.length} suffix="+" label="Courses Taught" />
-            <StatCard value={people.affiliates.length + 1} suffix="+" label="Collaborators" />
+            <StatCard value={(people.students || []).length + (people.mentees || []).length} label="Ph.D. Students Mentored" />
+            <StatCard value={2} label="Best Paper Awards" />
+            <StatCard value={courses.length} label="Courses Taught" />
           </div>
         )}
       </div>
@@ -73,14 +73,33 @@ function HomePage({ onNavigate, tweaks }) {
       <PageSection title="Research Thesis" accent="// mission" subtitle="CARE investigates how intelligent systems can anticipate, interpret, and adapt to malicious behavior before exploitation — shifting the focus from reactive defense to proactive intelligence.">
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20 }}>
           {[
-            { n: '01', title: 'Adversarial Signal Emergence', desc: 'How malicious intent, capabilities, and tactics emerge across heterogeneous data sources prior to exploitation.' },
-            { n: '02', title: 'Ambiguity-Aware Intelligence', desc: 'AI systems that operate under adversarial uncertainty — reasoning about ambiguity, deception, and partial information.' },
-            { n: '03', title: 'Human–AI Collaboration', desc: 'How humans and AI jointly interpret, validate, and act on adversarial signals in realistic security workflows.' },
+            { n: '01', title: 'Adversarial Signal Emergence', desc: 'How malicious intent, capabilities, and tactics emerge across heterogeneous data sources prior to exploitation.', systems: [
+              { name: 'TRACE', href: 'https://bampel.com/conference_publication/vendor-conditioned-contrastive-learning-for-predicting-organizational-/' },
+              { name: 'PHI-NEXT', href: 'https://bampel.com/journal_publication/phi-hacker-jmis/' },
+              { name: 'HackerSignal', href: 'https://bampel.com/conference_publication/hackersignal-a-large-scale-multi-source-dataset-linking-hacker-communi/' },
+            ] },
+            { n: '02', title: 'Ambiguity-Aware Intelligence', desc: 'AI systems that operate under adversarial uncertainty — reasoning about ambiguity, deception, and partial information.', systems: [
+              { name: 'Adaptive Phishing GAN', href: 'https://bampel.com/conference_publication/adaptive-phishing-gan-cars-2026/' },
+              { name: 'Four-Signal Fusion', href: 'https://bampel.com/conference_publication/four-signal-phishing-cars-2026/' },
+              { name: 'AVA', href: 'https://bampel.com/conference_publication/vuln-variant-cars-2026/' },
+            ] },
+            { n: '03', title: 'Human–AI Collaboration', desc: 'How humans and AI jointly interpret, validate, and act on adversarial signals in realistic security workflows.', systems: [
+              { name: 'AI-Assisted Training', href: 'https://bampel.com/conference_publication/performance-transfer-cars-2026/' },
+              { name: 'Prosody Training', href: 'https://bampel.com/conference_publication/prosody-vishing-icis-2026/' },
+              { name: 'HackerVote', href: 'https://bampel.com/journal_publication/hacker-communities-isf/' },
+            ] },
           ].map((p, i) => (
             <GlassCard key={i} glow>
               <div className="mono" style={{ color: 'var(--accent)', fontSize: 13, fontWeight: 700, marginBottom: 10, opacity: 0.6 }}>{p.n}</div>
               <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 8 }}>{p.title}</div>
               <div style={{ color: 'var(--text-secondary)', fontSize: 13.5, lineHeight: 1.65 }}>{p.desc}</div>
+              {p.systems && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 12 }}>
+                  {p.systems.map((s) => (
+                    <a key={s.name} href={s.href} className="mono" style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.5, padding: '3px 10px', borderRadius: 999, color: 'var(--accent)', border: '1px solid rgba(var(--accent-rgb),0.35)', background: 'rgba(var(--accent-rgb),0.06)', textDecoration: 'none' }}>{s.name}</a>
+                  ))}
+                </div>
+              )}
             </GlassCard>
           ))}
         </div>
@@ -229,6 +248,18 @@ function PeoplePage() {
         <PersonCard name={people.director.name} role={people.director.title} dept={people.director.dept} areas={people.director.areas} isDirector />
       </PageSection>
 
+      <PageSection title="Graduate Researchers" accent="// students" subtitle="Ph.D. students advised and mentored by CARE faculty at Georgia State and partner institutions.">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12 }}>
+          {[...(people.students || []), ...(people.mentees || [])].map((s) => (
+            <GlassCard key={s.name} style={{ padding: 18 }}>
+              <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 2 }}>{s.name}</div>
+              <div style={{ color: 'var(--accent2)', fontSize: 12, fontWeight: 600, marginBottom: 4 }}>{s.role}</div>
+              <div style={{ color: 'var(--text-muted)', fontSize: 12 }}>{s.org}{s.years ? ` · ${s.years}` : ''}</div>
+            </GlassCard>
+          ))}
+        </div>
+      </PageSection>
+
       <PageSection title="Faculty Affiliates" accent="// collaborators" subtitle="Internal and external faculty contributing to shared CARE artifacts across research primitives.">
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 }}>
           {people.affiliates.map((a) => (
@@ -365,30 +396,25 @@ function AboutPage({ onNavigate }) {
         </div>
       </PageSection>
 
-      <PageSection title="Funding Roadmap" accent="// 2026 strategy" subtitle="A strategic approach balancing immediate student support with long-term pursuit of center-scale awards.">
-        <Timeline items={funding.timeline} />
-      </PageSection>
-
-      <PageSection title="Funding & Partners" accent="// ecosystem" subtitle="CARE pursues synergistic funding across federal agencies, defense, and industry partnerships.">
+      <PageSection title="Research Support" accent="// support" subtitle="CARE research has been supported by federal and defense sponsors, acknowledged across the center's publications.">
         <div style={{ marginBottom: 24 }}>
-          <div className="mono" style={{ color: 'var(--accent)', fontSize: 12, fontWeight: 700, letterSpacing: 1, marginBottom: 14 }}>FEDERAL & DEFENSE</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 10 }}>
-            {funding.partners.filter(p => p.type !== 'industry').map((p) => (
-              <div key={p.name} style={{ padding: '12px 16px', borderRadius: 8, border: '1px solid rgba(var(--accent-rgb),0.10)', background: 'rgba(var(--accent-rgb),0.03)' }}>
+          <div className="mono" style={{ color: 'var(--accent)', fontSize: 12, fontWeight: 700, letterSpacing: 1, marginBottom: 14 }}>SPONSORED SUPPORT</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 10 }}>
+            {(funding.awarded || []).map((p) => (
+              <div key={p.id} style={{ padding: '12px 16px', borderRadius: 8, border: '1px solid rgba(var(--accent-rgb),0.10)', background: 'rgba(var(--accent-rgb),0.03)' }}>
                 <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 2 }}>{p.name}</div>
-                <div className="mono" style={{ fontSize: 11, color: 'var(--accent)', marginBottom: 4 }}>{p.program}</div>
-                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{p.focus}</div>
+                <div className="mono" style={{ fontSize: 11, color: 'var(--accent)', marginBottom: 4 }}>{p.id}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{p.role}</div>
               </div>
             ))}
           </div>
         </div>
         <div>
-          <div className="mono" style={{ color: 'var(--accent2)', fontSize: 12, fontWeight: 700, letterSpacing: 1, marginBottom: 14 }}>INDUSTRY</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 10 }}>
-            {funding.partners.filter(p => p.type === 'industry').map((p) => (
+          <div className="mono" style={{ color: 'var(--accent2)', fontSize: 12, fontWeight: 700, letterSpacing: 1, marginBottom: 14 }}>COLLABORATING INSTITUTIONS</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 10 }}>
+            {(funding.collaborations || []).map((p) => (
               <div key={p.name} style={{ padding: '12px 16px', borderRadius: 8, border: '1px solid rgba(var(--accent2-rgb),0.10)', background: 'rgba(var(--accent2-rgb),0.03)' }}>
                 <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 2 }}>{p.name}</div>
-                <div className="mono" style={{ fontSize: 11, color: 'var(--accent2)', marginBottom: 4 }}>{p.program}</div>
                 <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{p.focus}</div>
               </div>
             ))}
@@ -409,6 +435,29 @@ function AboutPage({ onNavigate }) {
               <div style={{ color: 'var(--text-secondary)', fontSize: 13, lineHeight: 1.6 }}>{g.desc}</div>
             </GlassCard>
           ))}
+        </div>
+      </PageSection>
+
+      <PageSection title="Contact" accent="// connect">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
+          <GlassCard style={{ padding: 22 }}>
+            <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 8, color: 'var(--accent)' }}>Director</div>
+            <div style={{ fontSize: 13.5, color: 'var(--text-secondary)', lineHeight: 1.8 }}>
+              Dr. Benjamin M. Ampel<br />
+              <a href="mailto:bampel@gsu.edu" style={{ color: 'var(--accent2)' }}>bampel@gsu.edu</a><br />
+              Department of Computer Information Systems<br />
+              J. Mack Robinson College of Business<br />
+              55 Park Place NW, Atlanta, GA 30303
+            </div>
+          </GlassCard>
+          <GlassCard style={{ padding: 22 }}>
+            <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 8, color: 'var(--accent)' }}>Robinson Cyber Ecosystem</div>
+            <div style={{ fontSize: 13.5, color: 'var(--text-secondary)', lineHeight: 1.8 }}>
+              <a href="https://robinson.gsu.edu/research-centers/crisp/" target="_blank" rel="noopener" style={{ color: 'var(--accent2)' }}>CRISP — Center for Research in Information Security &amp; Privacy</a><br />
+              NSF CyberCorps® Scholarship for Service participant<br />
+              NSA/DHS CAE Cyber Defense designated program
+            </div>
+          </GlassCard>
         </div>
       </PageSection>
 
