@@ -6,6 +6,9 @@
 title: Benjamin M. Ampel # Website name
 baseURL: 'https://bampel.com/' # Website URL
 
+# Render future-dated content (accepted papers listed before their conference dates)
+buildFuture: true
+
 ############################
 ## LANGUAGE
 ############################
