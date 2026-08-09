@@ -11,6 +11,16 @@ sections:
       title: Biography
       username: admin
 
+  # ---------- SELECTED PUBLICATIONS ----------
+  - block: markdown
+    id: selected-publications
+    content:
+      title: Selected Publications
+      text: |
+        {{< selected_publications >}}
+    design:
+      columns: '1'
+
   # ---------- RESEARCH IMPACT ----------
   - block: research_impact_overview
     id: stats

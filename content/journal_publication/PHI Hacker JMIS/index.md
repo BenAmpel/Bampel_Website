@@ -27,7 +27,7 @@ tags:
 - Healthcare Cybersecurity
 - Computational Design Science
 
-featured: false
+featured: true
 
 url_pdf: ''
 plain_summary: "Stolen medical records are increasingly bought and sold in encrypted chat groups on platforms like Telegram and Discord, buried in huge amounts of unrelated chatter. This paper introduces PHI-NEXT, a system that automatically finds those posts, pulls out what kind of health information is being traded, and tracks how the activity changes over time. It outperforms existing detection methods and gives security teams and regulators a practical way to monitor this underground market at scale."

@@ -158,6 +158,7 @@ def collect_publications():
                     "date": iso_date,
                     "abstract": str(abstract).strip() if abstract else None,
                     "award": award,
+                    "featured": bool(data.get("featured")),
                 }
             )
     items.sort(key=lambda x: (x["year"] or 0, x["title"]))

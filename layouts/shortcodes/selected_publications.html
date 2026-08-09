@@ -1,0 +1,132 @@
+<!--
+  selected_publications.html — homepage spotlight of featured publications.
+  Reads publications.json via the shared pub-loader; renders entries with
+  featured: true (journals first, newest first). Badges/hover styling reuse
+  the .pub-item / .pub-badge classes from the prestige-polish layer.
+-->
+<div class="selected-pubs" id="selected-pubs" hidden>
+  <div class="selected-pubs-list" id="selected-pubs-list"></div>
+  <div class="selected-pubs-more">
+    <a href="/publications/" class="selected-pubs-link">View all publications →</a>
+  </div>
+</div>
+
+<style>
+.selected-pubs-list {
+  display: grid;
+  gap: 12px;
+}
+.selected-pubs .pub-item {
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.2);
+}
+.selected-pubs .pub-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #00e5ff;
+  text-decoration: none;
+}
+.selected-pubs .pub-meta {
+  font-size: 0.75rem;
+  opacity: 0.75;
+  margin-top: 4px;
+}
+.selected-pubs .pub-authors {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  margin-top: 6px;
+}
+.selected-pubs-more {
+  margin-top: 14px;
+  text-align: right;
+}
+.selected-pubs-link {
+  font-family: 'Fira Code', 'Roboto Mono', monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  color: #00ff41;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(0, 255, 65, 0.35);
+  transition: border-color 0.2s ease, text-shadow 0.2s ease;
+}
+.selected-pubs-link:hover {
+  color: #00ff41;
+  border-color: #00ff41;
+  text-shadow: 0 0 14px rgba(0, 255, 65, 0.45);
+}
+body:not(.dark) .selected-pubs .pub-item {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+body:not(.dark) .selected-pubs .pub-title { color: #1a0dab; }
+body:not(.dark) .selected-pubs-link { color: #0b6b2c; border-color: rgba(11, 107, 44, 0.4); text-shadow: none; }
+</style>
+
+<script>
+(function () {
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  var PRESTIGE_VENUES = {
+    'MIS Quarterly': ['FT50', 'UTD24'],
+    'Journal of Management Information Systems': ['FT50', 'UTD24']
+  };
+
+  function badgesFor(pub) {
+    var chips = (PRESTIGE_VENUES[pub.venue] || []).map(function (b) {
+      var title = b === 'FT50' ? 'Financial Times Top 50 journal' : 'UT Dallas Top 24 journal';
+      return '<span class="pub-badge pub-badge--' + b.toLowerCase() + '" title="' + title + '">' + b + '</span>';
+    });
+    if (pub.award) {
+      chips.push('<span class="pub-badge pub-badge--award" title="' + esc(pub.award) + '">🏆 ' + esc(pub.award) + '</span>');
+    }
+    return chips.length ? '<span class="pub-badges">' + chips.join('') + '</span>' : '';
+  }
+
+  function render(pubs) {
+    var featured = pubs.filter(function (p) { return p.featured; });
+    if (!featured.length) return;
+
+    featured.sort(function (a, b) {
+      var typeDiff = (a.type === 'journal' ? 0 : 1) - (b.type === 'journal' ? 0 : 1);
+      if (typeDiff !== 0) return typeDiff;
+      return (b.year || 0) - (a.year || 0);
+    });
+
+    var list = document.getElementById('selected-pubs-list');
+    var wrap = document.getElementById('selected-pubs');
+    if (!list || !wrap) return;
+
+    list.innerHTML = featured.slice(0, 6).map(function (pub) {
+      var authors = Array.isArray(pub.authors) ? pub.authors.join(', ') : '';
+      var meta = [pub.year, pub.venue].filter(Boolean).join(' · ');
+      var title = pub.url
+        ? '<a href="' + esc(pub.url) + '" class="pub-title">' + esc(pub.title) + '</a>'
+        : '<span class="pub-title">' + esc(pub.title) + '</span>';
+      return '<div class="pub-item">' + title + badgesFor(pub) +
+        '<div class="pub-meta">' + esc(meta) + '</div>' +
+        '<div class="pub-authors">' + esc(authors) + '</div></div>';
+    }).join('');
+
+    wrap.hidden = false;
+  }
+
+  function init() {
+    (typeof loadPublications === 'function'
+      ? loadPublications()
+      : fetch('/data/publications.json').then(function (r) { return r.ok ? r.json() : []; }).catch(function () { return []; })
+    ).then(render).catch(function () { /* leave hidden on failure */ });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
