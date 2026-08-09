@@ -66,7 +66,7 @@ bio_modes:
       - "Hacker community mining to surface early warning signals."
     cta:
       label: "Explore publications"
-      href: "#publications"
+      href: "/publications/"
   - key: "teaching"
     label: "Teaching"
     summary: "Designs applied courses that blend threat intelligence, machine learning, and hands-on labs."
@@ -76,7 +76,7 @@ bio_modes:
       - "CIS 8080: IS Security and Privacy (GSU)."
     cta:
       label: "See teaching"
-      href: "#teaching"
+      href: "/teaching/"
   - key: "leadership"
     label: "Leadership"
     summary: "Serves the community through editorial roles and program leadership."
@@ -86,7 +86,7 @@ bio_modes:
       - "Co-chair, AI4Cyber Workshop at ACM KDD and HICSS Junior Faculty Consortium."
     cta:
       label: "View service"
-      href: "#service"
+      href: "/cv/#service"
   - key: "impact"
     label: "Impact"
     summary: "Recognized for research contributions and training the next generation of cyber leaders."
@@ -96,21 +96,21 @@ bio_modes:
       - "Robinson College of Business IS Cybersecurity Graduate Program Top Professor (2025)."
     cta:
       label: "Awards and honors"
-      href: "#awards"
+      href: "/cv/#awards"
 
 bio_quicklinks:
   - label: "Publications"
-    href: "#publications"
+    href: "/publications/"
   - label: "Teaching"
-    href: "#teaching"
+    href: "/teaching/"
   - label: "Talks"
-    href: "#talks"
+    href: "/cv/#talks"
   - label: "Awards"
-    href: "#awards"
+    href: "/cv/#awards"
   - label: "Service"
-    href: "#service"
+    href: "/cv/#service"
   - label: "Media"
-    href: "#media"
+    href: "/cv/#media"
 
 # Short bio (displayed in user profile at end of posts)
 bio: My research focuses on AI-enabled Cybersecurity, including Cyber Threat Intelligence, Large Language Models, and Phishing Detection.

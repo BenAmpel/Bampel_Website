@@ -78,6 +78,13 @@
         return response.json();
     })
     .then(stats => {
+        // Only surface the aggregate box once the numbers are strong enough
+        // to be a positive signal; low/zero scores stay hidden.
+        const meaningful = (stats.score || 0) >= 25 ||
+                           (stats.news || 0) >= 3 ||
+                           (stats.mendeley || 0) >= 150;
+        if (!meaningful) return;
+
         const box = document.getElementById('altmetric-summary-box');
         if (box) box.style.display = 'block';
 

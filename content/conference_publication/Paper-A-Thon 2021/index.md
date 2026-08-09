@@ -24,7 +24,7 @@ publication_types: ['1']
 
 # Publication name and optional abbreviated publication name.
 publication: In *International Conference on Information Systems*
-publication_short: In *ICIS 2021*
+publication_short: In *ICIS*
 
 abstract: "The increasing complexity of managerial decision-making for digital innovation activities accelerates cognitive biases like escalation of commitment (EoC). Decision aids (e.g., AI agents) can assist managers in avoiding EoC scenarios. However, how AI-based decision aids affect EoC in this context remains a critical yet understudied topic. To address this gap, we develop a theoretical model and propose a randomized controlled post-test vignette experiment with a fictive decision-making simulation to study the de-escalating effect of an AI-based decision aid in the digital innovation context. Our model accounts for moderating (AI familiarity, personality traits) and mediating (decision aid reliance) factors. By entangling the de-escalating effect of AI agent decision aid in decision-making scenarios about digital innovation projects we contribute to the digital innovation, AI agent, and the EoC literature. The future implementation of the proposed research design lays the foundation for designing AI agent decision support systems that de-bias managerial decision-making."
 # Summary. An optional shortened abstract.

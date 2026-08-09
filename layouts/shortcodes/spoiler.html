@@ -1,4 +1,4 @@
-<details class="spoiler">
+<details class="spoiler"{{ if in (slice "true" "1" "yes" "open") (lower (.Get "open" | default "")) }} open{{ end }}>
   <summary>{{ .Get "text" }}</summary>
   <div class="spoiler-content">
     {{ .Inner | .Page.RenderString (dict "display" "block") }}

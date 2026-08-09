@@ -1,0 +1,131 @@
+<!--
+  prestige-polish.html — motion & prestige layer (2026-08).
+  Scroll reveals, MPA view transitions, publication card glow, venue badges.
+  All effects gated behind prefers-reduced-motion; badges are static styling.
+-->
+<style>
+/* ===== Cross-page view transitions (MPA, progressive enhancement) ===== */
+@view-transition { navigation: auto; }
+@media not (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root) {
+    animation: vt-fade-out 0.22s ease both;
+  }
+  ::view-transition-new(root) {
+    animation: vt-fade-in 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes vt-fade-out {
+    to { opacity: 0; transform: translateY(-6px); }
+  }
+  @keyframes vt-fade-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: none; }
+  }
+}
+
+/* ===== Scroll reveal ===== */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+[data-reveal].is-revealed {
+  opacity: 1;
+  transform: none;
+  will-change: auto;
+}
+.reveals-off [data-reveal] {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* ===== Publication card polish (publications filter list) ===== */
+.pub-item {
+  position: relative;
+  overflow: hidden;
+  border-left: 2px solid rgba(0, 229, 255, 0.25);
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.28s ease, box-shadow 0.28s ease,
+              background 0.28s ease,
+              opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
+}
+.pub-item:hover {
+  transform: translateY(-3px) translateX(2px);
+  border-left-color: var(--clr-green, #00ff41);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.45), 0 0 22px rgba(0, 255, 65, 0.10);
+  background: rgba(0, 255, 65, 0.03);
+}
+/* Sheen sweep on hover */
+.pub-item::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 40%,
+              rgba(0, 229, 255, 0.07) 50%, transparent 60%);
+  transform: translateX(-120%);
+  pointer-events: none;
+}
+.pub-item:hover::after {
+  transition: transform 0.7s ease;
+  transform: translateX(120%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .pub-item, .pub-item::after { transition: none !important; }
+  .pub-item:hover { transform: none; }
+  .pub-item:hover::after { transform: translateX(-120%); }
+}
+
+/* ===== Venue prestige badges ===== */
+.pub-badges { display: inline-flex; gap: 6px; margin-left: 8px; vertical-align: middle; }
+.pub-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-family: 'Fira Code', 'Roboto Mono', monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.5;
+  border: 1px solid;
+}
+.pub-badge--ft50 {
+  color: #ffd700;
+  border-color: rgba(255, 215, 0, 0.55);
+  background: rgba(255, 215, 0, 0.08);
+  text-shadow: 0 0 12px rgba(255, 215, 0, 0.35);
+}
+.pub-badge--utd24 {
+  color: var(--clr-cyan, #00e5ff);
+  border-color: rgba(0, 229, 255, 0.5);
+  background: rgba(0, 229, 255, 0.07);
+}
+.pub-badge--award {
+  color: var(--clr-magenta, #e040fb);
+  border-color: rgba(224, 64, 251, 0.55);
+  background: rgba(224, 64, 251, 0.08);
+}
+body:not(.dark) .pub-badge--ft50 { color: #8a6d00; border-color: #c7a600; background: rgba(255, 215, 0, 0.12); text-shadow: none; }
+body:not(.dark) .pub-badge--utd24 { color: #006d7a; border-color: #0097a7; background: rgba(0, 229, 255, 0.10); }
+body:not(.dark) .pub-badge--award { color: #7b1fa2; border-color: #ab47bc; background: rgba(224, 64, 251, 0.10); }
+
+/* ===== Global link + focus polish ===== */
+::selection { background: rgba(0, 255, 65, 0.25); color: #fff; }
+a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid rgba(0, 229, 255, 0.7);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+</style>
+<script defer src="/js/reveal.js?v=20260808"></script>

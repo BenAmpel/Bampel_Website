@@ -141,6 +141,12 @@ def collect_publications():
             venue = normalize_venue(data)
             abstract = data.get("abstract") or data.get("summary") or data.get("description")
             url = f"/{dir_name}/{folder_slug}/"
+            award = None
+            award_sources = list(data.get("awards") or []) + list(data.get("tags") or [])
+            for entry in award_sources:
+                if "best paper" in str(entry).lower():
+                    award = "Best Paper Award"
+                    break
             items.append(
                 {
                     "title": str(title).strip(),
@@ -151,6 +157,7 @@ def collect_publications():
                     "url": url,
                     "date": iso_date,
                     "abstract": str(abstract).strip() if abstract else None,
+                    "award": award,
                 }
             )
     items.sort(key=lambda x: (x["year"] or 0, x["title"]))

@@ -11,15 +11,15 @@ sections:
       text: |
         Explore the lab's live intelligence feeds, funding, and research analytics. Expand any section below.
 
-        {{< spoiler text="🔭 Live Research Intelligence" >}}
+        {{< spoiler text="🔭 Live Research Intelligence" open="true" >}}
         {{< research_command_center >}}
         {{< /spoiler >}}
 
-        {{< spoiler text="💼 Funding & Grants" >}}
+        {{< spoiler text="💼 Funding & Grants" open="true" >}}
         {{< grant_experience >}}
         {{< /spoiler >}}
 
-        {{< spoiler text="📊 Research Dashboard" >}}
+        {{< spoiler text="📊 Research Dashboard" open="true" >}}
         {{< research_dashboard >}}
         {{< /spoiler >}}
 

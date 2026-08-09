@@ -13,6 +13,7 @@
       "url": "/conference_publication/sawtooth-19-isi/",
       "date": "2019-07-01",
       "abstract": "With the rapid development of blockchain platforms, it is important that different implementations are tested and analyzed for comparative purposes. One such implementation is Hyperledger Sawtooth, a new member of the Hyperledger family. Sawtooth blockchain is a permissioned implementation developed in part by Intel. While research has been done on Hyperledger Fabric, research on Sawtooth is not well documented. Using the Hyperledger Caliper benchmarking tool, we aim to test the performance of the blockchain and identify potential issues.",
+      "award": null,
       "citations": 131,
       "topic": "Other"
     },
@@ -33,6 +34,7 @@
       "url": "/conference_publication/vuln-github-isi/",
       "date": "2020-11-01",
       "abstract": "The scientific cyberinfrastructure community heavily relies on public internet-based systems (e.g., GitHub) to share resources and collaborate. GitHub is one of the most powerful and popular systems for open source collaboration that allows users to share and work on projects in a public space for accelerated development and deployment. Monitoring GitHub for exposed vulnerabilities can save financial cost and prevent misuse and attacks of cyberinfrastructure. Vulnerability scanners that can interface with GitHub directly can be leveraged to conduct such monitoring. This research aims to proactively identify vulnerable communities within scientific cyberinfrastructure. We use social network analysis to construct graphs representing the relationships amongst users and repositories. We leverage prevailing unsupervised graph embedding algorithms to generate graph embeddings that capture the network attributes and nodal features of our repository and user graphs. This enables the clustering of public cyberinfrastructure repositories and users that have similar network attributes and vulnerabilities. Results of this research find that major scientific cyberinfrastructures have vulnerabilities pertaining to secret leakage and insecure coding practices for high-impact genomics research. These results can help organizations address their vulnerable repositories and users in a targeted manner.",
+      "award": null,
       "citations": 36,
       "topic": "AI / Deep Learning"
     },
@@ -51,6 +53,7 @@
       "url": "/conference_publication/dtlel-isi/",
       "date": "2020-11-01",
       "abstract": "With the rapid development of new technologies, vulnerabilities are at an all-time high. Companies are investing in developing Cyber Threat Intelligence (CTI) to counteract these new vulnerabilities. However, this CTI is generally reactive based on internal data. Hacker forums can provide proactive CTI value through automated analysis of new trends and exploits. One way to identify exploits is by analyzing the source code that is posted on these forums. These source code snippets are often noisy and unlabeled, making standard data labeling techniques ineffective. This study aims to design a novel framework for the automated collection and categorization of hacker forum exploit source code. We propose a deep transfer learning framework, the Deep Transfer Learning for Exploit Labeling (DTL-EL). DTL-EL leverages the learned representation from professional labeled exploits to better generalize to hacker forum exploits. This model classifies the collected hacker forum exploits into eight predefined categories for proactive and timely CTI. The results of this study indicate that DTL-EL outperforms other prominent models in hacker forum literature.",
+      "award": "Best Paper Award",
       "citations": 56,
       "topic": "AI / Deep Learning"
     },
@@ -65,6 +68,7 @@
       "url": "/conference_publication/predicting-organizational-cybersecurity-risk-a-deep-learning-approach/",
       "date": "2020-01-01",
       "abstract": "Cyberattacks conducted by malicious hackers cause irreparable damage to organizations, governments, and individuals every year. Hackers use exploits found on hacker forums to carry out complex cyberattacks, making exploration of these forums vital. We propose a hacker forum entity recognition framework (HackER) to identify exploits and the entities that the exploits target. HackER then uses a bidirectional long short-term memory model (BiLSTM) to create a predictive model for what companies will be targeted by exploits. The results of the algorithm will be evaluated using a manually labeled gold-standard test dataset, using accuracy, precision, recall, and F1-score as metrics. We choose to compare our model against state of the art classical machine learning and deep learning benchmark models. Results show that our proposed HackER BiLSTM model outperforms all classical machine learning and deep learning models in F1-score (79.71%). These results are statistically significant at 0.05 or lower for all benchmarks except LSTM. The results of preliminary work suggest our model can help key cybersecurity stakeholders (e.g., analysts, researchers, educators) identify what type of business an exploit is targeting.",
+      "award": null,
       "citations": 0,
       "topic": "AI / Deep Learning"
     },
@@ -85,6 +89,7 @@
       "url": "/conference_publication/vuln-ci-isi/",
       "date": "2020-11-01",
       "abstract": "The accelerated growth of computing technologies has provided interdisciplinary teams a platform for producing innovative research at an unprecedented speed. Advanced scientific cyberinfrastructures, in particular, provide data storage, applications, software, and other resources to facilitate the development of critical scientific discoveries. Users of these environments often rely on custom developed virtual machine (VM) images that are comprised of a diverse array of open source applications. These can include vulnerabilities undetectable by conventional vulnerability scanners. This research aims to identify the installed applications, their vulnerabilities, and how they vary across images in scientific cyberinfrastructure. We propose a novel unsupervised graph embedding framework that captures relationships between applications, as well as vulnerabilities identified on corresponding GitHub repositories. This embedding is used to cluster images with similar applications and vulnerabilities. We evaluate cluster quality using Silhouette, Calinski-Harabasz, and Davies-Bouldin indices, and application vulnerabilities through inspection of selected clusters. Results reveal that images pertaining to genomics research in our research testbed are at greater risk of high-severity shell spawning and data validation vulnerabilities.",
+      "award": null,
       "citations": 19,
       "topic": "AI / Deep Learning"
     },
@@ -100,6 +105,7 @@
       "url": "/conference_publication/hack2vec-isi-2021/",
       "date": "2021-11-01",
       "abstract": "Hacker forums provide malicious actors with a large database of tutorials, goods, and assets to leverage for cyber-attacks. Careful research of these forums can provide tremendous benefit to the cybersecurity community through trend identification and exploit categorization. This study aims to provide a novel static word embedding, Hack2Vec, to improve performance on hacker forum classification tasks. Our proposed Hack2Vec model distills contextual representations from the seminal pre-trained language model BERT to a continuous bag-of-words model to create a highly targeted hacker forum static word embedding. The results of our experimental design indicate that Hack2Vec improves performance over prominent embeddings in accuracy, precision, recall, and F1-score for a benchmark hacker forum classification task.",
+      "award": null,
       "citations": 9,
       "topic": "AI / Deep Learning"
     },
@@ -118,6 +124,7 @@
       "url": "/conference_publication/exploit-sharing-hackers-isi/",
       "date": "2021-11-01",
       "abstract": "Cybercrime was estimated to cost the global economy $945 billion in 2020. Increasingly, law enforcement agencies are using social network analysis (SNA) to identify key hackers from Dark Web hacker forums for targeted investigations. However, past approaches have primarily focused on analyzing key hackers at a single point in time and use a hacker's structural features only. In this study, we propose a novel Hacker Evolution Identification Framework to identify how hackers evolve within hacker forums. The proposed framework has two novelties in its design. First, the framework captures features such as user statistics, node-level metrics, lexical measures, and post style, when representing each hacker with unsupervised graph embedding methods. Second, the framework incorporates mechanisms to align embedding spaces across multiple time-spells of data to facilitate analysis of how hackers evolve over time. Two experiments were conducted to assess the performance of prevailing graph embedding algorithms and nodal feature variations in the task of graph reconstruction in five time-spells. Results of our experiments indicate that Text-Associated Deep-Walk (TADW) with all of the proposed nodal features outperforms methods without nodal features in terms of Mean Average Precision in each time-spell. We illustrate the potential practical utility of the proposed framework with a case study on an English forum with 51,612 posts. The results produced by the framework in this case study identified key hackers posting piracy assets.",
+      "award": null,
       "citations": 6,
       "topic": "AI / Deep Learning"
     },
@@ -135,6 +142,7 @@
       "url": "/conference_publication/paste-site-21-isi/",
       "date": "2021-11-01",
       "abstract": "Malicious cyber activities impose substantial costs on the U.S. economy and global markets. Cyber-criminals often use information-sharing social media platforms such as paste sites (e.g., Pastebin) to share vast amounts of plain text content related to Personally Identifiable Information (PII), credit card numbers, exploit code, malware, and other sensitive content. Paste sites can provide targeted Cyber Threat Intelligence (CTI) about potential threats and prior breaches. In this research, we propose a novel Bidirectional Encoder Representation from Transformers (BERT) with Latent Dirichlet Allocation (LDA) model to categorize pastes automatically. Our proposed BERT-LDA model leverages a neural network transformer architecture to capture sequential dependencies when representing each sentence in a paste. BERT-LDA replaces the Bag-of-Words (BoW) approach in the conventional LDA with a Bag-of-Labels (BoL) that encompasses class labels at the sequence level. We compared the performance of the proposed BERT-LDA against the conventional LDA and BERT-LDA variants (e.g., GPT2-LDA) on 4,254,453 pastes from three paste sites. Experiment results indicate that the proposed BERT-LDA outperformed the standard LDA and each BERT-LDA variant in terms of perplexity on each paste site. Results of our BERT-LDA case study suggest that significant content relating to hacker community activities, malicious code, network and website vulnerabilities, and PII are shared on paste sites. The insights provided by this study could be used by organizations to proactively mitigate potential damage on their infrastructure.",
+      "award": null,
       "citations": 21,
       "topic": "AI / Deep Learning"
     },
@@ -152,6 +160,7 @@
       "url": "/workshop_publication/cve-attandck-kdd-2021/",
       "date": "2021-08-01",
       "abstract": "Due to the ever-increasing threat of cyber-attacks to critical cyber infrastructure, organizations are focusing on building their cybersecurity knowledge base. A salient list of cybersecurity knowledge is the Common Vulnerabilities and Exposures (CVE) list, which details vulnerabilities found in a wide range of software and hardware. However, these vulnerabilities often do not have a mitigation strategy to prevent an attacker from exploiting them. A well-known cybersecurity risk management framework, MITRE ATT&CK, offers mitigation techniques for many malicious tactics. Despite the tremendous benefits that both CVEs and the ATT&CK framework can provide for key cybersecurity stakeholders (e.g., analysts, educators, and managers), the two entities are currently separate. We propose a model, named the CVE Transformer (CVET), to label CVEs with one of ten MITRE ATT&CK tactics. The CVET model contains a fine-tuning and self-knowledge distillation design applied to the state-of-the-art pre-trained language model RoBERTa. Empirical results on a gold-standard dataset suggest that our proposed novelties can increase model performance in F1-score. The results of this research can allow cybersecurity stakeholders to add preliminary MITRE ATT&CK information to their collected CVEs.",
+      "award": null,
       "citations": 91,
       "topic": "Design Science"
     },
@@ -164,10 +173,11 @@
       ],
       "year": 2021,
       "type": "conference",
-      "venue": "ICIS 2021",
+      "venue": "ICIS",
       "url": "/conference_publication/paper-a-thon-2021/",
       "date": "2021-12-01",
       "abstract": "The increasing complexity of managerial decision-making for digital innovation activities accelerates cognitive biases like escalation of commitment (EoC). Decision aids (e.g., AI agents) can assist managers in avoiding EoC scenarios. However, how AI-based decision aids affect EoC in this context remains a critical yet understudied topic. To address this gap, we develop a theoretical model and propose a randomized controlled post-test vignette experiment with a fictive decision-making simulation to study the de-escalating effect of an AI-based decision aid in the digital innovation context. Our model accounts for moderating (AI familiarity, personality traits) and mediating (decision aid reliance) factors. By entangling the de-escalating effect of AI agent decision aid in decision-making scenarios about digital innovation projects we contribute to the digital innovation, AI agent, and the EoC literature. The future implementation of the proposed research design lays the foundation for designing AI agent decision support systems that de-bias managerial decision-making.",
+      "award": null,
       "citations": 3,
       "topic": "Other"
     },
@@ -186,6 +196,7 @@
       "url": "/conference_publication/phishing-robustness-amcis-2023/",
       "date": "2023-08-01",
       "abstract": "Social engineering attacks are currently the most cited cybersecurity threat to organizations. Phishing emails are the most salient form of social engineering attacks. Organizations are increasingly implementing AI-enabled systems to detect phishing emails. However, AI-enabled systems are often susceptible to textual perturbations, where an adversary makes a small change to cause a misclassification. In this study, we sought to identify the performance of prevailing phishing email detection systems (PEDS) against character, word, sentence, and multi-level adversarial text perturbations. Through a principled benchmarking framework, we quantitatively demonstrated the lack of robustness prevailing PEDS have to specific types of text-based adversarial perturbations (e.g., character, word, sentence, multi-level). The results of this study provide new insights into the robustness of AI-based PEDS and highlight the need for organizations to adopt a multi-layered approach to phishing protection. Additionally, organizations can implement our benchmark framework to test their PEDS against adversarial perturbations.",
+      "award": null,
       "citations": 8,
       "topic": "Cybersecurity"
     },
@@ -204,6 +215,7 @@
       "url": "/conference_publication/ransomware-bitcoin-isi-2023/",
       "date": "2023-10-01",
       "abstract": "Ransomware is a growing problem and significant threat to cybersecurity in the United States. One primary vector for ransomware payments is the Bitcoin network. Network science techniques are a potential approach to analyze ransomware payment networks to discover salient ransomware actors. In this study, we propose a design framework for labeling nodes in a ransomware payment network and identifying key ransomware Bitcoin addresses that can be targeted for disruption. By leveraging semi-supervised graph embedding methodology and updating the loss function of a prevailing algorithm, GraphSAGE, to manage dataset imbalance, we identify key wallets in our ransomware network. We demonstrate the utility of our approach with a case study identifying a Bitcoin wallet that has been reported as a ransomware actor as recently as December 2021 and has transferred over $450 million in Bitcoin.",
+      "award": null,
       "citations": 7,
       "topic": "AI / Deep Learning"
     },
@@ -220,6 +232,7 @@
       "url": "/journal_publication/phish-dtrap/",
       "date": "2023-09-01",
       "abstract": "Although machine learning-based anti-phishing detectors have provided promising results in phishing website detection, they remain vulnerable to evasion attacks. The Machine Learning Security Evasion Competition 2022 (MLSEC 2022) provides researchers and practitioners with the opportunity to deploy evasion attacks against anti-phishing machine learning models in real-world settings. In this field note, we share our experience participating in MLSEC 2022. We manipulated the source code of ten phishing HTML pages provided by the competition using obfuscation techniques to evade anti-phishing models. Our evasion attacks employing a benign overlap strategy achieved third place in the competition with 46 out of a potential 80 points. The results of our MLSEC 2022 performance can provide valuable insights for research seeking to robustify machine learning-based anti-phishing detectors.",
+      "award": null,
       "citations": 6,
       "topic": "AI / Deep Learning"
     },
@@ -238,6 +251,7 @@
       "url": "/workshop_publication/adversarial-phishing-wds-2023/",
       "date": "2023-10-01",
       "abstract": "Machine learning-based anti-phishing detectors are widely deployed to protect users from malicious websites. This paper presents a reinforcement learning approach to generate adversarial phishing websites that can evade these detectors, revealing potential vulnerabilities in current defense mechanisms and informing the development of more robust detection systems.",
+      "award": null,
       "citations": 0,
       "topic": "AI / Deep Learning"
     },
@@ -255,6 +269,7 @@
       "url": "/conference_publication/mitre-attandck-isi-2023/",
       "date": "2023-10-01",
       "abstract": "Cyber-criminals often use information-sharing platforms such as paste sites (e.g., Pastebin) to share vast amounts of malicious text content, such as exploit source code. Careful analysis of malicious paste site content can provide Cyber Threat Intelligence (CTI) about potential threats. In this research, we propose a Convolutional BiLSTM Transformer multi-label classification method that automatically maps paste site exploit source code to the MITRE ATT&CK framework to identify adversarial techniques in support of proactive CTI. The Convolutional BiLSTM Transformer combines a convolutional neural network layer placed before a Transformer block, a concatenated pooling from a global max pooling and global average, and a BiLSTM pair-wise function within the Transformer to capture word and sequence orders. We conducted an multi-label classification experiment where our proposed Convolutional BiLSTM Transformer model achieved state-of-the-art results in terms of accuracy, recall, F1-score, and hamming loss. The results of a case study showed the tactics and tools that are used by malicious actors on paste sites.",
+      "award": "Best Paper Award",
       "citations": 9,
       "topic": "Cybersecurity"
     },
@@ -269,6 +284,7 @@
       "url": "/conference_publication/ethereum-amcis-2023/",
       "date": "2023-08-01",
       "abstract": "Cryptocurrencies, such as Bitcoin and Ethereum, are digital currencies operating on a peer-to-peer network. Cryptocurrencies rely on consensus algorithms for transaction validation and network security. Ethereum recently replaced its proof-of-work (PoW) consensus algorithm with a proof-of-stake (PoS) algorithm on September 15, 2022. This research aims to study the following research question: Does changing from PoW to PoS consensus increase price and transaction volume? To answer this question, we implemented synthetic control methods to compare the pre- and post-treatment trends of the price and volume of Ethereum against a synthetic counterfactual. The result of our analysis suggests that Ethereum shifting from PoW to PoS had a positive effect on its price and a non-significant negative effect on transaction volume. Price increasing relative to the synthetic counterfactual is promising for convincing other PoW blockchains that a switch to PoS may lead to increased investment opportunities while decreasing the environmental impact.",
+      "award": null,
       "citations": 5,
       "topic": "Other"
     },
@@ -284,6 +300,7 @@
       "url": "/journal_publication/social-media-trr/",
       "date": "2023-12-01",
       "abstract": "This study is a methodological replication of the work originally published in Information Systems Research by Krasnova, Widjaja, Buxmann, Wenninger, and Benbasat (2015). The original work studied the effects of envy in the context of Social Network Sites (SNSs) among college-age users. We adapt the constructs and measurement items of the original survey but change the context of the SNS to Instagram instead of Facebook. We also target a sample of college-age students from the United States instead of from Germany. The results of our replication support six of the seven hypotheses from the original paper. Confirming these results reinforce the model proposed by Krasnova et al. (2015). However, our replication did not find a strong mediation effect from envy on an SNS between the intensity of social information consumption on an SNS and users' cognitive well-being. The results suggest that the difference in population, SNS, or time has led to a change in this effect inviting further replications and new studies.",
+      "award": null,
       "citations": 2,
       "topic": "Other"
     },
@@ -301,6 +318,7 @@
       "url": "/journal_publication/dtl-el-misq/",
       "date": "2024-03-01",
       "abstract": "The rapid proliferation of complex information systems has been met by an ever-increasing quantity of exploits that can cause irreparable cyber breaches. To mitigate these cyber threats, academia and industry have placed a significant focus on proactively identifying and labeling exploits developed by the international hacker community. However, prevailing approaches for labeling exploits in hacker forums do not leverage metadata from exploit darknet markets or public exploit repositories to enhance labeling performance. In this study, we adopted the computational design science paradigm to develop a novel information technology artifact, the deep transfer learning exploit labeler (DTL-EL). DTL-EL incorporates a pre-initialization design, multi-layer deep transfer learning (DTL), and a self-attention mechanism to automatically label exploits in hacker forums. We rigorously evaluated the proposed DTL-EL against state-of-the-art non-DTL benchmark methods based in classical machine learning and deep learning. Results suggest that the proposed DTL-EL significantly outperforms benchmark methods based on accuracy, precision, recall, and F1-score. Our proposed DTL-EL framework provides important practical implications for key stakeholders such as cybersecurity managers, analysts, and educators.",
+      "award": null,
       "citations": 38,
       "topic": "AI / Deep Learning"
     },
@@ -319,6 +337,7 @@
       "url": "/journal_publication/attack-link-jmis/",
       "date": "2024-03-01",
       "abstract": "Cyberattacks have been increasing in volume and intensity, necessitating proactive measures. Cybersecurity risk management frameworks are deployed to provide actionable intelligence to mitigate potential threats by analyzing the available cybersecurity data. Existing frameworks, such as MITRE ATT&CK, provide timely mitigation strategies against attacker capabilities yet do not account for hacker data when developing cyber threat intelligence. Therefore, we developed a novel information technology artifact, ATT&CK-Link, which incorporates a novel transformer and multi-teacher knowledge distillation design, to link hacker threats to this broadly used framework. Here, we illustrated how hospital systems can use this framework to proactively protect their cyberinfrastructure against hacker threats. Our ATT&CK-Link framework has practical implications for cybersecurity professionals, who can implement our framework to generate strategic, operational, and tactical cyber threat intelligence. ATT&CK-Link also contributes to the information systems knowledge base by providing design principles to pursue targeted cybersecurity analytics, risk management, and broader text analytics research through simultaneous multi-modal (e.g., text and code) distillation and classification.",
+      "award": null,
       "citations": 64,
       "topic": "Cybersecurity"
     },
@@ -337,6 +356,7 @@
       "url": "/conference_publication/ai4cyber-kdd-2024/",
       "date": "2024-08-26",
       "abstract": "Cybersecurity remains a grand societal challenge. Large and constantly changing attack surfaces are non-trivial to protect against malicious actors. Entities like the United States and the European Union have recently emphasized the value of Artificial Intelligence (AI) for advancing cybersecurity. For example, the National Science Foundation has called for AI systems that can enhance cyber threat intelligence, detect new and evolving threats, and analyze massive troves of cybersecurity data. The 4th Workshop on Artificial Intelligence-enabled Cybersecurity Analytics (co-located with ACM KDD) sought to make significant and novel contributions within these relevant topics. Submissions were reviewed by highly qualified AI for cybersecurity researchers and practitioners spanning academia and private industry firms.",
+      "award": null,
       "citations": 1,
       "topic": "AI / Deep Learning"
     },
@@ -354,6 +374,7 @@
       "url": "/workshop_publication/phishing-nudging-wisp-2025/",
       "date": "2025-12-14",
       "abstract": "Email is a ubiquitous communication tool. This ubiquity has made emails a frequent target of phishing attacks. Organizations often use digital nudges (interventions designed to guide user behavior) to warn users of a phishing email. However, these warnings are often uninterpretable and thus often ignored. Therefore, this study investigates how explainable artificial intelligence (XAI) can be implemented in a digital nudge to enhance user phishing detection and prevention. In this research, we designed an XAI-enabled nudge and conducted a between subjects' experiment comparing it against a popular extant nudge and a control group of no nudge. The results suggested that XAI-enabled nudges significantly improve user phishing detection accuracy by 10.1%. Additionally, XAI-enabled nudges significantly decreased intrinsic and germane cognitive load. These findings contribute to XAI research by demonstrating the value of AI explanations in security contexts and its impact on cognitive processing. These results also have practical implications for email security system integration design.",
+      "award": null,
       "citations": 0,
       "topic": "Cybersecurity"
     },
@@ -370,6 +391,7 @@
       "url": "/conference_publication/phishing-spw-2025/",
       "date": "2025-05-01",
       "abstract": "As machine learning (ML)-based detectors become increasingly prevalent in identifying phishing websites, attackers are also exploiting their vulnerabilities through evasion techniques. By subtly manipulating phishing websites, attackers can evade detection. The threats posed by evasion attacks necessitate proactive robustness testing of these detectors prior to deployment. Traditional red teaming efforts, where security experts manually emulate attacker behaviors, are labor-intensive and limited in scalability. To address this challenge, we propose an automated red teaming framework leveraging action-masked reinforcement learning (RL) to realistically emulate evasion attacks and evaluate the robustness of ML-based phishing website detectors. Our RL agent is equipped with HTML manipulation techniques commonly used by human attackers. Additionally, action masking ensures the RL agent selects only evasion actions that are feasible for a given website and prevents compromising website rendering. We evaluate our approach by testing the robustness of three ML-based detectors: Logistic Regression, Random Forest, and Convolutional Neural Networks. Experimental results demonstrate that our approach achieves high evasion capabilities and efficiency in converting detectable phishing websites into well-rendered evasion ones, thus effectively testing the robustness of the detectors.",
+      "award": null,
       "citations": 1,
       "topic": "AI / Deep Learning"
     },
@@ -387,6 +409,7 @@
       "url": "/journal_publication/llm_tmis/",
       "date": "2025-02-07",
       "abstract": "The exponential growth of digital content has generated massive textual datasets, necessitating the use of advanced analytical approaches. Large Language Models (LLMs) have emerged as tools that are capable of processing and extracting insights from massive unstructured textual datasets. However, how to leverage LLMs for text analytics Information Systems (IS) research is currently unclear. To assist the IS community in understanding how to operationalize LLMs, we propose a Text Analytics for Information Systems Research (TAISR) framework. Our proposed framework provides detailed recommendations grounded in IS and LLM literature on how to conduct meaningful text analytics IS research for design science, behavioral, and econometric streams. We conducted three business intelligence case studies using our TAISR framework to demonstrate its application in several IS research contexts. We also outline the potential challenges and limitations of adopting LLMs for IS. By offering a systematic approach and evidence of its utility, our TAISR framework contributes to future IS research streams looking to incorporate powerful LLMs for text analytics.",
+      "award": null,
       "citations": 55,
       "topic": "LLMs & NLP"
     },
@@ -403,6 +426,7 @@
       "url": "/workshop_publication/iac-vuln-wisp-2025/",
       "date": "2025-12-14",
       "abstract": "The growing reliance on Infrastructure as Code (IaC) has streamlined cloud provisioning but introduced new security challenges due to misconfigurations and insecure coding patterns. Existing vulnerability scanners (e.g., Trivy) can detect flaws but cannot perform automated remediation. This leaves developers responsible for manual fixes. To address this, we propose a computational framework for IaC remediation that adapts prevailing Large Language Models (LLMs) with vulnerability scanner outputs using parameter-efficient fine-tuning and in-context learning. We collected 6,149 Terraform scripts from 1,466 repositories, identified 27,557 misconfigurations using Trivy, and constructed 23,906 corrected code blocks for training and evaluation. Two open-source LLMs (CodeGen-350M-mono and Llama 3.2-1B) were fine-tuned with Low-Rank Adaptation (LoRA) and evaluated using BLEU and ROUGE metrics. Results suggested that fine-tuning LLMs improved vulnerability remediation. These findings demonstrate the value of domain adaptation for improving LLM-based IaC remediation and provide a foundation for future research on securing cloud infrastructure.",
+      "award": null,
       "citations": 2,
       "topic": "Cybersecurity"
     },
@@ -418,6 +442,7 @@
       "url": "/workshop_publication/multi-agent-sig-services-2025/",
       "date": "2025-12-14",
       "abstract": "Multi-agent AI systems offer promising capabilities for enhancing information systems research. This paper presents a framework for collaborative AI-augmented inquiry, demonstrating how multiple specialized AI agents can work together to support various stages of the research process, from literature review to data analysis and interpretation. We discuss the design principles for effective multi-agent research systems, including role differentiation, coordination protocols, and human-AI collaboration patterns that preserve scholarly rigor while leveraging AI capabilities.",
+      "award": null,
       "citations": 2,
       "topic": "Design Science"
     },
@@ -433,6 +458,7 @@
       "url": "/workshop_publication/multi-agent-treo-2025/",
       "date": "2025-12-15",
       "abstract": "This TREO talk explores provocative questions about the role of multi-agent AI systems in information systems scholarship. We examine the potential and pitfalls of AI-augmented research, discussing how multi-agent frameworks might transform academic inquiry while preserving scholarly rigor and ethical standards. Drawing on emerging paradigms like agentic services computing, we consider how role-differentiated AI agents can engage in collaborative problem-solving alongside human researchers.",
+      "award": null,
       "citations": 0,
       "topic": "Design Science"
     },
@@ -447,6 +473,7 @@
       "url": "/journal_publication/hacker-communities-isf/",
       "date": "2026-01-01",
       "abstract": "The rapid proliferation of complex information systems (IS) has been met by an ever-increasing number of attacks that can cause irreparable cyber breaches. These attacks are frequently discussed and disseminated in large international hacker forums. Prevailing approaches for studying hacker forum structures often identify key hackers but do not study how their removal changes information diffusion. In this study, we adopted the computational design science paradigm to develop a novel information technology artifact called the HackerVote framework. HackerVote incorporates network science principles and node centrality measures to maximize the disruption of information propagation in hacker communities. We rigorously evaluated the proposed HackerVote against state-of-the-art node centrality attack methods. The results suggest that the proposed HackerVote outperforms benchmark methods based on four established network measures: (1) average inverse distance, (2) average clustering coefficient, (3) largest connected component size, and (4) spectral radius. We also demonstrated HackerVote's proof-of-value with an in-depth case study simulating the removal of key hackers from a long-standing international hacker forum. Our proposed HackerVote framework provides important practical implications for law enforcement officials regarding targeted takedown strategies.",
+      "award": null,
       "citations": 0,
       "topic": "Hacker Communities"
     },
@@ -463,8 +490,25 @@
       "url": "/conference_publication/bias-detection-hicss-2026/",
       "date": "2026-01-06",
       "abstract": "Advances in Large Language Models (LLMs) have enabled new opportunities to automate media analysis and improve collaborative social cybersecurity. A key task is bias detection in news reporting, which is essential for promoting information fairness and reducing polarization. However, existing approaches often rely on supervised fine-tuning with labeled datasets and fail to capture domain-specific linguistic patterns, limiting scalability and generalization. To address this, we propose a lightweight, modular framework that combines domain-adaptive pretraining (DAP) with Masked Language Modeling (MLM) and soft prompt tuning to detect six types of media bias (framing, group, semantic properties, connotation, informational spin, and phrasing). Our framework leverages 401,000+ New York Times articles from 2000 to 2024 to pretrain five LLMs, followed by bias prompting with small labeled data. The approach improves F1 by 7.6% and precision by 6.8% over hard prompts on average across the six types of biases.",
+      "award": null,
       "citations": 1,
       "topic": "Design Science"
+    },
+    {
+      "title": "A Four-Signal Learned Fusion for Near-Real-Time Phishing URL Detection",
+      "authors": [
+        "Abena M. Darko",
+        "Benjamin M. Ampel"
+      ],
+      "year": 2026,
+      "type": "conference",
+      "venue": "IEEE CARS",
+      "url": "/conference_publication/four-signal-phishing-cars-2026/",
+      "date": "2026-10-26",
+      "abstract": "Phishing URLs remain the primary vector for attackers to steal confidential user information. Cyber analysts triaging URLs during a live incident cannot wait for a page to render or for repeated reputation lookups. URL-only classifiers are fast, but they judge each link in isolation and ignore the surrounding context of the URL. Reputation-assisted systems add that context yet are rarely implemented in URL classifiers for real-time use. In this study, we treat detection as a multi-signal decision and score each URL with (1) a character-level BERT model, (2) a CatBoost lexical model, (3) a VirusTotal reputation lookup, and (4) a Tranco popularity lookup. A learned meta-model combines the four scores into a classification decision. Across seven meta-model configurations, the fusion achieves a mean F1 of 99.2%, compared with 96.5% for the best single detector and 63.5% for plain score averaging. Ablation suggests that additional signals do not necessarily help further. Our proposed pipeline labels a URL in about 0.1 s, or 0.01 s once the deep model is removed, with an F1 score of 99% on a held-out test set. Of the four signals, domain popularity carries by far the most weight and has important implications for cybersecurity.",
+      "award": null,
+      "citations": 0,
+      "topic": "Cybersecurity"
     },
     {
       "title": "A Multi-Dimensional Evaluation of Explainability in Media Bias Detection",
@@ -480,8 +524,48 @@
       "url": "/conference_publication/a-multi-dimensional-evaluation-of-explainability-in-media-bias-detecti/",
       "date": "2026-01-01",
       "abstract": null,
+      "award": null,
       "citations": 0,
       "topic": "Behavioral"
+    },
+    {
+      "title": "Adaptive Phishing URL Classification: A Generative Adversarial Approach",
+      "authors": [
+        "Noah Abdellatif",
+        "Mason Wagner",
+        "Benjamin M. Ampel",
+        "James Hu",
+        "Zara Ahmad-Post",
+        "Hsinchun Chen"
+      ],
+      "year": 2026,
+      "type": "conference",
+      "venue": "IEEE CARS",
+      "url": "/conference_publication/adaptive-phishing-gan-cars-2026/",
+      "date": "2026-10-26",
+      "abstract": "Uniform Resource Locators (URLs) are foundational for navigating the internet. However, URLs remain a critical cybersecurity threat. Billions of URL-based phishing attempts are logged annually. Extant machine and deep learning phishing URL detectors often report accuracy exceeding 95%. However, these models are often trained on outdated datasets that fail to capture current phishing URL patterns. Generative Adversarial Networks (GANs) offer a pathway to improve classifier robustness on unseen data. These networks are predominantly implemented with traditional deep learning generators. We therefore propose a GAN framework that pairs a transformer-based generator with a ModernBERT discriminator and trains them using a reinforcement learning policy-gradient mechanism with a novel multi-signal reward function. The discriminator is pretrained on historical URLs and evaluated on a proprietary dataset of modern phishing URLs to simulate realistic deployment. GAN-based fine-tuning improved the classifier's recall on modern URLs by about 5% on average, indicating that adversarial generation can create generalizable URL classifiers that adapt to evolving attacks.",
+      "award": null,
+      "citations": 0,
+      "topic": "AI / Deep Learning"
+    },
+    {
+      "title": "Automated Cross-Repository Vulnerability Variant Retrieval Using Patch-Weighted Contrastive Learning",
+      "authors": [
+        "Joseph Chen",
+        "Benjamin M. Ampel",
+        "Steven Ullman",
+        "Raul Y. Reyes",
+        "Hsinchun Chen"
+      ],
+      "year": 2026,
+      "type": "conference",
+      "venue": "IEEE CARS",
+      "url": "/conference_publication/vuln-variant-cars-2026/",
+      "date": "2026-10-26",
+      "abstract": "Vulnerabilities propagate across open-source software (OSS) ecosystems through code reuse. However, existing vulnerability management tools often analyze repositories in isolation. Variant analysis can identify semantically similar vulnerable code at scale, but current workflows remain largely manual and expert-driven. To address this, we propose Automated Variant Analysis (AVA), a retrieval model that leverages known vulnerable code snippets and their corresponding patches to identify unremediated variants across OSS repositories. AVA generates vulnerability-preserving variants, represents code with Tree-sitter-based Token Projected Graphs (TPG), and trains embeddings using a patch-weighted supervised contrastive loss. Our results show that supervised contrastive training improves discrimination between vulnerable and patched code, while graph augmentation can reduce separation by pulling structurally similar vulnerable and patched samples closer together. These findings demonstrate that real-world patches can provide scalable supervision for detecting reused or modified vulnerabilities across OSS ecosystems, supporting remediation beyond the repository where a flaw was originally discovered.",
+      "award": null,
+      "citations": 0,
+      "topic": "Cybersecurity"
     },
     {
       "title": "Automatic Extraction of Protected Health Information from Multilingual Hacker Communities",
@@ -497,6 +581,7 @@
       "url": "/conference_publication/phi-hacker-hicss-2026/",
       "date": "2026-01-06",
       "abstract": "Protected Health Information (PHI, e.g., electronic health records, insurance information) is increasingly stolen in data breaches by malicious actors with the intent to sell to others in hacker communities. These actors often protect themselves by describing the content and availability of PHI data using encrypted messaging platforms (e.g., Telegram & Discord). In this research, we propose a Named Entity Recognition Framework for PHI (NERF-PHI) to systematically analyze PHI-related hacker conversations. We collected more than three million multilingual hacker posts from Discord servers and Telegram groups. Utilizing open-source machine translation tools, we translated conversations to English and extracted information related to vulnerable individuals and medical entities. Results suggest that encoder-based Large Language Models show significant promise for extracting PHI-related information from hacker communities.",
+      "award": null,
       "citations": 0,
       "topic": "Hacker Communities"
     },
@@ -513,6 +598,7 @@
       "url": "/journal_publication/voice-phishing-misq/",
       "date": "2026-01-01",
       "abstract": "Phishing attacks remain one of the most prevalent and pervasive cybersecurity concerns. Voice phishing (i.e., vishing) is an emerging type of phishing attack where malicious actors use audio channels to steal sensitive information from victims. However, vishing detection is a challenging task due to its real-time nature and the limited availability of datasets. To help address the concern of vishing detection, this study proposes the vishing generative pretrained transformer (VishGPT). VishGPT adopts the computational design paradigm and incorporates novel reinforcement learning-based large language model fine-tuning and synthetic data model pretraining to automatically detect vishing attempts in real time. We evaluated VishGPT using a series of benchmark experiments, where we empirically demonstrated its improvement over state-of-the-art vishing detection and audio classification models. The results suggest that our proposed VishGPT achieved state-of-the-art performance in terms of accuracy (86.18%), precision (90.63%), recall (85.02%), and F1-score (87.74%). VishGPT offers practical value to cybersecurity professionals, end users, and academia. Additionally, VishGPT provides important design principles in the form of a custom proximal policy optimization (PPO) reward function and synthetic pretraining to the information systems knowledge base.",
+      "award": null,
       "citations": 5,
       "topic": "Cybersecurity"
     },
@@ -528,8 +614,82 @@
       "url": "/conference_publication/hackersignal-a-large-scale-multi-source-dataset-linking-hacker-communi/",
       "date": "2026-01-01",
       "abstract": "We introduce HackerSignal, a benchmark for temporal out-of-distribution cyber threat intelligence (CTI) and cross-source CVE linkage. HackerSignal aggregates 7.45 million exact-deduplicated documents from 64 public forum/source identifiers spanning eight source layers and a 36-year window (1990-2026). In contrast to other publicly accessible cybersecurity datasets, HackerSignal is among the first public benchmark datasets that maps the full potential exploit to vulnerability trajectory from hacker community discourse, exploit databases with working and proof of concept exploits, vulnerability advisories, and software fix commits. HackerSignal creates these linkages through a shared CVE identifier space while preserving source-specific release modes to support a range of unique Artificial Intelligence (AI)-enabled cybersecurity analytics tasks. In this paper, we summarize HackerSignal and illustrate three selected benchmark tasks it uniquely supports: (1) CVE linkage retrieval (cross-source temporal out-of-distribution entity grounding); (2) exploit type classification (8-class vulnerability type prediction with temporal OOD evaluation); and (3) temporal generalization (prospective CVE-disjoint evaluation where C_train and C_test are disjoint). All tasks use temporal splits to evaluate prospective generalization. We release source-shortcut and leakage diagnostics, manual-audit packets, a datasheet, and a release-governance addendum to support the dissemination of the dataset. HackerSignal's code, data, and Croissant metadata are available at hf.co/datasets/BenAmpel/HackerSignal (data) and github.com/BenAmpel/hackersignal (code).",
+      "award": null,
       "citations": 0,
       "topic": "Cybersecurity"
+    },
+    {
+      "title": "Identifying Protected Health Information in Online Hacker Communities: A Multi-Task Relation Learning Approach",
+      "authors": [
+        "Cade Dacosta",
+        "Benjamin M. Ampel",
+        "Matthew Hashim",
+        "Hsinchun Chen"
+      ],
+      "year": 2026,
+      "type": "journal",
+      "venue": "Journal of Management Information Systems",
+      "url": "/journal_publication/phi-hacker-jmis/",
+      "date": "2026-08-05",
+      "abstract": "Encrypted messaging platforms (e.g., Telegram and Discord) have become increasingly utilized by malicious hacker communities for the procurement and sale of stolen Protected Health Information (PHI). However, discussions posted on these platforms often contain substantial irrelevant text, making it difficult to identify and analyze such content. In this research, we propose a novel framework, PHI Named Entity Extreme Text Classification (PHI-NEXT), to address this challenge. The framework incorporates extreme text classification, named entity recognition, and multi-task relation learning to automatically identify, extract, and analyze stolen health information within encrypted messaging platforms. Results from benchmark experiments suggest that our framework significantly outperforms existing methods in accuracy, precision, recall, and F1 score. We further demonstrate its potential value with a case study that illustrates how cybersecurity professionals can identify emerging trends in these communities. Our study provides practical value to the cybersecurity community by presenting a design that automates the identification and analysis of stolen health information. We also contribute to the Information Systems knowledge base through a nascent design theory for analyzing large volumes of user-generated text.",
+      "award": null,
+      "citations": 0,
+      "topic": "Hacker Communities"
+    },
+    {
+      "title": "Pathways to AI-Ready Entry-Level Talent for Industry Domains: Modular, Adaptive Design Principles for Business-School Curriculum",
+      "authors": [
+        "Arun Rai",
+        "Balasubramaniam Ramesh",
+        "Cynthia Breazeal",
+        "Eric Klopfer",
+        "Benjamin M. Ampel",
+        "Amrita George",
+        "Xinyu Fu",
+        "Madhu Kota"
+      ],
+      "year": 2026,
+      "type": "conference",
+      "venue": "ICIS",
+      "url": "/conference_publication/ai-talent-icis-2026/",
+      "date": "2026-12-13",
+      "abstract": "Generative AI is transforming entry-level knowledge work by automating tasks that have traditionally provided novices with practical experience, thereby disrupting the apprenticeship pathway to skilled employment. This study addresses the resulting curriculum challenge: preparing business students for roles that are rapidly evolving and not yet fully defined. A set of preliminary design principles for AI curricula in business schools is developed and instantiated. Grounded in cognitive apprenticeship, the design features a multi-course no-code-to-low-code-to-full-code (NCLC) progression, a bidirectional demand-signals-to-curriculum infrastructure for adaptive alignment amid skill volatility, and a hub-and-spoke deployment model for equity-relevant scaling. The design is instantiated in the AIX Hub, a multi-institutional hub-and-spoke initiative. The Spring 2026 deployment enrolled more than 1,000 students and engaged 11 industry partners through work-based learning. This study contributes a transferable, theory-grounded curriculum design for AI-enabled work.",
+      "award": null,
+      "citations": 0,
+      "topic": "Other"
+    },
+    {
+      "title": "Performance Transfer and Behavioral Reliance in AI-Assisted Cybersecurity Training",
+      "authors": [
+        "Kameron Clark",
+        "Benjamin M. Ampel",
+        "Balasubramaniam Ramesh"
+      ],
+      "year": 2026,
+      "type": "conference",
+      "venue": "IEEE CARS",
+      "url": "/conference_publication/performance-transfer-cars-2026/",
+      "date": "2026-10-26",
+      "abstract": "Generative AI can enhance cybersecurity training performance with support, but better-supported performance does not necessarily mean durable unaided skills. This six-week pilot study explores the performance-transfer gap in AI-assisted cybersecurity training, analyzing data from graduate students who completed cybersecurity detection tasks under control and AI-supported conditions. There were 167 task rows: 112 with AI support and 55 without. Participants using AI showed higher aided task accuracy than both their pretest and posttest unaided accuracy. However, unaided posttest accuracy did not significantly improve over pretest scores. These results indicate weak transfer or skill plateau, not erosion. No significant differences were found across conditions in learning gain, posttest accuracy, or transfer gap. Baseline skill influenced learning gains, with participants with low baseline skill improving more. Behavioral analyses revealed reliance as a significant negative predictor and perceived competence as a significant positive predictor of learning gain, though high collinearity among the behavioral measures means these indicators are best interpreted collectively. The study emphasizes distinguishing supported task performance from long-term skills and suggests reliance as a warning sign rather than a cause of skill erosion.",
+      "award": null,
+      "citations": 0,
+      "topic": "Cybersecurity"
+    },
+    {
+      "title": "Prosody Training for Lowering Vishing Susceptibility",
+      "authors": [
+        "Benjamin M. Ampel",
+        "Joseph Buckman"
+      ],
+      "year": 2026,
+      "type": "conference",
+      "venue": "ICIS",
+      "url": "/conference_publication/prosody-vishing-icis-2026/",
+      "date": "2026-12-13",
+      "abstract": "This short paper reports a pilot test of prosody-focused training for voice phishing (vishing). While vishing is increasingly leveraging synthetic voices, most end-user security training remains text-centric (e.g., email phishing). We developed an audio-based prosody training intervention and evaluated user outcomes with Signal Detection Theory (SDT), separating sensitivity (d′) from decision bias (criterion c). In a three-arm pilot (N = 27; AI-audio vs. human-audio vs. text-only), accuracy and sensitivity are stable from pre-test to post-test, but criterion shifts significantly toward a more conservative threshold (∆c = +0.328, p < .001), reducing both hit and false-alarm rates. Survey measures show increased perceived vulnerability and response efficacy. The results of the pilot study suggest that prosody-focused training can meaningfully shift decision thresholds even when sensitivity is unchanged.",
+      "award": null,
+      "citations": 0,
+      "topic": "Other"
     },
     {
       "title": "Seeing Is Not Believing: A Deepfake Video Call Scam at Pan-Asia Trading",
@@ -542,6 +702,7 @@
       "url": "/journal_publication/deepfake-jise/",
       "date": "2026-03-01",
       "abstract": "This teaching case uses a deepfake-enabled executive impersonation scam to help analyze cybersecurity failures and to design verification controls for communication environments. Pan-Asia Trading Ltd. is a fictional mid-sized firm that regularly conducts high-value monetary transfers. In early 2024, senior finance officer Grace Lee joins what appears to be a confidential video call with her CFO. However, the convincing face and voice are an advanced deepfake. The case examines failures in identity, authentication, and authorization, the role of AI-enabled deception, and the governance and privacy trade-offs faced by organizations. The case is designed for undergraduate and graduate courses in cybersecurity, information assurance, and MIS governance and supports experiential learning through realistic analysis of control gaps and AI-driven impersonation. The case emphasizes experiential learning around realistic AI-driven fraud scenarios and implementable verification controls.",
+      "award": null,
       "citations": 0,
       "topic": "Other"
     },
@@ -552,10 +713,11 @@
       ],
       "year": 2026,
       "type": "conference",
-      "venue": "arXiv preprint arXiv:2012.14425v2",
+      "venue": "IEEE CARS",
       "url": "/conference_publication/vendor-conditioned-contrastive-learning-for-predicting-organizational-/",
-      "date": "2026-01-01",
+      "date": "2026-10-26",
       "abstract": "Cyberattacks cause billions of dollars in damage annually, with malicious hackers often sharing exploit code and techniques on underground forums. Identifying which organizations are targeted by these exploits is critical for proactive Cyber Threat Intelligence (CTI). To address that gap, we propose Temporal Representation and Classification of Exploits (TRACE), a vendor-conditioned contrastive learning framework built on CySecBERT that jointly optimizes organizational target classification and vendor-coherent representations while evaluating robustness under temporal distribution shift. Unlike prior work limited to small, single-source datasets, we leverage a large-scale, multi-source corpus spanning 9 exploit databases and hacker forums, comprising 352,866 posts collected over three decades, yielding a 129,126-sample dataset across seven organizational categories. In the temporal out-of-distribution evaluation, TRACE achieves macro F1=97.00%, substantially outperforming 17 benchmark classical ML methods, deep learning with GloVe/FastText embeddings, and pretrained transformer models.",
+      "award": null,
       "citations": 3,
       "topic": "Cybersecurity"
     }
@@ -722,7 +884,7 @@
           "Benjamin M. Ampel",
           "Ben Lazarine"
         ],
-        "venue": "ICIS 2021",
+        "venue": "ICIS",
         "type": "conference",
         "topic": "Other",
         "symbolSize": 14.484941211906902
@@ -1006,6 +1168,20 @@
       },
       {
         "id": 28,
+        "name": "A Four-Signal Learned Fusion for Near-Real-Time Phishing URL Detection",
+        "value": 0,
+        "year": 2026,
+        "authors": [
+          "Abena M. Darko",
+          "Benjamin M. Ampel"
+        ],
+        "venue": "IEEE CARS",
+        "type": "conference",
+        "topic": "Cybersecurity",
+        "symbolSize": 10
+      },
+      {
+        "id": 29,
         "name": "A Multi-Dimensional Evaluation of Explainability in Media Bias Detection",
         "value": 0,
         "year": 2026,
@@ -1021,7 +1197,42 @@
         "symbolSize": 10
       },
       {
-        "id": 29,
+        "id": 30,
+        "name": "Adaptive Phishing URL Classification: A Generative Adversarial Approach",
+        "value": 0,
+        "year": 2026,
+        "authors": [
+          "Noah Abdellatif",
+          "Mason Wagner",
+          "Benjamin M. Ampel",
+          "James Hu",
+          "Zara Ahmad-Post",
+          "Hsinchun Chen"
+        ],
+        "venue": "IEEE CARS",
+        "type": "conference",
+        "topic": "AI / Deep Learning",
+        "symbolSize": 10
+      },
+      {
+        "id": 31,
+        "name": "Automated Cross-Repository Vulnerability Variant Retrieval Using Patch-Weighted Contrastive Learning",
+        "value": 0,
+        "year": 2026,
+        "authors": [
+          "Joseph Chen",
+          "Benjamin M. Ampel",
+          "Steven Ullman",
+          "Raul Y. Reyes",
+          "Hsinchun Chen"
+        ],
+        "venue": "IEEE CARS",
+        "type": "conference",
+        "topic": "Cybersecurity",
+        "symbolSize": 10
+      },
+      {
+        "id": 32,
         "name": "Automatic Extraction of Protected Health Information from Multilingual Hacker Communities",
         "value": 0,
         "year": 2026,
@@ -1037,7 +1248,7 @@
         "symbolSize": 10
       },
       {
-        "id": 30,
+        "id": 33,
         "name": "Automatically Detecting Voice Phishing: A Large Audio Model Approach",
         "value": 5,
         "year": 2026,
@@ -1052,7 +1263,7 @@
         "symbolSize": 17.51319134149782
       },
       {
-        "id": 31,
+        "id": 34,
         "name": "HackerSignal: A Large-Scale Multi-Source Dataset Linking Hacker Community Discourse to the CVE Vulnerability Lifecycle",
         "value": 0,
         "year": 2026,
@@ -1066,7 +1277,72 @@
         "symbolSize": 10
       },
       {
-        "id": 32,
+        "id": 35,
+        "name": "Identifying Protected Health Information in Online Hacker Communities: A Multi-Task Relation Learning Approach",
+        "value": 0,
+        "year": 2026,
+        "authors": [
+          "Cade Dacosta",
+          "Benjamin M. Ampel",
+          "Matthew Hashim",
+          "Hsinchun Chen"
+        ],
+        "venue": "Journal of Management Information Systems",
+        "type": "journal",
+        "topic": "Hacker Communities",
+        "symbolSize": 10
+      },
+      {
+        "id": 36,
+        "name": "Pathways to AI-Ready Entry-Level Talent for Industry Domains: Modular, Adaptive Design Principles for Business-School Curriculum",
+        "value": 0,
+        "year": 2026,
+        "authors": [
+          "Arun Rai",
+          "Balasubramaniam Ramesh",
+          "Cynthia Breazeal",
+          "Eric Klopfer",
+          "Benjamin M. Ampel",
+          "Amrita George",
+          "Xinyu Fu",
+          "Madhu Kota"
+        ],
+        "venue": "ICIS",
+        "type": "conference",
+        "topic": "Other",
+        "symbolSize": 10
+      },
+      {
+        "id": 37,
+        "name": "Performance Transfer and Behavioral Reliance in AI-Assisted Cybersecurity Training",
+        "value": 0,
+        "year": 2026,
+        "authors": [
+          "Kameron Clark",
+          "Benjamin M. Ampel",
+          "Balasubramaniam Ramesh"
+        ],
+        "venue": "IEEE CARS",
+        "type": "conference",
+        "topic": "Cybersecurity",
+        "symbolSize": 10
+      },
+      {
+        "id": 38,
+        "name": "Prosody Training for Lowering Vishing Susceptibility",
+        "value": 0,
+        "year": 2026,
+        "authors": [
+          "Benjamin M. Ampel",
+          "Joseph Buckman"
+        ],
+        "venue": "ICIS",
+        "type": "conference",
+        "topic": "Other",
+        "symbolSize": 10
+      },
+      {
+        "id": 39,
         "name": "Seeing Is Not Believing: A Deepfake Video Call Scam at Pan-Asia Trading",
         "value": 0,
         "year": 2026,
@@ -1079,14 +1355,14 @@
         "symbolSize": 10
       },
       {
-        "id": 33,
+        "id": 40,
         "name": "Vendor-Conditioned Contrastive Learning for Predicting Organizational Cyber Threat Targets",
         "value": 3,
         "year": 2026,
         "authors": [
           "Benjamin M. Ampel"
         ],
-        "venue": "arXiv preprint arXiv:2012.14425v2",
+        "venue": "IEEE CARS",
         "type": "conference",
         "topic": "Cybersecurity",
         "symbolSize": 14.484941211906902
@@ -1351,7 +1627,7 @@
       },
       {
         "source": 0,
-        "target": 29,
+        "target": 30,
         "value": 9.295802921492712,
         "reason": "1 Co-Authors",
         "types": {
@@ -1367,8 +1643,56 @@
       },
       {
         "source": 0,
-        "target": 30,
+        "target": 31,
+        "value": 9.295802921492712,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 0,
+        "target": 32,
+        "value": 9.295802921492712,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 0,
+        "target": 33,
         "value": 9.351159756895889,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 0,
+        "target": 35,
+        "value": 9.295802921492712,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -1751,22 +2075,6 @@
       },
       {
         "source": 1,
-        "target": 28,
-        "value": 7.41665846874966,
-        "reason": "1 Co-Authors",
-        "types": {
-          "topic": false,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 5,
-          "opacity": 0.45000000000000007,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 1,
         "target": 29,
         "value": 7.41665846874966,
         "reason": "1 Co-Authors",
@@ -1784,6 +2092,54 @@
       {
         "source": 1,
         "target": 30,
+        "value": 7.41665846874966,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 1,
+        "target": 31,
+        "value": 10.41665846874966,
+        "reason": "2 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.7,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 1,
+        "target": 32,
+        "value": 7.41665846874966,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 1,
+        "target": 33,
         "value": 10.602079402700426,
         "reason": "2 Co-Authors",
         "types": {
@@ -1799,7 +2155,7 @@
       },
       {
         "source": 1,
-        "target": 31,
+        "target": 34,
         "value": 7.41665846874966,
         "reason": "1 Co-Authors",
         "types": {
@@ -1810,6 +2166,22 @@
         "lineStyle": {
           "width": 5,
           "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 1,
+        "target": 35,
+        "value": 8.41665846874966,
+        "reason": "1 Keywords, 1 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.55,
           "curveness": 0.2
         }
       },
@@ -2167,7 +2539,7 @@
       },
       {
         "source": 2,
-        "target": 28,
+        "target": 29,
         "value": 8.050943744979712,
         "reason": "1 Co-Authors",
         "types": {
@@ -2183,27 +2555,27 @@
       },
       {
         "source": 2,
-        "target": 29,
-        "value": 9.050943744979712,
-        "reason": "1 Keywords, 1 Co-Authors",
+        "target": 30,
+        "value": 8.050943744979712,
+        "reason": "1 Co-Authors",
         "types": {
-          "topic": true,
+          "topic": false,
           "venue": false,
           "author": true
         },
         "lineStyle": {
           "width": 5,
-          "opacity": 0.55,
+          "opacity": 0.45000000000000007,
           "curveness": 0.2
         }
       },
       {
         "source": 2,
-        "target": 30,
-        "value": 11.174981318747381,
-        "reason": "2 Co-Authors",
+        "target": 31,
+        "value": 12.050943744979712,
+        "reason": "1 Keywords, 2 Co-Authors",
         "types": {
-          "topic": false,
+          "topic": true,
           "venue": false,
           "author": true
         },
@@ -2215,7 +2587,7 @@
       },
       {
         "source": 2,
-        "target": 31,
+        "target": 32,
         "value": 9.050943744979712,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -2232,6 +2604,54 @@
       {
         "source": 2,
         "target": 33,
+        "value": 11.174981318747381,
+        "reason": "2 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.7,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 2,
+        "target": 34,
+        "value": 9.050943744979712,
+        "reason": "1 Keywords, 1 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.55,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 2,
+        "target": 35,
+        "value": 10.050943744979712,
+        "reason": "2 Keywords, 1 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.65,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 2,
+        "target": 40,
         "value": 8.126590025420048,
         "reason": "3 Keywords",
         "types": {
@@ -2279,7 +2699,7 @@
       },
       {
         "source": 3,
-        "target": 33,
+        "target": 40,
         "value": 4.374436097811232,
         "reason": "3 Keywords",
         "types": {
@@ -2631,22 +3051,6 @@
       },
       {
         "source": 4,
-        "target": 28,
-        "value": 6.527062885745217,
-        "reason": "1 Co-Authors",
-        "types": {
-          "topic": false,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 5,
-          "opacity": 0.45000000000000007,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 4,
         "target": 29,
         "value": 6.527062885745217,
         "reason": "1 Co-Authors",
@@ -2664,6 +3068,54 @@
       {
         "source": 4,
         "target": 30,
+        "value": 6.527062885745217,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 4,
+        "target": 31,
+        "value": 10.527062885745217,
+        "reason": "1 Keywords, 2 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.7,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 4,
+        "target": 32,
+        "value": 6.527062885745217,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 4,
+        "target": 33,
         "value": 9.847424036192304,
         "reason": "2 Co-Authors",
         "types": {
@@ -2679,7 +3131,7 @@
       },
       {
         "source": 4,
-        "target": 31,
+        "target": 34,
         "value": 7.527062885745217,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -2690,6 +3142,22 @@
         "lineStyle": {
           "width": 5,
           "opacity": 0.55,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 4,
+        "target": 35,
+        "value": 6.527062885745217,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
           "curveness": 0.2
         }
       },
@@ -2887,7 +3355,39 @@
       },
       {
         "source": 5,
-        "target": 29,
+        "target": 30,
+        "value": 5.557122138357638,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 4.057122138357638,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 5,
+        "target": 31,
+        "value": 5.557122138357638,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 4.057122138357638,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 5,
+        "target": 32,
         "value": 6.557122138357638,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -2903,7 +3403,7 @@
       },
       {
         "source": 5,
-        "target": 30,
+        "target": 33,
         "value": 6.119162312519753,
         "reason": "1 Co-Authors",
         "types": {
@@ -2914,6 +3414,22 @@
         "lineStyle": {
           "width": 4.619162312519753,
           "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 5,
+        "target": 35,
+        "value": 6.557122138357638,
+        "reason": "1 Keywords, 1 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 4.557122138357638,
+          "opacity": 0.55,
           "curveness": 0.2
         }
       },
@@ -3159,22 +3675,6 @@
       },
       {
         "source": 6,
-        "target": 28,
-        "value": 5.079441541679836,
-        "reason": "1 Co-Authors",
-        "types": {
-          "topic": false,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 3.5794415416798357,
-          "opacity": 0.45000000000000007,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 6,
         "target": 29,
         "value": 5.079441541679836,
         "reason": "1 Co-Authors",
@@ -3192,6 +3692,54 @@
       {
         "source": 6,
         "target": 30,
+        "value": 5.079441541679836,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 3.5794415416798357,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 6,
+        "target": 31,
+        "value": 5.079441541679836,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 3.5794415416798357,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 6,
+        "target": 32,
+        "value": 5.079441541679836,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 3.5794415416798357,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 6,
+        "target": 33,
         "value": 8.807703265352387,
         "reason": "2 Co-Authors",
         "types": {
@@ -3207,7 +3755,23 @@
       },
       {
         "source": 6,
-        "target": 31,
+        "target": 34,
+        "value": 5.079441541679836,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 3.5794415416798357,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 6,
+        "target": 35,
         "value": 5.079441541679836,
         "reason": "1 Co-Authors",
         "types": {
@@ -3447,22 +4011,6 @@
       },
       {
         "source": 7,
-        "target": 28,
-        "value": 6.663520553053806,
-        "reason": "1 Co-Authors",
-        "types": {
-          "topic": false,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 5,
-          "opacity": 0.45000000000000007,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 7,
         "target": 29,
         "value": 6.663520553053806,
         "reason": "1 Co-Authors",
@@ -3480,8 +4028,8 @@
       {
         "source": 7,
         "target": 30,
-        "value": 9.958585994422887,
-        "reason": "2 Co-Authors",
+        "value": 6.663520553053806,
+        "reason": "1 Co-Authors",
         "types": {
           "topic": false,
           "venue": false,
@@ -3489,7 +4037,7 @@
         },
         "lineStyle": {
           "width": 5,
-          "opacity": 0.7,
+          "opacity": 0.45000000000000007,
           "curveness": 0.2
         }
       },
@@ -3506,6 +4054,70 @@
         "lineStyle": {
           "width": 5,
           "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 7,
+        "target": 32,
+        "value": 6.663520553053806,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 7,
+        "target": 33,
+        "value": 9.958585994422887,
+        "reason": "2 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.7,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 7,
+        "target": 34,
+        "value": 6.663520553053806,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 7,
+        "target": 35,
+        "value": 7.663520553053806,
+        "reason": "1 Keywords, 1 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.55,
           "curveness": 0.2
         }
       },
@@ -3767,22 +4379,6 @@
       },
       {
         "source": 8,
-        "target": 28,
-        "value": 8.759178468889965,
-        "reason": "1 Co-Authors",
-        "types": {
-          "topic": false,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 5,
-          "opacity": 0.45000000000000007,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 8,
         "target": 29,
         "value": 8.759178468889965,
         "reason": "1 Co-Authors",
@@ -3800,6 +4396,54 @@
       {
         "source": 8,
         "target": 30,
+        "value": 8.759178468889965,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 8,
+        "target": 31,
+        "value": 11.759178468889965,
+        "reason": "2 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.7,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 8,
+        "target": 32,
+        "value": 8.759178468889965,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 8,
+        "target": 33,
         "value": 11.837730447165939,
         "reason": "2 Co-Authors",
         "types": {
@@ -3815,7 +4459,7 @@
       },
       {
         "source": 8,
-        "target": 31,
+        "target": 34,
         "value": 9.759178468889965,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -3826,6 +4470,54 @@
         "lineStyle": {
           "width": 5,
           "opacity": 0.55,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 8,
+        "target": 35,
+        "value": 8.759178468889965,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 9,
+        "target": 36,
+        "value": 3.3744360978112327,
+        "reason": "Same Venue",
+        "types": {
+          "topic": false,
+          "venue": true,
+          "author": false
+        },
+        "lineStyle": {
+          "width": 2.3744360978112327,
+          "opacity": 0.35,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 9,
+        "target": 38,
+        "value": 3.3744360978112327,
+        "reason": "Same Venue",
+        "types": {
+          "topic": false,
+          "venue": true,
+          "author": false
+        },
+        "lineStyle": {
+          "width": 2.3744360978112327,
+          "opacity": 0.35,
           "curveness": 0.2
         }
       },
@@ -4039,22 +4731,6 @@
       },
       {
         "source": 10,
-        "target": 28,
-        "value": 5.41415686865115,
-        "reason": "1 Co-Authors",
-        "types": {
-          "topic": false,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 3.9141568686511503,
-          "opacity": 0.45000000000000007,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 10,
         "target": 29,
         "value": 5.41415686865115,
         "reason": "1 Co-Authors",
@@ -4072,7 +4748,7 @@
       {
         "source": 10,
         "target": 30,
-        "value": 10.022354530813397,
+        "value": 9.414156868651151,
         "reason": "1 Keywords, 2 Co-Authors",
         "types": {
           "topic": true,
@@ -4088,6 +4764,70 @@
       {
         "source": 10,
         "target": 31,
+        "value": 5.41415686865115,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 3.9141568686511503,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 10,
+        "target": 32,
+        "value": 5.41415686865115,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 3.9141568686511503,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 10,
+        "target": 33,
+        "value": 10.022354530813397,
+        "reason": "1 Keywords, 2 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.7,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 10,
+        "target": 34,
+        "value": 5.41415686865115,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 3.9141568686511503,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 10,
+        "target": 35,
         "value": 5.41415686865115,
         "reason": "1 Co-Authors",
         "types": {
@@ -4279,22 +5019,6 @@
       },
       {
         "source": 11,
-        "target": 28,
-        "value": 5.256116095164411,
-        "reason": "1 Co-Authors",
-        "types": {
-          "topic": false,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 3.756116095164411,
-          "opacity": 0.45000000000000007,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 11,
         "target": 29,
         "value": 5.256116095164411,
         "reason": "1 Co-Authors",
@@ -4312,6 +5036,54 @@
       {
         "source": 11,
         "target": 30,
+        "value": 5.256116095164411,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 3.756116095164411,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 11,
+        "target": 31,
+        "value": 5.256116095164411,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 3.756116095164411,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 11,
+        "target": 32,
+        "value": 5.256116095164411,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 3.756116095164411,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 11,
+        "target": 33,
         "value": 8.91886522358297,
         "reason": "2 Co-Authors",
         "types": {
@@ -4327,7 +5099,23 @@
       },
       {
         "source": 11,
-        "target": 31,
+        "target": 34,
+        "value": 5.256116095164411,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 3.756116095164411,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 11,
+        "target": 35,
         "value": 5.256116095164411,
         "reason": "1 Co-Authors",
         "types": {
@@ -4455,7 +5243,7 @@
       },
       {
         "source": 12,
-        "target": 28,
+        "target": 29,
         "value": 5.079441541679836,
         "reason": "1 Co-Authors",
         "types": {
@@ -4471,7 +5259,7 @@
       },
       {
         "source": 12,
-        "target": 30,
+        "target": 33,
         "value": 6.807703265352387,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -4487,7 +5275,7 @@
       },
       {
         "source": 12,
-        "target": 31,
+        "target": 34,
         "value": 5.079441541679836,
         "reason": "1 Co-Authors",
         "types": {
@@ -4599,7 +5387,7 @@
       },
       {
         "source": 13,
-        "target": 28,
+        "target": 29,
         "value": 3.0,
         "reason": "1 Co-Authors",
         "types": {
@@ -4616,6 +5404,22 @@
       {
         "source": 13,
         "target": 30,
+        "value": 2.0,
+        "reason": "2 Keywords",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": false
+        },
+        "lineStyle": {
+          "width": 1.0,
+          "opacity": 0.35,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 13,
+        "target": 33,
         "value": 5.879144452743052,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -4631,7 +5435,7 @@
       },
       {
         "source": 13,
-        "target": 31,
+        "target": 34,
         "value": 3.0,
         "reason": "1 Co-Authors",
         "types": {
@@ -4775,7 +5579,7 @@
       },
       {
         "source": 14,
-        "target": 28,
+        "target": 29,
         "value": 6.557122138357638,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -4791,7 +5595,7 @@
       },
       {
         "source": 14,
-        "target": 29,
+        "target": 30,
         "value": 5.557122138357638,
         "reason": "1 Co-Authors",
         "types": {
@@ -4807,7 +5611,39 @@
       },
       {
         "source": 14,
-        "target": 30,
+        "target": 31,
+        "value": 5.557122138357638,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 4.057122138357638,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 14,
+        "target": 32,
+        "value": 5.557122138357638,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 4.057122138357638,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 14,
+        "target": 33,
         "value": 9.119162312519753,
         "reason": "2 Co-Authors",
         "types": {
@@ -4823,7 +5659,23 @@
       },
       {
         "source": 14,
-        "target": 31,
+        "target": 34,
+        "value": 6.557122138357638,
+        "reason": "1 Keywords, 1 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 4.557122138357638,
+          "opacity": 0.55,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 14,
+        "target": 35,
         "value": 6.557122138357638,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -4872,6 +5724,22 @@
       {
         "source": 16,
         "target": 25,
+        "value": 4.039720770839918,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 2.539720770839918,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 16,
+        "target": 31,
         "value": 4.039720770839918,
         "reason": "1 Co-Authors",
         "types": {
@@ -4999,7 +5867,7 @@
       },
       {
         "source": 17,
-        "target": 28,
+        "target": 29,
         "value": 7.4935984103309865,
         "reason": "1 Co-Authors",
         "types": {
@@ -5015,33 +5883,17 @@
       },
       {
         "source": 17,
-        "target": 29,
-        "value": 8.493598410330986,
-        "reason": "1 Keywords, 1 Co-Authors",
+        "target": 30,
+        "value": 7.4935984103309865,
+        "reason": "1 Co-Authors",
         "types": {
-          "topic": true,
+          "topic": false,
           "venue": false,
           "author": true
         },
         "lineStyle": {
           "width": 5,
-          "opacity": 0.55,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 17,
-        "target": 30,
-        "value": 12.670272963815561,
-        "reason": "Same Venue, 2 Co-Authors",
-        "types": {
-          "topic": false,
-          "venue": true,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 5,
-          "opacity": 0.7,
+          "opacity": 0.45000000000000007,
           "curveness": 0.2
         }
       },
@@ -5063,7 +5915,71 @@
       },
       {
         "source": 17,
+        "target": 32,
+        "value": 8.493598410330986,
+        "reason": "1 Keywords, 1 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.55,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 17,
         "target": 33,
+        "value": 12.670272963815561,
+        "reason": "Same Venue, 2 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": true,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.7,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 17,
+        "target": 34,
+        "value": 8.493598410330986,
+        "reason": "1 Keywords, 1 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.55,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 17,
+        "target": 35,
+        "value": 9.493598410330986,
+        "reason": "2 Keywords, 1 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.65,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 17,
+        "target": 40,
         "value": 7.602079402700426,
         "reason": "3 Keywords",
         "types": {
@@ -5191,22 +6107,6 @@
       },
       {
         "source": 18,
-        "target": 28,
-        "value": 8.24476134219972,
-        "reason": "1 Co-Authors",
-        "types": {
-          "topic": false,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 5,
-          "opacity": 0.45000000000000007,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 18,
         "target": 29,
         "value": 8.24476134219972,
         "reason": "1 Co-Authors",
@@ -5224,8 +6124,8 @@
       {
         "source": 18,
         "target": 30,
-        "value": 11.354299044722055,
-        "reason": "2 Co-Authors",
+        "value": 8.24476134219972,
+        "reason": "1 Co-Authors",
         "types": {
           "topic": false,
           "venue": false,
@@ -5233,7 +6133,7 @@
         },
         "lineStyle": {
           "width": 5,
-          "opacity": 0.7,
+          "opacity": 0.45000000000000007,
           "curveness": 0.2
         }
       },
@@ -5250,6 +6150,70 @@
         "lineStyle": {
           "width": 5,
           "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 18,
+        "target": 32,
+        "value": 8.24476134219972,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 18,
+        "target": 33,
+        "value": 11.354299044722055,
+        "reason": "2 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.7,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 18,
+        "target": 34,
+        "value": 8.24476134219972,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 18,
+        "target": 35,
+        "value": 10.24476134219972,
+        "reason": "Same Venue, 1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": true,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.65,
           "curveness": 0.2
         }
       },
@@ -5367,22 +6331,6 @@
       },
       {
         "source": 19,
-        "target": 28,
-        "value": 3.6081976621622465,
-        "reason": "1 Co-Authors",
-        "types": {
-          "topic": false,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 2.1081976621622465,
-          "opacity": 0.45000000000000007,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 19,
         "target": 29,
         "value": 3.6081976621622465,
         "reason": "1 Co-Authors",
@@ -5400,6 +6348,54 @@
       {
         "source": 19,
         "target": 30,
+        "value": 3.6081976621622465,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 2.1081976621622465,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 19,
+        "target": 31,
+        "value": 6.6081976621622465,
+        "reason": "2 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 3.6081976621622465,
+          "opacity": 0.7,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 19,
+        "target": 32,
+        "value": 3.6081976621622465,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 2.1081976621622465,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 19,
+        "target": 33,
         "value": 8.079441541679836,
         "reason": "2 Co-Authors",
         "types": {
@@ -5415,7 +6411,23 @@
       },
       {
         "source": 19,
-        "target": 31,
+        "target": 34,
+        "value": 3.6081976621622465,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 2.1081976621622465,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 19,
+        "target": 35,
         "value": 3.6081976621622465,
         "reason": "1 Co-Authors",
         "types": {
@@ -5463,7 +6475,23 @@
       },
       {
         "source": 20,
-        "target": 29,
+        "target": 30,
+        "value": 7.0,
+        "reason": "1 Keywords, 2 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 3.5,
+          "opacity": 0.7,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 20,
+        "target": 31,
         "value": 3.0,
         "reason": "1 Co-Authors",
         "types": {
@@ -5479,7 +6507,23 @@
       },
       {
         "source": 20,
-        "target": 30,
+        "target": 32,
+        "value": 3.0,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 1.5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 20,
+        "target": 33,
         "value": 5.879144452743052,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -5490,6 +6534,22 @@
         "lineStyle": {
           "width": 3.879144452743052,
           "opacity": 0.55,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 20,
+        "target": 35,
+        "value": 3.0,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 1.5,
+          "opacity": 0.45000000000000007,
           "curveness": 0.2
         }
       },
@@ -5511,7 +6571,7 @@
       },
       {
         "source": 21,
-        "target": 28,
+        "target": 29,
         "value": 3.6081976621622465,
         "reason": "1 Co-Authors",
         "types": {
@@ -5527,7 +6587,23 @@
       },
       {
         "source": 21,
-        "target": 30,
+        "target": 31,
+        "value": 2.6081976621622465,
+        "reason": "2 Keywords",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": false
+        },
+        "lineStyle": {
+          "width": 1.6081976621622465,
+          "opacity": 0.35,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 21,
+        "target": 33,
         "value": 6.079441541679836,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -5543,7 +6619,7 @@
       },
       {
         "source": 21,
-        "target": 31,
+        "target": 34,
         "value": 3.6081976621622465,
         "reason": "1 Co-Authors",
         "types": {
@@ -5607,7 +6683,39 @@
       },
       {
         "source": 22,
-        "target": 29,
+        "target": 30,
+        "value": 11.024856130911907,
+        "reason": "2 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.7,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 22,
+        "target": 31,
+        "value": 8.024856130911907,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 22,
+        "target": 32,
         "value": 9.024856130911907,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -5623,7 +6731,7 @@
       },
       {
         "source": 22,
-        "target": 30,
+        "target": 33,
         "value": 9.15098080672772,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -5638,8 +6746,24 @@
         }
       },
       {
+        "source": 22,
+        "target": 35,
+        "value": 9.024856130911907,
+        "reason": "1 Keywords, 1 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.55,
+          "curveness": 0.2
+        }
+      },
+      {
         "source": 23,
-        "target": 29,
+        "target": 30,
         "value": 4.039720770839918,
         "reason": "1 Co-Authors",
         "types": {
@@ -5655,7 +6779,39 @@
       },
       {
         "source": 23,
-        "target": 30,
+        "target": 31,
+        "value": 5.039720770839918,
+        "reason": "1 Keywords, 1 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 3.039720770839918,
+          "opacity": 0.55,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 23,
+        "target": 32,
+        "value": 4.039720770839918,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 2.539720770839918,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 23,
+        "target": 33,
         "value": 6.256116095164411,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -5671,7 +6827,7 @@
       },
       {
         "source": 23,
-        "target": 31,
+        "target": 34,
         "value": 3.039720770839918,
         "reason": "2 Keywords",
         "types": {
@@ -5682,6 +6838,22 @@
         "lineStyle": {
           "width": 2.039720770839918,
           "opacity": 0.35,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 23,
+        "target": 35,
+        "value": 4.039720770839918,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 2.539720770839918,
+          "opacity": 0.45000000000000007,
           "curveness": 0.2
         }
       },
@@ -5702,8 +6874,88 @@
         }
       },
       {
+        "source": 24,
+        "target": 31,
+        "value": 4.039720770839918,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 2.539720770839918,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 24,
+        "target": 35,
+        "value": 3.039720770839918,
+        "reason": "2 Keywords",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": false
+        },
+        "lineStyle": {
+          "width": 2.039720770839918,
+          "opacity": 0.35,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 25,
+        "target": 31,
+        "value": 3.0,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 1.5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 25,
+        "target": 35,
+        "value": 2.0,
+        "reason": "2 Keywords",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": false
+        },
+        "lineStyle": {
+          "width": 1.0,
+          "opacity": 0.35,
+          "curveness": 0.2
+        }
+      },
+      {
         "source": 26,
-        "target": 29,
+        "target": 32,
+        "value": 2.0,
+        "reason": "2 Keywords",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": false
+        },
+        "lineStyle": {
+          "width": 1.0,
+          "opacity": 0.35,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 26,
+        "target": 35,
         "value": 2.0,
         "reason": "2 Keywords",
         "types": {
@@ -5719,7 +6971,7 @@
       },
       {
         "source": 27,
-        "target": 28,
+        "target": 29,
         "value": 5.6081976621622465,
         "reason": "2 Keywords, 1 Co-Authors",
         "types": {
@@ -5735,7 +6987,7 @@
       },
       {
         "source": 27,
-        "target": 29,
+        "target": 32,
         "value": 2.6081976621622465,
         "reason": "Same Venue",
         "types": {
@@ -5751,7 +7003,7 @@
       },
       {
         "source": 27,
-        "target": 30,
+        "target": 33,
         "value": 5.079441541679836,
         "reason": "1 Co-Authors",
         "types": {
@@ -5767,7 +7019,7 @@
       },
       {
         "source": 27,
-        "target": 31,
+        "target": 34,
         "value": 4.6081976621622465,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -5784,6 +7036,70 @@
       {
         "source": 28,
         "target": 30,
+        "value": 3.0,
+        "reason": "1 Keywords, Same Venue",
+        "types": {
+          "topic": true,
+          "venue": true,
+          "author": false
+        },
+        "lineStyle": {
+          "width": 1.5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 28,
+        "target": 31,
+        "value": 2.0,
+        "reason": "Same Venue",
+        "types": {
+          "topic": false,
+          "venue": true,
+          "author": false
+        },
+        "lineStyle": {
+          "width": 1.0,
+          "opacity": 0.35,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 28,
+        "target": 37,
+        "value": 2.0,
+        "reason": "Same Venue",
+        "types": {
+          "topic": false,
+          "venue": true,
+          "author": false
+        },
+        "lineStyle": {
+          "width": 1.0,
+          "opacity": 0.35,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 28,
+        "target": 40,
+        "value": 3.3744360978112327,
+        "reason": "Same Venue",
+        "types": {
+          "topic": false,
+          "venue": true,
+          "author": false
+        },
+        "lineStyle": {
+          "width": 2.3744360978112327,
+          "opacity": 0.35,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 29,
+        "target": 33,
         "value": 4.879144452743052,
         "reason": "1 Co-Authors",
         "types": {
@@ -5798,8 +7114,8 @@
         }
       },
       {
-        "source": 28,
-        "target": 31,
+        "source": 29,
+        "target": 34,
         "value": 4.0,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -5814,8 +7130,120 @@
         }
       },
       {
-        "source": 29,
-        "target": 30,
+        "source": 30,
+        "target": 31,
+        "value": 5.0,
+        "reason": "Same Venue, 1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": true,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 2.5,
+          "opacity": 0.65,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 30,
+        "target": 32,
+        "value": 3.0,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 1.5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 30,
+        "target": 33,
+        "value": 5.879144452743052,
+        "reason": "1 Keywords, 1 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 3.879144452743052,
+          "opacity": 0.55,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 30,
+        "target": 35,
+        "value": 3.0,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 1.5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 30,
+        "target": 37,
+        "value": 2.0,
+        "reason": "Same Venue",
+        "types": {
+          "topic": false,
+          "venue": true,
+          "author": false
+        },
+        "lineStyle": {
+          "width": 1.0,
+          "opacity": 0.35,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 30,
+        "target": 40,
+        "value": 3.3744360978112327,
+        "reason": "Same Venue",
+        "types": {
+          "topic": false,
+          "venue": true,
+          "author": false
+        },
+        "lineStyle": {
+          "width": 2.3744360978112327,
+          "opacity": 0.35,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 31,
+        "target": 32,
+        "value": 3.0,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 1.5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 31,
+        "target": 33,
         "value": 4.879144452743052,
         "reason": "1 Co-Authors",
         "types": {
@@ -5830,8 +7258,88 @@
         }
       },
       {
-        "source": 30,
-        "target": 31,
+        "source": 31,
+        "target": 35,
+        "value": 4.0,
+        "reason": "1 Keywords, 1 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 2.0,
+          "opacity": 0.55,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 31,
+        "target": 37,
+        "value": 2.0,
+        "reason": "Same Venue",
+        "types": {
+          "topic": false,
+          "venue": true,
+          "author": false
+        },
+        "lineStyle": {
+          "width": 1.0,
+          "opacity": 0.35,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 31,
+        "target": 40,
+        "value": 5.374436097811232,
+        "reason": "2 Keywords, Same Venue",
+        "types": {
+          "topic": true,
+          "venue": true,
+          "author": false
+        },
+        "lineStyle": {
+          "width": 3.3744360978112327,
+          "opacity": 0.55,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 32,
+        "target": 33,
+        "value": 4.879144452743052,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 3.379144452743052,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 32,
+        "target": 35,
+        "value": 14.0,
+        "reason": "5 Keywords, 3 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.7,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 33,
+        "target": 34,
         "value": 5.879144452743052,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -5842,6 +7350,86 @@
         "lineStyle": {
           "width": 3.879144452743052,
           "opacity": 0.55,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 33,
+        "target": 35,
+        "value": 4.879144452743052,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 3.379144452743052,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 34,
+        "target": 35,
+        "value": 2.0,
+        "reason": "2 Keywords",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": false
+        },
+        "lineStyle": {
+          "width": 1.0,
+          "opacity": 0.35,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 36,
+        "target": 37,
+        "value": 3.0,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 1.5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 36,
+        "target": 38,
+        "value": 2.0,
+        "reason": "Same Venue",
+        "types": {
+          "topic": false,
+          "venue": true,
+          "author": false
+        },
+        "lineStyle": {
+          "width": 1.0,
+          "opacity": 0.35,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 37,
+        "target": 40,
+        "value": 3.3744360978112327,
+        "reason": "Same Venue",
+        "types": {
+          "topic": false,
+          "venue": true,
+          "author": false
+        },
+        "lineStyle": {
+          "width": 2.3744360978112327,
+          "opacity": 0.35,
           "curveness": 0.2
         }
       }
@@ -5898,23 +7486,23 @@
   "impactStats": {
     "updatedLabel": "August 2026",
     "latestYear": 2026,
-    "latestYearCount": 8,
+    "latestYearCount": 15,
     "journals": {
-      "value": 8,
-      "base": 34,
-      "meta": "8 of 34 total publications",
+      "value": 9,
+      "base": 41,
+      "meta": "9 of 41 total publications",
       "tooltip": "Peer-reviewed journal articles."
     },
     "conferences": {
-      "value": 20,
-      "base": 34,
-      "meta": "20 of 34 total publications",
+      "value": 26,
+      "base": 41,
+      "meta": "26 of 41 total publications",
       "tooltip": "Conference papers and proceedings."
     },
     "workshops": {
       "value": 6,
-      "base": 34,
-      "meta": "6 of 34 total publications",
+      "base": 41,
+      "meta": "6 of 41 total publications",
       "tooltip": "Workshop and pre-conference papers."
     },
     "best-paper": {
@@ -5924,21 +7512,21 @@
       "tooltip": "Best Paper Awards in 2023, 2020"
     },
     "q1": {
-      "value": 5,
-      "base": 8,
-      "meta": "5 of 8 journal pubs",
+      "value": 6,
+      "base": 9,
+      "meta": "6 of 9 journal pubs",
       "tooltip": "Q1 venues: ACM Transactions on Management Information Systems, Information Systems Frontiers, Journal of Management Information Systems, MIS Quarterly"
     },
     "ft50": {
-      "value": 3,
-      "base": 8,
-      "meta": "3 of 8 journal pubs",
+      "value": 4,
+      "base": 9,
+      "meta": "4 of 9 journal pubs",
       "tooltip": "FT50 venues: Journal of Management Information Systems, MIS Quarterly"
     },
     "utd24": {
       "value": 2,
-      "base": 8,
-      "meta": "2 of 8 journal pubs",
+      "base": 9,
+      "meta": "2 of 9 journal pubs",
       "tooltip": "UTD24 venues: MIS Quarterly"
     }
   },
@@ -6533,116 +8121,60 @@
   },
   "topics": [
     {
-      "label": "Cybersecurity / Enabled",
-      "keywords": [
-        "cybersecurity",
-        "enabled",
-        "analytics",
-        "models",
-        "innovation",
-        "learning",
-        "deep",
-        "advanced"
-      ],
-      "weight": 0.18084373204914866
-    },
-    {
-      "label": "Approach / Language",
+      "label": "Approach / Phishing",
       "keywords": [
         "approach",
-        "language",
-        "model",
-        "large",
-        "learning",
-        "health",
         "phishing",
-        "multi"
+        "learning",
+        "large",
+        "model",
+        "language",
+        "multi",
+        "adversarial"
       ],
-      "weight": 0.14547981857186149
+      "weight": 0.31158271733614107
     },
     {
-      "label": "Scholarship / Cybersecurity",
+      "label": "Security / Intelligence",
       "keywords": [
-        "scholarship",
+        "security",
+        "intelligence",
+        "threat",
+        "online",
+        "email",
+        "nudging",
+        "explainable",
+        "prevention"
+      ],
+      "weight": 0.2466313147756596
+    },
+    {
+      "label": "Cybersecurity / Intelligence",
+      "keywords": [
         "cybersecurity",
-        "competition",
-        "commitment",
-        "security",
         "intelligence",
-        "science",
-        "embedding"
-      ],
-      "weight": 0.14385761718410625
-    },
-    {
-      "label": "Intelligence / Security",
-      "keywords": [
-        "intelligence",
-        "security",
         "artificial",
-        "collaborative",
-        "science",
-        "embedding",
-        "graph",
-        "innovation"
-      ],
-      "weight": 0.12849379169887257
-    },
-    {
-      "label": "Cyber / Science",
-      "keywords": [
-        "cyber",
         "science",
         "enabled",
-        "threat",
-        "security",
-        "asia",
-        "intelligence",
-        "self"
-      ],
-      "weight": 0.11703286608596879
-    },
-    {
-      "label": "Threat / Cyber",
-      "keywords": [
-        "threat",
+        "analytics",
         "cyber",
-        "intelligence",
-        "deep",
-        "note",
-        "creating",
-        "evading",
-        "labels"
+        "innovation"
       ],
-      "weight": 0.10928060470905
+      "weight": 0.2277006404106128
     },
     {
-      "label": "Security / Explainable",
+      "label": "Scholarship / Science",
       "keywords": [
-        "security",
-        "explainable",
-        "nudging",
-        "prevention",
-        "email",
-        "agent",
-        "multi",
-        "phishing"
+        "scholarship",
+        "science",
+        "prosody",
+        "training",
+        "vishing",
+        "innovation",
+        "competition",
+        "intelligence"
       ],
-      "weight": 0.0975249935761807
-    },
-    {
-      "label": "Targeted / Trading",
-      "keywords": [
-        "targeted",
-        "trading",
-        "disruption",
-        "scam",
-        "seeing",
-        "detecting",
-        "believing",
-        "automatically"
-      ],
-      "weight": 0.07748657612481151
+      "weight": 0.21408532747758666
     }
   ],
   "network": {

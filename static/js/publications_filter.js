@@ -53,6 +53,20 @@
       return String(a.title).localeCompare(String(b.title));
     });
 
+    const PRESTIGE_VENUES = {
+      'MIS Quarterly': ['FT50', 'UTD24'],
+      'Journal of Management Information Systems': ['FT50', 'UTD24'],
+    };
+    const badgesFor = (pub) => {
+      const chips = (PRESTIGE_VENUES[pub.venue] || []).map(
+        (b) => `<span class="pub-badge pub-badge--${b.toLowerCase()}" title="${b === 'FT50' ? 'Financial Times Top 50 journal' : 'UT Dallas Top 24 journal'}">${b}</span>`
+      );
+      if (pub.award) {
+        chips.push(`<span class="pub-badge pub-badge--award" title="${pub.award}">\u{1F3C6} ${pub.award}</span>`);
+      }
+      return chips.length ? `<span class="pub-badges">${chips.join('')}</span>` : '';
+    };
+
     listEl.innerHTML = sorted.map((pub) => {
       const authors = Array.isArray(pub.authors) ? pub.authors.join(', ') : '';
       const typeLabel = normalizeTypeLabel(pub.type || '');
@@ -62,7 +76,7 @@
         : `<span class="pub-title">${pub.title}</span>`;
       return `
         <div class="pub-item">
-          ${title}
+          ${title}${badgesFor(pub)}
           <div class="pub-meta">${meta}</div>
           <div class="pub-authors">${authors}</div>
         </div>

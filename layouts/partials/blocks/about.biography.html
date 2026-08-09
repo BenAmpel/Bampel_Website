@@ -130,7 +130,7 @@
         {{ end }}
 
         {{ with $person_page.Content }}
-        <details class="spoiler bio-story">
+        <details class="spoiler bio-story" open>
           <summary>Full Biography</summary>
           <div class="bio-story-progress" aria-hidden="true">
             <span class="bio-story-progress-bar" data-bio-progress-bar></span>
@@ -180,7 +180,7 @@
         <div class="section-subheading">{{ i18n "education" | markdownify }}</div>
         <div class="edu-path">
           <div class="edu-scroll-hint" aria-hidden="true">Scroll →</div>
-          {{ range sort .courses "start_year" }}
+          {{ range sort .courses "start_year" "desc" }}
           <div class="edu-step">
             {{ if .start_year }}
               <div class="edu-year">

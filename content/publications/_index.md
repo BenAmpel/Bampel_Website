@@ -9,7 +9,9 @@ sections:
     content:
       title: Publications
       text: |
-        {{< publications_filter >}}
+        {{< altmetric_summary >}}
+
+        {{< publications_filter open="true" >}}
 
         {{< spoiler text="🧪 Paper Diff View" >}}
         {{< paper_diff >}}

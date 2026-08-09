@@ -1,4 +1,4 @@
-<details class="spoiler pub-filter-spoiler">
+<details class="spoiler pub-filter-spoiler"{{ if in (slice "true" "1" "yes" "open") (lower (.Get "open" | default "")) }} open{{ end }}>
   <summary>📚 Publications (Search &amp; Filter)</summary>
   <div class="spoiler-content">
     <div class="pub-filter" id="pub-filter">
@@ -41,4 +41,4 @@
     </div>
   </div>
 </details>
-<script src="/js/publications_filter.js" defer></script>
+<script src="/js/publications_filter.js?v=20260808" defer></script>
