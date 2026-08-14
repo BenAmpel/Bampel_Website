@@ -19,3 +19,142 @@
   to = "/care/"
   status = 301
   force = true
+
+# 301s for legacy URLs driving 404 traffic (GA audit, Aug 2026).
+# Old /publication/<slug> scheme, deleted /authors/ pages, theme demo
+# leftovers, and renamed slugs. Specific rules precede catch-alls.
+
+[[redirects]]
+  from = "/publication/ampel-2025-voice-phishing"
+  to = "/journal_publication/voice-phishing-misq/"
+  status = 301
+
+[[redirects]]
+  from = "/publication/ampel-2024-creating"
+  to = "/journal_publication/dtl-el-misq/"
+  status = 301
+
+[[redirects]]
+  from = "/publication/ampel-2024-improving"
+  to = "/journal_publication/attack-link-jmis/"
+  status = 301
+
+[[redirects]]
+  from = "/publication/ampel-2025-large"
+  to = "/journal_publication/llm_tmis/"
+  status = 301
+
+[[redirects]]
+  from = "/publication/ampel-2021-linking"
+  to = "/workshop_publication/cve-attandck-kdd-2021/"
+  status = 301
+
+[[redirects]]
+  from = "/publication/ampel-2023-disrupting"
+  to = "/conference_publication/ransomware-bitcoin-isi-2023/"
+  status = 301
+
+[[redirects]]
+  from = "/publication/ampel-2023-effect"
+  to = "/conference_publication/ethereum-amcis-2023/"
+  status = 301
+
+[[redirects]]
+  from = "/publication/ampel-2023-mapping"
+  to = "/conference_publication/mitre-attandck-isi-2023/"
+  status = 301
+
+[[redirects]]
+  from = "/publication/dacosta-2026-health-info"
+  to = "/conference_publication/phi-hacker-hicss-2026/"
+  status = 301
+
+[[redirects]]
+  from = "/publication/gao-2024-evading"
+  to = "/journal_publication/phish-dtrap/"
+  status = 301
+
+[[redirects]]
+  from = "/publication/gao-2025-examining"
+  to = "/conference_publication/phishing-spw-2025/"
+  status = 301
+
+[[redirects]]
+  from = "/publication/lazarine-2020-identifying"
+  to = "/conference_publication/vuln-github-isi/"
+  status = 301
+
+[[redirects]]
+  from = "/publication/zhang-2026-bias-detection"
+  to = "/conference_publication/bias-detection-hicss-2026/"
+  status = 301
+
+[[redirects]]
+  from = "/publication/marx-2021-role"
+  to = "/conference_publication/paper-a-thon-2021/"
+  status = 301
+
+[[redirects]]
+  from = "/publication/ampel-2019-performance/*"
+  to = "/conference_publication/sawtooth-19-isi/"
+  status = 301
+
+[[redirects]]
+  from = "/publication/*"
+  to = "/publications/"
+  status = 301
+
+[[redirects]]
+  from = "/publication"
+  to = "/publications/"
+  status = 301
+
+[[redirects]]
+  from = "/conference_publication/exploit-labeling-isi-2021"
+  to = "/conference_publication/dtlel-isi/"
+  status = 301
+
+[[redirects]]
+  from = "/conference_publication/mitre-attck-isi-2023"
+  to = "/conference_publication/mitre-attandck-isi-2023/"
+  status = 301
+
+[[redirects]]
+  from = "/authors/*"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/slides/*"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/post/*"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/project/*"
+  to = "/research/"
+  status = 301
+
+[[redirects]]
+  from = "/tags/*"
+  to = "/tags/"
+  status = 301
+
+[[redirects]]
+  from = "/experience"
+  to = "/cv/"
+  status = 301
+
+[[redirects]]
+  from = "/contact"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/workshop_publication/preprint"
+  to = "/workshop_publication/"
+  status = 301
