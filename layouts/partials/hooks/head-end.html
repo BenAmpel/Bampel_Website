@@ -1946,16 +1946,7 @@ function runEnhancements() {
     
     if (targetElement) {
       const vizHTML = `
-        <div class="viz-grid" style="margin-top: 30px;">
-          <div class="viz-column">
-            <details class="viz-details">
-              <summary>🤝 Collaboration Network</summary>
-              <div class="viz-content">
-                <img src="/images/coauthor-network.png" alt="Research Collaboration Network" class="viz-image" id="network-img">
-                <p class="viz-caption">Research collaboration network based on co-authored publications</p>
-              </div>
-            </details>
-          </div>
+        <div class="viz-grid" style="margin-top: 30px; grid-template-columns: 1fr;">
           <div class="viz-column">
             <details class="viz-details" id="home-footprint-details">
               <summary>🌍 Research Footprint</summary>
@@ -2281,7 +2272,6 @@ function runEnhancements() {
     
     // Define images that have dark/light variants
     const themeImages = [
-      { selector: 'img[src*="coauthor-network"], #network-img', light: '/images/coauthor-network.png', dark: '/images/coauthor-network-dark.png' },
       { selector: 'img[src*="impact-dashboard"]', light: '/images/impact-dashboard.png', dark: '/images/impact-dashboard-dark.png' },
       { selector: 'img[src*="research-map"], #map-img', light: '/images/research-map.png', dark: '/images/research-map-dark.png' }
     ];
