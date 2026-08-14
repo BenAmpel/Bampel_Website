@@ -29,7 +29,7 @@ tags:
 
 featured: false
 
-url_pdf: ''
+url_pdf: 'uploads/papers/Chen_Ampel_2026_CARS_Cross-Repository-Vulnerability-Variant-Retrieval.pdf'
 plain_summary: "When a security flaw is found in one open-source project, copies and near-copies of that same flawed code often live on in other projects. This paper presents AVA, a system that learns from known vulnerabilities and their fixes to automatically hunt down those unfixed look-alikes across many repositories at once. It shows that real-world patches can teach a model to tell vulnerable code from fixed code, extending remediation beyond the project where a flaw was first reported."
 ---
 {{< publication_extras >}}

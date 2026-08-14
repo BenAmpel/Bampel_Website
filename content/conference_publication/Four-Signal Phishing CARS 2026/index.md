@@ -26,7 +26,7 @@ tags:
 
 featured: false
 
-url_pdf: ''
+url_pdf: 'uploads/papers/Darko_Ampel_2026_CARS_Four-Signal-Fusion-Phishing-URL-Detection.pdf'
 plain_summary: "Security analysts need to decide in a fraction of a second whether a link is a phishing attempt. This paper combines four fast signals — a deep language model reading the URL's characters, a lexical model, a threat-intelligence lookup, and a measure of how popular the domain is — and lets a small learned model weigh them together. The combination catches phishing links far more reliably than any single method, labels a URL in about a tenth of a second, and reveals that domain popularity is the single most informative signal."
 ---
 {{< publication_extras >}}

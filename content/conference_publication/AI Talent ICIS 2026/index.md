@@ -32,7 +32,7 @@ tags:
 
 featured: false
 
-url_pdf: ''
+url_pdf: 'uploads/papers/Rai_etal_Ampel_2026_ICIS_Pathways-to-AI-Ready-Entry-Level-Talent.pdf'
 plain_summary: "Generative AI is automating exactly the entry-level tasks that new graduates used to learn on — breaking the traditional apprenticeship path into skilled work. This paper lays out design principles for business-school AI curricula that adapt as job skills shift: students progress from no-code tools to full coding, course content is continuously realigned with employer demand signals, and a hub-and-spoke model spreads the program across institutions. The design is running in practice as the AIX Hub, with over 1,000 students and 11 industry partners in its first deployment."
 ---
 {{< publication_extras >}}

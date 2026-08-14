@@ -26,7 +26,7 @@ tags:
 
 featured: false
 
-url_pdf: ''
+url_pdf: 'uploads/papers/Ampel_Buckman_2026_ICIS_Prosody-Training-Vishing-Susceptibility.pdf'
 plain_summary: "Phone-call scams increasingly use AI-generated voices, yet most security training still focuses on email. This pilot study trained people to listen for prosody — the rhythm, stress, and intonation cues that give synthetic or manipulative calls away. Training didn't make listeners sharper at telling real from fake, but it made them meaningfully more cautious about trusting any call, and it raised their awareness of their own vulnerability — an early sign that audio-focused training changes how people decide, not just what they know."
 ---
 {{< publication_extras >}}

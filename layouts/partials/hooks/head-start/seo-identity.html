@@ -1,0 +1,37 @@
+{{/*
+  seo-identity.html — loaded via the theme's head-start hook, so it renders
+  BEFORE the module's own meta tags. Social scrapers (Facebook, LinkedIn,
+  Slack, Twitter) use the FIRST og:image/twitter:image they encounter, which
+  lets this branded 1200x630 card win over the theme's site-icon fallback
+  without overriding any theme partial.
+*/}}
+{{ $card := printf "%smedia/sharing-card.png" site.BaseURL }}
+<meta property="og:image" content="{{ $card }}" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="{{ $card }}" />
+
+{{/* Person knowledge-graph identity, homepage only. */}}
+{{ if .IsHome }}
+{{ $ld := dict
+    "@context" "https://schema.org"
+    "@type" "Person"
+    "name" "Benjamin M. Ampel"
+    "alternateName" (slice "Ben Ampel" "Benjamin Ampel")
+    "jobTitle" "Assistant Professor of Computer Information Systems"
+    "worksFor" (dict "@type" "CollegeOrUniversity" "name" "Georgia State University" "sameAs" "https://www.gsu.edu/")
+    "url" site.BaseURL
+    "image" (printf "%smedia/sharing-card.png" site.BaseURL)
+    "email" "bampel@gsu.edu"
+    "description" "Assistant Professor of Computer Information Systems at Georgia State University. Research on AI-enabled cybersecurity, phishing detection, hacker community analytics, and large language models."
+    "knowsAbout" (slice "AI for Cybersecurity" "Phishing Detection" "Cyber Threat Intelligence" "Large Language Models" "Hacker Community Analytics" "Design Science Research")
+    "sameAs" (slice
+      "https://scholar.google.com/citations?user=XDdwaZUAAAAJ"
+      "https://www.linkedin.com/in/benampel/"
+      "https://www.researchgate.net/profile/Benjamin-Ampel"
+      "https://github.com/BenAmpel"
+    )
+}}
+<script type="application/ld+json">{{ $ld | jsonify (dict "indent" "  ") | safeJS }}</script>
+{{ end }}

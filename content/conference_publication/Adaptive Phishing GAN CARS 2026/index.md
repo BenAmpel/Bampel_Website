@@ -30,7 +30,7 @@ tags:
 
 featured: false
 
-url_pdf: ''
+url_pdf: 'uploads/papers/Abdellatif_Wagner_Ampel_2026_CARS_Adaptive-Phishing-URL-GAN.pdf'
 plain_summary: "Phishing detectors trained on old data quietly lose their edge as attackers change tactics. This paper trains a generator to invent realistic new phishing URLs and pits it against a detector, so the detector learns to handle attacks it has never seen. Tested against a private feed of current phishing links from 2024–2025, the adversarially trained detector caught about 5% more modern phishing URLs, showing this cat-and-mouse training helps classifiers keep up with evolving threats."
 ---
 {{< publication_extras >}}

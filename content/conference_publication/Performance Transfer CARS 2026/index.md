@@ -27,7 +27,7 @@ tags:
 
 featured: false
 
-url_pdf: ''
+url_pdf: 'uploads/papers/Clark_Ampel_Ramesh_2026_CARS_Performance-Transfer-AI-Assisted-Cyber-Training.pdf'
 plain_summary: "People do better at spotting cyber threats when an AI assistant helps them — but do they actually learn anything they keep once the assistant is taken away? In this six-week pilot with graduate students, AI support boosted performance during training, yet participants' unaided skills afterward were no better than before. The study finds that heavy reliance on the AI predicted less learning, and argues that training programs should measure what trainees can do without the tool, not just with it."
 ---
 {{< publication_extras >}}

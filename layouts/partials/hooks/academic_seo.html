@@ -21,6 +21,8 @@
 
   {{ $venue := $page.Params.publication | default $page.Params.publication_short | default "" }}
   {{ $venuePlain := trim (replaceRE "^In\\s+" "" (replaceRE "\\*" "" (plainify $venue))) " " }}
+  {{/* Scholar parses this as the journal/conference name: strip status suffixes. */}}
+  {{ $venuePlain = trim (replaceRE "(?i),?\\s*\\(?(forthcoming|in press|accepted)\\)?\\.?$" "" $venuePlain) " " }}
   {{ $doi := "" }}{{ with $page.Params.doi }}{{ if ne . "" }}{{ $doi = . }}{{ end }}{{ end }}
   {{ $abstract := trim (replaceRE "\\s+" " " (plainify ($page.Params.abstract | default ""))) " " }}
 

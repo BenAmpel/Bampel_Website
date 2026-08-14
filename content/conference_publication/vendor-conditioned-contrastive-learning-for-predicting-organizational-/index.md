@@ -24,7 +24,7 @@ tags:
 
 featured: false
 
-url_pdf: ''
+url_pdf: 'uploads/papers/Ampel_2026_CARS_Vendor-Conditioned-Contrastive-Learning.pdf'
 url_code: ''
 url_dataset: ''
 url_project: ''
