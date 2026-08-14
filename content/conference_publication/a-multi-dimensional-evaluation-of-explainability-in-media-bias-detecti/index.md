@@ -2,8 +2,8 @@
 title: "A Multi-Dimensional Evaluation of Explainability in Media Bias Detection"
 
 authors:
-  - T Chen
-  - R Zhang
+  - Ting Chen
+  - Chengjun Zhang
   - admin
   - Sagar Samtani
 date: 2026-01-01

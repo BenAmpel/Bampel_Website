@@ -542,8 +542,8 @@
     {
       "title": "A Multi-Dimensional Evaluation of Explainability in Media Bias Detection",
       "authors": [
-        "T Chen",
-        "R Zhang",
+        "Ting Chen",
+        "Chengjun Zhang",
         "Benjamin M. Ampel",
         "Sagar Samtani"
       ],
@@ -1227,8 +1227,8 @@
         "value": 0,
         "year": 2026,
         "authors": [
-          "T Chen",
-          "R Zhang",
+          "Ting Chen",
+          "Chengjun Zhang",
           "Benjamin M. Ampel",
           "Sagar Samtani"
         ],
@@ -7013,16 +7013,16 @@
       {
         "source": 27,
         "target": 29,
-        "value": 5.6081976621622465,
-        "reason": "2 Keywords, 1 Co-Authors",
+        "value": 8.608197662162247,
+        "reason": "2 Keywords, 2 Co-Authors",
         "types": {
           "topic": true,
           "venue": false,
           "author": true
         },
         "lineStyle": {
-          "width": 3.1081976621622465,
-          "opacity": 0.65,
+          "width": 4.6081976621622465,
+          "opacity": 0.7,
           "curveness": 0.2
         }
       },
@@ -8736,7 +8736,7 @@
           "degree": 4,
           "topicLinks": 17,
           "venueLinks": 1,
-          "authorLinks": 58,
+          "authorLinks": 59,
           "authors": [
             "Chengjun Zhang",
             "Benjamin M. Ampel",
@@ -8771,10 +8771,10 @@
           "degree": 1,
           "topicLinks": 10,
           "venueLinks": 0,
-          "authorLinks": 58,
+          "authorLinks": 59,
           "authors": [
-            "T Chen",
-            "R Zhang",
+            "Ting Chen",
+            "Chengjun Zhang",
             "Benjamin M. Ampel",
             "Sagar Samtani"
           ]
@@ -9084,18 +9084,14 @@
             },
             {
               "id": "Chengjun Zhang",
-              "count": 1
+              "count": 2
             },
             {
               "id": "Abena M. Darko",
               "count": 1
             },
             {
-              "id": "R Zhang",
-              "count": 1
-            },
-            {
-              "id": "T Chen",
+              "id": "Ting Chen",
               "count": 1
             },
             {
@@ -9463,12 +9459,12 @@
             {
               "source": "Benjamin M. Ampel",
               "target": "Chengjun Zhang",
-              "count": 1
+              "count": 2
             },
             {
               "source": "Chengjun Zhang",
               "target": "Sagar Samtani",
-              "count": 1
+              "count": 2
             },
             {
               "source": "Abena M. Darko",
@@ -9477,27 +9473,17 @@
             },
             {
               "source": "Benjamin M. Ampel",
-              "target": "R Zhang",
+              "target": "Ting Chen",
               "count": 1
             },
             {
-              "source": "Benjamin M. Ampel",
-              "target": "T Chen",
-              "count": 1
-            },
-            {
-              "source": "R Zhang",
-              "target": "Sagar Samtani",
-              "count": 1
-            },
-            {
-              "source": "R Zhang",
-              "target": "T Chen",
+              "source": "Chengjun Zhang",
+              "target": "Ting Chen",
               "count": 1
             },
             {
               "source": "Sagar Samtani",
-              "target": "T Chen",
+              "target": "Ting Chen",
               "count": 1
             },
             {
@@ -9821,10 +9807,9 @@
                 "Matthew J. Hashim": 1,
                 "Chi-Heng Yang": 1,
                 "Raul Reyes": 1,
-                "Chengjun Zhang": 1,
+                "Chengjun Zhang": 2,
                 "Abena M. Darko": 1,
-                "R Zhang": 1,
-                "T Chen": 1,
+                "Ting Chen": 1,
                 "Noah Abdellatif": 1,
                 "Zara Ahmad-Post": 1,
                 "Joseph Chen": 1,
@@ -9993,9 +9978,8 @@
                 "Yidong Chai": 1,
                 "Jay F. Nunamaker Jr.": 1,
                 "Shanchieh Yang": 1,
-                "Chengjun Zhang": 1,
-                "R Zhang": 1,
-                "T Chen": 1
+                "Chengjun Zhang": 2,
+                "Ting Chen": 1
               }
             },
             "Steven Ullman": {
@@ -10223,16 +10207,18 @@
               }
             },
             "Chengjun Zhang": {
-              "count": 1,
+              "count": 2,
               "years": [
                 2026
               ],
               "venues": {
-                "HICSS": 1
+                "HICSS": 1,
+                "arXiv preprint arXiv:2607.19954": 1
               },
               "coauthors": {
-                "Benjamin M. Ampel": 1,
-                "Sagar Samtani": 1
+                "Benjamin M. Ampel": 2,
+                "Sagar Samtani": 2,
+                "Ting Chen": 1
               }
             },
             "Abena M. Darko": {
@@ -10247,7 +10233,7 @@
                 "Benjamin M. Ampel": 1
               }
             },
-            "R Zhang": {
+            "Ting Chen": {
               "count": 1,
               "years": [
                 2026
@@ -10257,21 +10243,7 @@
               },
               "coauthors": {
                 "Benjamin M. Ampel": 1,
-                "Sagar Samtani": 1,
-                "T Chen": 1
-              }
-            },
-            "T Chen": {
-              "count": 1,
-              "years": [
-                2026
-              ],
-              "venues": {
-                "arXiv preprint arXiv:2607.19954": 1
-              },
-              "coauthors": {
-                "Benjamin M. Ampel": 1,
-                "R Zhang": 1,
+                "Chengjun Zhang": 1,
                 "Sagar Samtani": 1
               }
             },
@@ -10591,18 +10563,14 @@
             },
             {
               "id": "Chengjun Zhang",
-              "count": 1
+              "count": 2
             },
             {
               "id": "Abena M. Darko",
               "count": 1
             },
             {
-              "id": "R Zhang",
-              "count": 1
-            },
-            {
-              "id": "T Chen",
+              "id": "Ting Chen",
               "count": 1
             },
             {
@@ -10900,12 +10868,12 @@
             {
               "source": "Benjamin M. Ampel",
               "target": "Chengjun Zhang",
-              "count": 1
+              "count": 2
             },
             {
               "source": "Chengjun Zhang",
               "target": "Sagar Samtani",
-              "count": 1
+              "count": 2
             },
             {
               "source": "Abena M. Darko",
@@ -10914,27 +10882,17 @@
             },
             {
               "source": "Benjamin M. Ampel",
-              "target": "R Zhang",
+              "target": "Ting Chen",
               "count": 1
             },
             {
-              "source": "Benjamin M. Ampel",
-              "target": "T Chen",
-              "count": 1
-            },
-            {
-              "source": "R Zhang",
-              "target": "Sagar Samtani",
-              "count": 1
-            },
-            {
-              "source": "R Zhang",
-              "target": "T Chen",
+              "source": "Chengjun Zhang",
+              "target": "Ting Chen",
               "count": 1
             },
             {
               "source": "Sagar Samtani",
-              "target": "T Chen",
+              "target": "Ting Chen",
               "count": 1
             },
             {
@@ -11250,10 +11208,9 @@
                 "Matthew J. Hashim": 1,
                 "Chi-Heng Yang": 1,
                 "Raul Reyes": 1,
-                "Chengjun Zhang": 1,
+                "Chengjun Zhang": 2,
                 "Abena M. Darko": 1,
-                "R Zhang": 1,
-                "T Chen": 1,
+                "Ting Chen": 1,
                 "Noah Abdellatif": 1,
                 "Zara Ahmad-Post": 1,
                 "Joseph Chen": 1,
@@ -11369,9 +11326,8 @@
                 "Jay F. Nunamaker Jr.": 1,
                 "Shanchieh Yang": 1,
                 "Steven Ullman": 1,
-                "Chengjun Zhang": 1,
-                "R Zhang": 1,
-                "T Chen": 1
+                "Chengjun Zhang": 2,
+                "Ting Chen": 1
               }
             },
             "Yang Gao": {
@@ -11576,16 +11532,18 @@
               }
             },
             "Chengjun Zhang": {
-              "count": 1,
+              "count": 2,
               "years": [
                 2026
               ],
               "venues": {
-                "HICSS": 1
+                "HICSS": 1,
+                "arXiv preprint arXiv:2607.19954": 1
               },
               "coauthors": {
-                "Benjamin M. Ampel": 1,
-                "Sagar Samtani": 1
+                "Benjamin M. Ampel": 2,
+                "Sagar Samtani": 2,
+                "Ting Chen": 1
               }
             },
             "Abena M. Darko": {
@@ -11600,7 +11558,7 @@
                 "Benjamin M. Ampel": 1
               }
             },
-            "R Zhang": {
+            "Ting Chen": {
               "count": 1,
               "years": [
                 2026
@@ -11610,21 +11568,7 @@
               },
               "coauthors": {
                 "Benjamin M. Ampel": 1,
-                "Sagar Samtani": 1,
-                "T Chen": 1
-              }
-            },
-            "T Chen": {
-              "count": 1,
-              "years": [
-                2026
-              ],
-              "venues": {
-                "arXiv preprint arXiv:2607.19954": 1
-              },
-              "coauthors": {
-                "Benjamin M. Ampel": 1,
-                "R Zhang": 1,
+                "Chengjun Zhang": 1,
                 "Sagar Samtani": 1
               }
             },
@@ -11932,18 +11876,14 @@
             },
             {
               "id": "Chengjun Zhang",
-              "count": 1
+              "count": 2
             },
             {
               "id": "Abena M. Darko",
               "count": 1
             },
             {
-              "id": "R Zhang",
-              "count": 1
-            },
-            {
-              "id": "T Chen",
+              "id": "Ting Chen",
               "count": 1
             },
             {
@@ -12166,12 +12106,12 @@
             {
               "source": "Benjamin M. Ampel",
               "target": "Chengjun Zhang",
-              "count": 1
+              "count": 2
             },
             {
               "source": "Chengjun Zhang",
               "target": "Sagar Samtani",
-              "count": 1
+              "count": 2
             },
             {
               "source": "Abena M. Darko",
@@ -12180,27 +12120,17 @@
             },
             {
               "source": "Benjamin M. Ampel",
-              "target": "R Zhang",
+              "target": "Ting Chen",
               "count": 1
             },
             {
-              "source": "Benjamin M. Ampel",
-              "target": "T Chen",
-              "count": 1
-            },
-            {
-              "source": "R Zhang",
-              "target": "Sagar Samtani",
-              "count": 1
-            },
-            {
-              "source": "R Zhang",
-              "target": "T Chen",
+              "source": "Chengjun Zhang",
+              "target": "Ting Chen",
               "count": 1
             },
             {
               "source": "Sagar Samtani",
-              "target": "T Chen",
+              "target": "Ting Chen",
               "count": 1
             },
             {
@@ -12507,10 +12437,9 @@
                 "Chi-Heng Yang": 1,
                 "James Hu": 2,
                 "Raul Reyes": 1,
-                "Chengjun Zhang": 1,
+                "Chengjun Zhang": 2,
                 "Abena M. Darko": 1,
-                "R Zhang": 1,
-                "T Chen": 1,
+                "Ting Chen": 1,
                 "Noah Abdellatif": 1,
                 "Zara Ahmad-Post": 1,
                 "Joseph Chen": 1,
@@ -12604,9 +12533,8 @@
                 "Shanchieh Yang": 1,
                 "Steven Ullman": 1,
                 "Yang Gao": 1,
-                "Chengjun Zhang": 1,
-                "R Zhang": 1,
-                "T Chen": 1
+                "Chengjun Zhang": 2,
+                "Ting Chen": 1
               }
             },
             "Jay F. Nunamaker Jr.": {
@@ -12754,16 +12682,18 @@
               }
             },
             "Chengjun Zhang": {
-              "count": 1,
+              "count": 2,
               "years": [
                 2026
               ],
               "venues": {
-                "HICSS": 1
+                "HICSS": 1,
+                "arXiv preprint arXiv:2607.19954": 1
               },
               "coauthors": {
-                "Benjamin M. Ampel": 1,
-                "Sagar Samtani": 1
+                "Benjamin M. Ampel": 2,
+                "Sagar Samtani": 2,
+                "Ting Chen": 1
               }
             },
             "Abena M. Darko": {
@@ -12778,7 +12708,7 @@
                 "Benjamin M. Ampel": 1
               }
             },
-            "R Zhang": {
+            "Ting Chen": {
               "count": 1,
               "years": [
                 2026
@@ -12788,21 +12718,7 @@
               },
               "coauthors": {
                 "Benjamin M. Ampel": 1,
-                "Sagar Samtani": 1,
-                "T Chen": 1
-              }
-            },
-            "T Chen": {
-              "count": 1,
-              "years": [
-                2026
-              ],
-              "venues": {
-                "arXiv preprint arXiv:2607.19954": 1
-              },
-              "coauthors": {
-                "Benjamin M. Ampel": 1,
-                "R Zhang": 1,
+                "Chengjun Zhang": 1,
                 "Sagar Samtani": 1
               }
             },
@@ -13098,18 +13014,14 @@
             },
             {
               "id": "Chengjun Zhang",
-              "count": 1
+              "count": 2
             },
             {
               "id": "Abena M. Darko",
               "count": 1
             },
             {
-              "id": "R Zhang",
-              "count": 1
-            },
-            {
-              "id": "T Chen",
+              "id": "Ting Chen",
               "count": 1
             },
             {
@@ -13262,12 +13174,12 @@
             {
               "source": "Benjamin M. Ampel",
               "target": "Chengjun Zhang",
-              "count": 1
+              "count": 2
             },
             {
               "source": "Chengjun Zhang",
               "target": "Sagar Samtani",
-              "count": 1
+              "count": 2
             },
             {
               "source": "Abena M. Darko",
@@ -13276,27 +13188,17 @@
             },
             {
               "source": "Benjamin M. Ampel",
-              "target": "R Zhang",
+              "target": "Ting Chen",
               "count": 1
             },
             {
-              "source": "Benjamin M. Ampel",
-              "target": "T Chen",
-              "count": 1
-            },
-            {
-              "source": "R Zhang",
-              "target": "Sagar Samtani",
-              "count": 1
-            },
-            {
-              "source": "R Zhang",
-              "target": "T Chen",
+              "source": "Chengjun Zhang",
+              "target": "Ting Chen",
               "count": 1
             },
             {
               "source": "Sagar Samtani",
-              "target": "T Chen",
+              "target": "Ting Chen",
               "count": 1
             },
             {
@@ -13608,10 +13510,9 @@
                 "James Hu": 2,
                 "Raul Reyes": 1,
                 "Steven Ullman": 3,
-                "Chengjun Zhang": 1,
+                "Chengjun Zhang": 2,
                 "Abena M. Darko": 1,
-                "R Zhang": 1,
-                "T Chen": 1,
+                "Ting Chen": 1,
                 "Noah Abdellatif": 1,
                 "Zara Ahmad-Post": 1,
                 "Joseph Chen": 1,
@@ -13709,9 +13610,8 @@
               "coauthors": {
                 "Benjamin M. Ampel": 5,
                 "Yang Gao": 1,
-                "Chengjun Zhang": 1,
-                "R Zhang": 1,
-                "T Chen": 1,
+                "Chengjun Zhang": 2,
+                "Ting Chen": 1,
                 "Hsinchun Chen": 1
               }
             },
@@ -13793,16 +13693,18 @@
               }
             },
             "Chengjun Zhang": {
-              "count": 1,
+              "count": 2,
               "years": [
                 2026
               ],
               "venues": {
-                "HICSS": 1
+                "HICSS": 1,
+                "arXiv preprint arXiv:2607.19954": 1
               },
               "coauthors": {
-                "Benjamin M. Ampel": 1,
-                "Sagar Samtani": 1
+                "Benjamin M. Ampel": 2,
+                "Sagar Samtani": 2,
+                "Ting Chen": 1
               }
             },
             "Abena M. Darko": {
@@ -13817,7 +13719,7 @@
                 "Benjamin M. Ampel": 1
               }
             },
-            "R Zhang": {
+            "Ting Chen": {
               "count": 1,
               "years": [
                 2026
@@ -13827,21 +13729,7 @@
               },
               "coauthors": {
                 "Benjamin M. Ampel": 1,
-                "Sagar Samtani": 1,
-                "T Chen": 1
-              }
-            },
-            "T Chen": {
-              "count": 1,
-              "years": [
-                2026
-              ],
-              "venues": {
-                "arXiv preprint arXiv:2607.19954": 1
-              },
-              "coauthors": {
-                "Benjamin M. Ampel": 1,
-                "R Zhang": 1,
+                "Chengjun Zhang": 1,
                 "Sagar Samtani": 1
               }
             },
