@@ -1,0 +1,108 @@
+# Venue gazetteer for the interactive Research Footprint map.
+#
+# scripts/build_dashboard_payload.py matches each conference/workshop entry in
+# publications.json against these rules (case-insensitive substring on the
+# venue field; FIRST match wins, so keep specific aliases above generic ones)
+# and emits a map point automatically. When a new paper is added at a known
+# venue+year it appears on the map with no other edits. An unmatched
+# venue+year prints a build warning — add a rule here to place it.
+#
+# skip: true silences the warning for virtual events and preprints.
+
+# --- specific aliases first ---
+- match: "AI4Cyber-KDD"
+  year: 2021
+  skip: true            # KDD 2021 workshop was virtual
+- match: "ICIS TREO"
+  year: 2025
+  name: "Pre-ICIS Workshops 2025"
+  city: "Nashville, TN"
+  lat: 36.1627
+  lng: -86.7816
+- match: "WISP"
+  year: 2025
+  name: "Pre-ICIS Workshops 2025"
+  city: "Nashville, TN"
+  lat: 36.1627
+  lng: -86.7816
+- match: "SIG Services"
+  year: 2025
+  name: "Pre-ICIS Workshops 2025"
+  city: "Nashville, TN"
+  lat: 36.1627
+  lng: -86.7816
+- match: "arXiv"
+  skip: true            # preprints have no venue location
+
+# --- conferences ---
+- match: "IEEE CARS"
+  year: 2026
+  name: "IEEE CARS 2026"
+  city: "Grand Forks, ND"
+  lat: 47.9253
+  lng: -97.0329
+- match: "ICIS"
+  year: 2021
+  name: "ICIS 2021"
+  city: "Austin, TX"
+  lat: 30.2672
+  lng: -97.7431
+- match: "ICIS"
+  year: 2026
+  name: "ICIS 2026"
+  city: "Lisbon, Portugal"
+  lat: 38.7223
+  lng: -9.1393
+- match: "HICSS"
+  name: "HICSS"
+  city: "Maui, Hawaii"
+  lat: 20.7984
+  lng: -156.3319
+- match: "IEEE ISI"
+  year: 2019
+  name: "IEEE ISI 2019"
+  city: "Shenzhen, China"
+  lat: 22.5431
+  lng: 114.0579
+- match: "IEEE ISI"
+  year: 2020
+  name: "IEEE ISI 2020"
+  city: "Washington, D.C."
+  lat: 38.9072
+  lng: -77.0369
+- match: "IEEE ISI"
+  year: 2021
+  name: "IEEE ISI 2021"
+  city: "San Antonio, TX"
+  lat: 29.4241
+  lng: -98.4936
+- match: "IEEE ISI"
+  year: 2023
+  name: "IEEE ISI 2023"
+  city: "Charlotte, NC"
+  lat: 35.2271
+  lng: -80.8431
+- match: "ACM KDD"
+  year: 2024
+  name: "ACM KDD 2024"
+  city: "Barcelona, Spain"
+  lat: 41.3851
+  lng: 2.1734
+- match: "AMCIS"
+  year: 2023
+  name: "AMCIS 2023"
+  city: "Panama City, Panama"
+  lat: 8.9824
+  lng: -79.5199
+- match: "WDS"
+  year: 2023
+  name: "INFORMS WDS 2023"
+  city: "Phoenix, AZ"
+  lat: 33.4484
+  lng: -112.074
+- match: "IEEE SPW"
+  year: 2025
+  name: "IEEE SPW 2025"
+  city: "San Francisco, CA"
+  lat: 37.7749
+  lng: -122.4194

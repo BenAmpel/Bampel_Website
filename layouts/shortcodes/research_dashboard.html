@@ -52,6 +52,32 @@
     <div id="dashboard-impact-map" style="width:100%; height:100%;" role="img" aria-label="Impact map connecting papers by topic, venue, and co-authorship" tabindex="0"></div>
   </div>
 
+  <!-- Research Footprint: interactive world map, auto-derived from publications.json
+       via data/venue_locations.yaml (see build_dashboard_payload.py). -->
+  <div style="position:relative; height:520px; border-top:1px solid var(--card-border, #333);">
+    <div style="position:absolute; top:20px; left:20px; z-index:1000; pointer-events:none;">
+      <h4 style="margin:0; font-size:0.8rem; opacity:0.7; text-transform:uppercase;">Research Footprint</h4>
+      <p style="margin:0; font-size:0.65rem; opacity:0.5;">Conference presentations &amp; collaborating institutions, generated from the publication record</p>
+    </div>
+    <div style="position:absolute; top:20px; right:20px; z-index:1000; display:flex; flex-direction:column; gap:8px; background:var(--card-bg, rgba(0,0,0,0.55)); border:1px solid var(--card-border, #333); border-radius:8px; padding:10px 12px; font-size:0.7rem;">
+      <div role="group" aria-label="Point categories" style="display:flex; gap:10px;">
+        <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" data-footprint-cat="Conference" checked> Conferences</label>
+        <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" data-footprint-cat="Collaboration" checked> Collaborations</label>
+        <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" data-footprint-cat="Institution" checked> Institutions</label>
+      </div>
+      <div role="group" aria-label="Map layers" style="display:flex; gap:10px;">
+        <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" data-footprint-layer="routes" checked> Timeline arcs</label>
+        <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" data-footprint-layer="clusters" checked> Cluster markers</label>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <label for="footprint-year-range" style="white-space:nowrap;">Through <span id="footprint-year-label">2026</span></label>
+        <input type="range" id="footprint-year-range" min="2019" max="2026" step="1" value="2026" style="flex:1; accent-color:var(--clr-green, #00ff41);" aria-label="Show activity through year">
+      </div>
+    </div>
+    <div id="footprint-legend" class="impact-map-legend" style="position:absolute; bottom:20px; left:20px; z-index:1000;"></div>
+    <div id="dashboard-footprint-map" style="width:100%; height:100%;" role="application" aria-label="Interactive world map of conference presentations and collaborating institutions" tabindex="0"></div>
+  </div>
+
 </div>
 </div>
 

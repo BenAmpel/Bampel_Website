@@ -508,19 +508,75 @@ def build_visitor_payload(visitor):
     }
 
 
-def enrich_footprint_points():
-    points = load_yaml(IMPACT_MAP_FILE, [])
+def enrich_footprint_points(publications=None):
+    """Footprint map data.
+
+    Conference/workshop points are DERIVED from publications.json against the
+    data/venue_locations.yaml gazetteer, so new papers at known venues appear
+    automatically. Institution/Collaboration points stay manually curated in
+    data/impact_map.yaml. Unmatched venue+year pairs print a build warning.
+    """
+    gazetteer = load_yaml(DATA_DIR / "venue_locations.yaml", [])
+    publications = publications or []
+
+    grouped = {}
+    for pub in publications:
+        if pub.get("type") not in {"conference", "workshop"}:
+            continue
+        venue = str(pub.get("venue") or "")
+        year = pub.get("year")
+        rule = None
+        for candidate in gazetteer:
+            if candidate.get("match", "").lower() in venue.lower() and (
+                "year" not in candidate or candidate.get("year") == year
+            ):
+                rule = candidate
+                break
+        if rule is None:
+            print(f"[footprint] WARNING: no gazetteer rule for venue={venue!r} year={year} -- add one to data/venue_locations.yaml")
+            continue
+        if rule.get("skip"):
+            continue
+        key = (rule["name"], rule["lat"], rule["lng"])
+        entry = grouped.setdefault(key, {"years": set(), "titles": [], "city": rule["city"]})
+        if year:
+            entry["years"].add(int(year))
+        entry["titles"].append(pub.get("title", ""))
+
     enriched = []
     all_years = []
-    for point in points:
+    for (name, lat, lng), entry in grouped.items():
+        years = sorted(entry["years"])
+        count = len(entry["titles"])
+        sample = "; ".join(t for t in entry["titles"][:3] if t)
+        desc = f"{count} paper{'s' if count != 1 else ''}: {sample}" + (" ..." if count > 3 else "")
+        title = name if re.search(r"(?:19|20)\d{2}", name) else (f"{name} {years[0]}-{years[-1]}" if len(years) > 1 else f"{name} {years[0]}" if years else name)
+        if years:
+            all_years.append(years[-1])
+        enriched.append(
+            {
+                "title": title,
+                "lat": lat,
+                "lng": lng,
+                "location": entry["city"],
+                "desc": desc,
+                "cat": "Conference",
+                "years": years,
+                "minYear": years[0] if years else None,
+                "maxYear": years[-1] if years else None,
+            }
+        )
+
+    # Manually curated non-conference points (institutions, collaborations).
+    for point in load_yaml(IMPACT_MAP_FILE, []):
+        if point.get("category") == "Conference":
+            continue  # conferences are derived from publications now
         title = point.get("title", "")
         desc = point.get("description", "")
         year_matches = re.findall(r"(?:19|20)\d{2}", f"{title} {desc}")
         years = sorted({int(match) for match in year_matches})
-        min_year = years[0] if years else None
-        max_year = years[-1] if years else None
-        if max_year:
-            all_years.append(max_year)
+        if years:
+            all_years.append(years[-1])
         enriched.append(
             {
                 "title": title,
@@ -530,8 +586,8 @@ def enrich_footprint_points():
                 "desc": desc,
                 "cat": point.get("category"),
                 "years": years,
-                "minYear": min_year,
-                "maxYear": max_year,
+                "minYear": years[0] if years else None,
+                "maxYear": years[-1] if years else None,
             }
         )
 
@@ -580,7 +636,7 @@ def main():
         "visitor": build_visitor_payload(visitor),
         "topics": cv_topics.get("topics", []),
         "network": dashboard_network,
-        "footprint": enrich_footprint_points(),
+        "footprint": enrich_footprint_points(merged_publications),
     }
 
     OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
