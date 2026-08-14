@@ -1957,11 +1957,12 @@ function runEnhancements() {
             </details>
           </div>
           <div class="viz-column">
-            <details class="viz-details">
+            <details class="viz-details" id="home-footprint-details">
               <summary>🌍 Research Footprint</summary>
               <div class="viz-content">
+                <div id="home-footprint-map" style="display:none; height:440px; border-radius:8px; overflow:hidden;"></div>
                 <img src="/images/research-map.png" alt="Research Map" class="viz-image" id="map-img">
-                <p class="viz-caption">Conference presentations and collaborator institutions worldwide</p>
+                <p class="viz-caption">Conference presentations and collaborator institutions worldwide &mdash; derived automatically from the publication record</p>
               </div>
             </details>
           </div>
@@ -1974,6 +1975,45 @@ function runEnhancements() {
       
       // Append to the section
       targetElement.appendChild(vizWrapper);
+
+      // Upgrade the static footprint PNG to an interactive Leaflet map on
+      // first open. Data comes from dashboard_payload.json, which is
+      // auto-derived from publications.json at build time, so the map stays
+      // current as new papers are added. The PNG remains the no-JS fallback.
+      const fpDetails = vizWrapper.querySelector('#home-footprint-details');
+      if (fpDetails) fpDetails.addEventListener('toggle', function () {
+        if (!fpDetails.open || fpDetails.dataset.mapReady) return;
+        fpDetails.dataset.mapReady = '1';
+        const css = document.createElement('link');
+        css.rel = 'stylesheet'; css.href = '/vendor/leaflet/leaflet.css';
+        document.head.appendChild(css);
+        const s = document.createElement('script');
+        s.src = '/vendor/leaflet/leaflet.js';
+        s.onload = function () {
+          fetch('/data/dashboard_payload.json').then(r => r.json()).then(payload => {
+            const el = document.getElementById('home-footprint-map');
+            if (!el || !window.L) return;
+            el.style.display = 'block';
+            const map = L.map(el, { scrollWheelZoom: false, worldCopyJump: true }).setView([30, -20], 2);
+            const dark = document.body.classList.contains('dark');
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/' + (dark ? 'dark_all' : 'light_all') + '/{z}/{x}/{y}{r}.png',
+              { attribution: '&copy; OpenStreetMap &copy; CARTO', subdomains: 'abcd', maxZoom: 18 }).addTo(map);
+            const colors = { Conference: '#00ff41', Collaboration: '#00bfff', Institution: '#ff6b35' };
+            ((payload.footprint || {}).points || []).forEach(pt => {
+              if (pt.lat == null || pt.lng == null) return;
+              const c = colors[pt.cat] || '#888';
+              L.circleMarker([pt.lat, pt.lng], { radius: 7, color: c, weight: 2, fillColor: c, fillOpacity: 0.55 })
+                .addTo(map)
+                .bindPopup('<strong>' + pt.title + '</strong><br>' + (pt.location || '') +
+                  (pt.desc ? '<br><span style="font-size:0.8em;opacity:0.8">' + pt.desc + '</span>' : ''));
+            });
+            const img = document.getElementById('map-img');
+            if (img) img.style.display = 'none';
+            setTimeout(() => map.invalidateSize(), 150);
+          }).catch(() => {});
+        };
+        document.body.appendChild(s);
+      });
       
       // Update images for dark mode
       setTimeout(() => {
