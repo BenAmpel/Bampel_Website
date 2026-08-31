@@ -517,6 +517,25 @@
     "featured": false
   },
   {
+    "title": "Authority Bias in Conversational Search Engines for Academic Paper Recommendation",
+    "authors": [
+      "Uthman Jinadu",
+      "Parsa Ghazvinian",
+      "Anjila Budathoki",
+      "Benjamin M. Ampel",
+      "Rajshekhar Sunderraman",
+      "Yi Ding"
+    ],
+    "year": 2026,
+    "type": "conference",
+    "venue": "EMNLP",
+    "url": "/conference_publication/authority-bias-emnlp-2026/",
+    "date": "2026-10-24",
+    "abstract": "Large Language Models (LLMs) are increasingly used as conversational search engines for academic literature, yet whether they judge papers on content or on authority signals has not been tested causally. We investigate authority bias: systematic preference for papers based on author prestige, venue, and citations rather than content. Holding title and abstract constant, we vary authority metadata across three counterfactual conditions (original, flipped, boosted) over eight LLMs (five open-weight and three frontier closed-weight). Our experiments show that authority bias is substantial and directional, varies markedly across models, and is only partially addressable through prompt-level debiasing. We further document a say-do gap: debiasing instructions suppress authority mentions far faster than authority-driven flips, so surface auditing systematically underestimates behavioral bias.",
+    "award": null,
+    "featured": false
+  },
+  {
     "title": "Automated Cross-Repository Vulnerability Variant Retrieval Using Patch-Weighted Contrastive Learning",
     "authors": [
       "Joseph Chen",
@@ -666,6 +685,23 @@
     "featured": false
   },
   {
+    "title": "Understanding the Role of Prompt Template in Knowledge Distillation for Safety Alignment",
+    "authors": [
+      "Anjila Budathoki",
+      "Manish Dhakal",
+      "Benjamin M. Ampel",
+      "Yi Ding"
+    ],
+    "year": 2026,
+    "type": "conference",
+    "venue": "EMNLP Findings",
+    "url": "/conference_publication/prompt-template-emnlp-findings-2026/",
+    "date": "2026-10-24",
+    "abstract": "Prior research has demonstrated that the choice of prompt template during Supervised Fine-Tuning (SFT) significantly impacts the robustness of safety alignment afterwards. However, the influence of template selection during Knowledge Distillation (KD) from teacher to student remains largely unexplored. Thus, we fill this gap by analyzing how different template configurations influence the pre-existing safety alignment of the student. We observe a significant degradation of safety alignment present in the aligned base instruct-tuned model. Specifically, we find that utilizing chat templates renders the model more compliant with harmful queries compared to a non-chat template. These findings are consistent across three models: LLaMA, Gemma and Qwen model families and are evaluated across multiple safety benchmarks. We further show that using a non-chat template during distillation better preserves the base student's internal representations, while chat template distillation induces a larger representational shift.",
+    "award": null,
+    "featured": false
+  },
+  {
     "title": "Vendor-Conditioned Contrastive Learning for Predicting Organizational Cyber Threat Targets",
     "authors": [
       "Benjamin M. Ampel"
@@ -676,6 +712,21 @@
     "url": "/conference_publication/vendor-conditioned-contrastive-learning-for-predicting-organizational-/",
     "date": "2026-10-26",
     "abstract": "Cyberattacks cause billions of dollars in damage annually, with malicious hackers often sharing exploit code and techniques on underground forums. Identifying which organizations are targeted by these exploits is critical for proactive Cyber Threat Intelligence (CTI). To address that gap, we propose Temporal Representation and Classification of Exploits (TRACE), a vendor-conditioned contrastive learning framework built on CySecBERT that jointly optimizes organizational target classification and vendor-coherent representations while evaluating robustness under temporal distribution shift. Unlike prior work limited to small, single-source datasets, we leverage a large-scale, multi-source corpus spanning 9 exploit databases and hacker forums, comprising 352,866 posts collected over three decades, yielding a 129,126-sample dataset across seven organizational categories. In the temporal out-of-distribution evaluation, TRACE achieves macro F1=97.00%, substantially outperforming 17 benchmark classical ML methods, deep learning with GloVe/FastText embeddings, and pretrained transformer models.",
+    "award": null,
+    "featured": false
+  },
+  {
+    "title": "Prediction Markets Are Efficient at Rest and Fragile in Motion",
+    "authors": [
+      "Benjamin M. Ampel",
+      "Joseph Buckman"
+    ],
+    "year": 2027,
+    "type": "conference",
+    "venue": "HICSS",
+    "url": "/conference_publication/prediction-markets-hicss-2026/",
+    "date": "2027-01-05",
+    "abstract": null,
     "award": null,
     "featured": false
   }
