@@ -1,22 +1,21 @@
 {
-  "refresh_date": "2026-08-24",
+  "refresh_date": "2026-08-31",
   "grants": [
     {
-      "title": "Collaborative Research: VINES: Track 1:Quantum-Ready and AI-Enabled by Design: Resilient and Deployable Next-Gen Cellular Networks",
-      "awardId": "2548945",
-      "piName": "Elisa Bertino",
-      "institution": "Purdue University",
-      "estimatedTotalAmt": "332900",
+      "title": "Research Initiation Award: Leveraging Machine Learning for Secure and Privacy-Preserving Vehicular Cyber-Physical Systems (VCPS)",
+      "awardId": "2500079",
+      "piName": "Amir Alipour-Fanid",
+      "institution": "University of the District of Columbia",
+      "estimatedTotalAmt": "450000",
       "startDate": "10/01/2026",
       "expDate": "09/30/2029",
-      "abstractText": "This collaborative project aims to improve the security and resilience of next-generation wireless networks by making them quantum-secure and artificial intelligence-enabled. These networks will connect phones, vehicles, hospitals, emergency responders, smart cities, and billions of everyday devices. As society becomes increasingly dependent on wireless connectivity, these systems must remain trustworthy even when attackers attempt to steal information, impersonate legitimate users, disrupt communications, or exploit artificial intelligence tools. The project develops new methods to protect wireless networks from emerging threats posed by future quantum computers, malicious network infrastructure, and attacks targeting artificial intelligence-driven network management. The broader impact of this project is to strengthen the national infrastructure that depends on mobile networks, including transportation, emergency response, health care, and public services. Open-source software, protocol implementations, formal models, datasets, and evaluation tools will be released to support and inform industrial adoption and standards development. Educational activities will introduce students to post-quantum security, cellular networking, artificial intelligence security, and privacy-preserving computation. Outreach efforts will engage undergraduate students, graduate students, educators, and pre-college learners through research experiences, cybersecurity programs, and community activities. These efforts will expand participation and prepare a future workforce capable of building resilient communication system.\r\n\r\n\r\n\r\nThe project is organized around three connected research thrusts. The first thrust develops compact and private post-quantum cryptographic tools, including identity-based signatures, threshold signatures, and blind signature protocols for constrained wireless environments. The second thrust integrates these tools into secure cellular protocols for device bootstrapping, authentication and key agreement, application key management, and mobile virtual network operator settings. The third thrust develops trustworthy machine learning for next-generation networks, including federated learning-based intrusion detection, differentially private model coordination, and post-quantum integrity verification for model updates. A shared experimental platform supports implementation, formal analysis, and large-scale evaluation.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "abstractText": "Connected and automated vehicles depend on reliable communication among vehicles, roadway infrastructure, sensors, and control systems. Cyberattacks can block safety messages, alter information exchanged inside a vehicle, or expose sensitive location and driving data. The project will develop machine learning methods to improve the security, resilience, privacy, and safety of connected transportation. Research activities will address three related needs: protecting wireless vehicle communication among vehicles from deliberate interference, detecting malicious activity in the communication bus inside vehicles, and protecting traffic, trajectory, and shared learning data. The research team will evaluate the methods under realistic cyber-attacks and changing driving conditions. Expected outcomes include safer vehicle communication, faster detection of harmful messages, stronger privacy protection, reusable research tools, and new knowledge for secure intelligent transportation. The project will also provide research training for graduate and undergraduate students and will share research findings, educational materials, and data with broader research and education communities.\r\n\r\nThe technical research consists of three coordinated components. The first will develop online learning methods that use inter-vehicle distance to guide channel selection, channel sensing, analysis of adaptive attackers and defenders, and centralized scheduling under several forms of deliberate interference. The second will develop real-time intrusion detection for the Controller Area Network by analyzing both message content and patterns over time, while federated learning will combine locally trained models without transferring raw vehicle data to a central location. The third will generate synthetic traffic data, apply location-sensitive privacy protection to vehicle trajectories, and protect shared learning from malicious model updates and attempts to infer private information. Evaluation will use theoretical analysis, integrated traffic and wireless communication simulations, public and newly collected vehicle data, controlled attack injection, and comparisons with established methods. Quantitative measures will assess learning performance, safe-distance violations, attack-detection accuracy, privacy protection, and resistance to attacks on shared learning. Expected contributions include methods connecting cyber observations with vehicle physical states, practical tools for secure communication and private data sharing, and expanded research and education capacity in machine learning and transportation cybersecurity.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
       "primaryProgram": [
-        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+        "04002627DB NSF STEM Education"
       ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2548945",
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2500079",
       "keywords": [
-        "Cybersecurity",
-        "Vulnerability"
+        "Cybersecurity"
       ]
     },
     {
@@ -71,6 +70,23 @@
         "Cybersecurity",
         "Vulnerability",
         "Multi-Agent AI"
+      ]
+    },
+    {
+      "title": "EPSCoR Research Fellows: NSF: AI-Secure Command Channels for Autonomous Space Systems",
+      "awardId": "2624437",
+      "piName": "Efren Lopez Morales",
+      "institution": "New Mexico State University",
+      "estimatedTotalAmt": "299665",
+      "startDate": "01/01/2027",
+      "expDate": "12/31/2028",
+      "abstractText": "This Research Infrastructure Improvement (RII) EPSCoR Research Fellows project provides a fellowship to an Assistant Professor and training for one student trainee at New Mexico State University. This work will be conducted in collaboration with collaborators at the University of California, Santa Cruz. Through the fellowship, the PI will investigate how artificial intelligence (AI) can be used safely to support command decisions for autonomous spacecraft. The project will develop methods to detect and prevent cyberattacks that manipulate AI\u2013generated spacecraft commands before they can affect mission operations. This research combines cybersecurity, artificial intelligence, and aerospace engineering to improve the security and resilience of future autonomous space systems. The fellowship will strengthen research capacity in New Mexico by training the next generation of cybersecurity researchers, expanding collaboration between the two institutions, and advancing technologies that improve the reliability, safety, and security of future space missions.\r\n\r\nThis project will establish a research program focused on securing AI-enabled spacecraft. The project will advance the state of the art by introducing a formal framework for modeling how AI systems transform inputs into spacecraft commands, characterizing AI-enabled command manipulation attacks, and developing runtime mechanisms that validate AI-generated commands against mission and safety constraints before execution. The proposed methodology will integrate formal threat modeling, taxonomy development, experimental prototype implementation, and empirical evaluation using an AI-enabled satellite command prototype that combines AI reasoning components with realistic spacecraft command and telemetry interfaces. The fellowship will strengthen research infrastructure at New Mexico State University by expanding faculty expertise in AI-enabled cyber-physical systems, establishing new collaborations with the University of California, Santa Cruz, and providing research training for undergraduate and graduate students. The fellowship will support the development of a sustainable research program, future external funding, curriculum development in AI and cybersecurity, and a workforce prepared to secure next-generation space systems.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2624437",
+      "keywords": [
+        "Cybersecurity"
       ]
     },
     {
@@ -142,23 +158,6 @@
       ]
     },
     {
-      "title": "Collaborative Research: Human-Inspired Cyber-Physical Security in Human-Robot Interactions",
-      "awardId": "2625054",
-      "piName": "Jundi Liu",
-      "institution": "Iowa State University",
-      "estimatedTotalAmt": "312413",
-      "startDate": "01/01/2027",
-      "expDate": "12/31/2029",
-      "abstractText": "This grant supports research on the safety and security of intelligent robots, advancing the safe deployment of robotic systems in manufacturing, healthcare, transportation, defense, and other public environments. Intelligent robots are increasingly expected to work near people and respond to physical contact, changing surroundings, and unexpected behavior. However, most existing human-robot interaction research assumes that people will cooperate with robots. As such, most robot security research represents an attacker as an abstract computer algorithm or an external disturbance. These approaches do not adequately explain the possibility that instead a person may observe a robot, identify a weakness, interfere with it, and change strategies in response to the robot\u2019s behavior. This award supports fundamental research to understand and defend against adversarial physical interactions between humans and robots. The research will develop models of human decision making, methods for identifying realistic robot vulnerabilities, and control strategies that allow robots to resist and recover from disruptive actions. The results will contribute to the safer use of mobile robots of all kinds and may inform future testing methods and safety standards. The research involves several disciplines, including human factors, cognitive science, robotics, artificial intelligence, control theory, and cybersecurity. This multidisciplinary approach will support graduate and undergraduate education, mentored research experiences, and outreach activities for K\u201312 students.\r\n\r\nCurrent approaches to robot safety and resilient control do not account for a cognitively able human who selects and adapts physical attack strategies while interacting with a responsive robot. This research aims to fill this knowledge gap through three integrated activities that will develop: 1) a Cognitive Adversary Model to represent how humans perceive robot vulnerabilities, select disruptive actions, learn from previous outcomes, and update their strategies as the robot responds. The model will be developed and tested using immersive virtual-reality experiments that measure participants\u2019 attack choices, gaze behavior, body movements, contact actions, physiological responses, and task performance; 2) a structured library of physical, perceptual, and environmental attack actions and combine the human cognitive model with AI-based search. Human participants will evaluate and refine AI-generated attacks, producing a set of effective attacks that remain physically and cognitively realistic; and 3) the team will use these attacks to develop robot controllers through offline adversarial training and adaptive co-training between robot defenders and simulated human-inspired attackers. The controllers will be evaluated in simulation, virtual reality, and a small-scale physical human-robot interaction study. The research will test the hypotheses that cognitive workload affects attack planning, that people update attack strategies based on observed robot responses, that human-constrained AI search discovers more realistic vulnerabilities than unconstrained search, and that controllers trained against human-inspired attacks are more resilient than controllers trained against generic disturbances.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
-      "primaryProgram": [
-        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
-      ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2625054",
-      "keywords": [
-        "Cybersecurity"
-      ]
-    },
-    {
       "title": "CICI: IPAAI: XAI-Driven Data Forensics for Nuclear Edge LLMs: Provenance, Detection, and Recovery",
       "awardId": "2613797",
       "piName": "Xiaolong Guo",
@@ -171,6 +170,23 @@
         "01002627DB NSF RESEARCH & RELATED ACTIVIT"
       ],
       "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2613797",
+      "keywords": [
+        "LLM / GenAI"
+      ]
+    },
+    {
+      "title": "Adaptive Troubleshooting in Engineering: Developing Cognitive Flexibility to Address Complex Challenges Among Undergraduates",
+      "awardId": "2613590",
+      "piName": "Ahmet Sabuncu",
+      "institution": "Worcester Polytechnic Institute",
+      "estimatedTotalAmt": "399935",
+      "startDate": "10/15/2026",
+      "expDate": "09/30/2029",
+      "abstractText": "This project aims to serve the national interest by improving how undergraduate engineering students learn to troubleshoot complex, real-world engineering systems. Modern technological systems, from power plants to spacecraft, are increasingly interconnected and rapidly changing, and the problems engineers encounter rarely match the well-defined exercises in undergraduate engineering coursework. Preparing engineers who can reason adaptively when standard procedures fall short is therefore a matter of national importance for public safety, economic competitiveness, and technological leadership. This Level 1 Engaged Student Learning project intends to strengthen students' capacity for adaptive troubleshooting by developing and studying a new educational platform, the Adaptive Troubleshooting Learning Environment (ATLAS). Building on decades of learning sciences research on how experts develop flexible knowledge, students using ATLAS will explore rich case studies of real engineering failures, examine each case from multiple perspectives, establish conceptual connections across cases, and practice solving novel problems with support from an AI-based conversational assistant to scaffold reasoning. By treating uncertainty as a normal and expected part of engineering practice, the project seeks to build confidence and persistence among students who might otherwise think that engineering is not for them. The significance of the project lies in its potential to prepare a more adaptable technical workforce and to share all case studies, software, and instructional materials freely with educators nationwide.\r\n\r\nThe goals of this project are to advance understanding of the cognitive demands of complex engineering troubleshooting and to design, implement, and study educational interventions that foster adaptive troubleshooting capacity. The scope encompasses case development, learning environment design, and classroom research in undergraduate fluid mechanics courses. Grounded in Cognitive Flexibility Theory, the project team plans to create conceptually rich case studies of engineering system failures, and to develop ATLAS, an open-source, web-based hypertext environment integrated with a learning management system. Using ATLAS, students will navigate cases through shared tags and construct solutions to novel troubleshooting problems with support from a large language model-powered chatbot that reveals information in response to learner-generated questions, guided by a well-researched troubleshooting framework attentive to internal dynamics of technical systems and external constraints of workplace contexts. With formative and summative evaluation from an external advisory board, the research plan combines expert interviews and think-aloud pilot studies with randomized controlled trials investigating conditions under which improved student learning occurs. The goal is to examine the effects of abductive reasoning and inquiry-driven information retrieval on complex problem solving. Dissemination plans include faculty development workshops at American Society of Engineering Education conferences, public release of all software, and publications in engineering education venues. The NSF IUSE: EDU Program supports research and development projects to improve the effectiveness of STEM education for all students. Through the Engaged Student Learning track, the program supports the creation, exploration, and implementation of promising practices and tools.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "04002627DB NSF STEM Education"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2613590",
       "keywords": [
         "LLM / GenAI"
       ]
