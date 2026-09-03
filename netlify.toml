@@ -158,3 +158,11 @@
   from = "/workshop_publication/preprint"
   to = "/workshop_publication/"
   status = 301
+
+# Media bias paper reclassified from conference to workshop publication
+# after BlackboxNLP 2026 acceptance (Sept 2026).
+[[redirects]]
+  from = "/conference_publication/a-multi-dimensional-evaluation-of-explainability-in-media-bias-detecti/"
+  to = "/workshop_publication/media-bias-blackboxnlp-2026/"
+  status = 301
+  force = true

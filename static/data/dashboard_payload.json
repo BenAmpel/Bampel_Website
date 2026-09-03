@@ -548,11 +548,11 @@
         "Sagar Samtani"
       ],
       "year": 2026,
-      "type": "conference",
-      "venue": "arXiv preprint arXiv:2607.19954",
-      "url": "/conference_publication/a-multi-dimensional-evaluation-of-explainability-in-media-bias-detecti/",
-      "date": "2026-01-01",
-      "abstract": null,
+      "type": "workshop",
+      "venue": "BlackboxNLP",
+      "url": "/workshop_publication/media-bias-blackboxnlp-2026/",
+      "date": "2026-10-29",
+      "abstract": "Detecting media bias automatically is difficult because biased framing is often subtle, yet in domains such as news analysis, accurate predictions alone are insufficient without explanations that reflect the model's underlying reasoning. We present a multi-dimensional evaluation of explainability in encoder-based media bias detection using the Bias Annotations By Experts (BABE) dataset. Specifically, we study BERT and RoBERTa as classifiers (base and large variants) along three complementary axes: predictive performance, explanation plausibility (token-level alignment with expert rationales), and mechanistic faithfulness (whether compact sets of attention heads recover predictive signal under counterfactual rationale masking). To induce variation in plausibility, we additionally investigate attention-supervised finetuning, which incorporates expert rationale annotations as an auxiliary training signal. Attention supervision serves as an intervention on attribution plausibility, while the effectiveness of attribution methods varies substantially across architectures. Circuit analysis further reveals substantial variation in mechanistic recoverability across architectures, suggesting that model scale alone does not determine circuit compressibility. Taken together, our findings suggest that predictive performance, attribution plausibility, and mechanistic faithfulness characterize different aspects of model behavior and should be evaluated separately when studying explainability in media bias detection.",
       "award": null,
       "featured": false,
       "citations": 0,
@@ -1289,8 +1289,8 @@
           "Benjamin M. Ampel",
           "Sagar Samtani"
         ],
-        "venue": "arXiv preprint arXiv:2607.19954",
-        "type": "conference",
+        "venue": "BlackboxNLP",
+        "type": "workshop",
         "topic": "Behavioral",
         "symbolSize": 10
       },
@@ -7704,15 +7704,15 @@
       "tooltip": "Peer-reviewed journal articles."
     },
     "conferences": {
-      "value": 29,
+      "value": 28,
       "base": 44,
-      "meta": "29 of 44 total publications",
+      "meta": "28 of 44 total publications",
       "tooltip": "Conference papers and proceedings."
     },
     "workshops": {
-      "value": 6,
+      "value": 7,
       "base": 44,
-      "meta": "6 of 44 total publications",
+      "meta": "7 of 44 total publications",
       "tooltip": "Workshop and pre-conference papers."
     },
     "best-paper": {
@@ -8955,7 +8955,7 @@
           "index": 29,
           "title": "A Multi-Dimensional Evaluation of Explainability in Media Bias Detection",
           "year": 2026,
-          "venue": "arXiv preprint arXiv:2607.19954",
+          "venue": "BlackboxNLP",
           "citations": 0,
           "eigen": 0.0017756080430611442,
           "between": 0.0,
@@ -10147,7 +10147,7 @@
                 "Information Systems Frontiers": 1,
                 "HICSS": 3,
                 "IEEE CARS": 5,
-                "arXiv preprint arXiv:2607.19954": 1,
+                "BlackboxNLP": 1,
                 "EMNLP": 1,
                 "arXiv preprint arXiv:2605.03158": 1,
                 "Journal of Information Systems Education": 1,
@@ -10332,7 +10332,7 @@
                 "ACM KDD": 1,
                 "IEEE SPW": 1,
                 "HICSS": 1,
-                "arXiv preprint arXiv:2607.19954": 1,
+                "BlackboxNLP": 1,
                 "arXiv preprint arXiv:2605.03158": 1
               },
               "coauthors": {
@@ -10584,7 +10584,7 @@
               ],
               "venues": {
                 "HICSS": 1,
-                "arXiv preprint arXiv:2607.19954": 1
+                "BlackboxNLP": 1
               },
               "coauthors": {
                 "Benjamin M. Ampel": 2,
@@ -10610,7 +10610,7 @@
                 2026
               ],
               "venues": {
-                "arXiv preprint arXiv:2607.19954": 1
+                "BlackboxNLP": 1
               },
               "coauthors": {
                 "Benjamin M. Ampel": 1,
@@ -11773,7 +11773,7 @@
                 "Information Systems Frontiers": 1,
                 "HICSS": 3,
                 "IEEE CARS": 5,
-                "arXiv preprint arXiv:2607.19954": 1,
+                "BlackboxNLP": 1,
                 "EMNLP": 1,
                 "arXiv preprint arXiv:2605.03158": 1,
                 "ICIS": 2,
@@ -11905,7 +11905,7 @@
                 "ACM KDD": 1,
                 "IEEE SPW": 1,
                 "HICSS": 1,
-                "arXiv preprint arXiv:2607.19954": 1,
+                "BlackboxNLP": 1,
                 "arXiv preprint arXiv:2605.03158": 1
               },
               "coauthors": {
@@ -12132,7 +12132,7 @@
               ],
               "venues": {
                 "HICSS": 1,
-                "arXiv preprint arXiv:2607.19954": 1
+                "BlackboxNLP": 1
               },
               "coauthors": {
                 "Benjamin M. Ampel": 2,
@@ -12158,7 +12158,7 @@
                 2026
               ],
               "venues": {
-                "arXiv preprint arXiv:2607.19954": 1
+                "BlackboxNLP": 1
               },
               "coauthors": {
                 "Benjamin M. Ampel": 1,
@@ -13228,7 +13228,7 @@
                 "Information Systems Frontiers": 1,
                 "HICSS": 3,
                 "IEEE CARS": 5,
-                "arXiv preprint arXiv:2607.19954": 1,
+                "BlackboxNLP": 1,
                 "EMNLP": 1,
                 "arXiv preprint arXiv:2605.03158": 1,
                 "ICIS": 2,
@@ -13339,7 +13339,7 @@
                 "ACM KDD": 1,
                 "IEEE SPW": 1,
                 "HICSS": 1,
-                "arXiv preprint arXiv:2607.19954": 1,
+                "BlackboxNLP": 1,
                 "arXiv preprint arXiv:2605.03158": 1
               },
               "coauthors": {
@@ -13505,7 +13505,7 @@
               ],
               "venues": {
                 "HICSS": 1,
-                "arXiv preprint arXiv:2607.19954": 1
+                "BlackboxNLP": 1
               },
               "coauthors": {
                 "Benjamin M. Ampel": 2,
@@ -13531,7 +13531,7 @@
                 2026
               ],
               "venues": {
-                "arXiv preprint arXiv:2607.19954": 1
+                "BlackboxNLP": 1
               },
               "coauthors": {
                 "Benjamin M. Ampel": 1,
@@ -14525,7 +14525,7 @@
                 "Information Systems Frontiers": 1,
                 "HICSS": 3,
                 "IEEE CARS": 5,
-                "arXiv preprint arXiv:2607.19954": 1,
+                "BlackboxNLP": 1,
                 "EMNLP": 1,
                 "MIS Quarterly": 1,
                 "arXiv preprint arXiv:2605.03158": 1,
@@ -14643,7 +14643,7 @@
               "venues": {
                 "IEEE SPW": 1,
                 "HICSS": 1,
-                "arXiv preprint arXiv:2607.19954": 1,
+                "BlackboxNLP": 1,
                 "MIS Quarterly": 1,
                 "arXiv preprint arXiv:2605.03158": 1
               },
@@ -14739,7 +14739,7 @@
               ],
               "venues": {
                 "HICSS": 1,
-                "arXiv preprint arXiv:2607.19954": 1
+                "BlackboxNLP": 1
               },
               "coauthors": {
                 "Benjamin M. Ampel": 2,
@@ -14765,7 +14765,7 @@
                 2026
               ],
               "venues": {
-                "arXiv preprint arXiv:2607.19954": 1
+                "BlackboxNLP": 1
               },
               "coauthors": {
                 "Benjamin M. Ampel": 1,
@@ -15283,6 +15283,19 @@
         "maxYear": 2026
       },
       {
+        "title": "BlackboxNLP 2026",
+        "lat": 47.4979,
+        "lng": 19.0402,
+        "location": "Budapest, Hungary",
+        "desc": "1 paper: A Multi-Dimensional Evaluation of Explainability in Media Bias Detection",
+        "cat": "Conference",
+        "years": [
+          2026
+        ],
+        "minYear": 2026,
+        "maxYear": 2026
+      },
+      {
         "title": "EMNLP 2026",
         "lat": 47.4979,
         "lng": 19.0402,
@@ -15540,6 +15553,19 @@
           "lat": 47.9253,
           "lng": -97.0329,
           "title": "IEEE CARS 2026"
+        },
+        "to": {
+          "lat": 47.4979,
+          "lng": 19.0402,
+          "title": "BlackboxNLP 2026"
+        },
+        "year": 2026
+      },
+      {
+        "from": {
+          "lat": 47.4979,
+          "lng": 19.0402,
+          "title": "BlackboxNLP 2026"
         },
         "to": {
           "lat": 47.4979,
