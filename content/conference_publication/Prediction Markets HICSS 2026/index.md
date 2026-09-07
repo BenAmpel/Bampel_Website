@@ -8,7 +8,7 @@ authors:
 date: '2027-01-05T00:00:00Z'
 
 publishDate: '2027-01-05T00:00:00Z'
-url: "/conference_publication/prediction-markets-hicss-2027/"
+url: "/conference_publication/prediction-markets-hicss-2026/"
 
 publication_types: ['1']
 

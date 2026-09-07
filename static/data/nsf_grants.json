@@ -1,21 +1,22 @@
 {
-  "refresh_date": "2026-08-31",
+  "refresh_date": "2026-09-07",
   "grants": [
     {
-      "title": "Research Initiation Award: Leveraging Machine Learning for Secure and Privacy-Preserving Vehicular Cyber-Physical Systems (VCPS)",
-      "awardId": "2500079",
-      "piName": "Amir Alipour-Fanid",
-      "institution": "University of the District of Columbia",
-      "estimatedTotalAmt": "450000",
+      "title": "Collaborative Research: VINES: Track 1:Quantum-Ready and AI-Enabled by Design: Resilient and Deployable Next-Gen Cellular Networks",
+      "awardId": "2548945",
+      "piName": "Elisa Bertino",
+      "institution": "Purdue University",
+      "estimatedTotalAmt": "332900",
       "startDate": "10/01/2026",
       "expDate": "09/30/2029",
-      "abstractText": "Connected and automated vehicles depend on reliable communication among vehicles, roadway infrastructure, sensors, and control systems. Cyberattacks can block safety messages, alter information exchanged inside a vehicle, or expose sensitive location and driving data. The project will develop machine learning methods to improve the security, resilience, privacy, and safety of connected transportation. Research activities will address three related needs: protecting wireless vehicle communication among vehicles from deliberate interference, detecting malicious activity in the communication bus inside vehicles, and protecting traffic, trajectory, and shared learning data. The research team will evaluate the methods under realistic cyber-attacks and changing driving conditions. Expected outcomes include safer vehicle communication, faster detection of harmful messages, stronger privacy protection, reusable research tools, and new knowledge for secure intelligent transportation. The project will also provide research training for graduate and undergraduate students and will share research findings, educational materials, and data with broader research and education communities.\r\n\r\nThe technical research consists of three coordinated components. The first will develop online learning methods that use inter-vehicle distance to guide channel selection, channel sensing, analysis of adaptive attackers and defenders, and centralized scheduling under several forms of deliberate interference. The second will develop real-time intrusion detection for the Controller Area Network by analyzing both message content and patterns over time, while federated learning will combine locally trained models without transferring raw vehicle data to a central location. The third will generate synthetic traffic data, apply location-sensitive privacy protection to vehicle trajectories, and protect shared learning from malicious model updates and attempts to infer private information. Evaluation will use theoretical analysis, integrated traffic and wireless communication simulations, public and newly collected vehicle data, controlled attack injection, and comparisons with established methods. Quantitative measures will assess learning performance, safe-distance violations, attack-detection accuracy, privacy protection, and resistance to attacks on shared learning. Expected contributions include methods connecting cyber observations with vehicle physical states, practical tools for secure communication and private data sharing, and expanded research and education capacity in machine learning and transportation cybersecurity.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "abstractText": "This collaborative project aims to improve the security and resilience of next-generation wireless networks by making them quantum-secure and artificial intelligence-enabled. These networks will connect phones, vehicles, hospitals, emergency responders, smart cities, and billions of everyday devices. As society becomes increasingly dependent on wireless connectivity, these systems must remain trustworthy even when attackers attempt to steal information, impersonate legitimate users, disrupt communications, or exploit artificial intelligence tools. The project develops new methods to protect wireless networks from emerging threats posed by future quantum computers, malicious network infrastructure, and attacks targeting artificial intelligence-driven network management. The broader impact of this project is to strengthen the national infrastructure that depends on mobile networks, including transportation, emergency response, health care, and public services. Open-source software, protocol implementations, formal models, datasets, and evaluation tools will be released to support and inform industrial adoption and standards development. Educational activities will introduce students to post-quantum security, cellular networking, artificial intelligence security, and privacy-preserving computation. Outreach efforts will engage undergraduate students, graduate students, educators, and pre-college learners through research experiences, cybersecurity programs, and community activities. These efforts will expand participation and prepare a future workforce capable of building resilient communication system.\r\n\r\n\r\n\r\nThe project is organized around three connected research thrusts. The first thrust develops compact and private post-quantum cryptographic tools, including identity-based signatures, threshold signatures, and blind signature protocols for constrained wireless environments. The second thrust integrates these tools into secure cellular protocols for device bootstrapping, authentication and key agreement, application key management, and mobile virtual network operator settings. The third thrust develops trustworthy machine learning for next-generation networks, including federated learning-based intrusion detection, differentially private model coordination, and post-quantum integrity verification for model updates. A shared experimental platform supports implementation, formal analysis, and large-scale evaluation.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
       "primaryProgram": [
-        "04002627DB NSF STEM Education"
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
       ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2500079",
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2548945",
       "keywords": [
-        "Cybersecurity"
+        "Cybersecurity",
+        "Vulnerability"
       ]
     },
     {
@@ -54,6 +55,24 @@
       ]
     },
     {
+      "title": "Excellence in Research: AI Powered Multi-Agent System (MAS) for Real-Time QoS Anomaly Detection and Adaptive Network Optimization in 6G-Enabled Industrial IoT Environments",
+      "awardId": "2602854",
+      "piName": "Cajetan Akujuobi",
+      "institution": "Prairie View A & M University",
+      "estimatedTotalAmt": "900000",
+      "startDate": "10/01/2026",
+      "expDate": "09/30/2029",
+      "abstractText": "Sixth generation (6G) wireless networks will support emerging applications such as smart manufacturing, autonomous robotics, intelligent transportation, advanced healthcare, and critical infrastructure. These applications depend on communication networks that can quickly detect disruptions, adapt to changing conditions, and maintain reliable operation with little or no human intervention. This project develops an artificial intelligence-powered system that continuously monitors network conditions, detects anomalies in real time, and intelligently adapts network resources to sustain dependable communications. The research also explores the use of blockchain technologies and intelligent spectrum management to strengthen the security and resilience of future wireless networks. Together, these advances will enable more reliable, secure, and efficient communications for mission-critical applications while preparing a future skilled workforce through undergraduate and graduate research experiences, curriculum enhancements, open educational modules, and annual workshops in AI, cybersecurity, blockchain, and next-generation wireless communications.\r\n\r\nThe project develops a decentralized Multi-Agent System for real-time Quality-of-Service (QoS) anomaly detection and adaptive network optimization in 6G-enabled Industrial Internet of Things environments. Intelligent monitoring agents collaborate with machine learning-based anomaly detection and reinforcement learning to identify network degradations and dynamically optimize resource allocation. Blockchain-based authentication, smart contract policy management, and Spectrum Access System integration enable secure coordination of network decisions and support efficient spectrum sharing. The framework will be evaluated using a programmable Firecell 5G/6G testbed under realistic industrial workloads to quantify improvements in latency, throughput, packet loss, QoS, and network resilience. The expected outcome is an AI-native framework for secure, autonomous management of next-generation wireless networks that delivers more reliable communications for mission-critical industrial systems.\r\n\r\nThis project is funded by the U.S. National Science Foundation (NSF) Historically Black Colleges and Universities-Excellence in Research (HBCU-EIR) Program. HBCU-EIR supports research at public and private HBCUs to strengthen their research capacity and promote engagement with NSF.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2602854",
+      "keywords": [
+        "Cybersecurity",
+        "Multi-Agent AI"
+      ]
+    },
+    {
       "title": "Collaborative Research: SaTC 2.0: RES: Automating Access Control Enforcement for Decentralized Microservice Systems",
       "awardId": "2614550",
       "piName": "Trent Jaeger",
@@ -73,6 +92,23 @@
       ]
     },
     {
+      "title": "EPSCoR Graduate Fellowship Program (EGFP): AIM Fellows - Artificial Intelligence and Machine Learning Industry PhD Fellowships with data science, cybersecurity, and online safety",
+      "awardId": "2535355",
+      "piName": "Christopher Danforth",
+      "institution": "University of Vermont & State Agricultural College",
+      "estimatedTotalAmt": "954000",
+      "startDate": "03/15/2027",
+      "expDate": "02/28/2030",
+      "abstractText": "The National Science Foundation (NSF), NSF EPSCoR Graduate Fellowship Program (EGFP) supports EGFP-designated institutions/programs in EPSCoR jurisdictions by providing funding for graduate fellowships for eligible applicants. Institutions receive a total of three years of stipend and associated cost-of-education (COE) allowance for each NSF EPSCoR Graduate Fellow.\r\n\r\nThis award at the University of Vermont (UVM) seeks to enhance research competitiveness and capability through an investment in talent development. Fellow research topics will align with goals and programs supported by the NSF Directorate for Computer and Information Science and Engineering (CISE), and the Directorate for Technology, Innovation, and Partnerships (TIP). Research topics and activities will focus on translational AI and ML research and learning in a world-renowned interdisciplinary complex systems institute where researchers bring expertise in digital healthcare, security, modeling, and prediction. AIM Fellows will work with an industry partner and a faculty mentor who will facilitate the industry mentoring relationship. The fellowships will incorporate experiential learning rooted in real-world scenarios, collaboration with industry partners, and leverage relationships to advance NSF\u2019s goal to build capacity for STEM research and innovation and economic growth.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2535355",
+      "keywords": [
+        "Cybersecurity"
+      ]
+    },
+    {
       "title": "EPSCoR Research Fellows: NSF: AI-Secure Command Channels for Autonomous Space Systems",
       "awardId": "2624437",
       "piName": "Efren Lopez Morales",
@@ -87,23 +123,6 @@
       "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2624437",
       "keywords": [
         "Cybersecurity"
-      ]
-    },
-    {
-      "title": "CAREER: Improving Software Test Quality and Developer Skills through Developer-in-the-Loop Test Optimization",
-      "awardId": "2544248",
-      "piName": "Ajay Jha",
-      "institution": "North Dakota State University Fargo",
-      "estimatedTotalAmt": "500000",
-      "startDate": "01/01/2027",
-      "expDate": "12/31/2031",
-      "abstractText": "Software testing plays a critical role in improving software quality by detecting defects before release. However, software tests often contain quality issues that make them difficult to understand, maintain, and evolve, reducing their effectiveness and increasing maintenance costs. Many developers receive limited training in writing high-quality tests, and existing automated tools provide limited support for identifying and addressing these issues. This project investigates how software tests can be systematically improved while helping students and developers strengthen their testing skills through hands-on interaction with intelligent tool support. The project's novelties are the integration of empirical evidence from real-world software development with developer-centered learning to create an interactive environment that supports both test improvement and skill development. The project's broader significance and importance are reducing software maintenance costs, improving software reliability, advancing software testing education, and preparing a workforce with stronger software testing expertise. The project also produces openly available datasets, software tools, and educational resources that benefit researchers, educators, and practitioners.\r\n\r\nThe project investigates how developers identify, understand, and address software test quality issues by analyzing open-source repositories, developer discussions, surveys, and interviews. These empirical findings inform the development of automated methods that combine rule-based program analysis, large language models, and validation mechanisms to identify test quality issues and generate context-aware recommendations to improve tests as software evolves. The project integrates these methods into an evolution-aware developer-in-the-loop framework that continuously identifies test quality issues, suggests improvements, and provides explanations for each recommendation, while enabling developers to review, modify, and learn from the suggestions during development. User studies with students and practitioners evaluate both improvements in test quality and gains in testing skills. The project contributes to more reliable and maintainable software systems and helps students and developers strengthen their skills in writing and improving software tests.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
-      "primaryProgram": [
-        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
-      ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2544248",
-      "keywords": [
-        "LLM / GenAI"
       ]
     },
     {
@@ -142,6 +161,23 @@
     },
     {
       "title": "Collaborative Research: Human-Inspired Cyber-Physical Security in Human-Robot Interactions",
+      "awardId": "2625054",
+      "piName": "Jundi Liu",
+      "institution": "Iowa State University",
+      "estimatedTotalAmt": "312413",
+      "startDate": "01/01/2027",
+      "expDate": "12/31/2029",
+      "abstractText": "This grant supports research on the safety and security of intelligent robots, advancing the safe deployment of robotic systems in manufacturing, healthcare, transportation, defense, and other public environments. Intelligent robots are increasingly expected to work near people and respond to physical contact, changing surroundings, and unexpected behavior. However, most existing human-robot interaction research assumes that people will cooperate with robots. As such, most robot security research represents an attacker as an abstract computer algorithm or an external disturbance. These approaches do not adequately explain the possibility that instead a person may observe a robot, identify a weakness, interfere with it, and change strategies in response to the robot\u2019s behavior. This award supports fundamental research to understand and defend against adversarial physical interactions between humans and robots. The research will develop models of human decision making, methods for identifying realistic robot vulnerabilities, and control strategies that allow robots to resist and recover from disruptive actions. The results will contribute to the safer use of mobile robots of all kinds and may inform future testing methods and safety standards. The research involves several disciplines, including human factors, cognitive science, robotics, artificial intelligence, control theory, and cybersecurity. This multidisciplinary approach will support graduate and undergraduate education, mentored research experiences, and outreach activities for K\u201312 students.\r\n\r\nCurrent approaches to robot safety and resilient control do not account for a cognitively able human who selects and adapts physical attack strategies while interacting with a responsive robot. This research aims to fill this knowledge gap through three integrated activities that will develop: 1) a Cognitive Adversary Model to represent how humans perceive robot vulnerabilities, select disruptive actions, learn from previous outcomes, and update their strategies as the robot responds. The model will be developed and tested using immersive virtual-reality experiments that measure participants\u2019 attack choices, gaze behavior, body movements, contact actions, physiological responses, and task performance; 2) a structured library of physical, perceptual, and environmental attack actions and combine the human cognitive model with AI-based search. Human participants will evaluate and refine AI-generated attacks, producing a set of effective attacks that remain physically and cognitively realistic; and 3) the team will use these attacks to develop robot controllers through offline adversarial training and adaptive co-training between robot defenders and simulated human-inspired attackers. The controllers will be evaluated in simulation, virtual reality, and a small-scale physical human-robot interaction study. The research will test the hypotheses that cognitive workload affects attack planning, that people update attack strategies based on observed robot responses, that human-constrained AI search discovers more realistic vulnerabilities than unconstrained search, and that controllers trained against human-inspired attacks are more resilient than controllers trained against generic disturbances.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2625054",
+      "keywords": [
+        "Cybersecurity"
+      ]
+    },
+    {
+      "title": "Collaborative Research: Human-Inspired Cyber-Physical Security in Human-Robot Interactions",
       "awardId": "2625055",
       "piName": "Dan Li",
       "institution": "University of Washington",
@@ -153,6 +189,23 @@
         "01002627DB NSF RESEARCH & RELATED ACTIVIT"
       ],
       "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2625055",
+      "keywords": [
+        "Cybersecurity"
+      ]
+    },
+    {
+      "title": "Continuous Process Verification for Trustworthy Manufacturing",
+      "awardId": "2626557",
+      "piName": "Liang He",
+      "institution": "University of Nebraska-Lincoln",
+      "estimatedTotalAmt": "307868",
+      "startDate": "01/01/2027",
+      "expDate": "12/31/2028",
+      "abstractText": "This project supports research to advance the trustworthiness of manufacturing systems. Manufacturing is undergoing a rapid transformation as factories increasingly rely on automation, intelligent decision making, and data-driven optimization to improve productivity, quality, and resilience. These advances depend on trustworthy systems that monitor and control physical manufacturing processes. If process measurements are compromised by cyberattacks, equipment failures, or sensing errors, manufacturers may unknowingly make incorrect decisions that reduce product quality, increase waste, disrupt production, and create safety risks. However, today\u2019s manufacturing systems are designed primarily to maximize production efficiency rather than continuously verify the integrity of process information. This project addresses this fundamental challenge by enabling manufacturing systems to continuously verify that sensed data faithfully represent physical processes. The resulting advances will improve the security, resilience, and reliability of advanced manufacturing, facilitate the adoption of intelligent manufacturing technologies, educate the future workforce, and strengthen the nation\u2019s economic competitiveness.\r\n\r\nThe specific goal of the research is to develop a control-monitoring co-randomization framework for trustworthy manufacturing. The research investigates whether carefully designed stochastic control and monitoring actions can generate physical watermarks that reveal discrepancies caused by cyberattacks, equipment faults, or compromised sensing. The framework integrates randomized control strategies, adaptive process monitoring, statistical signal analysis, system identification, and predictive control to continuously validate process integrity while preserving production quality and operational efficiency. The framework will be evaluated on representative manufacturing platforms, including automated assembly systems and chemical production processes. By tightly coupling physical process dynamics with cybersecurity mechanisms, this research establishes the scientific foundations for manufacturing systems that can continuously validate the trustworthiness of process information, enabling more reliable automation and the next generation of intelligent manufacturing.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2626557",
       "keywords": [
         "Cybersecurity"
       ]
@@ -189,6 +242,25 @@
       "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2613590",
       "keywords": [
         "LLM / GenAI"
+      ]
+    },
+    {
+      "title": "PDaSP Track 2: Secure Analytics over Federated Environments for Biomedical Science (SAFE-Bio)",
+      "awardId": "2628738",
+      "piName": "Ronald Hutchins",
+      "institution": "University of Virginia Main Campus",
+      "estimatedTotalAmt": "1000000",
+      "startDate": "10/01/2026",
+      "expDate": "09/30/2028",
+      "abstractText": "Biomedical research increasingly depends on combining sensitive health information held by many different hospitals and universities. Doctors and scientists could make faster progress against disease if they were able to analyze large collections of patient data together, but this information is private and legally protected, and institutions are often unable to share it because doing so risks exposing personal details. A central difficulty is that even if data are \"locked\" and protected when they are stored or sent across a network, they need be \"unlocked\" inside a computer's memory in order to be analyzed, which creates a point of vulnerability. This project is building a software system to allow computers to analyze such sensitive information while it stays locked and hidden, even from computer system administrators who may have direct access to the computing systems. The aim is to let different institutions work together on shared scientific questions without ever revealing private data. Success of such a system would enable researchers to collaborate in areas involving sensitive data, such as genetics, personalized treatment, and public health, while protecting the privacy of the individuals whose information makes those advances possible. The benefits reach beyond medicine to any setting in which organizations need to cooperate on confidential information that they cannot otherwise share freely.\r\n\r\nThis project is developing and validating a framework called SAFE-Bio: Secure Analytics over Federated Environments for Biomedical research, which applies confidential computing to secure, collaborative analysis across independent institutions. Confidential computing relies on hardware isolated enclaves that keep data encrypted even while they are being processed, so that the information remains inaccessible to system administrators and to other software running on the same machine. The framework provides a portable middleware layer that hides the differences among competing hardware platforms, allowing both new and legacy analytical applications to be moved onto the secure environment with little modification. The technical work is organized into research and development, testing and evaluation, and a pathway toward broader adoption. Central contributions include a certifier component for transparent deployment of confidential hardware, a chain of trust architecture that attests to the integrity of the full software stack, a curated operating system and container environment for general purpose applications, and security orchestration that extends confidential guarantees across distributed federated workflows. The framework is evaluated through realistic biomedical scenarios that involve distributed genomic datasets and analytics driven by artificial intelligence (AI), using established community testbeds and measurement methods to quantify security, performance, and the runtime overhead introduced by enclave based execution. The team of researchers spans the University of Virginia, Datica Research, the University of Southern California, and the National Institute of Standards and Technology, combining expertise in cybersecurity, distributed systems, biomedical informatics, and standards development. The project contributes reusable architectures, middleware, evaluation methods, and deployment guidance that lower barriers to secure collaboration, together with training opportunities for postdoctoral researchers and research computing professionals.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002728DB NSF RESEARCH & RELATED ACTIVIT",
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2628738",
+      "keywords": [
+        "Cybersecurity",
+        "Vulnerability"
       ]
     }
   ]

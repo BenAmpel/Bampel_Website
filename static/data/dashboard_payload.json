@@ -357,7 +357,7 @@
       "abstract": "Cyberattacks have been increasing in volume and intensity, necessitating proactive measures. Cybersecurity risk management frameworks are deployed to provide actionable intelligence to mitigate potential threats by analyzing the available cybersecurity data. Existing frameworks, such as MITRE ATT&CK, provide timely mitigation strategies against attacker capabilities yet do not account for hacker data when developing cyber threat intelligence. Therefore, we developed a novel information technology artifact, ATT&CK-Link, which incorporates a novel transformer and multi-teacher knowledge distillation design, to link hacker threats to this broadly used framework. Here, we illustrated how hospital systems can use this framework to proactively protect their cyberinfrastructure against hacker threats. Our ATT&CK-Link framework has practical implications for cybersecurity professionals, who can implement our framework to generate strategic, operational, and tactical cyber threat intelligence. ATT&CK-Link also contributes to the information systems knowledge base by providing design principles to pursue targeted cybersecurity analytics, risk management, and broader text analytics research through simultaneous multi-modal (e.g., text and code) distillation and classification.",
       "award": null,
       "featured": true,
-      "citations": 72,
+      "citations": 73,
       "topic": "Cybersecurity"
     },
     {
@@ -655,6 +655,25 @@
       "award": null,
       "featured": true,
       "citations": 7,
+      "topic": "Cybersecurity"
+    },
+    {
+      "title": "Cyber Threat Classification Under Non-Stationary Environments: An Adapt In-Context Learning (Adapt-ICL) Approach",
+      "authors": [
+        "Chengjun Zhang",
+        "Yang Gao",
+        "Benjamin M. Ampel",
+        "Sagar Samtani"
+      ],
+      "year": 2026,
+      "type": "workshop",
+      "venue": "INFORMS Workshop on Data Science",
+      "url": "/workshop_publication/cyber-threat-classification-under-non-stationary-environments-an-adapt/",
+      "date": "2026-01-01",
+      "abstract": null,
+      "award": null,
+      "featured": false,
+      "citations": 0,
       "topic": "Cybersecurity"
     },
     {
@@ -1115,7 +1134,7 @@
       {
         "id": 18,
         "name": "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach",
-        "value": 72,
+        "value": 73,
         "year": 2024,
         "authors": [
           "Benjamin M. Ampel",
@@ -1127,7 +1146,7 @@
         "venue": "Journal of Management Information Systems",
         "type": "journal",
         "topic": "Cybersecurity",
-        "symbolSize": 38.736585838837534
+        "symbolSize": 38.857393021826795
       },
       {
         "id": 19,
@@ -1380,6 +1399,22 @@
       },
       {
         "id": 35,
+        "name": "Cyber Threat Classification Under Non-Stationary Environments: An Adapt In-Context Learning (Adapt-ICL) Approach",
+        "value": 0,
+        "year": 2026,
+        "authors": [
+          "Chengjun Zhang",
+          "Yang Gao",
+          "Benjamin M. Ampel",
+          "Sagar Samtani"
+        ],
+        "venue": "INFORMS Workshop on Data Science",
+        "type": "workshop",
+        "topic": "Cybersecurity",
+        "symbolSize": 10
+      },
+      {
+        "id": 36,
         "name": "HackerSignal: A Large-Scale Multi-Source Dataset Linking Hacker Community Discourse to the CVE Vulnerability Lifecycle",
         "value": 0,
         "year": 2026,
@@ -1393,7 +1428,7 @@
         "symbolSize": 10
       },
       {
-        "id": 36,
+        "id": 37,
         "name": "Identifying Protected Health Information in Online Hacker Communities: A Multi-Task Relation Learning Approach",
         "value": 0,
         "year": 2026,
@@ -1409,7 +1444,7 @@
         "symbolSize": 10
       },
       {
-        "id": 37,
+        "id": 38,
         "name": "Pathways to AI-Ready Entry-Level Talent for Industry Domains: Modular, Adaptive Design Principles for Business-School Curriculum",
         "value": 0,
         "year": 2026,
@@ -1429,7 +1464,7 @@
         "symbolSize": 10
       },
       {
-        "id": 38,
+        "id": 39,
         "name": "Performance Transfer and Behavioral Reliance in AI-Assisted Cybersecurity Training",
         "value": 0,
         "year": 2026,
@@ -1444,7 +1479,7 @@
         "symbolSize": 10
       },
       {
-        "id": 39,
+        "id": 40,
         "name": "Prosody Training for Lowering Vishing Susceptibility",
         "value": 0,
         "year": 2026,
@@ -1458,7 +1493,7 @@
         "symbolSize": 10
       },
       {
-        "id": 40,
+        "id": 41,
         "name": "Seeing Is Not Believing: A Deepfake Video Call Scam at Pan-Asia Trading",
         "value": 0,
         "year": 2026,
@@ -1471,7 +1506,7 @@
         "symbolSize": 10
       },
       {
-        "id": 41,
+        "id": 42,
         "name": "Understanding the Role of Prompt Template in Knowledge Distillation for Safety Alignment",
         "value": 0,
         "year": 2026,
@@ -1487,7 +1522,7 @@
         "symbolSize": 10
       },
       {
-        "id": 42,
+        "id": 43,
         "name": "Vendor-Conditioned Contrastive Learning for Predicting Organizational Cyber Threat Targets",
         "value": 3,
         "year": 2026,
@@ -1500,7 +1535,7 @@
         "symbolSize": 14.484941211906902
       },
       {
-        "id": 43,
+        "id": 44,
         "name": "Prediction Markets Are Efficient at Rest and Fragile in Motion",
         "value": 0,
         "year": 2027,
@@ -1694,7 +1729,7 @@
       {
         "source": 0,
         "target": 18,
-        "value": 9.959357419058135,
+        "value": 9.96658634871206,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -1837,7 +1872,7 @@
       },
       {
         "source": 0,
-        "target": 36,
+        "target": 37,
         "value": 9.318191396817726,
         "reason": "1 Co-Authors",
         "types": {
@@ -2078,7 +2113,7 @@
       {
         "source": 1,
         "target": 18,
-        "value": 15.024574531128582,
+        "value": 15.038027536102724,
         "reason": "3 Co-Authors",
         "types": {
           "topic": false,
@@ -2318,6 +2353,22 @@
       {
         "source": 1,
         "target": 36,
+        "value": 7.455621698354552,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 1,
+        "target": 37,
         "value": 8.455621698354552,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -2542,7 +2593,7 @@
       {
         "source": 2,
         "target": 18,
-        "value": 16.284482113039637,
+        "value": 16.29580292149271,
         "reason": "1 Keywords, 3 Co-Authors",
         "types": {
           "topic": true,
@@ -2766,6 +2817,22 @@
       {
         "source": 2,
         "target": 35,
+        "value": 11.101796072493233,
+        "reason": "3 Keywords, 1 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.7,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 2,
+        "target": 36,
         "value": 9.101796072493233,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -2781,7 +2848,7 @@
       },
       {
         "source": 2,
-        "target": 36,
+        "target": 37,
         "value": 10.101796072493233,
         "reason": "2 Keywords, 1 Co-Authors",
         "types": {
@@ -2797,7 +2864,7 @@
       },
       {
         "source": 2,
-        "target": 42,
+        "target": 43,
         "value": 8.174981318747381,
         "reason": "3 Keywords",
         "types": {
@@ -2830,7 +2897,7 @@
       {
         "source": 3,
         "target": 18,
-        "value": 7.416376868966337,
+        "value": 7.436511399464548,
         "reason": "2 Keywords",
         "types": {
           "topic": true,
@@ -2845,7 +2912,7 @@
       },
       {
         "source": 3,
-        "target": 42,
+        "target": 43,
         "value": 4.374436097811232,
         "reason": "3 Keywords",
         "types": {
@@ -3054,7 +3121,7 @@
       {
         "source": 4,
         "target": 18,
-        "value": 14.759178468889965,
+        "value": 14.775221402565087,
         "reason": "3 Co-Authors",
         "types": {
           "topic": false,
@@ -3278,6 +3345,22 @@
       {
         "source": 4,
         "target": 35,
+        "value": 6.527062885745217,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 4,
+        "target": 36,
         "value": 7.527062885745217,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -3293,7 +3376,7 @@
       },
       {
         "source": 4,
-        "target": 36,
+        "target": 37,
         "value": 6.527062885745217,
         "reason": "1 Co-Authors",
         "types": {
@@ -3422,7 +3505,7 @@
       {
         "source": 5,
         "target": 18,
-        "value": 9.588540140854978,
+        "value": 9.606504427425053,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
           "topic": true,
@@ -3565,7 +3648,7 @@
       },
       {
         "source": 5,
-        "target": 36,
+        "target": 37,
         "value": 6.557122138357638,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -3710,7 +3793,7 @@
       {
         "source": 6,
         "target": 18,
-        "value": 14.533319181170905,
+        "value": 14.551952961168741,
         "reason": "3 Co-Authors",
         "types": {
           "topic": false,
@@ -3932,6 +4015,22 @@
         }
       },
       {
+        "source": 6,
+        "target": 37,
+        "value": 5.079441541679836,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 3.5794415416798357,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
         "source": 7,
         "target": 8,
         "value": 12.11630616585858,
@@ -4046,7 +4145,7 @@
       {
         "source": 7,
         "target": 18,
-        "value": 11.806801516361837,
+        "value": 11.822345696915157,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -4254,6 +4353,22 @@
       {
         "source": 7,
         "target": 36,
+        "value": 6.727359974682001,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 7,
+        "target": 37,
         "value": 7.727359974682001,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -4382,7 +4497,7 @@
       {
         "source": 8,
         "target": 18,
-        "value": 12.64622519826497,
+        "value": 12.655127301544692,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -4606,6 +4721,22 @@
       {
         "source": 8,
         "target": 35,
+        "value": 8.806801516361837,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 8,
+        "target": 36,
         "value": 9.806801516361837,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -4621,7 +4752,7 @@
       },
       {
         "source": 8,
-        "target": 36,
+        "target": 37,
         "value": 8.806801516361837,
         "reason": "1 Co-Authors",
         "types": {
@@ -4637,7 +4768,7 @@
       },
       {
         "source": 9,
-        "target": 37,
+        "target": 38,
         "value": 3.3744360978112327,
         "reason": "Same Venue",
         "types": {
@@ -4653,7 +4784,7 @@
       },
       {
         "source": 9,
-        "target": 39,
+        "target": 40,
         "value": 3.3744360978112327,
         "reason": "Same Venue",
         "types": {
@@ -4766,7 +4897,7 @@
       {
         "source": 10,
         "target": 18,
-        "value": 11.588540140854978,
+        "value": 11.606504427425053,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -4958,6 +5089,22 @@
       {
         "source": 10,
         "target": 35,
+        "value": 8.557122138357638,
+        "reason": "2 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.7,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 10,
+        "target": 36,
         "value": 5.557122138357638,
         "reason": "1 Co-Authors",
         "types": {
@@ -4973,7 +5120,7 @@
       },
       {
         "source": 10,
-        "target": 36,
+        "target": 37,
         "value": 5.557122138357638,
         "reason": "1 Co-Authors",
         "types": {
@@ -5054,7 +5201,7 @@
       {
         "source": 11,
         "target": 18,
-        "value": 14.551952961168741,
+        "value": 14.570358100056461,
         "reason": "3 Co-Authors",
         "types": {
           "topic": false,
@@ -5276,6 +5423,22 @@
         }
       },
       {
+        "source": 11,
+        "target": 37,
+        "value": 5.256116095164411,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 3.756116095164411,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
         "source": 12,
         "target": 13,
         "value": 12.079441541679836,
@@ -5326,7 +5489,7 @@
       {
         "source": 12,
         "target": 18,
-        "value": 8.533319181170905,
+        "value": 8.551952961168741,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -5422,6 +5585,22 @@
       {
         "source": 12,
         "target": 35,
+        "value": 9.079441541679836,
+        "reason": "1 Keywords, 2 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.7,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 12,
+        "target": 36,
         "value": 5.079441541679836,
         "reason": "1 Co-Authors",
         "types": {
@@ -5470,7 +5649,7 @@
       {
         "source": 13,
         "target": 18,
-        "value": 11.416376868966337,
+        "value": 11.436511399464548,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -5582,6 +5761,22 @@
       {
         "source": 13,
         "target": 35,
+        "value": 7.0,
+        "reason": "1 Keywords, 2 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 3.5,
+          "opacity": 0.7,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 13,
+        "target": 36,
         "value": 3.0,
         "reason": "1 Co-Authors",
         "types": {
@@ -5614,7 +5809,7 @@
       {
         "source": 14,
         "target": 18,
-        "value": 11.588540140854978,
+        "value": 11.606504427425053,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -5806,6 +6001,22 @@
       {
         "source": 14,
         "target": 35,
+        "value": 5.557122138357638,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 4.057122138357638,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 14,
+        "target": 36,
         "value": 6.557122138357638,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -5821,7 +6032,7 @@
       },
       {
         "source": 14,
-        "target": 36,
+        "target": 37,
         "value": 6.557122138357638,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -5902,7 +6113,7 @@
       {
         "source": 17,
         "target": 18,
-        "value": 16.128964468827377,
+        "value": 16.14151684333315,
         "reason": "1 Keywords, 3 Co-Authors",
         "types": {
           "topic": true,
@@ -6094,6 +6305,22 @@
       {
         "source": 17,
         "target": 35,
+        "value": 10.73550063172517,
+        "reason": "3 Keywords, 1 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.7,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 17,
+        "target": 36,
         "value": 8.73550063172517,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -6109,7 +6336,7 @@
       },
       {
         "source": 17,
-        "target": 36,
+        "target": 37,
         "value": 9.73550063172517,
         "reason": "2 Keywords, 1 Co-Authors",
         "types": {
@@ -6125,7 +6352,7 @@
       },
       {
         "source": 17,
-        "target": 42,
+        "target": 43,
         "value": 7.828313737302301,
         "reason": "3 Keywords",
         "types": {
@@ -6142,7 +6369,7 @@
       {
         "source": 18,
         "target": 19,
-        "value": 12.436511399464548,
+        "value": 12.456379239589578,
         "reason": "1 Keywords, 2 Co-Authors",
         "types": {
           "topic": true,
@@ -6158,7 +6385,7 @@
       {
         "source": 18,
         "target": 20,
-        "value": 8.416376868966337,
+        "value": 8.436511399464548,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -6174,38 +6401,6 @@
       {
         "source": 18,
         "target": 21,
-        "value": 8.436511399464548,
-        "reason": "1 Co-Authors",
-        "types": {
-          "topic": false,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 5,
-          "opacity": 0.45000000000000007,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 18,
-        "target": 22,
-        "value": 9.27307521396181,
-        "reason": "1 Co-Authors",
-        "types": {
-          "topic": false,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 5,
-          "opacity": 0.45000000000000007,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 18,
-        "target": 23,
         "value": 8.456379239589578,
         "reason": "1 Co-Authors",
         "types": {
@@ -6221,8 +6416,40 @@
       },
       {
         "source": 18,
+        "target": 22,
+        "value": 9.284482113039637,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 18,
+        "target": 23,
+        "value": 8.475987361940607,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 18,
         "target": 26,
-        "value": 7.416376868966337,
+        "value": 7.436511399464548,
         "reason": "2 Keywords",
         "types": {
           "topic": true,
@@ -6238,7 +6465,7 @@
       {
         "source": 18,
         "target": 27,
-        "value": 8.436511399464548,
+        "value": 8.456379239589578,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -6254,7 +6481,7 @@
       {
         "source": 18,
         "target": 29,
-        "value": 8.416376868966337,
+        "value": 8.436511399464548,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -6270,7 +6497,7 @@
       {
         "source": 18,
         "target": 30,
-        "value": 8.416376868966337,
+        "value": 8.436511399464548,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -6286,7 +6513,7 @@
       {
         "source": 18,
         "target": 32,
-        "value": 8.416376868966337,
+        "value": 8.436511399464548,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -6302,7 +6529,7 @@
       {
         "source": 18,
         "target": 33,
-        "value": 8.416376868966337,
+        "value": 8.436511399464548,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -6318,7 +6545,7 @@
       {
         "source": 18,
         "target": 34,
-        "value": 11.551952961168741,
+        "value": 11.570358100056461,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -6334,7 +6561,23 @@
       {
         "source": 18,
         "target": 35,
-        "value": 8.416376868966337,
+        "value": 9.436511399464548,
+        "reason": "1 Keywords, 1 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.55,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 18,
+        "target": 36,
+        "value": 8.436511399464548,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -6349,8 +6592,8 @@
       },
       {
         "source": 18,
-        "target": 36,
-        "value": 10.416376868966337,
+        "target": 37,
+        "value": 10.436511399464548,
         "reason": "Same Venue, 1 Co-Authors",
         "types": {
           "topic": false,
@@ -6588,6 +6831,22 @@
         }
       },
       {
+        "source": 19,
+        "target": 37,
+        "value": 3.6081976621622465,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 2.1081976621622465,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
         "source": 20,
         "target": 22,
         "value": 8.076585395018661,
@@ -6685,7 +6944,7 @@
       },
       {
         "source": 20,
-        "target": 36,
+        "target": 37,
         "value": 3.0,
         "reason": "1 Co-Authors",
         "types": {
@@ -6766,6 +7025,22 @@
       {
         "source": 21,
         "target": 35,
+        "value": 7.6081976621622465,
+        "reason": "1 Keywords, 2 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 4.1081976621622465,
+          "opacity": 0.7,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 21,
+        "target": 36,
         "value": 3.6081976621622465,
         "reason": "1 Co-Authors",
         "types": {
@@ -6893,7 +7168,7 @@
       },
       {
         "source": 22,
-        "target": 36,
+        "target": 37,
         "value": 9.076585395018661,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -6973,7 +7248,7 @@
       },
       {
         "source": 23,
-        "target": 35,
+        "target": 36,
         "value": 3.039720770839918,
         "reason": "2 Keywords",
         "types": {
@@ -6989,7 +7264,7 @@
       },
       {
         "source": 23,
-        "target": 36,
+        "target": 37,
         "value": 4.039720770839918,
         "reason": "1 Co-Authors",
         "types": {
@@ -7037,7 +7312,7 @@
       },
       {
         "source": 24,
-        "target": 36,
+        "target": 37,
         "value": 3.039720770839918,
         "reason": "2 Keywords",
         "types": {
@@ -7069,7 +7344,7 @@
       },
       {
         "source": 25,
-        "target": 36,
+        "target": 37,
         "value": 2.0,
         "reason": "2 Keywords",
         "types": {
@@ -7101,7 +7376,7 @@
       },
       {
         "source": 26,
-        "target": 36,
+        "target": 37,
         "value": 2.0,
         "reason": "2 Keywords",
         "types": {
@@ -7166,6 +7441,22 @@
       {
         "source": 27,
         "target": 35,
+        "value": 6.6081976621622465,
+        "reason": "2 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 3.6081976621622465,
+          "opacity": 0.7,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 27,
+        "target": 36,
         "value": 4.6081976621622465,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -7181,7 +7472,7 @@
       },
       {
         "source": 27,
-        "target": 43,
+        "target": 44,
         "value": 2.6081976621622465,
         "reason": "Same Venue",
         "types": {
@@ -7229,7 +7520,7 @@
       },
       {
         "source": 28,
-        "target": 38,
+        "target": 39,
         "value": 2.0,
         "reason": "Same Venue",
         "types": {
@@ -7245,7 +7536,7 @@
       },
       {
         "source": 28,
-        "target": 42,
+        "target": 43,
         "value": 3.3744360978112327,
         "reason": "Same Venue",
         "types": {
@@ -7278,6 +7569,22 @@
       {
         "source": 29,
         "target": 35,
+        "value": 6.0,
+        "reason": "2 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 3.0,
+          "opacity": 0.7,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 29,
+        "target": 36,
         "value": 4.0,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -7341,7 +7648,7 @@
       },
       {
         "source": 30,
-        "target": 36,
+        "target": 37,
         "value": 3.0,
         "reason": "1 Co-Authors",
         "types": {
@@ -7357,7 +7664,7 @@
       },
       {
         "source": 30,
-        "target": 38,
+        "target": 39,
         "value": 2.0,
         "reason": "Same Venue",
         "types": {
@@ -7373,7 +7680,7 @@
       },
       {
         "source": 30,
-        "target": 42,
+        "target": 43,
         "value": 3.3744360978112327,
         "reason": "Same Venue",
         "types": {
@@ -7389,7 +7696,7 @@
       },
       {
         "source": 31,
-        "target": 41,
+        "target": 42,
         "value": 6.0,
         "reason": "2 Co-Authors",
         "types": {
@@ -7437,7 +7744,7 @@
       },
       {
         "source": 32,
-        "target": 36,
+        "target": 37,
         "value": 4.0,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -7453,7 +7760,7 @@
       },
       {
         "source": 32,
-        "target": 38,
+        "target": 39,
         "value": 2.0,
         "reason": "Same Venue",
         "types": {
@@ -7469,7 +7776,7 @@
       },
       {
         "source": 32,
-        "target": 42,
+        "target": 43,
         "value": 5.374436097811232,
         "reason": "2 Keywords, Same Venue",
         "types": {
@@ -7501,7 +7808,7 @@
       },
       {
         "source": 33,
-        "target": 36,
+        "target": 37,
         "value": 14.0,
         "reason": "5 Keywords, 3 Co-Authors",
         "types": {
@@ -7517,7 +7824,7 @@
       },
       {
         "source": 33,
-        "target": 43,
+        "target": 44,
         "value": 2.0,
         "reason": "Same Venue",
         "types": {
@@ -7534,6 +7841,22 @@
       {
         "source": 34,
         "target": 35,
+        "value": 5.256116095164411,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 3.756116095164411,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 34,
+        "target": 36,
         "value": 6.256116095164411,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -7549,7 +7872,7 @@
       },
       {
         "source": 34,
-        "target": 36,
+        "target": 37,
         "value": 5.256116095164411,
         "reason": "1 Co-Authors",
         "types": {
@@ -7566,22 +7889,6 @@
       {
         "source": 35,
         "target": 36,
-        "value": 2.0,
-        "reason": "2 Keywords",
-        "types": {
-          "topic": true,
-          "venue": false,
-          "author": false
-        },
-        "lineStyle": {
-          "width": 1.0,
-          "opacity": 0.35,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 37,
-        "target": 38,
         "value": 3.0,
         "reason": "1 Co-Authors",
         "types": {
@@ -7596,8 +7903,56 @@
         }
       },
       {
-        "source": 37,
+        "source": 35,
+        "target": 43,
+        "value": 4.374436097811232,
+        "reason": "3 Keywords",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": false
+        },
+        "lineStyle": {
+          "width": 2.8744360978112327,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 36,
+        "target": 37,
+        "value": 2.0,
+        "reason": "2 Keywords",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": false
+        },
+        "lineStyle": {
+          "width": 1.0,
+          "opacity": 0.35,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 38,
         "target": 39,
+        "value": 3.0,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 1.5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 38,
+        "target": 40,
         "value": 2.0,
         "reason": "Same Venue",
         "types": {
@@ -7612,8 +7967,8 @@
         }
       },
       {
-        "source": 38,
-        "target": 42,
+        "source": 39,
+        "target": 43,
         "value": 3.3744360978112327,
         "reason": "Same Venue",
         "types": {
@@ -7628,8 +7983,8 @@
         }
       },
       {
-        "source": 39,
-        "target": 43,
+        "source": 40,
+        "target": 44,
         "value": 3.0,
         "reason": "1 Co-Authors",
         "types": {
@@ -7646,20 +8001,20 @@
     ]
   },
   "scholar": {
-    "lastUpdated": "August 2026",
+    "lastUpdated": "September 2026",
     "metrics": {
-      "citations": 610,
+      "citations": 611,
       "hIndex": 9,
       "i10Index": 9,
-      "publications": 38,
+      "publications": 42,
       "citationVelocity": 128,
       "interests": [
         "Learning",
         "Hacker",
         "Phishing",
         "Framework",
-        "Information",
-        "Embedding"
+        "Threat",
+        "Information"
       ]
     },
     "citationsByYear": [
@@ -7685,7 +8040,7 @@
       },
       {
         "year": "2025",
-        "citations": 151
+        "citations": 152
       },
       {
         "year": "2026",
@@ -7694,25 +8049,25 @@
     ]
   },
   "impactStats": {
-    "updatedLabel": "August 2026",
+    "updatedLabel": "September 2026",
     "latestYear": 2027,
     "latestYearCount": 1,
     "journals": {
       "value": 9,
-      "base": 44,
-      "meta": "9 of 44 total publications",
+      "base": 45,
+      "meta": "9 of 45 total publications",
       "tooltip": "Peer-reviewed journal articles."
     },
     "conferences": {
       "value": 28,
-      "base": 44,
-      "meta": "28 of 44 total publications",
+      "base": 45,
+      "meta": "28 of 45 total publications",
       "tooltip": "Conference papers and proceedings."
     },
     "workshops": {
-      "value": 7,
-      "base": 44,
-      "meta": "7 of 44 total publications",
+      "value": 8,
+      "base": 45,
+      "meta": "8 of 45 total publications",
       "tooltip": "Workshop and pre-conference papers."
     },
     "best-paper": {
@@ -7772,63 +8127,67 @@
       },
       {
         "month": "202608",
-        "visitors": 669
+        "visitors": 675
+      },
+      {
+        "month": "202609",
+        "visitors": 80
       }
     ],
     "devices": [
       {
         "device": "desktop",
-        "users": 615
+        "users": 653
       },
       {
         "device": "mobile",
-        "users": 55
+        "users": 57
       }
     ],
     "topPages": [
       {
         "path": "/",
-        "views": 176
-      },
-      {
-        "path": "/cv/",
-        "views": 30
-      },
-      {
-        "path": "/research/",
-        "views": 25
-      },
-      {
-        "path": "/journal_publication/voice-phishing-misq/",
-        "views": 24
+        "views": 188
       },
       {
         "path": "/publications/",
-        "views": 21
+        "views": 45
+      },
+      {
+        "path": "/journal_publication/voice-phishing-misq/",
+        "views": 28
+      },
+      {
+        "path": "/cv/",
+        "views": 27
+      },
+      {
+        "path": "/research/",
+        "views": 23
+      },
+      {
+        "path": "/conference_publication/four-signal-phishing-cars-2026/",
+        "views": 16
+      },
+      {
+        "path": "/journal_publication/dtl-el-misq/",
+        "views": 11
       },
       {
         "path": "/conference_publication/ai-talent-icis-2026/",
         "views": 10
       },
       {
-        "path": "/workshop_publication/phishing-nudging-wisp-2025/",
-        "views": 10
-      },
-      {
-        "path": "/journal_publication/dtl-el-misq/",
-        "views": 9
-      },
-      {
         "path": "/tag/voice-phishing/",
         "views": 9
       },
       {
-        "path": "/conference_publication/ai4cyber-kdd-2024/",
-        "views": 8
+        "path": "/teaching/",
+        "views": 9
       }
     ],
-    "totalLast30Days": 670,
-    "lifetimeTotal": 2236,
+    "totalLast30Days": 710,
+    "lifetimeTotal": 2322,
     "ranges": {
       "30": {
         "locations": [
@@ -7837,7 +8196,17 @@
             "region": "",
             "country": "Singapore",
             "countryRaw": "Singapore",
-            "visitors": 481,
+            "visitors": 505,
+            "display": "Singapore, —, Singapore",
+            "lat": 1.3521,
+            "lng": 103.8198
+          },
+          {
+            "city": "Singapore",
+            "region": "",
+            "country": "Singapore",
+            "countryRaw": "Singapore",
+            "visitors": 13,
             "display": "Singapore, —, Singapore",
             "lat": 1.3521,
             "lng": 103.8198
@@ -7847,7 +8216,7 @@
             "region": "GA",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 7,
+            "visitors": 12,
             "display": "Atlanta, GA, USA",
             "lat": 33.749,
             "lng": -84.388
@@ -7867,6 +8236,14 @@
             "countryRaw": "Colombia",
             "visitors": 6,
             "display": "Bogota, Bogota, Colombia"
+          },
+          {
+            "city": "Chongqing",
+            "region": "Chongqing",
+            "country": "China",
+            "countryRaw": "China",
+            "visitors": 6,
+            "display": "Chongqing, Chongqing, China"
           },
           {
             "city": "Dhaka",
@@ -7965,16 +8342,18 @@
             "display": "Baghdad, Baghdad Governorate, Iraq"
           },
           {
-            "city": "Dubai",
-            "region": "Dubai",
-            "country": "United Arab Emirates",
-            "countryRaw": "United Arab Emirates",
+            "city": "New York",
+            "region": "NY",
+            "country": "USA",
+            "countryRaw": "United States",
             "visitors": 4,
-            "display": "Dubai, Dubai, United Arab Emirates"
+            "display": "New York, NY, USA",
+            "lat": 40.7128,
+            "lng": -74.006
           }
         ],
-        "usPct": 1,
-        "intlPct": 99,
+        "usPct": 3,
+        "intlPct": 97,
         "topRegion": "Singapore",
         "topThreeWithCoords": [
           {
@@ -7982,7 +8361,17 @@
             "region": "",
             "country": "Singapore",
             "countryRaw": "Singapore",
-            "visitors": 481,
+            "visitors": 505,
+            "display": "Singapore, —, Singapore",
+            "lat": 1.3521,
+            "lng": 103.8198
+          },
+          {
+            "city": "Singapore",
+            "region": "",
+            "country": "Singapore",
+            "countryRaw": "Singapore",
+            "visitors": 13,
             "display": "Singapore, —, Singapore",
             "lat": 1.3521,
             "lng": 103.8198
@@ -7992,7 +8381,7 @@
             "region": "GA",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 7,
+            "visitors": 12,
             "display": "Atlanta, GA, USA",
             "lat": 33.749,
             "lng": -84.388
@@ -8006,10 +8395,20 @@
             "region": "",
             "country": "Singapore",
             "countryRaw": "Singapore",
-            "visitors": 713,
+            "visitors": 746,
             "display": "Singapore, —, Singapore",
             "lat": 1.3521,
             "lng": 103.8198
+          },
+          {
+            "city": "Atlanta",
+            "region": "GA",
+            "country": "USA",
+            "countryRaw": "United States",
+            "visitors": 19,
+            "display": "Atlanta, GA, USA",
+            "lat": 33.749,
+            "lng": -84.388
           },
           {
             "city": "Ho Chi Minh City",
@@ -8030,14 +8429,14 @@
             "lng": 105.8342
           },
           {
-            "city": "Atlanta",
-            "region": "GA",
-            "country": "USA",
-            "countryRaw": "United States",
+            "city": "Singapore",
+            "region": "",
+            "country": "Singapore",
+            "countryRaw": "Singapore",
             "visitors": 13,
-            "display": "Atlanta, GA, USA",
-            "lat": 33.749,
-            "lng": -84.388
+            "display": "Singapore, —, Singapore",
+            "lat": 1.3521,
+            "lng": 103.8198
           },
           {
             "city": "Dhaka",
@@ -8100,6 +8499,14 @@
             "display": "Cape Town, Western Cape, South Africa"
           },
           {
+            "city": "Chongqing",
+            "region": "Chongqing",
+            "country": "China",
+            "countryRaw": "China",
+            "visitors": 7,
+            "display": "Chongqing, Chongqing, China"
+          },
+          {
             "city": "Dubai",
             "region": "Dubai",
             "country": "United Arab Emirates",
@@ -8114,34 +8521,10 @@
             "countryRaw": "Hong Kong",
             "visitors": 7,
             "display": "Hong Kong, —, Hong Kong"
-          },
-          {
-            "city": "Los Angeles",
-            "region": "CA",
-            "country": "USA",
-            "countryRaw": "United States",
-            "visitors": 7,
-            "display": "Los Angeles, CA, USA"
-          },
-          {
-            "city": "San Jose",
-            "region": "CA",
-            "country": "USA",
-            "countryRaw": "United States",
-            "visitors": 7,
-            "display": "San Jose, CA, USA"
-          },
-          {
-            "city": "Santiago",
-            "region": "Santiago Metropolitan Region",
-            "country": "Chile",
-            "countryRaw": "Chile",
-            "visitors": 7,
-            "display": "Santiago, Santiago Metropolitan Region, Chile"
           }
         ],
-        "usPct": 5,
-        "intlPct": 95,
+        "usPct": 4,
+        "intlPct": 96,
         "topRegion": "Singapore",
         "topThreeWithCoords": [
           {
@@ -8149,10 +8532,20 @@
             "region": "",
             "country": "Singapore",
             "countryRaw": "Singapore",
-            "visitors": 713,
+            "visitors": 746,
             "display": "Singapore, —, Singapore",
             "lat": 1.3521,
             "lng": 103.8198
+          },
+          {
+            "city": "Atlanta",
+            "region": "GA",
+            "country": "USA",
+            "countryRaw": "United States",
+            "visitors": 19,
+            "display": "Atlanta, GA, USA",
+            "lat": 33.749,
+            "lng": -84.388
           },
           {
             "city": "Hanoi",
@@ -8163,16 +8556,6 @@
             "display": "Hanoi, Ha Noi, Vietnam",
             "lat": 21.0278,
             "lng": 105.8342
-          },
-          {
-            "city": "Atlanta",
-            "region": "GA",
-            "country": "USA",
-            "countryRaw": "United States",
-            "visitors": 13,
-            "display": "Atlanta, GA, USA",
-            "lat": 33.749,
-            "lng": -84.388
           }
         ]
       },
@@ -8183,7 +8566,7 @@
             "region": "",
             "country": "Singapore",
             "countryRaw": "Singapore",
-            "visitors": 916,
+            "visitors": 949,
             "display": "Singapore, —, Singapore",
             "lat": 1.3521,
             "lng": 103.8198
@@ -8203,7 +8586,7 @@
             "region": "GA",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 75,
+            "visitors": 81,
             "display": "Atlanta, GA, USA",
             "lat": 33.749,
             "lng": -84.388
@@ -8281,6 +8664,24 @@
             "lng": -74.006
           },
           {
+            "city": "Singapore",
+            "region": "",
+            "country": "Singapore",
+            "countryRaw": "Singapore",
+            "visitors": 13,
+            "display": "Singapore, —, Singapore",
+            "lat": 1.3521,
+            "lng": 103.8198
+          },
+          {
+            "city": "Hong Kong",
+            "region": "",
+            "country": "Hong Kong",
+            "countryRaw": "Hong Kong",
+            "visitors": 12,
+            "display": "Hong Kong, —, Hong Kong"
+          },
+          {
             "city": "Guangzhou",
             "region": "Guangdong Province",
             "country": "China",
@@ -8289,28 +8690,12 @@
             "display": "Guangzhou, Guangdong Province, China"
           },
           {
-            "city": "Hong Kong",
-            "region": "",
-            "country": "Hong Kong",
-            "countryRaw": "Hong Kong",
-            "visitors": 11,
-            "display": "Hong Kong, —, Hong Kong"
-          },
-          {
             "city": "Los Angeles",
             "region": "CA",
             "country": "USA",
             "countryRaw": "United States",
             "visitors": 10,
             "display": "Los Angeles, CA, USA"
-          },
-          {
-            "city": "Santiago",
-            "region": "Santiago Metropolitan Region",
-            "country": "Chile",
-            "countryRaw": "Chile",
-            "visitors": 10,
-            "display": "Santiago, Santiago Metropolitan Region, Chile"
           }
         ],
         "usPct": 9,
@@ -8322,7 +8707,7 @@
             "region": "",
             "country": "Singapore",
             "countryRaw": "Singapore",
-            "visitors": 916,
+            "visitors": 949,
             "display": "Singapore, —, Singapore",
             "lat": 1.3521,
             "lng": 103.8198
@@ -8342,7 +8727,7 @@
             "region": "GA",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 75,
+            "visitors": 81,
             "display": "Atlanta, GA, USA",
             "lat": 33.749,
             "lng": -84.388
@@ -8418,12 +8803,12 @@
           "year": 2019,
           "venue": "IEEE ISI",
           "citations": 133,
-          "eigen": 0.20114200441867902,
+          "eigen": 0.19540758418370907,
           "between": 0.0,
           "degree": 8,
           "topicLinks": 3,
           "venueLinks": 8,
-          "authorLinks": 66,
+          "authorLinks": 67,
           "authors": [
             "Benjamin M. Ampel",
             "Mark Patton",
@@ -8436,12 +8821,12 @@
           "year": 2020,
           "venue": "IEEE ISI",
           "citations": 37,
-          "eigen": 0.3873588839292967,
+          "eigen": 0.376433282014288,
           "between": 5.902777777777777,
           "degree": 9,
-          "topicLinks": 28,
+          "topicLinks": 29,
           "venueLinks": 8,
-          "authorLinks": 101,
+          "authorLinks": 103,
           "authors": [
             "Ben Lazarine",
             "Sagar Samtani",
@@ -8458,12 +8843,12 @@
           "year": 2020,
           "venue": "IEEE ISI",
           "citations": 58,
-          "eigen": 0.3309605882091391,
-          "between": 111.81349206349202,
-          "degree": 14,
-          "topicLinks": 39,
+          "eigen": 0.3468520110281647,
+          "between": 113.5480654965949,
+          "degree": 15,
+          "topicLinks": 43,
           "venueLinks": 8,
-          "authorLinks": 97,
+          "authorLinks": 99,
           "authors": [
             "Benjamin M. Ampel",
             "Sagar Samtani",
@@ -8478,12 +8863,12 @@
           "year": 2020,
           "venue": "arXiv preprint arXiv:2012.14425",
           "citations": 0,
-          "eigen": 0.05963757774933693,
-          "between": 11.657142857142855,
-          "degree": 6,
-          "topicLinks": 28,
+          "eigen": 0.0729738516694896,
+          "between": 8.291430464959877,
+          "degree": 7,
+          "topicLinks": 30,
           "venueLinks": 0,
-          "authorLinks": 43,
+          "authorLinks": 44,
           "authors": [
             "Benjamin M. Ampel"
           ]
@@ -8494,12 +8879,12 @@
           "year": 2020,
           "venue": "IEEE ISI",
           "citations": 19,
-          "eigen": 0.3716205645681279,
+          "eigen": 0.36041714793000235,
           "between": 0.0,
           "degree": 8,
-          "topicLinks": 29,
+          "topicLinks": 30,
           "venueLinks": 8,
-          "authorLinks": 101,
+          "authorLinks": 103,
           "authors": [
             "Steven Ullman",
             "Sagar Samtani",
@@ -8516,12 +8901,12 @@
           "year": 2021,
           "venue": "IEEE ISI",
           "citations": 9,
-          "eigen": 0.23821789824634407,
+          "eigen": 0.23184399129869449,
           "between": 0.0,
           "degree": 8,
           "topicLinks": 13,
           "venueLinks": 8,
-          "authorLinks": 64,
+          "authorLinks": 65,
           "authors": [
             "Benjamin M. Ampel",
             "Hsinchun Chen"
@@ -8533,12 +8918,12 @@
           "year": 2021,
           "venue": "IEEE ISI",
           "citations": 6,
-          "eigen": 0.36830949102625654,
+          "eigen": 0.3588232364789455,
           "between": 3.1666666666666665,
           "degree": 9,
-          "topicLinks": 26,
+          "topicLinks": 27,
           "venueLinks": 8,
-          "authorLinks": 90,
+          "authorLinks": 92,
           "authors": [
             "Kaeli Otto",
             "Benjamin M. Ampel",
@@ -8553,12 +8938,12 @@
           "year": 2021,
           "venue": "IEEE ISI",
           "citations": 22,
-          "eigen": 0.29609232641877564,
+          "eigen": 0.2888212948396358,
           "between": 5.902777777777777,
           "degree": 9,
-          "topicLinks": 20,
+          "topicLinks": 21,
           "venueLinks": 8,
-          "authorLinks": 83,
+          "authorLinks": 85,
           "authors": [
             "Tala Vahedi",
             "Benjamin M. Ampel",
@@ -8572,12 +8957,12 @@
           "year": 2021,
           "venue": "AI4Cyber-KDD",
           "citations": 94,
-          "eigen": 0.03721844071869925,
+          "eigen": 0.03701095191169992,
           "between": 0.0,
           "degree": 2,
-          "topicLinks": 23,
+          "topicLinks": 24,
           "venueLinks": 0,
-          "authorLinks": 90,
+          "authorLinks": 92,
           "authors": [
             "Benjamin M. Ampel",
             "Sagar Samtani",
@@ -8591,12 +8976,12 @@
           "year": 2021,
           "venue": "ICIS",
           "citations": 3,
-          "eigen": 6.174840689915158e-15,
+          "eigen": 3.307027789501003e-17,
           "between": 0.0,
           "degree": 2,
           "topicLinks": 0,
           "venueLinks": 2,
-          "authorLinks": 45,
+          "authorLinks": 46,
           "authors": [
             "Carolin Marx",
             "Benjamin M. Ampel",
@@ -8609,12 +8994,12 @@
           "year": 2023,
           "venue": "AMCIS",
           "citations": 9,
-          "eigen": 0.002142958132781306,
-          "between": 36.89285714285714,
+          "eigen": 0.0027032172367521994,
+          "between": 37.861111111111114,
           "degree": 4,
           "topicLinks": 16,
           "venueLinks": 1,
-          "authorLinks": 87,
+          "authorLinks": 90,
           "authors": [
             "Benjamin M. Ampel",
             "Yang Gao",
@@ -8629,12 +9014,12 @@
           "year": 2023,
           "venue": "IEEE ISI",
           "citations": 7,
-          "eigen": 0.33291832011411354,
+          "eigen": 0.32312394528480004,
           "between": 0.0,
           "degree": 8,
-          "topicLinks": 23,
+          "topicLinks": 24,
           "venueLinks": 8,
-          "authorLinks": 90,
+          "authorLinks": 92,
           "authors": [
             "Benjamin M. Ampel",
             "Kaeli Otto",
@@ -8649,12 +9034,12 @@
           "year": 2023,
           "venue": "Digital Threats: Research and Practice",
           "citations": 6,
-          "eigen": 0.0067313066936729275,
+          "eigen": 0.0082484339685506,
           "between": 0.0,
           "degree": 2,
-          "topicLinks": 19,
+          "topicLinks": 20,
           "venueLinks": 0,
-          "authorLinks": 64,
+          "authorLinks": 67,
           "authors": [
             "Yang Gao",
             "Benjamin M. Ampel",
@@ -8667,12 +9052,12 @@
           "year": 2023,
           "venue": "WDS",
           "citations": 0,
-          "eigen": 0.054393858681185264,
-          "between": 130.0,
-          "degree": 9,
-          "topicLinks": 35,
+          "eigen": 0.06741199771505269,
+          "between": 125.12304068480542,
+          "degree": 10,
+          "topicLinks": 37,
           "venueLinks": 0,
-          "authorLinks": 71,
+          "authorLinks": 74,
           "authors": [
             "Yang Gao",
             "Sagar Samtani",
@@ -8687,12 +9072,12 @@
           "year": 2023,
           "venue": "IEEE ISI",
           "citations": 9,
-          "eigen": 0.3113107026118894,
-          "between": 103.00079365079363,
+          "eigen": 0.30595257987657665,
+          "between": 102.42387334887337,
           "degree": 14,
-          "topicLinks": 31,
+          "topicLinks": 32,
           "venueLinks": 8,
-          "authorLinks": 83,
+          "authorLinks": 85,
           "authors": [
             "Benjamin M. Ampel",
             "Tala Vahedi",
@@ -8706,12 +9091,12 @@
           "year": 2023,
           "venue": "AMCIS",
           "citations": 5,
-          "eigen": 0.00014608325381872125,
+          "eigen": 0.00018228277887909447,
           "between": 0.0,
           "degree": 1,
           "topicLinks": 0,
           "venueLinks": 1,
-          "authorLinks": 43,
+          "authorLinks": 44,
           "authors": [
             "Benjamin M. Ampel"
           ]
@@ -8722,12 +9107,12 @@
           "year": 2023,
           "venue": "Transactions on Replication Research",
           "citations": 2,
-          "eigen": 5.312781043884642e-24,
+          "eigen": 1.053829230340124e-27,
           "between": 0.0,
           "degree": 0,
           "topicLinks": 0,
           "venueLinks": 0,
-          "authorLinks": 51,
+          "authorLinks": 52,
           "authors": [
             "Benjamin M. Ampel",
             "Steven Ullman"
@@ -8739,12 +9124,12 @@
           "year": 2024,
           "venue": "MIS Quarterly",
           "citations": 45,
-          "eigen": 0.1731855536246262,
-          "between": 52.751190476190494,
-          "degree": 9,
-          "topicLinks": 41,
+          "eigen": 0.1950316561479069,
+          "between": 49.27042451013039,
+          "degree": 10,
+          "topicLinks": 45,
           "venueLinks": 1,
-          "authorLinks": 89,
+          "authorLinks": 91,
           "authors": [
             "Benjamin M. Ampel",
             "Sagar Samtani",
@@ -8757,13 +9142,13 @@
           "title": "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach",
           "year": 2024,
           "venue": "Journal of Management Information Systems",
-          "citations": 72,
-          "eigen": 0.07912639268863361,
-          "between": 18.35436507936509,
-          "degree": 7,
-          "topicLinks": 30,
+          "citations": 73,
+          "eigen": 0.09000665880265012,
+          "between": 22.367649017649015,
+          "degree": 8,
+          "topicLinks": 32,
           "venueLinks": 1,
-          "authorLinks": 89,
+          "authorLinks": 91,
           "authors": [
             "Benjamin M. Ampel",
             "Sagar Samtani",
@@ -8778,12 +9163,12 @@
           "year": 2024,
           "venue": "ACM KDD",
           "citations": 1,
-          "eigen": 5.312781043884642e-24,
+          "eigen": 1.053829230340124e-27,
           "between": 0.0,
           "degree": 0,
           "topicLinks": 7,
           "venueLinks": 0,
-          "authorLinks": 90,
+          "authorLinks": 92,
           "authors": [
             "Steven Ullman",
             "Benjamin M. Ampel",
@@ -8798,12 +9183,12 @@
           "year": 2025,
           "venue": "WISP",
           "citations": 0,
-          "eigen": 0.0064561333942750425,
-          "between": 48.13333333333333,
+          "eigen": 0.008281087867452732,
+          "between": 49.23003679327208,
           "degree": 5,
-          "topicLinks": 23,
+          "topicLinks": 24,
           "venueLinks": 1,
-          "authorLinks": 65,
+          "authorLinks": 66,
           "authors": [
             "Mason Wagner",
             "Benjamin M. Ampel",
@@ -8817,12 +9202,12 @@
           "year": 2025,
           "venue": "IEEE SPW",
           "citations": 1,
-          "eigen": 0.01144704234042913,
-          "between": 25.76428571428571,
+          "eigen": 0.014143880949161523,
+          "between": 25.36036594124829,
           "degree": 5,
-          "topicLinks": 25,
+          "topicLinks": 26,
           "venueLinks": 0,
-          "authorLinks": 64,
+          "authorLinks": 67,
           "authors": [
             "Yang Gao",
             "Benjamin M. Ampel",
@@ -8835,12 +9220,12 @@
           "year": 2025,
           "venue": "ACM Transactions on Management Information Systems",
           "citations": 57,
-          "eigen": 0.005838756249336869,
+          "eigen": 0.0058608366661737086,
           "between": 9.015873015873014,
           "degree": 3,
           "topicLinks": 17,
           "venueLinks": 0,
-          "authorLinks": 66,
+          "authorLinks": 67,
           "authors": [
             "Benjamin M. Ampel",
             "Chi-Heng Yang",
@@ -8854,12 +9239,12 @@
           "year": 2025,
           "venue": "WISP",
           "citations": 2,
-          "eigen": 0.0017223851055348754,
-          "between": 17.66825396825397,
+          "eigen": 0.0018742798655955305,
+          "between": 17.319083694083695,
           "degree": 3,
           "topicLinks": 9,
           "venueLinks": 1,
-          "authorLinks": 64,
+          "authorLinks": 65,
           "authors": [
             "Raul Reyes",
             "Benjamin M. Ampel",
@@ -8872,12 +9257,12 @@
           "year": 2025,
           "venue": "SIG Services",
           "citations": 2,
-          "eigen": 0.03723965861745201,
-          "between": 29.928571428571427,
+          "eigen": 0.03733265923024654,
+          "between": 30.787518037518037,
           "degree": 5,
           "topicLinks": 22,
           "venueLinks": 0,
-          "authorLinks": 51,
+          "authorLinks": 52,
           "authors": [
             "Benjamin M. Ampel",
             "Steven Ullman"
@@ -8889,12 +9274,12 @@
           "year": 2025,
           "venue": "ICIS TREO",
           "citations": 0,
-          "eigen": 0.018150091648648257,
-          "between": 4.750000000000001,
+          "eigen": 0.0187430835960296,
+          "between": 5.280303030303031,
           "degree": 3,
           "topicLinks": 17,
           "venueLinks": 0,
-          "authorLinks": 51,
+          "authorLinks": 52,
           "authors": [
             "Benjamin M. Ampel",
             "Steven Ullman"
@@ -8906,12 +9291,12 @@
           "year": 2026,
           "venue": "Information Systems Frontiers",
           "citations": 0,
-          "eigen": 0.019952642027092304,
+          "eigen": 0.02172034870053255,
           "between": 1.0833333333333333,
           "degree": 3,
           "topicLinks": 16,
           "venueLinks": 0,
-          "authorLinks": 43,
+          "authorLinks": 44,
           "authors": [
             "Benjamin M. Ampel"
           ]
@@ -8922,12 +9307,12 @@
           "year": 2026,
           "venue": "HICSS",
           "citations": 1,
-          "eigen": 0.026052698157146465,
-          "between": 50.52142857142857,
+          "eigen": 0.02553194465812706,
+          "between": 51.24444444444444,
           "degree": 5,
           "topicLinks": 17,
           "venueLinks": 2,
-          "authorLinks": 62,
+          "authorLinks": 65,
           "authors": [
             "Chengjun Zhang",
             "Benjamin M. Ampel",
@@ -8940,12 +9325,12 @@
           "year": 2026,
           "venue": "IEEE CARS",
           "citations": 0,
-          "eigen": 0.007666618701407915,
-          "between": 15.696825396825396,
+          "eigen": 0.010411188239157609,
+          "between": 16.623522229404582,
           "degree": 6,
           "topicLinks": 11,
           "venueLinks": 4,
-          "authorLinks": 43,
+          "authorLinks": 44,
           "authors": [
             "Abena M. Darko",
             "Benjamin M. Ampel"
@@ -8957,12 +9342,12 @@
           "year": 2026,
           "venue": "BlackboxNLP",
           "citations": 0,
-          "eigen": 0.0017756080430611442,
+          "eigen": 0.0017214469989420326,
           "between": 0.0,
           "degree": 1,
           "topicLinks": 10,
           "venueLinks": 0,
-          "authorLinks": 62,
+          "authorLinks": 65,
           "authors": [
             "Ting Chen",
             "Chengjun Zhang",
@@ -8976,12 +9361,12 @@
           "year": 2026,
           "venue": "IEEE CARS",
           "citations": 0,
-          "eigen": 0.013679507117663072,
-          "between": 20.127777777777776,
-          "degree": 7,
-          "topicLinks": 25,
+          "eigen": 0.024357552371143502,
+          "between": 26.89805080540375,
+          "degree": 8,
+          "topicLinks": 27,
           "venueLinks": 4,
-          "authorLinks": 67,
+          "authorLinks": 68,
           "authors": [
             "Noah Abdellatif",
             "Mason Wagner",
@@ -8997,12 +9382,12 @@
           "year": 2026,
           "venue": "EMNLP",
           "citations": 0,
-          "eigen": 5.312781043884642e-24,
+          "eigen": 1.053829230340124e-27,
           "between": 0.0,
           "degree": 0,
           "topicLinks": 0,
           "venueLinks": 0,
-          "authorLinks": 45,
+          "authorLinks": 46,
           "authors": [
             "Uthman Jinadu",
             "Parsa Ghazvinian",
@@ -9018,12 +9403,12 @@
           "year": 2026,
           "venue": "IEEE CARS",
           "citations": 0,
-          "eigen": 0.01098711673927645,
-          "between": 1.8333333333333333,
+          "eigen": 0.014400990175784724,
+          "between": 1.8095238095238095,
           "degree": 5,
-          "topicLinks": 13,
+          "topicLinks": 14,
           "venueLinks": 4,
-          "authorLinks": 72,
+          "authorLinks": 73,
           "authors": [
             "Joseph Chen",
             "Benjamin M. Ampel",
@@ -9038,12 +9423,12 @@
           "year": 2026,
           "venue": "HICSS",
           "citations": 0,
-          "eigen": 0.02823508266834661,
-          "between": 24.002380952380953,
+          "eigen": 0.029935643966109475,
+          "between": 25.6484126984127,
           "degree": 4,
           "topicLinks": 14,
           "venueLinks": 2,
-          "authorLinks": 66,
+          "authorLinks": 67,
           "authors": [
             "Cade Dacosta",
             "Benjamin M. Ampel",
@@ -9057,12 +9442,12 @@
           "year": 2026,
           "venue": "MIS Quarterly",
           "citations": 7,
-          "eigen": 0.02278491690441887,
-          "between": 5.104365079365079,
+          "eigen": 0.02647072335623471,
+          "between": 4.339025680202151,
           "degree": 4,
-          "topicLinks": 25,
+          "topicLinks": 26,
           "venueLinks": 1,
-          "authorLinks": 82,
+          "authorLinks": 84,
           "authors": [
             "Benjamin M. Ampel",
             "Sagar Samtani",
@@ -9071,33 +9456,52 @@
         },
         {
           "index": 35,
-          "title": "HackerSignal: A Large-Scale Multi-Source Dataset Linking Hacker Community Discourse to the CVE Vulnerability Lifecycle",
+          "title": "Cyber Threat Classification Under Non-Stationary Environments: An Adapt In-Context Learning (Adapt-ICL) Approach",
           "year": 2026,
-          "venue": "arXiv preprint arXiv:2605.03158",
+          "venue": "INFORMS Workshop on Data Science",
           "citations": 0,
-          "eigen": 0.010056360858125215,
-          "between": 12.222222222222221,
-          "degree": 2,
-          "topicLinks": 19,
+          "eigen": 0.10874042576783255,
+          "between": 22.98147261235496,
+          "degree": 8,
+          "topicLinks": 33,
           "venueLinks": 0,
-          "authorLinks": 61,
+          "authorLinks": 69,
           "authors": [
+            "Chengjun Zhang",
+            "Yang Gao",
             "Benjamin M. Ampel",
             "Sagar Samtani"
           ]
         },
         {
           "index": 36,
+          "title": "HackerSignal: A Large-Scale Multi-Source Dataset Linking Hacker Community Discourse to the CVE Vulnerability Lifecycle",
+          "year": 2026,
+          "venue": "arXiv preprint arXiv:2605.03158",
+          "citations": 0,
+          "eigen": 0.010725397828873827,
+          "between": 12.555555555555555,
+          "degree": 2,
+          "topicLinks": 19,
+          "venueLinks": 0,
+          "authorLinks": 63,
+          "authors": [
+            "Benjamin M. Ampel",
+            "Sagar Samtani"
+          ]
+        },
+        {
+          "index": 37,
           "title": "Identifying Protected Health Information in Online Hacker Communities: A Multi-Task Relation Learning Approach",
           "year": 2026,
           "venue": "Journal of Management Information Systems",
           "citations": 0,
-          "eigen": 0.14582915829379353,
-          "between": 161.6174603174603,
-          "degree": 13,
-          "topicLinks": 45,
+          "eigen": 0.157199856375037,
+          "between": 170.68165886401178,
+          "degree": 14,
+          "topicLinks": 47,
           "venueLinks": 1,
-          "authorLinks": 66,
+          "authorLinks": 67,
           "authors": [
             "Cade Dacosta",
             "Benjamin M. Ampel",
@@ -9106,17 +9510,17 @@
           ]
         },
         {
-          "index": 37,
+          "index": 38,
           "title": "Pathways to AI-Ready Entry-Level Talent for Industry Domains: Modular, Adaptive Design Principles for Business-School Curriculum",
           "year": 2026,
           "venue": "ICIS",
           "citations": 0,
-          "eigen": 6.174840689915158e-15,
+          "eigen": 3.307027789501003e-17,
           "between": 0.0,
           "degree": 2,
           "topicLinks": 4,
           "venueLinks": 2,
-          "authorLinks": 44,
+          "authorLinks": 45,
           "authors": [
             "Arun Rai",
             "Balasubramaniam Ramesh",
@@ -9129,17 +9533,17 @@
           ]
         },
         {
-          "index": 38,
+          "index": 39,
           "title": "Performance Transfer and Behavioral Reliance in AI-Assisted Cybersecurity Training",
           "year": 2026,
           "venue": "IEEE CARS",
           "citations": 0,
-          "eigen": 0.006362960097657686,
+          "eigen": 0.008577671354729493,
           "between": 0.0,
           "degree": 4,
           "topicLinks": 7,
           "venueLinks": 4,
-          "authorLinks": 44,
+          "authorLinks": 45,
           "authors": [
             "Kameron Clark",
             "Benjamin M. Ampel",
@@ -9147,50 +9551,50 @@
           ]
         },
         {
-          "index": 39,
+          "index": 40,
           "title": "Prosody Training for Lowering Vishing Susceptibility",
           "year": 2026,
           "venue": "ICIS",
           "citations": 0,
-          "eigen": 6.174840689915158e-15,
+          "eigen": 3.307027789501003e-17,
           "between": 0.0,
           "degree": 2,
           "topicLinks": 1,
           "venueLinks": 2,
-          "authorLinks": 44,
+          "authorLinks": 45,
           "authors": [
             "Benjamin M. Ampel",
             "Joseph Buckman"
           ]
         },
         {
-          "index": 40,
+          "index": 41,
           "title": "Seeing Is Not Believing: A Deepfake Video Call Scam at Pan-Asia Trading",
           "year": 2026,
           "venue": "Journal of Information Systems Education",
           "citations": 0,
-          "eigen": 5.312781043884642e-24,
+          "eigen": 1.053829230340124e-27,
           "between": 0.0,
           "degree": 0,
           "topicLinks": 0,
           "venueLinks": 0,
-          "authorLinks": 43,
+          "authorLinks": 44,
           "authors": [
             "Benjamin M. Ampel"
           ]
         },
         {
-          "index": 41,
+          "index": 42,
           "title": "Understanding the Role of Prompt Template in Knowledge Distillation for Safety Alignment",
           "year": 2026,
           "venue": "EMNLP Findings",
           "citations": 0,
-          "eigen": 5.312781043884642e-24,
+          "eigen": 1.053829230340124e-27,
           "between": 0.0,
           "degree": 0,
           "topicLinks": 1,
           "venueLinks": 0,
-          "authorLinks": 45,
+          "authorLinks": 46,
           "authors": [
             "Anjila Budathoki",
             "Manish Dhakal",
@@ -9199,33 +9603,33 @@
           ]
         },
         {
-          "index": 42,
+          "index": 43,
           "title": "Vendor-Conditioned Contrastive Learning for Predicting Organizational Cyber Threat Targets",
           "year": 2026,
           "venue": "IEEE CARS",
           "citations": 3,
-          "eigen": 0.061023157929045446,
-          "between": 73.08849206349207,
-          "degree": 7,
-          "topicLinks": 16,
+          "eigen": 0.07804645962305062,
+          "between": 70.28400259870848,
+          "degree": 8,
+          "topicLinks": 19,
           "venueLinks": 4,
-          "authorLinks": 43,
+          "authorLinks": 44,
           "authors": [
             "Benjamin M. Ampel"
           ]
         },
         {
-          "index": 43,
+          "index": 44,
           "title": "Prediction Markets Are Efficient at Rest and Fragile in Motion",
           "year": 2027,
           "venue": "HICSS",
           "citations": 0,
-          "eigen": 0.0036999928487356196,
+          "eigen": 0.0037398431280476815,
           "between": 0.0,
           "degree": 2,
           "topicLinks": 0,
           "venueLinks": 2,
-          "authorLinks": 44,
+          "authorLinks": 45,
           "authors": [
             "Benjamin M. Ampel",
             "Joseph Buckman"
@@ -9233,20 +9637,20 @@
         }
       ],
       "metrics": {
-        "density": 0.1163,
-        "avgPath": 2.5556,
-        "clustering": 0.5209
+        "density": 0.1192,
+        "avgPath": 2.524,
+        "clustering": 0.5285
       },
       "thresholds": {
-        "topic": 25,
+        "topic": 27,
         "venue": 4,
-        "author": 83,
+        "author": 85,
         "citation": 9
       },
       "maxLinks": {
-        "topic": 45,
+        "topic": 47,
         "venue": 8,
-        "author": 101
+        "author": 103
       }
     },
     "collaboration": {
@@ -9256,7 +9660,7 @@
           "nodes": [
             {
               "id": "Benjamin M. Ampel",
-              "count": 44
+              "count": 45
             },
             {
               "id": "Hsinchun Chen",
@@ -9276,7 +9680,7 @@
             },
             {
               "id": "Sagar Samtani",
-              "count": 19
+              "count": 20
             },
             {
               "id": "Steven Ullman",
@@ -9300,7 +9704,7 @@
             },
             {
               "id": "Yang Gao",
-              "count": 4
+              "count": 5
             },
             {
               "id": "Yidong Chai",
@@ -9332,7 +9736,7 @@
             },
             {
               "id": "Chengjun Zhang",
-              "count": 2
+              "count": 3
             },
             {
               "id": "Abena M. Darko",
@@ -9481,7 +9885,7 @@
             {
               "source": "Benjamin M. Ampel",
               "target": "Sagar Samtani",
-              "count": 19
+              "count": 20
             },
             {
               "source": "Benjamin M. Ampel",
@@ -9586,7 +9990,7 @@
             {
               "source": "Benjamin M. Ampel",
               "target": "Yang Gao",
-              "count": 4
+              "count": 5
             },
             {
               "source": "Hsinchun Chen",
@@ -9611,7 +10015,7 @@
             {
               "source": "Sagar Samtani",
               "target": "Yang Gao",
-              "count": 4
+              "count": 5
             },
             {
               "source": "Benjamin M. Ampel",
@@ -9731,12 +10135,12 @@
             {
               "source": "Benjamin M. Ampel",
               "target": "Chengjun Zhang",
-              "count": 2
+              "count": 3
             },
             {
               "source": "Chengjun Zhang",
               "target": "Sagar Samtani",
-              "count": 2
+              "count": 3
             },
             {
               "source": "Abena M. Darko",
@@ -9944,6 +10348,11 @@
               "count": 2
             },
             {
+              "source": "Chengjun Zhang",
+              "target": "Yang Gao",
+              "count": 1
+            },
+            {
               "source": "Amrita George",
               "target": "Arun Rai",
               "count": 1
@@ -10116,7 +10525,7 @@
           ],
           "authorMeta": {
             "Benjamin M. Ampel": {
-              "count": 44,
+              "count": 45,
               "years": [
                 2019,
                 2020,
@@ -10149,6 +10558,7 @@
                 "IEEE CARS": 5,
                 "BlackboxNLP": 1,
                 "EMNLP": 1,
+                "INFORMS Workshop on Data Science": 1,
                 "arXiv preprint arXiv:2605.03158": 1,
                 "Journal of Information Systems Education": 1,
                 "EMNLP Findings": 1
@@ -10158,13 +10568,13 @@
                 "Mark Patton": 3,
                 "Ben Lazarine": 3,
                 "Hongyi Zhu": 8,
-                "Sagar Samtani": 19,
+                "Sagar Samtani": 20,
                 "Steven Ullman": 9,
                 "Kaeli Otto": 2,
                 "Tala Vahedi": 2,
                 "Carolin Marx": 1,
                 "James Hu": 3,
-                "Yang Gao": 4,
+                "Yang Gao": 5,
                 "Yidong Chai": 1,
                 "Jay F. Nunamaker Jr.": 1,
                 "Shanchieh Yang": 1,
@@ -10172,7 +10582,7 @@
                 "Matthew J. Hashim": 1,
                 "Chi-Heng Yang": 1,
                 "Raul Reyes": 1,
-                "Chengjun Zhang": 2,
+                "Chengjun Zhang": 3,
                 "Abena M. Darko": 1,
                 "Ting Chen": 1,
                 "Noah Abdellatif": 1,
@@ -10312,7 +10722,7 @@
               }
             },
             "Sagar Samtani": {
-              "count": 19,
+              "count": 20,
               "years": [
                 2020,
                 2021,
@@ -10333,11 +10743,12 @@
                 "IEEE SPW": 1,
                 "HICSS": 1,
                 "BlackboxNLP": 1,
+                "INFORMS Workshop on Data Science": 1,
                 "arXiv preprint arXiv:2605.03158": 1
               },
               "coauthors": {
                 "Ben Lazarine": 2,
-                "Benjamin M. Ampel": 19,
+                "Benjamin M. Ampel": 20,
                 "Hongyi Zhu": 8,
                 "Hsinchun Chen": 13,
                 "Mark Patton": 2,
@@ -10345,11 +10756,11 @@
                 "Kaeli Otto": 2,
                 "Tala Vahedi": 2,
                 "James Hu": 1,
-                "Yang Gao": 4,
+                "Yang Gao": 5,
                 "Yidong Chai": 1,
                 "Jay F. Nunamaker Jr.": 1,
                 "Shanchieh Yang": 1,
-                "Chengjun Zhang": 2,
+                "Chengjun Zhang": 3,
                 "Ting Chen": 1
               }
             },
@@ -10452,24 +10863,27 @@
               }
             },
             "Yang Gao": {
-              "count": 4,
+              "count": 5,
               "years": [
                 2023,
-                2025
+                2025,
+                2026
               ],
               "venues": {
                 "AMCIS": 1,
                 "Digital Threats: Research and Practice": 1,
                 "WDS": 1,
-                "IEEE SPW": 1
+                "IEEE SPW": 1,
+                "INFORMS Workshop on Data Science": 1
               },
               "coauthors": {
-                "Benjamin M. Ampel": 4,
+                "Benjamin M. Ampel": 5,
                 "Hsinchun Chen": 1,
                 "James Hu": 1,
-                "Sagar Samtani": 4,
+                "Sagar Samtani": 5,
                 "Hongyi Zhu": 1,
-                "Yidong Chai": 1
+                "Yidong Chai": 1,
+                "Chengjun Zhang": 1
               }
             },
             "Yidong Chai": {
@@ -10578,18 +10992,20 @@
               }
             },
             "Chengjun Zhang": {
-              "count": 2,
+              "count": 3,
               "years": [
                 2026
               ],
               "venues": {
                 "HICSS": 1,
-                "BlackboxNLP": 1
+                "BlackboxNLP": 1,
+                "INFORMS Workshop on Data Science": 1
               },
               "coauthors": {
-                "Benjamin M. Ampel": 2,
-                "Sagar Samtani": 2,
-                "Ting Chen": 1
+                "Benjamin M. Ampel": 3,
+                "Sagar Samtani": 3,
+                "Ting Chen": 1,
+                "Yang Gao": 1
               }
             },
             "Abena M. Darko": {
@@ -10964,13 +11380,13 @@
               }
             }
           },
-          "maxCount": 44
+          "maxCount": 45
         },
         "5": {
           "nodes": [
             {
               "id": "Benjamin M. Ampel",
-              "count": 34
+              "count": 35
             },
             {
               "id": "Hsinchun Chen",
@@ -10982,11 +11398,11 @@
             },
             {
               "id": "Sagar Samtani",
-              "count": 13
+              "count": 14
             },
             {
               "id": "Yang Gao",
-              "count": 4
+              "count": 5
             },
             {
               "id": "Hongyi Zhu",
@@ -11034,7 +11450,7 @@
             },
             {
               "id": "Chengjun Zhang",
-              "count": 2
+              "count": 3
             },
             {
               "id": "Abena M. Darko",
@@ -11143,12 +11559,12 @@
             {
               "source": "Benjamin M. Ampel",
               "target": "Sagar Samtani",
-              "count": 13
+              "count": 14
             },
             {
               "source": "Benjamin M. Ampel",
               "target": "Yang Gao",
-              "count": 4
+              "count": 5
             },
             {
               "source": "Hsinchun Chen",
@@ -11178,7 +11594,7 @@
             {
               "source": "Sagar Samtani",
               "target": "Yang Gao",
-              "count": 4
+              "count": 5
             },
             {
               "source": "Benjamin M. Ampel",
@@ -11363,12 +11779,12 @@
             {
               "source": "Benjamin M. Ampel",
               "target": "Chengjun Zhang",
-              "count": 2
+              "count": 3
             },
             {
               "source": "Chengjun Zhang",
               "target": "Sagar Samtani",
-              "count": 2
+              "count": 3
             },
             {
               "source": "Abena M. Darko",
@@ -11576,6 +11992,11 @@
               "count": 2
             },
             {
+              "source": "Chengjun Zhang",
+              "target": "Yang Gao",
+              "count": 1
+            },
+            {
               "source": "Amrita George",
               "target": "Arun Rai",
               "count": 1
@@ -11748,7 +12169,7 @@
           ],
           "authorMeta": {
             "Benjamin M. Ampel": {
-              "count": 34,
+              "count": 35,
               "years": [
                 2023,
                 2024,
@@ -11775,6 +12196,7 @@
                 "IEEE CARS": 5,
                 "BlackboxNLP": 1,
                 "EMNLP": 1,
+                "INFORMS Workshop on Data Science": 1,
                 "arXiv preprint arXiv:2605.03158": 1,
                 "ICIS": 2,
                 "Journal of Information Systems Education": 1,
@@ -11783,8 +12205,8 @@
               "coauthors": {
                 "Hsinchun Chen": 14,
                 "James Hu": 3,
-                "Sagar Samtani": 13,
-                "Yang Gao": 4,
+                "Sagar Samtani": 14,
+                "Yang Gao": 5,
                 "Hongyi Zhu": 4,
                 "Kaeli Otto": 1,
                 "Yidong Chai": 1,
@@ -11796,7 +12218,7 @@
                 "Matthew J. Hashim": 1,
                 "Chi-Heng Yang": 1,
                 "Raul Reyes": 1,
-                "Chengjun Zhang": 2,
+                "Chengjun Zhang": 3,
                 "Abena M. Darko": 1,
                 "Ting Chen": 1,
                 "Noah Abdellatif": 1,
@@ -11888,7 +12310,7 @@
               }
             },
             "Sagar Samtani": {
-              "count": 13,
+              "count": 14,
               "years": [
                 2023,
                 2024,
@@ -11906,13 +12328,14 @@
                 "IEEE SPW": 1,
                 "HICSS": 1,
                 "BlackboxNLP": 1,
+                "INFORMS Workshop on Data Science": 1,
                 "arXiv preprint arXiv:2605.03158": 1
               },
               "coauthors": {
-                "Benjamin M. Ampel": 13,
+                "Benjamin M. Ampel": 14,
                 "Hsinchun Chen": 7,
                 "James Hu": 1,
-                "Yang Gao": 4,
+                "Yang Gao": 5,
                 "Hongyi Zhu": 4,
                 "Kaeli Otto": 1,
                 "Yidong Chai": 1,
@@ -11920,29 +12343,32 @@
                 "Jay F. Nunamaker Jr.": 1,
                 "Shanchieh Yang": 1,
                 "Steven Ullman": 1,
-                "Chengjun Zhang": 2,
+                "Chengjun Zhang": 3,
                 "Ting Chen": 1
               }
             },
             "Yang Gao": {
-              "count": 4,
+              "count": 5,
               "years": [
                 2023,
-                2025
+                2025,
+                2026
               ],
               "venues": {
                 "AMCIS": 1,
                 "Digital Threats: Research and Practice": 1,
                 "WDS": 1,
-                "IEEE SPW": 1
+                "IEEE SPW": 1,
+                "INFORMS Workshop on Data Science": 1
               },
               "coauthors": {
-                "Benjamin M. Ampel": 4,
+                "Benjamin M. Ampel": 5,
                 "Hsinchun Chen": 1,
                 "James Hu": 1,
-                "Sagar Samtani": 4,
+                "Sagar Samtani": 5,
                 "Hongyi Zhu": 1,
-                "Yidong Chai": 1
+                "Yidong Chai": 1,
+                "Chengjun Zhang": 1
               }
             },
             "Hongyi Zhu": {
@@ -12126,18 +12552,20 @@
               }
             },
             "Chengjun Zhang": {
-              "count": 2,
+              "count": 3,
               "years": [
                 2026
               ],
               "venues": {
                 "HICSS": 1,
-                "BlackboxNLP": 1
+                "BlackboxNLP": 1,
+                "INFORMS Workshop on Data Science": 1
               },
               "coauthors": {
-                "Benjamin M. Ampel": 2,
-                "Sagar Samtani": 2,
-                "Ting Chen": 1
+                "Benjamin M. Ampel": 3,
+                "Sagar Samtani": 3,
+                "Ting Chen": 1,
+                "Yang Gao": 1
               }
             },
             "Abena M. Darko": {
@@ -12512,13 +12940,13 @@
               }
             }
           },
-          "maxCount": 34
+          "maxCount": 35
         },
         "3": {
           "nodes": [
             {
               "id": "Benjamin M. Ampel",
-              "count": 27
+              "count": 28
             },
             {
               "id": "Hongyi Zhu",
@@ -12530,7 +12958,7 @@
             },
             {
               "id": "Sagar Samtani",
-              "count": 8
+              "count": 9
             },
             {
               "id": "Jay F. Nunamaker Jr.",
@@ -12554,7 +12982,7 @@
             },
             {
               "id": "Yang Gao",
-              "count": 1
+              "count": 2
             },
             {
               "id": "Chi-Heng Yang",
@@ -12570,7 +12998,7 @@
             },
             {
               "id": "Chengjun Zhang",
-              "count": 2
+              "count": 3
             },
             {
               "id": "Abena M. Darko",
@@ -12679,7 +13107,7 @@
             {
               "source": "Benjamin M. Ampel",
               "target": "Sagar Samtani",
-              "count": 8
+              "count": 9
             },
             {
               "source": "Hongyi Zhu",
@@ -12779,12 +13207,12 @@
             {
               "source": "Benjamin M. Ampel",
               "target": "Yang Gao",
-              "count": 1
+              "count": 2
             },
             {
               "source": "Sagar Samtani",
               "target": "Yang Gao",
-              "count": 1
+              "count": 2
             },
             {
               "source": "Benjamin M. Ampel",
@@ -12824,12 +13252,12 @@
             {
               "source": "Benjamin M. Ampel",
               "target": "Chengjun Zhang",
-              "count": 2
+              "count": 3
             },
             {
               "source": "Chengjun Zhang",
               "target": "Sagar Samtani",
-              "count": 2
+              "count": 3
             },
             {
               "source": "Abena M. Darko",
@@ -13037,6 +13465,11 @@
               "count": 2
             },
             {
+              "source": "Chengjun Zhang",
+              "target": "Yang Gao",
+              "count": 1
+            },
+            {
               "source": "Amrita George",
               "target": "Arun Rai",
               "count": 1
@@ -13209,7 +13642,7 @@
           ],
           "authorMeta": {
             "Benjamin M. Ampel": {
-              "count": 27,
+              "count": 28,
               "years": [
                 2024,
                 2025,
@@ -13230,6 +13663,7 @@
                 "IEEE CARS": 5,
                 "BlackboxNLP": 1,
                 "EMNLP": 1,
+                "INFORMS Workshop on Data Science": 1,
                 "arXiv preprint arXiv:2605.03158": 1,
                 "ICIS": 2,
                 "Journal of Information Systems Education": 1,
@@ -13238,17 +13672,17 @@
               "coauthors": {
                 "Hongyi Zhu": 2,
                 "Hsinchun Chen": 11,
-                "Sagar Samtani": 8,
+                "Sagar Samtani": 9,
                 "Jay F. Nunamaker Jr.": 1,
                 "Shanchieh Yang": 1,
                 "Steven Ullman": 4,
                 "Mason Wagner": 2,
                 "Matthew J. Hashim": 1,
-                "Yang Gao": 1,
+                "Yang Gao": 2,
                 "Chi-Heng Yang": 1,
                 "James Hu": 2,
                 "Raul Reyes": 1,
-                "Chengjun Zhang": 2,
+                "Chengjun Zhang": 3,
                 "Abena M. Darko": 1,
                 "Ting Chen": 1,
                 "Noah Abdellatif": 1,
@@ -13327,7 +13761,7 @@
               }
             },
             "Sagar Samtani": {
-              "count": 8,
+              "count": 9,
               "years": [
                 2024,
                 2025,
@@ -13340,17 +13774,18 @@
                 "IEEE SPW": 1,
                 "HICSS": 1,
                 "BlackboxNLP": 1,
+                "INFORMS Workshop on Data Science": 1,
                 "arXiv preprint arXiv:2605.03158": 1
               },
               "coauthors": {
-                "Benjamin M. Ampel": 8,
+                "Benjamin M. Ampel": 9,
                 "Hongyi Zhu": 2,
                 "Hsinchun Chen": 4,
                 "Jay F. Nunamaker Jr.": 1,
                 "Shanchieh Yang": 1,
                 "Steven Ullman": 1,
-                "Yang Gao": 1,
-                "Chengjun Zhang": 2,
+                "Yang Gao": 2,
+                "Chengjun Zhang": 3,
                 "Ting Chen": 1
               }
             },
@@ -13440,16 +13875,19 @@
               }
             },
             "Yang Gao": {
-              "count": 1,
+              "count": 2,
               "years": [
-                2025
+                2025,
+                2026
               ],
               "venues": {
-                "IEEE SPW": 1
+                "IEEE SPW": 1,
+                "INFORMS Workshop on Data Science": 1
               },
               "coauthors": {
-                "Benjamin M. Ampel": 1,
-                "Sagar Samtani": 1
+                "Benjamin M. Ampel": 2,
+                "Sagar Samtani": 2,
+                "Chengjun Zhang": 1
               }
             },
             "Chi-Heng Yang": {
@@ -13499,18 +13937,20 @@
               }
             },
             "Chengjun Zhang": {
-              "count": 2,
+              "count": 3,
               "years": [
                 2026
               ],
               "venues": {
                 "HICSS": 1,
-                "BlackboxNLP": 1
+                "BlackboxNLP": 1,
+                "INFORMS Workshop on Data Science": 1
               },
               "coauthors": {
-                "Benjamin M. Ampel": 2,
-                "Sagar Samtani": 2,
-                "Ting Chen": 1
+                "Benjamin M. Ampel": 3,
+                "Sagar Samtani": 3,
+                "Ting Chen": 1,
+                "Yang Gao": 1
               }
             },
             "Abena M. Darko": {
@@ -13885,13 +14325,13 @@
               }
             }
           },
-          "maxCount": 27
+          "maxCount": 28
         },
         "2": {
           "nodes": [
             {
               "id": "Benjamin M. Ampel",
-              "count": 24
+              "count": 25
             },
             {
               "id": "Hsinchun Chen",
@@ -13907,11 +14347,11 @@
             },
             {
               "id": "Sagar Samtani",
-              "count": 5
+              "count": 6
             },
             {
               "id": "Yang Gao",
-              "count": 1
+              "count": 2
             },
             {
               "id": "Chi-Heng Yang",
@@ -13931,7 +14371,7 @@
             },
             {
               "id": "Chengjun Zhang",
-              "count": 2
+              "count": 3
             },
             {
               "id": "Abena M. Darko",
@@ -14060,17 +14500,17 @@
             {
               "source": "Benjamin M. Ampel",
               "target": "Sagar Samtani",
-              "count": 5
+              "count": 6
             },
             {
               "source": "Benjamin M. Ampel",
               "target": "Yang Gao",
-              "count": 1
+              "count": 2
             },
             {
               "source": "Sagar Samtani",
               "target": "Yang Gao",
-              "count": 1
+              "count": 2
             },
             {
               "source": "Benjamin M. Ampel",
@@ -14115,12 +14555,12 @@
             {
               "source": "Benjamin M. Ampel",
               "target": "Chengjun Zhang",
-              "count": 2
+              "count": 3
             },
             {
               "source": "Chengjun Zhang",
               "target": "Sagar Samtani",
-              "count": 2
+              "count": 3
             },
             {
               "source": "Abena M. Darko",
@@ -14338,6 +14778,11 @@
               "count": 1
             },
             {
+              "source": "Chengjun Zhang",
+              "target": "Yang Gao",
+              "count": 1
+            },
+            {
               "source": "Amrita George",
               "target": "Arun Rai",
               "count": 1
@@ -14510,7 +14955,7 @@
           ],
           "authorMeta": {
             "Benjamin M. Ampel": {
-              "count": 24,
+              "count": 25,
               "years": [
                 2025,
                 2026,
@@ -14528,6 +14973,7 @@
                 "BlackboxNLP": 1,
                 "EMNLP": 1,
                 "MIS Quarterly": 1,
+                "INFORMS Workshop on Data Science": 1,
                 "arXiv preprint arXiv:2605.03158": 1,
                 "Journal of Management Information Systems": 1,
                 "ICIS": 2,
@@ -14538,13 +14984,13 @@
                 "Hsinchun Chen": 8,
                 "Mason Wagner": 2,
                 "Matthew J. Hashim": 1,
-                "Sagar Samtani": 5,
-                "Yang Gao": 1,
+                "Sagar Samtani": 6,
+                "Yang Gao": 2,
                 "Chi-Heng Yang": 1,
                 "James Hu": 2,
                 "Raul Reyes": 1,
                 "Steven Ullman": 3,
-                "Chengjun Zhang": 2,
+                "Chengjun Zhang": 3,
                 "Abena M. Darko": 1,
                 "Ting Chen": 1,
                 "Noah Abdellatif": 1,
@@ -14635,7 +15081,7 @@
               }
             },
             "Sagar Samtani": {
-              "count": 5,
+              "count": 6,
               "years": [
                 2025,
                 2026
@@ -14645,27 +15091,31 @@
                 "HICSS": 1,
                 "BlackboxNLP": 1,
                 "MIS Quarterly": 1,
+                "INFORMS Workshop on Data Science": 1,
                 "arXiv preprint arXiv:2605.03158": 1
               },
               "coauthors": {
-                "Benjamin M. Ampel": 5,
-                "Yang Gao": 1,
-                "Chengjun Zhang": 2,
+                "Benjamin M. Ampel": 6,
+                "Yang Gao": 2,
+                "Chengjun Zhang": 3,
                 "Ting Chen": 1,
                 "Hsinchun Chen": 1
               }
             },
             "Yang Gao": {
-              "count": 1,
+              "count": 2,
               "years": [
-                2025
+                2025,
+                2026
               ],
               "venues": {
-                "IEEE SPW": 1
+                "IEEE SPW": 1,
+                "INFORMS Workshop on Data Science": 1
               },
               "coauthors": {
-                "Benjamin M. Ampel": 1,
-                "Sagar Samtani": 1
+                "Benjamin M. Ampel": 2,
+                "Sagar Samtani": 2,
+                "Chengjun Zhang": 1
               }
             },
             "Chi-Heng Yang": {
@@ -14733,18 +15183,20 @@
               }
             },
             "Chengjun Zhang": {
-              "count": 2,
+              "count": 3,
               "years": [
                 2026
               ],
               "venues": {
                 "HICSS": 1,
-                "BlackboxNLP": 1
+                "BlackboxNLP": 1,
+                "INFORMS Workshop on Data Science": 1
               },
               "coauthors": {
-                "Benjamin M. Ampel": 2,
-                "Sagar Samtani": 2,
-                "Ting Chen": 1
+                "Benjamin M. Ampel": 3,
+                "Sagar Samtani": 3,
+                "Ting Chen": 1,
+                "Yang Gao": 1
               }
             },
             "Abena M. Darko": {
@@ -15119,7 +15571,7 @@
               }
             }
           },
-          "maxCount": 24
+          "maxCount": 25
         }
       }
     }
