@@ -1,5 +1,5 @@
 ---
-title: 'Prediction Markets Are Efficient at Rest and Fragile in Motion'
+title: 'Prediction Markets Are Efficient at Rest and Dislocated in Motion'
 
 authors:
   - admin
