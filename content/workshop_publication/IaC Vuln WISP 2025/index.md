@@ -28,7 +28,7 @@ tags:
 
 featured: false
 
-url_pdf: ''
+url_pdf: 'uploads/papers/Reyes_Ampel_Chen_2025_WISP_IaC-Vulnerability-Remediation.pdf'
 plain_summary: "Infrastructure as Code lets teams set up cloud systems automatically, but the scripts often contain insecure settings that scanners can flag yet not fix. This paper fine-tunes large language models to automatically rewrite vulnerable Terraform code into secure versions, training on thousands of real scripts and their detected misconfigurations. The results show that adapting LLMs to this specific task improves their ability to remediate cloud security flaws."
 ---
 {{< publication_extras >}}

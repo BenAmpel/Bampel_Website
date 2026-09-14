@@ -28,7 +28,7 @@ tags:
 
 featured: false
 
-url_pdf: ''
+url_pdf: 'https://ieeexplore.ieee.org/document/11050022/'
 plain_summary: "Attackers can dodge AI tools that detect phishing websites by subtly altering the site's code. This paper builds an automated \"red team\" that uses reinforcement learning to realistically mimic those evasion tricks, with safeguards so the altered sites still look normal, providing a scalable way to test how robust phishing detectors really are before they're deployed."
 ---
 {{< altmetric doi="10.1109/SPW67851.2025.00041" >}}

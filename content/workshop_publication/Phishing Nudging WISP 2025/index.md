@@ -29,7 +29,7 @@ tags:
 
 featured: false
 
-url_pdf: ''
+url_pdf: 'uploads/papers/Wagner_Ampel_Hashim_Chen_2025_WISP_Email-Phishing-Nudging.pdf'
 plain_summary: "This paper tests whether adding plain-language AI explanations to phishing warning prompts (digital nudges) helps people avoid phishing emails. In a controlled experiment, the explainable-AI nudge improved users' phishing-detection accuracy by about 10% and reduced their mental effort compared to a standard warning or no warning. The work shows that explaining why something looks suspicious makes security warnings more effective."
 ---
 {{< publication_extras >}}

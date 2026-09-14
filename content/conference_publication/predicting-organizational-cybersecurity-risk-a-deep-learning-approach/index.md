@@ -20,7 +20,7 @@ tags: []
 
 featured: false
 
-url_pdf: ''
+url_pdf: 'https://arxiv.org/pdf/2012.14425'
 url_code: ''
 url_dataset: ''
 url_project: ''
