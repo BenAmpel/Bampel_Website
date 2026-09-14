@@ -30,6 +30,6 @@ url_video: ''
 links:
   - name: Scholar
 url: "/conference_publication/predicting-organizational-cybersecurity-risk-a-deep-learning-approach/"
-plain_summary: "This paper builds a tool called HackER that reads posts on hacker forums to spot software exploits and figure out which kinds of organizations they are aimed at. Using a deep learning model (a BiLSTM), it predicts the type of business an exploit targets, outperforming standard machine learning baselines with an F1-score of about 80%. The goal is to give security analysts an early warning about who attackers are likely to hit."
+plain_summary: "This early-stage 2020 preprint later grew into [Vendor-Conditioned Contrastive Learning for Predicting Organizational Cyber Threat Targets](/conference_publication/vendor-conditioned-contrastive-learning-for-predicting-organizational-/), accepted to IEEE CARS 2026. This paper builds a tool called HackER that reads posts on hacker forums to spot software exploits and figure out which kinds of organizations they are aimed at. Using a deep learning model (a BiLSTM), it predicts the type of business an exploit targets, outperforming standard machine learning baselines with an F1-score of about 80%. The goal is to give security analysts an early warning about who attackers are likely to hit."
 ---
 {{< publication_extras >}}
