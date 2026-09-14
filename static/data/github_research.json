@@ -1,11 +1,11 @@
 {
-  "refresh_date": "2026-09-07",
+  "refresh_date": "2026-09-14",
   "repos": [
     {
       "name": "x64dbg",
       "full_name": "x64dbg/x64dbg",
       "description": "An open-source user mode debugger for Windows. Optimized for reverse engineering and malware analysis.",
-      "stars": 49434,
+      "stars": 49505,
       "forks": 2838,
       "language": "C++",
       "topics": [
@@ -16,14 +16,14 @@
         "debugging"
       ],
       "url": "https://github.com/x64dbg/x64dbg",
-      "pushed_at": "2026-09-06"
+      "pushed_at": "2026-09-14"
     },
     {
       "name": "Anthropic-Cybersecurity-Skills",
       "full_name": "mukul975/Anthropic-Cybersecurity-Skills",
       "description": "817 structured cybersecurity skills for AI agents \u00b7 Mapped to 6 frameworks: MITRE ATT&CK, NIST CSF 2.0, MITRE ATLAS, D3FEND, NIST AI RMF & MITRE F3 (Fight Fraud) \u00b7 agentskills.io standard \u00b7 Works with Claude Code, GitHub Copilot, Codex CLI, Cursor, Gemini CLI & 20+ platforms \u00b7 29 security domains \u00b7 Apache 2.0",
-      "stars": 32340,
-      "forks": 3900,
+      "stars": 32763,
+      "forks": 3956,
       "language": "Python",
       "topics": [
         "ai-agents",
@@ -39,8 +39,8 @@
       "name": "nuclei",
       "full_name": "projectdiscovery/nuclei",
       "description": "Nuclei is a fast, customizable vulnerability scanner powered by the global security community and built on a simple YAML-based DSL, enabling collaboration to tackle trending vulnerabilities on the internet. It helps you find vulnerabilities in your applications, APIs, networks, DNS, and cloud configurations.",
-      "stars": 31058,
-      "forks": 3864,
+      "stars": 31156,
+      "forks": 3859,
       "language": "Go",
       "topics": [
         "attack-surface",
@@ -50,14 +50,14 @@
         "nuclei-engine"
       ],
       "url": "https://github.com/projectdiscovery/nuclei",
-      "pushed_at": "2026-09-07"
+      "pushed_at": "2026-09-14"
     },
     {
       "name": "radare2",
       "full_name": "radareorg/radare2",
       "description": "UNIX-like reverse engineering framework and command-line toolset",
-      "stars": 24751,
-      "forks": 3314,
+      "stars": 24795,
+      "forks": 3318,
       "language": "C",
       "topics": [
         "binary-analysis",
@@ -67,14 +67,14 @@
         "forensics"
       ],
       "url": "https://github.com/radareorg/radare2",
-      "pushed_at": "2026-09-07"
+      "pushed_at": "2026-09-14"
     },
     {
       "name": "spiderfoot",
       "full_name": "smicallef/spiderfoot",
       "description": "SpiderFoot automates OSINT for threat intelligence and mapping your attack surface.",
-      "stars": 21777,
-      "forks": 3523,
+      "stars": 22099,
+      "forks": 3579,
       "language": "Python",
       "topics": [
         "attacksurface",
@@ -90,8 +90,8 @@
       "name": "Mobile-Security-Framework-MobSF",
       "full_name": "MobSF/Mobile-Security-Framework-MobSF",
       "description": "Mobile Security Framework (MobSF) is an automated, all-in-one mobile application (Android/iOS/Windows) pen-testing, malware analysis and security assessment framework capable of performing static and dynamic analysis.",
-      "stars": 21718,
-      "forks": 3761,
+      "stars": 21767,
+      "forks": 3758,
       "language": "JavaScript",
       "topics": [
         "android-security",
@@ -101,14 +101,14 @@
         "devsecops"
       ],
       "url": "https://github.com/MobSF/Mobile-Security-Framework-MobSF",
-      "pushed_at": "2026-09-02"
+      "pushed_at": "2026-09-09"
     },
     {
       "name": "brook",
       "full_name": "txthinking/brook",
       "description": "A cross-platform programmable network tool",
-      "stars": 15172,
-      "forks": 2375,
+      "stars": 15181,
+      "forks": 2373,
       "language": "Go",
       "topics": [
         "android",
@@ -118,14 +118,14 @@
         "ios"
       ],
       "url": "https://github.com/txthinking/brook",
-      "pushed_at": "2026-02-25"
+      "pushed_at": "2026-09-14"
     },
     {
       "name": "amass",
       "full_name": "owasp-amass/amass",
       "description": "In-depth attack surface mapping and asset discovery",
-      "stars": 15115,
-      "forks": 2180,
+      "stars": 15157,
+      "forks": 2182,
       "language": "Go",
       "topics": [
         "attack-surfaces",
@@ -141,8 +141,8 @@
       "name": "theZoo",
       "full_name": "ytisf/theZoo",
       "description": "A repository of LIVE malwares for your own joy and pleasure. theZoo is a project created to make the possibility of malware analysis open and available to the public.",
-      "stars": 13363,
-      "forks": 2762,
+      "stars": 13384,
+      "forks": 2768,
       "language": "Python",
       "topics": [
         "malware",
@@ -152,14 +152,14 @@
         "malwareanalysis"
       ],
       "url": "https://github.com/ytisf/theZoo",
-      "pushed_at": "2026-07-24"
+      "pushed_at": "2026-09-14"
     },
     {
       "name": "scapy",
       "full_name": "secdev/scapy",
       "description": "Scapy: the Python-based interactive packet manipulation program & library.",
-      "stars": 12525,
-      "forks": 2243,
+      "stars": 12544,
+      "forks": 2245,
       "language": "Python",
       "topics": [
         "hacktoberfest",
@@ -169,31 +169,14 @@
         "network-security"
       ],
       "url": "https://github.com/secdev/scapy",
-      "pushed_at": "2026-09-06"
-    },
-    {
-      "name": "vuls",
-      "full_name": "future-architect/vuls",
-      "description": "Agent-less vulnerability scanner for Linux, FreeBSD, Container, WordPress, Programming language libraries, Network devices",
-      "stars": 12253,
-      "forks": 1242,
-      "language": "Go",
-      "topics": [
-        "administrator",
-        "cybersecurity",
-        "freebsd",
-        "go",
-        "golang"
-      ],
-      "url": "https://github.com/future-architect/vuls",
-      "pushed_at": "2026-09-02"
+      "pushed_at": "2026-09-12"
     },
     {
       "name": "thc-hydra",
       "full_name": "vanhauser-thc/thc-hydra",
       "description": "hydra",
-      "stars": 12245,
-      "forks": 2661,
+      "stars": 12268,
+      "forks": 2663,
       "language": "C",
       "topics": [
         "brute-force",
@@ -206,11 +189,28 @@
       "pushed_at": "2026-07-30"
     },
     {
+      "name": "vuls",
+      "full_name": "future-architect/vuls",
+      "description": "Agent-less vulnerability scanner for Linux, FreeBSD, Container, WordPress, Programming language libraries, Network devices",
+      "stars": 12255,
+      "forks": 1243,
+      "language": "Go",
+      "topics": [
+        "administrator",
+        "cybersecurity",
+        "freebsd",
+        "go",
+        "golang"
+      ],
+      "url": "https://github.com/future-architect/vuls",
+      "pushed_at": "2026-09-14"
+    },
+    {
       "name": "kubeshark",
       "full_name": "kubeshark/kubeshark",
       "description": "eBPF-powered network observability for Kubernetes. Indexes L4/L7 traffic with full K8s context, decrypts TLS without keys. Queryable by AI agents via MCP and humans via dashboard.",
-      "stars": 12072,
-      "forks": 547,
+      "stars": 12082,
+      "forks": 548,
       "language": "Go",
       "topics": [
         "cloud-native",
@@ -220,14 +220,14 @@
         "golang"
       ],
       "url": "https://github.com/kubeshark/kubeshark",
-      "pushed_at": "2026-09-01"
+      "pushed_at": "2026-09-09"
     },
     {
       "name": "hexstrike-ai",
       "full_name": "0x4m4/hexstrike-ai",
       "description": "HexStrike AI MCP Agents is an advanced MCP server that lets AI agents (Claude, GPT, Copilot, etc.) autonomously run 150+ cybersecurity tools for automated pentesting, vulnerability discovery, bug bounty automation, and security research. Seamlessly bridge LLMs with real-world offensive security capabilities.",
-      "stars": 11600,
-      "forks": 2404,
+      "stars": 11866,
+      "forks": 2440,
       "language": "Python",
       "topics": [
         "0x4m4",
@@ -243,8 +243,8 @@
       "name": "Detect-It-Easy",
       "full_name": "horsicq/Detect-It-Easy",
       "description": "Program for determining types of files for Windows, Linux and MacOS.",
-      "stars": 11496,
-      "forks": 951,
+      "stars": 11531,
+      "forks": 955,
       "language": "JavaScript",
       "topics": [
         "binary-analysis",
@@ -254,14 +254,14 @@
         "disassembler"
       ],
       "url": "https://github.com/horsicq/Detect-It-Easy",
-      "pushed_at": "2026-09-07"
+      "pushed_at": "2026-09-14"
     },
     {
       "name": "osv-scanner",
       "full_name": "google/osv-scanner",
       "description": "Vulnerability scanner written in Go which uses the data provided by https://osv.dev",
-      "stars": 10992,
-      "forks": 788,
+      "stars": 11026,
+      "forks": 790,
       "language": "Go",
       "topics": [
         "scanner",
@@ -270,14 +270,14 @@
         "vulnerability-scanner"
       ],
       "url": "https://github.com/google/osv-scanner",
-      "pushed_at": "2026-09-07"
+      "pushed_at": "2026-09-14"
     },
     {
       "name": "pwndbg",
       "full_name": "pwndbg/pwndbg",
       "description": "Exploit Development and Reverse Engineering with GDB & LLDB Made Easy",
-      "stars": 10838,
-      "forks": 1263,
+      "stars": 10866,
+      "forks": 1266,
       "language": "Python",
       "topics": [
         "binary-ninja",
@@ -287,14 +287,14 @@
         "disassembler"
       ],
       "url": "https://github.com/pwndbg/pwndbg",
-      "pushed_at": "2026-09-06"
+      "pushed_at": "2026-09-14"
     },
     {
       "name": "bbot",
       "full_name": "blacklanternsecurity/bbot",
       "description": "The recursive internet scanner for hackers. \ud83e\udde1",
-      "stars": 10543,
-      "forks": 920,
+      "stars": 10570,
+      "forks": 922,
       "language": "Python",
       "topics": [
         "asm",
@@ -304,14 +304,14 @@
         "cli"
       ],
       "url": "https://github.com/blacklanternsecurity/bbot",
-      "pushed_at": "2026-09-06"
+      "pushed_at": "2026-09-13"
     },
     {
       "name": "opencti",
       "full_name": "OpenCTI-Platform/opencti",
       "description": "Open Cyber Threat Intelligence Platform",
-      "stars": 9906,
-      "forks": 1445,
+      "stars": 9988,
+      "forks": 1451,
       "language": "TypeScript",
       "topics": [
         "cti",
@@ -321,14 +321,14 @@
         "osint"
       ],
       "url": "https://github.com/OpenCTI-Platform/opencti",
-      "pushed_at": "2026-09-07"
+      "pushed_at": "2026-09-14"
     },
     {
       "name": "tpotce",
       "full_name": "telekom-security/tpotce",
       "description": "\ud83c\udf6f T-Pot - The All In One Multi Honeypot Platform \ud83d\udc1d",
-      "stars": 9467,
-      "forks": 1388,
+      "stars": 9492,
+      "forks": 1393,
       "language": "Shell",
       "topics": [
         "deception",
@@ -343,9 +343,9 @@
     {
       "name": "firezone",
       "full_name": "firezone/firezone",
-      "description": "Enterprise-ready zero-trust access platform built on WireGuard\u00ae.",
-      "stars": 9053,
-      "forks": 451,
+      "description": "Blazing-fast remote access",
+      "stars": 9091,
+      "forks": 456,
       "language": "Elixir",
       "topics": [
         "cloud",
@@ -355,13 +355,13 @@
         "liveview"
       ],
       "url": "https://github.com/firezone/firezone",
-      "pushed_at": "2026-09-07"
+      "pushed_at": "2026-09-14"
     },
     {
       "name": "Scanners-Box",
       "full_name": "We5ter/Scanners-Box",
       "description": "A powerful and open-source toolkit for hackers and security automation - \u5b89\u5168\u884c\u4e1a\u4ece\u4e1a\u8005\u81ea\u7814\u5f00\u6e90\u626b\u63cf\u5668\u5408\u8f91",
-      "stars": 9038,
+      "stars": 9044,
       "forks": 2421,
       "language": "",
       "topics": [
@@ -378,8 +378,8 @@
       "name": "flare-vm",
       "full_name": "mandiant/flare-vm",
       "description": "A collection of software installations scripts for Windows systems that allows you to easily setup and maintain a reverse engineering environment on a VM.",
-      "stars": 8999,
-      "forks": 1107,
+      "stars": 9029,
+      "forks": 1114,
       "language": "PowerShell",
       "topics": [
         "flare",
@@ -393,7 +393,7 @@
       "name": "gef",
       "full_name": "hugsy/gef",
       "description": "GEF (GDB Enhanced Features) - a modern experience for GDB with advanced debugging capabilities for exploit devs & reverse engineers on Linux",
-      "stars": 8344,
+      "stars": 8356,
       "forks": 829,
       "language": "Python",
       "topics": [
@@ -407,21 +407,21 @@
       "pushed_at": "2026-08-20"
     },
     {
-      "name": "WatchYourLAN",
-      "full_name": "aceberg/WatchYourLAN",
-      "description": "Lightweight network IP scanner written in Go. With notifications, history, export to Grafana",
-      "stars": 7613,
-      "forks": 284,
-      "language": "Go",
+      "name": "deepdarkCTI",
+      "full_name": "fastfire/deepdarkCTI",
+      "description": "Collection of Cyber Threat Intelligence sources from the deep and dark web",
+      "stars": 7272,
+      "forks": 1215,
+      "language": "",
       "topics": [
-        "arp-scan",
-        "arp-scanner",
-        "intrusion-detection",
-        "monitoring",
-        "network-security"
+        "cti",
+        "cyberhunter",
+        "darkweb",
+        "deepweb",
+        "threat-intelligence"
       ],
-      "url": "https://github.com/aceberg/WatchYourLAN",
-      "pushed_at": "2025-09-10"
+      "url": "https://github.com/fastfire/deepdarkCTI",
+      "pushed_at": "2026-09-14"
     }
   ]
 }
