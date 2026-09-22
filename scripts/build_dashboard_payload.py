@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import math
 import re
+from difflib import SequenceMatcher
 from pathlib import Path
 
 import yaml
@@ -348,7 +349,9 @@ def build_impact_stats(publications, scholar, awards):
 
     def add_publication(publication):
         title_key = normalize_title(publication.get("title", ""))
-        if not title_key or title_key in seen_titles:
+        # Scholar titles can drift from the site's (a dropped word, punctuation), so near-identical
+        # titles are the same paper — otherwise it's double-counted in the Q1/FT50/UTD24 stats.
+        if not title_key or any(SequenceMatcher(None, title_key, seen).ratio() >= 0.92 for seen in seen_titles):
             return
         seen_titles.add(title_key)
         top_list_publications.append(publication)
