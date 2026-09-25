@@ -29,8 +29,6 @@ url_project: ''
 url_slides: ''
 url_video: ''
 
-links:
-  - name: Scholar
 url: "/workshop_publication/cyber-threat-classification-under-non-stationary-environments-an-adapt/"
 ---
 {{< publication_extras >}}
