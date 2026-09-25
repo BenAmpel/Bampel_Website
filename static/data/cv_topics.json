@@ -1,6 +1,20 @@
 {
-  "k": 5,
+  "k": 7,
   "topics": [
+    {
+      "label": "Security / Intelligence",
+      "keywords": [
+        "security",
+        "intelligence",
+        "threat",
+        "cyber",
+        "email",
+        "prevention",
+        "nudging",
+        "explainable"
+      ],
+      "weight": 0.1900786271042579
+    },
     {
       "label": "Intelligence / Science",
       "keywords": [
@@ -13,35 +27,21 @@
         "collaborative",
         "cyber"
       ],
-      "weight": 0.24301921617054478
+      "weight": 0.17982618759069355
     },
     {
       "label": "Approach / Phishing",
       "keywords": [
         "approach",
         "phishing",
-        "model",
         "multi",
+        "model",
         "large",
-        "language",
         "adversarial",
+        "language",
         "generative"
       ],
-      "weight": 0.2400672900485829
-    },
-    {
-      "label": "Security / Intelligence",
-      "keywords": [
-        "security",
-        "intelligence",
-        "online",
-        "threat",
-        "email",
-        "nudging",
-        "explainable",
-        "prevention"
-      ],
-      "weight": 0.22194207826108367
+      "weight": 0.16860041738901657
     },
     {
       "label": "Learning / Analytics",
@@ -55,7 +55,21 @@
         "advanced",
         "text"
       ],
-      "weight": 0.15075629923211853
+      "weight": 0.11735074623033294
+    },
+    {
+      "label": "Media / Adapt",
+      "keywords": [
+        "media",
+        "adapt",
+        "cyber",
+        "environments",
+        "infrastructure",
+        "context",
+        "icl",
+        "non"
+      ],
+      "weight": 0.11707258016128891
     },
     {
       "label": "Scholarship / Science",
@@ -65,11 +79,25 @@
         "competition",
         "innovation",
         "prosody",
-        "commitment",
         "training",
-        "vishing"
+        "vishing",
+        "commitment"
       ],
-      "weight": 0.14421511628767017
+      "weight": 0.11582858767593464
+    },
+    {
+      "label": "Computational / Proactive",
+      "keywords": [
+        "computational",
+        "proactive",
+        "threat",
+        "transfer",
+        "hacker",
+        "note",
+        "labels",
+        "evading"
+      ],
+      "weight": 0.11124285384847549
     }
   ],
   "source": "cv.pdf"

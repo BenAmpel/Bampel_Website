@@ -684,9 +684,9 @@
       ],
       "year": 2026,
       "type": "conference",
-      "venue": "arXiv preprint arXiv:2605.03158",
+      "venue": "NeurIPS ED Track",
       "url": "/conference_publication/hackersignal-a-large-scale-multi-source-dataset-linking-hacker-communi/",
-      "date": "2026-01-01",
+      "date": "2026-12-06",
       "abstract": "We introduce HackerSignal, a benchmark for temporal out-of-distribution cyber threat intelligence (CTI) and cross-source CVE linkage. HackerSignal aggregates 7.45 million exact-deduplicated documents from 64 public forum/source identifiers spanning eight source layers and a 36-year window (1990-2026). In contrast to other publicly accessible cybersecurity datasets, HackerSignal is among the first public benchmark datasets that maps the full potential exploit to vulnerability trajectory from hacker community discourse, exploit databases with working and proof of concept exploits, vulnerability advisories, and software fix commits. HackerSignal creates these linkages through a shared CVE identifier space while preserving source-specific release modes to support a range of unique Artificial Intelligence (AI)-enabled cybersecurity analytics tasks. In this paper, we summarize HackerSignal and illustrate three selected benchmark tasks it uniquely supports: (1) CVE linkage retrieval (cross-source temporal out-of-distribution entity grounding); (2) exploit type classification (8-class vulnerability type prediction with temporal OOD evaluation); and (3) temporal generalization (prospective CVE-disjoint evaluation where C_train and C_test are disjoint). All tasks use temporal splits to evaluate prospective generalization. We release source-shortcut and leakage diagnostics, manual-audit packets, a datasheet, and a release-governance addendum to support the dissemination of the dataset. HackerSignal's code, data, and Croissant metadata are available at hf.co/datasets/BenAmpel/HackerSignal (data) and github.com/BenAmpel/hackersignal (code).",
       "award": null,
       "featured": false,
@@ -1422,7 +1422,7 @@
           "Benjamin M. Ampel",
           "Sagar Samtani"
         ],
-        "venue": "arXiv preprint arXiv:2605.03158",
+        "venue": "NeurIPS ED Track",
         "type": "conference",
         "topic": "Cybersecurity",
         "symbolSize": 10
@@ -9431,7 +9431,7 @@
           "index": 36,
           "title": "HackerSignal: A Large-Scale Multi-Source Dataset Linking Hacker Community Discourse to the CVE Vulnerability Lifecycle",
           "year": 2026,
-          "venue": "arXiv preprint arXiv:2605.03158",
+          "venue": "NeurIPS ED Track",
           "citations": 0,
           "eigen": 0.010725397828873827,
           "between": 12.555555555555555,
@@ -10513,7 +10513,7 @@
                 "BlackboxNLP": 1,
                 "EMNLP": 1,
                 "INFORMS WDS": 1,
-                "arXiv preprint arXiv:2605.03158": 1,
+                "NeurIPS ED Track": 1,
                 "Journal of Information Systems Education": 1,
                 "EMNLP Findings": 1
               },
@@ -10698,7 +10698,7 @@
                 "HICSS": 1,
                 "BlackboxNLP": 1,
                 "INFORMS WDS": 1,
-                "arXiv preprint arXiv:2605.03158": 1
+                "NeurIPS ED Track": 1
               },
               "coauthors": {
                 "Ben Lazarine": 2,
@@ -12151,7 +12151,7 @@
                 "BlackboxNLP": 1,
                 "EMNLP": 1,
                 "INFORMS WDS": 1,
-                "arXiv preprint arXiv:2605.03158": 1,
+                "NeurIPS ED Track": 1,
                 "ICIS": 2,
                 "Journal of Information Systems Education": 1,
                 "EMNLP Findings": 1
@@ -12283,7 +12283,7 @@
                 "HICSS": 1,
                 "BlackboxNLP": 1,
                 "INFORMS WDS": 1,
-                "arXiv preprint arXiv:2605.03158": 1
+                "NeurIPS ED Track": 1
               },
               "coauthors": {
                 "Benjamin M. Ampel": 14,
@@ -13618,7 +13618,7 @@
                 "BlackboxNLP": 1,
                 "EMNLP": 1,
                 "INFORMS WDS": 1,
-                "arXiv preprint arXiv:2605.03158": 1,
+                "NeurIPS ED Track": 1,
                 "ICIS": 2,
                 "Journal of Information Systems Education": 1,
                 "EMNLP Findings": 1
@@ -13729,7 +13729,7 @@
                 "HICSS": 1,
                 "BlackboxNLP": 1,
                 "INFORMS WDS": 1,
-                "arXiv preprint arXiv:2605.03158": 1
+                "NeurIPS ED Track": 1
               },
               "coauthors": {
                 "Benjamin M. Ampel": 9,
@@ -14928,7 +14928,7 @@
                 "EMNLP": 1,
                 "MIS Quarterly": 1,
                 "INFORMS WDS": 1,
-                "arXiv preprint arXiv:2605.03158": 1,
+                "NeurIPS ED Track": 1,
                 "Journal of Management Information Systems": 1,
                 "ICIS": 2,
                 "Journal of Information Systems Education": 1,
@@ -15046,7 +15046,7 @@
                 "BlackboxNLP": 1,
                 "MIS Quarterly": 1,
                 "INFORMS WDS": 1,
-                "arXiv preprint arXiv:2605.03158": 1
+                "NeurIPS ED Track": 1
               },
               "coauthors": {
                 "Benjamin M. Ampel": 6,
@@ -15728,6 +15728,19 @@
         "maxYear": 2026
       },
       {
+        "title": "NeurIPS 2026",
+        "lat": -33.8688,
+        "lng": 151.2093,
+        "location": "Sydney, Australia",
+        "desc": "1 paper: HackerSignal: A Large-Scale Multi-Source Dataset Linking Hacker Community Discourse to the CVE Vulnerability Lifecycle",
+        "cat": "Conference",
+        "years": [
+          2026
+        ],
+        "minYear": 2026,
+        "maxYear": 2026
+      },
+      {
         "title": "ICIS 2026",
         "lat": 38.7223,
         "lng": -9.1393,
@@ -16011,6 +16024,19 @@
           "lat": 37.7749,
           "lng": -122.4194,
           "title": "INFORMS WDS 2026"
+        },
+        "to": {
+          "lat": -33.8688,
+          "lng": 151.2093,
+          "title": "NeurIPS 2026"
+        },
+        "year": 2026
+      },
+      {
+        "from": {
+          "lat": -33.8688,
+          "lng": 151.2093,
+          "title": "NeurIPS 2026"
         },
         "to": {
           "lat": 38.7223,
