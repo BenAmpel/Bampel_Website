@@ -1,5 +1,5 @@
 {
-  "refresh_date": "2026-09-21",
+  "refresh_date": "2026-09-28",
   "grants": [
     {
       "title": "Conference: NSF Quantum Computing Security Workshop",
@@ -109,23 +109,6 @@
       ]
     },
     {
-      "title": "Collaborative Research: A Subspace Optimization Framework for Resource-Efficient and Private Fine-Tuning of Large Language Models",
-      "awardId": "2619079",
-      "piName": "Yuanxiong Guo",
-      "institution": "University of Texas at San Antonio",
-      "estimatedTotalAmt": "120000",
-      "startDate": "01/01/2027",
-      "expDate": "12/31/2029",
-      "abstractText": "Large language models (LLMs) have transformed artificial intelligence (AI) applications by enabling advanced language understanding, content generation, and decision-making across many domains. However, adapting these general-purpose models to specialized tasks often requires substantial computing resources and access to sensitive, domain-specific data. These requirements can limit the ability of small organizations, universities, healthcare institutions, and other resource-constrained users to benefit from recent advances in AI. This project addresses this challenge by developing methods that make LLM adaptation more resource efficient while protecting sensitive information. The research contributes to societal benefits by broadening access to advanced AI tools, strengthening the protection of sensitive information, and reducing the financial and energy costs of model adaptation. The project also supports the development of the national AI workforce through new course content, laboratory modules, and hands-on research experiences for undergraduate and graduate students. Through established pre-college outreach activities at the participating institutions, project-based learning also introduces middle- and high-school students to modern AI and engineering.\r\n\r\nThe scientific problem addressed by this project is how to achieve performance comparable to full-parameter fine-tuning when computing resources are limited and training data are sensitive or cannot be shared. The research builds on evidence that changes made to large models during fine-tuning often follow structured patterns that can be represented in much smaller, low-dimensional spaces. Using this insight, the project investigates four connected research thrusts. First, the project develops a subspace optimization framework that dynamically constructs and updates these informative subspaces and optimizes the model only within them using low-cost evaluations of the training objective to reduce memory and computational requirements. Second, for settings in which sensitive data are stored centrally, the project integrates differential privacy with subspace optimization to improve the trade-offs among privacy, model performance, and resource use. Third, for distributed settings where data remain at separate entities, the project develops a federated subspace optimization method that supports collaborative fine-tuning while reducing communication costs and avoiding direct data sharing. Finally, the project connects the methodological and theoretical advances to practice by applying the developed methods to real-world healthcare problems and evaluating their effectiveness.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
-      "primaryProgram": [
-        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
-      ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2619079",
-      "keywords": [
-        "LLM / GenAI"
-      ]
-    },
-    {
       "title": "EPSCoR Research Fellows: NSF: AI-Secure Command Channels for Autonomous Space Systems",
       "awardId": "2624437",
       "piName": "Efren Lopez Morales",
@@ -140,6 +123,23 @@
       "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2624437",
       "keywords": [
         "Cybersecurity"
+      ]
+    },
+    {
+      "title": "Collaborative Research: A Subspace Optimization Framework for Resource-Efficient and Private Fine-Tuning of Large Language Models",
+      "awardId": "2619079",
+      "piName": "Yuanxiong Guo",
+      "institution": "University of Texas at San Antonio",
+      "estimatedTotalAmt": "120000",
+      "startDate": "01/01/2027",
+      "expDate": "12/31/2029",
+      "abstractText": "Large language models (LLMs) have transformed artificial intelligence (AI) applications by enabling advanced language understanding, content generation, and decision-making across many domains. However, adapting these general-purpose models to specialized tasks often requires substantial computing resources and access to sensitive, domain-specific data. These requirements can limit the ability of small organizations, universities, healthcare institutions, and other resource-constrained users to benefit from recent advances in AI. This project addresses this challenge by developing methods that make LLM adaptation more resource efficient while protecting sensitive information. The research contributes to societal benefits by broadening access to advanced AI tools, strengthening the protection of sensitive information, and reducing the financial and energy costs of model adaptation. The project also supports the development of the national AI workforce through new course content, laboratory modules, and hands-on research experiences for undergraduate and graduate students. Through established pre-college outreach activities at the participating institutions, project-based learning also introduces middle- and high-school students to modern AI and engineering.\r\n\r\nThe scientific problem addressed by this project is how to achieve performance comparable to full-parameter fine-tuning when computing resources are limited and training data are sensitive or cannot be shared. The research builds on evidence that changes made to large models during fine-tuning often follow structured patterns that can be represented in much smaller, low-dimensional spaces. Using this insight, the project investigates four connected research thrusts. First, the project develops a subspace optimization framework that dynamically constructs and updates these informative subspaces and optimizes the model only within them using low-cost evaluations of the training objective to reduce memory and computational requirements. Second, for settings in which sensitive data are stored centrally, the project integrates differential privacy with subspace optimization to improve the trade-offs among privacy, model performance, and resource use. Third, for distributed settings where data remain at separate entities, the project develops a federated subspace optimization method that supports collaborative fine-tuning while reducing communication costs and avoiding direct data sharing. Finally, the project connects the methodological and theoretical advances to practice by applying the developed methods to real-world healthcare problems and evaluating their effectiveness.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2619079",
+      "keywords": [
+        "LLM / GenAI"
       ]
     },
     {
