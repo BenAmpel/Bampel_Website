@@ -1,6 +1,34 @@
 {
-  "k": 10,
+  "k": 9,
   "topics": [
+    {
+      "label": "Security / Threat",
+      "keywords": [
+        "security",
+        "threat",
+        "intelligence",
+        "cyber",
+        "email",
+        "prevention",
+        "explainable",
+        "nudging"
+      ],
+      "weight": 0.15431181343543662
+    },
+    {
+      "label": "Science / Enabled",
+      "keywords": [
+        "science",
+        "enabled",
+        "innovation",
+        "cyber",
+        "contextual",
+        "markets",
+        "evaluation",
+        "prosody"
+      ],
+      "weight": 0.13515089505618405
+    },
     {
       "label": "Approach / Phishing",
       "keywords": [
@@ -8,54 +36,12 @@
         "phishing",
         "multi",
         "large",
+        "model",
         "adversarial",
         "language",
-        "generative",
-        "model"
+        "generative"
       ],
-      "weight": 0.17509049065021948
-    },
-    {
-      "label": "Security / Intelligence",
-      "keywords": [
-        "security",
-        "intelligence",
-        "threat",
-        "email",
-        "explainable",
-        "prevention",
-        "nudging",
-        "agent"
-      ],
-      "weight": 0.14979511799425993
-    },
-    {
-      "label": "Cyber / Science",
-      "keywords": [
-        "cyber",
-        "science",
-        "enabled",
-        "threat",
-        "intelligence",
-        "training",
-        "assisted",
-        "reliance"
-      ],
-      "weight": 0.12181297817936793
-    },
-    {
-      "label": "Scholarship / Science",
-      "keywords": [
-        "scholarship",
-        "science",
-        "competition",
-        "commitment",
-        "intelligence",
-        "security",
-        "prosody",
-        "vishing"
-      ],
-      "weight": 0.09389840762375164
+      "weight": 0.12291891622364517
     },
     {
       "label": "Learning / Analytics",
@@ -63,27 +49,41 @@
         "learning",
         "analytics",
         "deep",
-        "cybersecurity",
         "machine",
+        "cybersecurity",
         "vulnerability",
         "advanced",
         "text"
       ],
-      "weight": 0.08653327323753593
+      "weight": 0.11804657432906927
     },
     {
-      "label": "Cybersecurity / Artificial",
+      "label": "Cybersecurity / Search",
       "keywords": [
         "cybersecurity",
-        "artificial",
-        "intelligence",
         "search",
-        "science",
-        "collaborative",
-        "enabled",
-        "innovation"
+        "assisted",
+        "reliance",
+        "behavioral",
+        "performance",
+        "transfer",
+        "training"
       ],
-      "weight": 0.08173259817092553
+      "weight": 0.1095652458538684
+    },
+    {
+      "label": "Intelligence / Artificial",
+      "keywords": [
+        "intelligence",
+        "artificial",
+        "cybersecurity",
+        "collaborative",
+        "science",
+        "analytics",
+        "threat",
+        "reinforcement"
+      ],
+      "weight": 0.09939977891613477
     },
     {
       "label": "Computational / Proactive",
@@ -92,40 +92,12 @@
         "proactive",
         "threat",
         "hacker",
-        "documenting",
-        "mitigation",
+        "field",
         "labels",
-        "evading"
+        "evading",
+        "mitigation"
       ],
-      "weight": 0.07710765545894072
-    },
-    {
-      "label": "Github / Retrieval",
-      "keywords": [
-        "github",
-        "retrieval",
-        "using",
-        "weighted",
-        "patch",
-        "repository",
-        "cross",
-        "variant"
-      ],
-      "weight": 0.07517779710530131
-    },
-    {
-      "label": "Innovation / Markets",
-      "keywords": [
-        "innovation",
-        "markets",
-        "contextual",
-        "science",
-        "model",
-        "evaluation",
-        "design",
-        "prosody"
-      ],
-      "weight": 0.07271381943447885
+      "weight": 0.08993886334422722
     },
     {
       "label": "Media / Adapt",
@@ -133,13 +105,27 @@
         "media",
         "adapt",
         "stationary",
-        "icl",
-        "non",
         "infrastructure",
         "environments",
-        "context"
+        "context",
+        "icl",
+        "non"
       ],
-      "weight": 0.06613786214521869
+      "weight": 0.08695128008613733
+    },
+    {
+      "label": "Scholarship / Competition",
+      "keywords": [
+        "scholarship",
+        "competition",
+        "intelligence",
+        "commitment",
+        "security",
+        "science",
+        "prosody",
+        "vishing"
+      ],
+      "weight": 0.08371663275529706
     }
   ],
   "source": "cv.pdf"
