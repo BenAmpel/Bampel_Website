@@ -8,6 +8,7 @@ static/lab/
   assets/study.css              plain, light styling for participant pages
   tracelab/tracelab.js          passive trace capture (no dependencies)
   studies/demo-phishing/        demo study; data never leaves the browser
+  studies/verification/         multi-week alert triage study (access codes, server storage)
 ```
 
 ## Adding a study
@@ -52,3 +53,14 @@ Each event has `t` (ms since start), `type`, and `item`. Types: `move`, `down`, 
 - IRB approval, with the consent text describing passive trace capture.
 - An approved storage location for the `post` or `jatos` sink. Do not point a live study at storage that GSU has not approved for human-subjects data.
 - Test on desktop and mobile; pointer features mean little on touch devices.
+
+## Verification study (multi-week, server-backed)
+
+`studies/verification/` runs four weekly sessions of eight alert-triage trials each, with three between-subjects conditions (AI-first, evidence-first, control). The design follows Clark, *Preserving Human Verification in AI-Augmented Decision Making* (Section 4): accurate AI in session 1, mostly accurate in session 2, incorrect, uncertain, and manipulated AI in session 3, and no AI in session 4.
+
+- **Access**: each participant gets an unguessable code (`VC-XXXX-XXXX`) and types it in every week. Codes never appear in URLs.
+- **Server**: `netlify/functions/vc-api.mjs` at `/api/vc/*`, logic in `netlify/lib/vc-core.mjs`, data in the Netlify Blobs store `verification-study`. Ground truth and AI schedules stay on the server.
+- **Stimuli**: edit `netlify/lib/vc_build_alerts.py`, then run it to regenerate `vc-alerts.mjs`.
+- **Admin**: `/lab/studies/verification/admin.html`. Set `VC_ADMIN_KEY` (16+ characters) in the Netlify environment variables first. The page creates codes (balanced condition blocks, optional label, gap days, test flag), shows progress, and downloads a trial-level CSV with the verification, reliance, and performance measures, or the full JSON with raw traces.
+- **Local testing**: `VC_ADMIN_KEY=<key> netlify dev --dir static --offline`, then create codes with gap days 0.
+- **Before live participants**: replace the draft consent (set `draftConsent: false` in `app.js`), replace the draft survey items, and confirm GSU allows Netlify Blobs for this data or switch storage.

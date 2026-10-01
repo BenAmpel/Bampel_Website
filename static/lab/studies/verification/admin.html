@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Verification Study Admin</title>
+<link rel="stylesheet" href="../../assets/study.css">
+<style>
+  .wrap { max-width: 1100px; }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: end; }
+  .row label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+  input[type=text], input[type=password], input[type=number] { font: inherit; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--text); }
+  .table-wrap { overflow-x: auto; margin-top: 12px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { color: var(--muted); font-weight: 600; }
+  code { font-size: 13px; }
+  .section { margin-top: 24px; }
+  .error { color: #c62828; font-size: 14px; }
+  #created { white-space: pre; font-family: ui-monospace, Menlo, monospace; font-size: 13px; background: var(--status-bg); padding: 10px; border-radius: 8px; overflow-x: auto; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>Verification study: admin</h1>
+    <p class="muted">The admin key is the <code>VC_ADMIN_KEY</code> Netlify environment variable. It is kept in this tab only.</p>
+    <form class="row" id="keyform">
+      <label>Admin key <input type="password" id="key" autocomplete="off" size="32"></label>
+      <button type="submit">Load participants</button>
+      <button type="button" class="secondary" id="forget">Forget key</button>
+    </form>
+    <p class="error" id="err"></p>
+
+    <div class="section">
+      <h2>Create access codes</h2>
+      <p class="muted">Conditions are assigned in balanced blocks of three. Mark pilot or team codes as test so they can be filtered out of analysis. Gap days sets the minimum wait between sessions (0 for piloting).</p>
+      <form class="row" id="createform">
+        <label>How many <input type="number" id="count" min="1" max="300" value="3" style="width:90px"></label>
+        <label>Label (optional) <input type="text" id="label" placeholder="pilot-oct" style="width:160px"></label>
+        <label>Gap days <input type="number" id="gap" min="0" max="60" placeholder="6" style="width:90px"></label>
+        <label style="flex-direction:row;display:flex;gap:6px;align-items:center"><input type="checkbox" id="test"> Test codes</label>
+        <button type="submit">Create</button>
+      </form>
+      <div id="created" hidden></div>
+    </div>
+
+    <div class="section">
+      <h2>Participants</h2>
+      <div class="row">
+        <button type="button" class="secondary" id="refresh">Refresh</button>
+        <button type="button" class="secondary" id="csv">Download trials CSV</button>
+        <button type="button" class="secondary" id="json">Download full JSON</button>
+      </div>
+      <p class="muted" id="summary"></p>
+      <div class="table-wrap"><table id="tbl"></table></div>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  var API = '/api/vc/admin/';
+  var $ = function (id) { return document.getElementById(id); };
+  function getKey() { try { return sessionStorage.getItem('vc_admin') || ''; } catch (e) { return $('key').value; } }
+  function setKey(k) { try { if (k) sessionStorage.setItem('vc_admin', k); else sessionStorage.removeItem('vc_admin'); } catch (e) {} }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function fmt(ms) { return ms ? new Date(ms).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : ''; }
+  function err(msg) { $('err').textContent = msg || ''; }
+  function call(path, opts) {
+    opts = opts || {};
+    var key = getKey() || $('key').value;
+    return fetch(API + path, { method: opts.method || 'GET', headers: Object.assign({ 'x-admin-key': key }, opts.body ? { 'content-type': 'application/json' } : {}), body: opts.body ? JSON.stringify(opts.body) : undefined })
+      .then(function (r) {
+        if (r.status === 403) throw new Error('Wrong admin key.');
+        if (r.status === 503) throw new Error('Admin is disabled: set VC_ADMIN_KEY (16+ characters) in Netlify and redeploy.');
+        if (!r.ok) throw new Error('Request failed (' + r.status + ').');
+        return r;
+      });
+  }
+  function download(path, name) {
+    err();
+    call(path).then(function (r) { return r.blob(); }).then(function (b) {
+      var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    }).catch(function (e) { err(e.message); });
+  }
+  function load() {
+    err();
+    call('participants').then(function (r) { return r.json(); }).then(function (rows) {
+      var by = {}; rows.forEach(function (p) { if (!p.test) by[p.condition] = (by[p.condition] || 0) + 1; });
+      var done = rows.filter(function (p) { return !p.test && p.completedSessions >= 4; }).length;
+      $('summary').textContent = rows.length + ' codes (' + rows.filter(function (p) { return p.test; }).length + ' test). Non-test by condition: ' +
+        (Object.keys(by).map(function (k) { return k + ' ' + by[k]; }).join(', ') || 'none yet') + '. Finished all sessions: ' + done + '.';
+      var head = ['Code', 'Label', 'Condition', 'Test', 'Consent', 'Sessions done', 'In progress', 'Next opens', 'Gap', 'Last seen'];
+      $('tbl').innerHTML = '<tr>' + head.map(function (h) { return '<th>' + h + '</th>'; }).join('') + '</tr>' + rows.map(function (p) {
+        return '<tr><td><code>' + esc(p.code) + '</code></td><td>' + esc(p.label) + '</td><td>' + esc(p.condition) + '</td><td>' + (p.test ? 'yes' : '') + '</td><td>' +
+          (p.declined ? 'declined' : p.consented ? 'yes' : '') + '</td><td>' + p.completedSessions + ' / 4</td><td>' + (p.inProgress ? p.inProgress + ' / 8' : '') + '</td><td>' +
+          (p.nextSession ? 'S' + p.nextSession + ' ' + esc(fmt(p.availableAt)) : 'done') + '</td><td>' + p.gapDays + 'd</td><td>' + esc(fmt(p.lastSeenAt)) + '</td></tr>';
+      }).join('');
+    }).catch(function (e) { err(e.message); });
+  }
+  $('keyform').addEventListener('submit', function (e) { e.preventDefault(); setKey($('key').value); load(); });
+  $('forget').addEventListener('click', function () { setKey(''); $('key').value = ''; $('tbl').innerHTML = ''; $('summary').textContent = ''; });
+  $('refresh').addEventListener('click', load);
+  $('csv').addEventListener('click', function () { download('export.csv', 'verification_trials_' + new Date().toISOString().slice(0, 10) + '.csv'); });
+  $('json').addEventListener('click', function () { download('export.json', 'verification_all_' + new Date().toISOString().slice(0, 10) + '.json'); });
+  $('createform').addEventListener('submit', function (e) {
+    e.preventDefault(); err();
+    var body = { count: Number($('count').value), label: $('label').value.trim() || null, gapDays: $('gap').value === '' ? null : Number($('gap').value), test: $('test').checked };
+    call('create', { method: 'POST', body: body }).then(function (r) { return r.json(); }).then(function (res) {
+      var box = $('created'); box.hidden = false;
+      box.textContent = 'Created ' + res.created.length + ' codes (send one per person; do not reuse):\n' + res.created.map(function (p) { return p.code + '\t' + p.condition + (p.test ? '\ttest' : ''); }).join('\n');
+      load();
+    }).catch(function (e) { err(e.message); });
+  });
+  var k = getKey(); if (k) { $('key').value = k; load(); }
+})();
+</script>
+</body>
+</html>

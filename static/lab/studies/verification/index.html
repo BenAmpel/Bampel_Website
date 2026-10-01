@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Security Alert Study</title>
+<link rel="stylesheet" href="../../assets/study.css">
+<style>
+  .alert-head { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+  .sev { font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+  .summary { font-size: 17px; margin: 8px 0 16px; }
+  .ai-box { border: 2px solid var(--accent); border-radius: 10px; padding: 14px; margin: 16px 0; }
+  .ai-box .verdict { font-weight: 700; font-size: 17px; }
+  .ai-box .label { font-size: 12px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); }
+  .evidence { border: 1px solid var(--line); border-radius: 10px; margin: 16px 0; overflow: hidden; }
+  .tabs { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid var(--line); }
+  .tabs button { background: transparent; color: var(--text); border: 0; border-right: 1px solid var(--line); border-radius: 0; padding: 12px 6px; font-size: 14px; }
+  .tabs button:last-child { border-right: 0; }
+  .tabs button[aria-selected="true"] { background: var(--accent); color: var(--accent-text); }
+  .panel-body { padding: 16px; min-height: 96px; }
+  .panel-body .placeholder { color: var(--muted); }
+  .step { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 12px; }
+  .locked { opacity: .7; }
+  .checks { display: grid; gap: 6px; }
+  .banner { background: #fff4d6; color: #5c4400; border: 1px solid #e8cf86; border-radius: 8px; padding: 8px 12px; font-size: 13px; margin-bottom: 12px; }
+  input[type=text] { width: 100%; padding: 10px; font: inherit; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--text); letter-spacing: 1px; text-transform: uppercase; }
+  .error { color: #c62828; font-size: 14px; margin-top: 8px; }
+  select { font: inherit; padding: 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--text); }
+  @media (max-width: 560px) { .tabs { grid-template-columns: repeat(2, 1fr); } .tabs button:nth-child(2) { border-right: 0; } .tabs button:nth-child(-n+2) { border-bottom: 1px solid var(--line); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="progress" id="progress"></p>
+  <div class="card" id="stage"><p>Loading…</p></div>
+</div>
+<script src="../../tracelab/tracelab.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
