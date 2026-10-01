@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CARE Behavioral Lab</title>
+<meta name="description" content="Browser-based studies of how people judge cyber threats, from the CyberAI Research and Education Center (CARE) at Georgia State University.">
+<link rel="canonical" href="https://bampel.com/lab/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050a15; --surface: #0a1628; --card: #0f1f3a; --accent: #00ddb3; --accent-dim: rgba(0,221,179,0.10);
+    --accent2: #2d8cf0; --text: #e8edf5; --text2: #8b9ab8; --muted: #7288ab;
+    --border: rgba(0,221,179,0.14); --border-subtle: rgba(255,255,255,0.06);
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #f5f8fb; --surface: #ffffff; --card: #ffffff; --accent: #007a63; --accent-dim: rgba(0,122,99,0.08);
+      --accent2: #1f6feb; --text: #0f1b2d; --text2: #3c4a60; --muted: #5a6880;
+      --border: rgba(0,122,99,0.18); --border-subtle: rgba(15,27,45,0.08);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #f5f8fb; --surface: #ffffff; --card: #ffffff; --accent: #007a63; --accent-dim: rgba(0,122,99,0.08);
+    --accent2: #1f6feb; --text: #0f1b2d; --text2: #3c4a60; --muted: #5a6880;
+    --border: rgba(0,122,99,0.18); --border-subtle: rgba(15,27,45,0.08);
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Manrope', sans-serif; line-height: 1.6; }
+  a { color: var(--accent); }
+  .mono { font-family: 'Space Mono', monospace; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
+  header { border-bottom: 1px solid var(--border-subtle); }
+  header .wrap { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 14px; padding-bottom: 14px; flex-wrap: wrap; }
+  .brand { font-weight: 800; color: var(--text); text-decoration: none; letter-spacing: .2px; }
+  .brand span { color: var(--accent); }
+  nav a { color: var(--text2); text-decoration: none; margin-left: 18px; font-size: 14px; }
+  nav a:first-child { margin-left: 0; }
+  nav a:hover { color: var(--accent); }
+  .hero { padding: 64px 0 40px; }
+  .eyebrow { color: var(--accent); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; }
+  h1 { font-size: clamp(30px, 5vw, 48px); line-height: 1.1; margin: 12px 0 16px; }
+  .lede { color: var(--text2); font-size: 18px; max-width: 720px; }
+  section { padding: 32px 0; }
+  h2 { font-size: 24px; margin: 0 0 16px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+  .card h3 { margin: 0 0 6px; font-size: 16px; }
+  .card p { margin: 0; color: var(--text2); font-size: 14px; }
+  .tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; background: var(--accent-dim); color: var(--accent); margin-bottom: 8px; }
+  .study { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .btn { display: inline-block; padding: 10px 16px; border-radius: 8px; background: var(--accent); color: var(--bg); font-weight: 700; text-decoration: none; }
+  ul.plain { padding-left: 18px; color: var(--text2); margin: 0; }
+  ul.plain li { margin: 6px 0; }
+  footer { border-top: 1px solid var(--border-subtle); padding: 24px 0 40px; color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <a class="brand" href="/lab/">CARE <span>Behavioral Lab</span></a>
+    <nav><a href="/care/">CARE</a><a href="#studies">Studies</a><a href="#data">Data &amp; privacy</a><a href="/">bampel.com</a></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="hero">
+    <div class="eyebrow mono">CyberAI Research and Education Center · Georgia State University</div>
+    <h1>How people judge cyber threats, measured as they decide.</h1>
+    <p class="lede">The CARE Behavioral Lab runs browser-based studies of security decisions such as spotting phishing, judging links, and responding to suspicious calls. Each study records the answer and how the person arrived at it (timing, hesitation, where attention went), so we can study the decision process rather than only its outcome.</p>
+  </div>
+
+  <section id="studies">
+    <h2>Studies</h2>
+    <div class="card study">
+      <div>
+        <span class="tag mono">Demo · no data leaves your browser</span>
+        <h3>Email judgment demo</h3>
+        <p>Judge two emails and a link, explain one decision, and see what the lab records. About three minutes.</p>
+      </div>
+      <a class="btn" href="/lab/studies/demo-phishing/">Try the demo</a>
+    </div>
+    <p style="color:var(--muted);font-size:14px;margin-top:12px">Live studies appear here once they have IRB approval. Participants reach them through a study link with their own ID.</p>
+  </section>
+
+  <section id="traces">
+    <h2>What a study can record</h2>
+    <div class="grid">
+      <div class="card"><h3>Timing</h3><p>Time on each item, delay before the first move, idle pauses, and when answers were given.</p></div>
+      <div class="card"><h3>Pointer</h3><p>Sampled cursor path, speed, direction changes, clicks, and how long the pointer rested on links, headers, and options.</p></div>
+      <div class="card"><h3>Answer changes</h3><p>Every change to a response, not just the final choice, including confidence adjustments.</p></div>
+      <div class="card"><h3>Typing rhythm</h3><p>Keystroke timing, deletions, and paste events. The lab records the kind of key (letter, space, delete), never the key itself.</p></div>
+      <div class="card"><h3>Attention</h3><p>Time the tab was hidden, window focus loss, scrolling, and window resizing.</p></div>
+      <div class="card"><h3>Media</h3><p>For audio or video stimuli: delay before playing, share of the clip heard, replays, and seeks.</p></div>
+    </div>
+    <p style="color:var(--muted);font-size:14px;margin-top:12px">Webcam modules (gaze and facial expression) are planned as an opt-in add-on for studies that need them. They will compute features in the browser and will not upload video.</p>
+  </section>
+
+  <section id="data">
+    <h2>Data and privacy</h2>
+    <ul class="plain">
+      <li>Nothing is recorded before a participant gives consent on the study's first page.</li>
+      <li>The lab never records which keys were pressed, and never uses the camera or microphone unless a study asks for it and the participant agrees.</li>
+      <li>Live studies store data only where the approved IRB protocol says, under a study ID rather than a name.</li>
+      <li>The demo stores nothing: its data stays in the browser tab and disappears when the tab closes.</li>
+    </ul>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">CARE Behavioral Lab · Directed by Dr. Benjamin M. Ampel · <a href="mailto:bampel@gsu.edu">bampel@gsu.edu</a></div>
+</footer>
+</body>
+</html>

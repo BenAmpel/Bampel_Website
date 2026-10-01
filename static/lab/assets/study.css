@@ -1,0 +1,69 @@
+/* CARE Behavioral Lab: participant-facing study pages.
+   Deliberately plain and light so styling does not steer judgments. */
+:root {
+  --bg: #f6f7f9;
+  --card: #ffffff;
+  --text: #1c2330;
+  --muted: #5a6577;
+  --line: #d9dee6;
+  --accent: #1f6feb;
+  --accent-text: #ffffff;
+  --mail-bg: #ffffff;
+  --link: #1a56c4;
+  --status-bg: #e9ecf1;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12161d; --card: #1a2029; --text: #e6eaf0; --muted: #9aa5b5; --line: #2c3442;
+    --accent: #4c8dff; --mail-bg: #1f2631; --link: #8ab4ff; --status-bg: #262e3a;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12161d; --card: #1a2029; --text: #e6eaf0; --muted: #9aa5b5; --line: #2c3442;
+  --accent: #4c8dff; --mail-bg: #1f2631; --link: #8ab4ff; --status-bg: #262e3a;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  padding: 24px 16px 96px;
+}
+.wrap { max-width: 760px; margin: 0 auto; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 24px; }
+.progress { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
+h1 { font-size: 22px; margin: 0 0 12px; }
+h2 { font-size: 18px; margin: 0 0 12px; }
+p { margin: 0 0 12px; }
+.muted { color: var(--muted); font-size: 14px; }
+.q { font-weight: 600; margin: 20px 0 10px; }
+.options { display: grid; gap: 8px; }
+.option { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; }
+.option:hover { border-color: var(--accent); }
+.option input { margin: 0; }
+.likert { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.likert .option { flex-direction: column; text-align: center; font-size: 13px; padding: 8px 4px; }
+.slider-row { display: flex; gap: 12px; align-items: center; }
+.slider-row input[type=range] { flex: 1; }
+.slider-val { min-width: 3ch; text-align: right; font-variant-numeric: tabular-nums; }
+textarea { width: 100%; min-height: 120px; padding: 10px; border: 1px solid var(--line); border-radius: 8px; font: inherit; background: var(--card); color: var(--text); }
+.actions { display: flex; justify-content: flex-end; margin-top: 24px; }
+button { font: inherit; padding: 10px 18px; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-text); cursor: pointer; }
+button[disabled] { opacity: .45; cursor: not-allowed; }
+button.secondary { background: transparent; color: var(--accent); }
+
+/* Simulated email client */
+.mail { border: 1px solid var(--line); border-radius: 8px; background: var(--mail-bg); overflow: hidden; }
+.mail-head { padding: 12px 14px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.mail-head div { margin: 2px 0; }
+.mail-head .label { color: var(--muted); display: inline-block; width: 64px; }
+.mail-body { padding: 14px; font-size: 15px; }
+.mail-body a { color: var(--link); text-decoration: underline; cursor: pointer; }
+.statusbar { position: fixed; left: 8px; bottom: 8px; max-width: calc(100% - 16px); background: var(--status-bg); color: var(--text); border: 1px solid var(--line); border-radius: 4px; padding: 3px 8px; font-size: 12px; font-family: ui-monospace, Menlo, Consolas, monospace; display: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.urlbox { font-family: ui-monospace, Menlo, Consolas, monospace; background: var(--status-bg); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; overflow-wrap: anywhere; }
+
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-weight: 600; }
+.table-scroll { overflow-x: auto; }
+@media (max-width: 560px) { .likert { grid-template-columns: 1fr; } .card { padding: 18px; } }

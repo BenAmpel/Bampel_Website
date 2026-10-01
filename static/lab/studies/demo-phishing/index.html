@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Email Judgment Demo</title>
+<link rel="stylesheet" href="../../assets/study.css">
+</head>
+<body>
+<div class="wrap">
+  <p class="progress" id="progress"></p>
+  <div class="card" id="stage"></div>
+</div>
+<div class="statusbar" id="statusbar"></div>
+
+<script src="../../tracelab/tracelab.js"></script>
+<script>
+(function () {
+  'use strict';
+  var lab = TraceLab.create({ study: 'demo-phishing', version: '0.1.0', sink: { type: 'local' } });
+  var stage = document.getElementById('stage');
+  var progress = document.getElementById('progress');
+  var statusbar = document.getElementById('statusbar');
+  var responses = {};
+
+  // Fictional organizations only. Links never navigate.
+  var emails = {
+    payroll: {
+      from: 'Northwind Payroll &lt;payroll@northwind-hr-update.co&gt;',
+      to: 'you@northwindtraders.example',
+      subject: 'Action required: confirm your direct deposit by 5 PM today',
+      body: '<p>Hello,</p><p>Our payroll provider is moving to a new system. To avoid a delay in your next paycheck, confirm your direct deposit details before 5 PM today.</p>' +
+            '<p><a data-trace="link" data-url="http://northwind-hr-update.co/verify?session=88213">Confirm direct deposit</a></p>' +
+            '<p>Thank you,<br>Northwind Payroll Team</p>'
+    },
+    it: {
+      from: 'Northwind IT Service Desk &lt;servicedesk@northwindtraders.example&gt;',
+      to: 'you@northwindtraders.example',
+      subject: 'Scheduled maintenance this Saturday',
+      body: '<p>Hi team,</p><p>The VPN will be unavailable on Saturday from 6 to 8 AM for scheduled maintenance. You do not need to take any action.</p>' +
+            '<p>Details are on the <a data-trace="link" data-url="https://intranet.northwindtraders.example/it/maintenance">IT status page</a>.</p>' +
+            '<p>Northwind IT Service Desk</p>'
+    }
+  };
+
+  function el(html) { var d = document.createElement('div'); d.innerHTML = html; return d; }
+
+  function bindLinks(root) {
+    root.querySelectorAll('a[data-url]').forEach(function (a) {
+      a.href = '#';
+      a.addEventListener('mouseenter', function () { statusbar.textContent = a.getAttribute('data-url'); statusbar.style.display = 'block'; });
+      a.addEventListener('mouseleave', function () { statusbar.style.display = 'none'; });
+      a.addEventListener('click', function (e) { e.preventDefault(); lab.recordAnswer('link_clicked', a.getAttribute('data-url')); });
+    });
+  }
+
+  function choiceBlock(name, label, options) {
+    return '<p class="q">' + label + '</p><div class="options">' + options.map(function (o) {
+      return '<label class="option" data-trace="opt:' + o[0] + '"><input type="radio" name="' + name + '" value="' + o[0] + '"> ' + o[1] + '</label>';
+    }).join('') + '</div>';
+  }
+
+  function confidenceBlock(name) {
+    return '<p class="q">How confident are you? (0 = guessing, 100 = certain)</p>' +
+      '<div class="slider-row" data-trace="confidence"><input type="range" min="0" max="100" step="1" value="50" name="' + name + '" aria-label="Confidence"><span class="slider-val">50</span></div>' +
+      '<p class="muted">Move the slider to record your confidence.</p>';
+  }
+
+  var items = [
+    { id: 'email_payroll', render: function () {
+      return '<h2>Email 1 of 2</h2><p class="muted">Read the email as if it arrived in your work inbox. Hover over links to see where they go. Clicking a link does nothing here.</p>' +
+        mailHtml(emails.payroll) + choiceBlock('judgment', 'Is this email phishing?', [['phishing', 'Phishing'], ['legitimate', 'Legitimate']]) + confidenceBlock('confidence');
+    }, required: ['judgment', 'confidence'] },
+    { id: 'email_it', render: function () {
+      return '<h2>Email 2 of 2</h2><p class="muted">Same task with a different email.</p>' +
+        mailHtml(emails.it) + choiceBlock('judgment', 'Is this email phishing?', [['phishing', 'Phishing'], ['legitimate', 'Legitimate']]) + confidenceBlock('confidence');
+    }, required: ['judgment', 'confidence'] },
+    { id: 'url_check', render: function () {
+      return '<h2>Link check</h2><p>A coworker sends you this sign-in link in a chat message:</p>' +
+        '<div class="urlbox" data-trace="url">https://login.northwindtraders.example.account-verify.co/signin</div>' +
+        choiceBlock('judgment', 'Would you sign in through this link?', [['yes', 'Yes, it looks safe'], ['no', 'No, it looks unsafe'], ['unsure', 'I am not sure']]);
+    }, required: ['judgment'] },
+    { id: 'explain', render: function () {
+      return '<h2>In your own words</h2><p class="q">What made you decide whether Email 1 was phishing?</p>' +
+        '<textarea name="explanation" data-trace="textbox" aria-label="Your explanation"></textarea><p class="muted">A sentence or two is enough.</p>';
+    }, required: ['explanation'] },
+    { id: 'habit', render: function () {
+      var labels = ['Strongly disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly agree'];
+      return '<h2>One last question</h2><p class="q">"I usually check where a link goes before I click it."</p><div class="likert">' +
+        labels.map(function (l, i) { return '<label class="option" data-trace="likert:' + (i + 1) + '"><input type="radio" name="likert" value="' + (i + 1) + '"> ' + l + '</label>'; }).join('') + '</div>';
+    }, required: ['likert'] }
+  ];
+
+  function mailHtml(m) {
+    return '<div class="mail" data-trace="email"><div class="mail-head" data-trace="email_header"><div><span class="label">From</span>' + m.from + '</div>' +
+      '<div><span class="label">To</span>' + m.to + '</div><div><span class="label">Subject</span><strong>' + m.subject + '</strong></div></div>' +
+      '<div class="mail-body" data-trace="email_body">' + m.body + '</div></div>';
+  }
+
+  function showWelcome() {
+    progress.textContent = '';
+    stage.innerHTML = '<h1>Email judgment demo</h1>' +
+      '<p>This short demonstration shows how the CARE Behavioral Lab records behavior while you answer questions. It has five short items and takes about three minutes.</p>' +
+      '<p>Once you agree below, the page records how you answer: timing, mouse movement, hovers, clicks, scrolling, and typing rhythm. It never records the keys you press, and it does not use your camera or microphone.</p>' +
+      '<p><strong>This is a demo. Nothing is sent anywhere.</strong> Your data stays in this browser tab, and you can view or download it at the end.</p>' +
+      '<label class="option" style="margin-top:16px"><input type="checkbox" id="consent"> I understand and want to try the demo.</label>' +
+      '<div class="actions"><button id="begin" disabled>Begin</button></div>';
+    var c = document.getElementById('consent'), b = document.getElementById('begin');
+    c.addEventListener('change', function () { b.disabled = !c.checked; });
+    b.addEventListener('click', function () { lab.start(); showItem(0); });
+  }
+
+  function showItem(i) {
+    var it = items[i];
+    progress.textContent = 'Item ' + (i + 1) + ' of ' + items.length;
+    stage.innerHTML = it.render() + '<div class="actions"><button id="next" disabled>' + (i === items.length - 1 ? 'Finish' : 'Next') + '</button></div>';
+    window.scrollTo(0, 0);
+    bindLinks(stage);
+    lab.beginItem(it.id, stage);
+    var answered = {};
+    var next = document.getElementById('next');
+    function check() { next.disabled = !it.required.every(function (f) { return answered[f] != null && answered[f] !== ''; }); }
+    stage.querySelectorAll('input[type=radio]').forEach(function (r) {
+      r.addEventListener('change', function () { answered[r.name] = r.value; lab.recordAnswer(r.name, r.value); check(); });
+    });
+    stage.querySelectorAll('input[type=range]').forEach(function (s) {
+      var out = s.parentNode.querySelector('.slider-val');
+      s.addEventListener('input', function () { out.textContent = s.value; });
+      // A click or key press on the slider counts as an answer, even if the value stays at the default.
+      var last = null;
+      function commit() {
+        var v = Number(s.value);
+        if (v === last && answered[s.name] != null) return;
+        last = v; answered[s.name] = v; lab.recordAnswer(s.name, v); check();
+      }
+      s.addEventListener('change', commit);
+      s.addEventListener('pointerup', commit);
+      s.addEventListener('keyup', commit);
+    });
+    stage.querySelectorAll('textarea').forEach(function (t) {
+      t.addEventListener('input', function () { answered[t.name] = t.value.trim(); check(); });
+      t.addEventListener('change', function () { lab.recordAnswer(t.name, t.value); });
+    });
+    next.addEventListener('click', function () {
+      lab.endItem(answered);
+      responses[it.id] = answered;
+      if (i + 1 < items.length) showItem(i + 1); else finish();
+    });
+  }
+
+  function finish() {
+    progress.textContent = '';
+    lab.finish({ responses: responses }).then(function (payload) {
+      var rows = payload.items.map(function (it) {
+        var f = it.features;
+        var hov = Object.keys(f.hovers).map(function (k) { return k + ' (' + Math.round(f.hovers[k].dwellMs) + ' ms)'; }).join(', ') || '—';
+        return '<tr><td>' + it.id + '</td><td>' + (f.durationMs / 1000).toFixed(1) + ' s</td><td>' + (f.firstInteractionMs == null ? '—' : Math.round(f.firstInteractionMs) + ' ms') +
+          '</td><td>' + f.answerChanges + '</td><td>' + f.mousePathPx + ' px</td><td>' + f.idleGaps + '</td><td>' + f.keystrokes + ' / ' + f.deletions + '</td><td>' + hov + '</td></tr>';
+      }).join('');
+      stage.innerHTML = '<h1>Thank you</h1><p>Here is a summary of what the page recorded for each item. The full file also contains the raw time-stamped events (' + payload.events.length + ' in total).</p>' +
+        '<div class="table-scroll"><table><thead><tr><th>Item</th><th>Time</th><th>First move</th><th>Answer changes</th><th>Mouse path</th><th>Pauses</th><th>Keys / deletions</th><th>Hovered</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+        '<div class="actions"><button class="secondary" id="dl">Download my data (JSON)</button></div>' +
+        '<p class="muted">Nothing was sent to a server. Closing this tab deletes the data.</p>';
+      document.getElementById('dl').addEventListener('click', function () { TraceLab.download(payload); });
+    });
+  }
+
+  showWelcome();
+})();
+</script>
+</body>
+</html>
