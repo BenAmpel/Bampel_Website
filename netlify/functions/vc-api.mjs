@@ -85,7 +85,7 @@ export default async (req) => {
         case 'export.json': return json(await core.exportAll(store));
         case 'export.csv': return csv(await core.exportCsv(store), 'verification_trials.csv');
         case 'export-surveys.csv': return csv(await core.exportSurveyCsv(store), 'verification_surveys.csv');
-        case 'content': return json(await content.getContent(store));
+        case 'content': return json({ ...(await content.getContent(store)), _textFields: content.TEXT_FIELDS, _aiTypes: content.AI_TYPES });
         case 'content-history': return json(await content.contentHistory(store));
         case 'team': return json(await admin.listMembers(store));
         case 'activity': return json(await admin.auditLog(store));

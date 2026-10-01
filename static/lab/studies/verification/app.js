@@ -26,6 +26,14 @@
   }
   function show(html) { stage.innerHTML = html; window.scrollTo(0, 0); }
   function errorBox(msg) { return '<p class="error" role="alert">' + esc(msg) + '</p>'; }
+  // Screen text from the study content. {placeholders} are filled from vars; blank lines split paragraphs.
+  function T(key, vars) {
+    var t = (S.content && S.content.text && S.content.text[key]) || '';
+    return t.replace(/\{(\w+)\}/g, function (m, k) { return vars && vars[k] != null ? vars[k] : k === 'minutes' ? S.content.minutesPerSession : m; });
+  }
+  function linkify(h) { return h.replace(/([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})/g, '<a href="mailto:$1">$1</a>'); }
+  function Th(key, vars) { return esc(T(key, vars)); }
+  function Tp(key, vars, cls) { return T(key, vars).split(/\n\s*\n/).map(function (x) { return '<p' + (cls ? ' class="' + cls + '"' : '') + '>' + linkify(esc(x.trim())) + '</p>'; }).join(''); }
   var ERR = {
     invalid_code: 'That access code was not recognized. Check it and try again.',
     not_enrolled: 'That email is not on the study roster. Use the email address your invitation was sent to, or contact the research team.',
@@ -38,7 +46,7 @@
 
   function slider(name, label) {
     return '<p class="q">' + label + '</p><div class="slider-row"><input type="range" min="0" max="100" step="1" value="50" name="' + name + '" aria-label="' + esc(label) + '"><span class="slider-val">50</span></div>' +
-      '<p class="muted">0 = guessing, 100 = certain. Click or move the slider to record your answer.</p>';
+      '<p class="muted">' + Th('conf_help') + '</p>';
   }
   function radios(name, opts, traceName) {
     return '<div class="options">' + opts.map(function (o) {
@@ -74,7 +82,7 @@
   function showLogin(msg, mode, email) {
     progress.textContent = '';
     if (mode === 'code') {
-      show('<h1>Security alert study</h1><p>Enter your pilot access code.</p>' +
+      show('<h1>' + Th('login_title') + '</h1><p>Enter your pilot access code.</p>' +
         '<form id="f"><input type="text" id="code" class="code" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="VC-XXXX-XXXX" aria-label="Access code">' +
         (msg ? errorBox(msg) : '') + '<div class="actions" style="justify-content:space-between"><button type="button" class="secondary" id="alt">Sign in with email</button><button type="submit">Continue</button></div></form>');
       document.getElementById('alt').addEventListener('click', function () { showLogin(); });
@@ -85,10 +93,10 @@
       });
       return;
     }
-    show('<h1>Security alert study</h1><p>Sign in with the email address your invitation was sent to. Use the same email and PIN each week.</p>' +
+    show('<h1>' + Th('login_title') + '</h1>' + Tp('login_intro') +
       '<form id="f"><label class="field">Email<input type="email" id="email" autocomplete="email" spellcheck="false" value="' + esc(email || '') + '"></label>' +
       '<label class="field">4-digit PIN<input type="password" id="pin" autocomplete="current-password" ' + PIN_ATTR + '></label>' +
-      '<p class="muted">First time here? Leave the PIN blank and you will create one.</p>' +
+      '<p class="muted">' + Th('login_first_time') + '</p>' +
       (msg ? errorBox(msg) : '') + '<div class="actions" style="justify-content:space-between"><button type="button" class="secondary" id="alt">I have an access code</button><button type="submit">Continue</button></div></form>');
     document.getElementById('alt').addEventListener('click', function () { showLogin(null, 'code'); });
     document.getElementById(email ? 'pin' : 'email').focus();
@@ -141,15 +149,12 @@
   }
 
   // ---------- consent ----------
-  function para(text) {
-    var t = esc(String(text).replace(/\{minutes\}/g, S.content.minutesPerSession));
-    return t.replace(/([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})/g, '<a href="mailto:$1">$1</a>');
-  }
+  function para(text) { return linkify(esc(String(text).replace(/\{minutes\}/g, S.content.minutesPerSession))); }
   function showConsent() {
     progress.textContent = '';
     var c = S.content.consent;
     show((c.approved ? '' : '<div class="banner">Draft consent text, pending IRB approval. Do not enroll participants with this version.</div>') +
-      '<h1>Consent to participate</h1>' + c.paragraphs.map(function (x) { return '<p>' + para(x) + '</p>'; }).join('') +
+      '<h1>' + Th('consent_title') + '</h1>' + c.paragraphs.map(function (x) { return '<p>' + para(x) + '</p>'; }).join('') +
       '<label class="option" style="margin-top:12px"><input type="checkbox" id="agree"> ' + esc(c.agreeLabel) + '</label>' +
       '<div class="actions" style="gap:8px"><button class="secondary" id="decline">I do not agree</button><button id="ok" disabled>Continue</button></div>');
     var agree = document.getElementById('agree'), ok = document.getElementById('ok');
@@ -159,25 +164,24 @@
       api('consent', { token: S.token, agree: true }).then(function (r) { if (r.error) return showLogin(ERR[r.error] || ERR.server_error); refresh(); });
     });
     document.getElementById('decline').addEventListener('click', function () {
-      api('consent', { token: S.token, agree: false }).then(function () { store('vc_token', null); show('<h1>Thank you</h1><p>You have chosen not to take part. You can close this page.</p>'); });
+      api('consent', { token: S.token, agree: false }).then(function () { store('vc_token', null); show('<h1>' + Th('finished_title') + '</h1>' + Tp('decline_body')); });
     });
   }
 
   // ---------- status ----------
   function showStatus(st) {
     progress.textContent = '';
-    if (st.finished) return show('<h1>All sessions complete</h1><p>You have finished all ' + st.total + ' sessions. Thank you for taking part.</p>');
-    var done = st.completed ? '<p>You have completed ' + st.completed + ' of ' + st.total + ' sessions.</p>' : '';
+    if (st.finished) return show('<h1>' + Th('finished_title') + '</h1>' + Tp('finished_body'));
+    var done = st.completed ? Tp('progress_done', { completed: st.completed, total: st.total }) : '';
+    var out = '<button class="secondary" id="out">' + Th('sign_out') + '</button>';
     if (!st.available) {
-      return show('<h1>Your next session is not open yet</h1>' + done + '<p>Session ' + st.nextSession + ' opens on <strong>' + esc(fmtDate(st.availableAt)) + '</strong>. Come back then and sign in the same way.</p>' +
-        '<div class="actions"><button class="secondary" id="out">Sign out</button></div>');
+      show('<h1>' + Th('wait_title') + '</h1>' + done + Tp('wait_body', { session: st.nextSession, date: fmtDate(st.availableAt) }) + '<div class="actions">' + out + '</div>');
+    } else {
+      show('<h1>' + Th('start_title', { session: st.nextSession, total: st.total }) + '</h1>' + done + Tp('start_body') +
+        '<div class="actions" style="gap:8px">' + out + '<button id="go">' + Th('start_button', { session: st.nextSession }) + '</button></div>');
+      document.getElementById('go').addEventListener('click', startSession);
     }
-    show('<h1>Session ' + st.nextSession + ' of ' + st.total + '</h1>' + done +
-      '<p>This session takes about ' + S.content.minutesPerSession + ' minutes. Please complete it in one sitting, on a laptop or desktop computer, somewhere you will not be interrupted.</p>' +
-      '<p class="muted">If you get disconnected, sign in again and you will pick up where you left off.</p>' +
-      '<div class="actions" style="gap:8px"><button class="secondary" id="out">Sign out</button><button id="go">Start session ' + st.nextSession + '</button></div>');
-    document.getElementById('go').addEventListener('click', startSession);
-    var out = document.getElementById('out'); if (out) out.addEventListener('click', signOut);
+    document.getElementById('out').addEventListener('click', signOut);
   }
   function signOut() { store('vc_token', null); S.token = null; showLogin(); }
 
@@ -197,7 +201,7 @@
 
   function next() {
     var p = S.plan;
-    if (p.session === 1 && !p.preSurveyDone) return showPreSurvey();
+    if (!p.preSurveyDone) return showPreSurvey();
     if (!p._instructed) return showInstructions();
     if (p.practice && !p.practiceDone) return runTrial(p.practice, p.practiceAI, 'practice');
     var t = p.trials.filter(function (x) { return !x.done; })[0];
@@ -207,18 +211,11 @@
 
   function showInstructions() {
     var p = S.plan, mode = p.mode;
-    var how = {
-      ai_first: '<p>For each alert, an AI assistant will show its assessment first. Then review whatever evidence you want and make your decision. The AI assistant is helpful but not always correct.</p>',
-      evidence_first: '<p>For each alert, first review whatever evidence you want and record your initial assessment. Then an AI assistant will show its assessment, and you will make your final decision. You can look at the evidence again before deciding. The AI assistant is helpful but not always correct.</p>',
-      none: '<p>For each alert, review whatever evidence you want and make your decision.</p>'
-    }[mode];
-    if (mode === 'none' && p.session === 4 && p.priorAI) how = '<p>In this session there is no AI assistant. For each alert, review whatever evidence you want and make your decision.</p>';
-    progress.textContent = 'Session ' + p.session;
-    show('<h1>How this session works</h1>' +
-      '<p>You are a security analyst reviewing alerts from a company network. You will see ' + p.total + ' alerts. Each alert has a short summary and four sources of evidence: network activity, user behavior, system events, and context &amp; threat intel.</p>' + how +
-      '<p>Open evidence by clicking its tab. Open as much or as little as you think you need. About half of the alerts are malicious.</p>' +
-      (p.practice && !p.practiceDone ? '<p>You will start with one practice alert that does not count.</p>' : '') +
-      '<div class="actions"><button id="go">Begin</button></div>');
+    var how = mode === 'ai_first' ? 'instr_ai_first' : mode === 'evidence_first' ? 'instr_evidence_first' : p.aiRemoved ? 'instr_ai_removed' : 'instr_none';
+    progress.textContent = T('start_title', { session: p.session, total: S.content.sessions });
+    show('<h1>' + Th('instr_title') + '</h1>' + Tp('instr_intro', { n: p.total }) + Tp(how) + Tp('instr_outro') +
+      (p.practice && !p.practiceDone ? Tp('instr_practice') : '') +
+      '<div class="actions"><button id="go">' + Th('begin_button') + '</button></div>');
     document.getElementById('go').addEventListener('click', function () { p._instructed = true; next(); });
   }
 
@@ -227,7 +224,7 @@
     var p = S.plan, mode = ai ? p.mode : 'none';
     var isPractice = index === 'practice';
     var doneCount = p.trials.filter(function (x) { return x.done; }).length;
-    progress.textContent = isPractice ? 'Practice alert' : 'Session ' + p.session + ' · Alert ' + (doneCount + 1) + ' of ' + p.total;
+    progress.textContent = isPractice ? T('progress_practice') : T('progress_trial', { session: p.session, i: doneCount + 1, n: p.total });
     var itemId = isPractice ? 'practice' : 't' + index;
     var t0 = performance.now();
     var ms = function () { return Math.round(performance.now() - t0); };
@@ -236,22 +233,23 @@
 
     function aiBox() {
       if (!ai) return '';
-      var v = ai.verdict === 'malicious' ? 'Malicious' : 'Benign';
-      return '<div class="ai-box" data-trace="ai_box"><div class="label">AI assistant assessment</div><div class="verdict">' + v + ' · ' + ai.confidence + '% confidence</div><p style="margin:6px 0 0">' + esc(ai.rationale) + '</p></div>';
+      var v = ai.verdict === 'malicious' ? Th('label_malicious') : Th('label_benign');
+      return '<div class="ai-box" data-trace="ai_box"><div class="label">' + Th('ai_label') + '</div><div class="verdict">' + v + ' · ' + Th('ai_confidence', { confidence: ai.confidence }) + '</div><p style="margin:6px 0 0">' + esc(ai.rationale) + '</p></div>';
     }
     var aiAtTop = mode === 'ai_first' && ai;
     var twoStep = mode === 'evidence_first' && ai;
-    var influenceOpts = alert.panels.map(function (x) { return [x.key, x.label]; }).concat([['summary', 'The alert summary']]);
+    var influenceOpts = alert.panels.map(function (x) { return [x.key, x.label]; }).concat([['summary', T('infl_summary')]]);
+    var answerOpts = [['malicious', Th('label_malicious')], ['benign', Th('label_benign')]];
 
-    show('<div class="alert-head"><h2 style="margin:0">' + esc(alert.title) + '</h2><span class="sev">Severity: ' + esc(alert.severity) + '</span></div>' +
+    show('<div class="alert-head"><h2 style="margin:0">' + esc(alert.title) + '</h2><span class="sev">' + Th('severity_label') + ': ' + esc(alert.severity) + '</span></div>' +
       '<p class="summary" data-trace="summary">' + esc(alert.summary) + '</p>' +
       (aiAtTop ? aiBox() : '') +
       '<div class="evidence"><div class="tabs" role="tablist">' + alert.panels.map(function (x) {
         return '<button role="tab" aria-selected="false" data-panel="' + x.key + '" data-trace="tab:' + x.key + '">' + esc(x.label) + '</button>';
-      }).join('') + '</div><div class="panel-body" id="pbody" data-trace="panel_body"><p class="placeholder">Select an evidence source above to view it.</p></div></div>' +
+      }).join('') + '</div><div class="panel-body" id="pbody" data-trace="panel_body"><p class="placeholder">' + Th('evidence_placeholder') + '</p></div></div>' +
       (twoStep ?
-        '<div class="step" id="step1"><p class="q">Your initial assessment: is this alert malicious or benign?</p>' + radios('initial_judgment', [['malicious', 'Malicious'], ['benign', 'Benign']], 'initial') + slider('initial_confidence', 'How confident are you in your initial assessment?') +
-        '<div class="actions"><button id="lock" disabled>Record initial assessment and see the AI assessment</button></div></div><div id="step2" hidden></div>'
+        '<div class="step" id="step1"><p class="q">' + Th('q_initial') + '</p>' + radios('initial_judgment', answerOpts, 'initial') + slider('initial_confidence', Th('q_initial_conf')) +
+        '<div class="actions"><button id="lock" disabled>' + Th('lock_button') + '</button></div></div><div id="step2" hidden></div>'
         : '<div class="step" id="step2"></div>') +
       '');
 
@@ -274,12 +272,12 @@
 
     function finalBlock() {
       var showAiOpt = !!ai;
-      var opts = influenceOpts.concat(showAiOpt ? [['ai', 'The AI assessment']] : []);
-      return '<p class="q">' + (twoStep ? 'Your final decision' : 'Your decision') + ': is this alert malicious or benign?</p>' + radios('final_judgment', [['malicious', 'Malicious'], ['benign', 'Benign']], 'final') +
-        slider('final_confidence', 'How confident are you?') +
-        '<p class="q">Which information most influenced your decision? Select all that apply.</p><div class="checks">' +
+      var opts = influenceOpts.concat(showAiOpt ? [['ai', T('infl_ai')]] : []);
+      return '<p class="q">' + Th(twoStep ? 'q_final_two' : 'q_final') + '</p>' + radios('final_judgment', answerOpts, 'final') +
+        slider('final_confidence', Th('q_conf')) +
+        '<p class="q">' + Th('q_influence') + '</p><div class="checks">' +
         opts.map(function (o) { return '<label class="option" data-trace="infl:' + o[0] + '"><input type="checkbox" name="influential" value="' + o[0] + '"> ' + esc(o[1]) + '</label>'; }).join('') + '</div>' +
-        '<div class="actions"><button id="submit" disabled>' + (isPractice ? 'Finish practice' : 'Submit decision') + '</button></div>';
+        '<div class="actions"><button id="submit" disabled>' + Th(isPractice ? 'practice_submit' : 'submit_button') + '</button></div>';
     }
 
     var evStart = S.lab ? S.lab.events.length : 0;
@@ -335,7 +333,7 @@
   }
 
   function showPracticeDone() {
-    show('<h1>Practice complete</h1><p>The real alerts start now. They will look the same as the practice alert.</p><div class="actions"><button id="go">Start</button></div>');
+    show('<h1>' + Th('practice_done_title') + '</h1>' + Tp('practice_done_body') + '<div class="actions"><button id="go">' + Th('practice_done_button') + '</button></div>');
     document.getElementById('go').addEventListener('click', next);
   }
 
@@ -347,19 +345,22 @@
     if (it.type === 'select') return q + '<select name="' + it.id + '"><option value="">Select…</option>' + it.options.map(function (o) { return '<option value="' + esc(o.value) + '">' + esc(o.label) + '</option>'; }).join('') + '</select>';
     return q + '<textarea name="' + it.id + '" data-trace="text:' + it.id + '"></textarea>';
   }
-  function shown(it) {
+  // Mirrors itemsFor() in netlify/lib/vc-content.mjs.
+  function shown(it, kind) {
     var p = S.plan;
+    var inSession = it.sessions && it.sessions.length ? it.sessions.indexOf(p.session) >= 0 : (kind === 'pre' ? p.session === 1 : true);
+    if (!inSession) return false;
     if (it.showIf === 'ai') return p.mode !== 'none';
     if (it.showIf === 'no_ai') return p.mode === 'none';
-    if (it.showIf === 'after_ai') return p.mode === 'none' && p.priorAI && p.session > 1;
+    if (it.showIf === 'after_ai') return !!p.aiRemoved;
     return true;
   }
   function surveyPage(title, items, kind) {
-    items = items.filter(shown);
+    items = items.filter(function (it) { return shown(it, kind); });
     if (!items.length) return submitSurvey({}, kind, null);
     var required = items.filter(function (it) { return it.required; }).map(function (it) { return it.id; });
-    progress.textContent = 'Session ' + S.plan.session;
-    show('<h1>' + title + '</h1>' + items.map(itemHtml).join('') + '<div class="actions"><button id="go"' + (required.length ? ' disabled' : '') + '>Continue</button></div>');
+    progress.textContent = T('start_title', { session: S.plan.session, total: S.content.sessions });
+    show('<h1>' + esc(title) + '</h1>' + items.map(itemHtml).join('') + '<div class="actions"><button id="go"' + (required.length ? ' disabled' : '') + '>' + Th('continue_button') + '</button></div>');
     var ans = {}; var go = document.getElementById('go');
     wire(stage, function (n, v) { ans[n] = v; go.disabled = !required.every(function (k) { return ans[k] != null && String(ans[k]).trim() !== ''; }); });
     go.addEventListener('click', function () { go.disabled = true; submitSurvey(ans, kind, go); });
@@ -371,17 +372,17 @@
       showDone(r.status);
     });
   }
-  function showPreSurvey() { surveyPage('A few questions about you', S.content.survey.pre, 'pre'); }
-  function showPostSurvey() { surveyPage('About this session', S.content.survey.post, 'post'); }
+  function showPreSurvey() { surveyPage(T('pre_title'), S.content.survey.pre, 'pre'); }
+  function showPostSurvey() { surveyPage(T('post_title'), S.content.survey.post, 'post'); }
 
   function showDone(st) {
     progress.textContent = '';
-    if (st && st.finished) return show('<h1>Thank you</h1><p>You have completed all sessions of the study. You can close this page.</p>');
-    show('<h1>Session complete</h1><p>Thank you. Your answers are saved.</p>' +
-      (st && st.availableAt ? '<p>Your next session opens on <strong>' + esc(fmtDate(st.availableAt)) + '</strong>. Sign in the same way each week.</p>' : '') +
-      '<div class="actions"><button class="secondary" id="out">Sign out</button></div>');
-    document.getElementById('out').addEventListener('click', signOut);
     S.lab = null;
+    if (st && st.finished) return show('<h1>' + Th('finished_title') + '</h1>' + Tp('finished_body'));
+    show('<h1>' + Th('done_title') + '</h1>' + Tp('done_body') +
+      (st && st.availableAt ? Tp('done_next', { date: fmtDate(st.availableAt) }) : '') +
+      '<div class="actions"><button class="secondary" id="out">' + Th('sign_out') + '</button></div>');
+    document.getElementById('out').addEventListener('click', signOut);
   }
 
   // ---------- boot ----------

@@ -7,7 +7,11 @@
 <title>Verification Study Admin</title>
 <link rel="stylesheet" href="../../assets/study.css">
 <style>
+  [hidden] { display: none !important; }
   .wrap { max-width: 1100px; }
+  .pick { max-height: 260px; overflow: auto; border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2px 16px; }
+  .pick label { display: flex; gap: 8px; align-items: baseline; font-size: 13px; margin: 3px 0; color: var(--text); }
+  .pick .meta { color: var(--muted); font-family: ui-monospace, Menlo, monospace; font-size: 12px; white-space: nowrap; }
   .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: end; }
   .row label, .f { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
   .f { margin-bottom: 10px; }
@@ -37,6 +41,7 @@
   .qcard .bar .btns { display: flex; gap: 6px; }
   .qcard .bar button, button.small { padding: 4px 10px; font-size: 13px; }
   .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  h3 { font-size: 15px; }
   .check { display: flex !important; gap: 8px; align-items: center; color: var(--text) !important; }
   .panel-edit { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 10px; }
   .savebar { position: sticky; bottom: 0; background: var(--card); border-top: 1px solid var(--line); padding: 12px 0; margin-top: 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
@@ -239,11 +244,11 @@
       var real = rows.filter(function (p) { return !p.test; });
       var by = {}; real.forEach(function (p) { by[p.condition] = (by[p.condition] || 0) + 1; });
       $('summary').textContent = rows.length + ' participants (' + (rows.length - real.length) + ' test). Real participants by condition: ' +
-        (Object.keys(by).map(function (k) { return k + ' ' + by[k]; }).join(', ') || 'none yet') + '. Finished all sessions: ' + real.filter(function (p) { return p.completedSessions >= 4; }).length + '.';
+        (Object.keys(by).map(function (k) { return k + ' ' + by[k]; }).join(', ') || 'none yet') + '. Finished all sessions: ' + real.filter(function (p) { return p.completedSessions >= p.totalSessions; }).length + '.';
       var head = ['Study ID', 'Sign-in', 'PIN set', 'Label', 'Condition', 'Test', 'Consent', 'Sessions done', 'In progress', 'Next opens', 'Gap', 'Last seen'].concat(can('owner') ? [''] : []);
       $('tbl').innerHTML = '<tr>' + head.map(function (h) { return '<th>' + h + '</th>'; }).join('') + '</tr>' + rows.map(function (p) {
         return '<tr><td><code>' + esc(p.code) + '</code></td><td>' + esc(p.type) + '</td><td>' + (p.type === 'email' ? (p.pinSet ? 'yes' : 'not yet') : '') + '</td><td>' + esc(p.label) + '</td><td>' + esc(p.condition) + '</td><td>' + (p.test ? 'yes' : '') + '</td><td>' +
-          (p.declined ? 'declined' : p.consented ? 'yes' : '') + '</td><td>' + p.completedSessions + ' / 4</td><td>' + (p.inProgress ? p.inProgress + ' / 8' : '') + '</td><td>' +
+          (p.declined ? 'declined' : p.consented ? 'yes' : '') + '</td><td>' + p.completedSessions + ' / ' + p.totalSessions + '</td><td>' + (p.inProgress ? p.inProgress + ' / ' + p.inProgressOf : '') + '</td><td>' +
           (p.nextSession ? 'S' + p.nextSession + ' ' + esc(fmt(p.availableAt)) : 'done') + '</td><td>' + p.gapDays + 'd</td><td>' + esc(fmt(p.lastSeenAt)) + '</td>' +
           (can('owner') ? '<td><button type="button" class="danger secondary small" data-del="' + esc(p.code) + '">Delete</button></td>' : '') + '</tr>';
       }).join('');
@@ -282,7 +287,7 @@
       lookupRows = rows; $('lcsv').disabled = !rows.length;
       $('ltbl').innerHTML = '<tr><th>Email</th><th>Enrolled</th><th>PIN set</th><th>Consented</th><th>Sessions done</th><th>Finished</th><th>Last session</th></tr>' + rows.map(function (r) {
         return '<tr><td>' + esc(r.email) + '</td><td>' + (r.enrolled ? 'yes' : '<strong>no</strong>') + '</td><td>' + (r.enrolled ? (r.pinSet ? 'yes' : 'no') : '') + '</td><td>' +
-          (r.declined ? 'declined' : r.consented ? 'yes' : '') + '</td><td>' + (r.enrolled ? r.completedSessions + ' / 4' : '') + '</td><td>' + (r.finished ? '<span class="ok">yes</span>' : '') + '</td><td>' + esc(fmt(r.lastCompletedAt)) + '</td></tr>';
+          (r.declined ? 'declined' : r.consented ? 'yes' : '') + '</td><td>' + (r.enrolled ? r.completedSessions + ' / ' + r.totalSessions : '') + '</td><td>' + (r.finished ? '<span class="ok">yes</span>' : '') + '</td><td>' + esc(fmt(r.lastCompletedAt)) + '</td></tr>';
       }).join('');
     }).catch(function (e) { err(e.message); });
   });
@@ -308,10 +313,11 @@
   });
 
   // ---------- study content editor ----------
-  var saved = null, draft = null, dirty = false, sub = 'consent', alertSel = 'practice';
-  var SHOW = [['always', 'Always'], ['ai', 'Only in sessions with the AI'], ['no_ai', 'Only in sessions without the AI'], ['after_ai', 'Only after the AI is removed (session 4, AI groups)']];
+  var saved = null, draft = null, dirty = false, sub = 'sessions', alertSel = null, META = { text: [], ai: {} };
+  var SHOW = [['always', 'Always'], ['ai', 'Only in sessions with the AI'], ['no_ai', 'Only in sessions without the AI'], ['after_ai', 'Only after the AI is removed (AI groups)']];
   var TYPES = [['scale', 'Rating scale'], ['choice', 'Multiple choice'], ['select', 'Dropdown'], ['text', 'Text answer']];
-  var SUBS = [['consent', 'Consent & settings'], ['pre', 'Background survey'], ['post', 'End-of-session survey'], ['alerts', 'Alerts']];
+  var SUBS = [['sessions', 'Sessions & AI'], ['alerts', 'Alerts'], ['pre', 'Start-of-session survey'], ['post', 'End-of-session survey'], ['consent', 'Consent'], ['text', 'Screen text']];
+  var PANEL_DEFAULTS = [['network', 'Network activity'], ['user', 'User behavior'], ['system', 'System events'], ['context', 'Context & threat intel']];
   function clone(x) { return JSON.parse(JSON.stringify(x)); }
   function setDirty(v) {
     dirty = v;
@@ -322,10 +328,13 @@
   function loadContent(force) {
     if (draft && !force) return renderEditor();
     Promise.all([getJSON('content'), getJSON('content-history'), getJSON('participants')]).then(function (res) {
+      META = { text: res[0]._textFields, ai: res[0]._aiTypes };
+      delete res[0]._textFields; delete res[0]._aiTypes;
       saved = res[0]; draft = clone(saved); setDirty(false);
+      if (!alertSel || !draft.alerts.some(function (a) { return a.id === alertSel; })) alertSel = 'practice';
       var started = res[2].filter(function (p) { return !p.test && (p.consented || p.completedSessions); }).length;
       $('contentinfo').textContent = 'Current version: ' + (saved.version || 0) + (saved.version ? ', saved ' + fmt(saved.savedAt) + ' by ' + saved.savedBy : ' (the built-in defaults)') + '.' + (can('editor') ? '' : ' You can view the content but not change it.');
-      $('contentwarn').innerHTML = started ? '<div class="warn">' + started + ' real participant' + (started === 1 ? ' has' : 's have') + ' already started. Changes apply to screens shown after you save. Answers already collected keep the version they were collected under, and each trial keeps a copy of the alert and answer key as scored. Changing questions mid-study makes sessions hard to compare, so check with the team first.</div>' : '';
+      $('contentwarn').innerHTML = started ? '<div class="warn">' + started + ' real participant' + (started === 1 ? ' has' : 's have') + ' already started. Changes apply from each participant\'s next session (a session in progress keeps the alerts and AI behaviors it started with). Answers record the version they were collected under, and each trial keeps a copy of the alert and answer key as scored. Changing the design mid-study makes sessions hard to compare, so check with the team first.</div>' : '';
       $('vtbl').innerHTML = '<tr><th>Version</th><th>Saved</th><th>By</th><th></th></tr>' + res[1].map(function (v) {
         return '<tr><td>' + v.version + (v.version === saved.version ? ' (current)' : '') + '</td><td>' + esc(fmt(v.savedAt)) + '</td><td>' + esc(v.savedBy) + (v.restoredFrom != null ? ' (restored v' + v.restoredFrom + ')' : '') + '</td><td>' +
           (can('editor') && v.version !== saved.version ? '<button type="button" class="secondary small" data-restore="' + v.version + '">Restore</button>' : '') + '</td></tr>';
@@ -349,102 +358,208 @@
   function field(label, html) { return '<label class="f">' + label + html + '</label>'; }
   function checkbox(attr, checked, label) { return '<label class="f check"><input type="checkbox" ' + attr + (checked ? ' checked' : '') + '> ' + label + '</label>'; }
   function inp(path, value, extra) { return '<input type="text" data-path="' + path + '" value="' + esc(value) + '"' + (extra || '') + '>'; }
+  function num(path, value, lo, hi) { return '<input type="number" min="' + lo + '" max="' + hi + '" data-path="' + path + '" data-num="1" value="' + esc(value) + '">'; }
   function area(path, value, rows) { return '<textarea data-path="' + path + '" rows="' + (rows || 3) + '">' + esc(value) + '</textarea>'; }
   function sel(path, value, opts) { return '<select data-path="' + path + '">' + opts.map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === value ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select>'; }
   function getPath(path) { return path.split('.').reduce(function (o, k) { return o[k]; }, draft); }
   function setPath(path, v) { var ks = path.split('.'), last = ks.pop(); ks.reduce(function (o, k) { return o[k]; }, draft)[last] = v; }
+  function btn(attr, label, cls, disabled) { return '<button type="button" class="' + (cls || 'secondary') + ' small" ' + attr + (disabled ? ' disabled' : '') + '>' + label + '</button>'; }
+  function alertById(id) { return id === 'practice' ? draft.practice : draft.alerts.filter(function (a) { return a.id === id; })[0]; }
+  function sessionsUsing(id) { var out = []; draft.design.sessions.forEach(function (s, i) { if (s.alerts.indexOf(id) >= 0) out.push(i + 1); }); return out; }
+  function counts(ai) { var c = {}; Object.keys(META.ai).forEach(function (k) { c[k] = 0; }); (ai || []).forEach(function (t) { c[t] = (c[t] || 0) + 1; }); return c; }
+  function fromCounts(c) { var a = []; Object.keys(META.ai).forEach(function (k) { for (var i = 0; i < (c[k] || 0); i++) a.push(k); }); return a; }
 
   function renderEditor() {
     $('subtabs').innerHTML = SUBS.map(function (s) { return '<button type="button" data-sub="' + s[0] + '" aria-selected="' + (s[0] === sub) + '">' + s[1] + '</button>'; }).join('');
     var h = '';
-    if (sub === 'consent') {
-      h = field('Minutes per session (shown to participants; write {minutes} in the consent text to insert it)', '<input type="number" min="1" max="180" data-path="minutesPerSession" data-num="1" value="' + draft.minutesPerSession + '" style="width:100px">') +
+    if (sub === 'sessions') h = renderSessions();
+    else if (sub === 'alerts') h = renderAlerts();
+    else if (sub === 'pre' || sub === 'post') {
+      var items = draft.survey[sub];
+      h = '<p class="muted">' + (sub === 'pre' ? 'Shown at the start of a session, before the alerts. By default only in session 1; list other session numbers to ask again (for example, 1, 4).' : 'Shown at the end of a session. Leave "Sessions" blank to ask every session.') +
+        ' "Show when" limits a question to sessions with or without the AI. The variable name is the column name in the surveys CSV: keep it if you only reword a question, and use a new name if it now measures something different.</p>' +
+        items.map(function (it, i) { return qcard(sub, it, i, items.length); }).join('') +
+        '<button type="button" class="secondary" data-add="' + sub + '">Add a question</button>';
+    } else if (sub === 'consent') {
+      h = field('Minutes per session (write {minutes} in any text to insert it)', num('minutesPerSession', draft.minutesPerSession, 1, 180)) +
         field('Consent text (leave a blank line between paragraphs; email addresses become links)', '<textarea id="consenttext" rows="14">' + esc(draft.consent.paragraphs.join('\n\n')) + '</textarea>') +
         field('Agreement checkbox label', inp('consent.agreeLabel', draft.consent.agreeLabel)) +
         checkbox('data-path="consent.approved" data-bool="1"', draft.consent.approved, 'This is the IRB-approved consent text (removes the "draft" banner participants see)');
-    } else if (sub === 'pre' || sub === 'post') {
-      var items = draft.survey[sub];
-      h = '<p class="muted">' + (sub === 'pre' ? 'Shown once, in session 1, before the practice alert.' : 'Shown at the end of every session. Use "Show when" to limit a question to sessions with or without the AI.') +
-        ' The variable name is the column name in the surveys CSV: keep it if you only reword a question, and use a new name if the question now measures something different.</p>' +
-        items.map(function (it, i) { return qcard(sub, it, i, items.length); }).join('') +
-        '<button type="button" class="secondary" data-add="' + sub + '">Add a question</button>';
     } else {
-      var all = [draft.practice].concat(draft.alerts);
-      h = field('Alert', '<select id="alertsel">' + all.map(function (a) {
-        return '<option value="' + a.id + '"' + (a.id === alertSel ? ' selected' : '') + '>' + (a.id === 'practice' ? 'Practice alert' : esc(a.title) + ' · version ' + (a.variant + 1) + ' (' + a.truth + ')') + '</option>';
-      }).join('') + '</select>');
-      var idx = alertSel === 'practice' ? -1 : draft.alerts.map(function (a) { return a.id; }).indexOf(alertSel);
-      var base = idx < 0 ? 'practice' : 'alerts.' + idx, a = getPath(base);
-      h += '<p class="muted">Each session shows one version of each of the 8 alert types, so the set of alerts is fixed, but the text and answer keys can be edited. ' +
-        'Keep about half of each session malicious. "Points to" is the answer a panel supports and drives the CSV measures for contradicting evidence. "Misleading" marks a panel that points the wrong way.</p>' +
-        '<div class="grid3">' + field('Title', inp(base + '.title', a.title)) + field('Severity', inp(base + '.severity', a.severity)) +
-        field('Correct answer', sel(base + '.truth', a.truth, [['malicious', 'Malicious'], ['benign', 'Benign']])) + '</div>' +
-        field('Summary', area(base + '.summary', a.summary, 2)) +
-        a.panels.map(function (p, j) {
-          var pb = base + '.panels.' + j;
-          return '<div class="panel-edit"><div class="grid3">' + field('Evidence tab label', inp(pb + '.label', p.label)) +
-            field('Points to', sel(pb + '.supports', p.supports, [['malicious', 'Malicious'], ['benign', 'Benign'], ['neutral', 'Neither']])) +
-            checkbox('data-mislead="' + base + '|' + p.key + '"', a.misleadingPanels.indexOf(p.key) >= 0, 'Misleading') + '</div>' +
-            field('Text', area(pb + '.text', p.text, 3)) + '</div>';
-        }).join('') +
-        '<div class="panel-edit">' + field('AI explanation when the AI is right' + (idx < 0 ? ' (in the practice alert the AI is always right)' : ''), area(base + '.aiRationale.correct', a.aiRationale.correct, 2)) +
-        (idx < 0 ? '' : field('AI explanation when the AI is wrong (low-confidence versions add "The evidence is mixed." in front; the manipulated version adds "No other indicators in this alert are notable." at the end)', area(base + '.aiRationale.incorrect', a.aiRationale.incorrect, 2))) + '</div>';
+      var group = null;
+      h = '<p class="muted">Every piece of text participants see. Words in {braces} are filled in on screen (listed in each label). Leave a blank line between paragraphs.</p>';
+      META.text.forEach(function (f) {
+        if (f.group !== group) { h += '<h3 style="margin:20px 0 8px">' + esc(f.group) + '</h3>'; group = f.group; }
+        var changed = draft.text[f.key] !== f.def;
+        h += '<div class="f"><span>' + esc(f.label) + (changed ? ' · ' + btn('data-resettext="' + f.key + '"', 'Reset to default') : '') + '</span>' +
+          area('text.' + f.key, draft.text[f.key], Math.min(6, Math.max(1, Math.ceil(String(draft.text[f.key]).length / 90)))) + '</div>';
+      });
     }
     $('editor').innerHTML = h;
     $('editor').disabled = !can('editor');
   }
+
+  function renderSessions() {
+    var d = draft.design, nAll = draft.alerts.length;
+    var h = '<p class="muted">The study runs these sessions in order, each opening after the participant\'s gap days. Each session shows its alerts in a random order. For the AI-first and evidence-first groups, choose what the AI does on each alert in a session; the behaviors are shuffled across that session\'s alerts. The control group never sees the AI.</p>' +
+      checkbox('data-path="design.practice" data-bool="1"', d.practice, 'Start session 1 with the practice alert') +
+      '<div class="row" style="margin-bottom:12px">' +
+      '<label>AI confidence when "high": from ' + num('design.aiConfidence.highMin', d.aiConfidence.highMin, 50, 100) + '</label><label>to ' + num('design.aiConfidence.highMax', d.aiConfidence.highMax, 50, 100) + '</label>' +
+      '<label>when "low": from ' + num('design.aiConfidence.lowMin', d.aiConfidence.lowMin, 50, 100) + '</label><label>to ' + num('design.aiConfidence.lowMax', d.aiConfidence.lowMax, 50, 100) + '</label></div>';
+    d.sessions.forEach(function (s, i) {
+      var n = s.alerts.length, c = counts(s.ai), total = s.ai ? s.ai.length : 0;
+      var sorted = draft.alerts.slice().sort(function (a, b) { return (a.family + a.title).localeCompare(b.family + b.title); });
+      h += '<div class="qcard"><div class="bar"><strong>Session ' + (i + 1) + '</strong><div class="btns">' +
+        btn('data-smove="' + i + '|-1"', '↑', null, i === 0) + btn('data-smove="' + i + '|1"', '↓', null, i === d.sessions.length - 1) +
+        btn('data-sdup="' + i + '"', 'Duplicate') + btn('data-sremove="' + i + '"', 'Remove', 'danger secondary', d.sessions.length === 1) + '</div></div>' +
+        '<p class="muted" style="margin:0 0 6px">' + n + ' of ' + nAll + ' alerts selected (' + s.alerts.filter(function (id) { var a = alertById(id); return a && a.truth === 'malicious'; }).length + ' malicious).</p>' +
+        '<div class="pick">' +
+        sorted.map(function (a) { return '<label title="' + esc(a.summary) + '"><input type="checkbox" data-salert="' + i + '|' + esc(a.id) + '"' + (s.alerts.indexOf(a.id) >= 0 ? ' checked' : '') + '><span>' + esc(a.title) + ' <span class="meta">' + esc(a.id) + ' · ' + (a.truth === 'malicious' ? 'mal' : 'ben') + '</span></span></label>'; }).join('') + '</div>' +
+        checkbox('data-sai="' + i + '"', !!s.ai, 'AI assistant in this session (AI groups)') +
+        (s.ai ? '<div class="row">' + Object.keys(META.ai).map(function (k) { return '<label>' + esc(META.ai[k]) + ' <input type="number" min="0" max="40" style="width:80px" data-scount="' + i + '|' + k + '" value="' + c[k] + '"></label>'; }).join('') + '</div>' +
+          '<p id="scount-' + i + '" style="margin-top:6px">' + countMsg(total, n) + '</p>' : '') +
+        '</div>';
+    });
+    return h + '<button type="button" class="secondary" data-saddsession="1">Add a session</button>';
+  }
+
+  function countMsg(total, n) { return total === n ? '<span class="muted">AI behaviors: ' + total + ' of ' + n + ' alerts.</span>' : '<span class="error">AI behaviors: ' + total + ' of ' + n + ' alerts. These must match before you can save.</span>'; }
+
+  function renderAlerts() {
+    var all = [draft.practice].concat(draft.alerts.slice().sort(function (a, b) { return (a.family + a.title).localeCompare(b.family + b.title); }));
+    var a = alertById(alertSel) || draft.practice, isP = a === draft.practice;
+    var base = isP ? 'practice' : 'alerts.' + draft.alerts.indexOf(a);
+    var used = isP ? [] : sessionsUsing(a.id);
+    var h = '<div class="row" style="margin-bottom:8px"><label style="flex:1;min-width:240px">Alert <select id="alertsel" style="width:100%">' + all.map(function (x) {
+        return '<option value="' + esc(x.id) + '"' + (x.id === a.id ? ' selected' : '') + '>' + (x.id === 'practice' ? 'Practice alert' : esc(x.title) + ' · ' + esc(x.id) + ' · ' + x.truth) + '</option>';
+      }).join('') + '</select></label>' + btn('data-addalert="1"', 'Add alert') + btn('data-dupalert="1"', 'Duplicate') + btn('data-delalert="1"', 'Delete', 'danger secondary', isP) + '</div>' +
+      '<p class="muted">' + (isP ? 'Shown once at the start of session 1 when "practice alert" is on (Sessions & AI tab). Not scored.' : used.length ? 'Used in session' + (used.length > 1 ? 's ' : ' ') + used.join(', ') + '.' : '<strong>Not used in any session yet.</strong> Add it on the Sessions & AI tab.') +
+      ' "Points to" is the answer a panel supports and drives the CSV measures for contradicting evidence; "Misleading" marks a panel that points the wrong way.</p>' +
+      '<div class="grid3">' + field('Title', inp(base + '.title', a.title)) + field('Severity', inp(base + '.severity', a.severity)) +
+      field('Correct answer', sel(base + '.truth', a.truth, [['malicious', 'Malicious'], ['benign', 'Benign']])) + '</div>' +
+      (isP ? '' : field('Alert type (groups versions of the same alert in analysis)', inp(base + '.family', a.family, ' class="mono"'))) +
+      field('Summary', area(base + '.summary', a.summary, 2));
+    a.panels.forEach(function (p, j) {
+      var pb = base + '.panels.' + j;
+      h += '<div class="panel-edit"><div class="bar" style="display:flex;justify-content:space-between;align-items:center"><strong style="font-size:14px">Evidence ' + (j + 1) + '</strong><div class="btns" style="display:flex;gap:6px">' +
+        btn('data-pmove="' + base + '|' + j + '|-1"', '↑', null, j === 0) + btn('data-pmove="' + base + '|' + j + '|1"', '↓', null, j === a.panels.length - 1) +
+        btn('data-premove="' + base + '|' + j + '"', 'Remove', 'danger secondary', a.panels.length === 1) + '</div></div>' +
+        '<div class="grid3">' + field('Tab label', inp(pb + '.label', p.label)) + field('Variable name (CSV column)', '<input type="text" class="mono" data-pkey="' + base + '|' + j + '" value="' + esc(p.key) + '">') +
+        field('Points to', sel(pb + '.supports', p.supports, [['malicious', 'Malicious'], ['benign', 'Benign'], ['neutral', 'Neither']])) + '</div>' +
+        checkbox('data-mislead="' + base + '|' + p.key + '"', a.misleadingPanels.indexOf(p.key) >= 0, 'Misleading') +
+        field('Text', area(pb + '.text', p.text, 3)) + '</div>';
+    });
+    h += (a.panels.length < 6 ? '<p>' + btn('data-padd="' + base + '"', 'Add evidence panel') + '</p>' : '') +
+      '<div class="panel-edit">' + field('AI explanation when the AI is right' + (isP ? ' (in the practice alert the AI is always right)' : ''), area(base + '.aiRationale.correct', a.aiRationale.correct, 2)) +
+      (isP ? '' : field('AI explanation when the AI is wrong (low-confidence and manipulated versions add the text set on the Screen text tab)', area(base + '.aiRationale.incorrect', a.aiRationale.incorrect, 2))) + '</div>';
+    return h;
+  }
+
   function qcard(kind, it, i, n) {
     var b = 'survey.' + kind + '.' + i;
     var optText = (it.options || []).map(function (o) { return o.value === o.label ? o.label : o.value + ' | ' + o.label; }).join('\n');
     return '<div class="qcard"><div class="bar"><strong>Question ' + (i + 1) + '</strong><div class="btns">' +
-      '<button type="button" class="secondary" data-move="' + kind + '|' + i + '|-1"' + (i === 0 ? ' disabled' : '') + ' aria-label="Move up">↑</button>' +
-      '<button type="button" class="secondary" data-move="' + kind + '|' + i + '|1"' + (i === n - 1 ? ' disabled' : '') + ' aria-label="Move down">↓</button>' +
-      '<button type="button" class="danger secondary" data-remove="' + kind + '|' + i + '">Remove</button></div></div>' +
+      btn('data-move="' + kind + '|' + i + '|-1"', '↑', null, i === 0) + btn('data-move="' + kind + '|' + i + '|1"', '↓', null, i === n - 1) +
+      btn('data-dupq="' + kind + '|' + i + '"', 'Duplicate') + btn('data-remove="' + kind + '|' + i + '"', 'Remove', 'danger secondary') + '</div></div>' +
       field('Question text', area(b + '.text', it.text, 2)) +
       '<div class="grid3">' + field('Variable name', inp(b + '.id', it.id, ' class="mono"')) + field('Type', sel(b + '.type', it.type, TYPES)) + field('Show when', sel(b + '.showIf', it.showIf, SHOW)) + '</div>' +
-      (it.type === 'scale' ? '<div class="grid3">' + field('Points', '<input type="number" min="2" max="11" data-path="' + b + '.n" data-num="1" value="' + (it.n || 7) + '">') + field('Label for 1', inp(b + '.lo', it.lo || '')) + field('Label for the top point', inp(b + '.hi', it.hi || '')) + '</div>' : '') +
+      field('Sessions (numbers separated by commas; blank = ' + (kind === 'pre' ? 'session 1 only' : 'every session') + ')', '<input type="text" data-sessions="' + b + '" value="' + esc((it.sessions || []).join(', ')) + '" style="max-width:240px">') +
+      (it.type === 'scale' ? '<div class="grid3">' + field('Points', num(b + '.n', it.n || 7, 2, 11)) + field('Label for 1', inp(b + '.lo', it.lo || '')) + field('Label for the top point', inp(b + '.hi', it.hi || '')) + '</div>' : '') +
       (it.type === 'choice' || it.type === 'select' ? field('Options, one per line (optionally "saved value | text shown")', '<textarea data-opts="' + b + '" rows="4" class="mono">' + esc(optText) + '</textarea>') : '') +
       checkbox('data-path="' + b + '.required" data-bool="1"', it.required, 'Required') + '</div>';
   }
+
   $('subtabs').addEventListener('click', function (e) { var s = e.target.getAttribute && e.target.getAttribute('data-sub'); if (s) { sub = s; renderEditor(); } });
+
+  // Applies one field edit to the draft. Returns true when the screen should be redrawn.
   function applyEdit(t) {
+    var v, redraw = false;
     if (t.id === 'consenttext') draft.consent.paragraphs = t.value.split(/\n\s*\n/).map(function (x) { return x.trim(); }).filter(Boolean);
-    else if (t.hasAttribute('data-opts')) setPath(t.getAttribute('data-opts') + '.options', t.value.split('\n').map(function (l) { return l.trim(); }).filter(Boolean).map(function (l) {
+    else if ((v = t.getAttribute('data-opts'))) setPath(v + '.options', t.value.split('\n').map(function (l) { return l.trim(); }).filter(Boolean).map(function (l) {
       var m = l.split(/\s+\|\s+/); return m.length > 1 ? { value: m[0].trim(), label: m.slice(1).join(' | ').trim() } : { value: l, label: l };
     }));
-    else if (t.hasAttribute('data-path')) setPath(t.getAttribute('data-path'), t.hasAttribute('data-bool') ? t.checked : t.hasAttribute('data-num') ? Number(t.value) : t.value);
-    else if (t.hasAttribute('data-mislead')) {
-      var parts = t.getAttribute('data-mislead').split('|'), a = getPath(parts[0]);
-      a.misleadingPanels = a.panels.map(function (p) { return p.key; }).filter(function (k) { return k === parts[1] ? t.checked : a.misleadingPanels.indexOf(k) >= 0; });
+    else if ((v = t.getAttribute('data-sessions'))) setPath(v + '.sessions', t.value.split(/[\s,;]+/).filter(Boolean).map(Number).filter(function (x) { return Number.isInteger(x); }));
+    else if ((v = t.getAttribute('data-pkey'))) {
+      var pk = v.split('|'), a = getPath(pk[0]), panel = a.panels[Number(pk[1])], old = panel.key;
+      panel.key = t.value.trim();
+      a.misleadingPanels = a.misleadingPanels.map(function (k) { return k === old ? panel.key : k; });
+      var mb = $('editor').querySelector('[data-mislead="' + pk[0] + '|' + old + '"]'); if (mb) mb.setAttribute('data-mislead', pk[0] + '|' + panel.key);
+    } else if ((v = t.getAttribute('data-mislead'))) {
+      var parts = v.split('|'), al = getPath(parts[0]);
+      al.misleadingPanels = al.panels.map(function (p) { return p.key; }).filter(function (k) { return k === parts[1] ? t.checked : al.misleadingPanels.indexOf(k) >= 0; });
+    } else if ((v = t.getAttribute('data-salert'))) {
+      var sa = v.split('|'), s = draft.design.sessions[Number(sa[0])], id = sa.slice(1).join('|');
+      if (t.checked) { if (s.alerts.indexOf(id) < 0) { s.alerts.push(id); if (s.ai) s.ai.push('accurate'); } }
+      else { s.alerts = s.alerts.filter(function (x) { return x !== id; }); if (s.ai && s.ai.length > s.alerts.length) { var k = s.ai.lastIndexOf('accurate'); s.ai.splice(k >= 0 ? k : s.ai.length - 1, 1); } }
+      redraw = true;
+    } else if ((v = t.getAttribute('data-sai'))) {
+      var ss = draft.design.sessions[Number(v)]; ss.ai = t.checked ? ss.alerts.map(function () { return 'accurate'; }) : null; redraw = true;
+    } else if ((v = t.getAttribute('data-scount'))) {
+      var sc = v.split('|'), s2 = draft.design.sessions[Number(sc[0])], c = counts(s2.ai); c[sc[1]] = Math.max(0, parseInt(t.value, 10) || 0); s2.ai = fromCounts(c);
+      var msg = $('scount-' + sc[0]); if (msg) msg.innerHTML = countMsg(s2.ai.length, s2.alerts.length);
+    } else if ((v = t.getAttribute('data-path'))) {
+      setPath(v, t.hasAttribute('data-bool') ? t.checked : t.hasAttribute('data-num') ? Number(t.value) : t.value);
+      if (/\.(type|truth)$/.test(v) || v === 'design.practice') redraw = true;
+      if (/\.type$/.test(v)) {
+        var it = getPath(v.replace(/\.type$/, ''));
+        if (it.type === 'scale' && !it.n) { it.n = 7; it.lo = it.lo || 'Strongly disagree'; it.hi = it.hi || 'Strongly agree'; }
+        if ((it.type === 'choice' || it.type === 'select') && !(it.options && it.options.length)) it.options = [{ value: 'Option 1', label: 'Option 1' }, { value: 'Option 2', label: 'Option 2' }];
+      }
     } else return false;
-    setDirty(true); return true;
+    setDirty(true);
+    return redraw;
   }
-  $('editor').addEventListener('input', function (e) { if (e.target.tagName !== 'SELECT' && e.target.type !== 'checkbox') applyEdit(e.target); });
+  // Typing updates the draft without redrawing; checkboxes, dropdowns, and leaving a field can redraw.
+  $('editor').addEventListener('input', function (e) { var t = e.target; if (t.tagName !== 'SELECT' && t.type !== 'checkbox') applyEdit(t); });
   $('editor').addEventListener('change', function (e) {
     var t = e.target;
     if (t.id === 'alertsel') { alertSel = t.value; return renderEditor(); }
-    if (t.tagName !== 'SELECT' && t.type !== 'checkbox') return;
-    applyEdit(t);
-    var path = t.getAttribute('data-path') || '';
-    if (/\.type$/.test(path)) {
-      var it = getPath(path.replace(/\.type$/, ''));
-      if (it.type === 'scale' && !it.n) { it.n = 7; it.lo = it.lo || 'Strongly disagree'; it.hi = it.hi || 'Strongly agree'; }
-      if ((it.type === 'choice' || it.type === 'select') && !(it.options && it.options.length)) it.options = [{ value: 'Option 1', label: 'Option 1' }, { value: 'Option 2', label: 'Option 2' }];
-      renderEditor();
-    }
-    if (/\.truth$/.test(path)) renderEditor();
+    if ((t.tagName === 'SELECT' || t.type === 'checkbox') && applyEdit(t) === true) renderEditor();
   });
   $('editor').addEventListener('click', function (e) {
-    var t = e.target, v;
+    var t = e.target.closest ? e.target.closest('button') : null; if (!t || t.disabled) return;
+    var v, d = draft.design;
     if ((v = t.getAttribute('data-add'))) {
       var items = draft.survey[v], n = items.length + 1, id = 'q' + n;
       while (items.some(function (x) { return x.id === id; })) id = 'q' + (++n);
-      items.push({ id: id, text: '', type: 'scale', n: 7, lo: 'Strongly disagree', hi: 'Strongly agree', required: true, showIf: 'always' });
+      items.push({ id: id, text: '', type: 'scale', n: 7, lo: 'Strongly disagree', hi: 'Strongly agree', required: true, showIf: 'always', sessions: v === 'pre' ? [1] : [] });
     } else if ((v = t.getAttribute('data-remove'))) {
       var r = v.split('|'); if (!confirm('Remove this question?')) return; draft.survey[r[0]].splice(Number(r[1]), 1);
+    } else if ((v = t.getAttribute('data-dupq'))) {
+      var q = v.split('|'), list = draft.survey[q[0]], copy = clone(list[Number(q[1])]); copy.id = copy.id + '_copy'; list.splice(Number(q[1]) + 1, 0, copy);
     } else if ((v = t.getAttribute('data-move'))) {
-      var m = v.split('|'), arr = draft.survey[m[0]], i = Number(m[1]), j = i + Number(m[2]);
-      var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+      var m = v.split('|'), arr = draft.survey[m[0]], i = Number(m[1]), j = i + Number(m[2]), tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    } else if ((v = t.getAttribute('data-smove'))) {
+      var sm = v.split('|'), si = Number(sm[0]), sj = si + Number(sm[1]), st = d.sessions[si]; d.sessions[si] = d.sessions[sj]; d.sessions[sj] = st;
+    } else if ((v = t.getAttribute('data-sdup'))) {
+      d.sessions.splice(Number(v) + 1, 0, clone(d.sessions[Number(v)]));
+    } else if ((v = t.getAttribute('data-sremove'))) {
+      if (!confirm('Remove session ' + (Number(v) + 1) + '? Questions limited to later session numbers may need updating.')) return; d.sessions.splice(Number(v), 1);
+    } else if (t.hasAttribute('data-saddsession')) {
+      d.sessions.push({ alerts: [], ai: null });
+    } else if (t.hasAttribute('data-addalert') || t.hasAttribute('data-dupalert')) {
+      var src = alertById(alertSel), nid = 'alert-' + Date.now().toString(36);
+      var na = t.hasAttribute('data-dupalert') ? clone(src) : { title: 'New alert', severity: 'Medium', truth: 'malicious', family: 'new', summary: '', misleadingPanels: [], aiRationale: { correct: '', incorrect: '' },
+        panels: PANEL_DEFAULTS.map(function (p) { return { key: p[0], label: p[1], text: '', supports: 'neutral' }; }) };
+      na.id = nid; if (t.hasAttribute('data-dupalert')) { na.title += ' (copy)'; if (src === draft.practice) na.family = 'practice-copy'; }
+      if (!na.aiRationale.incorrect) na.aiRationale.incorrect = na.aiRationale.incorrect || '';
+      delete na.variant; draft.alerts.push(na); alertSel = nid;
+    } else if (t.hasAttribute('data-delalert')) {
+      var del = alertById(alertSel), usedIn = sessionsUsing(del.id);
+      if (!confirm('Delete "' + del.title + '"?' + (usedIn.length ? ' It will also be removed from session' + (usedIn.length > 1 ? 's ' : ' ') + usedIn.join(', ') + '.' : ''))) return;
+      d.sessions.forEach(function (s) { var k = s.alerts.indexOf(del.id); if (k >= 0) { s.alerts.splice(k, 1); if (s.ai) { var x = s.ai.lastIndexOf('accurate'); s.ai.splice(x >= 0 ? x : s.ai.length - 1, 1); } } });
+      draft.alerts.splice(draft.alerts.indexOf(del), 1); alertSel = 'practice';
+    } else if ((v = t.getAttribute('data-padd'))) {
+      var pa = getPath(v), k = 'evidence' + (pa.panels.length + 1);
+      while (pa.panels.some(function (p) { return p.key === k; })) k += '_';
+      pa.panels.push({ key: k, label: 'New evidence', text: '', supports: 'neutral' });
+    } else if ((v = t.getAttribute('data-premove'))) {
+      var pr = v.split('|'), pal = getPath(pr[0]), gone = pal.panels.splice(Number(pr[1]), 1)[0];
+      pal.misleadingPanels = pal.misleadingPanels.filter(function (k) { return k !== gone.key; });
+    } else if ((v = t.getAttribute('data-pmove'))) {
+      var pm = v.split('|'), pp = getPath(pm[0]).panels, pi = Number(pm[1]), pj = pi + Number(pm[2]), ptmp = pp[pi]; pp[pi] = pp[pj]; pp[pj] = ptmp;
+    } else if ((v = t.getAttribute('data-resettext'))) {
+      draft.text[v] = META.text.filter(function (f) { return f.key === v; })[0].def;
     } else return;
     setDirty(true); renderEditor();
   });
