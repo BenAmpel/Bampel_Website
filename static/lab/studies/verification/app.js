@@ -171,7 +171,7 @@
   // ---------- status ----------
   function showStatus(st) {
     progress.textContent = '';
-    if (st.finished) return show('<h1>' + Th('finished_title') + '</h1>' + Tp('finished_body'));
+    if (st.finished) return showFinished();
     var done = st.completed ? Tp('progress_done', { completed: st.completed, total: st.total }) : '';
     var out = '<button class="secondary" id="out">' + Th('sign_out') + '</button>';
     if (!st.available) {
@@ -181,6 +181,11 @@
         '<div class="actions" style="gap:8px">' + out + '<button id="go">' + Th('start_button', { session: st.nextSession }) + '</button></div>');
       document.getElementById('go').addEventListener('click', startSession);
     }
+    document.getElementById('out').addEventListener('click', signOut);
+  }
+  function showFinished() {
+    progress.textContent = '';
+    show('<h1>' + Th('finished_title') + '</h1>' + Tp('finished_body') + '<div class="actions"><button class="secondary" id="out">' + Th('sign_out') + '</button></div>');
     document.getElementById('out').addEventListener('click', signOut);
   }
   function signOut() { store('vc_token', null); S.token = null; showLogin(); }
@@ -378,7 +383,7 @@
   function showDone(st) {
     progress.textContent = '';
     S.lab = null;
-    if (st && st.finished) return show('<h1>' + Th('finished_title') + '</h1>' + Tp('finished_body'));
+    if (st && st.finished) return showFinished();
     show('<h1>' + Th('done_title') + '</h1>' + Tp('done_body') +
       (st && st.availableAt ? Tp('done_next', { date: fmtDate(st.availableAt) }) : '') +
       '<div class="actions"><button class="secondary" id="out">' + Th('sign_out') + '</button></div>');
