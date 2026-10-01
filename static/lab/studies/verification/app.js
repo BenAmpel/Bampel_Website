@@ -11,7 +11,7 @@
 
   var stage = document.getElementById('stage');
   var progress = document.getElementById('progress');
-  var S = { code: null, plan: null, lab: null };
+  var S = { token: null, plan: null, lab: null };
 
   // ---------- utilities ----------
   function store(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); if (v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch (e) { return null; } }
@@ -20,12 +20,19 @@
   function api(route, body) {
     return fetch(CONFIG.api + route, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body || {}) })
       .then(function (r) { return r.json().then(function (j) { j._status = r.status; return j; }, function () { return { error: 'server_error', _status: r.status }; }); },
-            function () { return { error: 'network' }; });
+            function () { return { error: 'network' }; })
+      .then(function (j) {
+        if (j.error === 'expired' && route !== 'login') { store('vc_token', null); S.token = null; showLogin(ERR.expired); return new Promise(function () {}); }
+        return j;
+      });
   }
   function show(html) { stage.innerHTML = html; window.scrollTo(0, 0); }
   function errorBox(msg) { return '<p class="error" role="alert">' + esc(msg) + '</p>'; }
   var ERR = {
     invalid_code: 'That access code was not recognized. Check it and try again.',
+    not_enrolled: 'That email is not on the study roster. Use the email address your invitation was sent to, or contact the research team.',
+    bad_pin_format: 'Your PIN must be exactly 4 digits.',
+    expired: 'Your sign-in expired. Sign in again to pick up where you left off.',
     network: 'Could not reach the study server. Check your connection and try again.',
     server_error: 'Something went wrong on our end. Please try again in a minute.',
     wrong_session: 'This session is no longer active. Reload the page to continue.'
@@ -63,24 +70,72 @@
     root.querySelectorAll('select').forEach(function (s) { s.addEventListener('change', function () { onAnswer(s.name, s.value); }); });
   }
 
-  // ---------- login ----------
-  function showLogin(msg) {
+  // ---------- sign-in: email + 4-digit PIN (pilot access codes also accepted) ----------
+  var PIN_ATTR = 'inputmode="numeric" pattern="[0-9]{4}" maxlength="4" spellcheck="false"';
+  function showLogin(msg, mode, email) {
     progress.textContent = '';
-    show('<h1>Security alert study</h1><p>Enter the access code from your invitation email. Use the same code each week.</p>' +
-      '<form id="f"><input type="text" id="code" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="VC-XXXX-XXXX" aria-label="Access code">' +
-      (msg ? errorBox(msg) : '') + '<div class="actions"><button type="submit">Continue</button></div></form>');
+    if (mode === 'code') {
+      show('<h1>Security alert study</h1><p>Enter your pilot access code.</p>' +
+        '<form id="f"><input type="text" id="code" class="code" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="VC-XXXX-XXXX" aria-label="Access code">' +
+        (msg ? errorBox(msg) : '') + '<div class="actions" style="justify-content:space-between"><button type="button" class="secondary" id="alt">Sign in with email</button><button type="submit">Continue</button></div></form>');
+      document.getElementById('alt').addEventListener('click', function () { showLogin(); });
+      document.getElementById('f').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var code = document.getElementById('code').value.trim();
+        if (code) signIn({ code: code });
+      });
+      return;
+    }
+    show('<h1>Security alert study</h1><p>Sign in with the email address your invitation was sent to. Use the same email and PIN each week.</p>' +
+      '<form id="f"><label class="field">Email<input type="email" id="email" autocomplete="email" spellcheck="false" value="' + esc(email || '') + '"></label>' +
+      '<label class="field">4-digit PIN<input type="password" id="pin" autocomplete="current-password" ' + PIN_ATTR + '></label>' +
+      '<p class="muted">First time here? Leave the PIN blank and you will create one.</p>' +
+      (msg ? errorBox(msg) : '') + '<div class="actions" style="justify-content:space-between"><button type="button" class="secondary" id="alt">I have an access code</button><button type="submit">Continue</button></div></form>');
+    document.getElementById('alt').addEventListener('click', function () { showLogin(null, 'code'); });
+    document.getElementById(email ? 'pin' : 'email').focus();
     document.getElementById('f').addEventListener('submit', function (e) {
       e.preventDefault();
-      var code = document.getElementById('code').value.trim();
-      if (!code) return;
-      login(code);
+      var em = document.getElementById('email').value.trim();
+      if (em) signIn({ email: em, pin: document.getElementById('pin').value.trim() });
     });
   }
 
-  function login(code) {
-    api('login', { code: code }).then(function (r) {
-      if (r.error) { store('vc_code', null); return showLogin(ERR[r.error] || ERR.server_error); }
-      S.code = r.code; store('vc_code', r.code);
+  function showSetPin(email, msg) {
+    progress.textContent = '';
+    show('<h1>Create your PIN</h1><p>Choose a 4-digit PIN. You will sign in each week with <strong>' + esc(email) + '</strong> and this PIN, so pick one you will remember.</p>' +
+      '<form id="f"><label class="field">New PIN<input type="password" id="p1" autocomplete="new-password" ' + PIN_ATTR + '></label>' +
+      '<label class="field">Type it again<input type="password" id="p2" autocomplete="new-password" ' + PIN_ATTR + '></label>' +
+      (msg ? errorBox(msg) : '') + '<div class="actions"><button type="submit">Save PIN and continue</button></div></form>');
+    document.getElementById('p1').focus();
+    document.getElementById('f').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var a = document.getElementById('p1').value.trim(), b = document.getElementById('p2').value.trim();
+      if (!/^\d{4}$/.test(a)) return showSetPin(email, ERR.bad_pin_format);
+      if (a !== b) return showSetPin(email, 'The two PINs do not match.');
+      signIn({ email: email, pin: a, setPin: true });
+    });
+  }
+
+  function loginError(r) {
+    if (r.error === 'wrong_pin') return 'That PIN is not right. ' + r.attemptsLeft + (r.attemptsLeft === 1 ? ' try' : ' tries') + ' left before a 15-minute lock. Forgot it? Contact the research team to reset it.';
+    if (r.error === 'locked') return 'Too many wrong PINs. Try again after ' + new Date(r.until).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }) + ', or contact the research team to reset your PIN.';
+    return ERR[r.error] || ERR.server_error;
+  }
+
+  function signIn(creds) {
+    api('login', creds).then(function (r) {
+      if (r.error === 'set_pin') return showSetPin(creds.email);
+      if (r.error) return showLogin(loginError(r), creds.email != null ? 'email' : 'code', creds.email);
+      S.token = r.token; store('vc_token', r.token);
+      if (!r.consented) return showConsent();
+      showStatus(r.status);
+    });
+  }
+
+  // Re-reads progress for the signed-in participant (after a reload or between screens).
+  function refresh() {
+    api('resume', { token: S.token }).then(function (r) {
+      if (r.error) return showLogin(ERR[r.error] || ERR.server_error);
       if (!r.consented) return showConsent();
       showStatus(r.status);
     });
@@ -93,7 +148,7 @@
       '<h1>Consent to participate</h1>' +
       '<p>This study examines how people review cybersecurity alerts with and without an AI assistant. It has four sessions, about one week apart, each taking about ' + CONFIG.minutesPerSession + ' minutes.</p>' +
       '<p>In each session you will review short security alerts, look at the evidence you choose, and decide whether each alert is malicious or benign. Some sessions include an AI assistant. The AI assistant is part of the study and is not always correct.</p>' +
-      '<p>While you work, the page records your answers and how you reached them: which evidence you open and for how long, timing, mouse movement, clicks, scrolling, and typing rhythm. It does not record which keys you press, and it does not use your camera or microphone. Your data is stored under your access code, not your name.</p>' +
+      '<p>While you work, the page records your answers and how you reached them: which evidence you open and for how long, timing, mouse movement, clicks, scrolling, and typing rhythm. It does not record which keys you press, and it does not use your camera or microphone. Your email is used only to sign you in and to confirm that you completed the study. Your responses are stored under a study ID, not your name or email.</p>' +
       '<p>Participation is voluntary. You may skip the study or stop at any time without penalty.</p>' +
       '<p class="muted">Questions: Dr. Benjamin Ampel, Georgia State University, <a href="mailto:bampel@gsu.edu">bampel@gsu.edu</a>.</p>' +
       '<label class="option" style="margin-top:12px"><input type="checkbox" id="agree"> I am 18 or older and I agree to participate.</label>' +
@@ -102,10 +157,10 @@
     agree.addEventListener('change', function () { ok.disabled = !agree.checked; });
     ok.addEventListener('click', function () {
       ok.disabled = true;
-      api('consent', { code: S.code, agree: true }).then(function (r) { if (r.error) return showLogin(ERR[r.error] || ERR.server_error); login(S.code); });
+      api('consent', { token: S.token, agree: true }).then(function (r) { if (r.error) return showLogin(ERR[r.error] || ERR.server_error); refresh(); });
     });
     document.getElementById('decline').addEventListener('click', function () {
-      api('consent', { code: S.code, agree: false }).then(function () { store('vc_code', null); show('<h1>Thank you</h1><p>You have chosen not to take part. You can close this page.</p>'); });
+      api('consent', { token: S.token, agree: false }).then(function () { store('vc_token', null); show('<h1>Thank you</h1><p>You have chosen not to take part. You can close this page.</p>'); });
     });
   }
 
@@ -115,26 +170,26 @@
     if (st.finished) return show('<h1>All sessions complete</h1><p>You have finished all ' + st.total + ' sessions. Thank you for taking part.</p>');
     var done = st.completed ? '<p>You have completed ' + st.completed + ' of ' + st.total + ' sessions.</p>' : '';
     if (!st.available) {
-      return show('<h1>Your next session is not open yet</h1>' + done + '<p>Session ' + st.nextSession + ' opens on <strong>' + esc(fmtDate(st.availableAt)) + '</strong>. Come back then and enter the same access code.</p>' +
+      return show('<h1>Your next session is not open yet</h1>' + done + '<p>Session ' + st.nextSession + ' opens on <strong>' + esc(fmtDate(st.availableAt)) + '</strong>. Come back then and sign in the same way.</p>' +
         '<div class="actions"><button class="secondary" id="out">Sign out</button></div>');
     }
     show('<h1>Session ' + st.nextSession + ' of ' + st.total + '</h1>' + done +
       '<p>This session takes about ' + CONFIG.minutesPerSession + ' minutes. Please complete it in one sitting, on a laptop or desktop computer, somewhere you will not be interrupted.</p>' +
-      '<p class="muted">If you get disconnected, sign in again with your code and you will pick up where you left off.</p>' +
+      '<p class="muted">If you get disconnected, sign in again and you will pick up where you left off.</p>' +
       '<div class="actions" style="gap:8px"><button class="secondary" id="out">Sign out</button><button id="go">Start session ' + st.nextSession + '</button></div>');
     document.getElementById('go').addEventListener('click', startSession);
     var out = document.getElementById('out'); if (out) out.addEventListener('click', signOut);
   }
-  function signOut() { store('vc_code', null); S.code = null; showLogin(); }
+  function signOut() { store('vc_token', null); S.token = null; showLogin(); }
 
   // ---------- session ----------
   function startSession() {
-    api('session', { code: S.code }).then(function (r) {
-      if (r.error === 'not_yet' || r.error === 'finished') return login(S.code);
+    api('session', { token: S.token }).then(function (r) {
+      if (r.error === 'not_yet' || r.error === 'finished') return refresh();
       if (r.error) return showLogin(ERR[r.error] || ERR.server_error);
       S.plan = r;
       if (!S.lab) {
-        S.lab = TraceLab.create({ study: 'verification-v1', version: '1.0.0', participant: S.code, sink: { type: 'local' }, mouseSampleMs: 50 });
+        S.lab = TraceLab.create({ study: 'verification-v1', version: '1.0.0', sink: { type: 'local' }, mouseSampleMs: 50 });
         S.lab.start();
       }
       next();
@@ -255,7 +310,7 @@
           rawEvents: raw,
           viewport: { w: window.innerWidth, h: window.innerHeight }
         };
-        api('trial', { code: S.code, session: p.session, index: index, data: data }).then(function (r) {
+        api('trial', { token: S.token, session: p.session, index: index, data: data }).then(function (r) {
           if (r.error) { submit.disabled = false; return stage.insertAdjacentHTML('beforeend', errorBox(ERR[r.error] || ERR.server_error)); }
           if (isPractice) { p.practiceDone = true; return showPracticeDone(); }
           p.trials.forEach(function (x) { if (x.index === index) x.done = true; });
@@ -293,7 +348,7 @@
     wire(stage, function (n, v) { ans[n] = v; go.disabled = !required.every(function (k) { return ans[k] != null && ans[k] !== ''; }); });
     go.addEventListener('click', function () {
       go.disabled = true;
-      api('survey', { code: S.code, session: S.plan.session, kind: kind, data: ans }).then(function (r) {
+      api('survey', { token: S.token, session: S.plan.session, kind: kind, data: ans }).then(function (r) {
         if (r.error) { go.disabled = false; return stage.insertAdjacentHTML('beforeend', errorBox(ERR[r.error] || ERR.server_error)); }
         if (kind === 'pre') { S.plan.preSurveyDone = true; return next(); }
         showDone(r.status);
@@ -332,13 +387,13 @@
     progress.textContent = '';
     if (st && st.finished) return show('<h1>Thank you</h1><p>You have completed all sessions of the study. You can close this page.</p>');
     show('<h1>Session complete</h1><p>Thank you. Your answers are saved.</p>' +
-      (st && st.availableAt ? '<p>Your next session opens on <strong>' + esc(fmtDate(st.availableAt)) + '</strong>. Use the same access code.</p>' : '') +
+      (st && st.availableAt ? '<p>Your next session opens on <strong>' + esc(fmtDate(st.availableAt)) + '</strong>. Sign in the same way each week.</p>' : '') +
       '<div class="actions"><button class="secondary" id="out">Sign out</button></div>');
     document.getElementById('out').addEventListener('click', signOut);
     S.lab = null;
   }
 
   // ---------- boot ----------
-  var saved = store('vc_code');
-  if (saved) login(saved); else showLogin();
+  S.token = store('vc_token');
+  if (S.token) refresh(); else showLogin();
 })();

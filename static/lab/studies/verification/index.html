@@ -24,7 +24,10 @@
   .locked { opacity: .7; }
   .checks { display: grid; gap: 6px; }
   .banner { background: #fff4d6; color: #5c4400; border: 1px solid #e8cf86; border-radius: 8px; padding: 8px 12px; font-size: 13px; margin-bottom: 12px; }
-  input[type=text] { width: 100%; padding: 10px; font: inherit; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--text); letter-spacing: 1px; text-transform: uppercase; }
+  input[type=text], input[type=email], input[type=password] { width: 100%; padding: 10px; font: inherit; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--text); }
+  input.code { letter-spacing: 1px; text-transform: uppercase; }
+  .field { display: grid; gap: 4px; font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+  .field input { font-weight: 400; }
   .error { color: #c62828; font-size: 14px; margin-top: 8px; }
   select { font: inherit; padding: 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--text); }
   @media (max-width: 560px) { .tabs { grid-template-columns: repeat(2, 1fr); } .tabs button:nth-child(2) { border-right: 0; } .tabs button:nth-child(-n+2) { border-bottom: 1px solid var(--line); } }

@@ -1,6 +1,7 @@
 // Verification study (Clark): server-side study logic.
 // Storage is injected (a Netlify Blobs store in production, a Map in tests),
 // so this module has no platform dependencies.
+import { createHmac, randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
 import { ALERTS, PRACTICE } from './vc-alerts.mjs';
 
 export const STUDY = {
@@ -8,6 +9,9 @@ export const STUDY = {
   sessions: 4,
   trialsPerSession: 8,
   defaultGapDays: 6,
+  pinFailLimit: 5,          // wrong PINs before a lockout
+  pinLockMinutes: 15,
+  tokenHours: 12,
   conditions: ['ai_first', 'evidence_first', 'control'],
   // AI schedule per session for AI conditions. Each entry is a trial type.
   // accurate: correct verdict, high confidence. uncertain: low confidence.
@@ -31,6 +35,44 @@ export function newCode(rand = Math.random) {
 
 export function normalizeCode(c) {
   return String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, '').replace(/^VC/, '').replace(/(.{4})(.{4}).*/, 'VC-$1-$2');
+}
+
+// ---------- Identity ----------
+// Students sign in with their email and a 4-digit PIN they choose the first time.
+// Emails are never stored: a participant's ID is a keyed hash of the email, with the key
+// (the "pepper") kept in the store, so exports stay de-identified. Pilot participants can
+// still use generated access codes.
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PIN_RE = /^\d{4}$/;
+const PID_RE = /^P-[0-9a-f]{16}$/;
+
+export function normalizeEmail(e) { return String(e || '').trim().toLowerCase(); }
+const hmac = (key, s) => createHmac('sha256', key).update(s).digest();
+export function pidFor(pepper, email) { return 'P-' + hmac(pepper, 'email|' + normalizeEmail(email)).toString('hex').slice(0, 16); }
+const hashPin = (pin, salt) => scryptSync(pin, salt, 32).toString('hex');
+
+async function getPepper(store, create = false) {
+  let m = await store.get('meta/pepper');
+  if (!m && create) { m = { value: randomBytes(32).toString('hex'), createdAt: Date.now() }; await store.set('meta/pepper', m); }
+  return m ? m.value : null;
+}
+
+async function issueToken(store, pid, now) {
+  const pepper = await getPepper(store, true);
+  const exp = now + STUDY.tokenHours * 3600000;
+  return `${pid}.${exp}.${hmac(pepper, `tok|${pid}|${exp}`).toString('base64url')}`;
+}
+
+// Returns the participant ID for a valid, unexpired token, else null.
+export async function verifyToken(store, token, now = Date.now()) {
+  const [pid, exp, sig] = String(token || '').split('.');
+  if (!pid || !exp || !sig || !(Number(exp) > now)) return null;
+  const pepper = await getPepper(store);
+  if (!pepper) return null;
+  const want = Buffer.from(hmac(pepper, `tok|${pid}|${exp}`).toString('base64url'));
+  const got = Buffer.from(sig);
+  return want.length === got.length && timingSafeEqual(want, got) ? pid : null;
 }
 
 // Deterministic PRNG so a participant's session plan is identical on resume.
@@ -122,6 +164,7 @@ export function status(p, now = Date.now()) {
 const pKey = code => `participants/${code}`;
 
 export async function loadParticipant(store, rawCode) {
+  if (PID_RE.test(String(rawCode || ''))) return await store.get(pKey(rawCode));
   const code = normalizeCode(rawCode);
   if (!/^VC-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code)) return null;
   return await store.get(pKey(code));
@@ -129,11 +172,46 @@ export async function loadParticipant(store, rawCode) {
 
 async function save(store, p) { p.updatedAt = Date.now(); await store.set(pKey(p.code), p); }
 
-export async function login(store, code, now = Date.now()) {
-  const p = await loadParticipant(store, code);
-  if (!p) return { error: 'invalid_code', status: 401 };
+// creds: { email, pin, setPin } for students, or { code } for pilot access codes.
+export async function login(store, creds = {}, now = Date.now()) {
+  let p;
+  if (creds.email != null) {
+    const email = normalizeEmail(creds.email);
+    const pepper = await getPepper(store);
+    if (!pepper || !EMAIL_RE.test(email)) return { error: 'not_enrolled', status: 401 };
+    p = await store.get(pKey(pidFor(pepper, email)));
+    if (!p) return { error: 'not_enrolled', status: 401 };
+    const pin = String(creds.pin ?? '');
+    if (!p.pin) {
+      if (!creds.setPin) return { error: 'set_pin', status: 401 };
+      if (!PIN_RE.test(pin)) return { error: 'bad_pin_format', status: 400 };
+      const salt = randomBytes(16).toString('hex');
+      p.pin = { salt, hash: hashPin(pin, salt), setAt: now };
+    } else {
+      if (p.pinLockUntil && now < p.pinLockUntil) return { error: 'locked', status: 429, until: p.pinLockUntil };
+      const ok = PIN_RE.test(pin) && timingSafeEqual(Buffer.from(hashPin(pin, p.pin.salt), 'hex'), Buffer.from(p.pin.hash, 'hex'));
+      if (!ok) {
+        p.pinFails = (p.pinFails || 0) + 1;
+        const locked = p.pinFails >= STUDY.pinFailLimit;
+        if (locked) { p.pinLockUntil = now + STUDY.pinLockMinutes * 60000; p.pinFails = 0; }
+        await save(store, p);
+        return locked ? { error: 'locked', status: 429, until: p.pinLockUntil } : { error: 'wrong_pin', status: 401, attemptsLeft: STUDY.pinFailLimit - p.pinFails };
+      }
+      p.pinFails = 0; p.pinLockUntil = null;
+    }
+  } else {
+    p = await loadParticipant(store, creds.code);
+    if (!p || PID_RE.test(p.code)) return { error: 'invalid_code', status: 401 };
+  }
   p.lastSeenAt = now; await save(store, p);
-  return { code: p.code, consented: !!p.consentedAt, status: status(p, now) };
+  return { token: await issueToken(store, p.code, now), consented: !!p.consentedAt, status: status(p, now) };
+}
+
+// Restores a signed-in participant after a page reload.
+export async function resume(store, pid, now = Date.now()) {
+  const p = await loadParticipant(store, pid);
+  if (!p) return { error: 'expired', status: 401 };
+  return { consented: !!p.consentedAt, status: status(p, now) };
 }
 
 export async function consent(store, code, agree, now = Date.now()) {
@@ -201,19 +279,71 @@ export async function saveSurvey(store, code, session, kind, data, now = Date.no
 
 // ---------- Admin ----------
 
-export async function createParticipants(store, count, opts = {}, now = Date.now(), rand = Math.random) {
+// Conditions come from balanced blocks of three. The unused rest of a block carries over
+// between calls, so adding a roster in batches stays balanced.
+async function enroll(store, ids, opts, now, rand) {
   const meta = (await store.get('meta/assignment')) || { assigned: 0 };
+  let block = meta.block || [];
   const made = [];
-  let block = [];
-  for (let i = 0; i < count; i++) {
+  for (const id of ids) {
     if (!block.length) block = shuffle(STUDY.conditions, rand);
-    let code; do { code = newCode(rand); } while (await store.get(pKey(code)));
-    const p = { code, condition: block.pop(), createdAt: now, gapDays: opts.gapDays ?? STUDY.defaultGapDays, label: opts.label || null, test: !!opts.test };
-    await store.set(pKey(code), p);
-    made.push({ code, condition: p.condition, label: p.label, gapDays: p.gapDays, test: p.test });
+    const p = { code: id, condition: block.pop(), createdAt: now, gapDays: opts.gapDays ?? STUDY.defaultGapDays, label: opts.label || null, test: !!opts.test };
+    await store.set(pKey(id), p);
+    made.push(p);
   }
-  meta.assigned += count; await store.set('meta/assignment', meta);
-  return { created: made };
+  meta.assigned += ids.length; meta.block = block; await store.set('meta/assignment', meta);
+  return made;
+}
+
+export async function createParticipants(store, count, opts = {}, now = Date.now(), rand = Math.random) {
+  const ids = [];
+  for (let i = 0; i < count; i++) {
+    let code; do { code = newCode(rand); } while (ids.includes(code) || await store.get(pKey(code)));
+    ids.push(code);
+  }
+  const made = await enroll(store, ids, opts, now, rand);
+  return { created: made.map(p => ({ code: p.code, condition: p.condition, label: p.label, gapDays: p.gapDays, test: p.test })) };
+}
+
+// Adds roster emails. Only hashes are stored; emails already enrolled are left as they are.
+export async function addRoster(store, emails, opts = {}, now = Date.now(), rand = Math.random) {
+  const pepper = await getPepper(store, true);
+  const invalid = []; const ids = []; let existing = 0;
+  for (const raw of emails) {
+    const e = normalizeEmail(raw);
+    if (!e) continue;
+    if (!EMAIL_RE.test(e)) { invalid.push(raw); continue; }
+    const id = pidFor(pepper, e);
+    if (ids.includes(id)) continue;
+    if (await store.get(pKey(id))) { existing++; continue; }
+    ids.push(id);
+  }
+  await enroll(store, ids, opts, now, rand);
+  return { added: ids.length, existing, invalid };
+}
+
+// Completion check for course credit: status for each email the admin pastes in.
+export async function lookupEmails(store, emails, now = Date.now()) {
+  const pepper = await getPepper(store);
+  const out = [];
+  for (const raw of emails) {
+    const email = normalizeEmail(raw);
+    if (!email) continue;
+    const p = pepper && EMAIL_RE.test(email) ? await store.get(pKey(pidFor(pepper, email))) : null;
+    if (!p) { out.push({ email, enrolled: false }); continue; }
+    const st = status(p, now);
+    out.push({ email, enrolled: true, id: p.code, pinSet: !!p.pin, consented: !!p.consentedAt, declined: !!p.declinedAt,
+      completedSessions: st.completed, finished: !!st.finished, lastCompletedAt: (p.completed || []).slice(-1)[0]?.completedAt || null });
+  }
+  return out;
+}
+
+export async function resetPin(store, email) {
+  const pepper = await getPepper(store);
+  const p = pepper ? await store.get(pKey(pidFor(pepper, email))) : null;
+  if (!p) return { error: 'not_enrolled', status: 404 };
+  p.pin = null; p.pinFails = 0; p.pinLockUntil = null; await save(store, p);
+  return { ok: true };
 }
 
 export async function listParticipants(store, now = Date.now()) {
@@ -223,7 +353,7 @@ export async function listParticipants(store, now = Date.now()) {
     const p = await store.get(k);
     if (!p) continue;
     const st = status(p, now);
-    out.push({ code: p.code, condition: p.condition, label: p.label, test: !!p.test, gapDays: p.gapDays, consented: !!p.consentedAt, declined: !!p.declinedAt,
+    out.push({ code: p.code, type: PID_RE.test(p.code) ? 'email' : 'code', pinSet: !!p.pin, condition: p.condition, label: p.label, test: !!p.test, gapDays: p.gapDays, consented: !!p.consentedAt, declined: !!p.declinedAt,
       completedSessions: st.completed, nextSession: st.nextSession || null, availableAt: st.availableAt || null, lastSeenAt: p.lastSeenAt || null,
       inProgress: p.sessions && st.nextSession && p.sessions[st.nextSession] ? p.sessions[st.nextSession].trialsDone.length : 0 });
   }
@@ -235,7 +365,7 @@ export async function exportAll(store) {
   const records = [];
   for (const k of keys) records.push({ key: k, ...(await store.get(k)) });
   const participants = [];
-  for (const k of await store.list('participants/')) participants.push(await store.get(k));
+  for (const k of await store.list('participants/')) { const { pin, ...p } = await store.get(k); participants.push(p); }
   return { study: STUDY.id, exportedAt: new Date().toISOString(), participants, records };
 }
 

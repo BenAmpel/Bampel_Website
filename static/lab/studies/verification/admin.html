@@ -18,6 +18,8 @@
   code { font-size: 13px; }
   .section { margin-top: 24px; }
   .error { color: #c62828; font-size: 14px; }
+  textarea { min-height: 110px; font-family: ui-monospace, Menlo, monospace; font-size: 13px; }
+  .ok { color: #2e7d32; }
   #created { white-space: pre; font-family: ui-monospace, Menlo, monospace; font-size: 13px; background: var(--status-bg); padding: 10px; border-radius: 8px; overflow-x: auto; }
 </style>
 </head>
@@ -34,8 +36,43 @@
     <p class="error" id="err"></p>
 
     <div class="section">
-      <h2>Create access codes</h2>
-      <p class="muted">Conditions are assigned in balanced blocks of three. Mark pilot or team codes as test so they can be filtered out of analysis. Gap days sets the minimum wait between sessions (0 for piloting).</p>
+      <h2>Add students</h2>
+      <p class="muted">Paste student emails, one per line or separated by commas. Only these emails can sign in. Each student creates a 4-digit PIN at first sign-in. Emails are not stored: the server keeps a one-way keyed hash, so exports stay de-identified. Conditions are assigned in balanced blocks of three across all batches. Emails already enrolled are skipped.</p>
+      <form id="rosterform">
+        <textarea id="emails" placeholder="jdoe1@student.gsu.edu&#10;asmith2@student.gsu.edu"></textarea>
+        <div class="row" style="margin-top:8px">
+          <label>Label (optional) <input type="text" id="rlabel" placeholder="CIS8080-fall26" style="width:180px"></label>
+          <label>Gap days <input type="number" id="rgap" min="0" max="60" placeholder="6" style="width:90px"></label>
+          <label style="flex-direction:row;display:flex;gap:6px;align-items:center"><input type="checkbox" id="rtest"> Test</label>
+          <button type="submit">Add students</button>
+        </div>
+      </form>
+      <p id="rosterout" class="muted"></p>
+    </div>
+
+    <div class="section">
+      <h2>Check completion</h2>
+      <p class="muted">Paste emails to see who has finished, for awarding credit. Emails are looked up, not saved.</p>
+      <form id="lookupform">
+        <textarea id="lemails"></textarea>
+        <div class="row" style="margin-top:8px"><button type="submit">Check</button><button type="button" class="secondary" id="lcsv" disabled>Download as CSV</button></div>
+      </form>
+      <div class="table-wrap"><table id="ltbl"></table></div>
+    </div>
+
+    <div class="section">
+      <h2>Reset a PIN</h2>
+      <p class="muted">For a student who forgot their PIN or is locked out. They create a new PIN at their next sign-in. Their progress is kept.</p>
+      <form class="row" id="resetform">
+        <label>Student email <input type="text" id="remail" style="width:260px"></label>
+        <button type="submit">Reset PIN</button>
+      </form>
+      <p id="resetout" class="muted"></p>
+    </div>
+
+    <div class="section">
+      <h2>Create pilot access codes</h2>
+      <p class="muted">For pilots and team testing without a roster. Mark them as test so they can be filtered out of analysis. Gap days sets the minimum wait between sessions (0 for piloting).</p>
       <form class="row" id="createform">
         <label>How many <input type="number" id="count" min="1" max="300" value="3" style="width:90px"></label>
         <label>Label (optional) <input type="text" id="label" placeholder="pilot-oct" style="width:160px"></label>
@@ -92,9 +129,9 @@
       var done = rows.filter(function (p) { return !p.test && p.completedSessions >= 4; }).length;
       $('summary').textContent = rows.length + ' codes (' + rows.filter(function (p) { return p.test; }).length + ' test). Non-test by condition: ' +
         (Object.keys(by).map(function (k) { return k + ' ' + by[k]; }).join(', ') || 'none yet') + '. Finished all sessions: ' + done + '.';
-      var head = ['Code', 'Label', 'Condition', 'Test', 'Consent', 'Sessions done', 'In progress', 'Next opens', 'Gap', 'Last seen'];
+      var head = ['Study ID', 'Sign-in', 'PIN set', 'Label', 'Condition', 'Test', 'Consent', 'Sessions done', 'In progress', 'Next opens', 'Gap', 'Last seen'];
       $('tbl').innerHTML = '<tr>' + head.map(function (h) { return '<th>' + h + '</th>'; }).join('') + '</tr>' + rows.map(function (p) {
-        return '<tr><td><code>' + esc(p.code) + '</code></td><td>' + esc(p.label) + '</td><td>' + esc(p.condition) + '</td><td>' + (p.test ? 'yes' : '') + '</td><td>' +
+        return '<tr><td><code>' + esc(p.code) + '</code></td><td>' + esc(p.type) + '</td><td>' + (p.type === 'email' ? (p.pinSet ? 'yes' : 'not yet') : '') + '</td><td>' + esc(p.label) + '</td><td>' + esc(p.condition) + '</td><td>' + (p.test ? 'yes' : '') + '</td><td>' +
           (p.declined ? 'declined' : p.consented ? 'yes' : '') + '</td><td>' + p.completedSessions + ' / 4</td><td>' + (p.inProgress ? p.inProgress + ' / 8' : '') + '</td><td>' +
           (p.nextSession ? 'S' + p.nextSession + ' ' + esc(fmt(p.availableAt)) : 'done') + '</td><td>' + p.gapDays + 'd</td><td>' + esc(fmt(p.lastSeenAt)) + '</td></tr>';
       }).join('');
@@ -113,6 +150,41 @@
       box.textContent = 'Created ' + res.created.length + ' codes (send one per person; do not reuse):\n' + res.created.map(function (p) { return p.code + '\t' + p.condition + (p.test ? '\ttest' : ''); }).join('\n');
       load();
     }).catch(function (e) { err(e.message); });
+  });
+  function emails(id) { return $(id).value.split(/[\s,;]+/).map(function (x) { return x.trim(); }).filter(Boolean); }
+  $('rosterform').addEventListener('submit', function (e) {
+    e.preventDefault(); err();
+    var list = emails('emails'); if (!list.length) return;
+    call('roster', { method: 'POST', body: { emails: list, label: $('rlabel').value.trim() || null, gapDays: $('rgap').value === '' ? null : Number($('rgap').value), test: $('rtest').checked } })
+      .then(function (r) { return r.json(); }).then(function (res) {
+        $('rosterout').innerHTML = '<span class="ok">Added ' + res.added + '.</span> Already enrolled: ' + res.existing + '.' + (res.invalid.length ? ' Not valid emails (skipped): ' + esc(res.invalid.join(', ')) : '');
+        $('emails').value = ''; load();
+      }).catch(function (e) { err(e.message); });
+  });
+  var lookupRows = [];
+  $('lookupform').addEventListener('submit', function (e) {
+    e.preventDefault(); err();
+    var list = emails('lemails'); if (!list.length) return;
+    call('lookup', { method: 'POST', body: { emails: list } }).then(function (r) { return r.json(); }).then(function (rows) {
+      lookupRows = rows; $('lcsv').disabled = !rows.length;
+      $('ltbl').innerHTML = '<tr><th>Email</th><th>Enrolled</th><th>PIN set</th><th>Consented</th><th>Sessions done</th><th>Finished</th><th>Last session</th></tr>' + rows.map(function (r) {
+        return '<tr><td>' + esc(r.email) + '</td><td>' + (r.enrolled ? 'yes' : '<strong>no</strong>') + '</td><td>' + (r.enrolled ? (r.pinSet ? 'yes' : 'no') : '') + '</td><td>' +
+          (r.declined ? 'declined' : r.consented ? 'yes' : '') + '</td><td>' + (r.enrolled ? r.completedSessions + ' / 4' : '') + '</td><td>' + (r.finished ? '<span class="ok">yes</span>' : '') + '</td><td>' + esc(fmt(r.lastCompletedAt)) + '</td></tr>';
+      }).join('');
+    }).catch(function (e) { err(e.message); });
+  });
+  $('lcsv').addEventListener('click', function () {
+    var lines = ['email,enrolled,consented,sessions_completed,finished,last_session'].concat(lookupRows.map(function (r) {
+      return [r.email, r.enrolled ? 1 : 0, r.consented ? 1 : 0, r.completedSessions || 0, r.finished ? 1 : 0, r.lastCompletedAt ? new Date(r.lastCompletedAt).toISOString() : ''].join(',');
+    }));
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([lines.join('\n') + '\n'], { type: 'text/csv' }));
+    a.download = 'completion_' + new Date().toISOString().slice(0, 10) + '.csv'; document.body.appendChild(a); a.click(); a.remove();
+  });
+  $('resetform').addEventListener('submit', function (e) {
+    e.preventDefault(); err();
+    var em = $('remail').value.trim(); if (!em) return;
+    call('reset-pin', { method: 'POST', body: { email: em } }).then(function () { $('resetout').innerHTML = '<span class="ok">PIN reset for ' + esc(em) + '.</span> They will create a new one at next sign-in.'; $('remail').value = ''; load(); })
+      .catch(function (e) { err(/404/.test(e.message) ? 'That email is not enrolled.' : e.message); });
   });
   var k = getKey(); if (k) { $('key').value = k; load(); }
 })();
