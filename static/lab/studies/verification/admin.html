@@ -9,163 +9,276 @@
 <style>
   .wrap { max-width: 1100px; }
   .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: end; }
-  .row label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
-  input[type=text], input[type=password], input[type=number] { font: inherit; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--text); }
+  .row label, .f { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+  .f { margin-bottom: 10px; }
+  input[type=text], input[type=password], input[type=number], select, textarea { font: inherit; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--text); }
+  .f input[type=text], .f textarea, .f select { width: 100%; }
+  textarea { min-height: 70px; }
+  .mono { font-family: ui-monospace, Menlo, monospace; font-size: 13px; }
   .table-wrap { overflow-x: auto; margin-top: 12px; }
   table { border-collapse: collapse; width: 100%; font-size: 13px; }
-  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; vertical-align: top; }
   th { color: var(--muted); font-weight: 600; }
+  td.wrap-cell { white-space: normal; min-width: 240px; }
   code { font-size: 13px; }
   .section { margin-top: 24px; }
-  .error { color: #c62828; font-size: 14px; }
-  textarea { min-height: 110px; font-family: ui-monospace, Menlo, monospace; font-size: 13px; }
+  .error { color: #c62828; font-size: 14px; white-space: pre-line; }
   .ok { color: #2e7d32; }
-  #created { white-space: pre; font-family: ui-monospace, Menlo, monospace; font-size: 13px; background: var(--status-bg); padding: 10px; border-radius: 8px; overflow-x: auto; }
+  .warn { background: #fff4d6; color: #5c4400; border: 1px solid #e8cf86; border-radius: 8px; padding: 8px 12px; font-size: 13px; margin: 12px 0; }
+  .keybox { white-space: pre; font-family: ui-monospace, Menlo, monospace; font-size: 13px; background: var(--status-bg); padding: 10px; border-radius: 8px; overflow-x: auto; }
+  nav.tabs { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 1px solid var(--line); margin: 16px 0; }
+  nav.tabs button { background: transparent; color: var(--text); border: 0; border-bottom: 2px solid transparent; border-radius: 0; padding: 8px 12px; }
+  nav.tabs button[aria-selected=true] { border-bottom-color: var(--accent); color: var(--accent); font-weight: 600; }
+  nav.sub button { font-size: 14px; }
+  .who { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .pill { font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+  .qcard { border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin: 10px 0; }
+  .qcard .bar { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .qcard .bar .btns { display: flex; gap: 6px; }
+  .qcard .bar button, button.small { padding: 4px 10px; font-size: 13px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .check { display: flex !important; gap: 8px; align-items: center; color: var(--text) !important; }
+  .panel-edit { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 10px; }
+  .savebar { position: sticky; bottom: 0; background: var(--card); border-top: 1px solid var(--line); padding: 12px 0; margin-top: 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .savebar .grow { flex: 1; min-width: 200px; }
+  button.danger { background: #c62828; border-color: #c62828; color: #fff; }
+  button.danger.secondary { background: transparent; color: #c62828; }
+  @media (max-width: 640px) { .grid3 { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="card">
-    <h1>Verification study: admin</h1>
-    <p class="muted">The admin key is the <code>VC_ADMIN_KEY</code> Netlify environment variable. It is kept in this tab only.</p>
-    <form class="row" id="keyform">
-      <label>Admin key <input type="password" id="key" autocomplete="off" size="32"></label>
-      <button type="submit">Load participants</button>
-      <button type="button" class="secondary" id="forget">Forget key</button>
+    <div class="who"><h1 style="margin:0">Verification study: admin</h1><span id="whoami" class="muted"></span></div>
+
+    <form class="row" id="keyform" style="margin-top:12px">
+      <label>Admin key <input type="password" id="key" autocomplete="off" size="36"></label>
+      <button type="submit">Sign in</button>
     </form>
-    <p class="error" id="err"></p>
+    <p class="muted" id="keyhelp">Use the owner key (the <code>VC_ADMIN_KEY</code> Netlify variable) or the team key the owner gave you. It is kept in this tab only.</p>
+    <p class="error" id="err" role="alert"></p>
 
-    <div class="section">
-      <h2>Add students</h2>
-      <p class="muted">Paste student emails, one per line or separated by commas. Only these emails can sign in. Each student creates a 4-digit PIN at first sign-in. Emails are not stored: the server keeps a one-way keyed hash, so exports stay de-identified. Conditions are assigned in balanced blocks of three across all batches. Emails already enrolled are skipped.</p>
-      <form id="rosterform">
-        <textarea id="emails" placeholder="jdoe1@student.gsu.edu&#10;asmith2@student.gsu.edu"></textarea>
-        <div class="row" style="margin-top:8px">
-          <label>Label (optional) <input type="text" id="rlabel" placeholder="CIS8080-fall26" style="width:180px"></label>
-          <label>Gap days <input type="number" id="rgap" min="0" max="60" placeholder="6" style="width:90px"></label>
-          <label style="flex-direction:row;display:flex;gap:6px;align-items:center"><input type="checkbox" id="rtest"> Test</label>
-          <button type="submit">Add students</button>
+    <div id="app" hidden>
+      <nav class="tabs" id="tabs"></nav>
+
+      <section data-tab="participants">
+        <div class="row">
+          <button type="button" class="secondary" id="refresh">Refresh</button>
+          <button type="button" class="secondary" data-dl="export.csv">Download trials CSV</button>
+          <button type="button" class="secondary" data-dl="export-surveys.csv">Download surveys CSV</button>
+          <button type="button" class="secondary" data-dl="export.json">Download full JSON</button>
+          <button type="button" class="danger secondary" data-role="owner" id="deltest">Delete all test participants</button>
         </div>
-      </form>
-      <p id="rosterout" class="muted"></p>
-    </div>
+        <p class="muted" id="summary"></p>
+        <div class="table-wrap"><table id="tbl"></table></div>
+      </section>
 
-    <div class="section">
-      <h2>Check completion</h2>
-      <p class="muted">Paste emails to see who has finished, for awarding credit. Emails are looked up, not saved.</p>
-      <form id="lookupform">
-        <textarea id="lemails"></textarea>
-        <div class="row" style="margin-top:8px"><button type="submit">Check</button><button type="button" class="secondary" id="lcsv" disabled>Download as CSV</button></div>
-      </form>
-      <div class="table-wrap"><table id="ltbl"></table></div>
-    </div>
+      <section data-tab="students" hidden>
+        <h2>Add students</h2>
+        <p class="muted">Paste student emails, one per line or separated by commas. Only these emails can sign in. Each student creates a 4-digit PIN at first sign-in. Emails are not stored: the server keeps a one-way keyed hash, so exports stay de-identified. Conditions are assigned in balanced blocks of three across all batches. Emails already enrolled are skipped.</p>
+        <form id="rosterform">
+          <textarea id="emails" class="mono" style="width:100%;min-height:110px" placeholder="jdoe1@student.gsu.edu&#10;asmith2@student.gsu.edu"></textarea>
+          <div class="row" style="margin-top:8px">
+            <label>Label (optional) <input type="text" id="rlabel" placeholder="CIS8080-fall26" style="width:180px"></label>
+            <label>Gap days <input type="number" id="rgap" min="0" max="60" placeholder="6" style="width:90px"></label>
+            <label class="check"><input type="checkbox" id="rtest"> Test</label>
+            <button type="submit">Add students</button>
+          </div>
+        </form>
+        <p id="rosterout" class="muted"></p>
 
-    <div class="section">
-      <h2>Reset a PIN</h2>
-      <p class="muted">For a student who forgot their PIN or is locked out. They create a new PIN at their next sign-in. Their progress is kept.</p>
-      <form class="row" id="resetform">
-        <label>Student email <input type="text" id="remail" style="width:260px"></label>
-        <button type="submit">Reset PIN</button>
-      </form>
-      <p id="resetout" class="muted"></p>
-    </div>
+        <div class="section">
+          <h2>Check completion</h2>
+          <p class="muted">Paste emails to see who has finished, for awarding credit. Emails are looked up, not saved.</p>
+          <form id="lookupform">
+            <textarea id="lemails" class="mono" style="width:100%;min-height:90px"></textarea>
+            <div class="row" style="margin-top:8px"><button type="submit">Check</button><button type="button" class="secondary" id="lcsv" disabled>Download as CSV</button></div>
+          </form>
+          <div class="table-wrap"><table id="ltbl"></table></div>
+        </div>
 
-    <div class="section">
-      <h2>Create pilot access codes</h2>
-      <p class="muted">For pilots and team testing without a roster. Mark them as test so they can be filtered out of analysis. Gap days sets the minimum wait between sessions (0 for piloting).</p>
-      <form class="row" id="createform">
-        <label>How many <input type="number" id="count" min="1" max="300" value="3" style="width:90px"></label>
-        <label>Label (optional) <input type="text" id="label" placeholder="pilot-oct" style="width:160px"></label>
-        <label>Gap days <input type="number" id="gap" min="0" max="60" placeholder="6" style="width:90px"></label>
-        <label style="flex-direction:row;display:flex;gap:6px;align-items:center"><input type="checkbox" id="test"> Test codes</label>
-        <button type="submit">Create</button>
-      </form>
-      <div id="created" hidden></div>
-    </div>
+        <div class="section">
+          <h2>Reset a PIN</h2>
+          <p class="muted">For a student who forgot their PIN or is locked out. They create a new PIN at their next sign-in. Their progress is kept.</p>
+          <form class="row" id="resetform">
+            <label>Student email <input type="text" id="remail" style="width:260px"></label>
+            <button type="submit">Reset PIN</button>
+          </form>
+          <p id="resetout" class="muted"></p>
+        </div>
 
-    <div class="section">
-      <h2>Participants</h2>
-      <div class="row">
-        <button type="button" class="secondary" id="refresh">Refresh</button>
-        <button type="button" class="secondary" id="csv">Download trials CSV</button>
-        <button type="button" class="secondary" id="json">Download full JSON</button>
-      </div>
-      <p class="muted" id="summary"></p>
-      <div class="table-wrap"><table id="tbl"></table></div>
+        <div class="section">
+          <h2>Create pilot access codes</h2>
+          <p class="muted">For pilots and team testing without a roster. Mark them as test so they are excluded from the counts and can be deleted in one step. Gap days sets the minimum wait between sessions (0 for piloting).</p>
+          <form class="row" id="createform">
+            <label>How many <input type="number" id="count" min="1" max="300" value="3" style="width:90px"></label>
+            <label>Label (optional) <input type="text" id="label" placeholder="pilot-oct" style="width:160px"></label>
+            <label>Gap days <input type="number" id="gap" min="0" max="60" placeholder="6" style="width:90px"></label>
+            <label class="check"><input type="checkbox" id="test" checked> Test codes</label>
+            <button type="submit">Create</button>
+          </form>
+          <div id="created" class="keybox" hidden></div>
+        </div>
+      </section>
+
+      <section data-tab="content" hidden>
+        <p class="muted" id="contentinfo"></p>
+        <div id="contentwarn"></div>
+        <nav class="tabs sub" id="subtabs"></nav>
+        <fieldset id="editor" style="border:0;padding:0;margin:0;min-width:0"></fieldset>
+        <div class="savebar" id="savebar" data-role="editor">
+          <span id="dirty" class="muted">No unsaved changes.</span>
+          <input type="text" id="note" class="grow" placeholder="What changed? (optional, shown in the activity log)">
+          <button type="button" class="secondary" id="discard" disabled>Discard changes</button>
+          <button type="button" id="save" disabled>Save changes</button>
+        </div>
+        <div class="section">
+          <h2>Versions</h2>
+          <p class="muted">Every save makes a new version. Restoring an old version saves it again as the newest version, so nothing is lost. Each answer records the version it was collected under.</p>
+          <div class="table-wrap"><table id="vtbl"></table></div>
+        </div>
+      </section>
+
+      <section data-tab="team" hidden>
+        <h2>Add a team member</h2>
+        <p class="muted">Each person gets their own key. Share it privately. Removing a person disables their key immediately.</p>
+        <form class="row" id="teamform">
+          <label>Name <input type="text" id="tname" placeholder="Kameron Clark" style="width:200px"></label>
+          <label>Access <select id="trole"></select></label>
+          <button type="submit">Create key</button>
+        </form>
+        <p class="muted" id="roledesc"></p>
+        <div id="newkey" hidden></div>
+        <div class="table-wrap"><table id="teamtbl"></table></div>
+      </section>
+
+      <section data-tab="activity" hidden>
+        <p class="muted">Who added students, changed content, reset PINs, deleted data, or changed the team.</p>
+        <div class="table-wrap"><table id="acttbl"></table></div>
+      </section>
     </div>
   </div>
 </div>
 <script>
 (function () {
+  'use strict';
   var API = '/api/vc/admin/';
+  var ROLES = ['viewer', 'editor', 'manager', 'owner'];
   var $ = function (id) { return document.getElementById(id); };
-  function getKey() { try { return sessionStorage.getItem('vc_admin') || ''; } catch (e) { return $('key').value; } }
+  var me = null;
+  function can(need) { return !!me && ROLES.indexOf(me.role) >= ROLES.indexOf(need); }
+  function getKey() { try { return sessionStorage.getItem('vc_admin') || $('key').value; } catch (e) { return $('key').value; } }
   function setKey(k) { try { if (k) sessionStorage.setItem('vc_admin', k); else sessionStorage.removeItem('vc_admin'); } catch (e) {} }
-  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function fmt(ms) { return ms ? new Date(ms).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : ''; }
-  function err(msg) { $('err').textContent = msg || ''; }
-  function call(path, opts) {
-    opts = opts || {};
-    var key = getKey() || $('key').value;
-    return fetch(API + path, { method: opts.method || 'GET', headers: Object.assign({ 'x-admin-key': key }, opts.body ? { 'content-type': 'application/json' } : {}), body: opts.body ? JSON.stringify(opts.body) : undefined })
+  function err(msg) { $('err').textContent = msg || ''; if (msg) $('err').scrollIntoView({ block: 'nearest' }); }
+  function call(path, body) {
+    return fetch(API + path, { method: body ? 'POST' : 'GET', headers: Object.assign({ 'x-admin-key': getKey() }, body ? { 'content-type': 'application/json' } : {}), body: body ? JSON.stringify(body) : undefined })
       .then(function (r) {
-        if (r.status === 403) throw new Error('Wrong admin key.');
-        if (r.status === 503) throw new Error('Admin is disabled: set VC_ADMIN_KEY (16+ characters) in Netlify and redeploy.');
-        if (!r.ok) throw new Error('Request failed (' + r.status + ').');
-        return r;
+        if (r.ok) return r;
+        return r.json().catch(function () { return {}; }).then(function (j) {
+          var msg = r.status === 503 ? 'Admin is disabled: set VC_ADMIN_KEY (16+ characters) in Netlify and redeploy.'
+            : j.error === 'forbidden' ? 'That key was not recognized.'
+            : j.error === 'not_allowed' ? 'Your access level cannot do that.'
+            : j.error === 'invalid' ? 'Not saved. Please fix:\n• ' + j.errors.join('\n• ')
+            : j.error === 'conflict' ? 'Someone else saved changes (now version ' + j.version + ') while you were editing. Copy anything you need, then click Discard changes to load their version.'
+            : j.error === 'not_found' ? 'Not found.' : 'Request failed (' + r.status + ').';
+          var e = new Error(msg); e.code = j.error; throw e;
+        });
       });
   }
-  function download(path, name) {
+  var getJSON = function (p) { return call(p).then(function (r) { return r.json(); }); };
+  var postJSON = function (p, b) { return call(p, b).then(function (r) { return r.json(); }); };
+
+  // ---------- sign-in and tabs ----------
+  var TABS = [['participants', 'Participants', 'viewer'], ['students', 'Students', 'manager'], ['content', 'Study content', 'viewer'], ['team', 'Team', 'owner'], ['activity', 'Activity', 'owner']];
+  function showTab(name) {
+    document.querySelectorAll('section[data-tab]').forEach(function (s) { s.hidden = s.getAttribute('data-tab') !== name; });
+    $('tabs').querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-selected', b.getAttribute('data-tab') === name ? 'true' : 'false'); });
+    try { sessionStorage.setItem('vc_admin_tab', name); } catch (e) {}
     err();
-    call(path).then(function (r) { return r.blob(); }).then(function (b) {
-      var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click();
-      setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
-    }).catch(function (e) { err(e.message); });
+    if (name === 'participants') load();
+    if (name === 'content') loadContent();
+    if (name === 'team') loadTeam();
+    if (name === 'activity') loadActivity();
   }
-  function load() {
+  function start() {
     err();
-    call('participants').then(function (r) { return r.json(); }).then(function (rows) {
-      var by = {}; rows.forEach(function (p) { if (!p.test) by[p.condition] = (by[p.condition] || 0) + 1; });
-      var done = rows.filter(function (p) { return !p.test && p.completedSessions >= 4; }).length;
-      $('summary').textContent = rows.length + ' codes (' + rows.filter(function (p) { return p.test; }).length + ' test). Non-test by condition: ' +
-        (Object.keys(by).map(function (k) { return k + ' ' + by[k]; }).join(', ') || 'none yet') + '. Finished all sessions: ' + done + '.';
-      var head = ['Study ID', 'Sign-in', 'PIN set', 'Label', 'Condition', 'Test', 'Consent', 'Sessions done', 'In progress', 'Next opens', 'Gap', 'Last seen'];
+    getJSON('me').then(function (m) {
+      me = m;
+      $('keyform').hidden = true; $('keyhelp').hidden = true; $('app').hidden = false;
+      $('whoami').innerHTML = esc(m.name) + ' <span class="pill">' + esc(m.role) + '</span> <button type="button" class="secondary small" id="signout">Sign out</button>';
+      $('signout').addEventListener('click', function () { if (dirty && !confirm('Discard unsaved content changes?')) return; dirty = false; setKey(''); location.reload(); });
+      document.querySelectorAll('[data-role]').forEach(function (el) { el.hidden = !can(el.getAttribute('data-role')); });
+      $('tabs').innerHTML = TABS.filter(function (t) { return can(t[2]); }).map(function (t) { return '<button type="button" data-tab="' + t[0] + '">' + t[1] + '</button>'; }).join('');
+      $('tabs').querySelectorAll('button').forEach(function (b) { b.addEventListener('click', function () { showTab(b.getAttribute('data-tab')); }); });
+      $('trole').innerHTML = ['viewer', 'editor', 'manager'].map(function (r) { return '<option value="' + r + '">' + r[0].toUpperCase() + r.slice(1) + '</option>'; }).join('');
+      var desc = function () { $('roledesc').textContent = m.roles[$('trole').value]; }; $('trole').addEventListener('change', desc); desc();
+      var last = null; try { last = sessionStorage.getItem('vc_admin_tab'); } catch (e) {}
+      showTab(TABS.some(function (t) { return t[0] === last && can(t[2]); }) ? last : 'participants');
+    }).catch(function (e) { setKey(''); $('keyform').hidden = false; $('app').hidden = true; err(e.message); });
+  }
+  $('keyform').addEventListener('submit', function (e) { e.preventDefault(); setKey($('key').value.trim()); start(); });
+
+  // ---------- participants ----------
+  var DL = { 'export.csv': 'trials.csv', 'export-surveys.csv': 'surveys.csv', 'export.json': 'all.json' };
+  document.querySelectorAll('[data-dl]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      err();
+      var p = b.getAttribute('data-dl'), name = 'verification_' + DL[p].replace('.', '_' + new Date().toISOString().slice(0, 10) + '.');
+      call(p).then(function (r) { return r.blob(); }).then(function (blob) {
+        var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
+        setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+      }).catch(function (e) { err(e.message); });
+    });
+  });
+  var people = [];
+  function load() {
+    getJSON('participants').then(function (rows) {
+      people = rows;
+      var real = rows.filter(function (p) { return !p.test; });
+      var by = {}; real.forEach(function (p) { by[p.condition] = (by[p.condition] || 0) + 1; });
+      $('summary').textContent = rows.length + ' participants (' + (rows.length - real.length) + ' test). Real participants by condition: ' +
+        (Object.keys(by).map(function (k) { return k + ' ' + by[k]; }).join(', ') || 'none yet') + '. Finished all sessions: ' + real.filter(function (p) { return p.completedSessions >= 4; }).length + '.';
+      var head = ['Study ID', 'Sign-in', 'PIN set', 'Label', 'Condition', 'Test', 'Consent', 'Sessions done', 'In progress', 'Next opens', 'Gap', 'Last seen'].concat(can('owner') ? [''] : []);
       $('tbl').innerHTML = '<tr>' + head.map(function (h) { return '<th>' + h + '</th>'; }).join('') + '</tr>' + rows.map(function (p) {
         return '<tr><td><code>' + esc(p.code) + '</code></td><td>' + esc(p.type) + '</td><td>' + (p.type === 'email' ? (p.pinSet ? 'yes' : 'not yet') : '') + '</td><td>' + esc(p.label) + '</td><td>' + esc(p.condition) + '</td><td>' + (p.test ? 'yes' : '') + '</td><td>' +
           (p.declined ? 'declined' : p.consented ? 'yes' : '') + '</td><td>' + p.completedSessions + ' / 4</td><td>' + (p.inProgress ? p.inProgress + ' / 8' : '') + '</td><td>' +
-          (p.nextSession ? 'S' + p.nextSession + ' ' + esc(fmt(p.availableAt)) : 'done') + '</td><td>' + p.gapDays + 'd</td><td>' + esc(fmt(p.lastSeenAt)) + '</td></tr>';
+          (p.nextSession ? 'S' + p.nextSession + ' ' + esc(fmt(p.availableAt)) : 'done') + '</td><td>' + p.gapDays + 'd</td><td>' + esc(fmt(p.lastSeenAt)) + '</td>' +
+          (can('owner') ? '<td><button type="button" class="danger secondary small" data-del="' + esc(p.code) + '">Delete</button></td>' : '') + '</tr>';
       }).join('');
     }).catch(function (e) { err(e.message); });
   }
-  $('keyform').addEventListener('submit', function (e) { e.preventDefault(); setKey($('key').value); load(); });
-  $('forget').addEventListener('click', function () { setKey(''); $('key').value = ''; $('tbl').innerHTML = ''; $('summary').textContent = ''; });
   $('refresh').addEventListener('click', load);
-  $('csv').addEventListener('click', function () { download('export.csv', 'verification_trials_' + new Date().toISOString().slice(0, 10) + '.csv'); });
-  $('json').addEventListener('click', function () { download('export.json', 'verification_all_' + new Date().toISOString().slice(0, 10) + '.json'); });
-  $('createform').addEventListener('submit', function (e) {
-    e.preventDefault(); err();
-    var body = { count: Number($('count').value), label: $('label').value.trim() || null, gapDays: $('gap').value === '' ? null : Number($('gap').value), test: $('test').checked };
-    call('create', { method: 'POST', body: body }).then(function (r) { return r.json(); }).then(function (res) {
-      var box = $('created'); box.hidden = false;
-      box.textContent = 'Created ' + res.created.length + ' codes (send one per person; do not reuse):\n' + res.created.map(function (p) { return p.code + '\t' + p.condition + (p.test ? '\ttest' : ''); }).join('\n');
-      load();
-    }).catch(function (e) { err(e.message); });
+  $('tbl').addEventListener('click', function (e) {
+    var id = e.target.getAttribute && e.target.getAttribute('data-del'); if (!id) return;
+    var p = people.filter(function (x) { return x.code === id; })[0] || {};
+    if (!confirm('Permanently delete ' + id + (p.test ? ' (test)' : '') + ' and all of their answers and traces?' +
+      (p.test ? '' : '\n\nThis is a REAL participant. Only do this if they withdrew or asked for their data to be removed.') + '\n\nThis cannot be undone.')) return;
+    postJSON('delete', { id: id }).then(function (r) { load(); setTimeout(function () { $('summary').insertAdjacentHTML('afterbegin', '<span class="ok">Deleted ' + esc(r.code) + ' and ' + r.records + ' records.</span> '); }, 600); }).catch(function (e) { err(e.message); });
   });
+  $('deltest').addEventListener('click', function () {
+    var n = people.filter(function (p) { return p.test; }).length;
+    if (!n) return err('There are no test participants.');
+    if (prompt('This permanently deletes all ' + n + ' test participants and their data. Real participants are not touched.\n\nType DELETE to confirm.') !== 'DELETE') return;
+    postJSON('delete-test', { confirm: 'DELETE' }).then(function (r) { load(); setTimeout(function () { $('summary').insertAdjacentHTML('afterbegin', '<span class="ok">Deleted ' + r.participants + ' test participants and ' + r.records + ' records.</span> '); }, 600); }).catch(function (e) { err(e.message); });
+  });
+
+  // ---------- students ----------
   function emails(id) { return $(id).value.split(/[\s,;]+/).map(function (x) { return x.trim(); }).filter(Boolean); }
   $('rosterform').addEventListener('submit', function (e) {
     e.preventDefault(); err();
     var list = emails('emails'); if (!list.length) return;
-    call('roster', { method: 'POST', body: { emails: list, label: $('rlabel').value.trim() || null, gapDays: $('rgap').value === '' ? null : Number($('rgap').value), test: $('rtest').checked } })
-      .then(function (r) { return r.json(); }).then(function (res) {
-        $('rosterout').innerHTML = '<span class="ok">Added ' + res.added + '.</span> Already enrolled: ' + res.existing + '.' + (res.invalid.length ? ' Not valid emails (skipped): ' + esc(res.invalid.join(', ')) : '');
-        $('emails').value = ''; load();
-      }).catch(function (e) { err(e.message); });
+    postJSON('roster', { emails: list, label: $('rlabel').value.trim() || null, gapDays: $('rgap').value === '' ? null : Number($('rgap').value), test: $('rtest').checked }).then(function (res) {
+      $('rosterout').innerHTML = '<span class="ok">Added ' + res.added + '.</span> Already enrolled: ' + res.existing + '.' + (res.invalid.length ? ' Not valid emails (skipped): ' + esc(res.invalid.join(', ')) : '');
+      $('emails').value = '';
+    }).catch(function (e) { err(e.message); });
   });
   var lookupRows = [];
   $('lookupform').addEventListener('submit', function (e) {
     e.preventDefault(); err();
     var list = emails('lemails'); if (!list.length) return;
-    call('lookup', { method: 'POST', body: { emails: list } }).then(function (r) { return r.json(); }).then(function (rows) {
+    postJSON('lookup', { emails: list }).then(function (rows) {
       lookupRows = rows; $('lcsv').disabled = !rows.length;
       $('ltbl').innerHTML = '<tr><th>Email</th><th>Enrolled</th><th>PIN set</th><th>Consented</th><th>Sessions done</th><th>Finished</th><th>Last session</th></tr>' + rows.map(function (r) {
         return '<tr><td>' + esc(r.email) + '</td><td>' + (r.enrolled ? 'yes' : '<strong>no</strong>') + '</td><td>' + (r.enrolled ? (r.pinSet ? 'yes' : 'no') : '') + '</td><td>' +
@@ -183,10 +296,193 @@
   $('resetform').addEventListener('submit', function (e) {
     e.preventDefault(); err();
     var em = $('remail').value.trim(); if (!em) return;
-    call('reset-pin', { method: 'POST', body: { email: em } }).then(function () { $('resetout').innerHTML = '<span class="ok">PIN reset for ' + esc(em) + '.</span> They will create a new one at next sign-in.'; $('remail').value = ''; load(); })
-      .catch(function (e) { err(/404/.test(e.message) ? 'That email is not enrolled.' : e.message); });
+    postJSON('reset-pin', { email: em }).then(function () { $('resetout').innerHTML = '<span class="ok">PIN reset for ' + esc(em) + '.</span> They will create a new one at next sign-in.'; $('remail').value = ''; })
+      .catch(function (e) { err(e.code === 'not_enrolled' ? 'That email is not enrolled.' : e.message); });
   });
-  var k = getKey(); if (k) { $('key').value = k; load(); }
+  $('createform').addEventListener('submit', function (e) {
+    e.preventDefault(); err();
+    postJSON('create', { count: Number($('count').value), label: $('label').value.trim() || null, gapDays: $('gap').value === '' ? null : Number($('gap').value), test: $('test').checked }).then(function (res) {
+      var box = $('created'); box.hidden = false;
+      box.textContent = 'Created ' + res.created.length + ' codes (send one per person; do not reuse):\n' + res.created.map(function (p) { return p.code + '\t' + p.condition + (p.test ? '\ttest' : ''); }).join('\n');
+    }).catch(function (e) { err(e.message); });
+  });
+
+  // ---------- study content editor ----------
+  var saved = null, draft = null, dirty = false, sub = 'consent', alertSel = 'practice';
+  var SHOW = [['always', 'Always'], ['ai', 'Only in sessions with the AI'], ['no_ai', 'Only in sessions without the AI'], ['after_ai', 'Only after the AI is removed (session 4, AI groups)']];
+  var TYPES = [['scale', 'Rating scale'], ['choice', 'Multiple choice'], ['select', 'Dropdown'], ['text', 'Text answer']];
+  var SUBS = [['consent', 'Consent & settings'], ['pre', 'Background survey'], ['post', 'End-of-session survey'], ['alerts', 'Alerts']];
+  function clone(x) { return JSON.parse(JSON.stringify(x)); }
+  function setDirty(v) {
+    dirty = v;
+    $('dirty').innerHTML = v ? '<strong>Unsaved changes.</strong>' : 'No unsaved changes.';
+    $('save').disabled = !v; $('discard').disabled = !v;
+  }
+  window.addEventListener('beforeunload', function (e) { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+  function loadContent(force) {
+    if (draft && !force) return renderEditor();
+    Promise.all([getJSON('content'), getJSON('content-history'), getJSON('participants')]).then(function (res) {
+      saved = res[0]; draft = clone(saved); setDirty(false);
+      var started = res[2].filter(function (p) { return !p.test && (p.consented || p.completedSessions); }).length;
+      $('contentinfo').textContent = 'Current version: ' + (saved.version || 0) + (saved.version ? ', saved ' + fmt(saved.savedAt) + ' by ' + saved.savedBy : ' (the built-in defaults)') + '.' + (can('editor') ? '' : ' You can view the content but not change it.');
+      $('contentwarn').innerHTML = started ? '<div class="warn">' + started + ' real participant' + (started === 1 ? ' has' : 's have') + ' already started. Changes apply to screens shown after you save. Answers already collected keep the version they were collected under, and each trial keeps a copy of the alert and answer key as scored. Changing questions mid-study makes sessions hard to compare, so check with the team first.</div>' : '';
+      $('vtbl').innerHTML = '<tr><th>Version</th><th>Saved</th><th>By</th><th></th></tr>' + res[1].map(function (v) {
+        return '<tr><td>' + v.version + (v.version === saved.version ? ' (current)' : '') + '</td><td>' + esc(fmt(v.savedAt)) + '</td><td>' + esc(v.savedBy) + (v.restoredFrom != null ? ' (restored v' + v.restoredFrom + ')' : '') + '</td><td>' +
+          (can('editor') && v.version !== saved.version ? '<button type="button" class="secondary small" data-restore="' + v.version + '">Restore</button>' : '') + '</td></tr>';
+      }).join('') + '<tr><td>0</td><td colspan="2">Built-in defaults</td><td>' + (can('editor') && saved.version ? '<button type="button" class="secondary small" data-restore="0">Restore</button>' : '') + '</td></tr>';
+      renderEditor();
+    }).catch(function (e) { err(e.message); });
+  }
+  $('vtbl').addEventListener('click', function (e) {
+    var v = e.target.getAttribute && e.target.getAttribute('data-restore'); if (v == null) return;
+    if (!confirm((dirty ? 'Your unsaved changes will be discarded. ' : '') + 'Restore version ' + v + '? It will be saved as a new version.')) return;
+    postJSON('content-restore', { version: Number(v) }).then(function () { loadContent(true); }).catch(function (e) { err(e.message); });
+  });
+  $('discard').addEventListener('click', function () { if (confirm('Discard all unsaved changes?')) { err(); loadContent(true); } });
+  $('save').addEventListener('click', function () {
+    err(); $('save').disabled = true;
+    postJSON('content-save', { content: draft, baseVersion: saved.version || 0, note: $('note').value.trim() || undefined })
+      .then(function (r) { $('note').value = ''; loadContent(true); setTimeout(function () { $('dirty').innerHTML = '<span class="ok">Saved as version ' + r.version + '.</span>'; }, 400); })
+      .catch(function (e) { $('save').disabled = false; err(e.message); });
+  });
+
+  function field(label, html) { return '<label class="f">' + label + html + '</label>'; }
+  function checkbox(attr, checked, label) { return '<label class="f check"><input type="checkbox" ' + attr + (checked ? ' checked' : '') + '> ' + label + '</label>'; }
+  function inp(path, value, extra) { return '<input type="text" data-path="' + path + '" value="' + esc(value) + '"' + (extra || '') + '>'; }
+  function area(path, value, rows) { return '<textarea data-path="' + path + '" rows="' + (rows || 3) + '">' + esc(value) + '</textarea>'; }
+  function sel(path, value, opts) { return '<select data-path="' + path + '">' + opts.map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === value ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select>'; }
+  function getPath(path) { return path.split('.').reduce(function (o, k) { return o[k]; }, draft); }
+  function setPath(path, v) { var ks = path.split('.'), last = ks.pop(); ks.reduce(function (o, k) { return o[k]; }, draft)[last] = v; }
+
+  function renderEditor() {
+    $('subtabs').innerHTML = SUBS.map(function (s) { return '<button type="button" data-sub="' + s[0] + '" aria-selected="' + (s[0] === sub) + '">' + s[1] + '</button>'; }).join('');
+    var h = '';
+    if (sub === 'consent') {
+      h = field('Minutes per session (shown to participants; write {minutes} in the consent text to insert it)', '<input type="number" min="1" max="180" data-path="minutesPerSession" data-num="1" value="' + draft.minutesPerSession + '" style="width:100px">') +
+        field('Consent text (leave a blank line between paragraphs; email addresses become links)', '<textarea id="consenttext" rows="14">' + esc(draft.consent.paragraphs.join('\n\n')) + '</textarea>') +
+        field('Agreement checkbox label', inp('consent.agreeLabel', draft.consent.agreeLabel)) +
+        checkbox('data-path="consent.approved" data-bool="1"', draft.consent.approved, 'This is the IRB-approved consent text (removes the "draft" banner participants see)');
+    } else if (sub === 'pre' || sub === 'post') {
+      var items = draft.survey[sub];
+      h = '<p class="muted">' + (sub === 'pre' ? 'Shown once, in session 1, before the practice alert.' : 'Shown at the end of every session. Use "Show when" to limit a question to sessions with or without the AI.') +
+        ' The variable name is the column name in the surveys CSV: keep it if you only reword a question, and use a new name if the question now measures something different.</p>' +
+        items.map(function (it, i) { return qcard(sub, it, i, items.length); }).join('') +
+        '<button type="button" class="secondary" data-add="' + sub + '">Add a question</button>';
+    } else {
+      var all = [draft.practice].concat(draft.alerts);
+      h = field('Alert', '<select id="alertsel">' + all.map(function (a) {
+        return '<option value="' + a.id + '"' + (a.id === alertSel ? ' selected' : '') + '>' + (a.id === 'practice' ? 'Practice alert' : esc(a.title) + ' · version ' + (a.variant + 1) + ' (' + a.truth + ')') + '</option>';
+      }).join('') + '</select>');
+      var idx = alertSel === 'practice' ? -1 : draft.alerts.map(function (a) { return a.id; }).indexOf(alertSel);
+      var base = idx < 0 ? 'practice' : 'alerts.' + idx, a = getPath(base);
+      h += '<p class="muted">Each session shows one version of each of the 8 alert types, so the set of alerts is fixed, but the text and answer keys can be edited. ' +
+        'Keep about half of each session malicious. "Points to" is the answer a panel supports and drives the CSV measures for contradicting evidence. "Misleading" marks a panel that points the wrong way.</p>' +
+        '<div class="grid3">' + field('Title', inp(base + '.title', a.title)) + field('Severity', inp(base + '.severity', a.severity)) +
+        field('Correct answer', sel(base + '.truth', a.truth, [['malicious', 'Malicious'], ['benign', 'Benign']])) + '</div>' +
+        field('Summary', area(base + '.summary', a.summary, 2)) +
+        a.panels.map(function (p, j) {
+          var pb = base + '.panels.' + j;
+          return '<div class="panel-edit"><div class="grid3">' + field('Evidence tab label', inp(pb + '.label', p.label)) +
+            field('Points to', sel(pb + '.supports', p.supports, [['malicious', 'Malicious'], ['benign', 'Benign'], ['neutral', 'Neither']])) +
+            checkbox('data-mislead="' + base + '|' + p.key + '"', a.misleadingPanels.indexOf(p.key) >= 0, 'Misleading') + '</div>' +
+            field('Text', area(pb + '.text', p.text, 3)) + '</div>';
+        }).join('') +
+        '<div class="panel-edit">' + field('AI explanation when the AI is right' + (idx < 0 ? ' (in the practice alert the AI is always right)' : ''), area(base + '.aiRationale.correct', a.aiRationale.correct, 2)) +
+        (idx < 0 ? '' : field('AI explanation when the AI is wrong (low-confidence versions add "The evidence is mixed." in front; the manipulated version adds "No other indicators in this alert are notable." at the end)', area(base + '.aiRationale.incorrect', a.aiRationale.incorrect, 2))) + '</div>';
+    }
+    $('editor').innerHTML = h;
+    $('editor').disabled = !can('editor');
+  }
+  function qcard(kind, it, i, n) {
+    var b = 'survey.' + kind + '.' + i;
+    var optText = (it.options || []).map(function (o) { return o.value === o.label ? o.label : o.value + ' | ' + o.label; }).join('\n');
+    return '<div class="qcard"><div class="bar"><strong>Question ' + (i + 1) + '</strong><div class="btns">' +
+      '<button type="button" class="secondary" data-move="' + kind + '|' + i + '|-1"' + (i === 0 ? ' disabled' : '') + ' aria-label="Move up">↑</button>' +
+      '<button type="button" class="secondary" data-move="' + kind + '|' + i + '|1"' + (i === n - 1 ? ' disabled' : '') + ' aria-label="Move down">↓</button>' +
+      '<button type="button" class="danger secondary" data-remove="' + kind + '|' + i + '">Remove</button></div></div>' +
+      field('Question text', area(b + '.text', it.text, 2)) +
+      '<div class="grid3">' + field('Variable name', inp(b + '.id', it.id, ' class="mono"')) + field('Type', sel(b + '.type', it.type, TYPES)) + field('Show when', sel(b + '.showIf', it.showIf, SHOW)) + '</div>' +
+      (it.type === 'scale' ? '<div class="grid3">' + field('Points', '<input type="number" min="2" max="11" data-path="' + b + '.n" data-num="1" value="' + (it.n || 7) + '">') + field('Label for 1', inp(b + '.lo', it.lo || '')) + field('Label for the top point', inp(b + '.hi', it.hi || '')) + '</div>' : '') +
+      (it.type === 'choice' || it.type === 'select' ? field('Options, one per line (optionally "saved value | text shown")', '<textarea data-opts="' + b + '" rows="4" class="mono">' + esc(optText) + '</textarea>') : '') +
+      checkbox('data-path="' + b + '.required" data-bool="1"', it.required, 'Required') + '</div>';
+  }
+  $('subtabs').addEventListener('click', function (e) { var s = e.target.getAttribute && e.target.getAttribute('data-sub'); if (s) { sub = s; renderEditor(); } });
+  function applyEdit(t) {
+    if (t.id === 'consenttext') draft.consent.paragraphs = t.value.split(/\n\s*\n/).map(function (x) { return x.trim(); }).filter(Boolean);
+    else if (t.hasAttribute('data-opts')) setPath(t.getAttribute('data-opts') + '.options', t.value.split('\n').map(function (l) { return l.trim(); }).filter(Boolean).map(function (l) {
+      var m = l.split(/\s+\|\s+/); return m.length > 1 ? { value: m[0].trim(), label: m.slice(1).join(' | ').trim() } : { value: l, label: l };
+    }));
+    else if (t.hasAttribute('data-path')) setPath(t.getAttribute('data-path'), t.hasAttribute('data-bool') ? t.checked : t.hasAttribute('data-num') ? Number(t.value) : t.value);
+    else if (t.hasAttribute('data-mislead')) {
+      var parts = t.getAttribute('data-mislead').split('|'), a = getPath(parts[0]);
+      a.misleadingPanels = a.panels.map(function (p) { return p.key; }).filter(function (k) { return k === parts[1] ? t.checked : a.misleadingPanels.indexOf(k) >= 0; });
+    } else return false;
+    setDirty(true); return true;
+  }
+  $('editor').addEventListener('input', function (e) { if (e.target.tagName !== 'SELECT' && e.target.type !== 'checkbox') applyEdit(e.target); });
+  $('editor').addEventListener('change', function (e) {
+    var t = e.target;
+    if (t.id === 'alertsel') { alertSel = t.value; return renderEditor(); }
+    if (t.tagName !== 'SELECT' && t.type !== 'checkbox') return;
+    applyEdit(t);
+    var path = t.getAttribute('data-path') || '';
+    if (/\.type$/.test(path)) {
+      var it = getPath(path.replace(/\.type$/, ''));
+      if (it.type === 'scale' && !it.n) { it.n = 7; it.lo = it.lo || 'Strongly disagree'; it.hi = it.hi || 'Strongly agree'; }
+      if ((it.type === 'choice' || it.type === 'select') && !(it.options && it.options.length)) it.options = [{ value: 'Option 1', label: 'Option 1' }, { value: 'Option 2', label: 'Option 2' }];
+      renderEditor();
+    }
+    if (/\.truth$/.test(path)) renderEditor();
+  });
+  $('editor').addEventListener('click', function (e) {
+    var t = e.target, v;
+    if ((v = t.getAttribute('data-add'))) {
+      var items = draft.survey[v], n = items.length + 1, id = 'q' + n;
+      while (items.some(function (x) { return x.id === id; })) id = 'q' + (++n);
+      items.push({ id: id, text: '', type: 'scale', n: 7, lo: 'Strongly disagree', hi: 'Strongly agree', required: true, showIf: 'always' });
+    } else if ((v = t.getAttribute('data-remove'))) {
+      var r = v.split('|'); if (!confirm('Remove this question?')) return; draft.survey[r[0]].splice(Number(r[1]), 1);
+    } else if ((v = t.getAttribute('data-move'))) {
+      var m = v.split('|'), arr = draft.survey[m[0]], i = Number(m[1]), j = i + Number(m[2]);
+      var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    } else return;
+    setDirty(true); renderEditor();
+  });
+
+  // ---------- team ----------
+  function loadTeam() {
+    getJSON('team').then(function (rows) {
+      $('teamtbl').innerHTML = '<tr><th>Name</th><th>Access</th><th>Added</th><th>Last active</th><th></th></tr>' + rows.map(function (m) {
+        return '<tr><td>' + esc(m.name) + '</td><td>' + esc(m.role) + '</td><td>' + esc(fmt(m.createdAt)) + ' by ' + esc(m.createdBy) + '</td><td>' + esc(fmt(m.lastUsedAt)) + '</td><td><button type="button" class="danger secondary small" data-rm="' + m.id + '" data-name="' + esc(m.name) + '">Remove</button></td></tr>';
+      }).join('') + (rows.length ? '' : '<tr><td colspan="5" class="muted">No team members yet.</td></tr>');
+    }).catch(function (e) { err(e.message); });
+  }
+  $('teamform').addEventListener('submit', function (e) {
+    e.preventDefault(); err();
+    var name = $('tname').value.trim(); if (!name) return err('Enter a name.');
+    postJSON('team-add', { name: name, role: $('trole').value }).then(function (r) {
+      var box = $('newkey'); box.hidden = false;
+      box.innerHTML = '<div class="warn">Copy this key now and send it to ' + esc(r.name) + ' privately. It will not be shown again. They sign in on this page with it.</div><div class="row"><div class="keybox" style="flex:1">' + esc(r.key) + '</div><button type="button" class="secondary" id="copykey">Copy</button></div>';
+      $('copykey').addEventListener('click', function () { try { navigator.clipboard.writeText(r.key); $('copykey').textContent = 'Copied'; } catch (x) {} });
+      $('tname').value = ''; loadTeam();
+    }).catch(function (e) { err(e.message); });
+  });
+  $('teamtbl').addEventListener('click', function (e) {
+    var id = e.target.getAttribute && e.target.getAttribute('data-rm'); if (!id) return;
+    if (!confirm('Remove ' + e.target.getAttribute('data-name') + '? Their key stops working immediately.')) return;
+    postJSON('team-remove', { id: id }).then(loadTeam).catch(function (e) { err(e.message); });
+  });
+
+  // ---------- activity ----------
+  function loadActivity() {
+    getJSON('activity').then(function (rows) {
+      $('acttbl').innerHTML = '<tr><th>When</th><th>Who</th><th>Action</th><th>Details</th></tr>' + rows.map(function (r) {
+        return '<tr><td>' + esc(fmt(r.at)) + '</td><td>' + esc(r.who) + ' <span class="pill">' + esc(r.role) + '</span></td><td>' + esc(r.action) + '</td><td class="wrap-cell">' + esc(r.detail) + '</td></tr>';
+      }).join('') + (rows.length ? '' : '<tr><td colspan="4" class="muted">Nothing yet.</td></tr>');
+    }).catch(function (e) { err(e.message); });
+  }
+
+  if (getKey()) start();
 })();
 </script>
 </body>

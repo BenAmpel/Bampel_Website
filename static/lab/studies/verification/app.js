@@ -3,15 +3,13 @@
 (function () {
   'use strict';
 
-  var CONFIG = {
-    api: '/api/vc/',
-    draftConsent: true, // set false once IRB-approved consent text replaces the draft below
-    minutesPerSession: 20
-  };
+  // Consent text, survey questions, and session length come from /api/vc/content,
+  // which the research team edits on the admin page.
+  var CONFIG = { api: '/api/vc/' };
 
   var stage = document.getElementById('stage');
   var progress = document.getElementById('progress');
-  var S = { token: null, plan: null, lab: null };
+  var S = { token: null, plan: null, lab: null, content: null };
 
   // ---------- utilities ----------
   function store(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); if (v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch (e) { return null; } }
@@ -68,6 +66,7 @@
       s.addEventListener('change', commit); s.addEventListener('pointerup', commit); s.addEventListener('keyup', commit);
     });
     root.querySelectorAll('select').forEach(function (s) { s.addEventListener('change', function () { onAnswer(s.name, s.value); }); });
+    root.querySelectorAll('textarea').forEach(function (t) { t.addEventListener('input', function () { onAnswer(t.name, t.value); }); });
   }
 
   // ---------- sign-in: email + 4-digit PIN (pilot access codes also accepted) ----------
@@ -142,16 +141,16 @@
   }
 
   // ---------- consent ----------
+  function para(text) {
+    var t = esc(String(text).replace(/\{minutes\}/g, S.content.minutesPerSession));
+    return t.replace(/([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})/g, '<a href="mailto:$1">$1</a>');
+  }
   function showConsent() {
     progress.textContent = '';
-    show((CONFIG.draftConsent ? '<div class="banner">Draft consent text, pending IRB approval. Do not enroll participants with this version.</div>' : '') +
-      '<h1>Consent to participate</h1>' +
-      '<p>This study examines how people review cybersecurity alerts with and without an AI assistant. It has four sessions, about one week apart, each taking about ' + CONFIG.minutesPerSession + ' minutes.</p>' +
-      '<p>In each session you will review short security alerts, look at the evidence you choose, and decide whether each alert is malicious or benign. Some sessions include an AI assistant. The AI assistant is part of the study and is not always correct.</p>' +
-      '<p>While you work, the page records your answers and how you reached them: which evidence you open and for how long, timing, mouse movement, clicks, scrolling, and typing rhythm. It does not record which keys you press, and it does not use your camera or microphone. Your email is used only to sign you in and to confirm that you completed the study. Your responses are stored under a study ID, not your name or email.</p>' +
-      '<p>Participation is voluntary. You may skip the study or stop at any time without penalty.</p>' +
-      '<p class="muted">Questions: Dr. Benjamin Ampel, Georgia State University, <a href="mailto:bampel@gsu.edu">bampel@gsu.edu</a>.</p>' +
-      '<label class="option" style="margin-top:12px"><input type="checkbox" id="agree"> I am 18 or older and I agree to participate.</label>' +
+    var c = S.content.consent;
+    show((c.approved ? '' : '<div class="banner">Draft consent text, pending IRB approval. Do not enroll participants with this version.</div>') +
+      '<h1>Consent to participate</h1>' + c.paragraphs.map(function (x) { return '<p>' + para(x) + '</p>'; }).join('') +
+      '<label class="option" style="margin-top:12px"><input type="checkbox" id="agree"> ' + esc(c.agreeLabel) + '</label>' +
       '<div class="actions" style="gap:8px"><button class="secondary" id="decline">I do not agree</button><button id="ok" disabled>Continue</button></div>');
     var agree = document.getElementById('agree'), ok = document.getElementById('ok');
     agree.addEventListener('change', function () { ok.disabled = !agree.checked; });
@@ -174,7 +173,7 @@
         '<div class="actions"><button class="secondary" id="out">Sign out</button></div>');
     }
     show('<h1>Session ' + st.nextSession + ' of ' + st.total + '</h1>' + done +
-      '<p>This session takes about ' + CONFIG.minutesPerSession + ' minutes. Please complete it in one sitting, on a laptop or desktop computer, somewhere you will not be interrupted.</p>' +
+      '<p>This session takes about ' + S.content.minutesPerSession + ' minutes. Please complete it in one sitting, on a laptop or desktop computer, somewhere you will not be interrupted.</p>' +
       '<p class="muted">If you get disconnected, sign in again and you will pick up where you left off.</p>' +
       '<div class="actions" style="gap:8px"><button class="secondary" id="out">Sign out</button><button id="go">Start session ' + st.nextSession + '</button></div>');
     document.getElementById('go').addEventListener('click', startSession);
@@ -340,48 +339,40 @@
     document.getElementById('go').addEventListener('click', next);
   }
 
-  // ---------- surveys (DRAFT items: replace with the validated scales chosen for the study) ----------
-  function surveyPage(title, html, required, kind) {
+  // ---------- surveys (items come from the study content) ----------
+  function itemHtml(it) {
+    var q = '<p class="q">' + esc(it.text) + (it.required ? '' : ' <span class="muted">(optional)</span>') + '</p>';
+    if (it.type === 'scale') return q + scale(it.id, esc(it.lo || ''), esc(it.hi || ''), it.n);
+    if (it.type === 'choice') return q + radios(it.id, it.options.map(function (o) { return [esc(o.value), esc(o.label)]; }));
+    if (it.type === 'select') return q + '<select name="' + it.id + '"><option value="">Select…</option>' + it.options.map(function (o) { return '<option value="' + esc(o.value) + '">' + esc(o.label) + '</option>'; }).join('') + '</select>';
+    return q + '<textarea name="' + it.id + '" data-trace="text:' + it.id + '"></textarea>';
+  }
+  function shown(it) {
+    var p = S.plan;
+    if (it.showIf === 'ai') return p.mode !== 'none';
+    if (it.showIf === 'no_ai') return p.mode === 'none';
+    if (it.showIf === 'after_ai') return p.mode === 'none' && p.priorAI && p.session > 1;
+    return true;
+  }
+  function surveyPage(title, items, kind) {
+    items = items.filter(shown);
+    if (!items.length) return submitSurvey({}, kind, null);
+    var required = items.filter(function (it) { return it.required; }).map(function (it) { return it.id; });
     progress.textContent = 'Session ' + S.plan.session;
-    show('<h1>' + title + '</h1>' + html + '<div class="actions"><button id="go" disabled>Continue</button></div>');
+    show('<h1>' + title + '</h1>' + items.map(itemHtml).join('') + '<div class="actions"><button id="go"' + (required.length ? ' disabled' : '') + '>Continue</button></div>');
     var ans = {}; var go = document.getElementById('go');
-    wire(stage, function (n, v) { ans[n] = v; go.disabled = !required.every(function (k) { return ans[k] != null && ans[k] !== ''; }); });
-    go.addEventListener('click', function () {
-      go.disabled = true;
-      api('survey', { token: S.token, session: S.plan.session, kind: kind, data: ans }).then(function (r) {
-        if (r.error) { go.disabled = false; return stage.insertAdjacentHTML('beforeend', errorBox(ERR[r.error] || ERR.server_error)); }
-        if (kind === 'pre') { S.plan.preSurveyDone = true; return next(); }
-        showDone(r.status);
-      });
+    wire(stage, function (n, v) { ans[n] = v; go.disabled = !required.every(function (k) { return ans[k] != null && String(ans[k]).trim() !== ''; }); });
+    go.addEventListener('click', function () { go.disabled = true; submitSurvey(ans, kind, go); });
+  }
+  function submitSurvey(ans, kind, go) {
+    api('survey', { token: S.token, session: S.plan.session, kind: kind, data: ans }).then(function (r) {
+      if (r.error) { if (go) go.disabled = false; return stage.insertAdjacentHTML('beforeend', errorBox(ERR[r.error] || ERR.server_error)); }
+      if (kind === 'pre') { S.plan.preSurveyDone = true; return next(); }
+      showDone(r.status);
     });
   }
-
-  function showPreSurvey() {
-    surveyPage('A few questions about you',
-      '<p class="q">How many years of cybersecurity work or study experience do you have?</p><select name="experience_years"><option value="">Select…</option><option>None</option><option>Less than 1</option><option>1–2</option><option>3–5</option><option>More than 5</option></select>' +
-      '<p class="q">Which best describes you?</p>' + radios('role', [['student', 'Student'], ['analyst', 'Security analyst or SOC staff'], ['it', 'Other IT role'], ['other', 'Other']]) +
-      '<p class="q">How familiar are you with reviewing security alerts?</p>' + scale('alert_familiarity', 'Not at all familiar', 'Extremely familiar', 5) +
-      '<p class="q">How often do you use AI tools (such as chat assistants) for work or study?</p>' + scale('ai_use', 'Never', 'Several times a day', 5),
-      ['experience_years', 'role', 'alert_familiarity', 'ai_use'], 'pre');
-  }
-
-  function showPostSurvey() {
-    var p = S.plan, hadAI = p.mode !== 'none';
-    var html = '';
-    var req = ['mental_effort'];
-    if (hadAI) {
-      html += '<p class="q">"I trusted the AI assistant\'s assessments in this session."</p>' + scale('trust_1', 'Strongly disagree', 'Strongly agree', 7) +
-        '<p class="q">"The AI assistant was reliable."</p>' + scale('trust_2', 'Strongly disagree', 'Strongly agree', 7) +
-        '<p class="q">"I relied on the AI assistant to make my decisions."</p>' + scale('reliance_1', 'Strongly disagree', 'Strongly agree', 7);
-      req = req.concat(['trust_1', 'trust_2', 'reliance_1']);
-    }
-    if (p.session === 4 && p.priorAI) {
-      html += '<p class="q">How difficult was it to decide without the AI assistant in this session?</p>' + scale('no_ai_difficulty', 'Not at all difficult', 'Extremely difficult', 7);
-      req.push('no_ai_difficulty');
-    }
-    html += '<p class="q">How much mental effort did this session take?</p>' + scale('mental_effort', 'Very, very low', 'Very, very high', 9);
-    surveyPage('About this session', html, req, 'post');
-  }
+  function showPreSurvey() { surveyPage('A few questions about you', S.content.survey.pre, 'pre'); }
+  function showPostSurvey() { surveyPage('About this session', S.content.survey.post, 'post'); }
 
   function showDone(st) {
     progress.textContent = '';
@@ -394,6 +385,9 @@
   }
 
   // ---------- boot ----------
-  S.token = store('vc_token');
-  if (S.token) refresh(); else showLogin();
+  fetch(CONFIG.api + 'content', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (c) {
+    S.content = c;
+    S.token = store('vc_token');
+    if (S.token) refresh(); else showLogin();
+  }, function () { show('<h1>Security alert study</h1>' + errorBox(ERR.network)); });
 })();

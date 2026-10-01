@@ -2,7 +2,8 @@
 // Storage is injected (a Netlify Blobs store in production, a Map in tests),
 // so this module has no platform dependencies.
 import { createHmac, randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
-import { ALERTS, PRACTICE } from './vc-alerts.mjs';
+import { ALERTS, PRACTICE as DEFAULT_PRACTICE } from './vc-alerts.mjs';
+import { getContent } from './vc-content.mjs';
 
 export const STUDY = {
   id: 'verification-v1',
@@ -94,9 +95,9 @@ function shuffle(arr, rand) {
 }
 
 // Each session gets one alert per family; variant rotates so every participant sees all 32 once.
-export function sessionAlerts(session) {
+export function sessionAlerts(session, alerts = ALERTS) {
   const families = [...new Set(ALERTS.map(a => a.family))];
-  return families.map((fam, f) => ALERTS.find(a => a.family === fam && a.variant === (f + session - 1) % 4));
+  return families.map((fam, f) => alerts.find(a => a.family === fam && a.variant === (f + session - 1) % 4));
 }
 
 function aiFor(alert, type, rand) {
@@ -114,15 +115,15 @@ function aiFor(alert, type, rand) {
   }
 }
 
-export function buildPlan(p, session) {
+export function buildPlan(p, session, alerts = ALERTS) {
   const rand = seeded(`${p.code}|${STUDY.id}|s${session}`);
-  const alerts = shuffle(sessionAlerts(session), rand);
+  const order = shuffle(sessionAlerts(session, alerts), rand);
   const usesAI = p.condition !== 'control' && STUDY.aiSchedule[session];
-  const types = usesAI ? shuffle(STUDY.aiSchedule[session], rand) : alerts.map(() => null);
+  const types = usesAI ? shuffle(STUDY.aiSchedule[session], rand) : order.map(() => null);
   const mode = usesAI ? p.condition : 'none';
   return {
     session, mode,
-    trials: alerts.map((a, i) => ({ index: i, alertId: a.id, aiType: types[i], ai: aiFor(a, types[i], rand) })),
+    trials: order.map((a, i) => ({ index: i, alertId: a.id, aiType: types[i], ai: aiFor(a, types[i], rand) })),
     practice: session === 1
   };
 }
@@ -135,7 +136,8 @@ export function publicAlert(a) {
   };
 }
 
-export function publicPlan(plan, state) {
+export function publicPlan(plan, state, content) {
+  const alerts = content ? content.alerts : ALERTS; const PRACTICE = content ? content.practice : DEFAULT_PRACTICE;
   const done = new Set(state.trialsDone || []);
   return {
     session: plan.session, mode: plan.mode, total: plan.trials.length,
@@ -144,7 +146,7 @@ export function publicPlan(plan, state) {
     practiceDone: !!state.practiceDone,
     preSurveyDone: !!state.preSurveyDone,
     trials: plan.trials.map(t => ({
-      index: t.index, done: done.has(t.index), alert: publicAlert(ALERTS.find(a => a.id === t.alertId)),
+      index: t.index, done: done.has(t.index), alert: publicAlert(alerts.find(a => a.id === t.alertId)),
       ai: t.ai ? { verdict: t.ai.verdict, confidence: t.ai.confidence, rationale: t.ai.rationale } : null
     }))
   };
@@ -234,7 +236,8 @@ export async function startSession(store, code, now = Date.now()) {
   const s = p.sessions[n] || (p.sessions[n] = { startedAt: now, trialsDone: [], practiceDone: false, preSurveyDone: n !== 1 });
   s.lastResumedAt = now;
   await save(store, p);
-  return { ...publicPlan(buildPlan(p, n), s), priorAI: p.condition !== 'control' };
+  const c = await getContent(store);
+  return { ...publicPlan(buildPlan(p, n, c.alerts), s, c), priorAI: p.condition !== 'control', contentVersion: c.version || 0 };
 }
 
 export async function saveTrial(store, code, session, index, data, now = Date.now()) {
@@ -245,13 +248,17 @@ export async function saveTrial(store, code, session, index, data, now = Date.no
   const s = p.sessions[session];
   const kind = index === 'practice' ? 'practice' : 'trial';
   if (kind === 'trial') {
-    const plan = buildPlan(p, session);
+    const c = await getContent(store);
+    const plan = buildPlan(p, session, c.alerts);
     const t = plan.trials[index];
     if (!t) return { error: 'bad_index', status: 400 };
-    await store.set(`data/${p.code}/s${session}/t${index}`, { code: p.code, condition: p.condition, session, index, alertId: t.alertId, aiType: t.aiType, ai: t.ai, receivedAt: now, data });
+    // Keep a copy of the alert as scored, so later edits to the alert text or answer key don't change this record.
+    const a = c.alerts.find(x => x.id === t.alertId);
+    const alert = { id: a.id, family: a.family, variant: a.variant, truth: a.truth, title: a.title, misleadingPanels: a.misleadingPanels, panels: a.panels.map(x => ({ key: x.key, supports: x.supports })) };
+    await store.set(`data/${p.code}/s${session}/t${index}`, { code: p.code, condition: p.condition, session, index, alertId: t.alertId, aiType: t.aiType, ai: t.ai, alert, contentVersion: c.version || 0, receivedAt: now, data });
     if (!s.trialsDone.includes(index)) s.trialsDone.push(index);
   } else {
-    await store.set(`data/${p.code}/s${session}/practice`, { code: p.code, session, receivedAt: now, data });
+    await store.set(`data/${p.code}/s${session}/practice`, { code: p.code, session, contentVersion: (await getContent(store)).version || 0, receivedAt: now, data });
     s.practiceDone = true;
   }
   await save(store, p);
@@ -265,7 +272,7 @@ export async function saveSurvey(store, code, session, kind, data, now = Date.no
   if (st.finished || session !== st.nextSession || !p.sessions?.[session]) return { error: 'wrong_session', status: 409 };
   if (!['pre', 'post'].includes(kind)) return { error: 'bad_kind', status: 400 };
   const s = p.sessions[session];
-  await store.set(`data/${p.code}/s${session}/survey-${kind}`, { code: p.code, condition: p.condition, session, kind, receivedAt: now, data });
+  await store.set(`data/${p.code}/s${session}/survey-${kind}`, { code: p.code, condition: p.condition, session, kind, contentVersion: (await getContent(store)).version || 0, receivedAt: now, data });
   if (kind === 'pre') s.preSurveyDone = true;
   if (kind === 'post') {
     if (s.trialsDone.length < STUDY.trialsPerSession) return { error: 'trials_incomplete', status: 409 };
@@ -377,10 +384,10 @@ export async function exportCsv(store) {
     'correct', 'agree_ai', 'changed_initial_to_final', 'switched_to_ai',
     'panels_opened_unique', 'panel_opens_total', 'evidence_breadth', 'revisits', 'opens_after_ai', 'first_panel', 'panel_sequence',
     'misleading_inspected', 'contradicts_ai_inspected', 'contradicts_ai_inspected_after_ai', 'dwell_network_ms', 'dwell_user_ms', 'dwell_system_ms', 'dwell_context_ms',
-    'influential_panels', 'trial_ms', 'mouse_path_px', 'idle_ms', 'hidden_ms'];
+    'influential_panels', 'trial_ms', 'mouse_path_px', 'idle_ms', 'hidden_ms', 'content_version'];
   const rows = [head.join(',')];
   for (const r of records.filter(r => /\/t\d+$/.test(r.key))) {
-    const a = ALERTS.find(x => x.id === r.alertId); const d = r.data || {}; const ev = d.evidence || {};
+    const a = r.alert || ALERTS.find(x => x.id === r.alertId); const d = r.data || {}; const ev = d.evidence || {};
     const opens = ev.opens || [];
     const keys = [...new Set(opens.map(o => o.panel))];
     const aiAt = d.aiShownAtMs;
@@ -398,8 +405,40 @@ export async function exportCsv(store) {
       r.ai ? Number(contra.some(k => keys.includes(k))) : '',
       r.ai && aiAt != null ? Number(opens.some(o => contra.includes(o.panel) && o.atMs >= aiAt)) : '',
       dwell('network'), dwell('user'), dwell('system'), dwell('context'),
-      (fin.influential || []).join('|'), d.traces?.durationMs ?? '', d.traces?.mousePathPx ?? '', d.traces?.idleMs ?? '', d.traces?.hiddenMs ?? ''];
+      (fin.influential || []).join('|'), d.traces?.durationMs ?? '', d.traces?.mousePathPx ?? '', d.traces?.idleMs ?? '', d.traces?.hiddenMs ?? '', r.contentVersion ?? 0];
     rows.push(vals.map(v => { const s = String(v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }).join(','));
   }
   return rows.join('\n') + '\n';
+}
+
+const csvCell = v => { const s = Array.isArray(v) ? v.join('|') : String(v ?? ''); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+
+// One row per survey response; one column per question variable seen in any response.
+export async function exportSurveyCsv(store) {
+  const { records } = await exportAll(store);
+  const rs = records.filter(r => /\/survey-(pre|post)$/.test(r.key));
+  const vars = [...new Set(rs.flatMap(r => Object.keys(r.data || {})))].sort();
+  const head = ['code', 'condition', 'session', 'survey', 'content_version', 'received_at', ...vars];
+  const rows = [head.join(',')];
+  for (const r of rs) rows.push([r.code, r.condition, r.session, r.kind, r.contentVersion ?? 0, new Date(r.receivedAt).toISOString(), ...vars.map(v => (r.data || {})[v])].map(csvCell).join(','));
+  return rows.join('\n') + '\n';
+}
+
+// Deletes a participant and every record they produced. Permanent.
+export async function deleteParticipant(store, id) {
+  const p = await store.get(pKey(id));
+  if (!p) return { error: 'not_found', status: 404 };
+  const keys = await store.list(`data/${p.code}/`);
+  for (const k of keys) await store.delete(k);
+  await store.delete(pKey(p.code));
+  return { ok: true, code: p.code, test: !!p.test, records: keys.length };
+}
+
+export async function deleteTestParticipants(store) {
+  let participants = 0, records = 0;
+  for (const k of await store.list('participants/')) {
+    const p = await store.get(k);
+    if (p && p.test) { const r = await deleteParticipant(store, p.code); participants++; records += r.records; }
+  }
+  return { ok: true, participants, records };
 }
