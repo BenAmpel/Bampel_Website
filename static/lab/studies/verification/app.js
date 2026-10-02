@@ -36,8 +36,7 @@
   function Tp(key, vars, cls) { return T(key, vars).split(/\n\s*\n/).map(function (x) { return '<p' + (cls ? ' class="' + cls + '"' : '') + '>' + linkify(esc(x.trim())) + '</p>'; }).join(''); }
   var ERR = {
     invalid_code: 'That access code was not recognized. Check it and try again.',
-    not_enrolled: 'That email is not on the study roster. Use the email address your invitation was sent to, or contact the research team.',
-    bad_pin_format: 'Your PIN must be exactly 4 digits.',
+    not_enrolled: 'That email can\'t be used for this study. Contact the research team if you think this is a mistake.',
     expired: 'Your sign-in expired. Sign in again to pick up where you left off.',
     network: 'Could not reach the study server. Check your connection and try again.',
     server_error: 'Something went wrong on our end. Please try again in a minute.',
@@ -77,8 +76,7 @@
     root.querySelectorAll('textarea').forEach(function (t) { t.addEventListener('input', function () { onAnswer(t.name, t.value); }); });
   }
 
-  // ---------- sign-in: email + 4-digit PIN (pilot access codes also accepted) ----------
-  var PIN_ATTR = 'inputmode="numeric" pattern="[0-9]{4}" maxlength="4" spellcheck="false"';
+  // ---------- sign-in: GSU email (pilot access codes also accepted) ----------
   function showLogin(msg, mode, email) {
     progress.textContent = '';
     if (mode === 'code') {
@@ -95,44 +93,33 @@
     }
     show('<h1>' + Th('login_title') + '</h1>' + Tp('login_intro') +
       '<form id="f"><label class="field">Email<input type="email" id="email" autocomplete="email" spellcheck="false" value="' + esc(email || '') + '"></label>' +
-      '<label class="field">4-digit PIN<input type="password" id="pin" autocomplete="current-password" ' + PIN_ATTR + '></label>' +
-      '<p class="muted">' + Th('login_first_time') + '</p>' +
       (msg ? errorBox(msg) : '') + '<div class="actions" style="justify-content:space-between"><button type="button" class="secondary" id="alt">I have an access code</button><button type="submit">Continue</button></div></form>');
     document.getElementById('alt').addEventListener('click', function () { showLogin(null, 'code'); });
-    document.getElementById(email ? 'pin' : 'email').focus();
+    document.getElementById('email').focus();
     document.getElementById('f').addEventListener('submit', function (e) {
       e.preventDefault();
       var em = document.getElementById('email').value.trim();
-      if (em) signIn({ email: em, pin: document.getElementById('pin').value.trim() });
+      if (em) signIn({ email: em });
     });
   }
 
-  function showSetPin(email, msg) {
+  // First sign-in only: the email links every week's sessions, so check it before creating the record.
+  function showConfirm(email) {
     progress.textContent = '';
-    show('<h1>Create your PIN</h1><p>Choose a 4-digit PIN. You will sign in each week with <strong>' + esc(email) + '</strong> and this PIN, so pick one you will remember.</p>' +
-      '<form id="f"><label class="field">New PIN<input type="password" id="p1" autocomplete="new-password" ' + PIN_ATTR + '></label>' +
-      '<label class="field">Type it again<input type="password" id="p2" autocomplete="new-password" ' + PIN_ATTR + '></label>' +
-      (msg ? errorBox(msg) : '') + '<div class="actions"><button type="submit">Save PIN and continue</button></div></form>');
-    document.getElementById('p1').focus();
-    document.getElementById('f').addEventListener('submit', function (e) {
-      e.preventDefault();
-      var a = document.getElementById('p1').value.trim(), b = document.getElementById('p2').value.trim();
-      if (!/^\d{4}$/.test(a)) return showSetPin(email, ERR.bad_pin_format);
-      if (a !== b) return showSetPin(email, 'The two PINs do not match.');
-      signIn({ email: email, pin: a, setPin: true });
-    });
+    show('<h1>' + Th('confirm_title') + '</h1><p class="summary"><strong>' + esc(email) + '</strong></p>' + Tp('confirm_body', { email: email }) +
+      '<div class="actions" style="gap:8px"><button class="secondary" id="no">' + Th('confirm_no') + '</button><button id="yes">' + Th('confirm_yes') + '</button></div>');
+    document.getElementById('no').addEventListener('click', function () { showLogin(null, 'email', email); });
+    document.getElementById('yes').addEventListener('click', function () { this.disabled = true; signIn({ email: email, confirm: true }); });
   }
 
   function loginError(r) {
-    if (r.error === 'wrong_pin') return 'That PIN is not right. ' + r.attemptsLeft + (r.attemptsLeft === 1 ? ' try' : ' tries') + ' left before a 15-minute lock. Forgot it? Contact the research team to reset it.';
     if (r.error === 'not_enrolled' && r.domains && r.domains.length) return 'That email can\'t be used for this study. Use an email address ending in @' + r.domains.join(' or @') + '.';
-    if (r.error === 'locked') return 'Too many wrong PINs. Try again after ' + new Date(r.until).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }) + ', or contact the research team to reset your PIN.';
     return ERR[r.error] || ERR.server_error;
   }
 
   function signIn(creds) {
     api('login', creds).then(function (r) {
-      if (r.error === 'set_pin') return showSetPin(creds.email);
+      if (r.error === 'confirm_new') return showConfirm(r.email || creds.email);
       if (r.error) return showLogin(loginError(r), creds.email != null ? 'email' : 'code', creds.email);
       S.token = r.token; store('vc_token', r.token);
       if (!r.consented) return showConsent();

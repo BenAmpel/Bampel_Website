@@ -28,8 +28,11 @@ function defaultSessionAlerts(session) {
 // Leave a blank line between paragraphs.
 export const TEXT_FIELDS = [
   ['Sign-in', 'login_title', 'Page title', 'Security alert study'],
-  ['Sign-in', 'login_intro', 'Sign-in instructions', 'Sign in with your GSU email address. Use the same email and PIN each week.'],
-  ['Sign-in', 'login_first_time', 'First-time hint', 'First time here? Leave the PIN blank and you will create one.'],
+  ['Sign-in', 'login_intro', 'Sign-in instructions', 'Enter your GSU email address. Use the same email each week so your sessions stay together and your extra credit is recorded.'],
+  ['Sign-in', 'confirm_title', 'First sign-in: title', 'Is this your email?'],
+  ['Sign-in', 'confirm_body', 'First sign-in: text ({email})', 'You are starting the study as {email}. Use this same address every week. If it has a typo, change it now.'],
+  ['Sign-in', 'confirm_yes', 'First sign-in: confirm button', 'Yes, that is my email'],
+  ['Sign-in', 'confirm_no', 'First sign-in: change button', 'Change email'],
   ['Consent', 'consent_title', 'Consent page title', 'Consent to participate'],
   ['Consent', 'decline_body', 'Shown after "I do not agree"', 'You have chosen not to take part. You can close this page.'],
   ['Session start', 'start_title', 'Title ({session}, {total})', 'Session {session} of {total}'],
@@ -94,14 +97,14 @@ export const DEFAULT_CONTENT = {
     paragraphs: [
       'This study examines how people review cybersecurity alerts with and without an AI assistant. It has four sessions, about one week apart, each taking about {minutes} minutes.',
       'In each session you will review short security alerts, look at the evidence you choose, and decide whether each alert is malicious or benign. Some sessions include an AI assistant. The AI assistant is part of the study and is not always correct.',
-      'While you work, the page records your answers and how you reached them: which evidence you open and for how long, timing, mouse movement, clicks, scrolling, and typing rhythm. It does not record which keys you press, and it does not use your camera or microphone. Your email is used only to sign you in and to confirm that you completed the study. Your responses are stored under a study ID, not your name or email.',
+      'While you work, the page records your answers and how you reached them: which evidence you open and for how long, timing, mouse movement, clicks, scrolling, and typing rhythm. It does not record which keys you press, and it does not use your camera or microphone. Your email is used to keep your weekly sessions together and to award extra credit. It is stored separately from your answers, which are stored under a study ID, not your name or email.',
       'Participation is voluntary. You may skip the study or stop at any time without penalty.',
       'Questions: Dr. Benjamin Ampel, Georgia State University, bampel@gsu.edu.'
     ],
     agreeLabel: 'I am 18 or older and I agree to participate.'
   },
   // Who can sign up. With "open", anyone whose email ends in one of the domains can create an account
-  // (email + PIN) on first sign-in; emails added on the Students tab can always sign in.
+  // on first sign-in; emails added on the Students tab can always sign in.
   enrollment: { open: true, domains: ['gsu.edu', 'student.gsu.edu'], gapDays: 6, label: 'self-signup' },
   design: {
     practice: true,                // one practice alert at the start of session 1

@@ -1,15 +1,13 @@
 // Verification study (Clark): server-side study logic.
 // Storage is injected (a Netlify Blobs store in production, a Map in tests),
 // so this module has no platform dependencies.
-import { createHmac, randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
+import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { getContent, itemsFor, domainAllowed } from './vc-content.mjs';
 
 // Sessions, alerts, and the AI schedule are study content (vc-content.mjs), editable on the admin page.
 export const STUDY = {
   id: 'verification-v1',
   defaultGapDays: 6,
-  pinFailLimit: 5,          // wrong PINs before a lockout
-  pinLockMinutes: 15,
   tokenHours: 12,
   conditions: ['ai_first', 'evidence_first', 'control']
 };
@@ -27,19 +25,17 @@ export function normalizeCode(c) {
 }
 
 // ---------- Identity ----------
-// Students sign in with their email and a 4-digit PIN they choose the first time.
-// Emails are never stored: a participant's ID is a keyed hash of the email, with the key
-// (the "pepper") kept in the store, so exports stay de-identified. Pilot participants can
+// Students sign in with their email. A participant's study ID is a keyed hash of the email (key, the
+// "pepper", kept in the store). The email is saved only under contact/{id} for extra-credit matching,
+// never in the research records, so trial/survey exports stay de-identified. Pilot participants can
 // still use generated access codes.
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PIN_RE = /^\d{4}$/;
 const PID_RE = /^P-[0-9a-f]{16}$/;
 
 export function normalizeEmail(e) { return String(e || '').trim().toLowerCase(); }
 const hmac = (key, s) => createHmac('sha256', key).update(s).digest();
 export function pidFor(pepper, email) { return 'P-' + hmac(pepper, 'email|' + normalizeEmail(email)).toString('hex').slice(0, 16); }
-const hashPin = (pin, salt) => scryptSync(pin, salt, 32).toString('hex');
 
 async function getPepper(store, create = false) {
   let m = await store.get('meta/pepper');
@@ -161,6 +157,7 @@ async function statusOf(store, p, now) { return status(p, now, nSessions(await g
 // ---------- Handlers (storage: { get(key), set(key, value), list(prefix) }) ----------
 
 const pKey = code => `participants/${code}`;
+const contactKey = code => `contact/${code}`;
 
 export async function loadParticipant(store, rawCode) {
   if (PID_RE.test(String(rawCode || ''))) return await store.get(pKey(rawCode));
@@ -171,7 +168,9 @@ export async function loadParticipant(store, rawCode) {
 
 async function save(store, p) { p.updatedAt = Date.now(); await store.set(pKey(p.code), p); }
 
-// creds: { email, pin, setPin } for students, or { code } for pilot access codes.
+// Students sign in with their email alone; the first sign-in asks them to confirm it (creds.confirm)
+// so a typo doesn't split their sessions. Pilot access codes use { code }.
+// The email itself is kept apart from the answers, under contact/{id}, for extra-credit matching.
 export async function login(store, creds = {}, now = Date.now()) {
   let p;
   if (creds.email != null) {
@@ -183,31 +182,12 @@ export async function login(store, creds = {}, now = Date.now()) {
     if (!pepper || !EMAIL_RE.test(email)) return notEnrolled;
     const pid = pidFor(pepper, email);
     p = await store.get(pKey(pid));
-    const pin = String(creds.pin ?? '');
     if (!p) {
-      // Self sign-up: the account is created only once the student sets a PIN.
       if (!canSignUp) return notEnrolled;
-      if (!creds.setPin) return { error: 'set_pin', status: 401 };
-      if (!PIN_RE.test(pin)) return { error: 'bad_pin_format', status: 400 };
+      if (!creds.confirm) return { error: 'confirm_new', status: 401, email };
       [p] = await enroll(store, [pid], { gapDays: en.gapDays, label: en.label || null, selfSignup: true }, now, Math.random);
     }
-    if (!p.pin) {
-      if (!creds.setPin) return { error: 'set_pin', status: 401 };
-      if (!PIN_RE.test(pin)) return { error: 'bad_pin_format', status: 400 };
-      const salt = randomBytes(16).toString('hex');
-      p.pin = { salt, hash: hashPin(pin, salt), setAt: now };
-    } else {
-      if (p.pinLockUntil && now < p.pinLockUntil) return { error: 'locked', status: 429, until: p.pinLockUntil };
-      const ok = PIN_RE.test(pin) && timingSafeEqual(Buffer.from(hashPin(pin, p.pin.salt), 'hex'), Buffer.from(p.pin.hash, 'hex'));
-      if (!ok) {
-        p.pinFails = (p.pinFails || 0) + 1;
-        const locked = p.pinFails >= STUDY.pinFailLimit;
-        if (locked) { p.pinLockUntil = now + STUDY.pinLockMinutes * 60000; p.pinFails = 0; }
-        await save(store, p);
-        return locked ? { error: 'locked', status: 429, until: p.pinLockUntil } : { error: 'wrong_pin', status: 401, attemptsLeft: STUDY.pinFailLimit - p.pinFails };
-      }
-      p.pinFails = 0; p.pinLockUntil = null;
-    }
+    if (!(await store.get(contactKey(p.code)))) await store.set(contactKey(p.code), { email, firstSeenAt: now });
   } else {
     p = await loadParticipant(store, creds.code);
     if (!p || PID_RE.test(p.code)) return { error: 'invalid_code', status: 401 };
@@ -342,7 +322,7 @@ export async function addRoster(store, emails, opts = {}, now = Date.now(), rand
     const id = pidFor(pepper, e);
     if (ids.includes(id)) continue;
     if (await store.get(pKey(id))) { existing++; continue; }
-    ids.push(id);
+    ids.push(id); await store.set(contactKey(id), { email: e, addedAt: now });
   }
   await enroll(store, ids, opts, now, rand);
   return { added: ids.length, existing, invalid };
@@ -359,19 +339,12 @@ export async function lookupEmails(store, emails, now = Date.now()) {
     const p = pepper && EMAIL_RE.test(email) ? await store.get(pKey(pidFor(pepper, email))) : null;
     if (!p) { out.push({ email, enrolled: false }); continue; }
     const st = status(p, now, total);
-    out.push({ email, enrolled: true, totalSessions: total, id: p.code, pinSet: !!p.pin, consented: !!p.consentedAt, declined: !!p.declinedAt,
+    out.push({ email, enrolled: true, totalSessions: total, id: p.code, consented: !!p.consentedAt, declined: !!p.declinedAt,
       completedSessions: st.completed, finished: !!st.finished, lastCompletedAt: (p.completed || []).slice(-1)[0]?.completedAt || null });
   }
   return out;
 }
 
-export async function resetPin(store, email) {
-  const pepper = await getPepper(store);
-  const p = pepper ? await store.get(pKey(pidFor(pepper, email))) : null;
-  if (!p) return { error: 'not_enrolled', status: 404 };
-  p.pin = null; p.pinFails = 0; p.pinLockUntil = null; await save(store, p);
-  return { ok: true };
-}
 
 export async function listParticipants(store, now = Date.now()) {
   const keys = await store.list('participants/');
@@ -381,7 +354,7 @@ export async function listParticipants(store, now = Date.now()) {
     const p = await store.get(k);
     if (!p) continue;
     const st = status(p, now, total);
-    out.push({ code: p.code, type: PID_RE.test(p.code) ? (p.selfSignup ? 'email (self)' : 'email') : 'code', pinSet: !!p.pin, condition: p.condition, label: p.label, test: !!p.test, gapDays: p.gapDays, consented: !!p.consentedAt, declined: !!p.declinedAt,
+    out.push({ code: p.code, type: PID_RE.test(p.code) ? (p.selfSignup ? 'email (self)' : 'email') : 'code', condition: p.condition, label: p.label, test: !!p.test, gapDays: p.gapDays, consented: !!p.consentedAt, declined: !!p.declinedAt,
       completedSessions: st.completed, nextSession: st.nextSession || null, availableAt: st.availableAt || null, lastSeenAt: p.lastSeenAt || null,
       totalSessions: total, inProgress: p.sessions && st.nextSession && p.sessions[st.nextSession] ? p.sessions[st.nextSession].trialsDone.length : 0,
       inProgressOf: p.sessions && st.nextSession && p.sessions[st.nextSession]?.plan ? p.sessions[st.nextSession].plan.trials.length : 0 });
@@ -466,6 +439,7 @@ export async function deleteParticipant(store, id) {
   if (!p) return { error: 'not_found', status: 404 };
   const keys = await store.list(`data/${p.code}/`);
   for (let i = 0; i < keys.length; i += 25) await Promise.all(keys.slice(i, i + 25).map(k => store.delete(k)));
+  await store.delete(contactKey(p.code));
   await store.delete(pKey(p.code));
   return { ok: true, code: p.code, test: !!p.test, records: keys.length };
 }
@@ -485,4 +459,22 @@ export async function setTest(store, id, test) {
   if (!p) return { error: 'not_found', status: 404 };
   p.test = !!test; await save(store, p);
   return { ok: true, code: p.code, test: p.test };
+}
+
+// Extra-credit list: every student email with completion. Kept out of the research exports.
+export async function exportCredit(store, now = Date.now()) {
+  const total = nSessions(await getContent(store));
+  const keys = await store.list('contact/');
+  const rows = [['email', 'sessions_completed', 'total_sessions', 'finished', 'last_session_completed', 'first_seen', 'label', 'test'].join(',')];
+  const vals = [];
+  for (let i = 0; i < keys.length; i += 25) {
+    const batch = keys.slice(i, i + 25);
+    vals.push(...await Promise.all(batch.map(async k => [await store.get(k), await store.get(pKey(k.slice(8)))])));
+  }
+  for (const [c, p] of vals.sort((a, b) => String(a[0]?.email).localeCompare(String(b[0]?.email)))) {
+    if (!c || !p) continue;
+    const st = status(p, now, total), last = (p.completed || []).slice(-1)[0];
+    rows.push([c.email, st.completed, total, st.finished ? 1 : 0, last ? new Date(last.completedAt).toISOString() : '', new Date(c.firstSeenAt || c.addedAt || p.createdAt).toISOString(), p.label || '', p.test ? 1 : 0].map(csvCell).join(','));
+  }
+  return rows.join('\n') + '\n';
 }

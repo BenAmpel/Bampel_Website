@@ -87,7 +87,7 @@
 
       <section data-tab="students" hidden>
         <h2>Add students</h2>
-        <p class="muted">Optional while self sign-up is on (Study content → Sign-up &amp; consent): add emails here to pre-enroll a class with its own label or gap days, to mark pilots as test, or to let in addresses outside the sign-up domains. One per line or separated by commas. Each student creates a 4-digit PIN at first sign-in. Emails are not stored: the server keeps a one-way keyed hash, so exports stay de-identified. Conditions are assigned in balanced blocks of three across all batches. Emails already enrolled are skipped.</p>
+        <p class="muted">Optional while self sign-up is on (Study content → Sign-up &amp; consent): add emails here to pre-enroll a class with its own label or gap days, to mark pilots as test, or to let in addresses outside the sign-up domains. One per line or separated by commas. Emails are not stored: the server keeps a one-way keyed hash, so exports stay de-identified. Conditions are assigned in balanced blocks of three across all batches. Emails already enrolled are skipped.</p>
         <form id="rosterform">
           <textarea id="emails" class="mono" style="width:100%;min-height:110px" placeholder="jdoe1@student.gsu.edu&#10;asmith2@student.gsu.edu"></textarea>
           <div class="row" style="margin-top:8px">
@@ -110,13 +110,9 @@
         </div>
 
         <div class="section">
-          <h2>Reset a PIN</h2>
-          <p class="muted">For a student who forgot their PIN or is locked out. They create a new PIN at their next sign-in. Their progress is kept.</p>
-          <form class="row" id="resetform">
-            <label>Student email <input type="text" id="remail" style="width:260px"></label>
-            <button type="submit">Reset PIN</button>
-          </form>
-          <p id="resetout" class="muted"></p>
+          <h2>Extra credit</h2>
+          <p class="muted">Every student email with how many sessions they completed. Emails are stored apart from the answers and never appear in the research exports.</p>
+          <div class="row"><button type="button" class="secondary" data-dl="credit.csv">Download extra-credit list (CSV)</button></div>
         </div>
 
         <div class="section">
@@ -165,7 +161,7 @@
       </section>
 
       <section data-tab="activity" hidden>
-        <p class="muted">Who added students, changed content, reset PINs, deleted data, or changed the team.</p>
+        <p class="muted">Who added students, changed content, ran self-tests, deleted data, or changed the team.</p>
         <div class="table-wrap"><table id="acttbl"></table></div>
       </section>
     </div>
@@ -233,7 +229,7 @@
   $('keyform').addEventListener('submit', function (e) { e.preventDefault(); setKey($('key').value.trim()); start(); });
 
   // ---------- participants ----------
-  var DL = { 'export.csv': 'trials.csv', 'export-surveys.csv': 'surveys.csv', 'export.json': 'all.json' };
+  var DL = { 'export.csv': 'trials.csv', 'export-surveys.csv': 'surveys.csv', 'export.json': 'all.json', 'credit.csv': 'extra_credit.csv' };
   document.querySelectorAll('[data-dl]').forEach(function (b) {
     b.addEventListener('click', function () {
       err();
@@ -252,9 +248,9 @@
       var by = {}; real.forEach(function (p) { by[p.condition] = (by[p.condition] || 0) + 1; });
       $('summary').textContent = rows.length + ' participants (' + (rows.length - real.length) + ' test). Real participants by condition: ' +
         (Object.keys(by).map(function (k) { return k + ' ' + by[k]; }).join(', ') || 'none yet') + '. Finished all sessions: ' + real.filter(function (p) { return p.completedSessions >= p.totalSessions; }).length + '.';
-      var head = ['Study ID', 'Sign-in', 'PIN set', 'Label', 'Condition', 'Test', 'Consent', 'Sessions done', 'In progress', 'Next opens', 'Gap', 'Last seen'].concat(can('owner') ? [''] : []);
+      var head = ['Study ID', 'Sign-in', 'Label', 'Condition', 'Test', 'Consent', 'Sessions done', 'In progress', 'Next opens', 'Gap', 'Last seen'].concat(can('owner') ? [''] : []);
       $('tbl').innerHTML = '<tr>' + head.map(function (h) { return '<th>' + h + '</th>'; }).join('') + '</tr>' + rows.map(function (p) {
-        return '<tr><td><code>' + esc(p.code) + '</code></td><td>' + esc(p.type) + '</td><td>' + (p.type.indexOf('email') === 0 ? (p.pinSet ? 'yes' : 'not yet') : '') + '</td><td>' + esc(p.label) + '</td><td>' + esc(p.condition) + '</td><td>' + (p.test ? 'yes ' : '') + (can('manager') ? '<button type="button" class="secondary small" data-settest="' + esc(p.code) + '|' + (p.test ? '0' : '1') + '">' + (p.test ? 'Mark real' : 'Mark test') + '</button>' : '') + '</td><td>' +
+        return '<tr><td><code>' + esc(p.code) + '</code></td><td>' + esc(p.type) + '</td><td>' + esc(p.label) + '</td><td>' + esc(p.condition) + '</td><td>' + (p.test ? 'yes ' : '') + (can('manager') ? '<button type="button" class="secondary small" data-settest="' + esc(p.code) + '|' + (p.test ? '0' : '1') + '">' + (p.test ? 'Mark real' : 'Mark test') + '</button>' : '') + '</td><td>' +
           (p.declined ? 'declined' : p.consented ? 'yes' : '') + '</td><td>' + p.completedSessions + ' / ' + p.totalSessions + '</td><td>' + (p.inProgress ? p.inProgress + ' / ' + p.inProgressOf : '') + '</td><td>' +
           (p.nextSession ? 'S' + p.nextSession + ' ' + esc(fmt(p.availableAt)) : 'done') + '</td><td>' + p.gapDays + 'd</td><td>' + esc(fmt(p.lastSeenAt)) + '</td>' +
           (can('owner') ? '<td><button type="button" class="danger secondary small" data-del="' + esc(p.code) + '">Delete</button></td>' : '') + '</tr>';
@@ -321,8 +317,8 @@
     var list = emails('lemails'); if (!list.length) return;
     postJSON('lookup', { emails: list }).then(function (rows) {
       lookupRows = rows; $('lcsv').disabled = !rows.length;
-      $('ltbl').innerHTML = '<tr><th>Email</th><th>Enrolled</th><th>PIN set</th><th>Consented</th><th>Sessions done</th><th>Finished</th><th>Last session</th></tr>' + rows.map(function (r) {
-        return '<tr><td>' + esc(r.email) + '</td><td>' + (r.enrolled ? 'yes' : '<strong>no</strong>') + '</td><td>' + (r.enrolled ? (r.pinSet ? 'yes' : 'no') : '') + '</td><td>' +
+      $('ltbl').innerHTML = '<tr><th>Email</th><th>Enrolled</th><th>Consented</th><th>Sessions done</th><th>Finished</th><th>Last session</th></tr>' + rows.map(function (r) {
+        return '<tr><td>' + esc(r.email) + '</td><td>' + (r.enrolled ? 'yes' : '<strong>no</strong>') + '</td><td>' +
           (r.declined ? 'declined' : r.consented ? 'yes' : '') + '</td><td>' + (r.enrolled ? r.completedSessions + ' / ' + r.totalSessions : '') + '</td><td>' + (r.finished ? '<span class="ok">yes</span>' : '') + '</td><td>' + esc(fmt(r.lastCompletedAt)) + '</td></tr>';
       }).join('');
     }).catch(function (e) { err(e.message); });
@@ -333,12 +329,6 @@
     }));
     var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([lines.join('\n') + '\n'], { type: 'text/csv' }));
     a.download = 'completion_' + new Date().toISOString().slice(0, 10) + '.csv'; document.body.appendChild(a); a.click(); a.remove();
-  });
-  $('resetform').addEventListener('submit', function (e) {
-    e.preventDefault(); err();
-    var em = $('remail').value.trim(); if (!em) return;
-    postJSON('reset-pin', { email: em }).then(function () { $('resetout').innerHTML = '<span class="ok">PIN reset for ' + esc(em) + '.</span> They will create a new one at next sign-in.'; $('remail').value = ''; })
-      .catch(function (e) { err(e.code === 'not_enrolled' ? 'That email is not enrolled.' : e.message); });
   });
   $('createform').addEventListener('submit', function (e) {
     e.preventDefault(); err();
@@ -420,7 +410,7 @@
       var en = draft.enrollment;
       h = '<h3 style="margin:0 0 8px">Sign-up</h3>' +
         checkbox('data-path="enrollment.open" data-bool="1"', en.open, 'Anyone with an email address at these domains can sign up (no list needed)') +
-        '<p class="muted">They create their account by setting a PIN at first sign-in. There is no verification email, so the first person to sign up with an address owns it; if a student reports that someone else used their email, reset their PIN on the Students tab. Emails added on the Students tab can always sign in, even with sign-up off.</p>' +
+        '<p class="muted">Students type their email each week; the first time, they confirm it. There is no verification email, so the study relies on students entering their own address. Emails added on the Students tab can always sign in, even with sign-up off.</p>' +
         '<div class="grid3">' + field('Email domains (one per line, no @)', '<textarea data-domains="1" rows="3" class="mono">' + esc(en.domains.join('\n')) + '</textarea>') +
         field('Gap days for self sign-ups', num('enrollment.gapDays', en.gapDays, 0, 60)) + field('Label for self sign-ups', inp('enrollment.label', en.label || '')) + '</div>' +
         '<h3 style="margin:20px 0 8px">Consent</h3>' + field('Minutes per session (write {minutes} in any text to insert it)', num('minutesPerSession', draft.minutesPerSession, 1, 180)) +

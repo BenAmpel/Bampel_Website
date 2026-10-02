@@ -1,5 +1,5 @@
 // Verification study API (Netlify Function, served at /api/vc/*).
-// Participants sign in (email + PIN, or a pilot access code) and get a short-lived token
+// Participants sign in (GSU email, or a pilot access code) and get a short-lived token
 // that every other participant route requires.
 // Admin routes take a key in the x-admin-key header: the owner's VC_ADMIN_KEY environment
 // variable, or a team member key the owner created. Each route needs a minimum role.
@@ -40,7 +40,7 @@ const NEED = {
   me: 'viewer', participants: 'viewer', 'export.csv': 'viewer', 'export-surveys.csv': 'viewer', 'export.json': 'viewer',
   content: 'viewer', 'content-history': 'viewer',
   'content-save': 'editor', 'content-restore': 'editor',
-  roster: 'manager', lookup: 'manager', 'reset-pin': 'manager', create: 'manager', 'set-test': 'manager',
+  roster: 'manager', lookup: 'manager', 'credit.csv': 'manager', create: 'manager', 'set-test': 'manager',
   delete: 'owner', 'delete-test': 'owner', 'self-test': 'owner', team: 'owner', 'team-add': 'owner', 'team-remove': 'owner', activity: 'owner'
 };
 
@@ -54,7 +54,7 @@ export default async (req) => {
   try {
     if (route === 'content') return json(content.publicContent(await content.getContent(store)));
     if (route === 'login') {
-      const creds = body.email != null ? { email: body.email, pin: body.pin, setPin: body.setPin === true } : { code: body.code };
+      const creds = body.email != null ? { email: body.email, confirm: body.confirm === true } : { code: body.code };
       return reply(await core.login(store, creds));
     }
     if (['resume', 'consent', 'session', 'trial', 'survey'].includes(route)) {
@@ -85,6 +85,7 @@ export default async (req) => {
         case 'participants': return json(await core.listParticipants(store));
         case 'export.json': return json(await core.exportAll(store));
         case 'export.csv': return csv(await core.exportCsv(store), 'verification_trials.csv');
+        case 'credit.csv': return csv(await core.exportCredit(store), 'extra_credit.csv');
         case 'export-surveys.csv': return csv(await core.exportSurveyCsv(store), 'verification_surveys.csv');
         case 'content': return json({ ...(await content.getContent(store)), _textFields: content.TEXT_FIELDS, _aiTypes: content.AI_TYPES });
         case 'content-history': return json(await content.contentHistory(store));
@@ -112,11 +113,6 @@ export default async (req) => {
         case 'set-test': {
           const r = await core.setTest(store, String(body.id || ''), body.test === true);
           if (r.ok) await admin.audit(store, who, 'participant.set_test', `${r.code} marked ${r.test ? 'test' : 'real'}`);
-          return reply(r);
-        }
-        case 'reset-pin': {
-          const r = await core.resetPin(store, body.email);
-          if (r.ok) await admin.audit(store, who, 'students.reset_pin', 'one student');
           return reply(r);
         }
         case 'create': {
