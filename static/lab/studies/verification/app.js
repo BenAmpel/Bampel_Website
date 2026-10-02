@@ -15,10 +15,15 @@
   function store(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); if (v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch (e) { return null; } }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function fmtDate(ms) { return new Date(ms).toLocaleString(undefined, { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' }); }
-  function api(route, body) {
+  // Retries once after a second on a dropped connection or a server hiccup (every route is safe to repeat).
+  function post(route, body) {
     return fetch(CONFIG.api + route, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body || {}) })
       .then(function (r) { return r.json().then(function (j) { j._status = r.status; return j; }, function () { return { error: 'server_error', _status: r.status }; }); },
-            function () { return { error: 'network' }; })
+            function () { return { error: 'network' }; });
+  }
+  function api(route, body) {
+    return post(route, body)
+      .then(function (j) { return j.error === 'network' || j.error === 'server_error' ? new Promise(function (res) { setTimeout(res, 1000); }).then(function () { return post(route, body); }) : j; })
       .then(function (j) {
         if (j.error === 'expired' && route !== 'login') { store('vc_token', null); S.token = null; showLogin(ERR.expired); return new Promise(function () {}); }
         return j;
