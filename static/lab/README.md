@@ -68,6 +68,7 @@ Each event has `t` (ms since start), `type`, and `item`. Types: `move`, `down`, 
 | `netlify/lib/vc-content.mjs` | editable content (consent, sessions & AI, alerts, surveys, screen text), validation, versions |
 | `netlify/lib/vc-admin.mjs` | owner and team keys, activity log |
 | `netlify/lib/vc-selftest.mjs` | resumable live self-test (owner button on the admin page) |
+| `netlify/lib/vc-backup.mjs`, `netlify/functions/vc-backup.mjs` | hourly scheduled mirror into the `verification-backup` store; purge on withdrawal |
 | `netlify/lib/vc_build_alerts.py` → `vc-alerts.mjs` | built-in default alerts |
 | `static/lab/studies/verification/` | `index.html` + `app.js` (participant app), `admin.html` (admin app) |
 | `tests/lab/` | `npm run test:lab`: design, audit regressions, content/admin, sign-in, self-test (in-memory store; the audit test also runs on a store whose conditional writes are not atomic, like live Blobs) |
@@ -98,6 +99,7 @@ Key schema: `participants/{id}`, `consent/{id}`, `plans/{id}/s{n}`, `started/{id
 Set `VC_ADMIN_KEY` (16+ characters) in the Netlify environment variables; that is the owner key. Tabs:
 
 - *Participants*: progress; the live self-test (also checks the storage itself); trials CSV, surveys CSV, full JSON, and raw-trace JSONL downloads (assembled in the browser in batches of participants, so they work at any study size; optionally real participants only); mark test/real; delete one or all test participants; the live self-test.
+- *Pilot report*: per-alert accuracy without the AI (flags alerts that are too easy or too hard), accuracy when the AI is right vs wrong, agreement and evidence checking by AI behavior, accuracy by condition and session, session length vs the promised minutes, and drop-off by session. Filter by label to look at one pilot batch; download the per-alert table as CSV.
 - *Students*: pre-enroll emails (optional while self sign-up is on), check completion, extra-credit list, pilot codes.
 - *Study content*: Sessions & AI (session count, alerts per session, practice alert, counterbalancing, AI behavior mix and confidence ranges), Alerts (add/duplicate/delete, 1–6 evidence panels with CSV variable names), start- and end-of-session surveys, Sign-up & consent, Screen text. Every save is a numbered version that can be restored.
 - *Team* (owner): viewer / editor / manager keys; only hashes are stored. *Activity* (owner): audit log.
@@ -119,6 +121,8 @@ Choices that change measured behavior are marked [B]; keep them identical across
 
 ### Operations runbook
 
+- **Pilot**: enroll 10–15 students under their own label (for example `pilot-oct`), let them complete at least session 1 (session 4 too, if the timeline allows, since it has no AI for anyone), then open *Pilot report*, filter by that label, and retune alerts flagged too easy or too hard under Study content → Alerts. Aim for roughly 60–80% accuracy without the AI, so that both following a wrong AI and catching it are possible. Check the median session length against the minutes in the consent text. Mark pilot participants as test (or delete them) before the main study if their data shouldn't count.
+- **Backups**: the hourly mirror runs automatically (Participants tab → Backups shows the last run; "Run backup now" forces one). Weekly, the owner downloads the complete backup (.json.gz) and saves it to GSU-approved storage; it contains student emails. Restoring is a manual operation from either copy; deleting a participant removes them from the mirror but not from earlier downloaded files, so note withdrawals so they can be removed from saved copies too.
 - **Before live participants**: IRB-approved consent pasted in and "IRB-approved" ticked; survey items finalized; GSU sign-off on storing study data and student emails in Netlify Blobs; run the live self-test; delete all test participants.
 - **During the study**: Participants tab for progress; Students → extra-credit list for credit; withdrawals: delete the participant (removes answers, traces, plans, and email).
 - **Exports**: trials CSV and surveys CSV for analysis (definitions in `static/lab/CODEBOOK.md`); full JSON for archiving; raw traces JSONL only if you need event-level data.

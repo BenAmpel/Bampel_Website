@@ -81,12 +81,31 @@
         <p class="muted" id="summary"></p>
         <div class="table-wrap"><table id="tbl"></table></div>
         <div class="section" data-role="owner">
+          <h2>Backups</h2>
+          <p class="muted">Every hour the study data is copied to a separate backup store on Netlify (answers once, changing records every time). That protects against mistakes and bugs. For a copy outside Netlify, download a complete backup (every record, raw traces, student emails, study content, team, and activity log) and save it to GSU-approved storage, for example weekly. It contains emails, so treat it as identifiable data. Deleting a participant also removes them from the backup store.</p>
+          <p id="bkstatus" class="muted"></p>
+          <div class="row"><button type="button" class="secondary" id="bkrun">Run backup now</button><button type="button" class="secondary" id="bkdl">Download complete backup (.json.gz)</button></div>
+          <p id="bkprog" class="muted"></p>
+        </div>
+        <div class="section" data-role="owner">
           <h2>Live self-test</h2>
           <p class="muted">Runs one throwaway test participant per group through every session of the current design on this live site (practice, surveys, every alert), then checks what was saved and what the exports say, and deletes the test participants. Takes about a minute. Real participants are not touched.</p>
           <div class="row"><button type="button" id="selftest">Run self-test (all three groups)</button><label class="check"><input type="checkbox" id="stkeep"> Keep the test participants so I can look at them (delete later with "Delete all test participants")</label></div>
           <p class="muted" id="stprog"></p>
           <div id="stout"></div>
         </div>
+      </section>
+
+      <section data-tab="report" hidden>
+        <p class="muted">How the alerts and sessions are performing, for tuning the study after a pilot. Accuracy without the AI is the key number: if an alert is answered correctly almost always (or almost never) without help, it can't show whether people over-rely on the AI. Flags need at least <span id="minn">5</span> answers per alert.</p>
+        <div class="row">
+          <label>Participants <select id="rpwho"><option value="real">Real participants only</option><option value="all">Everyone, including test</option></select></label>
+          <label>Label <select id="rplabel"><option value="">All labels</option></select></label>
+          <button type="button" id="rprun">Build report</button>
+          <button type="button" class="secondary" id="rpcsv" disabled>Download per-alert table (CSV)</button>
+        </div>
+        <p class="muted" id="rpprog"></p>
+        <div id="rpout"></div>
       </section>
 
       <section data-tab="students" hidden>
@@ -203,13 +222,14 @@
   var postJSON = function (p, b) { return call(p, b).then(function (r) { return r.json(); }); };
 
   // ---------- sign-in and tabs ----------
-  var TABS = [['participants', 'Participants', 'viewer'], ['students', 'Students', 'manager'], ['content', 'Study content', 'viewer'], ['team', 'Team', 'owner'], ['activity', 'Activity', 'owner']];
+  var TABS = [['participants', 'Participants', 'viewer'], ['report', 'Pilot report', 'viewer'], ['students', 'Students', 'manager'], ['content', 'Study content', 'viewer'], ['team', 'Team', 'owner'], ['activity', 'Activity', 'owner']];
   function showTab(name) {
     document.querySelectorAll('section[data-tab]').forEach(function (s) { s.hidden = s.getAttribute('data-tab') !== name; });
     $('tabs').querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-selected', b.getAttribute('data-tab') === name ? 'true' : 'false'); });
     try { sessionStorage.setItem('vc_admin_tab', name); } catch (e) {}
     err();
-    if (name === 'participants') load();
+    if (name === 'participants') { load(); if (can('owner')) loadBackup(); }
+    if (name === 'report') initReport();
     if (name === 'content') loadContent();
     if (name === 'team') loadTeam();
     if (name === 'activity') loadActivity();
@@ -256,7 +276,8 @@
       var buttons = document.querySelectorAll('[data-export]'); buttons.forEach(function (x) { x.disabled = true; });
       getJSON('participants').then(function (list) {
         var codes = list.filter(function (p) { return !$('exreal').checked || !p.test; }).map(function (p) { return p.code; });
-        var size = kind === 'raw' ? 1 : 10, batches = [];
+        // Small batches keep each response well under the function size limit (raw traces: one participant at a time).
+        var size = kind === 'raw' ? 1 : kind === 'json' ? 2 : 4, batches = [];
         for (var i = 0; i < codes.length; i += size) batches.push(codes.slice(i, i + size));
         var out = [], done = 0;
         function step() {
@@ -352,6 +373,138 @@
     if (!n) return err('There are no test participants.');
     if (prompt('This permanently deletes all ' + n + ' test participants and their data. Real participants are not touched.\n\nType DELETE to confirm.') !== 'DELETE') return;
     postJSON('delete-test', { confirm: 'DELETE' }).then(function (r) { load(); setTimeout(function () { $('summary').insertAdjacentHTML('afterbegin', '<span class="ok">Deleted ' + r.participants + ' test participants and ' + r.records + ' records.</span> '); }, 600); }).catch(function (e) { err(e.message); });
+  });
+
+  // ---------- backups (owner) ----------
+  function loadBackup() {
+    getJSON('backup-status').then(function (b) {
+      $('bkstatus').innerHTML = b.lastRunAt ? 'Last backup run ' + esc(fmt(b.lastRunAt)) + (b.complete ? ' (complete)' : ' (catching up: ' + b.pending + ' records left)') + '. Last complete copy: ' + esc(fmt(b.lastCompleteAt) || 'not yet') + '. Records in backup: ' + b.keysInMirror + ' of ' + b.keysInStudy + '.' : 'No backup has run yet. The first hourly run happens within an hour of deploying, or click "Run backup now".';
+    }).catch(function (e) { $('bkstatus').textContent = e.message; });
+  }
+  $('bkrun').addEventListener('click', function () {
+    err(); $('bkrun').disabled = true; $('bkprog').textContent = 'Backing up…';
+    (function step(n) {
+      return postJSON('backup-run', {}).then(function (r) {
+        $('bkprog').textContent = 'Copied ' + r.copied + ' records' + (r.complete ? '. Backup complete.' : ', ' + r.pending + ' left…');
+        if (!r.complete && n < 40) return step(n + 1);
+      });
+    })(0).catch(function (e) { err(e.message); }).then(function () { $('bkrun').disabled = false; loadBackup(); });
+  });
+  $('bkdl').addEventListener('click', function () {
+    err(); var btn = $('bkdl'); btn.disabled = true;
+    getJSON('participants').then(function (list) {
+      var codes = list.map(function (p) { return p.code; }), batches = [], parts = [], raw = [];
+      for (var i = 0; i < codes.length; i += 2) batches.push(codes.slice(i, i + 2));
+      var total = batches.length + codes.length;
+      function step(i) {
+        if (i >= batches.length) return rawStep(0);
+        $('bkprog').textContent = 'Collecting… ' + Math.round(i / Math.max(1, total) * 100) + '%';
+        return getJSON('backup-part?part=people&codes=' + batches[i].join(',')).then(function (r) { parts.push(r); return step(i + 1); });
+      }
+      function rawStep(j) {   // raw traces are the bulk of the data: one participant per request
+        if (j >= codes.length) return historyStep(0, []);
+        $('bkprog').textContent = 'Collecting… ' + Math.round((batches.length + j) / Math.max(1, total) * 100) + '%';
+        return getJSON('raw?codes=' + codes[j]).then(function (r) { raw.push.apply(raw, r); return rawStep(j + 1); });
+      }
+      function historyStep(page, acc) {   // every saved version of the study content, 10 at a time
+        return getJSON('backup-part?part=history&page=' + page).then(function (r) {
+          acc = acc.concat(r.entries);
+          return (page + 1) * 10 < r.total ? historyStep(page + 1, acc) : getJSON('backup-part?part=meta').then(function (m) { m.contentHistory = acc; return finish(m); });
+        });
+      }
+      function finish(meta) {
+        var flat = function (k) { return [].concat.apply([], parts.map(function (p) { return p[k] || []; })); };
+        var all = { kind: 'verification-study complete backup', exportedAt: new Date().toISOString(), meta: meta,
+          participants: flat('participants'), contacts: flat('contacts'), plans: flat('plans'), records: flat('records'), raw: raw };
+        var text = JSON.stringify(all), name = 'verification_backup_' + new Date().toISOString().slice(0, 10) + '.json';
+        var done = function (blob, n) { var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = n; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000); };
+        if (window.CompressionStream) {
+          return new Response(new Blob([text]).stream().pipeThrough(new CompressionStream('gzip'))).blob().then(function (b) { done(b, name + '.gz'); $('bkprog').textContent = 'Downloaded ' + all.participants.length + ' participants, ' + all.records.length + ' records (' + Math.round(b.size / 1024) + ' KB compressed). Save it to GSU-approved storage.'; });
+        }
+        done(new Blob([text], { type: 'application/json' }), name); $('bkprog').textContent = 'Downloaded. Save it to GSU-approved storage.';
+      }
+      return step(0);
+    }).catch(function (e) { err(e.message); }).then(function () { btn.disabled = false; });
+  });
+
+  // ---------- pilot report ----------
+  var MINN = 5, reportRows = [];
+  function initReport() {
+    getJSON('participants').then(function (list) {
+      var labels = []; list.forEach(function (p) { if (p.label && labels.indexOf(p.label) < 0) labels.push(p.label); });
+      var cur = $('rplabel').value;
+      $('rplabel').innerHTML = '<option value="">All labels</option>' + labels.sort().map(function (l) { return '<option' + (l === cur ? ' selected' : '') + '>' + esc(l) + '</option>'; }).join('');
+    }).catch(function (e) { err(e.message); });
+  }
+  function median(a) { if (!a.length) return null; var b = a.slice().sort(function (x, y) { return x - y; }), m = Math.floor(b.length / 2); return b.length % 2 ? b[m] : (b[m - 1] + b[m]) / 2; }
+  function mean(a) { return a.length ? a.reduce(function (x, y) { return x + y; }, 0) / a.length : null; }
+  function pct(a) { return a.length ? Math.round(mean(a) * 100) + '%' : '–'; }
+  function cnt(a) { return a.length ? ' <span class="muted">(' + a.length + ')</span>' : ''; }
+  $('rprun').addEventListener('click', function () {
+    err(); $('rprun').disabled = true; $('rpout').innerHTML = '';
+    Promise.all([getJSON('participants'), getJSON('content')]).then(function (res) {
+      var list = res[0], content = res[1], who = $('rpwho').value, label = $('rplabel').value;
+      var people = list.filter(function (p) { return (who === 'all' || !p.test) && (!label || p.label === label); });
+      var titles = {}; content.alerts.forEach(function (a) { titles[a.id] = a.title; });
+      var codes = people.map(function (p) { return p.code; }), batches = [], rows = [];
+      for (var i = 0; i < codes.length; i += 4) batches.push(codes.slice(i, i + 4));
+      function step(i) {
+        if (i >= batches.length) return render(people, rows, titles, content);
+        $('rpprog').textContent = 'Reading answers… ' + Math.round(i / Math.max(1, batches.length) * 100) + '%';
+        return getJSON('rows?kind=trials&codes=' + batches[i].join(',')).then(function (r) { rows.push.apply(rows, r); return step(i + 1); });
+      }
+      return step(0);
+    }).catch(function (e) { err(e.message); }).then(function () { $('rprun').disabled = false; });
+  });
+  function render(people, rows, titles, content) {
+    $('rpprog').textContent = people.length + ' participants, ' + rows.length + ' alert answers.';
+    if (!rows.length) { $('rpout').innerHTML = '<p class="muted">No answers yet for this selection.</p>'; return; }
+    var num = function (v) { return v === '' || v == null ? null : Number(v); };
+    // Overview: sessions, time, dropout
+    var sess = {};
+    rows.forEach(function (r) { var k = r.code + '|' + r.session; if (!sess[k]) sess[k] = { s: r.session, start: r.session_started_at, end: r.session_completed_at }; });
+    var byS = {}; Object.keys(sess).forEach(function (k) { var x = sess[k]; (byS[x.s] = byS[x.s] || { started: 0, done: 0, mins: [] }).started++; if (x.end) { byS[x.s].done++; if (x.start) byS[x.s].mins.push((new Date(x.end) - new Date(x.start)) / 60000); } });
+    var h = '<h2>Sessions</h2><div class="table-wrap"><table><tr><th>Session</th><th>Started</th><th>Completed</th><th>Median minutes</th><th>Slowest</th></tr>' +
+      Object.keys(byS).sort(function (a, b) { return a - b; }).map(function (s) { var x = byS[s], md = median(x.mins); return '<tr><td>' + s + '</td><td>' + x.started + '</td><td>' + x.done + '</td><td>' + (md == null ? '–' : md.toFixed(1)) + '</td><td>' + (x.mins.length ? Math.max.apply(null, x.mins).toFixed(1) : '–') + '</td></tr>'; }).join('') +
+      '</table></div><p class="muted">Compare the median with the ' + content.minutesPerSession + ' minutes promised to participants (Study content → Sign-up &amp; consent).</p>';
+    // Condition x session
+    var cs = {};
+    rows.forEach(function (r) { var k = r.condition + '|' + r.session; var x = cs[k] = cs[k] || { acc: [], agree: [], conf: [], panels: [] }; if (r.correct !== '') x.acc.push(+r.correct); if (r.agree_ai !== '') x.agree.push(+r.agree_ai); if (num(r.final_confidence) != null) x.conf.push(num(r.final_confidence)); x.panels.push(+r.panels_opened_unique); });
+    h += '<h2>By condition and session</h2><div class="table-wrap"><table><tr><th>Condition</th><th>Session</th><th>Accuracy</th><th>Agreed with AI</th><th>Mean confidence</th><th>Panels opened (mean)</th></tr>' +
+      Object.keys(cs).sort().map(function (k) { var x = cs[k], p = k.split('|'); return '<tr><td>' + esc(p[0]) + '</td><td>' + p[1] + '</td><td>' + pct(x.acc) + cnt(x.acc) + '</td><td>' + (x.agree.length ? pct(x.agree) : '–') + '</td><td>' + (x.conf.length ? mean(x.conf).toFixed(0) : '–') + '</td><td>' + mean(x.panels).toFixed(2) + '</td></tr>'; }).join('') + '</table></div>';
+    // AI behavior
+    var at = {};
+    rows.forEach(function (r) { if (!r.ai_type) return; var x = at[r.ai_type] = at[r.ai_type] || { agree: [], acc: [], contra: [] }; x.agree.push(+r.agree_ai); x.acc.push(+r.correct); if (r.contradicts_ai_inspected !== '') x.contra.push(+r.contradicts_ai_inspected); });
+    h += '<h2>When the AI was right or wrong</h2><p class="muted">Agreement with a wrong AI is over-reliance; checking evidence that contradicts the AI is verification.</p><div class="table-wrap"><table><tr><th>AI behavior</th><th>Answers</th><th>Agreed with AI</th><th>Correct</th><th>Opened evidence against the AI</th></tr>' +
+      Object.keys(at).map(function (k) { var x = at[k]; return '<tr><td>' + esc(k) + '</td><td>' + x.agree.length + '</td><td>' + pct(x.agree) + '</td><td>' + pct(x.acc) + '</td><td>' + pct(x.contra) + '</td></tr>'; }).join('') + '</table></div>';
+    // Per alert
+    var al = {};
+    rows.forEach(function (r) {
+      var x = al[r.alert_id] = al[r.alert_id] || { id: r.alert_id, family: r.family, truth: r.truth, noAI: [], aiRight: [], aiWrong: [], all: [], conf: [], rt: [], panels: [], mis: [] };
+      var c = r.correct === '' ? null : +r.correct;
+      if (c != null) { x.all.push(c); if (!r.ai_type) x.noAI.push(c); else if (r.ai_verdict === r.truth) x.aiRight.push(c); else x.aiWrong.push(c); }
+      if (num(r.final_confidence) != null) x.conf.push(num(r.final_confidence)); if (num(r.final_rt_ms) != null) x.rt.push(num(r.final_rt_ms) / 1000);
+      x.panels.push(+r.panels_opened_unique); x.mis.push(+r.misleading_inspected);
+    });
+    reportRows = Object.keys(al).map(function (k) {
+      var x = al[k], na = x.noAI.length >= MINN ? mean(x.noAI) : null, flag = '';
+      if (na != null && na >= 0.9) flag = 'Too easy without AI';
+      else if (na != null && na <= 0.4) flag = 'Too hard without AI';
+      else if (x.noAI.length < MINN) flag = 'Not enough no-AI answers yet';
+      return { alert_id: x.id, title: titles[x.id] || '', family: x.family, truth: x.truth, answers: x.all.length,
+        acc_no_ai: x.noAI.length ? mean(x.noAI) : null, n_no_ai: x.noAI.length, acc_ai_right: x.aiRight.length ? mean(x.aiRight) : null, n_ai_right: x.aiRight.length,
+        acc_ai_wrong: x.aiWrong.length ? mean(x.aiWrong) : null, n_ai_wrong: x.aiWrong.length, mean_confidence: mean(x.conf), median_seconds: median(x.rt),
+        mean_panels_opened: mean(x.panels), misleading_opened: mean(x.mis), flag: flag };
+    }).sort(function (a, b) { return (a.acc_no_ai == null) - (b.acc_no_ai == null) || (b.acc_no_ai || 0) - (a.acc_no_ai || 0); });
+    var f = function (v, p) { return v == null ? '–' : p ? Math.round(v * 100) + '%' : v.toFixed(1); };
+    h += '<h2>By alert</h2><p class="muted">Sorted from easiest to hardest without the AI. Accuracy without the AI comes from the control group and AI-free sessions. Edit flagged alerts under Study content → Alerts.</p><div class="table-wrap"><table><tr><th>Alert</th><th>Truth</th><th>Answers</th><th>Correct, no AI</th><th>Correct, AI right</th><th>Correct, AI wrong</th><th>Confidence</th><th>Median s</th><th>Panels</th><th>Misleading opened</th><th>Flag</th></tr>' +
+      reportRows.map(function (r) { return '<tr><td class="wrap-cell">' + esc(r.title) + ' <span class="muted mono">' + esc(r.alert_id) + '</span></td><td>' + r.truth + '</td><td>' + r.answers + '</td><td>' + f(r.acc_no_ai, 1) + ' <span class="muted">(' + r.n_no_ai + ')</span></td><td>' + f(r.acc_ai_right, 1) + ' <span class="muted">(' + r.n_ai_right + ')</span></td><td>' + f(r.acc_ai_wrong, 1) + ' <span class="muted">(' + r.n_ai_wrong + ')</span></td><td>' + (r.mean_confidence == null ? '–' : r.mean_confidence.toFixed(0)) + '</td><td>' + f(r.median_seconds) + '</td><td>' + f(r.mean_panels_opened) + '</td><td>' + f(r.misleading_opened, 1) + '</td><td>' + (r.flag && !/Not enough/.test(r.flag) ? '<strong>' + esc(r.flag) + '</strong>' : '<span class="muted">' + esc(r.flag) + '</span>') + '</td></tr>'; }).join('') + '</table></div>';
+    $('rpout').innerHTML = h; $('rpcsv').disabled = false;
+  }
+  $('rpcsv').addEventListener('click', function () {
+    var cols = ['alert_id', 'title', 'family', 'truth', 'answers', 'acc_no_ai', 'n_no_ai', 'acc_ai_right', 'n_ai_right', 'acc_ai_wrong', 'n_ai_wrong', 'mean_confidence', 'median_seconds', 'mean_panels_opened', 'misleading_opened', 'flag'];
+    var text = [cols.join(',')].concat(reportRows.map(function (r) { return cols.map(function (c) { var v = r[c]; return csvCell(typeof v === 'number' ? Math.round(v * 1000) / 1000 : v); }).join(','); })).join('\n') + '\n';
+    saveFile(text, 'verification_alert_report_' + new Date().toISOString().slice(0, 10) + '.csv', 'text/csv');
   });
 
   // ---------- students ----------

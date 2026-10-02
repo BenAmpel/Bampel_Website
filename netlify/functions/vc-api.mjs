@@ -8,9 +8,10 @@ import * as core from '../lib/vc-core.mjs';
 import * as content from '../lib/vc-content.mjs';
 import * as admin from '../lib/vc-admin.mjs';
 import { runSelfTest } from '../lib/vc-selftest.mjs';
+import * as backup from '../lib/vc-backup.mjs';
 
-function blobStore() {
-  const s = getStore({ name: 'verification-study', consistency: 'strong' });
+function blobStore(name = 'verification-study') {
+  const s = getStore({ name, consistency: 'strong' });
   return {
     get: key => s.get(key, { type: 'json' }),
     set: (key, value) => s.setJSON(key, value),
@@ -45,7 +46,7 @@ const NEED = {
   content: 'viewer', 'content-history': 'viewer',
   'content-save': 'editor', 'content-restore': 'editor',
   roster: 'manager', lookup: 'manager', 'credit.csv': 'manager', create: 'manager', 'set-test': 'manager',
-  delete: 'owner', 'delete-test': 'owner', 'self-test': 'owner', team: 'owner', 'team-add': 'owner', 'team-remove': 'owner', activity: 'owner'
+  delete: 'owner', 'delete-test': 'owner', 'self-test': 'owner', 'backup-status': 'owner', 'backup-run': 'owner', 'backup-part': 'owner', team: 'owner', 'team-add': 'owner', 'team-remove': 'owner', activity: 'owner'
 };
 
 export default async (req) => {
@@ -106,6 +107,30 @@ export default async (req) => {
         case 'content': return json({ ...(await content.getContent(store)), _textFields: content.TEXT_FIELDS, _aiTypes: content.AI_TYPES });
         case 'content-history': return json(await content.contentHistory(store));
         case 'team': return json(await admin.listMembers(store));
+        case 'backup-status': return json(await backup.backupStatus(blobStore('verification-backup')));
+        // Pieces of the complete backup download, assembled by the admin page (owner only).
+        case 'backup-part': {
+          const part = url.searchParams.get('part');
+          if (part === 'people') {
+            const recs = await core.exportRecords(store, codes.length ? codes : ['none']);
+            const contacts = (await core.getMany(store, codes.map(c => `contact/${c}`))).map(([k, v]) => v ? { code: k.slice(8), ...v } : null).filter(Boolean);
+            const plans = (await core.getMany(store, (await Promise.all(codes.map(c => store.list(`plans/${c}/`)))).flat())).map(([key, v]) => ({ key, ...v }));
+            return json({ ...recs, contacts, plans });
+          }
+          if (part === 'history') {   // saved content versions, 10 per request
+            const keys = (await store.list('content/history/')).sort();
+            const page = Math.max(0, Number(url.searchParams.get('page')) || 0);
+            const vals = await core.getMany(store, keys.slice(page * 10, page * 10 + 10));
+            return json({ total: keys.length, entries: vals.filter(([, v]) => v != null).map(([key, value]) => ({ key, value })) });
+          }
+          if (part === 'meta') {
+            const keys = (await Promise.all(['content/current', 'cond/', 'cond-test/', 'consent/'].map(p => store.list(p)))).flat().filter(k => !k.startsWith('content/history/'));
+            const vals = await core.getMany(store, keys);
+            return json({ study: 'verification-v1', exportedAt: new Date().toISOString(), entries: vals.filter(([, v]) => v != null).map(([key, value]) => ({ key, value })),
+              team: await admin.listMembers(store), activity: await admin.auditLog(store, 5000) });
+          }
+          return json({ error: 'bad_part' }, 400);
+        }
         case 'activity': return json(await admin.auditLog(store));
       }
       if (req.method !== 'POST') return json({ error: 'post_required' }, 405);
@@ -137,14 +162,23 @@ export default async (req) => {
           await admin.audit(store, who, 'codes.create', `${n} pilot codes${body.test ? ', test' : ''}`);
           return json(r);
         }
+        case 'backup-run': {
+          const r = await backup.runBackup(store, blobStore('verification-backup'), { budgetMs: 7000 });
+          await admin.audit(store, who, 'backup.run', `${r.copied} copied, ${r.pending} pending`);
+          return json(r);
+        }
         case 'delete': {
+          const target = await store.get(`participants/${String(body.id || '')}`);
           const r = await core.deleteParticipant(store, String(body.id || ''));
+          if (r.ok && target) await backup.purgeParticipant(blobStore('verification-backup'), target.code, target.condition);
           if (r.ok) await admin.audit(store, who, 'participant.delete', `${r.code}${r.test ? ' (test)' : ''}, ${r.records} records`);
           return reply(r);
         }
         case 'delete-test': {
           if (body.confirm !== 'DELETE') return json({ error: 'confirm_required' }, 400);
+          const tests = (await core.getMany(store, await store.list('participants/'))).map(([, v]) => v).filter(v => v && v.test);
           const r = await core.deleteTestParticipants(store);
+          for (const t of tests) await backup.purgeParticipant(blobStore('verification-backup'), t.code, t.condition);
           await admin.audit(store, who, 'participant.delete_test', `${r.participants} test participants, ${r.records} records`);
           return json(r);
         }
