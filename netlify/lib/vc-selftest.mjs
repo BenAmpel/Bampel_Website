@@ -44,6 +44,11 @@ export async function runSelfTest(store, { condition, code, keep = false, budget
   try {
     if (st.contentVersion !== (c.version || 0)) { ok(false, 'Study content changed during the self-test; run it again'); st.stage = 'cleanup'; }
     if (st.stage === 'start') {
+      // The storage must honor conditional writes, or simultaneous requests could overwrite each other.
+      const cas = await casProbe(store);
+      ok(cas.etag && cas.stale === false && cas.fresh === true && cas.final === 4 && cas.created === false, `Storage honors conditional writes ${JSON.stringify(cas)}`);
+      const n = await counterProbe(store);
+      ok(n === 20, `20 simultaneous updates to one record all kept (got ${n})`);
       const lg = await core.login(store, { code });
       ok(lg.token && await core.verifyToken(store, lg.token) === code, 'Sign-in token issued and accepted');
       ok((await core.startSession(store, code)).error === 'no_consent', 'Sessions are blocked before consent');
@@ -172,4 +177,29 @@ async function verify(store, c, st, ok) {
   ok(!/rawEvents|self_test/.test(JSON.stringify(full.records)) && (await store.list(`raw/${code}/`)).length === nTrials, 'Raw events stored separately, not in the research records');
   ok(!/"pin"|"hash"|"salt"/.test(JSON.stringify(full)), 'No PIN data in the export');
   ok(full.participants.length === 1 && full.participants[0].completed.length === nS, 'Participant record shows every session complete');
+}
+
+async function casProbe(store) {
+  if (!store.getMeta || !store.setIf) return { etag: false };
+  const k = `selftest/diag-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  try {
+    await store.set(k, { v: 1 });
+    const m1 = await store.getMeta(k);
+    await store.set(k, { v: 2 });
+    const stale = await store.setIf(k, { v: 3 }, { etag: m1.etag });
+    const m2 = await store.getMeta(k);
+    const fresh = await store.setIf(k, { v: 4 }, { etag: m2.etag });
+    const final = (await store.get(k))?.v;
+    const created = await store.setIf(k, { v: 5 }, { onlyIfNew: true });
+    return { etag: !!m1.etag && !!m2.etag && m1.etag !== m2.etag, stale, fresh, final, created };
+  } finally { await store.delete(k); }
+}
+
+async function counterProbe(store) {
+  const k = `selftest/count-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  try {
+    await store.set(k, { n: 0 });
+    await Promise.all(Array.from({ length: 20 }, () => core.update(store, k, d => { d.n++; })));
+    return (await store.get(k)).n;
+  } finally { await store.delete(k); }
 }

@@ -84,7 +84,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 // Read-modify-write with a compare-and-swap on the blob's etag, retried on conflict, so two requests
 // at once (double-click, two tabs) can't overwrite each other. fn(draft) mutates the draft and may
 // return { error } to abort without writing. Stores without getMeta/setIf fall back to plain get/set.
-export async function update(store, key, fn, tries = 8) {
+export async function update(store, key, fn, tries = 30) {
   for (let i = 0; i < tries; i++) {
     const cur = store.getMeta ? await store.getMeta(key) : { data: await store.get(key) };
     if (!cur || cur.data == null) return { error: 'not_found', status: 404 };
@@ -94,7 +94,7 @@ export async function update(store, key, fn, tries = 8) {
     draft.updatedAt = Date.now();
     if (!store.setIf) { await store.set(key, draft); return { value: draft, out }; }
     if (await store.setIf(key, draft, { etag: cur.etag })) return { value: draft, out };
-    await sleep(15 + Math.random() * 60 * (i + 1));
+    await sleep(5 + Math.random() * 25 * Math.min(i + 1, 6));   // jittered backoff
   }
   return { error: 'busy', status: 503 };
 }
