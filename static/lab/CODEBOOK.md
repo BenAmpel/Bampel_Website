@@ -67,7 +67,7 @@ Trials CSV: one row per alert answered. Surveys CSV: one row per survey submitte
 | `session_started_at`, `session_completed_at` | Session start and completion (server time) |
 | `days_since_prev_session` | Days between finishing the previous session and starting this one |
 
-Device details (touch, screen size, user agent) are in the full JSON export, on each participant's session record (`sessions.{n}.device`).
+Device details (touch, screen size, user agent) are in the full JSON export, on the first trial of each session (`records[].data.device`). Session start/completion times and per-trial view counts are on each participant (`participants[].sessions.{n}`).
 
 ## Surveys CSV
 

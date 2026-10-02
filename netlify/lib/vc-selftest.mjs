@@ -47,8 +47,7 @@ export async function runSelfTest(store, { condition, code, keep = false, budget
       // The storage must honor conditional writes, or simultaneous requests could overwrite each other.
       const cas = await casProbe(store);
       ok(cas.etag && cas.stale === false && cas.fresh === true && cas.final === 4 && cas.created === false, `Storage honors conditional writes ${JSON.stringify(cas)}`);
-      const n = await counterProbe(store);
-      ok(n === 20, `20 simultaneous updates to one record all kept (got ${n})`);
+
       const lg = await core.login(store, { code });
       ok(lg.token && await core.verifyToken(store, lg.token) === code, 'Sign-in token issued and accepted');
       ok((await core.startSession(store, code)).error === 'no_consent', 'Sessions are blocked before consent');
@@ -96,13 +95,15 @@ export async function runSelfTest(store, { condition, code, keep = false, budget
         };
         st.firstDone = st.firstDone || {};
         if (!st.firstDone[s] && pending.length > 1) {
-          // Two answers at the same moment (double click, two tabs) must both be kept, and a re-sent
+          // Several answers at the same moment (double clicks, two tabs) must all be kept, and a re-sent
           // answer must be acknowledged without overwriting the first.
           st.firstDone[s] = true;
-          const [a, b] = pending, da = make(a), db = make(b);
-          const [r1, r2] = await Promise.all([core.saveTrial(store, code, s, a.index, da), core.saveTrial(store, code, s, b.index, db)]);
-          ok(r1.ok && r2.ok, `Session ${s}: two simultaneous answers both saved`);
-          ok((await core.saveTrial(store, code, s, a.index, { ...da, final: { judgment: 'benign' === da.final.judgment ? 'malicious' : 'benign' } })).repeat, `Session ${s}: a re-sent answer is acknowledged, not overwritten`);
+          const batch = pending.slice(0, 4), datas = batch.map(make);
+          const res = await Promise.all(batch.map((t, j) => core.saveTrial(store, code, s, t.index, datas[j])));
+          ok(res.every(x => x.ok), `Session ${s}: ${batch.length} simultaneous answers all accepted`);
+          const prog = await core.progressOf(store, await core.loadParticipant(store, code));
+          ok(batch.every(t => prog.sessions[s].trialsDone.includes(t.index)), `Session ${s}: all ${batch.length} simultaneous answers recorded`);
+          ok((await core.saveTrial(store, code, s, batch[0].index, { ...datas[0], final: { judgment: 'benign' === datas[0].final.judgment ? 'malicious' : 'benign' } })).repeat, `Session ${s}: a re-sent answer is acknowledged, not overwritten`);
         } else {
           const t = pending[0];
           ok((await core.saveTrial(store, code, s, t.index, make(t))).ok, `Session ${s}, alert ${t.index + 1}: saved`);
@@ -192,14 +193,5 @@ async function casProbe(store) {
     const final = (await store.get(k))?.v;
     const created = await store.setIf(k, { v: 5 }, { onlyIfNew: true });
     return { etag: !!m1.etag && !!m2.etag && m1.etag !== m2.etag, stale, fresh, final, created };
-  } finally { await store.delete(k); }
-}
-
-async function counterProbe(store) {
-  const k = `selftest/count-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-  try {
-    await store.set(k, { n: 0 });
-    await Promise.all(Array.from({ length: 20 }, () => core.update(store, k, d => { d.n++; })));
-    return (await store.get(k)).n;
   } finally { await store.delete(k); }
 }

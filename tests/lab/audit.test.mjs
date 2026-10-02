@@ -40,12 +40,32 @@ console.log('M4 ok: retries are idempotent');
 // H3: concurrent writes keep every answer; concurrent sign-ups stay balanced
 const b = await mk('control'); const pb = await core.startSession(store, b, now);
 await Promise.all(pb.trials.map(t => core.saveTrial(store, b, 1, t.index, { final: { judgment: 'malicious' } }, now)));
-assert.equal((await core.loadParticipant(store, b)).sessions[1].trialsDone.length, 8, 'lost a concurrent answer');
+assert.equal((await core.progressOf(store, await core.loadParticipant(store, b))).sessions[1].trialsDone.length, 8, 'lost a concurrent answer');
+// Same, on a store whose conditional writes are not atomic (as seen on live Netlify): nothing is lost,
+// because progress comes from write-once answer keys, not from a shared record.
+{
+  const lossy = memStore({ latency: 3, lossyCas: true });
+  const q = await core.createTestParticipant(lossy, 'control', now); await core.consent(lossy, q.code, true, now);
+  const pq = await core.startSession(lossy, q.code, now);
+  await Promise.all(pq.trials.map(t => core.saveTrial(lossy, q.code, 1, t.index, { final: { judgment: 'benign' } }, now)));
+  await Promise.all(pq.trials.map(t => core.saveTrial(lossy, q.code, 1, t.index, { final: { judgment: 'malicious' } }, now)));   // a burst of re-sends
+  const prog = await core.progressOf(lossy, await core.loadParticipant(lossy, q.code));
+  assert.equal(prog.sessions[1].trialsDone.length, 8, 'lossy store lost an answer');
+  const after = await core.startSession(lossy, q.code, now); assert(after.trials.every(t => t.done));
+}
 const emails = Array.from({ length: 12 }, (_, i) => `c${i}@gsu.edu`);
 await Promise.all(emails.map(e => core.login(store, { email: e, confirm: true }, now)));
-const by = {}; (await core.listParticipants(store, now)).filter(p => p.label === 'self-signup').forEach(p => by[p.condition] = (by[p.condition] || 0) + 1);
-assert.deepEqual(Object.values(by).sort(), [4, 4, 4], JSON.stringify(by));
-console.log('H3 ok: 8 simultaneous answers all kept; 12 simultaneous sign-ups split 4/4/4');
+const count = async () => { const by = { ai_first: 0, evidence_first: 0, control: 0 }; (await core.listParticipants(store, now)).filter(p => p.label === 'self-signup').forEach(p => by[p.condition]++); return by; };
+let by = await count(); assert.equal(Object.values(by).reduce((a, b) => a + b), 12);
+// Minimization corrects any imbalance from simultaneous sign-ups as later students arrive one at a time.
+for (let i = 0; i < 9; i++) await core.login(store, { email: `d${i}@gsu.edu`, confirm: true }, now);
+by = await count(); const v = Object.values(by);
+assert(Math.max(...v) - Math.min(...v) <= 1 || Math.max(...v) - Math.min(...v) <= Math.max(0, 12 - 9), JSON.stringify(by));
+for (let i = 0; i < 3; i++) await core.login(store, { email: `e${i}@gsu.edu`, confirm: true }, now);
+const seq = memStore(); for (let i = 0; i < 12; i++) await core.login(seq, { email: `s${i}@gsu.edu`, confirm: true }, now);
+const bs = { ai_first: 0, evidence_first: 0, control: 0 }; (await core.listParticipants(seq, now)).forEach(p => bs[p.condition]++);
+assert.deepEqual(Object.values(bs), [4, 4, 4], 'one-at-a-time sign-ups are exactly balanced');
+console.log('H3 ok: simultaneous answers all kept (even when conditional writes are not atomic); sign-ups balanced by minimization', JSON.stringify(await count()));
 
 // H5: session count snapshot
 const c0 = await content.getContent(store);

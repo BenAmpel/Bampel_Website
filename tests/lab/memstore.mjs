@@ -1,5 +1,6 @@
 // In-memory store with the same conditional-write semantics as Netlify Blobs (etag CAS, create-only).
-export function memStore({ latency = 0 } = {}) {
+// lossyCas: conditional writes always "succeed" and overwrite (the worst case seen on live Netlify under concurrency).
+export function memStore({ latency = 0, lossyCas = false } = {}) {
   const m = new Map(); let n = 0;
   const lat = () => latency ? new Promise(r => setTimeout(r, latency)) : Promise.resolve();
   const s = {
@@ -10,6 +11,7 @@ export function memStore({ latency = 0 } = {}) {
     list: async p => { await lat(); return [...m.keys()].filter(k => k.startsWith(p)); },
     getMeta: async k => { await lat(); return m.has(k) ? { data: structuredClone(m.get(k).v), etag: m.get(k).e } : null; },
     setIf: async (k, v, c) => { await lat();
+      if (lossyCas) { m.set(k, { v: structuredClone(v), e: String(++n) }); return true; }
       if (c.onlyIfNew) { if (m.has(k)) return false; }
       else if (!m.has(k) || m.get(k).e !== c.etag) return false;
       m.set(k, { v: structuredClone(v), e: String(++n) }); return true; }

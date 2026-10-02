@@ -70,7 +70,7 @@ Each event has `t` (ms since start), `type`, and `item`. Types: `move`, `down`, 
 | `netlify/lib/vc-selftest.mjs` | resumable live self-test (owner button on the admin page) |
 | `netlify/lib/vc_build_alerts.py` → `vc-alerts.mjs` | built-in default alerts |
 | `static/lab/studies/verification/` | `index.html` + `app.js` (participant app), `admin.html` (admin app) |
-| `tests/lab/` | `npm run test:lab`: design, audit regressions, content/admin, sign-in, self-test (in-memory store with the same conditional-write rules as Blobs) |
+| `tests/lab/` | `npm run test:lab`: design, audit regressions, content/admin, sign-in, self-test (in-memory store; the audit test also runs on a store whose conditional writes are not atomic, like live Blobs) |
 
 ### Sign-in and privacy model
 
@@ -83,20 +83,21 @@ Each event has `t` (ms since start), `type`, and `item`. Types: `move`, `down`, 
 
 ### Data integrity
 
-- Each participant record holds only small per-session status. Plans (`plans/{id}/s{n}`) are written once when a session starts, so later content edits never change a session in progress. Each participant keeps the number of sessions in place when they started session 1 (cutting sessions shortens it; adding sessions does not lengthen it).
-- Every update to a participant record is a compare-and-swap on the blob's etag, retried on conflict, so double clicks and two open tabs cannot lose answers. Condition assignment uses the same mechanism, so simultaneous sign-ups stay balanced.
-- Repeated submissions (the app retries once on network errors) are acknowledged without overwriting the first answer.
+- **Progress comes from write-once records, not a shared counter.** Each answer is its own key, written only if it doesn't exist yet; whether an alert, survey, or session is done is read back from which keys exist. This matters because the live self-test showed that Netlify Blobs does not keep conditional (etag) writes atomic when requests arrive at the same moment, so a shared progress record could lose updates. With write-once keys, double clicks, two open tabs, and retries can't lose or overwrite an answer (the first answer wins; repeats are acknowledged).
+- Plans (`plans/{id}/s{n}`) are written once when a session starts, so later content edits never change a session in progress. Each participant keeps the number of sessions in place when they started session 1 (cutting sessions shortens it; adding sessions does not lengthen it).
+- Conditions are assigned by minimization: each new participant joins the condition with the fewest participants so far (ties at random), counted from write-once marker keys. Real and test participants are balanced separately. Simultaneous sign-ups can briefly tie; later sign-ups even it out.
+- The participant record itself only holds rarely-changed fields (condition, flags, consent time, last seen).
 - The server validates what the browser sends: unknown survey variables and out-of-range values are dropped, trial fields are type-checked and capped, request bodies over 4 MB are refused.
 - Each trial stores a copy of its alert and answer key as scored, plus the content version.
 - CSV cells that a spreadsheet would run as a formula are prefixed with `'`.
 
-Key schema: `participants/{id}`, `plans/{id}/s{n}`, `data/{id}/s{n}/t{i}` (trial, no raw events), `raw/{id}/s{n}/t{i}` (raw TraceLab events), `data/{id}/s{n}/practice|survey-pre|survey-post`, `contact/{id}`, `meta/pepper`, `meta/assignment`, `content/current`, `content/history/v{n}`, `admins/{sha256(key)}`, `audit/{time}`, `selftest/{id}`.
+Key schema: `participants/{id}`, `consent/{id}`, `plans/{id}/s{n}`, `started/{id}/s{n}-{time}`, `done/{id}/s{n}-{time}`, `views/{id}/s{n}/t{i}/{time}`, `data/{id}/s{n}/t{i}` (trial, no raw events), `raw/{id}/s{n}/t{i}` (raw TraceLab events), `data/{id}/s{n}/practice|survey-pre|survey-post`, `contact/{id}`, `cond/{condition}/{id}` and `cond-test/…` (assignment counts), `meta/pepper`, `content/current`, `content/history/v{n}`, `admins/{sha256(key)}`, `audit/{time}`, `selftest/{id}`.
 
 ### Admin page (`/lab/studies/verification/admin.html`)
 
 Set `VC_ADMIN_KEY` (16+ characters) in the Netlify environment variables; that is the owner key. Tabs:
 
-- *Participants*: progress; trials CSV, surveys CSV, full JSON, and raw-trace JSONL downloads (assembled in the browser in batches of participants, so they work at any study size; optionally real participants only); mark test/real; delete one or all test participants; the live self-test.
+- *Participants*: progress; the live self-test (also checks the storage itself); trials CSV, surveys CSV, full JSON, and raw-trace JSONL downloads (assembled in the browser in batches of participants, so they work at any study size; optionally real participants only); mark test/real; delete one or all test participants; the live self-test.
 - *Students*: pre-enroll emails (optional while self sign-up is on), check completion, extra-credit list, pilot codes.
 - *Study content*: Sessions & AI (session count, alerts per session, practice alert, counterbalancing, AI behavior mix and confidence ranges), Alerts (add/duplicate/delete, 1–6 evidence panels with CSV variable names), start- and end-of-session surveys, Sign-up & consent, Screen text. Every save is a numbered version that can be restored.
 - *Team* (owner): viewer / editor / manager keys; only hashes are stored. *Activity* (owner): audit log.
