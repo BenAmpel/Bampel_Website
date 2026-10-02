@@ -80,7 +80,7 @@
 
       <section data-tab="students" hidden>
         <h2>Add students</h2>
-        <p class="muted">Paste student emails, one per line or separated by commas. Only these emails can sign in. Each student creates a 4-digit PIN at first sign-in. Emails are not stored: the server keeps a one-way keyed hash, so exports stay de-identified. Conditions are assigned in balanced blocks of three across all batches. Emails already enrolled are skipped.</p>
+        <p class="muted">Optional while self sign-up is on (Study content → Sign-up &amp; consent): add emails here to pre-enroll a class with its own label or gap days, to mark pilots as test, or to let in addresses outside the sign-up domains. One per line or separated by commas. Each student creates a 4-digit PIN at first sign-in. Emails are not stored: the server keeps a one-way keyed hash, so exports stay de-identified. Conditions are assigned in balanced blocks of three across all batches. Emails already enrolled are skipped.</p>
         <form id="rosterform">
           <textarea id="emails" class="mono" style="width:100%;min-height:110px" placeholder="jdoe1@student.gsu.edu&#10;asmith2@student.gsu.edu"></textarea>
           <div class="row" style="margin-top:8px">
@@ -247,7 +247,7 @@
         (Object.keys(by).map(function (k) { return k + ' ' + by[k]; }).join(', ') || 'none yet') + '. Finished all sessions: ' + real.filter(function (p) { return p.completedSessions >= p.totalSessions; }).length + '.';
       var head = ['Study ID', 'Sign-in', 'PIN set', 'Label', 'Condition', 'Test', 'Consent', 'Sessions done', 'In progress', 'Next opens', 'Gap', 'Last seen'].concat(can('owner') ? [''] : []);
       $('tbl').innerHTML = '<tr>' + head.map(function (h) { return '<th>' + h + '</th>'; }).join('') + '</tr>' + rows.map(function (p) {
-        return '<tr><td><code>' + esc(p.code) + '</code></td><td>' + esc(p.type) + '</td><td>' + (p.type === 'email' ? (p.pinSet ? 'yes' : 'not yet') : '') + '</td><td>' + esc(p.label) + '</td><td>' + esc(p.condition) + '</td><td>' + (p.test ? 'yes' : '') + '</td><td>' +
+        return '<tr><td><code>' + esc(p.code) + '</code></td><td>' + esc(p.type) + '</td><td>' + (p.type.indexOf('email') === 0 ? (p.pinSet ? 'yes' : 'not yet') : '') + '</td><td>' + esc(p.label) + '</td><td>' + esc(p.condition) + '</td><td>' + (p.test ? 'yes ' : '') + (can('manager') ? '<button type="button" class="secondary small" data-settest="' + esc(p.code) + '|' + (p.test ? '0' : '1') + '">' + (p.test ? 'Mark real' : 'Mark test') + '</button>' : '') + '</td><td>' +
           (p.declined ? 'declined' : p.consented ? 'yes' : '') + '</td><td>' + p.completedSessions + ' / ' + p.totalSessions + '</td><td>' + (p.inProgress ? p.inProgress + ' / ' + p.inProgressOf : '') + '</td><td>' +
           (p.nextSession ? 'S' + p.nextSession + ' ' + esc(fmt(p.availableAt)) : 'done') + '</td><td>' + p.gapDays + 'd</td><td>' + esc(fmt(p.lastSeenAt)) + '</td>' +
           (can('owner') ? '<td><button type="button" class="danger secondary small" data-del="' + esc(p.code) + '">Delete</button></td>' : '') + '</tr>';
@@ -255,6 +255,11 @@
     }).catch(function (e) { err(e.message); });
   }
   $('refresh').addEventListener('click', load);
+  $('tbl').addEventListener('click', function (e) {
+    var v = e.target.getAttribute && e.target.getAttribute('data-settest'); if (!v) return;
+    var parts = v.split('|');
+    postJSON('set-test', { id: parts[0], test: parts[1] === '1' }).then(load).catch(function (e) { err(e.message); });
+  });
   $('tbl').addEventListener('click', function (e) {
     var id = e.target.getAttribute && e.target.getAttribute('data-del'); if (!id) return;
     var p = people.filter(function (x) { return x.code === id; })[0] || {};
@@ -316,7 +321,7 @@
   var saved = null, draft = null, dirty = false, sub = 'sessions', alertSel = null, META = { text: [], ai: {} };
   var SHOW = [['always', 'Always'], ['ai', 'Only in sessions with the AI'], ['no_ai', 'Only in sessions without the AI'], ['after_ai', 'Only after the AI is removed (AI groups)']];
   var TYPES = [['scale', 'Rating scale'], ['choice', 'Multiple choice'], ['select', 'Dropdown'], ['text', 'Text answer']];
-  var SUBS = [['sessions', 'Sessions & AI'], ['alerts', 'Alerts'], ['pre', 'Start-of-session survey'], ['post', 'End-of-session survey'], ['consent', 'Consent'], ['text', 'Screen text']];
+  var SUBS = [['sessions', 'Sessions & AI'], ['alerts', 'Alerts'], ['pre', 'Start-of-session survey'], ['post', 'End-of-session survey'], ['consent', 'Sign-up & consent'], ['text', 'Screen text']];
   var PANEL_DEFAULTS = [['network', 'Network activity'], ['user', 'User behavior'], ['system', 'System events'], ['context', 'Context & threat intel']];
   function clone(x) { return JSON.parse(JSON.stringify(x)); }
   function setDirty(v) {
@@ -381,7 +386,13 @@
         items.map(function (it, i) { return qcard(sub, it, i, items.length); }).join('') +
         '<button type="button" class="secondary" data-add="' + sub + '">Add a question</button>';
     } else if (sub === 'consent') {
-      h = field('Minutes per session (write {minutes} in any text to insert it)', num('minutesPerSession', draft.minutesPerSession, 1, 180)) +
+      var en = draft.enrollment;
+      h = '<h3 style="margin:0 0 8px">Sign-up</h3>' +
+        checkbox('data-path="enrollment.open" data-bool="1"', en.open, 'Anyone with an email address at these domains can sign up (no list needed)') +
+        '<p class="muted">They create their account by setting a PIN at first sign-in. There is no verification email, so the first person to sign up with an address owns it; if a student reports that someone else used their email, reset their PIN on the Students tab. Emails added on the Students tab can always sign in, even with sign-up off.</p>' +
+        '<div class="grid3">' + field('Email domains (one per line, no @)', '<textarea data-domains="1" rows="3" class="mono">' + esc(en.domains.join('\n')) + '</textarea>') +
+        field('Gap days for self sign-ups', num('enrollment.gapDays', en.gapDays, 0, 60)) + field('Label for self sign-ups', inp('enrollment.label', en.label || '')) + '</div>' +
+        '<h3 style="margin:20px 0 8px">Consent</h3>' + field('Minutes per session (write {minutes} in any text to insert it)', num('minutesPerSession', draft.minutesPerSession, 1, 180)) +
         field('Consent text (leave a blank line between paragraphs; email addresses become links)', '<textarea id="consenttext" rows="14">' + esc(draft.consent.paragraphs.join('\n\n')) + '</textarea>') +
         field('Agreement checkbox label', inp('consent.agreeLabel', draft.consent.agreeLabel)) +
         checkbox('data-path="consent.approved" data-bool="1"', draft.consent.approved, 'This is the IRB-approved consent text (removes the "draft" banner participants see)');
@@ -478,6 +489,7 @@
     else if ((v = t.getAttribute('data-opts'))) setPath(v + '.options', t.value.split('\n').map(function (l) { return l.trim(); }).filter(Boolean).map(function (l) {
       var m = l.split(/\s+\|\s+/); return m.length > 1 ? { value: m[0].trim(), label: m.slice(1).join(' | ').trim() } : { value: l, label: l };
     }));
+    else if (t.hasAttribute('data-domains')) draft.enrollment.domains = t.value.split(/[\s,;]+/).map(function (x) { return x.trim().toLowerCase().replace(/^@/, ''); }).filter(Boolean);
     else if ((v = t.getAttribute('data-sessions'))) setPath(v + '.sessions', t.value.split(/[\s,;]+/).filter(Boolean).map(Number).filter(function (x) { return Number.isInteger(x); }));
     else if ((v = t.getAttribute('data-pkey'))) {
       var pk = v.split('|'), a = getPath(pk[0]), panel = a.panels[Number(pk[1])], old = panel.key;

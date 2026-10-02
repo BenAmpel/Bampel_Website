@@ -2,7 +2,7 @@
 // Storage is injected (a Netlify Blobs store in production, a Map in tests),
 // so this module has no platform dependencies.
 import { createHmac, randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
-import { getContent, itemsFor } from './vc-content.mjs';
+import { getContent, itemsFor, domainAllowed } from './vc-content.mjs';
 
 // Sessions, alerts, and the AI schedule are study content (vc-content.mjs), editable on the admin page.
 export const STUDY = {
@@ -176,11 +176,21 @@ export async function login(store, creds = {}, now = Date.now()) {
   let p;
   if (creds.email != null) {
     const email = normalizeEmail(creds.email);
-    const pepper = await getPepper(store);
-    if (!pepper || !EMAIL_RE.test(email)) return { error: 'not_enrolled', status: 401 };
-    p = await store.get(pKey(pidFor(pepper, email)));
-    if (!p) return { error: 'not_enrolled', status: 401 };
+    const en = (await getContent(store)).enrollment;
+    const canSignUp = en.open && EMAIL_RE.test(email) && domainAllowed(email, en.domains);
+    const pepper = await getPepper(store, canSignUp);
+    const notEnrolled = { error: 'not_enrolled', status: 401, domains: en.open ? en.domains : [] };
+    if (!pepper || !EMAIL_RE.test(email)) return notEnrolled;
+    const pid = pidFor(pepper, email);
+    p = await store.get(pKey(pid));
     const pin = String(creds.pin ?? '');
+    if (!p) {
+      // Self sign-up: the account is created only once the student sets a PIN.
+      if (!canSignUp) return notEnrolled;
+      if (!creds.setPin) return { error: 'set_pin', status: 401 };
+      if (!PIN_RE.test(pin)) return { error: 'bad_pin_format', status: 400 };
+      [p] = await enroll(store, [pid], { gapDays: en.gapDays, label: en.label || null, selfSignup: true }, now, Math.random);
+    }
     if (!p.pin) {
       if (!creds.setPin) return { error: 'set_pin', status: 401 };
       if (!PIN_RE.test(pin)) return { error: 'bad_pin_format', status: 400 };
@@ -294,7 +304,7 @@ async function enroll(store, ids, opts, now, rand) {
   const made = [];
   for (const id of ids) {
     if (!block.length) block = shuffle(STUDY.conditions, rand);
-    const p = { code: id, condition: block.pop(), createdAt: now, gapDays: opts.gapDays ?? STUDY.defaultGapDays, label: opts.label || null, test: !!opts.test };
+    const p = { code: id, condition: block.pop(), createdAt: now, gapDays: opts.gapDays ?? STUDY.defaultGapDays, label: opts.label || null, test: !!opts.test, selfSignup: !!opts.selfSignup };
     await store.set(pKey(id), p);
     made.push(p);
   }
@@ -362,7 +372,7 @@ export async function listParticipants(store, now = Date.now()) {
     const p = await store.get(k);
     if (!p) continue;
     const st = status(p, now, total);
-    out.push({ code: p.code, type: PID_RE.test(p.code) ? 'email' : 'code', pinSet: !!p.pin, condition: p.condition, label: p.label, test: !!p.test, gapDays: p.gapDays, consented: !!p.consentedAt, declined: !!p.declinedAt,
+    out.push({ code: p.code, type: PID_RE.test(p.code) ? (p.selfSignup ? 'email (self)' : 'email') : 'code', pinSet: !!p.pin, condition: p.condition, label: p.label, test: !!p.test, gapDays: p.gapDays, consented: !!p.consentedAt, declined: !!p.declinedAt,
       completedSessions: st.completed, nextSession: st.nextSession || null, availableAt: st.availableAt || null, lastSeenAt: p.lastSeenAt || null,
       totalSessions: total, inProgress: p.sessions && st.nextSession && p.sessions[st.nextSession] ? p.sessions[st.nextSession].trialsDone.length : 0,
       inProgressOf: p.sessions && st.nextSession && p.sessions[st.nextSession]?.plan ? p.sessions[st.nextSession].plan.trials.length : 0 });
@@ -452,4 +462,12 @@ export async function deleteTestParticipants(store) {
     if (p && p.test) { const r = await deleteParticipant(store, p.code); participants++; records += r.records; }
   }
   return { ok: true, participants, records };
+}
+
+// Marks a participant as test (excluded from counts, removable in one step) or real.
+export async function setTest(store, id, test) {
+  const p = await store.get(pKey(id));
+  if (!p) return { error: 'not_found', status: 404 };
+  p.test = !!test; await save(store, p);
+  return { ok: true, code: p.code, test: p.test };
 }

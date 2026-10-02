@@ -125,6 +125,7 @@
 
   function loginError(r) {
     if (r.error === 'wrong_pin') return 'That PIN is not right. ' + r.attemptsLeft + (r.attemptsLeft === 1 ? ' try' : ' tries') + ' left before a 15-minute lock. Forgot it? Contact the research team to reset it.';
+    if (r.error === 'not_enrolled' && r.domains && r.domains.length) return 'That email can\'t be used for this study. Use an email address ending in @' + r.domains.join(' or @') + '.';
     if (r.error === 'locked') return 'Too many wrong PINs. Try again after ' + new Date(r.until).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }) + ', or contact the research team to reset your PIN.';
     return ERR[r.error] || ERR.server_error;
   }

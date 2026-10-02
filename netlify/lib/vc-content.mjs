@@ -28,7 +28,7 @@ function defaultSessionAlerts(session) {
 // Leave a blank line between paragraphs.
 export const TEXT_FIELDS = [
   ['Sign-in', 'login_title', 'Page title', 'Security alert study'],
-  ['Sign-in', 'login_intro', 'Sign-in instructions', 'Sign in with the email address your invitation was sent to. Use the same email and PIN each week.'],
+  ['Sign-in', 'login_intro', 'Sign-in instructions', 'Sign in with your GSU email address. Use the same email and PIN each week.'],
   ['Sign-in', 'login_first_time', 'First-time hint', 'First time here? Leave the PIN blank and you will create one.'],
   ['Consent', 'consent_title', 'Consent page title', 'Consent to participate'],
   ['Consent', 'decline_body', 'Shown after "I do not agree"', 'You have chosen not to take part. You can close this page.'],
@@ -100,6 +100,9 @@ export const DEFAULT_CONTENT = {
     ],
     agreeLabel: 'I am 18 or older and I agree to participate.'
   },
+  // Who can sign up. With "open", anyone whose email ends in one of the domains can create an account
+  // (email + PIN) on first sign-in; emails added on the Students tab can always sign in.
+  enrollment: { open: true, domains: ['gsu.edu', 'student.gsu.edu'], gapDays: 6, label: 'self-signup' },
   design: {
     practice: true,                // one practice alert at the start of session 1
     aiConfidence: { highMin: 85, highMax: 95, lowMin: 52, lowMax: 59 },
@@ -149,6 +152,7 @@ export function itemsFor(items, kind, ctx) {
 
 // Fills in anything an older saved version lacks.
 export function normalize(c) {
+  c.enrollment = { ...DEFAULT_CONTENT.enrollment, ...(c.enrollment || {}) };
   c.design = c.design || structuredClone(DEFAULT_CONTENT.design);
   c.design.aiConfidence = { ...DEFAULT_CONTENT.design.aiConfidence, ...(c.design.aiConfidence || {}) };
   if (c.design.practice == null) c.design.practice = true;
@@ -169,7 +173,8 @@ export function clearContentCache() { cache = null; }
 
 // What participants' browsers receive (no alerts, no answer keys).
 export function publicContent(c) {
-  return { version: c.version, minutesPerSession: c.minutesPerSession, consent: c.consent, survey: c.survey, text: c.text, sessions: c.design.sessions.length };
+  return { version: c.version, minutesPerSession: c.minutesPerSession, consent: c.consent, survey: c.survey, text: c.text, sessions: c.design.sessions.length,
+    signup: c.enrollment.open ? c.enrollment.domains : [] };
 }
 
 const str = (v, max = 4000) => typeof v === 'string' && v.trim().length > 0 && v.length <= max;
@@ -257,6 +262,16 @@ export function validateContent(c) {
     });
   }
 
+  // Sign-up
+  const en = c.enrollment;
+  if (!en || typeof en.open !== 'boolean') e.push('Choose whether students can sign up themselves.');
+  else {
+    if (!Array.isArray(en.domains) || !en.domains.every(x => /^[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/.test(x))) e.push('Sign-up domains must look like gsu.edu (one per line, no @).');
+    else if (en.open && !en.domains.length) e.push('Add at least one email domain, or turn off self sign-up.');
+    if (!intIn(en.gapDays, 0, 60)) e.push('Gap days for self sign-ups must be a whole number from 0 to 60.');
+    if (en.label != null && typeof en.label === 'string' && en.label.length > 40) e.push('The self sign-up label must be 40 characters or fewer.');
+  }
+
   // Screen text
   if (!c.text || typeof c.text !== 'object') e.push('Screen text is missing.');
   else for (const f of TEXT_FIELDS) if (!str(c.text[f.key], 3000)) e.push(`Screen text "${f.group}: ${f.label}" is empty.`);
@@ -269,7 +284,7 @@ export async function saveContent(store, next, who, baseVersion, now = Date.now(
   if (baseVersion != null && Number(baseVersion) !== (cur.version || 0)) return { error: 'conflict', status: 409, version: cur.version || 0 };
   const text = Object.fromEntries(TEXT_FIELDS.map(f => [f.key, next.text ? next.text[f.key] : undefined]));
   const clean = {
-    minutesPerSession: Number(next.minutesPerSession), consent: next.consent, design: next.design, survey: next.survey, text, alerts: next.alerts, practice: next.practice
+    minutesPerSession: Number(next.minutesPerSession), consent: next.consent, enrollment: next.enrollment, design: next.design, survey: next.survey, text, alerts: next.alerts, practice: next.practice
   };
   normalize(clean);
   const errors = validateContent(clean);
@@ -298,4 +313,9 @@ export async function restoreContent(store, version, who, now = Date.now()) {
   const r = await saveContent(store, normalize(old), who, cur.version || 0, now);
   if (r.ok) { const k = `content/history/v${String(r.version).padStart(5, '0')}`; const c = await store.get(k); c.restoredFrom = version; await store.set(k, c); await store.set('content/current', c); clearContentCache(); }
   return r;
+}
+
+export function domainAllowed(email, domains) {
+  const at = email.lastIndexOf('@');
+  return at > 0 && (domains || []).includes(email.slice(at + 1));
 }

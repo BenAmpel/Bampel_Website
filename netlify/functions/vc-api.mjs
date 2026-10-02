@@ -39,7 +39,7 @@ const NEED = {
   me: 'viewer', participants: 'viewer', 'export.csv': 'viewer', 'export-surveys.csv': 'viewer', 'export.json': 'viewer',
   content: 'viewer', 'content-history': 'viewer',
   'content-save': 'editor', 'content-restore': 'editor',
-  roster: 'manager', lookup: 'manager', 'reset-pin': 'manager', create: 'manager',
+  roster: 'manager', lookup: 'manager', 'reset-pin': 'manager', create: 'manager', 'set-test': 'manager',
   delete: 'owner', 'delete-test': 'owner', team: 'owner', 'team-add': 'owner', 'team-remove': 'owner', activity: 'owner'
 };
 
@@ -108,6 +108,11 @@ export default async (req) => {
           return json(r);
         }
         case 'lookup': return json(await core.lookupEmails(store, list(body.emails)));
+        case 'set-test': {
+          const r = await core.setTest(store, String(body.id || ''), body.test === true);
+          if (r.ok) await admin.audit(store, who, 'participant.set_test', `${r.code} marked ${r.test ? 'test' : 'real'}`);
+          return reply(r);
+        }
         case 'reset-pin': {
           const r = await core.resetPin(store, body.email);
           if (r.ok) await admin.audit(store, who, 'students.reset_pin', 'one student');
