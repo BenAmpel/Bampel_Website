@@ -1,10 +1,20 @@
 // Verification study (Clark): server-side study logic.
-// Storage is injected (a Netlify Blobs store in production, a Map in tests),
-// so this module has no platform dependencies.
+// Storage is injected (a Netlify Blobs store in production, a Map in tests), so this module has no
+// platform dependencies. Store interface: get, set, delete, list(prefix), and optionally
+// getMeta(key) -> { data, etag } and setIf(key, value, { etag } | { onlyIfNew: true }) -> boolean
+// for conditional writes (see update()).
+//
+// Key schema
+//   participants/{id}          small record: condition, flags, timestamps, per-session status
+//   plans/{id}/s{n}            the session plan (alert copies, order, AI advice), fixed when the session starts
+//   data/{id}/s{n}/t{i}        one trial (answers, evidence opens, trace features), no raw events
+//   raw/{id}/s{n}/t{i}         raw TraceLab events for that trial
+//   data/{id}/s{n}/practice | survey-pre | survey-post
+//   contact/{id}               the student's email (extra credit only; never in research exports)
+//   meta/pepper, meta/assignment, content/*, admins/*, audit/*, selftest/*
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { getContent, itemsFor, domainAllowed } from './vc-content.mjs';
 
-// Sessions, alerts, and the AI schedule are study content (vc-content.mjs), editable on the admin page.
 export const STUDY = {
   id: 'verification-v1',
   defaultGapDays: 6,
@@ -25,12 +35,12 @@ export function normalizeCode(c) {
 }
 
 // ---------- Identity ----------
-// Students sign in with their email. A participant's study ID is a keyed hash of the email (key, the
-// "pepper", kept in the store). The email is saved only under contact/{id} for extra-credit matching,
-// never in the research records, so trial/survey exports stay de-identified. Pilot participants can
-// still use generated access codes.
+// Students sign in with their email (no password; the first sign-in asks them to confirm it). A
+// participant's study ID is a keyed hash of the email; the key ("pepper") lives in the same store, so
+// anyone with Netlify access to the store can re-identify participants. The email itself is saved only
+// under contact/{id} for extra-credit matching, never in research records or exports.
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_RE = /^[a-z0-9._%+-]+@[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/;
 const PID_RE = /^P-[0-9a-f]{16}$/;
 
 export function normalizeEmail(e) { return String(e || '').trim().toLowerCase(); }
@@ -39,7 +49,11 @@ export function pidFor(pepper, email) { return 'P-' + hmac(pepper, 'email|' + no
 
 async function getPepper(store, create = false) {
   let m = await store.get('meta/pepper');
-  if (!m && create) { m = { value: randomBytes(32).toString('hex'), createdAt: Date.now() }; await store.set('meta/pepper', m); }
+  if (!m && create) {
+    const fresh = { value: randomBytes(32).toString('hex'), createdAt: Date.now() };
+    if (store.setIf) { await store.setIf('meta/pepper', fresh, { onlyIfNew: true }); m = await store.get('meta/pepper'); }
+    else { await store.set('meta/pepper', fresh); m = fresh; }
+  }
   return m ? m.value : null;
 }
 
@@ -59,6 +73,50 @@ export async function verifyToken(store, token, now = Date.now()) {
   const got = Buffer.from(sig);
   return want.length === got.length && timingSafeEqual(want, got) ? pid : null;
 }
+
+// ---------- Storage helpers ----------
+
+const pKey = code => `participants/${code}`;
+const contactKey = code => `contact/${code}`;
+const planKey = (code, n) => `plans/${code}/s${n}`;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+// Read-modify-write with a compare-and-swap on the blob's etag, retried on conflict, so two requests
+// at once (double-click, two tabs) can't overwrite each other. fn(draft) mutates the draft and may
+// return { error } to abort without writing. Stores without getMeta/setIf fall back to plain get/set.
+export async function update(store, key, fn, tries = 8) {
+  for (let i = 0; i < tries; i++) {
+    const cur = store.getMeta ? await store.getMeta(key) : { data: await store.get(key) };
+    if (!cur || cur.data == null) return { error: 'not_found', status: 404 };
+    const draft = structuredClone(cur.data);
+    const out = await fn(draft);
+    if (out && out.error) return out;
+    draft.updatedAt = Date.now();
+    if (!store.setIf) { await store.set(key, draft); return { value: draft, out }; }
+    if (await store.setIf(key, draft, { etag: cur.etag })) return { value: draft, out };
+    await sleep(15 + Math.random() * 60 * (i + 1));
+  }
+  return { error: 'busy', status: 503 };
+}
+
+// Reads many keys in parallel batches.
+export async function getMany(store, keys, batch = 40) {
+  const out = [];
+  for (let i = 0; i < keys.length; i += batch) {
+    const slice = keys.slice(i, i + batch);
+    const vals = await Promise.all(slice.map(k => store.get(k)));
+    slice.forEach((k, j) => out.push([k, vals[j]]));
+  }
+  return out;
+}
+
+async function setNew(store, key, value) {
+  if (store.setIf) return store.setIf(key, value, { onlyIfNew: true });
+  if (await store.get(key)) return false;
+  await store.set(key, value); return true;
+}
+
+// ---------- Session design ----------
 
 // Deterministic PRNG so a participant's session plan is identical on resume.
 function seeded(str) {
@@ -103,44 +161,61 @@ export function sessionInfo(p, session, c) {
   return { spec, usesAI, aiRemoved, mode: usesAI ? p.condition : 'none' };
 }
 
-// A participant's plan for one session: alert order and AI behaviors are shuffled with a seed
-// from their ID. The plan (with full alert copies) is saved when the session starts, so edits made
-// mid-session never change what that participant is working through.
+// A participant's plan for one session: alert order and AI behaviors are shuffled with a seed from
+// their ID. The plan (with full alert copies) is stored when the session starts, so edits made
+// mid-study never change a session in progress.
 export function buildPlan(p, session, c) {
   const rand = seeded(`${p.code}|${STUDY.id}|s${session}`);
   const { spec, usesAI, aiRemoved, mode } = sessionInfo(p, session, c);
   const order = shuffle(spec.alerts.map(id => c.alerts.find(a => a.id === id)), rand);
   const types = usesAI ? shuffle(spec.ai, rand) : order.map(() => null);
-  const practice = session === 1 && c.design.practice ? structuredClone(c.practice) : null;
+  // Counterbalancing: a fixed per-participant rotation of evidence panels and answer-button order.
+  const cb = c.design.counterbalance || {}, pr = seeded(`${p.code}|${STUDY.id}|cb`), turn = Math.floor(pr() * 1e6), flip = pr() < 0.5;
+  const rotate = a => { if (!cb.panels || !a) return a; const k = turn % a.panels.length; a.panels = a.panels.slice(k).concat(a.panels.slice(0, k)); return a; };
+  const practice = session === 1 && c.design.practice ? rotate(structuredClone(c.practice)) : null;
+  const ctx = { session, mode, aiRemoved };
   return {
-    session, mode, aiRemoved, contentVersion: c.version || 0,
-    trials: order.map((a, i) => ({ index: i, alertId: a.id, aiType: types[i], ai: aiFor(a, types[i], rand, c), alert: structuredClone(a) })),
+    session, mode, aiRemoved, contentVersion: c.version || 0, createdAt: Date.now(),
+    answerOrder: cb.answers && flip ? ['benign', 'malicious'] : ['malicious', 'benign'],
+    trials: order.map((a, i) => ({ index: i, alertId: a.id, aiType: types[i], ai: aiFor(a, types[i], rand, c), alert: rotate(structuredClone(a)) })),
     practice,
-    practiceAI: practice && mode !== 'none' ? { verdict: practice.truth, confidence: 90, rationale: practice.aiRationale.correct } : null
+    practiceAI: practice && mode !== 'none' ? { verdict: practice.truth, confidence: 90, rationale: practice.aiRationale.correct } : null,
+    // Survey questions this participant sees this session, fixed with the plan.
+    preItems: itemsFor(c.survey.pre, 'pre', ctx),
+    postItems: itemsFor(c.survey.post, 'post', ctx)
   };
 }
 
-// What the browser receives: no ground truth, no panel support codes.
+// What the browser receives: no IDs (variant numbering could hint at the answer), no ground truth,
+// no panel support codes.
 export function publicAlert(a) {
-  return {
-    id: a.id, title: a.title, severity: a.severity, summary: a.summary,
-    panels: a.panels.map(x => ({ key: x.key, label: x.label, text: x.text }))
-  };
+  return { title: a.title, severity: a.severity, summary: a.summary, panels: a.panels.map(x => ({ key: x.key, label: x.label, text: x.text })) };
 }
 
 export function publicPlan(plan, state) {
   const done = new Set(state.trialsDone || []);
   return {
-    session: plan.session, mode: plan.mode, aiRemoved: !!plan.aiRemoved, total: plan.trials.length,
+    session: plan.session, mode: plan.mode, aiRemoved: !!plan.aiRemoved, total: plan.trials.length, answerOrder: plan.answerOrder || ['malicious', 'benign'],
     practice: plan.practice ? publicAlert(plan.practice) : null,
     practiceAI: plan.practiceAI || null,
     practiceDone: !!state.practiceDone,
     preSurveyDone: !!state.preSurveyDone,
+    preItems: plan.preItems || [], postItems: plan.postItems || [],
     trials: plan.trials.map(t => ({
       index: t.index, done: done.has(t.index), alert: publicAlert(t.alert),
       ai: t.ai ? { verdict: t.ai.verdict, confidence: t.ai.confidence, rationale: t.ai.rationale } : null
     }))
   };
+}
+
+// Number of sessions for this participant: fixed when they start session 1, so adding sessions later
+// doesn't un-finish anyone, and removing sessions never strands a session already in progress.
+export function totalFor(p, c) {
+  const nS = c.design.sessions.length;
+  let total = Math.min(p.totalSessions ?? nS, nS);
+  const next = (p.completed || []).length + 1;
+  if (next > total && p.sessions?.[next]?.startedAt && !p.sessions[next].completedAt) total = next;
+  return total;
 }
 
 export function status(p, now = Date.now(), total = 4) {
@@ -151,13 +226,52 @@ export function status(p, now = Date.now(), total = 4) {
   const availableAt = last ? last.completedAt + (p.gapDays ?? STUDY.defaultGapDays) * 86400000 : p.createdAt;
   return { finished: false, completed: completed.length, total, nextSession: next, availableAt, available: now >= availableAt };
 }
-const nSessions = c => c.design.sessions.length;
-async function statusOf(store, p, now) { return status(p, now, nSessions(await getContent(store))); }
+async function statusOf(store, p, now) { return status(p, now, totalFor(p, await getContent(store))); }
 
-// ---------- Handlers (storage: { get(key), set(key, value), list(prefix) }) ----------
+async function getPlan(store, p, n) { return p.sessions?.[n]?.plan || await store.get(planKey(p.code, n)); }
 
-const pKey = code => `participants/${code}`;
-const contactKey = code => `contact/${code}`;
+// ---------- Validation of what the browser sends ----------
+
+const num = (v, lo, hi) => { const x = Number(v); return Number.isFinite(x) ? Math.min(hi, Math.max(lo, x)) : null; };
+const oneOf = (v, opts) => opts.includes(v) ? v : null;
+const str = (v, max) => typeof v === 'string' ? v.slice(0, max) : null;
+const jsonSize = v => { try { return JSON.stringify(v).length; } catch { return Infinity; } };
+
+export function cleanTrialData(d, alert) {
+  d = d && typeof d === 'object' ? d : {};
+  const keys = alert.panels.map(x => x.key), J = ['malicious', 'benign'];
+  const step = x => x && typeof x === 'object' ? { judgment: oneOf(x.judgment, J), confidence: num(x.confidence, 0, 100), rtMs: num(x.rtMs, 0, 864e5) } : null;
+  const fin = step(d.final) || {};
+  fin.influential = Array.isArray(d.final?.influential) ? d.final.influential.filter(k => keys.includes(k) || k === 'summary' || k === 'ai').slice(0, 20) : [];
+  const opens = Array.isArray(d.evidence?.opens) ? d.evidence.opens.slice(0, 1000).filter(o => o && keys.includes(o.panel))
+    .map(o => ({ panel: o.panel, atMs: num(o.atMs, 0, 864e5), dwellMs: num(o.dwellMs, 0, 864e5), hiddenMs: num(o.hiddenMs, 0, 864e5) || 0, afterAI: !!o.afterAI })) : [];
+  const answerLog = Array.isArray(d.answerLog) ? d.answerLog.slice(0, 1000).map(a => ({ atMs: num(a?.atMs, 0, 864e5), name: str(a?.name, 40),
+    value: Array.isArray(a?.value) ? a.value.slice(0, 20).map(x => str(String(x), 40)) : typeof a?.value === 'number' ? a.value : str(String(a?.value ?? ''), 200) })) : [];
+  const small = (v, max) => v && typeof v === 'object' && jsonSize(v) <= max ? v : null;
+  return {
+    mode: oneOf(d.mode, ['ai_first', 'evidence_first', 'none']), aiShownAtMs: num(d.aiShownAtMs, 0, 864e5),
+    initial: step(d.initial), final: fin,
+    evidence: { opens, unique: [...new Set(opens.map(o => o.panel))] },
+    answerLog, traces: small(d.traces, 50000),
+    viewport: d.viewport ? { w: num(d.viewport.w, 0, 20000), h: num(d.viewport.h, 0, 20000) } : null,
+    device: small(d.device, 4000), selfTest: d.selfTest === true || undefined
+  };
+}
+
+export function cleanSurveyData(d, items) {
+  d = d && typeof d === 'object' ? d : {};
+  const out = {};
+  for (const it of items) {
+    const v = d[it.id];
+    if (v == null || v === '') continue;
+    if (it.type === 'scale') { const n = Number(v); if (Number.isInteger(n) && n >= 1 && n <= it.n) out[it.id] = String(n); }
+    else if (it.type === 'choice' || it.type === 'select') { if (it.options.some(o => o.value === v)) out[it.id] = v; }
+    else out[it.id] = String(v).slice(0, 4000);
+  }
+  return out;
+}
+
+// ---------- Participant handlers ----------
 
 export async function loadParticipant(store, rawCode) {
   if (PID_RE.test(String(rawCode || ''))) return await store.get(pKey(rawCode));
@@ -166,11 +280,8 @@ export async function loadParticipant(store, rawCode) {
   return await store.get(pKey(code));
 }
 
-async function save(store, p) { p.updatedAt = Date.now(); await store.set(pKey(p.code), p); }
-
 // Students sign in with their email alone; the first sign-in asks them to confirm it (creds.confirm)
 // so a typo doesn't split their sessions. Pilot access codes use { code }.
-// The email itself is kept apart from the answers, under contact/{id}, for extra-credit matching.
 export async function login(store, creds = {}, now = Date.now()) {
   let p;
   if (creds.email != null) {
@@ -187,13 +298,14 @@ export async function login(store, creds = {}, now = Date.now()) {
       if (!creds.confirm) return { error: 'confirm_new', status: 401, email };
       [p] = await enroll(store, [pid], { gapDays: en.gapDays, label: en.label || null, selfSignup: true }, now, Math.random);
     }
-    if (!(await store.get(contactKey(p.code)))) await store.set(contactKey(p.code), { email, firstSeenAt: now });
+    await setNew(store, contactKey(p.code), { email, firstSeenAt: now });
   } else {
     p = await loadParticipant(store, creds.code);
     if (!p || PID_RE.test(p.code)) return { error: 'invalid_code', status: 401 };
   }
-  p.lastSeenAt = now; await save(store, p);
-  return { token: await issueToken(store, p.code, now), consented: !!p.consentedAt, status: await statusOf(store, p, now) };
+  const u = await update(store, pKey(p.code), d => { d.lastSeenAt = now; });
+  if (u.error) return u;
+  return { token: await issueToken(store, p.code, now), consented: !!u.value.consentedAt, status: await statusOf(store, u.value, now) };
 }
 
 // Restores a signed-in participant after a page reload.
@@ -204,91 +316,121 @@ export async function resume(store, pid, now = Date.now()) {
 }
 
 export async function consent(store, code, agree, now = Date.now()) {
-  const p = await loadParticipant(store, code);
-  if (!p) return { error: 'invalid_code', status: 401 };
-  if (!agree) { p.declinedAt = now; await save(store, p); return { ok: true, declined: true }; }
-  p.consentedAt = p.consentedAt || now; await save(store, p);
-  return { ok: true };
+  const u = await update(store, pKey(code), d => { if (agree) d.consentedAt = d.consentedAt || now; else d.declinedAt = now; });
+  if (u.error) return u.error === 'not_found' ? { error: 'invalid_code', status: 401 } : u;
+  return agree ? { ok: true } : { ok: true, declined: true };
 }
 
 export async function startSession(store, code, now = Date.now()) {
-  const p = await loadParticipant(store, code);
-  if (!p) return { error: 'invalid_code', status: 401 };
-  if (!p.consentedAt) return { error: 'no_consent', status: 403 };
+  const p0 = await loadParticipant(store, code);
+  if (!p0) return { error: 'invalid_code', status: 401 };
+  if (!p0.consentedAt) return { error: 'no_consent', status: 403 };
   const c = await getContent(store);
-  const st = status(p, now, nSessions(c));
+  const st = status(p0, now, totalFor(p0, c));
   if (st.finished) return { error: 'finished', status: 409 };
   if (!st.available) return { error: 'not_yet', status: 409, availableAt: st.availableAt };
   const n = st.nextSession;
-  p.sessions = p.sessions || {};
-  const s = p.sessions[n] || (p.sessions[n] = { startedAt: now, trialsDone: [], practiceDone: false });
-  if (!s.plan) s.plan = buildPlan(p, n, c);
-  if (s.preSurveyDone == null) s.preSurveyDone = itemsFor(c.survey.pre, 'pre', { session: n, mode: s.plan.mode, aiRemoved: s.plan.aiRemoved }).length === 0;
-  if (!s.plan.practice) s.practiceDone = true;
-  s.lastResumedAt = now;
-  await save(store, p);
-  return { ...publicPlan(s.plan, s), priorAI: p.condition !== 'control', contentVersion: s.plan.contentVersion };
+  // The plan is written once; whoever writes first wins and everyone reads that copy.
+  let plan = await getPlan(store, p0, n);
+  if (!plan) { await setNew(store, planKey(p0.code, n), buildPlan(p0, n, c)); plan = await store.get(planKey(p0.code, n)); }
+  const u = await update(store, pKey(p0.code), d => {
+    d.sessions = d.sessions || {};
+    if (n === 1 && d.totalSessions == null) d.totalSessions = c.design.sessions.length;
+    const s = d.sessions[n] || (d.sessions[n] = { startedAt: now, trialsDone: [], practiceDone: !plan.practice, views: {} });
+    if (s.preSurveyDone == null) s.preSurveyDone = !(plan.preItems || itemsFor(c.survey.pre, 'pre', { session: n, mode: plan.mode, aiRemoved: plan.aiRemoved })).length;
+    s.planSize = plan.trials.length;
+    s.lastResumedAt = now;
+  });
+  if (u.error) return u;
+  return { ...publicPlan(plan, u.value.sessions[n]), priorAI: p0.condition !== 'control', contentVersion: plan.contentVersion };
+}
+
+// Records that a trial screen was shown (a reload re-shows it); exported as views.
+export async function viewTrial(store, code, session, index) {
+  const u = await update(store, pKey(code), d => {
+    const s = d.sessions?.[session];
+    if (!s || s.completedAt) return { error: 'wrong_session', status: 409 };
+    s.views = s.views || {};
+    s.views[index] = (s.views[index] || 0) + 1;
+  });
+  return u.error ? u : { ok: true };
 }
 
 export async function saveTrial(store, code, session, index, data, now = Date.now()) {
   const p = await loadParticipant(store, code);
   if (!p) return { error: 'invalid_code', status: 401 };
+  const s0 = p.sessions?.[session];
+  // Re-sends (retries, double clicks) are acknowledged without overwriting the first answer.
+  if (s0 && (index === 'practice' ? s0.practiceDone && s0.practiceSavedAt : s0.trialsDone?.includes(index))) return { ok: true, repeat: true, trialsDone: s0.trialsDone.length };
   const st = await statusOf(store, p, now);
-  if (st.finished || session !== st.nextSession || !p.sessions?.[session]?.plan) return { error: 'wrong_session', status: 409 };
-  const s = p.sessions[session];
-  const plan = s.plan;
+  const plan = s0 ? await getPlan(store, p, session) : null;
+  if (st.finished || session !== st.nextSession || !plan) return { error: 'wrong_session', status: 409 };
   const kind = index === 'practice' ? 'practice' : 'trial';
   if (kind === 'trial') {
     const t = plan.trials[index];
     if (!t) return { error: 'bad_index', status: 400 };
-    // Keep a copy of the alert as scored, so later edits to the alert text or answer key don't change this record.
     const a = t.alert;
+    const raw = Array.isArray(data?.rawEvents) ? data.rawEvents.slice(0, 20000) : [];
+    const clean = cleanTrialData(data, a);
+    // Keep a copy of the alert as scored, so later edits to the alert text or answer key don't change this record.
     const alert = { id: a.id, family: a.family, variant: a.variant, truth: a.truth, title: a.title, misleadingPanels: a.misleadingPanels, panels: a.panels.map(x => ({ key: x.key, supports: x.supports })) };
-    await store.set(`data/${p.code}/s${session}/t${index}`, { code: p.code, condition: p.condition, session, index, alertId: t.alertId, aiType: t.aiType, ai: t.ai, alert, contentVersion: plan.contentVersion, receivedAt: now, data });
-    if (!s.trialsDone.includes(index)) s.trialsDone.push(index);
+    await store.set(`data/${p.code}/s${session}/t${index}`, { code: p.code, condition: p.condition, session, index, alertId: t.alertId, aiType: t.aiType, ai: t.ai, alert, answerOrder: plan.answerOrder || ['malicious', 'benign'], contentVersion: plan.contentVersion, receivedAt: now, data: clean });
+    if (raw.length && jsonSize(raw) <= 3e6) await store.set(`raw/${p.code}/s${session}/t${index}`, { code: p.code, session, index, events: raw });
   } else {
-    await store.set(`data/${p.code}/s${session}/practice`, { code: p.code, session, contentVersion: plan.contentVersion, receivedAt: now, data });
-    s.practiceDone = true;
+    await store.set(`data/${p.code}/s${session}/practice`, { code: p.code, session, contentVersion: plan.contentVersion, receivedAt: now, data: { selfTest: data?.selfTest === true || undefined } });
   }
-  await save(store, p);
-  return { ok: true, trialsDone: s.trialsDone.length };
+  const u = await update(store, pKey(p.code), d => {
+    const s = d.sessions[session];
+    if (kind === 'trial') { if (!s.trialsDone.includes(index)) s.trialsDone.push(index); }
+    else { s.practiceDone = true; s.practiceSavedAt = now; }
+    if (kind === 'trial' && data?.device && !s.device) s.device = cleanTrialData({ device: data.device }, { panels: [] }).device;
+  });
+  if (u.error) return u;
+  return { ok: true, trialsDone: u.value.sessions[session].trialsDone.length };
 }
 
 export async function saveSurvey(store, code, session, kind, data, now = Date.now()) {
   const p = await loadParticipant(store, code);
   if (!p) return { error: 'invalid_code', status: 401 };
-  const c = await getContent(store);
-  const st = status(p, now, nSessions(c));
-  if (st.finished || session !== st.nextSession || !p.sessions?.[session]?.plan) return { error: 'wrong_session', status: 409 };
   if (!['pre', 'post'].includes(kind)) return { error: 'bad_kind', status: 400 };
-  const s = p.sessions[session];
-  if (kind === 'post' && s.trialsDone.length < s.plan.trials.length) return { error: 'trials_incomplete', status: 409 };
-  await store.set(`data/${p.code}/s${session}/survey-${kind}`, { code: p.code, condition: p.condition, session, kind, contentVersion: c.version || 0, receivedAt: now, data });
-  if (kind === 'pre') s.preSurveyDone = true;
-  if (kind === 'post') {
-    s.completedAt = now;
-    p.completed = p.completed || [];
-    p.completed.push({ session, completedAt: now });
-  }
-  await save(store, p);
-  return { ok: true, status: status(p, now, nSessions(c)) };
+  const c = await getContent(store);
+  const s0 = p.sessions?.[session];
+  // Re-sends are acknowledged without overwriting.
+  if (s0 && ((kind === 'post' && s0.completedAt) || (kind === 'pre' && s0.preSurveyDone && s0.preSavedAt))) return { ok: true, repeat: true, status: status(p, now, totalFor(p, c)) };
+  const st = status(p, now, totalFor(p, c));
+  const plan = s0 ? await getPlan(store, p, session) : null;
+  if (st.finished || session !== st.nextSession || !plan) return { error: 'wrong_session', status: 409 };
+  if (kind === 'post' && s0.trialsDone.length < plan.trials.length) return { error: 'trials_incomplete', status: 409 };
+  const items = (kind === 'pre' ? plan.preItems : plan.postItems) || itemsFor(c.survey[kind], kind, { session, mode: plan.mode, aiRemoved: plan.aiRemoved });
+  await store.set(`data/${p.code}/s${session}/survey-${kind}`, { code: p.code, condition: p.condition, session, kind, contentVersion: plan.contentVersion, receivedAt: now, data: cleanSurveyData(data, items) });
+  const u = await update(store, pKey(p.code), d => {
+    const s = d.sessions[session];
+    if (kind === 'pre') { s.preSurveyDone = true; s.preSavedAt = now; }
+    else if (!s.completedAt) { s.completedAt = now; d.completed = d.completed || []; d.completed.push({ session, completedAt: now }); }
+  });
+  if (u.error) return u;
+  return { ok: true, status: status(u.value, now, totalFor(u.value, c)) };
 }
 
 // ---------- Admin ----------
 
-// Conditions come from balanced blocks of three. The unused rest of a block carries over
-// between calls, so adding a roster in batches stays balanced.
+// Conditions come from balanced blocks of three. The unused rest of a block carries over between
+// calls (and is updated with a conditional write), so sign-ups at the same moment stay balanced.
 async function enroll(store, ids, opts, now, rand) {
-  const meta = (await store.get('meta/assignment')) || { assigned: 0 };
-  let block = meta.block || [];
   const made = [];
-  for (const id of ids) {
-    if (!block.length) block = shuffle(STUDY.conditions, rand);
-    const p = { code: id, condition: block.pop(), createdAt: now, gapDays: opts.gapDays ?? STUDY.defaultGapDays, label: opts.label || null, test: !!opts.test, selfSignup: !!opts.selfSignup };
-    await store.set(pKey(id), p);
-    made.push(p);
+  if (!ids.length) return made;
+  if (!(await store.get('meta/assignment'))) await setNew(store, 'meta/assignment', { assigned: 0, block: [] });
+  let picked = [];
+  const u = await update(store, 'meta/assignment', meta => {
+    let block = (meta.block || []).slice(); picked = [];
+    for (let i = 0; i < ids.length; i++) { if (!block.length) block = shuffle(STUDY.conditions, rand); picked.push(block.pop()); }
+    meta.block = block; meta.assigned = (meta.assigned || 0) + ids.length;
+  });
+  if (u.error) throw new Error('assignment busy');
+  for (let i = 0; i < ids.length; i++) {
+    const p = { code: ids[i], condition: picked[i], createdAt: now, gapDays: opts.gapDays ?? STUDY.defaultGapDays, label: opts.label || null, test: !!opts.test, selfSignup: !!opts.selfSignup };
+    if (await setNew(store, pKey(ids[i]), p)) made.push(p); else made.push(await store.get(pKey(ids[i])));
   }
-  meta.assigned += ids.length; meta.block = block; await store.set('meta/assignment', meta);
   return made;
 }
 
@@ -311,18 +453,18 @@ export async function createTestParticipant(store, condition, now = Date.now(), 
   return p;
 }
 
-// Adds roster emails. Only hashes are stored; emails already enrolled are left as they are.
+// Pre-enrolls roster emails. The email is kept under contact/{id} (for extra credit), apart from the data.
 export async function addRoster(store, emails, opts = {}, now = Date.now(), rand = Math.random) {
   const pepper = await getPepper(store, true);
   const invalid = []; const ids = []; let existing = 0;
   for (const raw of emails) {
     const e = normalizeEmail(raw);
     if (!e) continue;
-    if (!EMAIL_RE.test(e)) { invalid.push(raw); continue; }
+    if (!EMAIL_RE.test(e)) { invalid.push(String(raw).slice(0, 100)); continue; }
     const id = pidFor(pepper, e);
     if (ids.includes(id)) continue;
     if (await store.get(pKey(id))) { existing++; continue; }
-    ids.push(id); await store.set(contactKey(id), { email: e, addedAt: now });
+    ids.push(id); await setNew(store, contactKey(id), { email: e, addedAt: now });
   }
   await enroll(store, ids, opts, now, rand);
   return { added: ids.length, existing, invalid };
@@ -331,150 +473,164 @@ export async function addRoster(store, emails, opts = {}, now = Date.now(), rand
 // Completion check for course credit: status for each email the admin pastes in.
 export async function lookupEmails(store, emails, now = Date.now()) {
   const pepper = await getPepper(store);
-  const total = nSessions(await getContent(store));
+  const c = await getContent(store);
   const out = [];
-  for (const raw of emails) {
+  for (const raw of emails.slice(0, 2000)) {
     const email = normalizeEmail(raw);
     if (!email) continue;
     const p = pepper && EMAIL_RE.test(email) ? await store.get(pKey(pidFor(pepper, email))) : null;
     if (!p) { out.push({ email, enrolled: false }); continue; }
-    const st = status(p, now, total);
+    const total = totalFor(p, c), st = status(p, now, total);
     out.push({ email, enrolled: true, totalSessions: total, id: p.code, consented: !!p.consentedAt, declined: !!p.declinedAt,
       completedSessions: st.completed, finished: !!st.finished, lastCompletedAt: (p.completed || []).slice(-1)[0]?.completedAt || null });
   }
   return out;
 }
 
-
 export async function listParticipants(store, now = Date.now()) {
-  const keys = await store.list('participants/');
-  const total = nSessions(await getContent(store));
+  const c = await getContent(store);
   const out = [];
-  for (const k of keys) {
-    const p = await store.get(k);
+  for (const [, p] of await getMany(store, await store.list('participants/'))) {
     if (!p) continue;
-    const st = status(p, now, total);
+    const total = totalFor(p, c), st = status(p, now, total), cur = st.nextSession && p.sessions?.[st.nextSession];
     out.push({ code: p.code, type: PID_RE.test(p.code) ? (p.selfSignup ? 'email (self)' : 'email') : 'code', condition: p.condition, label: p.label, test: !!p.test, gapDays: p.gapDays, consented: !!p.consentedAt, declined: !!p.declinedAt,
       completedSessions: st.completed, nextSession: st.nextSession || null, availableAt: st.availableAt || null, lastSeenAt: p.lastSeenAt || null,
-      totalSessions: total, inProgress: p.sessions && st.nextSession && p.sessions[st.nextSession] ? p.sessions[st.nextSession].trialsDone.length : 0,
-      inProgressOf: p.sessions && st.nextSession && p.sessions[st.nextSession]?.plan ? p.sessions[st.nextSession].plan.trials.length : 0 });
+      totalSessions: total, inProgress: cur ? (cur.trialsDone || []).length : 0, inProgressOf: cur ? (cur.planSize || null) : 0 });
   }
   return out.sort((a, b) => (a.label || a.code).localeCompare(b.label || b.code));
 }
 
-// `only` limits the export to one participant (used by the self-test).
-export async function exportAll(store, only) {
-  const keys = await store.list(only ? `data/${only}/` : 'data/');
-  const records = [];
-  for (let i = 0; i < keys.length; i += 25) {   // read in parallel batches
-    const batch = keys.slice(i, i + 25);
-    const vals = await Promise.all(batch.map(k => store.get(k)));
-    batch.forEach((k, j) => records.push({ key: k, ...vals[j] }));
-  }
-  const participants = [];
-  for (const k of only ? [`participants/${only}`] : await store.list('participants/')) {
-    const rec = await store.get(k); if (!rec) continue;
-    const { pin, sessions, ...p } = rec;
-    p.sessions = Object.fromEntries(Object.entries(sessions || {}).map(([n, x]) => { const { plan, ...rest } = x; return [n, { ...rest, mode: plan?.mode, contentVersion: plan?.contentVersion, alerts: plan?.trials.map(t => t.alertId) }]; }));
-    participants.push(p);
-  }
+// Participant record as exported: no plan copies, no PIN fields from older versions.
+function exportParticipant(rec) {
+  const { pin, pinFails, pinLockUntil, sessions, ...p } = rec;
+  p.sessions = Object.fromEntries(Object.entries(sessions || {}).map(([n, x]) => { const { plan, ...rest } = x; return [n, rest]; }));
+  return p;
+}
+
+// Records for some participants (or one, or all). Exports run in batches of participants from the admin
+// page, so no single request reads the whole study.
+export async function exportRecords(store, codes) {
+  const list = codes && codes.length ? codes : (await store.list('participants/')).map(k => k.slice(13));
+  const keys = (await Promise.all(list.map(code => store.list(`data/${code}/`)))).flat();
+  const records = (await getMany(store, keys)).filter(([, v]) => v).map(([key, v]) => ({ key, ...v }));
+  const participants = (await getMany(store, list.map(pKey))).filter(([, v]) => v).map(([, v]) => exportParticipant(v));
   return { study: STUDY.id, exportedAt: new Date().toISOString(), participants, records };
 }
+export const exportAll = (store, only) => exportRecords(store, only ? [only] : null);
 
-// Trial-level CSV with derived verification, reliance, and performance measures.
-export async function exportCsv(store, only) {
-  const { records } = await exportAll(store, only);
-  const trials = records.filter(r => /\/t\d+$/.test(r.key));
-  // One dwell column per evidence panel variable name in use (the four defaults first).
-  const seen = new Set(trials.flatMap(r => (r.alert?.panels || []).map(x => x.key)));
-  const panelKeys = ['network', 'user', 'system', 'context'].filter(k => seen.has(k)).concat([...seen].filter(k => !['network', 'user', 'system', 'context'].includes(k)).sort());
-  const head = ['code', 'condition', 'session', 'trial_index', 'alert_id', 'family', 'truth', 'ai_type', 'ai_verdict', 'ai_confidence',
-    'initial_judgment', 'initial_confidence', 'initial_rt_ms', 'final_judgment', 'final_confidence', 'final_rt_ms',
-    'correct', 'agree_ai', 'changed_initial_to_final', 'switched_to_ai',
-    'panels_opened_unique', 'panel_opens_total', 'evidence_breadth', 'revisits', 'opens_after_ai', 'first_panel', 'panel_sequence',
-    'misleading_inspected', 'contradicts_ai_inspected', 'contradicts_ai_inspected_after_ai', ...panelKeys.map(k => `dwell_${k}_ms`),
-    'influential_panels', 'trial_ms', 'mouse_path_px', 'idle_ms', 'hidden_ms', 'content_version'];
-  const rows = [head.join(',')];
-  for (const r of trials) {
-    const a = r.alert; const d = r.data || {}; const ev = d.evidence || {};
-    const opens = ev.opens || [];
-    const keys = [...new Set(opens.map(o => o.panel))];
-    const aiAt = d.aiShownAtMs;
-    const contra = r.ai ? a.panels.filter(x => x.supports !== 'neutral' && x.supports !== r.ai.verdict).map(x => x.key) : [];
-    const dwell = k => Math.round(opens.filter(o => o.panel === k).reduce((s, o) => s + (o.dwellMs || 0), 0));
-    const fin = d.final || {}; const ini = d.initial || {};
-    const vals = [r.code, r.condition, r.session, r.index, r.alertId, a.family, a.truth, r.aiType || '', r.ai?.verdict || '', r.ai?.confidence ?? '',
-      ini.judgment || '', ini.confidence ?? '', ini.rtMs ?? '', fin.judgment || '', fin.confidence ?? '', fin.rtMs ?? '',
-      fin.judgment ? Number(fin.judgment === a.truth) : '', r.ai && fin.judgment ? Number(fin.judgment === r.ai.verdict) : '',
-      ini.judgment && fin.judgment ? Number(ini.judgment !== fin.judgment) : '',
-      r.ai && ini.judgment && fin.judgment ? Number(ini.judgment !== r.ai.verdict && fin.judgment === r.ai.verdict) : '',
-      keys.length, opens.length, (keys.length / a.panels.length).toFixed(2), opens.length - keys.length,
-      aiAt != null ? opens.filter(o => o.atMs >= aiAt).length : '', keys[0] || '', opens.map(o => o.panel).join('>'),
-      Number(a.misleadingPanels.some(k => keys.includes(k))),
-      r.ai ? Number(contra.some(k => keys.includes(k))) : '',
-      r.ai && aiAt != null ? Number(opens.some(o => contra.includes(o.panel) && o.atMs >= aiAt)) : '',
-      ...panelKeys.map(dwell),
-      (fin.influential || []).join('|'), d.traces?.durationMs ?? '', d.traces?.mousePathPx ?? '', d.traces?.idleMs ?? '', d.traces?.hiddenMs ?? '', r.contentVersion ?? 0];
-    rows.push(vals.map(v => { const s = String(v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }).join(','));
-  }
-  return rows.join('\n') + '\n';
+export async function exportRaw(store, code) {
+  const keys = await store.list(`raw/${code}/`);
+  return (await getMany(store, keys)).filter(([, v]) => v).map(([, v]) => v);
 }
 
-const csvCell = v => { const s = Array.isArray(v) ? v.join('|') : String(v ?? ''); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
-
-// One row per survey response; one column per question variable seen in any response.
-export async function exportSurveyCsv(store, only) {
-  const { records } = await exportAll(store, only);
-  const rs = records.filter(r => /\/survey-(pre|post)$/.test(r.key));
-  const vars = [...new Set(rs.flatMap(r => Object.keys(r.data || {})))].sort();
-  const head = ['code', 'condition', 'session', 'survey', 'content_version', 'received_at', ...vars];
-  const rows = [head.join(',')];
-  for (const r of rs) rows.push([r.code, r.condition, r.session, r.kind, r.contentVersion ?? 0, new Date(r.receivedAt).toISOString(), ...vars.map(v => (r.data || {})[v])].map(csvCell).join(','));
-  return rows.join('\n') + '\n';
+// One analysis row per trial, with derived verification, reliance, and performance measures.
+// Definitions are in static/lab/CODEBOOK.md.
+export function trialRow(r, p) {
+  const a = r.alert, d = r.data || {}, opens = Array.isArray(d.evidence?.opens) ? d.evidence.opens : [];
+  const keys = [...new Set(opens.map(o => o.panel))];
+  const aiAt = d.aiShownAtMs;
+  const contra = r.ai ? a.panels.filter(x => x.supports !== 'neutral' && x.supports !== r.ai.verdict).map(x => x.key) : [];
+  const fin = d.final || {}, ini = d.initial || {};
+  const s = p?.sessions?.[r.session] || {}, prev = (p?.completed || []).find(x => x.session === r.session - 1);
+  const row = {
+    code: r.code, condition: r.condition, test: p?.test ? 1 : 0, label: p?.label || '', self_signup: p?.selfSignup ? 1 : 0,
+    session: r.session, trial_index: r.index, alert_id: r.alertId, family: a.family, truth: a.truth, mode: d.mode || '',
+    ai_type: r.aiType || '', ai_verdict: r.ai?.verdict || '', ai_confidence: r.ai?.confidence ?? '', ai_shown_at_ms: aiAt ?? '',
+    initial_judgment: ini.judgment || '', initial_confidence: ini.confidence ?? '', initial_rt_ms: ini.rtMs ?? '',
+    final_judgment: fin.judgment || '', final_confidence: fin.confidence ?? '', final_rt_ms: fin.rtMs ?? '',
+    correct: fin.judgment ? Number(fin.judgment === a.truth) : '', agree_ai: r.ai && fin.judgment ? Number(fin.judgment === r.ai.verdict) : '',
+    changed_initial_to_final: ini.judgment && fin.judgment ? Number(ini.judgment !== fin.judgment) : '',
+    switched_to_ai: r.ai && ini.judgment && fin.judgment ? Number(ini.judgment !== r.ai.verdict && fin.judgment === r.ai.verdict) : '',
+    panel_order: a.panels.map(x => x.key).join('>'), answer_order: (r.answerOrder || ['malicious', 'benign']).join('>'),
+    first_panel_position: keys[0] ? a.panels.findIndex(x => x.key === keys[0]) + 1 : '',
+    panels_opened_unique: keys.length, panel_opens_total: opens.length, evidence_breadth: (keys.length / a.panels.length).toFixed(2), revisits: opens.length - keys.length,
+    opens_after_ai: aiAt != null ? opens.filter(o => o.atMs >= aiAt).length : '', first_panel: keys[0] || '', panel_sequence: opens.map(o => o.panel).join('>'),
+    misleading_inspected: Number(a.misleadingPanels.some(k => keys.includes(k))),
+    contradicts_ai_inspected: r.ai ? Number(contra.some(k => keys.includes(k))) : '',
+    // A panel counts as inspected after the AI if it was open at any point after the AI appeared.
+    contradicts_ai_inspected_after_ai: r.ai && aiAt != null ? Number(opens.some(o => contra.includes(o.panel) && (o.atMs >= aiAt || o.atMs + (o.dwellMs || 0) > aiAt))) : '',
+    influential_panels: (Array.isArray(fin.influential) ? fin.influential : []).join('|'),
+    trial_ms: d.traces?.durationMs ?? '', mouse_path_px: d.traces?.mousePathPx ?? '', idle_ms: d.traces?.idleMs ?? '', hidden_ms: d.traces?.hiddenMs ?? '',
+    views: s.views?.[r.index] ?? '', viewport_w: d.viewport?.w ?? '', viewport_h: d.viewport?.h ?? '',
+    received_at: r.receivedAt ? new Date(r.receivedAt).toISOString() : '',
+    session_started_at: s.startedAt ? new Date(s.startedAt).toISOString() : '', session_completed_at: s.completedAt ? new Date(s.completedAt).toISOString() : '',
+    days_since_prev_session: prev && s.startedAt ? ((s.startedAt - prev.completedAt) / 864e5).toFixed(2) : '',
+    content_version: r.contentVersion ?? 0
+  };
+  for (const k of a.panels.map(x => x.key)) row[`dwell_${k}_ms`] = Math.round(opens.filter(o => o.panel === k).reduce((n, o) => n + (o.dwellMs || 0), 0));
+  return row;
 }
+
+export function surveyRow(r, p) {
+  const row = { code: r.code, condition: r.condition, test: p?.test ? 1 : 0, label: p?.label || '', self_signup: p?.selfSignup ? 1 : 0,
+    session: r.session, survey: r.kind, content_version: r.contentVersion ?? 0, received_at: r.receivedAt ? new Date(r.receivedAt).toISOString() : '' };
+  // Question variables keep their names unless they collide with a column above.
+  for (const [k, v] of Object.entries(r.data || {})) if (/^[a-z][a-z0-9_]{0,40}$/.test(k)) row[k in row ? `q_${k}` : k] = v;
+  return row;
+}
+
+// Rows (as objects) for a batch of participants; the admin page assembles the CSV.
+export async function exportRows(store, kind, codes) {
+  const { records, participants } = await exportRecords(store, codes);
+  const byCode = Object.fromEntries(participants.map(p => [p.code, p]));
+  if (kind === 'surveys') return records.filter(r => /\/survey-(pre|post)$/.test(r.key)).map(r => surveyRow(r, byCode[r.code]));
+  return records.filter(r => /\/t\d+$/.test(r.key)).map(r => trialRow(r, byCode[r.code]));
+}
+
+// CSV cells: quote when needed, and neutralize text a spreadsheet would run as a formula.
+export const csvCell = v => {
+  let s = Array.isArray(v) ? v.join('|') : String(v ?? '');
+  if (/^[=+@\t\r]/.test(s) || (/^-/.test(s) && !/^-?\d+(\.\d+)?$/.test(s))) s = "'" + s;
+  return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+};
+const TRIAL_FIRST = ['code', 'condition', 'test', 'label', 'self_signup', 'session', 'trial_index', 'alert_id', 'family', 'truth', 'mode'];
+export function toCsv(rows, first = []) {
+  const cols = [...first.filter(c => rows.some(r => c in r))];
+  for (const r of rows) for (const c of Object.keys(r)) if (!cols.includes(c)) cols.push(c);
+  return [cols.map(csvCell).join(','), ...rows.map(r => cols.map(c => csvCell(r[c])).join(','))].join('\n') + '\n';
+}
+export async function exportCsv(store, only) { return toCsv(await exportRows(store, 'trials', only ? [only] : null), TRIAL_FIRST); }
+export async function exportSurveyCsv(store, only) { return toCsv(await exportRows(store, 'surveys', only ? [only] : null), TRIAL_FIRST.slice(0, 6)); }
 
 // Deletes a participant and every record they produced. Permanent.
 export async function deleteParticipant(store, id) {
   const p = await store.get(pKey(id));
   if (!p) return { error: 'not_found', status: 404 };
-  const keys = await store.list(`data/${p.code}/`);
-  for (let i = 0; i < keys.length; i += 25) await Promise.all(keys.slice(i, i + 25).map(k => store.delete(k)));
+  const keys = (await Promise.all([`data/${p.code}/`, `raw/${p.code}/`, `plans/${p.code}/`].map(k => store.list(k)))).flat();
+  for (let i = 0; i < keys.length; i += 40) await Promise.all(keys.slice(i, i + 40).map(k => store.delete(k)));
   await store.delete(contactKey(p.code));
   await store.delete(pKey(p.code));
-  return { ok: true, code: p.code, test: !!p.test, records: keys.length };
+  return { ok: true, code: p.code, test: !!p.test, records: keys.filter(k => k.startsWith('data/')).length };
 }
 
 export async function deleteTestParticipants(store) {
   let participants = 0, records = 0;
-  for (const k of await store.list('participants/')) {
-    const p = await store.get(k);
-    if (p && p.test) { const r = await deleteParticipant(store, p.code); participants++; records += r.records; }
+  for (const [, p] of await getMany(store, await store.list('participants/'))) {
+    if (p && p.test) { const r = await deleteParticipant(store, p.code); participants++; records += r.records || 0; }
   }
   return { ok: true, participants, records };
 }
 
 // Marks a participant as test (excluded from counts, removable in one step) or real.
 export async function setTest(store, id, test) {
-  const p = await store.get(pKey(id));
-  if (!p) return { error: 'not_found', status: 404 };
-  p.test = !!test; await save(store, p);
-  return { ok: true, code: p.code, test: p.test };
+  const u = await update(store, pKey(id), d => { d.test = !!test; });
+  return u.error ? u : { ok: true, code: u.value.code, test: u.value.test };
 }
 
 // Extra-credit list: every student email with completion. Kept out of the research exports.
 export async function exportCredit(store, now = Date.now()) {
-  const total = nSessions(await getContent(store));
+  const c = await getContent(store);
   const keys = await store.list('contact/');
-  const rows = [['email', 'sessions_completed', 'total_sessions', 'finished', 'last_session_completed', 'first_seen', 'label', 'test'].join(',')];
-  const vals = [];
-  for (let i = 0; i < keys.length; i += 25) {
-    const batch = keys.slice(i, i + 25);
-    vals.push(...await Promise.all(batch.map(async k => [await store.get(k), await store.get(pKey(k.slice(8)))])));
+  const contacts = await getMany(store, keys);
+  const people = Object.fromEntries((await getMany(store, keys.map(k => pKey(k.slice(8))))).map(([k, v]) => [k.slice(13), v]));
+  const rows = [];
+  for (const [k, ct] of contacts) {
+    const p = people[k.slice(8)];
+    if (!ct || !p) continue;
+    const total = totalFor(p, c), st = status(p, now, total), last = (p.completed || []).slice(-1)[0];
+    rows.push({ email: ct.email, sessions_completed: st.completed, total_sessions: total, finished: st.finished ? 1 : 0,
+      last_session_completed: last ? new Date(last.completedAt).toISOString() : '', first_seen: new Date(ct.firstSeenAt || ct.addedAt || p.createdAt).toISOString(),
+      label: p.label || '', test: p.test ? 1 : 0 });
   }
-  for (const [c, p] of vals.sort((a, b) => String(a[0]?.email).localeCompare(String(b[0]?.email)))) {
-    if (!c || !p) continue;
-    const st = status(p, now, total), last = (p.completed || []).slice(-1)[0];
-    rows.push([c.email, st.completed, total, st.finished ? 1 : 0, last ? new Date(last.completedAt).toISOString() : '', new Date(c.firstSeenAt || c.addedAt || p.createdAt).toISOString(), p.label || '', p.test ? 1 : 0].map(csvCell).join(','));
-  }
-  return rows.join('\n') + '\n';
+  return toCsv(rows.sort((a, b) => a.email.localeCompare(b.email)), ['email']);
 }

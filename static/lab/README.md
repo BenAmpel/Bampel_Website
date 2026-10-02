@@ -8,7 +8,8 @@ static/lab/
   assets/study.css              plain, light styling for participant pages
   tracelab/tracelab.js          passive trace capture (no dependencies)
   studies/demo-phishing/        demo study; data never leaves the browser
-  studies/verification/         multi-week alert triage study (access codes, server storage)
+  studies/verification/         multi-week alert triage study (GSU email sign-in, server storage)
+  CODEBOOK.md                   column definitions for the verification study exports
 ```
 
 ## Adding a study
@@ -56,17 +57,74 @@ Each event has `t` (ms since start), `type`, and `item`. Types: `move`, `down`, 
 
 ## Verification study (multi-week, server-backed)
 
-`studies/verification/` runs four weekly sessions of eight alert-triage trials each, with three between-subjects conditions (AI-first, evidence-first, control). The design follows Clark, *Preserving Human Verification in AI-Augmented Decision Making* (Section 4): accurate AI in session 1, mostly accurate in session 2, incorrect, uncertain, and manipulated AI in session 3, and no AI in session 4.
+`studies/verification/` runs repeated alert-triage sessions (default: four weekly sessions of eight alerts) with three between-subjects conditions (AI-first, evidence-first, control). The default design follows Clark, *Preserving Human Verification in AI-Augmented Decision Making* (Section 4): accurate AI in session 1, mostly accurate in session 2, incorrect, uncertain, and manipulated AI in session 3, and no AI in session 4. Everything participants see, and the session design, is editable on the admin page.
 
-- **Sign-in**: students type their GSU email (@gsu.edu or @student.gsu.edu by default) each week; no password. The first time, they confirm the address so a typo doesn't split their sessions. Their study ID is a keyed hash of the email (key in `meta/pepper` in the store). The email itself is stored only under `contact/{id}` for extra credit and never appears in the trial, survey, or JSON exports. Study content → Sign-up & consent sets the domains, gap days, and label, or turns sign-up off; emails added on the Students tab can always sign in. Sign-in returns a 12-hour token that every other route requires. Pilot access codes (`VC-XXXX-XXXX`) still work.
-- **Credit**: Students tab → "Download extra-credit list" gives every email with sessions completed; "Check completion" looks up specific emails.
-- **Server**: `netlify/functions/vc-api.mjs` at `/api/vc/*`, logic in `netlify/lib/vc-core.mjs`, data in the Netlify Blobs store `verification-study`. Ground truth and AI schedules stay on the server.
-- **Admin**: `/lab/studies/verification/admin.html`. Set `VC_ADMIN_KEY` (16+ characters) in the Netlify environment variables first; that is the owner key. Tabs:
-  - *Participants*: progress, downloads (trials CSV, surveys CSV, full JSON), and delete (one participant, or all test participants). Deletes are permanent and logged.
-  - *Students*: add roster emails, check completion, download the extra-credit list, create pilot codes.
-  - *Study content*: everything participants see and the session design, editable without code. *Sessions & AI*: number of sessions, which alerts each shows, the practice alert, and for the AI groups how many alerts get each AI behavior (right/wrong, high/low confidence, manipulated) plus the confidence ranges. *Alerts*: add, duplicate, or delete alerts; edit text, answer key, alert type, and 1–6 evidence panels (each with its own CSV variable name). *Surveys*: start- and end-of-session questions, per-session and with/without-AI rules. *Consent* and *Screen text* (every label, button, and instruction). Every save is a numbered version that can be restored. A session in progress keeps the plan it started with (alerts, order, AI behaviors); edits apply from each participant's next session. Each trial stores the alert and answer key as scored, and records its content version. Logic in `netlify/lib/vc-content.mjs`; defaults are in code.
-  - *Team* (owner): give collaborators their own keys. Viewer = see progress and download data; editor = also edit content; manager = also manage students and download the extra-credit list. Only key hashes are stored. Logic in `netlify/lib/vc-admin.mjs`.
-  - *Activity* (owner): log of content changes, student changes, deletions, and team changes.
-- **Stimuli defaults**: edit `netlify/lib/vc_build_alerts.py` and rerun it to change the built-in alerts; the admin editor overrides them once saved.
-- **Local testing**: `VC_ADMIN_KEY=<key> netlify dev --dir static --offline`, then add test emails or codes with gap days 0.
-- **Before live participants**: replace the draft consent on the Study content tab and tick "IRB-approved", replace the draft survey items, and confirm GSU allows Netlify Blobs for this data or switch storage.
+### Files
+
+| Path | Role |
+|---|---|
+| `netlify/functions/vc-api.mjs` | HTTP routes at `/api/vc/*`, request size cap, admin roles, Netlify Blobs adapter (`verification-study` store) |
+| `netlify/lib/vc-core.mjs` | sign-in, tokens, session plans, saving and validating answers, exports, deletes |
+| `netlify/lib/vc-content.mjs` | editable content (consent, sessions & AI, alerts, surveys, screen text), validation, versions |
+| `netlify/lib/vc-admin.mjs` | owner and team keys, activity log |
+| `netlify/lib/vc-selftest.mjs` | resumable live self-test (owner button on the admin page) |
+| `netlify/lib/vc_build_alerts.py` → `vc-alerts.mjs` | built-in default alerts |
+| `static/lab/studies/verification/` | `index.html` + `app.js` (participant app), `admin.html` (admin app) |
+| `tests/lab/` | `npm run test:lab`: design, audit regressions, content/admin, sign-in, self-test (in-memory store with the same conditional-write rules as Blobs) |
+
+### Sign-in and privacy model
+
+- Students type their GSU email each week (domains are set under Study content → Sign-up & consent); no password. The first sign-in asks them to confirm the address so a typo doesn't split their sessions. Pilot access codes (`VC-XXXX-XXXX`) also work.
+- Study ID = HMAC(pepper, email). The pepper is stored in the same Blobs store (`meta/pepper`), so **anyone with access to the Netlify site can re-identify participants**; treat Netlify access as access to identifiable data.
+- The email is stored once, under `contact/{id}`, for extra credit. It never appears in the trial, survey, JSON, or raw-trace exports. Only managers and the owner can download the extra-credit list.
+- There is no verification email: anyone who knows a classmate's GSU address could sign in as them. This was a deliberate trade-off for ease of use; if it matters for a future study, add an emailed one-time code at first sign-in.
+- Tokens are HMAC-signed, expire after 12 hours, and are kept in the tab's sessionStorage.
+- The browser never receives alert IDs, answer keys, or which panels are misleading.
+
+### Data integrity
+
+- Each participant record holds only small per-session status. Plans (`plans/{id}/s{n}`) are written once when a session starts, so later content edits never change a session in progress. Each participant keeps the number of sessions in place when they started session 1 (cutting sessions shortens it; adding sessions does not lengthen it).
+- Every update to a participant record is a compare-and-swap on the blob's etag, retried on conflict, so double clicks and two open tabs cannot lose answers. Condition assignment uses the same mechanism, so simultaneous sign-ups stay balanced.
+- Repeated submissions (the app retries once on network errors) are acknowledged without overwriting the first answer.
+- The server validates what the browser sends: unknown survey variables and out-of-range values are dropped, trial fields are type-checked and capped, request bodies over 4 MB are refused.
+- Each trial stores a copy of its alert and answer key as scored, plus the content version.
+- CSV cells that a spreadsheet would run as a formula are prefixed with `'`.
+
+Key schema: `participants/{id}`, `plans/{id}/s{n}`, `data/{id}/s{n}/t{i}` (trial, no raw events), `raw/{id}/s{n}/t{i}` (raw TraceLab events), `data/{id}/s{n}/practice|survey-pre|survey-post`, `contact/{id}`, `meta/pepper`, `meta/assignment`, `content/current`, `content/history/v{n}`, `admins/{sha256(key)}`, `audit/{time}`, `selftest/{id}`.
+
+### Admin page (`/lab/studies/verification/admin.html`)
+
+Set `VC_ADMIN_KEY` (16+ characters) in the Netlify environment variables; that is the owner key. Tabs:
+
+- *Participants*: progress; trials CSV, surveys CSV, full JSON, and raw-trace JSONL downloads (assembled in the browser in batches of participants, so they work at any study size; optionally real participants only); mark test/real; delete one or all test participants; the live self-test.
+- *Students*: pre-enroll emails (optional while self sign-up is on), check completion, extra-credit list, pilot codes.
+- *Study content*: Sessions & AI (session count, alerts per session, practice alert, counterbalancing, AI behavior mix and confidence ranges), Alerts (add/duplicate/delete, 1–6 evidence panels with CSV variable names), start- and end-of-session surveys, Sign-up & consent, Screen text. Every save is a numbered version that can be restored.
+- *Team* (owner): viewer / editor / manager keys; only hashes are stored. *Activity* (owner): audit log.
+
+### Participant UI and the research behind it
+
+Choices that change measured behavior are marked [B]; keep them identical across conditions and decide them before data collection.
+
+- [B] Confidence is a click-anywhere 0–100 line with **no starting handle**; the number appears once the participant chooses (default handle positions anchor answers: Liu & Conrad 2019; sliders with handles perform worse than click-to-place scales: Funke 2016; Angelike & Reips 2026). Keyboard users can use the arrow keys (starting at 50), and no dragging is required (WCAG 2.5.7).
+- [B] Malicious/Benign button order is fixed for each participant and counterbalanced across participants, in the same neutral style (Tourangeau, Couper & Conrad 2004, 2007). Setting: Sessions & AI.
+- [B] Evidence is revealed by click only, one panel at a time, in an order fixed for each participant and rotated across participants (reading order drives acquisition order: Willemsen & Johnson 2011; Lohse & Johnson 1996). The CSV records `panel_order` and `first_panel_position`.
+- [B] AI advice uses the same neutral box, wording, and position in both AI conditions; only its timing differs. Evidence-first locks the initial answer before the AI appears (Buçinca et al. 2021; Fogliato et al. 2022).
+- [B] Rating scales label every point in words; options are laid out in one row on wide screens and stacked on phones; one question per row, no grids (Krosnick & Presser 2010; Couper et al. 2013; Roßmann et al. 2018; Antoun et al. 2018). The default end-of-session effort item is the 9-point Paas scale with its verbal labels.
+- Short lists use radio buttons, not dropdowns (Couper et al. 2004). Survey questions get one gentle reminder if skipped instead of being forced; trial answers stay required (de Leeuw et al. 2016; Sischka et al. 2022; Décieux et al. 2015).
+- Honest progress only: "Alert k of N" and one dot per session; no progress bar tricks (Villar, Callegaro & Yang 2013; Conrad et al. 2010).
+- No attention checks among the trials (instructed checks change how carefully people work: Hauser & Schwarz 2015); careless responding is judged afterwards from timing traces.
+- Accessibility (WCAG 2.2): focus moves to each new screen's heading, questions are fieldsets with legends, evidence uses the tabs pattern with arrow keys, 48 px tap targets, 3:1 control contrast, visible focus, reduced-motion support, errors announced and explained.
+- Retention: the end screen offers an add-to-calendar file for the next session (Dillman, Smyth & Christian 2014). Reminder emails are not built in.
+
+### Operations runbook
+
+- **Before live participants**: IRB-approved consent pasted in and "IRB-approved" ticked; survey items finalized; GSU sign-off on storing study data and student emails in Netlify Blobs; run the live self-test; delete all test participants.
+- **During the study**: Participants tab for progress; Students → extra-credit list for credit; withdrawals: delete the participant (removes answers, traces, plans, and email).
+- **Exports**: trials CSV and surveys CSV for analysis (definitions in `static/lab/CODEBOOK.md`); full JSON for archiving; raw traces JSONL only if you need event-level data.
+- **Local testing**: `VC_ADMIN_KEY=<key> netlify dev --dir static --offline`, then add test emails with gap days 0; `npm run test:lab` for the automated tests.
+
+### Reusing this for a future study
+
+Generic today, reusable as is: sign-in and tokens, session scheduling and gaps, content versioning, admin roles and audit log, batched exports and safe CSV, the conditional-write store adapter, the self-test pattern, and the participant survey components (labeled scales, confidence line, soft reminders, focus handling). Study-specific: the alert-triage trial (`runTrial` in `app.js`, `buildPlan` / `trialRow` / `cleanTrialData` in `vc-core.mjs`, the Alerts and Sessions & AI editor tabs).
+
+Planned refactor when a second server-backed study starts: move the generic parts to `netlify/lib/study-engine/` (store, identity, sessions, content, admin, exports, selftest) and `static/lab/engine/` (participant shell and survey components), and give each study a plugin `{ id, conditions, defaultContent, validateContent, buildPlan, publicTrial, cleanTrialData, trialRow, simulate }` plus a client `runTrial(ctx) → data`. One function, `/api/study/:studyId/*`, would serve every study with its own Blobs store.

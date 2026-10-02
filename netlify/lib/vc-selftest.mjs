@@ -2,7 +2,7 @@
 // current design against the real store, checks what was saved and exported, then deletes it.
 // Owner-only; triggered from the admin page. Nothing here signs in through the website.
 import * as core from './vc-core.mjs';
-import { getContent, itemsFor } from './vc-content.mjs';
+import { getContent } from './vc-content.mjs';
 
 const pick = (a, r) => a[Math.floor(r() * a.length)];
 
@@ -26,7 +26,7 @@ function answerFor(it, r) {
 
 // Resumable: each call works for about budgetMs, saves its progress under selftest/{code}, and
 // returns { done: false, code } until finished, so no single call hits the function time limit.
-export async function runSelfTest(store, { condition, code, keep = false, budgetMs = 4500 } = {}) {
+export async function runSelfTest(store, { condition, code, keep = false, budgetMs = 2500 } = {}) {
   const t0 = Date.now(), r = Math.random;
   const c = await getContent(store), nS = c.design.sessions.length;
   let st;
@@ -50,46 +50,73 @@ export async function runSelfTest(store, { condition, code, keep = false, budget
       await core.consent(store, code, true);
       st.stage = 'sessions';
     }
+    // One step per loop: open the session (first visit), then one alert at a time, then finish it.
+    // Progress is saved between calls, so each call stays well inside the function time limit.
     while (st.stage === 'sessions') {
       if (st.session > nS) { st.stage = 'verify'; break; }
       if (Date.now() - t0 > budgetMs) { await store.set(`selftest/${code}`, st); return progress(); }
       const s = st.session;
       const plan = await core.startSession(store, code);
       if (!ok(!plan.error && plan.session === s, `Session ${s} opens`)) { st.stage = 'cleanup'; break; }
-      const spec = c.design.sessions[s - 1], usesAI = condition !== 'control' && Array.isArray(spec.ai);
-      ok(plan.total === spec.alerts.length, `Session ${s}: ${spec.alerts.length} alerts`);
-      ok(plan.mode === (usesAI ? condition : 'none'), `Session ${s}: AI mode is "${usesAI ? condition : 'none'}"`);
-      ok(!/"truth"|"supports"|misleading/.test(JSON.stringify(plan)), `Session ${s}: no answer key sent to the browser`);
-      if (!plan.preSurveyDone) {
-        const items = itemsFor(c.survey.pre, 'pre', { session: s, mode: plan.mode, aiRemoved: plan.aiRemoved });
-        const data = Object.fromEntries(items.map(it => [it.id, answerFor(it, r)]));
-        ok((await core.saveSurvey(store, code, s, 'pre', data)).ok, `Session ${s}: start-of-session survey saved`);
-        st.expect.push({ kind: 'pre', session: s, data });
+      st.opened = st.opened || {};
+      if (!st.opened[s]) {
+        st.opened[s] = true;
+        const spec = c.design.sessions[s - 1], usesAI = condition !== 'control' && Array.isArray(spec.ai);
+        ok(plan.total === spec.alerts.length, `Session ${s}: ${spec.alerts.length} alerts`);
+        ok(plan.mode === (usesAI ? condition : 'none'), `Session ${s}: AI mode is "${usesAI ? condition : 'none'}"`);
+        ok(!/"truth"|"supports"|misleading|"variant"|"alertId"/.test(JSON.stringify(plan)) && plan.trials.every(t => !('id' in t.alert)), `Session ${s}: no answer key or alert IDs sent to the browser`);
+        if (!plan.preSurveyDone) {
+          const data = Object.fromEntries(plan.preItems.map(it => [it.id, answerFor(it, r)]));
+          ok((await core.saveSurvey(store, code, s, 'pre', data)).ok, `Session ${s}: start-of-session survey saved`);
+          st.expect.push({ kind: 'pre', session: s, data });
+        }
+        if (plan.practice && !plan.practiceDone) ok((await core.saveTrial(store, code, s, 'practice', { selfTest: true })).ok, `Session ${s}: practice saved`);
+        ok((await core.saveSurvey(store, code, s, 'post', {})).error === 'trials_incomplete', `Session ${s}: cannot finish before all alerts`);
+        continue;
       }
-      if (plan.practice && !plan.practiceDone) ok((await core.saveTrial(store, code, s, 'practice', { selfTest: true })).ok, `Session ${s}: practice saved`);
-      ok((await core.saveSurvey(store, code, s, 'post', {})).error === 'trials_incomplete', `Session ${s}: cannot finish before all alerts`);
-      for (const t of plan.trials) {
-        if (t.done) continue;
-        const keys = t.alert.panels.map(x => x.key), opens = keys.filter(() => r() < 0.6);
-        if (!opens.length) opens.push(keys[0]);
-        const initial = plan.mode === 'evidence_first' ? pick(['malicious', 'benign'], r) : null;
-        const final = pick(['malicious', 'benign'], r);
-        const data = { mode: plan.mode, aiShownAtMs: plan.mode === 'ai_first' ? 0 : plan.mode === 'evidence_first' ? 1000 : null,
-          initial: initial ? { judgment: initial, confidence: 50, rtMs: 900 } : null,
-          final: { judgment: final, confidence: 70, influential: [opens[0]], rtMs: 2000 },
-          evidence: { opens: opens.map((k, i) => ({ panel: k, atMs: 100 + i * 400, dwellMs: 300 })) }, traces: { durationMs: 2000 }, selfTest: true };
-        ok((await core.saveTrial(store, code, s, t.index, data)).ok, `Session ${s}, alert ${t.index + 1}: saved`);
-        st.expect.push({ kind: 'trial', session: s, index: t.index, final, initial, opens, ai: t.ai });
+      const pending = plan.trials.filter(t => !t.done);
+      if (pending.length) {
+        const make = t => {
+          const keys = t.alert.panels.map(x => x.key), opens = keys.filter(() => r() < 0.6);
+          if (!opens.length) opens.push(keys[0]);
+          const initial = plan.mode === 'evidence_first' ? pick(['malicious', 'benign'], r) : null;
+          const final = pick(['malicious', 'benign'], r);
+          const data = { mode: plan.mode, aiShownAtMs: plan.mode === 'ai_first' ? 0 : plan.mode === 'evidence_first' ? 1000 : null,
+            initial: initial ? { judgment: initial, confidence: 50, rtMs: 900 } : null,
+            final: { judgment: final, confidence: 70, influential: [opens[0]], rtMs: 2000 },
+            evidence: { opens: opens.map((k, i) => ({ panel: k, atMs: 100 + i * 400, dwellMs: 300 })) }, traces: { durationMs: 2000 }, selfTest: true,
+            rawEvents: [{ t: 1, type: 'self_test' }] };
+          st.expect.push({ kind: 'trial', session: s, index: t.index, final, initial, opens, ai: t.ai });
+          return data;
+        };
+        st.firstDone = st.firstDone || {};
+        if (!st.firstDone[s] && pending.length > 1) {
+          // Two answers at the same moment (double click, two tabs) must both be kept, and a re-sent
+          // answer must be acknowledged without overwriting the first.
+          st.firstDone[s] = true;
+          const [a, b] = pending, da = make(a), db = make(b);
+          const [r1, r2] = await Promise.all([core.saveTrial(store, code, s, a.index, da), core.saveTrial(store, code, s, b.index, db)]);
+          ok(r1.ok && r2.ok, `Session ${s}: two simultaneous answers both saved`);
+          ok((await core.saveTrial(store, code, s, a.index, { ...da, final: { judgment: 'benign' === da.final.judgment ? 'malicious' : 'benign' } })).repeat, `Session ${s}: a re-sent answer is acknowledged, not overwritten`);
+        } else {
+          const t = pending[0];
+          ok((await core.saveTrial(store, code, s, t.index, make(t))).ok, `Session ${s}, alert ${t.index + 1}: saved`);
+        }
+        continue;
       }
-      const items = itemsFor(c.survey.post, 'post', { session: s, mode: plan.mode, aiRemoved: plan.aiRemoved });
-      const data = Object.fromEntries(items.map(it => [it.id, answerFor(it, r)]));
+      const data = Object.fromEntries(plan.postItems.map(it => [it.id, answerFor(it, r)]));
       const done = await core.saveSurvey(store, code, s, 'post', data);
       ok(done.ok, `Session ${s}: end-of-session survey saved`);
+      ok((await core.saveSurvey(store, code, s, 'post', data)).repeat, `Session ${s}: a re-sent survey is acknowledged`);
       st.expect.push({ kind: 'post', session: s, data });
       ok(s < nS ? done.status.nextSession === s + 1 && done.status.available : done.status.finished, s < nS ? `Session ${s + 1} opens next (no wait for test)` : 'Study marked finished');
       st.session++;
     }
-    if (st.stage === 'verify') { await verify(store, c, st, ok); st.stage = 'cleanup'; }
+    if (st.stage === 'verify') {
+      if (Date.now() - t0 > 1500) { await store.set(`selftest/${code}`, st); return progress(); }
+      await verify(store, c, st, ok); st.stage = 'cleanup';
+      await store.set(`selftest/${code}`, st); return progress();   // clean up in the next call
+    }
   } catch (e) {
     ok(false, 'Unexpected error: ' + (e && e.message || e));
   }
@@ -101,7 +128,8 @@ export async function runSelfTest(store, { condition, code, keep = false, budget
 
 async function verify(store, c, st, ok) {
   const { code, condition, expect } = st, nS = c.design.sessions.length;
-  const stored = await core.loadParticipant(store, code);
+  const plans = {};
+  for (let s = 1; s <= nS; s++) plans[s] = await store.get(`plans/${code}/s${s}`);
   const [trialsText, surveysText, full] = await Promise.all([core.exportCsv(store, code), core.exportSurveyCsv(store, code), core.exportAll(store, code)]);
   const trialsCsv = parseCsv(trialsText), surveysCsv = parseCsv(surveysText);
   const nTrials = c.design.sessions.reduce((n, x) => n + x.alerts.length, 0);
@@ -117,7 +145,7 @@ async function verify(store, c, st, ok) {
   for (const e of expect.filter(x => x.kind === 'trial')) {
     const row = trialsCsv.find(x => +x.session === e.session && +x.trial_index === e.index);
     if (!row) { bad.push(`s${e.session}a${e.index + 1}: missing`); continue; }
-    const a = stored.sessions[e.session].plan.trials[e.index].alert, problems = [];
+    const a = plans[e.session].trials[e.index].alert, problems = [];
     if (row.final_judgment !== e.final) problems.push('answer');
     if (row.correct !== String(+(e.final === a.truth))) problems.push('correct');
     if (row.panel_sequence !== e.opens.join('>')) problems.push('evidence order');
@@ -140,6 +168,8 @@ async function verify(store, c, st, ok) {
   }
   ok(!bad.length, bad.length ? `Survey answers match (problems: ${bad.slice(0, 5).join('; ')})` : `Survey answers match (${expect.filter(x => x.kind !== 'trial').length} surveys)`);
   ok(trialsCsv.every(x => x.content_version === String(c.version || 0)), `Rows are tagged with content version ${c.version || 0}`);
+  ok(trialsCsv.every(x => x.test === '1' && x.label === 'self-test'), 'Rows are marked as test data');
+  ok(!/rawEvents|self_test/.test(JSON.stringify(full.records)) && (await store.list(`raw/${code}/`)).length === nTrials, 'Raw events stored separately, not in the research records');
   ok(!/"pin"|"hash"|"salt"/.test(JSON.stringify(full)), 'No PIN data in the export');
   ok(full.participants.length === 1 && full.participants[0].completed.length === nS, 'Participant record shows every session complete');
 }

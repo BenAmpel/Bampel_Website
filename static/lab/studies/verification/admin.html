@@ -69,11 +69,15 @@
       <section data-tab="participants">
         <div class="row">
           <button type="button" class="secondary" id="refresh">Refresh</button>
-          <button type="button" class="secondary" data-dl="export.csv">Download trials CSV</button>
-          <button type="button" class="secondary" data-dl="export-surveys.csv">Download surveys CSV</button>
-          <button type="button" class="secondary" data-dl="export.json">Download full JSON</button>
+          <button type="button" class="secondary" data-export="trials">Download trials CSV</button>
+          <button type="button" class="secondary" data-export="surveys">Download surveys CSV</button>
+          <button type="button" class="secondary" data-export="json">Download full JSON</button>
+          <button type="button" class="secondary" data-export="raw">Download raw behavior traces (JSONL)</button>
+          <label class="check" style="font-size:13px"><input type="checkbox" id="exreal"> Real participants only</label>
           <button type="button" class="danger secondary" data-role="owner" id="deltest">Delete all test participants</button>
         </div>
+        <p class="muted" id="exprog"></p>
+        <p class="muted">Column definitions: <a href="/lab/CODEBOOK.md" target="_blank" rel="noopener">codebook</a>. Test participants are included and marked in the <code>test</code> column unless "Real participants only" is ticked.</p>
         <p class="muted" id="summary"></p>
         <div class="table-wrap"><table id="tbl"></table></div>
         <div class="section" data-role="owner">
@@ -87,7 +91,7 @@
 
       <section data-tab="students" hidden>
         <h2>Add students</h2>
-        <p class="muted">Optional while self sign-up is on (Study content → Sign-up &amp; consent): add emails here to pre-enroll a class with its own label or gap days, to mark pilots as test, or to let in addresses outside the sign-up domains. One per line or separated by commas. Emails are not stored: the server keeps a one-way keyed hash, so exports stay de-identified. Conditions are assigned in balanced blocks of three across all batches. Emails already enrolled are skipped.</p>
+        <p class="muted">Optional while self sign-up is on (Study content → Sign-up &amp; consent): add emails here to pre-enroll a class with its own label or gap days, to mark pilots as test, or to let in addresses outside the sign-up domains. One per line or separated by commas. Each email is stored once, apart from the answers (for extra credit); research exports identify students only by a study ID derived from the email with a secret key. Conditions are assigned in balanced blocks of three across all batches. Emails already enrolled are skipped.</p>
         <form id="rosterform">
           <textarea id="emails" class="mono" style="width:100%;min-height:110px" placeholder="jdoe1@student.gsu.edu&#10;asmith2@student.gsu.edu"></textarea>
           <div class="row" style="margin-top:8px">
@@ -229,7 +233,56 @@
   $('keyform').addEventListener('submit', function (e) { e.preventDefault(); setKey($('key').value.trim()); start(); });
 
   // ---------- participants ----------
-  var DL = { 'export.csv': 'trials.csv', 'export-surveys.csv': 'surveys.csv', 'export.json': 'all.json', 'credit.csv': 'extra_credit.csv' };
+  // Research exports are assembled here in batches of participants, so no single server request has to
+  // read the whole study (Netlify functions have a ~10 s limit).
+  function csvCell(v) {
+    var s = Array.isArray(v) ? v.join('|') : String(v == null ? '' : v);
+    if (/^[=+@\t\r]/.test(s) || (/^-/.test(s) && !/^-?\d+(\.\d+)?$/.test(s))) s = "'" + s;   // never a spreadsheet formula
+    return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+  function toCsv(rows, first) {
+    var cols = first.filter(function (c) { return rows.some(function (r) { return c in r; }); });
+    rows.forEach(function (r) { Object.keys(r).forEach(function (c) { if (cols.indexOf(c) < 0) cols.push(c); }); });
+    return [cols.map(csvCell).join(',')].concat(rows.map(function (r) { return cols.map(function (c) { return csvCell(r[c]); }).join(','); })).join('\n') + '\n';
+  }
+  function saveFile(text, name, type) {
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: type })); a.download = name; document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+  var FIRST = ['code', 'condition', 'test', 'label', 'self_signup', 'session', 'trial_index', 'alert_id', 'family', 'truth', 'mode'];
+  document.querySelectorAll('[data-export]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      err(); var kind = b.getAttribute('data-export'), day = new Date().toISOString().slice(0, 10);
+      var buttons = document.querySelectorAll('[data-export]'); buttons.forEach(function (x) { x.disabled = true; });
+      getJSON('participants').then(function (list) {
+        var codes = list.filter(function (p) { return !$('exreal').checked || !p.test; }).map(function (p) { return p.code; });
+        var size = kind === 'raw' ? 1 : 10, batches = [];
+        for (var i = 0; i < codes.length; i += size) batches.push(codes.slice(i, i + size));
+        var out = [], done = 0;
+        function step() {
+          if (done >= batches.length) return finish();
+          $('exprog').textContent = 'Exporting… ' + Math.round(done / Math.max(1, batches.length) * 100) + '%';
+          var q = batches[done].join(',');
+          var path = kind === 'raw' ? 'raw?codes=' + q : kind === 'json' ? 'records?codes=' + q : 'rows?kind=' + kind + '&codes=' + q;
+          return getJSON(path).then(function (r) {
+            if (kind === 'raw') r.forEach(function (x) { out.push(JSON.stringify(x)); });
+            else if (kind === 'json') { out.push(r); }
+            else out.push.apply(out, r);
+            done++; return step();
+          });
+        }
+        function finish() {
+          if (kind === 'raw') saveFile(out.join('\n') + '\n', 'verification_raw_' + day + '.jsonl', 'application/x-ndjson');
+          else if (kind === 'json') saveFile(JSON.stringify({ study: 'verification-v1', exportedAt: new Date().toISOString(),
+            participants: [].concat.apply([], out.map(function (r) { return r.participants; })), records: [].concat.apply([], out.map(function (r) { return r.records; })) }), 'verification_all_' + day + '.json', 'application/json');
+          else saveFile(toCsv(out, kind === 'trials' ? FIRST : FIRST.slice(0, 6)), 'verification_' + kind + '_' + day + '.csv', 'text/csv');
+          $('exprog').textContent = 'Exported ' + codes.length + ' participants.';
+        }
+        return step();
+      }).catch(function (e) { err(e.message); }).then(function () { buttons.forEach(function (x) { x.disabled = false; }); });
+    });
+  });
+  var DL = { 'credit.csv': 'extra_credit.csv' };
   document.querySelectorAll('[data-dl]').forEach(function (b) {
     b.addEventListener('click', function () {
       err();
@@ -435,6 +488,8 @@
     var d = draft.design, nAll = draft.alerts.length;
     var h = '<p class="muted">The study runs these sessions in order, each opening after the participant\'s gap days. Each session shows its alerts in a random order. For the AI-first and evidence-first groups, choose what the AI does on each alert in a session; the behaviors are shuffled across that session\'s alerts. The control group never sees the AI.</p>' +
       checkbox('data-path="design.practice" data-bool="1"', d.practice, 'Start session 1 with the practice alert') +
+      checkbox('data-path="design.counterbalance.panels" data-bool="1"', d.counterbalance.panels, 'Counterbalance evidence-panel order across participants (each participant keeps one order)') +
+      checkbox('data-path="design.counterbalance.answers" data-bool="1"', d.counterbalance.answers, 'Counterbalance the Malicious/Benign button order across participants') +
       '<div class="row" style="margin-bottom:12px">' +
       '<label>AI confidence when "high": from ' + num('design.aiConfidence.highMin', d.aiConfidence.highMin, 50, 100) + '</label><label>to ' + num('design.aiConfidence.highMax', d.aiConfidence.highMax, 50, 100) + '</label>' +
       '<label>when "low": from ' + num('design.aiConfidence.lowMin', d.aiConfidence.lowMin, 50, 100) + '</label><label>to ' + num('design.aiConfidence.lowMax', d.aiConfidence.lowMax, 50, 100) + '</label></div>';
@@ -496,9 +551,10 @@
       field('Question text', area(b + '.text', it.text, 2)) +
       '<div class="grid3">' + field('Variable name', inp(b + '.id', it.id, ' class="mono"')) + field('Type', sel(b + '.type', it.type, TYPES)) + field('Show when', sel(b + '.showIf', it.showIf, SHOW)) + '</div>' +
       field('Sessions (numbers separated by commas; blank = ' + (kind === 'pre' ? 'session 1 only' : 'every session') + ')', '<input type="text" data-sessions="' + b + '" value="' + esc((it.sessions || []).join(', ')) + '" style="max-width:240px">') +
-      (it.type === 'scale' ? '<div class="grid3">' + field('Points', num(b + '.n', it.n || 7, 2, 11)) + field('Label for 1', inp(b + '.lo', it.lo || '')) + field('Label for the top point', inp(b + '.hi', it.hi || '')) + '</div>' : '') +
+      (it.type === 'scale' ? '<div class="grid3">' + field('Points', num(b + '.n', it.n || 7, 2, 11)) + field('Label for 1', inp(b + '.lo', it.lo || '')) + field('Label for the top point', inp(b + '.hi', it.hi || '')) + '</div>' +
+        field('Label every point (recommended): one line per point, from 1 to ' + (it.n || 7) + '. Leave empty to label only the ends.', '<textarea data-labels="' + b + '" rows="' + Math.min(11, it.n || 7) + '" class="mono">' + esc((it.labels || []).join('\n')) + '</textarea>') : '') +
       (it.type === 'choice' || it.type === 'select' ? field('Options, one per line (optionally "saved value | text shown")', '<textarea data-opts="' + b + '" rows="4" class="mono">' + esc(optText) + '</textarea>') : '') +
-      checkbox('data-path="' + b + '.required" data-bool="1"', it.required, 'Required') + '</div>';
+      checkbox('data-path="' + b + '.required" data-bool="1"', it.required, 'Required (if unticked, a skipped question gets one gentle reminder)') + '</div>';
   }
 
   $('subtabs').addEventListener('click', function (e) { var s = e.target.getAttribute && e.target.getAttribute('data-sub'); if (s) { sub = s; renderEditor(); } });
@@ -510,6 +566,7 @@
     else if ((v = t.getAttribute('data-opts'))) setPath(v + '.options', t.value.split('\n').map(function (l) { return l.trim(); }).filter(Boolean).map(function (l) {
       var m = l.split(/\s+\|\s+/); return m.length > 1 ? { value: m[0].trim(), label: m.slice(1).join(' | ').trim() } : { value: l, label: l };
     }));
+    else if ((v = t.getAttribute('data-labels'))) setPath(v + '.labels', t.value.split('\n').map(function (x) { return x.trim(); }).filter(Boolean));
     else if (t.hasAttribute('data-domains')) draft.enrollment.domains = t.value.split(/[\s,;]+/).map(function (x) { return x.trim().toLowerCase().replace(/^@/, ''); }).filter(Boolean);
     else if ((v = t.getAttribute('data-sessions'))) setPath(v + '.sessions', t.value.split(/[\s,;]+/).filter(Boolean).map(Number).filter(function (x) { return Number.isInteger(x); }));
     else if ((v = t.getAttribute('data-pkey'))) {
@@ -555,7 +612,7 @@
     if ((v = t.getAttribute('data-add'))) {
       var items = draft.survey[v], n = items.length + 1, id = 'q' + n;
       while (items.some(function (x) { return x.id === id; })) id = 'q' + (++n);
-      items.push({ id: id, text: '', type: 'scale', n: 7, lo: 'Strongly disagree', hi: 'Strongly agree', required: true, showIf: 'always', sessions: v === 'pre' ? [1] : [] });
+      items.push({ id: id, text: '', type: 'scale', n: 7, lo: 'Strongly disagree', hi: 'Strongly agree', labels: ['Strongly disagree', 'Disagree', 'Somewhat disagree', 'Neither agree nor disagree', 'Somewhat agree', 'Agree', 'Strongly agree'], required: false, showIf: 'always', sessions: v === 'pre' ? [1] : [] });
     } else if ((v = t.getAttribute('data-remove'))) {
       var r = v.split('|'); if (!confirm('Remove this question?')) return; draft.survey[r[0]].splice(Number(r[1]), 1);
     } else if ((v = t.getAttribute('data-dupq'))) {

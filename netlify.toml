@@ -2,6 +2,21 @@
   command = "npm install && npm run build:ccair && hugo --gc --minify"
   publish = "public"
 
+# Lab study pages: never framed by other sites, not indexed; admin pages also send no referrer.
+[[headers]]
+  for = "/lab/studies/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    Content-Security-Policy = "frame-ancestors 'none'"
+    X-Robots-Tag = "noindex"
+    Referrer-Policy = "same-origin"
+
+[[headers]]
+  for = "/lab/studies/*/admin.html"
+  [headers.values]
+    Referrer-Policy = "no-referrer"
+    Cache-Control = "no-store"
+
 [build.environment]
   HUGO_VERSION = "0.148.2"
   HUGO_ENV = "production"

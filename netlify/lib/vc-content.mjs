@@ -46,7 +46,7 @@ export const TEXT_FIELDS = [
   ['Instructions', 'instr_ai_first', 'AI-first group, sessions with the AI', 'For each alert, an AI assistant will show its assessment first. Then review whatever evidence you want and make your decision. The AI assistant is helpful but not always correct.'],
   ['Instructions', 'instr_evidence_first', 'Evidence-first group, sessions with the AI', 'For each alert, first review whatever evidence you want and record your initial assessment. Then an AI assistant will show its assessment, and you will make your final decision. You can look at the evidence again before deciding. The AI assistant is helpful but not always correct.'],
   ['Instructions', 'instr_none', 'Sessions without the AI', 'For each alert, review whatever evidence you want and make your decision.'],
-  ['Instructions', 'instr_ai_removed', 'AI groups, first session after the AI is removed', 'In this session there is no AI assistant. For each alert, review whatever evidence you want and make your decision.'],
+  ['Instructions', 'instr_ai_removed', 'AI groups, sessions after the AI is removed', 'In this session there is no AI assistant. For each alert, review whatever evidence you want and make your decision.'],
   ['Instructions', 'instr_outro', 'Closing', 'Open evidence by clicking its tab. Open as much or as little as you think you need. About half of the alerts are malicious.'],
   ['Instructions', 'instr_practice', 'Practice notice', 'You will start with one practice alert that does not count.'],
   ['Instructions', 'begin_button', 'Begin button', 'Begin'],
@@ -62,7 +62,10 @@ export const TEXT_FIELDS = [
   ['Alert screen', 'q_final', 'Decision question', 'Your decision: is this alert malicious or benign?'],
   ['Alert screen', 'q_final_two', 'Decision question after an initial assessment', 'Your final decision: is this alert malicious or benign?'],
   ['Alert screen', 'q_conf', 'Confidence question', 'How confident are you?'],
-  ['Alert screen', 'conf_help', 'Confidence slider help', '0 = guessing, 100 = certain. Click or move the slider to record your answer.'],
+  ['Alert screen', 'conf_help', 'Confidence scale help', 'Click or tap anywhere on the line to set your confidence. You can adjust it before you continue.'],
+  ['Alert screen', 'conf_low', 'Confidence scale, left end', '0 · Guessing'],
+  ['Alert screen', 'conf_high', 'Confidence scale, right end', 'Certain · 100'],
+  ['Alert screen', 'conf_needed', 'Reminder when confidence is missing', 'Set your confidence on the line to continue.'],
   ['Alert screen', 'q_influence', 'Influential-information question', 'Which information most influenced your decision? Select all that apply.'],
   ['Alert screen', 'infl_summary', 'Option: the summary', 'The alert summary'],
   ['Alert screen', 'infl_ai', 'Option: the AI', 'The AI assessment'],
@@ -78,16 +81,23 @@ export const TEXT_FIELDS = [
   ['Surveys', 'pre_title', 'Start-of-session survey title', 'A few questions about you'],
   ['Surveys', 'post_title', 'End-of-session survey title', 'About this session'],
   ['Surveys', 'continue_button', 'Continue button', 'Continue'],
+  ['Surveys', 'skip_prompt', 'Reminder about skipped questions ({n})', 'You left {n} question(s) unanswered. Your answers help the study, but you can continue without them.'],
+  ['Surveys', 'skip_continue', 'Continue without answering', 'Continue anyway'],
+  ['Surveys', 'required_prompt', 'Reminder about required questions', 'Please answer the highlighted question(s) to continue.'],
   ['End of session', 'done_title', 'Title', 'Session complete'],
   ['End of session', 'done_body', 'Text', 'Thank you. Your answers are saved.'],
   ['End of session', 'done_next', 'Next session ({date})', 'Your next session opens on {date}. Sign in the same way each week.'],
   ['End of session', 'finished_title', 'Last session: title', 'Thank you'],
   ['End of session', 'finished_body', 'Last session: text', 'You have completed all sessions of the study. You can close this page.'],
+  ['End of session', 'calendar_button', 'Add-to-calendar button', 'Add the next session to my calendar'],
   ['End of session', 'sign_out', 'Sign-out button', 'Sign out']
 ].map(([group, key, label, def]) => ({ group, key, label, def }));
 export const DEFAULT_TEXT = Object.fromEntries(TEXT_FIELDS.map(f => [f.key, f.def]));
 
-const scale7 = (id, text, showIf = 'ai') => ({ id, text, type: 'scale', n: 7, lo: 'Strongly disagree', hi: 'Strongly agree', required: true, showIf, sessions: [] });
+// Defaults follow web-survey research: every scale point labeled in words, radio buttons rather than
+// dropdowns for short lists, and soft reminders instead of forced answers (see static/lab/README.md).
+const AGREE7 = ['Strongly disagree', 'Disagree', 'Somewhat disagree', 'Neither agree nor disagree', 'Somewhat agree', 'Agree', 'Strongly agree'];
+const scale7 = (id, text, showIf = 'ai') => ({ id, text, type: 'scale', n: 7, lo: AGREE7[0], hi: AGREE7[6], labels: AGREE7, required: false, showIf, sessions: [] });
 
 export const DEFAULT_CONTENT = {
   version: 0,
@@ -108,6 +118,8 @@ export const DEFAULT_CONTENT = {
   enrollment: { open: true, domains: ['gsu.edu', 'student.gsu.edu'], gapDays: 6, label: 'self-signup' },
   design: {
     practice: true,                // one practice alert at the start of session 1
+    // Order effects: each participant gets a fixed order, rotated across participants.
+    counterbalance: { panels: true, answers: true },
     aiConfidence: { highMin: 85, highMax: 95, lowMin: 52, lowMax: 59 },
     // Per session: the alerts shown (in random order) and, for the AI groups, one AI behavior per alert
     // (shuffled), or null for no AI. The control group never sees the AI.
@@ -116,20 +128,25 @@ export const DEFAULT_CONTENT = {
   survey: {
     // Start-of-session questions; "sessions" picks which sessions (default: session 1 only).
     pre: [
-      { id: 'experience_years', text: 'How many years of cybersecurity work or study experience do you have?', type: 'select', required: true, showIf: 'always', sessions: [1],
+      { id: 'experience_years', text: 'How many years of cybersecurity work or study experience do you have?', type: 'choice', required: false, showIf: 'always', sessions: [1],
         options: ['None', 'Less than 1', '1–2', '3–5', 'More than 5'].map(v => ({ value: v, label: v })) },
-      { id: 'role', text: 'Which best describes you?', type: 'choice', required: true, showIf: 'always', sessions: [1],
+      { id: 'role', text: 'Which best describes you?', type: 'choice', required: false, showIf: 'always', sessions: [1],
         options: [['student', 'Student'], ['analyst', 'Security analyst or SOC staff'], ['it', 'Other IT role'], ['other', 'Other']].map(([value, label]) => ({ value, label })) },
-      { id: 'alert_familiarity', text: 'How familiar are you with reviewing security alerts?', type: 'scale', n: 5, lo: 'Not at all familiar', hi: 'Extremely familiar', required: true, showIf: 'always', sessions: [1] },
-      { id: 'ai_use', text: 'How often do you use AI tools (such as chat assistants) for work or study?', type: 'scale', n: 5, lo: 'Never', hi: 'Several times a day', required: true, showIf: 'always', sessions: [1] }
+      { id: 'alert_familiarity', text: 'How familiar are you with reviewing security alerts?', type: 'scale', n: 5, lo: 'Not at all familiar', hi: 'Extremely familiar',
+        labels: ['Not at all familiar', 'Slightly familiar', 'Moderately familiar', 'Very familiar', 'Extremely familiar'], required: false, showIf: 'always', sessions: [1] },
+      { id: 'ai_use', text: 'How often do you use AI tools (such as chat assistants) for work or study?', type: 'scale', n: 5, lo: 'Never', hi: 'Daily',
+        labels: ['Never', 'Less than once a month', 'A few times a month', 'A few times a week', 'Daily'], required: false, showIf: 'always', sessions: [1] }
     ],
     // End-of-session questions; empty "sessions" means every session.
     post: [
       scale7('trust_1', '"I trusted the AI assistant\'s assessments in this session."'),
       scale7('trust_2', '"The AI assistant was reliable."'),
       scale7('reliance_1', '"I relied on the AI assistant to make my decisions."'),
-      { id: 'no_ai_difficulty', text: 'How difficult was it to decide without the AI assistant in this session?', type: 'scale', n: 7, lo: 'Not at all difficult', hi: 'Extremely difficult', required: true, showIf: 'after_ai', sessions: [] },
-      { id: 'mental_effort', text: 'How much mental effort did this session take?', type: 'scale', n: 9, lo: 'Very, very low', hi: 'Very, very high', required: true, showIf: 'always', sessions: [] }
+      { id: 'no_ai_difficulty', text: 'How difficult was it to decide without the AI assistant in this session?', type: 'scale', n: 7, lo: 'Not at all difficult', hi: 'Extremely difficult',
+        labels: ['Not at all difficult', 'Slightly difficult', 'Somewhat difficult', 'Moderately difficult', 'Quite difficult', 'Very difficult', 'Extremely difficult'], required: false, showIf: 'after_ai', sessions: [] },
+      // Paas (1992) mental-effort scale, with its verbal labels.
+      { id: 'mental_effort', text: 'How much mental effort did this session take?', type: 'scale', n: 9, lo: 'Very, very low', hi: 'Very, very high',
+        labels: ['Very, very low', 'Very low', 'Low', 'Rather low', 'Neither low nor high', 'Rather high', 'High', 'Very high', 'Very, very high'], required: false, showIf: 'always', sessions: [] }
     ]
   },
   text: DEFAULT_TEXT,
@@ -159,6 +176,7 @@ export function normalize(c) {
   c.design = c.design || structuredClone(DEFAULT_CONTENT.design);
   c.design.aiConfidence = { ...DEFAULT_CONTENT.design.aiConfidence, ...(c.design.aiConfidence || {}) };
   if (c.design.practice == null) c.design.practice = true;
+  c.design.counterbalance = { ...DEFAULT_CONTENT.design.counterbalance, ...(c.design.counterbalance || {}) };
   c.text = { ...DEFAULT_TEXT, ...(c.text || {}) };
   for (const kind of ['pre', 'post']) for (const it of (c.survey?.[kind] || [])) if (!Array.isArray(it.sessions)) it.sessions = kind === 'pre' ? [1] : [];
   for (const a of c.alerts || []) if (!a.family) a.family = a.id;
@@ -240,6 +258,7 @@ export function validateContent(c) {
   if (!conf || !intIn(conf.highMin, 50, 100) || !intIn(conf.highMax, 50, 100) || !intIn(conf.lowMin, 50, 100) || !intIn(conf.lowMax, 50, 100) || conf.highMin > conf.highMax || conf.lowMin > conf.lowMax)
     e.push('AI confidence ranges must be whole numbers from 50 to 100, with the lowest no higher than the highest.');
   if (typeof d?.practice !== 'boolean') e.push('Choose whether session 1 starts with a practice alert.');
+  if (!d?.counterbalance || typeof d.counterbalance.panels !== 'boolean' || typeof d.counterbalance.answers !== 'boolean') e.push('Choose the counterbalancing settings.');
 
   // Surveys
   const nS = d && Array.isArray(d.sessions) ? d.sessions.length : 0;
@@ -257,6 +276,9 @@ export function validateContent(c) {
       if (!SHOW_IF.includes(it.showIf)) e.push(`${where}: unknown "show when" setting.`);
       if (!Array.isArray(it.sessions) || !it.sessions.every(n => intIn(n, 1, nS))) e.push(`${where}: sessions must be numbers from 1 to ${nS}.`);
       if (it.type === 'scale' && !intIn(it.n, 2, 11)) e.push(`${where}: a scale needs 2 to 11 points.`);
+      if (it.type === 'scale' && it.labels != null && it.labels.length && (!Array.isArray(it.labels) || it.labels.length !== it.n || !it.labels.every(x => str(x, 120))))
+        e.push(`${where}: give one label per point (${it.n}), or leave the labels empty to label only the ends.`);
+      if (['code', 'condition', 'test', 'label', 'self_signup', 'session', 'survey', 'content_version', 'received_at'].includes(it.id)) e.push(`${where}: "${it.id}" is reserved for an export column; choose another variable name.`);
       if (it.type === 'choice' || it.type === 'select') {
         if (!Array.isArray(it.options) || it.options.length < 2) e.push(`${where}: add at least two options.`);
         else if (!it.options.every(o => str(o.value, 200) && str(o.label, 300))) e.push(`${where}: every option needs text.`);
@@ -294,7 +316,9 @@ export async function saveContent(store, next, who, baseVersion, now = Date.now(
   if (errors.length) return { error: 'invalid', status: 400, errors };
   const version = (cur.version || 0) + 1;
   const saved = { version, savedAt: now, savedBy: who, ...clean };
-  await store.set(`content/history/v${String(version).padStart(5, '0')}`, saved);
+  const hk = `content/history/v${String(version).padStart(5, '0')}`;
+  if (store.setIf) { if (!(await store.setIf(hk, saved, { onlyIfNew: true }))) return { error: 'conflict', status: 409, version }; }
+  else await store.set(hk, saved);
   await store.set('content/current', saved);
   clearContentCache();
   return { ok: true, version };
@@ -304,9 +328,8 @@ async function getContentFresh(store) { clearContentCache(); return getContent(s
 
 export async function contentHistory(store) {
   const keys = (await store.list('content/history/')).sort().reverse();
-  const out = [];
-  for (const k of keys.slice(0, 100)) { const c = await store.get(k); if (c) out.push({ version: c.version, savedAt: c.savedAt, savedBy: c.savedBy, restoredFrom: c.restoredFrom ?? null }); }
-  return out;
+  const vals = await Promise.all(keys.slice(0, 100).map(k => store.get(k)));
+  return vals.filter(Boolean).map(c => ({ version: c.version, savedAt: c.savedAt, savedBy: c.savedBy, restoredFrom: c.restoredFrom ?? null }));
 }
 
 export async function restoreContent(store, version, who, now = Date.now()) {

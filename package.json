@@ -1,7 +1,8 @@
 {
   "private": true,
   "scripts": {
-    "build:ccair": "node scripts/build-ccair.js"
+    "build:ccair": "node scripts/build-ccair.js",
+    "test:lab": "node tests/lab/run.mjs"
   },
   "devDependencies": {
     "esbuild": "^0.25.0"

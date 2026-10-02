@@ -15,6 +15,9 @@ function blobStore() {
     get: key => s.get(key, { type: 'json' }),
     set: (key, value) => s.setJSON(key, value),
     delete: key => s.delete(key),
+    // Conditional writes: compare-and-swap on the etag, or create-only.
+    getMeta: async key => { const r = await s.getWithMetadata(key, { type: 'json' }); return r ? { data: r.data, etag: r.etag } : null; },
+    setIf: async (key, value, cond) => (await s.setJSON(key, value, cond.onlyIfNew ? { onlyIfNew: true } : { onlyIfMatch: cond.etag })).modified !== false,
     list: async prefix => {
       const keys = [];
       for await (const page of s.list({ prefix, paginate: true })) for (const b of page.blobs) keys.push(b.key);
@@ -27,8 +30,9 @@ const json = (body, status = 200) => new Response(JSON.stringify(body), {
   status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store', 'x-robots-tag': 'noindex' }
 });
 const csv = (text, name) => new Response(text, {
-  headers: { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': `attachment; filename="${name}"`, 'cache-control': 'no-store' }
+  headers: { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': `attachment; filename="${name}"`, 'cache-control': 'no-store', 'x-robots-tag': 'noindex' }
 });
+const MAX_BODY = 4_000_000; // bytes; a trial with raw events is well under 1 MB
 
 function reply(result) {
   if (result && result.error) return json(result, result.status || 400);
@@ -37,7 +41,7 @@ function reply(result) {
 
 // Minimum role for each admin action.
 const NEED = {
-  me: 'viewer', participants: 'viewer', 'export.csv': 'viewer', 'export-surveys.csv': 'viewer', 'export.json': 'viewer',
+  me: 'viewer', participants: 'viewer', 'export.csv': 'viewer', 'export-surveys.csv': 'viewer', 'export.json': 'viewer', rows: 'viewer', records: 'viewer', raw: 'viewer',
   content: 'viewer', 'content-history': 'viewer',
   'content-save': 'editor', 'content-restore': 'editor',
   roster: 'manager', lookup: 'manager', 'credit.csv': 'manager', create: 'manager', 'set-test': 'manager',
@@ -49,7 +53,12 @@ export default async (req) => {
   const route = url.pathname.replace(/^\/api\/vc\/?/, '');
   const store = blobStore();
   let body = {};
-  if (req.method === 'POST') { try { body = await req.json(); } catch { return json({ error: 'bad_json' }, 400); } }
+  if (req.method === 'POST') {
+    if (Number(req.headers.get('content-length') || 0) > MAX_BODY) return json({ error: 'too_large' }, 413);
+    const text = await req.text();
+    if (text.length > MAX_BODY) return json({ error: 'too_large' }, 413);
+    try { body = JSON.parse(text || '{}'); } catch { return json({ error: 'bad_json' }, 400); }
+  }
 
   try {
     if (route === 'content') return json(content.publicContent(await content.getContent(store)));
@@ -57,13 +66,14 @@ export default async (req) => {
       const creds = body.email != null ? { email: body.email, confirm: body.confirm === true } : { code: body.code };
       return reply(await core.login(store, creds));
     }
-    if (['resume', 'consent', 'session', 'trial', 'survey'].includes(route)) {
+    if (['resume', 'consent', 'session', 'view', 'trial', 'survey'].includes(route)) {
       const pid = await core.verifyToken(store, body.token);
       if (!pid) return json({ error: 'expired' }, 401);
       switch (route) {
         case 'resume': return reply(await core.resume(store, pid));
         case 'consent': return reply(await core.consent(store, pid, body.agree === true));
         case 'session': return reply(await core.startSession(store, pid));
+        case 'view': return reply(await core.viewTrial(store, pid, Number(body.session), body.index === 'practice' ? 'practice' : Number(body.index)));
         case 'trial': return reply(await core.saveTrial(store, pid, Number(body.session), body.index === 'practice' ? 'practice' : Number(body.index), body.data));
         case 'survey': return reply(await core.saveSurvey(store, pid, Number(body.session), body.kind, body.data));
       }
@@ -79,11 +89,17 @@ export default async (req) => {
       if (!admin.can(who.role, need)) return json({ error: 'not_allowed', need }, 403);
       const list = v => (Array.isArray(v) ? v : String(v || '').split(/[\s,;]+/)).map(x => String(x).trim()).filter(Boolean).slice(0, 2000);
       const gap = body.gapDays == null || body.gapDays === '' ? undefined : Number(body.gapDays);
+      if (gap !== undefined && !(Number.isInteger(gap) && gap >= 0 && gap <= 60)) return json({ error: 'bad_gap', hint: 'Gap days must be a whole number from 0 to 60.' }, 400);
+      // Batched exports: the admin page asks for at most 25 participants per request.
+      const codes = (url.searchParams.get('codes') || '').split(',').filter(x => /^(P-[0-9a-f]{16}|VC-[A-Z0-9]{4}-[A-Z0-9]{4})$/.test(x)).slice(0, 25);
 
       switch (action) {
         case 'me': return json({ name: who.name, role: who.role, roles: admin.ROLE_INFO });
         case 'participants': return json(await core.listParticipants(store));
         case 'export.json': return json(await core.exportAll(store));
+        case 'rows': return json(await core.exportRows(store, url.searchParams.get('kind') === 'surveys' ? 'surveys' : 'trials', codes.length ? codes : ['none']));
+        case 'records': return json(await core.exportRecords(store, codes.length ? codes : ['none']));
+        case 'raw': return json(codes.length === 1 ? await core.exportRaw(store, codes[0]) : { error: 'one_code' });
         case 'export.csv': return csv(await core.exportCsv(store), 'verification_trials.csv');
         case 'credit.csv': return csv(await core.exportCredit(store), 'extra_credit.csv');
         case 'export-surveys.csv': return csv(await core.exportSurveyCsv(store), 'verification_surveys.csv');

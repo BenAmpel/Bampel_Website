@@ -7,7 +7,7 @@ export const ROLES = ['viewer', 'editor', 'manager', 'owner'];
 export const ROLE_INFO = {
   viewer: 'See progress and download data',
   editor: 'Viewer, plus edit questions, alerts, and consent text',
-  manager: 'Editor, plus add students, check completion, reset PINs, and create pilot codes',
+  manager: 'Editor, plus add students, check completion, download the extra-credit list, and create pilot codes',
   owner: 'Everything, including deleting data and managing the team'
 };
 export const can = (role, need) => ROLES.indexOf(role) >= ROLES.indexOf(need);
@@ -60,7 +60,6 @@ export async function audit(store, who, action, detail, now = Date.now()) {
 
 export async function auditLog(store, limit = 300) {
   const keys = (await store.list('audit/')).sort().reverse().slice(0, limit);
-  const out = [];
-  for (const k of keys) { const r = await store.get(k); if (r) out.push(r); }
-  return out;
+  const vals = await Promise.all(keys.map(k => store.get(k)));
+  return vals.filter(Boolean);
 }
