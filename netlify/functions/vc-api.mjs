@@ -7,6 +7,7 @@ import { getStore } from '@netlify/blobs';
 import * as core from '../lib/vc-core.mjs';
 import * as content from '../lib/vc-content.mjs';
 import * as admin from '../lib/vc-admin.mjs';
+import { runSelfTest } from '../lib/vc-selftest.mjs';
 
 function blobStore() {
   const s = getStore({ name: 'verification-study', consistency: 'strong' });
@@ -40,7 +41,7 @@ const NEED = {
   content: 'viewer', 'content-history': 'viewer',
   'content-save': 'editor', 'content-restore': 'editor',
   roster: 'manager', lookup: 'manager', 'reset-pin': 'manager', create: 'manager', 'set-test': 'manager',
-  delete: 'owner', 'delete-test': 'owner', team: 'owner', 'team-add': 'owner', 'team-remove': 'owner', activity: 'owner'
+  delete: 'owner', 'delete-test': 'owner', 'self-test': 'owner', team: 'owner', 'team-add': 'owner', 'team-remove': 'owner', activity: 'owner'
 };
 
 export default async (req) => {
@@ -134,6 +135,11 @@ export default async (req) => {
           const r = await core.deleteTestParticipants(store);
           await admin.audit(store, who, 'participant.delete_test', `${r.participants} test participants, ${r.records} records`);
           return json(r);
+        }
+        case 'self-test': {
+          const r = await runSelfTest(store, { condition: String(body.condition || ''), code: body.code ? String(body.code) : undefined, keep: body.keep === true });
+          if (r.done) await admin.audit(store, who, 'self_test', `${r.condition}: ${r.passed} passed, ${r.failed} failed${r.kept ? ', kept ' + r.code : ''}`);
+          return reply(r);
         }
         case 'team-add': return reply(await admin.addMember(store, body.name, body.role, who));
         case 'team-remove': return reply(await admin.removeMember(store, body.id, who));

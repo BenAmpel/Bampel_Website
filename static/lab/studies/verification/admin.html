@@ -76,6 +76,13 @@
         </div>
         <p class="muted" id="summary"></p>
         <div class="table-wrap"><table id="tbl"></table></div>
+        <div class="section" data-role="owner">
+          <h2>Live self-test</h2>
+          <p class="muted">Runs one throwaway test participant per group through every session of the current design on this live site (practice, surveys, every alert), then checks what was saved and what the exports say, and deletes the test participants. Takes about a minute. Real participants are not touched.</p>
+          <div class="row"><button type="button" id="selftest">Run self-test (all three groups)</button><label class="check"><input type="checkbox" id="stkeep"> Keep the test participants so I can look at them (delete later with "Delete all test participants")</label></div>
+          <p class="muted" id="stprog"></p>
+          <div id="stout"></div>
+        </div>
       </section>
 
       <section data-tab="students" hidden>
@@ -266,6 +273,30 @@
     if (!confirm('Permanently delete ' + id + (p.test ? ' (test)' : '') + ' and all of their answers and traces?' +
       (p.test ? '' : '\n\nThis is a REAL participant. Only do this if they withdrew or asked for their data to be removed.') + '\n\nThis cannot be undone.')) return;
     postJSON('delete', { id: id }).then(function (r) { load(); setTimeout(function () { $('summary').insertAdjacentHTML('afterbegin', '<span class="ok">Deleted ' + esc(r.code) + ' and ' + r.records + ' records.</span> '); }, 600); }).catch(function (e) { err(e.message); });
+  });
+  $('selftest').addEventListener('click', function () {
+    var btn = $('selftest'), keep = $('stkeep').checked, groups = ['ai_first', 'evidence_first', 'control'], results = [];
+    btn.disabled = true; err(); $('stout').innerHTML = '';
+    function step(i, code) {
+      if (i >= groups.length) return finish();
+      $('stprog').textContent = 'Running ' + groups[i] + (code ? '…' : ' (starting)…');
+      postJSON('self-test', code ? { code: code } : { condition: groups[i], keep: keep }).then(function (r) {
+        if (r.error) throw new Error(r.error);
+        if (!r.done) { $('stprog').textContent = 'Running ' + groups[i] + ': session ' + r.session + ' of ' + r.sessions + ', ' + r.passed + ' checks passed so far…'; return step(i, r.code); }
+        results.push(r); step(i + 1, null);
+      }).catch(function (e) { btn.disabled = false; $('stprog').textContent = ''; err('Self-test stopped: ' + e.message); });
+    }
+    function finish() {
+      btn.disabled = false;
+      var failed = results.reduce(function (n, r) { return n + r.failed; }, 0), passed = results.reduce(function (n, r) { return n + r.passed; }, 0);
+      $('stprog').innerHTML = failed ? '<span class="error">' + failed + ' check(s) failed, ' + passed + ' passed.</span>' : '<span class="ok">All ' + passed + ' checks passed</span> (content version ' + results[0].contentVersion + ').';
+      $('stout').innerHTML = results.map(function (r) {
+        return '<details' + (r.failed ? ' open' : '') + ' style="margin:8px 0"><summary><strong>' + esc(r.condition) + '</strong>: ' + r.passed + ' passed, ' + r.failed + ' failed, ' + Math.round(r.ms / 1000) + 's' + (r.kept ? ' (kept as ' + esc(r.code) + ')' : '') + '</summary><ul style="margin:6px 0;font-size:13px">' +
+          r.checks.map(function (c) { return '<li class="' + (c.pass ? '' : 'error') + '">' + (c.pass ? '✓ ' : '✗ ') + esc(c.what) + '</li>'; }).join('') + '</ul></details>';
+      }).join('');
+      load();
+    }
+    step(0, null);
   });
   $('deltest').addEventListener('click', function () {
     var n = people.filter(function (p) { return p.test; }).length;

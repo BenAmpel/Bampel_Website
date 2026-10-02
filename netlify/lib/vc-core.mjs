@@ -322,6 +322,15 @@ export async function createParticipants(store, count, opts = {}, now = Date.now
   return { created: made.map(p => ({ code: p.code, condition: p.condition, label: p.label, gapDays: p.gapDays, test: p.test })) };
 }
 
+// Self-test participants: fixed condition, outside the balanced assignment blocks.
+export async function createTestParticipant(store, condition, now = Date.now(), rand = Math.random) {
+  if (!STUDY.conditions.includes(condition)) return { error: 'bad_condition', status: 400 };
+  let code; do { code = newCode(rand); } while (await store.get(pKey(code)));
+  const p = { code, condition, createdAt: now, gapDays: 0, label: 'self-test', test: true, selfTest: true };
+  await store.set(pKey(code), p);
+  return p;
+}
+
 // Adds roster emails. Only hashes are stored; emails already enrolled are left as they are.
 export async function addRoster(store, emails, opts = {}, now = Date.now(), rand = Math.random) {
   const pepper = await getPepper(store, true);
@@ -380,13 +389,19 @@ export async function listParticipants(store, now = Date.now()) {
   return out.sort((a, b) => (a.label || a.code).localeCompare(b.label || b.code));
 }
 
-export async function exportAll(store) {
-  const keys = await store.list('data/');
+// `only` limits the export to one participant (used by the self-test).
+export async function exportAll(store, only) {
+  const keys = await store.list(only ? `data/${only}/` : 'data/');
   const records = [];
-  for (const k of keys) records.push({ key: k, ...(await store.get(k)) });
+  for (let i = 0; i < keys.length; i += 25) {   // read in parallel batches
+    const batch = keys.slice(i, i + 25);
+    const vals = await Promise.all(batch.map(k => store.get(k)));
+    batch.forEach((k, j) => records.push({ key: k, ...vals[j] }));
+  }
   const participants = [];
-  for (const k of await store.list('participants/')) {
-    const { pin, sessions, ...p } = await store.get(k);
+  for (const k of only ? [`participants/${only}`] : await store.list('participants/')) {
+    const rec = await store.get(k); if (!rec) continue;
+    const { pin, sessions, ...p } = rec;
     p.sessions = Object.fromEntries(Object.entries(sessions || {}).map(([n, x]) => { const { plan, ...rest } = x; return [n, { ...rest, mode: plan?.mode, contentVersion: plan?.contentVersion, alerts: plan?.trials.map(t => t.alertId) }]; }));
     participants.push(p);
   }
@@ -394,8 +409,8 @@ export async function exportAll(store) {
 }
 
 // Trial-level CSV with derived verification, reliance, and performance measures.
-export async function exportCsv(store) {
-  const { records } = await exportAll(store);
+export async function exportCsv(store, only) {
+  const { records } = await exportAll(store, only);
   const trials = records.filter(r => /\/t\d+$/.test(r.key));
   // One dwell column per evidence panel variable name in use (the four defaults first).
   const seen = new Set(trials.flatMap(r => (r.alert?.panels || []).map(x => x.key)));
@@ -435,8 +450,8 @@ export async function exportCsv(store) {
 const csvCell = v => { const s = Array.isArray(v) ? v.join('|') : String(v ?? ''); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
 
 // One row per survey response; one column per question variable seen in any response.
-export async function exportSurveyCsv(store) {
-  const { records } = await exportAll(store);
+export async function exportSurveyCsv(store, only) {
+  const { records } = await exportAll(store, only);
   const rs = records.filter(r => /\/survey-(pre|post)$/.test(r.key));
   const vars = [...new Set(rs.flatMap(r => Object.keys(r.data || {})))].sort();
   const head = ['code', 'condition', 'session', 'survey', 'content_version', 'received_at', ...vars];
@@ -450,7 +465,7 @@ export async function deleteParticipant(store, id) {
   const p = await store.get(pKey(id));
   if (!p) return { error: 'not_found', status: 404 };
   const keys = await store.list(`data/${p.code}/`);
-  for (const k of keys) await store.delete(k);
+  for (let i = 0; i < keys.length; i += 25) await Promise.all(keys.slice(i, i + 25).map(k => store.delete(k)));
   await store.delete(pKey(p.code));
   return { ok: true, code: p.code, test: !!p.test, records: keys.length };
 }
