@@ -1,12 +1,12 @@
-// Verification study: admin access (owner + team members), activity log.
-// The owner signs in with the VC_ADMIN_KEY environment variable. The owner can give team
-// members their own keys; only a SHA-256 hash of each key is stored.
+// CARE Behavioral Lab: admin access (lab owner + per-study team members) and the activity log.
+// The lab owner signs in with the LAB_ADMIN_KEY environment variable (VC_ADMIN_KEY also works). The owner gives team
+// members their own key per study; only a SHA-256 hash of each key is stored, in that study's store.
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 
 export const ROLES = ['viewer', 'editor', 'manager', 'owner'];
 export const ROLE_INFO = {
   viewer: 'See progress and download data',
-  editor: 'Viewer, plus edit questions, alerts, and consent text',
+  editor: 'Viewer, plus edit the study content (questions, items, consent, screen text)',
   manager: 'Editor, plus add students, check completion, download the extra-credit list, and create pilot codes',
   owner: 'Everything, including deleting data and managing the team'
 };

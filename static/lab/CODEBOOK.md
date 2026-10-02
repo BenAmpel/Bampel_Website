@@ -1,6 +1,8 @@
-# Verification study: export codebook
+# Lab export codebook
 
-Trials CSV: one row per alert answered. Surveys CSV: one row per survey submitted. Times are ISO 8601 UTC; durations are milliseconds. Empty cells mean "not applicable" (for example, AI columns in sessions without the AI).
+Applies to every study on the lab engine. "Identifiers and design" (first rows), "Behavior and context", and "Surveys CSV" are the same for every study; the alert sections are specific to `alert-triage` studies (the verification study), and "Vignettes studies" lists the columns of `vignettes` studies.
+
+Trials CSV: one row per item (alert, scenario) answered. Surveys CSV: one row per survey submitted. Times are ISO 8601 UTC; durations are milliseconds. Empty cells mean "not applicable" (for example, AI columns in sessions without the AI).
 
 ## Identifiers and design
 
@@ -72,3 +74,19 @@ Device details (touch, screen size, user agent) are in the full JSON export, on 
 ## Surveys CSV
 
 `code`, `condition`, `test`, `label`, `self_signup`, `session`, `survey` (`pre` = start of session, `post` = end of session), `content_version`, `received_at`, then one column per question variable name. Scale answers are the point number (1 = left/first). A question variable that would collide with one of these columns is exported as `q_{name}`. Blank = skipped (survey questions are not forced unless marked required).
+
+## Vignettes studies
+
+Trials CSV columns after `trial_index` (the generic identifier, behavior, and context columns above also apply):
+
+| Column | Meaning |
+|---|---|
+| `item_id`, `item_title` | Item as defined on the admin page (Items tab) |
+| `item_kind` | `text` or `email` |
+| `item_variant` | Condition whose wording was shown; blank = the base wording |
+| `rt_ms` | Time from the item appearing to submitting |
+| `first_answer_ms`, `answer_changes` | Time to the first answer; number of answer changes (from TraceLab) |
+| `link_hovers`, `link_hover_ms`, `link_clicks` | Pointer hovers over links in the item, total hover time, and clicks (links do not open) |
+| `a_{question}` | Answer to each item question (scale point, option value, 0–100 confidence, or text) |
+
+Per-link detail (`link:<url>` targets) is in the full JSON export under `records[].data.traces.hovers` and `clickTargets`.

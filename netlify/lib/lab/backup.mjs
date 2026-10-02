@@ -1,12 +1,11 @@
-// Verification study: backups.
-// An hourly scheduled function mirrors the study store into a separate Blobs store
-// ("verification-backup", keys "m/{original key}"). Answers are write-once, so each run copies only
-// keys the mirror doesn't have yet; small records that can change (participants, content, team) are
-// re-copied every run. Each run stops after a time budget and the next run continues.
-// Deleting a participant (e.g., a withdrawal) also removes them from the mirror.
-// The admin page's "Download complete backup" gives an off-Netlify copy to keep in GSU storage.
+// CARE Behavioral Lab: backups, for every study.
+// An hourly scheduled function mirrors each study's store into its backup store (keys "m/{original key}").
+// Answers are write-once, so each run copies only keys the mirror doesn't have yet; records that can
+// change (participants, content, team, meta) are re-copied every run. Each run stops after a time
+// budget and the next run continues. Deleting a participant also removes them from the mirror.
+// The admin page's "Download complete backup" gives an off-Netlify copy for GSU-approved storage.
+import { deleteKeys } from './store.mjs';
 
-// Keys whose value can change after they are first written; everything else is write-once.
 const MUTABLE = [/^participants\//, /^content\/current$/, /^meta\//, /^admins\//];
 const PREFIXES = ['participants/', 'consent/', 'plans/', 'started/', 'done/', 'views/', 'data/', 'raw/', 'contact/', 'cond/', 'cond-test/', 'content/', 'admins/', 'audit/', 'meta/'];
 const STATE = 'state/backup';
@@ -25,9 +24,8 @@ export async function runBackup(main, backup, { budgetMs = 20000, now = Date.now
     copied += batch.length;
   }
   const state = { lastRunAt: now, complete: done, copied, pending: todo.length - copied, keysInStudy: mainKeys.length, keysInMirror: (await backup.list('m/')).length, ms: Date.now() - t0 };
-  if (done) state.lastCompleteAt = now;
   const prev = (await backup.get(STATE)) || {};
-  await backup.set(STATE, { ...prev, ...state, lastCompleteAt: state.lastCompleteAt || prev.lastCompleteAt || null });
+  await backup.set(STATE, { ...prev, ...state, lastCompleteAt: done ? now : prev.lastCompleteAt || null });
   return state;
 }
 
@@ -35,11 +33,10 @@ export async function backupStatus(backup) {
   return (await backup.get(STATE)) || { lastRunAt: null, lastCompleteAt: null };
 }
 
-// Removes a participant from the mirror (withdrawal or test cleanup must not leave copies behind).
+// Removes a participant from the mirror (a withdrawal or test cleanup must not leave copies behind).
 export async function purgeParticipant(backup, code, condition) {
-  const prefixes = ['data/', 'raw/', 'plans/', 'started/', 'done/', 'views/'].map(p => `m/${p}${code}/`);
-  const keys = (await Promise.all(prefixes.map(p => backup.list(p)))).flat()
+  const keys = (await Promise.all(['data', 'raw', 'plans', 'started', 'done', 'views'].map(p => backup.list(`m/${p}/${code}/`)))).flat()
     .concat([`m/participants/${code}`, `m/contact/${code}`, `m/consent/${code}`, `m/cond/${condition}/${code}`, `m/cond-test/${condition}/${code}`]);
-  for (let i = 0; i < keys.length; i += 40) await Promise.all(keys.slice(i, i + 40).map(k => backup.delete(k)));
+  await deleteKeys(backup, keys);
   return keys.length;
 }

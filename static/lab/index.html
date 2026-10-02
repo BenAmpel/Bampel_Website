@@ -83,6 +83,7 @@
       </div>
       <a class="btn" href="/lab/studies/demo-phishing/">Try the demo</a>
     </div>
+    <div id="live">
     <div class="card study">
       <div>
         <span class="tag mono">Pilot · GSU email sign-in</span>
@@ -90,6 +91,7 @@
         <p>Four weekly sessions of security alert triage, with and without an AI assistant. GSU students sign in with their university email.</p>
       </div>
       <a class="btn" href="/lab/studies/verification/">Sign in</a>
+    </div>
     </div>
     <p style="color:var(--muted);font-size:14px;margin-top:12px">Live studies appear here once they have IRB approval. Participants reach them through the study link they are given.</p>
   </section>
@@ -121,5 +123,16 @@
 <footer>
   <div class="wrap">CARE Behavioral Lab · Directed by Dr. Benjamin M. Ampel · <a href="mailto:bampel@gsu.edu">bampel@gsu.edu</a></div>
 </footer>
+<script>
+  // Listed studies come from the lab registry (/api/lab/_lab/studies); the card above is the fallback.
+  fetch('/api/lab/_lab/studies').then(function (r) { return r.ok ? r.json() : null; }).then(function (list) {
+    if (!list || !list.length) return;
+    var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+    document.getElementById('live').innerHTML = list.map(function (s) {
+      return '<div class="card study" style="margin-top:14px"><div><span class="tag mono">Live · email sign-in</span><h3>' + esc(s.name) + '</h3><p>' + esc(s.description) + '</p></div>' +
+        '<a class="btn" href="' + esc(s.paths.participant) + '">Sign in</a></div>';
+    }).join('');
+  }).catch(function () {});
+</script>
 </body>
 </html>

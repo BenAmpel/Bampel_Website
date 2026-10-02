@@ -17,6 +17,35 @@
     Referrer-Policy = "no-referrer"
     Cache-Control = "no-store"
 
+[[headers]]
+  for = "/lab/s/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    Content-Security-Policy = "frame-ancestors 'none'"
+    X-Robots-Tag = "noindex"
+    Referrer-Policy = "same-origin"
+
+[[headers]]
+  for = "/lab/admin/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    Content-Security-Policy = "frame-ancestors 'none'"
+    X-Robots-Tag = "noindex"
+    Referrer-Policy = "no-referrer"
+    Cache-Control = "no-store"
+
+# Lab engine: every study is served by one participant page and one admin page, which read the study ID
+# from the address (/lab/s/<study>, /lab/admin/<study>).
+[[redirects]]
+  from = "/lab/s/*"
+  to = "/lab/s/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/lab/admin/*"
+  to = "/lab/admin/index.html"
+  status = 200
+
 [build.environment]
   HUGO_VERSION = "0.148.2"
   HUGO_ENV = "production"

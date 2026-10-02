@@ -1,8 +1,8 @@
-import * as core from '../../netlify/lib/vc-core.mjs';
+import { core } from './compat.mjs';
 import assert from 'node:assert/strict';
 import { memStore } from './memstore.mjs';
 const store=memStore({latency:0}), m={get:k=>store.m.has(k)?store.m.get(k).v:undefined, entries:()=>[...store.m.entries()].map(([k,x])=>[k,x.v]), values:()=>[...store.m.values()].map(x=>x.v)};
-import * as content from '../../netlify/lib/vc-content.mjs';
+import { content } from './compat.mjs';
 const C0=content.normalize(structuredClone(content.DEFAULT_CONTENT));
 
 let now=Date.UTC(2026,9,5,15);

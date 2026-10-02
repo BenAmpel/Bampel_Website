@@ -1,5 +1,5 @@
-import * as core from '../../netlify/lib/vc-core.mjs';
-import * as content from '../../netlify/lib/vc-content.mjs';
+import { core } from './compat.mjs';
+import { content } from './compat.mjs';
 import assert from 'node:assert/strict';
 import { memStore } from './memstore.mjs';
 const store = memStore({ latency: 2 });

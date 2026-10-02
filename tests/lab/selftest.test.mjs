@@ -1,5 +1,5 @@
-import { runSelfTest } from '../../netlify/lib/vc-selftest.mjs';
-import * as core from '../../netlify/lib/vc-core.mjs';
+import { runSelfTest } from './compat.mjs';
+import { core } from './compat.mjs';
 import assert from 'node:assert/strict';
 import { memStore } from './memstore.mjs';
 const store=memStore({latency:80}), m={get:k=>store.m.has(k)?store.m.get(k).v:undefined, entries:()=>[...store.m.entries()].map(([k,x])=>[k,x.v]), values:()=>[...store.m.values()].map(x=>x.v)};

@@ -1,5 +1,5 @@
-import * as core from '../../netlify/lib/vc-core.mjs';
-import { runBackup, backupStatus, purgeParticipant } from '../../netlify/lib/vc-backup.mjs';
+import { core } from './compat.mjs';
+import { runBackup, backupStatus, purgeParticipant } from '../../netlify/lib/lab/backup.mjs';
 import assert from 'node:assert/strict';
 import { memStore } from './memstore.mjs';
 const main = memStore(), backup = memStore({ latency: 1 });

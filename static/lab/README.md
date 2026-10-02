@@ -4,21 +4,49 @@ Browser-based behavioral studies at `bampel.com/lab/`. Everything here is static
 
 ```
 static/lab/
-  index.html                    lab landing page
+  index.html                    lab landing page (lists studies from the registry)
   assets/study.css              plain, light styling for participant pages
   tracelab/tracelab.js          passive trace capture (no dependencies)
+  engine/participant.js, .css   shared participant app (every server-backed study)
+  engine/admin.js, .css         shared admin page and lab console
+  engine/types/<type>.js        a study type's item screen
+  engine/types/<type>-admin.js  a study type's content-editor tabs and report sections
+  s/index.html                  participant page for /lab/s/<study>
+  admin/index.html              admin page for /lab/admin/<study>; lab console at /lab/admin/
   studies/demo-phishing/        demo study; data never leaves the browser
-  studies/verification/         multi-week alert triage study (GSU email sign-in, server storage)
-  CODEBOOK.md                   column definitions for the verification study exports
+  studies/verification/         original URLs of the verification study (thin pages on the engine)
+  CODEBOOK.md                   column definitions for the exports
 ```
+
+## Study engine
+
+Every server-backed study runs on one engine; a study is data (its content, edited on its admin page) plus a **study type** that defines its item screen. The engine provides, for every study: GSU-email sign-in (or pilot codes), consent, multi-session scheduling with gap days, balanced condition assignment, start- and end-of-session surveys, behavior traces, write-once storage, versioned content editing, team roles, the activity log, batched exports, hourly backups, the pilot report, and the live self-test.
+
+| Layer | Files |
+|---|---|
+| HTTP | `netlify/functions/lab-api.mjs` → `netlify/lib/lab/router.mjs`: `/api/lab/<study>/*` (participant and admin routes), `/api/lab/_lab/*` (studies list, create, update), `/api/vc/*` (original verification URLs) |
+| Registry | `netlify/lib/lab/registry.mjs`: built-in studies in code; studies created in the lab console are stored in the `lab-registry` Blobs store. Each study gets its own stores (`lab-<id>`, `lab-<id>-backup`). |
+| Engine | `engine.mjs` (identity, sessions, plans, saving, exports, deletes), `content.mjs` (engine content, validation, versions), `admin.mjs` (keys, roles, audit), `backup.mjs`, `selftest.mjs`, `store.mjs` |
+| Study types | `netlify/lib/lab/types/<type>.mjs` (server) + `static/lab/engine/types/<type>.js` and `<type>-admin.js` (browser), registered in `types/index.mjs` |
+| Backups | `netlify/functions/lab-backup.mjs`: hourly, every study in the registry |
+| Tests | `npm run test:lab` (in-memory stores); `npm run lab:dev` runs the pages and API locally on in-memory stores at `http://localhost:8899/lab/admin/` (owner key `local-owner-key-0123456789`) |
+
+Study types today:
+
+- **`alert-triage`**: security alerts with click-to-reveal evidence and scheduled AI advice (AI-first, evidence-first, control). Used by the verification study.
+- **`vignettes`** (general purpose): scenarios as plain text or emails (optionally with an image), each followed by configurable questions (rating scales, multiple choice, confidence line, text). Conditions are defined in the content, and each item can have different wording per condition, so manipulations need no code. Links written `[text](url)` are shown as links that do not open; pointing at one shows its address at the bottom of the screen, and hovers and clicks are recorded. Sessions without items make a survey-only (for example, longitudinal) study.
 
 ## Adding a study
 
-1. Copy `studies/demo-phishing/` to `studies/<study-id>/`.
-2. Replace the consent text with the IRB-approved wording, and the items with your stimuli. Use fictional organizations for phishing stimuli.
-3. Mark anything whose hover or click matters with `data-trace="name"` (links, email headers, answer options).
-4. Choose a sink (below). Keep `{ type: 'local' }` until the protocol and storage are approved.
-5. Add a card for the study on `index.html`.
+**With an existing type (no code):** open `/lab/admin/` with the owner key, create the study (name, ID, type), then on its admin page edit the content (consent, items, questions, sessions), run the live self-test, and pilot. When the consent is IRB-approved and it is ready to recruit, click *List* in the lab console to show it on `/lab/`. Participants sign in at `/lab/s/<id>`.
+
+**With a new type (code):** add three files and register the type in `netlify/lib/lab/types/index.mjs`.
+
+- `netlify/lib/lab/types/<type>.mjs` exports `{ id, label, description, contentKeys, textFields, defaultContent(), normalize(c, defaults), validate(c, errors), conditionsOf(c), sessionCount(c), surveyRules, surveyRule?(rule, ctx), editorMeta?(), buildPlan(p, session, c, rand, helpers) → { trials, practice, ... }, publicTrial(t, plan), publicPlanExtras?(plan), cleanTrialData(data, t, plan), recordFields(t, plan), trialRow(record), simulate(trial, plan, rand), checkRow(row, sent), checkSession(rows, session, condition, c) }`. The browser never sees anything `publicTrial` leaves out (answer keys, internal IDs). `simulate`, `checkRow`, and `checkSession` make the live self-test work for the type.
+- `static/lab/engine/types/<type>.js` calls `LabEngine.registerType('<type>', { instructions?(plan, ui) → html, runTrial(ctx, ui) })`. `runTrial` draws the item with `ui` (escaping, screen text, question components, focus handling) and calls `ctx.submit(fields, onError)`; the engine adds traces, raw events, viewport, and device, saves, and moves on. `ctx.record(name, value)` logs answer changes.
+- `static/lab/engine/types/<type>-admin.js` calls `LabAdmin.registerType('<type>', { subtabs, render(sub, A), applyEdit?(el, A), click?(button, A), select?(el, A), conditions?(draft), report?(rows, content, R) → { html, table } })` for the content editor and pilot report. Survey, consent, and screen-text tabs come from the engine.
+
+**Browser-only demo (no server):** copy `studies/demo-phishing/`, mark anything whose hover or click matters with `data-trace="name"`, and keep the `{ type: 'local' }` sink.
 
 ## TraceLab API
 
@@ -61,17 +89,7 @@ Each event has `t` (ms since start), `type`, and `item`. Types: `move`, `down`, 
 
 ### Files
 
-| Path | Role |
-|---|---|
-| `netlify/functions/vc-api.mjs` | HTTP routes at `/api/vc/*`, request size cap, admin roles, Netlify Blobs adapter (`verification-study` store) |
-| `netlify/lib/vc-core.mjs` | sign-in, tokens, session plans, saving and validating answers, exports, deletes |
-| `netlify/lib/vc-content.mjs` | editable content (consent, sessions & AI, alerts, surveys, screen text), validation, versions |
-| `netlify/lib/vc-admin.mjs` | owner and team keys, activity log |
-| `netlify/lib/vc-selftest.mjs` | resumable live self-test (owner button on the admin page) |
-| `netlify/lib/vc-backup.mjs`, `netlify/functions/vc-backup.mjs` | hourly scheduled mirror into the `verification-backup` store; purge on withdrawal |
-| `netlify/lib/vc_build_alerts.py` → `vc-alerts.mjs` | built-in default alerts |
-| `static/lab/studies/verification/` | `index.html` + `app.js` (participant app), `admin.html` (admin app) |
-| `tests/lab/` | `npm run test:lab`: design, audit regressions, content/admin, sign-in, self-test (in-memory store; the audit test also runs on a store whose conditional writes are not atomic, like live Blobs) |
+The study is the built-in `verification` entry in `netlify/lib/lab/registry.mjs` (type `alert-triage`, stores `verification-study` and `verification-backup`), served at its original URLs `/lab/studies/verification/` (participant), `/lab/studies/verification/admin.html` (admin), and `/api/vc/*`. Type code: `netlify/lib/lab/types/alert-triage.mjs` (default content in `alert-triage-alerts.mjs`, generated by `build_alert_triage_alerts.py`), `static/lab/engine/types/alert-triage.js` and `alert-triage-admin.js`.
 
 ### Sign-in and privacy model
 
@@ -94,9 +112,9 @@ Each event has `t` (ms since start), `type`, and `item`. Types: `move`, `down`, 
 
 Key schema: `participants/{id}`, `consent/{id}`, `plans/{id}/s{n}`, `started/{id}/s{n}-{time}`, `done/{id}/s{n}-{time}`, `views/{id}/s{n}/t{i}/{time}`, `data/{id}/s{n}/t{i}` (trial, no raw events), `raw/{id}/s{n}/t{i}` (raw TraceLab events), `data/{id}/s{n}/practice|survey-pre|survey-post`, `contact/{id}`, `cond/{condition}/{id}` and `cond-test/…` (assignment counts), `meta/pepper`, `content/current`, `content/history/v{n}`, `admins/{sha256(key)}`, `audit/{time}`, `selftest/{id}`.
 
-### Admin page (`/lab/studies/verification/admin.html`)
+### Admin page (`/lab/studies/verification/admin.html`, the same for every study at `/lab/admin/<study>`)
 
-Set `VC_ADMIN_KEY` (16+ characters) in the Netlify environment variables; that is the owner key. Tabs:
+Set `LAB_ADMIN_KEY` (or the original `VC_ADMIN_KEY`; 16+ characters) in the Netlify environment variables; that is the lab owner key, valid for every study and the lab console. Team keys are per study. Tabs:
 
 - *Participants*: progress; the live self-test (also checks the storage itself); trials CSV, surveys CSV, full JSON, and raw-trace JSONL downloads (assembled in the browser in batches of participants, so they work at any study size; optionally real participants only); mark test/real; delete one or all test participants; the live self-test.
 - *Pilot report*: per-alert accuracy without the AI (flags alerts that are too easy or too hard), accuracy when the AI is right vs wrong, agreement and evidence checking by AI behavior, accuracy by condition and session, session length vs the promised minutes, and drop-off by session. Filter by label to look at one pilot batch; download the per-alert table as CSV.
@@ -126,10 +144,8 @@ Choices that change measured behavior are marked [B]; keep them identical across
 - **Before live participants**: IRB-approved consent pasted in and "IRB-approved" ticked; survey items finalized; GSU sign-off on storing study data and student emails in Netlify Blobs; run the live self-test; delete all test participants.
 - **During the study**: Participants tab for progress; Students → extra-credit list for credit; withdrawals: delete the participant (removes answers, traces, plans, and email).
 - **Exports**: trials CSV and surveys CSV for analysis (definitions in `static/lab/CODEBOOK.md`); full JSON for archiving; raw traces JSONL only if you need event-level data.
-- **Local testing**: `VC_ADMIN_KEY=<key> netlify dev --dir static --offline`, then add test emails with gap days 0; `npm run test:lab` for the automated tests.
+- **Local testing**: `npm run lab:dev` (pages and API on in-memory stores, nothing saved), then add test emails with gap days 0; `npm run test:lab` for the automated tests.
 
 ### Reusing this for a future study
 
-Generic today, reusable as is: sign-in and tokens, session scheduling and gaps, content versioning, admin roles and audit log, batched exports and safe CSV, the conditional-write store adapter, the self-test pattern, and the participant survey components (labeled scales, confidence line, soft reminders, focus handling). Study-specific: the alert-triage trial (`runTrial` in `app.js`, `buildPlan` / `trialRow` / `cleanTrialData` in `vc-core.mjs`, the Alerts and Sessions & AI editor tabs).
-
-Planned refactor when a second server-backed study starts: move the generic parts to `netlify/lib/study-engine/` (store, identity, sessions, content, admin, exports, selftest) and `static/lab/engine/` (participant shell and survey components), and give each study a plugin `{ id, conditions, defaultContent, validateContent, buildPlan, publicTrial, cleanTrialData, trialRow, simulate }` plus a client `runTrial(ctx) → data`. One function, `/api/study/:studyId/*`, would serve every study with its own Blobs store.
+Done: the generic parts now live in the engine (see "Study engine" above), and this study is one instance of the `alert-triage` type. A new alert-triage study (different alerts, sessions, or AI schedule) needs no code: create it in the lab console and edit its content.
