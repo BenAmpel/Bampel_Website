@@ -1,19 +1,19 @@
 {
-  "refresh_date": "2026-09-28",
+  "refresh_date": "2026-10-05",
   "grants": [
     {
-      "title": "Conference: NSF Quantum Computing Security Workshop",
-      "awardId": "2629256",
-      "piName": "Trent Jaeger",
-      "institution": "University of California-Riverside",
-      "estimatedTotalAmt": "50000",
+      "title": "Research Initiation Award: Leveraging Machine Learning for Secure and Privacy-Preserving Vehicular Cyber-Physical Systems (VCPS)",
+      "awardId": "2500079",
+      "piName": "Amir Alipour-Fanid",
+      "institution": "University of the District of Columbia",
+      "estimatedTotalAmt": "450000",
       "startDate": "10/01/2026",
-      "expDate": "09/30/2027",
-      "abstractText": "Industry leaders are releasing quantum computing infrastructures, such as Quantum Computing as a Service (QCaaS), that are accessible to the general public.  Quantum computing presents both new challenges for cybersecurity as well as new opportunities to improve cybersecurity enforcement.  On one hand, quantum computing presents new threats to cryptographic algorithms, side channels, and quantum software security.  On the other hand, quantum algorithms may enable more secure key distribution, more effective software analysis, and more accurate intrusion detection.  The time has come to bring together the research community to discuss how the NSF and the broader research community should target needs for the future quantum security issues.\r\n\r\nThe proposed NSF Quantum Computing Security Workshop will bring together a myriad of researchers working actively in the quantum computing and cybersecurity spaces to share their insights and help the NSF prepare research plans for this critical emerging technology.  The proposed workshop will include keynotes from industrial and academic experts, presentations from leading researchers, and breakouts to discussion key questions in the future of quantum computing security research.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "expDate": "09/30/2029",
+      "abstractText": "Connected and automated vehicles depend on reliable communication among vehicles, roadway infrastructure, sensors, and control systems. Cyberattacks can block safety messages, alter information exchanged inside a vehicle, or expose sensitive location and driving data. The project will develop machine learning methods to improve the security, resilience, privacy, and safety of connected transportation. Research activities will address three related needs: protecting wireless vehicle communication among vehicles from deliberate interference, detecting malicious activity in the communication bus inside vehicles, and protecting traffic, trajectory, and shared learning data. The research team will evaluate the methods under realistic cyber-attacks and changing driving conditions. Expected outcomes include safer vehicle communication, faster detection of harmful messages, stronger privacy protection, reusable research tools, and new knowledge for secure intelligent transportation. The project will also provide research training for graduate and undergraduate students and will share research findings, educational materials, and data with broader research and education communities.\r\n\r\nThe technical research consists of three coordinated components. The first will develop online learning methods that use inter-vehicle distance to guide channel selection, channel sensing, analysis of adaptive attackers and defenders, and centralized scheduling under several forms of deliberate interference. The second will develop real-time intrusion detection for the Controller Area Network by analyzing both message content and patterns over time, while federated learning will combine locally trained models without transferring raw vehicle data to a central location. The third will generate synthetic traffic data, apply location-sensitive privacy protection to vehicle trajectories, and protect shared learning from malicious model updates and attempts to infer private information. Evaluation will use theoretical analysis, integrated traffic and wireless communication simulations, public and newly collected vehicle data, controlled attack injection, and comparisons with established methods. Quantitative measures will assess learning performance, safe-distance violations, attack-detection accuracy, privacy protection, and resistance to attacks on shared learning. Expected contributions include methods connecting cyber observations with vehicle physical states, practical tools for secure communication and private data sharing, and expanded research and education capacity in machine learning and transportation cybersecurity.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
       "primaryProgram": [
-        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+        "04002627DB NSF STEM Education"
       ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2629256",
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2500079",
       "keywords": [
         "Cybersecurity"
       ]
@@ -37,61 +37,6 @@
       ]
     },
     {
-      "title": "Collaborative Research: Excellence in Research: Designing an adaptive attack risk estimation framework for proactive cyber threats",
-      "awardId": "2602894",
-      "piName": "Dong Hyun Jeong",
-      "institution": "University of the District of Columbia",
-      "estimatedTotalAmt": "100711",
-      "startDate": "10/01/2026",
-      "expDate": "09/30/2028",
-      "abstractText": "Cyberattacks are becoming more sophisticated, threatening critical infrastructure, businesses, and personal data across the nation. Modern computer networks generate vast amounts of diverse information at high speeds, making it difficult for security teams to identify which threats require immediate attention. Current cybersecurity systems often analyze network data in isolation, missing important connections between different types of security events and how attack methods evolve over time. This project addresses a critical gap: developing a systematic approach to identify warning signs of network vulnerability by examining patterns across multiple data sources and tracking how these patterns change as attacks unfold. The work serves the national interest by strengthening cyber defenses that protect essential services, economic activities, and sensitive information. Project outcomes will include new methods for learning and representing changing indicators of network vulnerability and for translating these insights into effective defense strategies. This will advance the field of cybersecurity by enabling security systems to recognize evolving threats and helping analysts make better decisions about which incidents require immediate response. Additionally, the project will build research capacity at two institutions by engaging students in advanced cybersecurity research, preparing the next generation of cybersecurity professionals.\r\n\r\nThis project involves designing a framework that enables early warning and reliable, risk-informed cyber defense through machine learning and data analysis techniques. It will examine context-aware temporal and spatial features of network activity to predict network event frequencies and estimate attack severity. The framework will generate data-driven rules that link extracted features to specific attack behaviors, encoding these as interpretable indicators of network vulnerability. These indicators will be combined with severity estimates and temporal frequency predictions to construct state representations for reinforcement learning. The learning agent will develop policies that map evolving threat conditions to response actions, including alert prioritization and incident review recommendations. The project will also design multi-scale temporal visualizations to help security analysts understand how attacker behaviors change over time and interpret the changing risk levels with quantified confidence.\r\n\r\nThis project is funded by the U.S. National Science Foundation (NSF) Historically Black Colleges and Universities-Excellence in Research (HBCU-EIR) Program. HBCU-EIR supports research at public and private HBCUs to strengthen their research capacity and promote engagement with NSF.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
-      "primaryProgram": [
-        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
-      ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2602894",
-      "keywords": [
-        "Cybersecurity",
-        "Vulnerability"
-      ]
-    },
-    {
-      "title": "REU Site: Applied Research in Deep Learning",
-      "awardId": "2548161",
-      "piName": "Mohammed Belkhouche",
-      "institution": "Missouri State University",
-      "estimatedTotalAmt": "489183",
-      "startDate": "10/01/2026",
-      "expDate": "09/30/2029",
-      "abstractText": "This project will provide undergraduate students with hands-on research experiences in the rapidly growing field of deep learning. Over three years, the program will engage 30 students from computer science, engineering, information technology, and related disciplines in meaningful research projects guided by faculty mentors. Participants will explore how deep learning techniques can be used to address real-world challenges in cybersecurity, robotics, hate speech in social media, and autonomous systems. Through these experiences, students will gain exposure to how deep learning technologies can be used to benefit society across a wide range of applications. In addition to research activities, the program will provide structured training to help students develop important professional skills, including scientific writing, oral communication, teamwork, and responsible research practices. By working in a collaborative and supportive environment, students will strengthen both their technical abilities and their confidence as emerging researchers. Overall, the program aims to inspire and prepare the next generation of scientists and engineers by giving them early, meaningful exposure to research in deep learning and its many beneficial uses.\r\n\r\nThis project establishes a structured, research-intensive undergraduate training program aimed at increasing student engagement in state-of-the-art deep learning methodologies and applications. Research activities will focus on the design, analysis, and application of modern deep learning techniques to address contemporary challenges in areas such as multimedia security, robotic motion planning, autonomous multi-agent coordination, and malicious network activity detection. Faculty-mentored projects will emphasize both methodological advances and applied system development, with students contributing to end-to-end research pipelines including data preprocessing, model design, training, evaluation, and deployment-oriented analysis. Key objectives include: (i) developing students\u2019 problem-solving and critical thinking skills in the context of deep learning research; (ii) building proficiency in contemporary deep learning frameworks and methodologies; (iii) training students in scholarly communication and research dissemination practices; and (iv) enhancing collaboration and teamwork. Collectively, this REU Site aims to cultivate a pipeline of well-prepared undergraduate researchers equipped for graduate study and careers in machine learning and artificial intelligence research.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
-      "primaryProgram": [
-        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
-      ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2548161",
-      "keywords": [
-        "Cybersecurity",
-        "Deep Learning",
-        "Multi-Agent AI"
-      ]
-    },
-    {
-      "title": "Excellence in Research: AI Powered Multi-Agent System (MAS) for Real-Time QoS Anomaly Detection and Adaptive Network Optimization in 6G-Enabled Industrial IoT Environments",
-      "awardId": "2602854",
-      "piName": "Cajetan Akujuobi",
-      "institution": "Prairie View A & M University",
-      "estimatedTotalAmt": "900000",
-      "startDate": "10/01/2026",
-      "expDate": "09/30/2029",
-      "abstractText": "Sixth generation (6G) wireless networks will support emerging applications such as smart manufacturing, autonomous robotics, intelligent transportation, advanced healthcare, and critical infrastructure. These applications depend on communication networks that can quickly detect disruptions, adapt to changing conditions, and maintain reliable operation with little or no human intervention. This project develops an artificial intelligence-powered system that continuously monitors network conditions, detects anomalies in real time, and intelligently adapts network resources to sustain dependable communications. The research also explores the use of blockchain technologies and intelligent spectrum management to strengthen the security and resilience of future wireless networks. Together, these advances will enable more reliable, secure, and efficient communications for mission-critical applications while preparing a future skilled workforce through undergraduate and graduate research experiences, curriculum enhancements, open educational modules, and annual workshops in AI, cybersecurity, blockchain, and next-generation wireless communications.\r\n\r\nThe project develops a decentralized Multi-Agent System for real-time Quality-of-Service (QoS) anomaly detection and adaptive network optimization in 6G-enabled Industrial Internet of Things environments. Intelligent monitoring agents collaborate with machine learning-based anomaly detection and reinforcement learning to identify network degradations and dynamically optimize resource allocation. Blockchain-based authentication, smart contract policy management, and Spectrum Access System integration enable secure coordination of network decisions and support efficient spectrum sharing. The framework will be evaluated using a programmable Firecell 5G/6G testbed under realistic industrial workloads to quantify improvements in latency, throughput, packet loss, QoS, and network resilience. The expected outcome is an AI-native framework for secure, autonomous management of next-generation wireless networks that delivers more reliable communications for mission-critical industrial systems.\r\n\r\nThis project is funded by the U.S. National Science Foundation (NSF) Historically Black Colleges and Universities-Excellence in Research (HBCU-EIR) Program. HBCU-EIR supports research at public and private HBCUs to strengthen their research capacity and promote engagement with NSF.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
-      "primaryProgram": [
-        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
-      ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2602854",
-      "keywords": [
-        "Cybersecurity",
-        "Multi-Agent AI"
-      ]
-    },
-    {
       "title": "EPSCoR Graduate Fellowship Program (EGFP): AIM Fellows - Artificial Intelligence and Machine Learning Industry PhD Fellowships with data science, cybersecurity, and online safety",
       "awardId": "2535355",
       "piName": "Christopher Danforth",
@@ -104,23 +49,6 @@
         "01002627DB NSF RESEARCH & RELATED ACTIVIT"
       ],
       "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2535355",
-      "keywords": [
-        "Cybersecurity"
-      ]
-    },
-    {
-      "title": "EPSCoR Research Fellows: NSF: AI-Secure Command Channels for Autonomous Space Systems",
-      "awardId": "2624437",
-      "piName": "Efren Lopez Morales",
-      "institution": "New Mexico State University",
-      "estimatedTotalAmt": "299665",
-      "startDate": "01/01/2027",
-      "expDate": "12/31/2028",
-      "abstractText": "This Research Infrastructure Improvement (RII) EPSCoR Research Fellows project provides a fellowship to an Assistant Professor and training for one student trainee at New Mexico State University. This work will be conducted in collaboration with collaborators at the University of California, Santa Cruz. Through the fellowship, the PI will investigate how artificial intelligence (AI) can be used safely to support command decisions for autonomous spacecraft. The project will develop methods to detect and prevent cyberattacks that manipulate AI\u2013generated spacecraft commands before they can affect mission operations. This research combines cybersecurity, artificial intelligence, and aerospace engineering to improve the security and resilience of future autonomous space systems. The fellowship will strengthen research capacity in New Mexico by training the next generation of cybersecurity researchers, expanding collaboration between the two institutions, and advancing technologies that improve the reliability, safety, and security of future space missions.\r\n\r\nThis project will establish a research program focused on securing AI-enabled spacecraft. The project will advance the state of the art by introducing a formal framework for modeling how AI systems transform inputs into spacecraft commands, characterizing AI-enabled command manipulation attacks, and developing runtime mechanisms that validate AI-generated commands against mission and safety constraints before execution. The proposed methodology will integrate formal threat modeling, taxonomy development, experimental prototype implementation, and empirical evaluation using an AI-enabled satellite command prototype that combines AI reasoning components with realistic spacecraft command and telemetry interfaces. The fellowship will strengthen research infrastructure at New Mexico State University by expanding faculty expertise in AI-enabled cyber-physical systems, establishing new collaborations with the University of California, Santa Cruz, and providing research training for undergraduate and graduate students. The fellowship will support the development of a sustainable research program, future external funding, curriculum development in AI and cybersecurity, and a workforce prepared to secure next-generation space systems.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
-      "primaryProgram": [
-        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
-      ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2624437",
       "keywords": [
         "Cybersecurity"
       ]
@@ -143,6 +71,23 @@
       ]
     },
     {
+      "title": "CAREER: Improving Software Test Quality and Developer Skills through Developer-in-the-Loop Test Optimization",
+      "awardId": "2544248",
+      "piName": "Ajay Jha",
+      "institution": "North Dakota State University Fargo",
+      "estimatedTotalAmt": "500000",
+      "startDate": "01/01/2027",
+      "expDate": "12/31/2031",
+      "abstractText": "Software testing plays a critical role in improving software quality by detecting defects before release. However, software tests often contain quality issues that make them difficult to understand, maintain, and evolve, reducing their effectiveness and increasing maintenance costs. Many developers receive limited training in writing high-quality tests, and existing automated tools provide limited support for identifying and addressing these issues. This project investigates how software tests can be systematically improved while helping students and developers strengthen their testing skills through hands-on interaction with intelligent tool support. The project's novelties are the integration of empirical evidence from real-world software development with developer-centered learning to create an interactive environment that supports both test improvement and skill development. The project's broader significance and importance are reducing software maintenance costs, improving software reliability, advancing software testing education, and preparing a workforce with stronger software testing expertise. The project also produces openly available datasets, software tools, and educational resources that benefit researchers, educators, and practitioners.\r\n\r\nThe project investigates how developers identify, understand, and address software test quality issues by analyzing open-source repositories, developer discussions, surveys, and interviews. These empirical findings inform the development of automated methods that combine rule-based program analysis, large language models, and validation mechanisms to identify test quality issues and generate context-aware recommendations to improve tests as software evolves. The project integrates these methods into an evolution-aware developer-in-the-loop framework that continuously identifies test quality issues, suggests improvements, and provides explanations for each recommendation, while enabling developers to review, modify, and learn from the suggestions during development. User studies with students and practitioners evaluate both improvements in test quality and gains in testing skills. The project contributes to more reliable and maintainable software systems and helps students and developers strengthen their skills in writing and improving software tests.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2544248",
+      "keywords": [
+        "LLM / GenAI"
+      ]
+    },
+    {
       "title": "Collaborative Research: A Subspace Optimization Framework for Resource-Efficient and Private Fine-Tuning of Large Language Models",
       "awardId": "2619080",
       "piName": "Yanmin Gong",
@@ -160,18 +105,18 @@
       ]
     },
     {
-      "title": "CAREER: Improving Software Test Quality and Developer Skills through Developer-in-the-Loop Test Optimization",
-      "awardId": "2544248",
-      "piName": "Ajay Jha",
-      "institution": "North Dakota State University Fargo",
-      "estimatedTotalAmt": "500000",
-      "startDate": "01/01/2027",
-      "expDate": "12/31/2031",
-      "abstractText": "Software testing plays a critical role in improving software quality by detecting defects before release. However, software tests often contain quality issues that make them difficult to understand, maintain, and evolve, reducing their effectiveness and increasing maintenance costs. Many developers receive limited training in writing high-quality tests, and existing automated tools provide limited support for identifying and addressing these issues. This project investigates how software tests can be systematically improved while helping students and developers strengthen their testing skills through hands-on interaction with intelligent tool support. The project's novelties are the integration of empirical evidence from real-world software development with developer-centered learning to create an interactive environment that supports both test improvement and skill development. The project's broader significance and importance are reducing software maintenance costs, improving software reliability, advancing software testing education, and preparing a workforce with stronger software testing expertise. The project also produces openly available datasets, software tools, and educational resources that benefit researchers, educators, and practitioners.\r\n\r\nThe project investigates how developers identify, understand, and address software test quality issues by analyzing open-source repositories, developer discussions, surveys, and interviews. These empirical findings inform the development of automated methods that combine rule-based program analysis, large language models, and validation mechanisms to identify test quality issues and generate context-aware recommendations to improve tests as software evolves. The project integrates these methods into an evolution-aware developer-in-the-loop framework that continuously identifies test quality issues, suggests improvements, and provides explanations for each recommendation, while enabling developers to review, modify, and learn from the suggestions during development. User studies with students and practitioners evaluate both improvements in test quality and gains in testing skills. The project contributes to more reliable and maintainable software systems and helps students and developers strengthen their skills in writing and improving software tests.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "title": "CICI: IPAAI: XAI-Driven Data Forensics for Nuclear Edge LLMs: Provenance, Detection, and Recovery",
+      "awardId": "2641406",
+      "piName": "Xiaolong Guo",
+      "institution": "Lehigh University",
+      "estimatedTotalAmt": "899868",
+      "startDate": "11/01/2026",
+      "expDate": "10/31/2029",
+      "abstractText": "Nuclear reactors supply a large share of reliable electricity, and reactor operators increasingly turn to large language models to help interpret procedures, sensor logs, and alarm messages in real time. Running these models on-site, close to the reactor, keeps sensitive data in-house and speeds decision-making, but it also opens new ways for these systems to fail or be attacked. Poisoned or low-quality training data, foundation models that carry hidden backdoors, and manipulated prompts can each push a model toward confident but incorrect recommendations, a serious hazard that could threaten safety or force a costly shutdown. This project builds an explainable artificial intelligence framework that secures the entire workflow of nuclear-domain large language models. \r\n\r\nThe team develops interpretability methods that trace a model's outputs back to specific inputs and internal representations, then uses those signals to detect and remove poisoned or low-quality training data through machine unlearning. To confirm a model's origin, hardware-based fingerprinting techniques are employed. At inference time, layered defenses screen inputs, flag risky prompts, and validate outputs before any recommendation reaches an operator. The methods are validated with real operational data from a research nuclear reactor. By establishing a unified approach to data integrity, model provenance, and output reliability, the project advances the safe deployment of large language models in critical infrastructure, protecting public welfare and national security. Openly shared tools, datasets, and a fingerprint library, along with new university courses and K\u201312 outreach, will help build a security-aware technical workforce.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
       "primaryProgram": [
         "01002627DB NSF RESEARCH & RELATED ACTIVIT"
       ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2544248",
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2641406",
       "keywords": [
         "LLM / GenAI"
       ]
@@ -194,18 +139,35 @@
       ]
     },
     {
-      "title": "CICI: IPAAI: XAI-Driven Data Forensics for Nuclear Edge LLMs: Provenance, Detection, and Recovery",
-      "awardId": "2641406",
-      "piName": "Xiaolong Guo",
-      "institution": "Lehigh University",
-      "estimatedTotalAmt": "899868",
-      "startDate": "11/01/2026",
-      "expDate": "10/31/2029",
-      "abstractText": "Nuclear reactors supply a large share of reliable electricity, and reactor operators increasingly turn to large language models to help interpret procedures, sensor logs, and alarm messages in real time. Running these models on-site, close to the reactor, keeps sensitive data in-house and speeds decision-making, but it also opens new ways for these systems to fail or be attacked. Poisoned or low-quality training data, foundation models that carry hidden backdoors, and manipulated prompts can each push a model toward confident but incorrect recommendations, a serious hazard that could threaten safety or force a costly shutdown. This project builds an explainable artificial intelligence framework that secures the entire workflow of nuclear-domain large language models. \r\n\r\nThe team develops interpretability methods that trace a model's outputs back to specific inputs and internal representations, then uses those signals to detect and remove poisoned or low-quality training data through machine unlearning. To confirm a model's origin, hardware-based fingerprinting techniques are employed. At inference time, layered defenses screen inputs, flag risky prompts, and validate outputs before any recommendation reaches an operator. The methods are validated with real operational data from a research nuclear reactor. By establishing a unified approach to data integrity, model provenance, and output reliability, the project advances the safe deployment of large language models in critical infrastructure, protecting public welfare and national security. Openly shared tools, datasets, and a fingerprint library, along with new university courses and K\u201312 outreach, will help build a security-aware technical workforce.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "title": "NSF-BSF:CIF: Localization Theories for Modern Quickest Detection",
+      "awardId": "2615519",
+      "piName": "Yajun Mei",
+      "institution": "New York University",
+      "estimatedTotalAmt": "326288",
+      "startDate": "10/01/2026",
+      "expDate": "09/30/2029",
+      "abstractText": "Quickest detection, also known as sequential change-point detection, has many important real-world applications, including biosurveillance, environmental monitoring, disaster response, homeland security, manufacturing quality control, and threat detection. The goal of quickest detection is to detect change in the area (e.g., a sensor) as quickly as possible, subject to a global constraint on the rate of false alarms. While the classical quickest detection theory is well developed for systems involving a single sensor or a small number of sensors, the fundamental information bounds and optimal design principles for modern data-rich environments remain largely unknown. This project will develop a general theoretical framework to characterize the information-theoretic limits of quickest detection and develop efficient online algorithms for modern settings involving high-dimensional data, distributed sensor networks, and/or privacy constraints. The results will provide rigorous foundations for future sensing and monitoring systems, and help practitioners assess when improvements in data quality or sensing techniques are necessary to meet application-specific requirements. Graduate students will also receive training through their involvement in the project's research.   \r\n\r\nThis project develops general localization theories for establishing information-theoretic bounds and statistical performance of quickest detection algorithms under modern asymptotic regimes and complex data structures. The central idea is a divide-and-conquer approach that partitions a global detection problem into a sequence of local sub-problems that can be investigated using localization theorems. The specific research aims are: (1) Information bounds on sparse change detection; (2) Federated quickest detection over networks; and (3) Quickest detection with differential privacy. In addition, real-world case studies in engineering and health will be investigated. Results of the project are expected to advance the state of the art in sequential analysis, change-point detection, streaming data analysis, online learning, and large-scale statistical inference.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
       "primaryProgram": [
         "01002627DB NSF RESEARCH & RELATED ACTIVIT"
       ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2641406",
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2615519",
+      "keywords": [
+        "Threat Intel"
+      ]
+    },
+    {
+      "title": "CIF: Efficient Distributed Solutions for Problems in Computational Imaging and AI",
+      "awardId": "2552423",
+      "piName": "Namrata Vaswani",
+      "institution": "Iowa State University",
+      "estimatedTotalAmt": "699774",
+      "startDate": "10/01/2026",
+      "expDate": "09/30/2030",
+      "abstractText": "This project develops faster and more communication-efficient methods for solving large-scale data analysis problems that arise in computational imaging and artificial intelligence. In many modern applications, data are collected or processed across multiple machines or devices, making it important to design methods that reduce both computation and communication costs. Examples include dynamic magnetic resonance imaging, image and video compression, detection and tracking of moving objects for driverless cars, multi-target tracking in robotics, and efficient adaptation of large language models for specialized uses. A central challenge in these applications is to recover useful information from incomplete, corrupted, or distributed data while keeping the algorithms fast, reliable, and broadly usable across different data sets and measurement settings. The project will advance the foundations of efficient distributed learning and may enable practical improvements in areas such as near-real-time dynamic medical imaging and reliable artificial intelligence systems. The project will also support education and workforce development through the CyMath K-12 Math program which provides mathematics tutoring and mentoring. During this project, CyMath will be expanded into a multi-tier mathematics mentoring program that supports K-12 students, undergraduate tutors, and graduate student mentors, while also producing pilot evaluations of the program's educational impact.\r\n\r\nThe project studies fast distributed algorithms for two classes of robust low-rank matrix and tensor learning problems. The first class is low-rank plus sparse matrix recovery from missing or otherwise undersampled observed data, often called the low-rank plus sparse model. The second class is low-rank recovery from shuffled, column-wise undersampled measurements. These models are motivated by computational imaging, tracking, video analysis, and parameter-efficient adaptation of large language models, where changes in model parameters can often be represented using low-rank or low-rank plus sparse structures. The research will develop a generalized multi-block alternating gradient descent and minimization framework, called Multi-AltGDmin, for partly decoupled optimization problems. In such problems, some groups of variables can be updated very efficiently when the other variables are fixed, while other groups are more computationally expensive. The goal is to design algorithms that retain the low per-iteration cost of gradient descent while approaching the faster convergence behavior of alternating minimization. The project will analyze sample complexity, iteration complexity, communication efficiency, and resilience to Byzantine attacks in distributed settings. It will also address new algorithmic and proof challenges caused by multiple variable blocks, including the need to choose update sequences that respect problem assumptions and to design distributed updates when different blocks depend on differently partitioned data. If successful, the project will provide the first provably correct, efficient, and attack-resilient distributed Multi-AltGDmin methods for robust principal component analysis and related problems, as well as for shuffled low-rank column-wise sensing. The resulting proof techniques are expected to be useful for other distributed learning and optimization problems.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2552423",
       "keywords": [
         "LLM / GenAI"
       ]
