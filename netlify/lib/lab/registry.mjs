@@ -1,4 +1,4 @@
-// CARE Behavioral Lab: the study registry.
+// CCAIR Behavioral Lab: the study registry.
 // Built-in studies are listed here; studies created on the lab admin page are stored in the
 // "lab-registry" Blobs store (studies/{id}). Each study has its own Blobs store for data and one for
 // its backup mirror, so studies never share participants or data.

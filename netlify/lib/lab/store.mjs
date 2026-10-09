@@ -1,4 +1,4 @@
-// CARE Behavioral Lab: storage helpers shared by every study.
+// CCAIR Behavioral Lab: storage helpers shared by every study.
 // A "store" is { get, set, delete, list(prefix), getMeta?, setIf? }: a Netlify Blobs store in production
 // (blobsStore below), an in-memory Map in tests. Study logic never imports @netlify/blobs directly.
 //

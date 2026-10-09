@@ -1,4 +1,4 @@
-// CARE Behavioral Lab API: every study, one function. Routes: netlify/lib/lab/router.mjs.
+// CCAIR Behavioral Lab API: every study, one function. Routes: netlify/lib/lab/router.mjs.
 import { getStore } from '@netlify/blobs';
 import { handle } from '../lib/lab/router.mjs';
 

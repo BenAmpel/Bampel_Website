@@ -1,4 +1,4 @@
-/* CARE Behavioral Lab: participant app, shared by every study.
+/* CCAIR Behavioral Lab: participant app, shared by every study.
    Handles sign-in (GSU email, or pilot code), consent, session progress, start- and end-of-session
    surveys, behavior traces (TraceLab), retries, and accessibility. Each study type supplies only its
    item screen: static/lab/engine/types/<type>.js calls LabEngine.registerType(id, { instructions?, runTrial }).
@@ -267,7 +267,7 @@
   function calendar(session, at) {
     var d = function (ms) { return new Date(ms).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, ''); };
     var url = location.origin + location.pathname;
-    var ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//CARE Lab//Study//EN', 'BEGIN:VEVENT', 'UID:lab-' + studyId + '-' + at + '-' + session + '@bampel.com', 'DTSTAMP:' + d(Date.now()),
+    var ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//CCAIR Lab//Study//EN', 'BEGIN:VEVENT', 'UID:lab-' + studyId + '-' + at + '-' + session + '@bampel.com', 'DTSTAMP:' + d(Date.now()),
       'DTSTART:' + d(at), 'DTEND:' + d(at + S.content.minutesPerSession * 60000), 'SUMMARY:' + T('login_title') + ': session ' + session, 'URL:' + url, 'DESCRIPTION:' + url, 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
     var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' })); a.download = 'study-session-' + session + '.ics';
     document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);

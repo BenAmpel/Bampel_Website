@@ -1,4 +1,4 @@
-// CARE Behavioral Lab: HTTP routes for every study.
+// CCAIR Behavioral Lab: HTTP routes for every study.
 //   /api/lab/{study}/{route}   participant and admin routes for one study
 //   /api/vc/{route}            the same, for the built-in verification study (original URLs)
 //   /api/lab/_lab/{route}      lab-level routes: list, create, and update studies

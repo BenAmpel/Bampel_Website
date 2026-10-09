@@ -84,7 +84,7 @@ function HeroIdentity({ id, threads, alerts }) {
               <p>
                 <strong>Dr. Benjamin M. Ampel</strong> is an Assistant Professor in Computer Information
                 Systems at Georgia State University's J. Mack Robinson College of Business and Director
-                of the <strong>CyberAI Research and Education Center (CARE)</strong>. He earned his Ph.D. from the
+                of the <strong>Center for CyberAI Research (CCAIR)</strong>. He earned his Ph.D. from the
                 University of Arizona under Dr. Hsinchun Chen; his dissertation, <em>"Securing Cyberspace:
                 AI-Enabled Cyber-Adversary Defense,"</em> received the <em className="tag">ACM SIGMIS
                 Doctoral Dissertation Award</em> at ICIS 2024.

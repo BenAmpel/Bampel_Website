@@ -1,6 +1,6 @@
 /*!
  * TraceLab: passive behavioral trace capture for browser-based studies.
- * CARE Behavioral Lab, Georgia State University (bampel.com/lab).
+ * CCAIR Behavioral Lab, Georgia State University (bampel.com/lab).
  *
  * Captures, after consent only:
  *   - timing: item duration, first-interaction latency, idle gaps

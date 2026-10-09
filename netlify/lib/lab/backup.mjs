@@ -1,4 +1,4 @@
-// CARE Behavioral Lab: backups, for every study.
+// CCAIR Behavioral Lab: backups, for every study.
 // An hourly scheduled function mirrors each study's store into its backup store (keys "m/{original key}").
 // Answers are write-once, so each run copies only keys the mirror doesn't have yet; records that can
 // change (participants, content, team, meta) are re-copied every run. Each run stops after a time

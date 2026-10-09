@@ -1,4 +1,4 @@
-/* CARE Behavioral Lab: admin page, shared by every study, and the lab console.
+/* CCAIR Behavioral Lab: admin page, shared by every study, and the lab console.
    /lab/admin/<study> (or a page with <html data-study="...">): participants, exports, pilot report,
    students, study content editor, team, activity, backups, live self-test.
    /lab/admin/ with no study: the lab console (owner only) to create studies and list them on /lab/.
@@ -566,7 +566,7 @@
   // ======================= lab console =======================
   function labConsole() {
     document.title = 'Lab console';
-    root.innerHTML = '<div class="who"><h1 style="margin:0">CARE Lab: studies</h1><span id="whoami" class="muted"></span></div>' + SIGNIN + '<div id="app" hidden>' +
+    root.innerHTML = '<div class="who"><h1 style="margin:0">CCAIR Lab: studies</h1><span id="whoami" class="muted"></span></div>' + SIGNIN + '<div id="app" hidden>' +
       '<p class="muted">Every study runs on the same engine: sign-in, consent, sessions, surveys, behavior traces, exports, backups, team access, and the live self-test. A new study gets its own data store, admin page, and participant link. Studies start unlisted; list one on <a href="/lab/">the lab page</a> once its consent text is IRB-approved and it is ready to recruit.</p>' +
       '<div class="table-wrap"><table id="stbl"></table></div>' +
       '<div class="section"><h2>New study</h2><form id="newform"><div class="grid3">' +

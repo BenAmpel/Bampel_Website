@@ -1,4 +1,4 @@
-// CARE Behavioral Lab: the study engine shared by every study.
+// CCAIR Behavioral Lab: the study engine shared by every study.
 // Every function takes S = { store, type, study }: the study's Blobs store, its study type
 // (netlify/lib/lab/types/*.mjs), and its registry entry (netlify/lib/lab/registry.mjs).
 //

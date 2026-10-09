@@ -1,4 +1,4 @@
-// CARE Behavioral Lab: live self-test for any study.
+// CCAIR Behavioral Lab: live self-test for any study.
 // Runs one throwaway participant (in a chosen condition) through every session of the current design
 // against the study's real store, using the study type's simulate() for answers, then checks what was
 // saved and exported (type checks: checkRow, checkSession) and deletes the participant. Resumable:

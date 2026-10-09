@@ -1,4 +1,4 @@
-// CARE Behavioral Lab: admin access (lab owner + per-study team members) and the activity log.
+// CCAIR Behavioral Lab: admin access (lab owner + per-study team members) and the activity log.
 // The lab owner signs in with the LAB_ADMIN_KEY environment variable (VC_ADMIN_KEY also works). The owner gives team
 // members their own key per study; only a SHA-256 hash of each key is stored, in that study's store.
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';

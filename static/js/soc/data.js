@@ -5,7 +5,7 @@ window.AMPEL_DATA = {
     name: "Benjamin M. Ampel",
     handle: "@bampel",
     role: "Assistant Professor, Computer Information Systems",
-    role2: "Director, CyberAI Research and Education Center (CARE)",
+    role2: "Director, Center for CyberAI Research (CCAIR)",
     affil: "Georgia State University · J. Mack Robinson College of Business",
     location: "Atlanta, GA",
     email: "bampel@gsu.edu",
@@ -47,7 +47,7 @@ window.AMPEL_DATA = {
   ],
 
   career: [
-    { date: "2026 — Present", title: "Director, CyberAI Research and Education Center (CARE)",          sub: "Georgia State University", current: true },
+    { date: "2026 — Present", title: "Director, Center for CyberAI Research (CCAIR)",          sub: "Georgia State University", current: true },
     { date: "2024 — Present", title: "Assistant Professor, Computer Information Systems",        sub: "Georgia State University · Robinson College of Business", current: true },
     { date: "2021 — 2024",   title: "Adjunct Lecturer (Limited Term)",                          sub: "University of Arizona" },
     { date: "2018 — 2024",   title: "Research Associate, Artificial Intelligence Lab",          sub: "University of Arizona" },

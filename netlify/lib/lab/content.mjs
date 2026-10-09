@@ -1,4 +1,4 @@
-// CARE Behavioral Lab: editable study content, shared by every study type.
+// CCAIR Behavioral Lab: editable study content, shared by every study type.
 // Engine-level parts: session length, consent, sign-up rules, start/end-of-session surveys, and the
 // screen text the participant shell uses. Each study type adds its own parts (contentKeys), text fields,
 // defaults, normalization, validation, and survey "show when" rules. Saved edits are numbered versions.

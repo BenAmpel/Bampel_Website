@@ -1,4 +1,4 @@
-# CARE Behavioral Lab
+# CCAIR Behavioral Lab
 
 Browser-based behavioral studies at `bampel.com/lab/`. Everything here is static and needs no build step: Hugo copies `static/lab/` to the site as is.
 
