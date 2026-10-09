@@ -49,7 +49,7 @@ function HomePage({ onNavigate, tweaks }) {
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 860, animation: 'fadeInUp 0.8s ease' }}>
           <img src="uploads/care-logo.png" alt="CCAIR" style={{ height: tweaks.heroStyle === 'full' ? 100 : 64, marginBottom: 24, filter: 'drop-shadow(0 0 30px rgba(var(--accent-rgb),0.2))' }} />
           <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.8rem)', marginBottom: 16, lineHeight: 1.1 }}>
-            <span style={{ color: 'var(--accent)' }}>CyberAI</span> Research {'&'} Education Center
+            Center for <span style={{ color: 'var(--accent)' }}>CyberAI</span> Research
           </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: 'clamp(15px, 2vw, 18px)', maxWidth: 600, margin: '0 auto 36px', lineHeight: 1.7 }}>
             Advancing the theory and practice of proactive cyber threat intelligence under adversarial uncertainty.
