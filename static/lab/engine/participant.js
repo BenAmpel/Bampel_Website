@@ -119,6 +119,15 @@
     if (it.type === 'scale') return scaleGroup(it);
     if (it.type === 'confidence') return vas(it.id, esc(it.text));
     if (it.type === 'choice' || (it.type === 'select' && it.options.length <= 10)) return choiceGroup(it.id, esc(it.text), it.options.map(function (o) { return [o.value, esc(o.label)]; }));
+    if (it.type === 'multi') {
+      return '<fieldset class="q-group" data-name="' + it.id + '"><legend class="q">' + esc(it.text) + '</legend><div class="checks">' + it.options.map(function (o) {
+        return '<label class="option" data-trace="' + it.id + ':' + esc(o.value) + '"><input type="checkbox" name="' + it.id + '" value="' + esc(o.value) + '"><span>' + esc(o.label) + '</span></label>';
+      }).join('') + '</div></fieldset>';
+    }
+    if (it.type === 'number') {
+      var nid = nextId('num');
+      return '<div class="q-group" data-name="' + it.id + '"><label class="q" for="' + nid + '">' + esc(it.text) + '</label><input type="text" id="' + nid + '" class="num" name="' + it.id + '" inputmode="decimal" autocomplete="off" data-trace="num:' + it.id + '"></div>';
+    }
     if (it.type === 'select') {
       var sid = nextId('sel');
       return '<div class="q-group" data-name="' + it.id + '"><label class="q" for="' + sid + '">' + esc(it.text) + '</label><select id="' + sid + '" name="' + it.id + '"><option value="">Select…</option>' +
@@ -138,6 +147,7 @@
     root.querySelectorAll('.vas').forEach(function (v) { wireVas(v, onAnswer); });
     root.querySelectorAll('select').forEach(function (s) { s.addEventListener('change', function () { onAnswer(s.name, s.value); }); });
     root.querySelectorAll('textarea').forEach(function (t) { t.addEventListener('input', function () { onAnswer(t.name, t.value); }); });
+    root.querySelectorAll('input.num').forEach(function (t) { t.addEventListener('input', function () { onAnswer(t.name, t.value); }); });
   }
   function flag(root, names, scroll) {
     root.querySelectorAll('.q-group').forEach(function (g) { g.classList.toggle('missing', names.indexOf(g.getAttribute('data-name')) >= 0); });
@@ -158,6 +168,8 @@
       check: function () {
         var hard = blank(answers, items.filter(function (i) { return i.required; }).map(function (i) { return i.id; }));
         var soft = blank(answers, items.filter(function (i) { return !i.required; }).map(function (i) { return i.id; }));
+        var badNum = items.filter(function (i) { var v = answers[i.id]; return i.type === 'number' && v != null && String(v).trim() !== '' && !isFinite(Number(String(v).replace(/,/g, ''))); }).map(function (i) { return i.id; });
+        if (badNum.length) { flag(root, badNum, true); msgEl.innerHTML = errorBox(T('number_invalid')); return false; }
         if (hard.length) { flag(root, hard, true); msgEl.innerHTML = errorBox(hard.length === 1 && items.filter(function (i) { return i.id === hard[0]; })[0].type === 'confidence' ? T('conf_needed') : T('required_prompt')); return false; }
         if (soft.length && !prompted) {
           prompted = true; flag(root, soft, true);
@@ -337,14 +349,31 @@
   // questions instead of forced answers (Couper et al. 2013; Roßmann et al. 2018; de Leeuw et al. 2016).
   function surveyPage(title, items, kind) {
     if (!items.length) return submitSurvey({}, kind, null);
-    progress.textContent = T('start_title', { session: S.plan.session, total: S.content.sessions });
-    show('<h1>' + esc(title) + '</h1>' + items.map(questionHtml).join('') + '<div id="surveymsg"></div><div class="actions"><button id="go">' + Th('continue_button') + '</button></div>');
-    var go = document.getElementById('go'), qs = questionSet(stage, items, document.getElementById('surveymsg'), go);
-    go.addEventListener('click', function () { if (!qs.check()) return; go.disabled = true; submitSurvey(qs.answers, kind, go); });
+    // Questions with the same "page" number are shown together, pages in ascending order. Answers from earlier
+    // pages are kept in this tab (sessionStorage) so a reload part-way through does not lose them.
+    var pages = [], byPage = {}, all = {}, idx = 0, saveKey = 'lab_sv_' + studyId + '_s' + S.plan.session + '_' + kind;
+    items.forEach(function (it) { var k = it.page || 1; if (!byPage[k]) { byPage[k] = []; pages.push(k); } byPage[k].push(it); });
+    pages.sort(function (a, b) { return a - b; });
+    try { var kept = JSON.parse(store(saveKey) || 'null'); if (kept && kept.all && kept.idx < pages.length) { all = kept.all; idx = kept.idx; } } catch (e) {}
+    S.survey = { key: saveKey };
+    function showPage() {
+      var list = byPage[pages[idx]], last = idx === pages.length - 1;
+      progress.textContent = T('start_title', { session: S.plan.session, total: S.content.sessions }) + (pages.length > 1 ? ' · ' + T('survey_page', { i: idx + 1, n: pages.length }) : '');
+      show('<h1>' + esc(title) + '</h1>' + list.map(questionHtml).join('') + '<div id="surveymsg"></div><div class="actions"><button id="go">' + Th('continue_button') + '</button></div>');
+      var go = document.getElementById('go'), qs = questionSet(stage, list, document.getElementById('surveymsg'), go);
+      go.addEventListener('click', function () {
+        if (!qs.check()) return;
+        Object.keys(qs.answers).forEach(function (k) { all[k] = qs.answers[k]; });
+        if (!last) { idx++; store(saveKey, JSON.stringify({ all: all, idx: idx })); return showPage(); }
+        go.disabled = true; submitSurvey(all, kind, go);
+      });
+    }
+    showPage();
   }
   function submitSurvey(ans, kind, go) {
     api('survey', { token: S.token, session: S.plan.session, kind: kind, data: ans }).then(function (r) {
       if (r.error) { if (go) go.disabled = false; var m = document.getElementById('surveymsg'); if (m) m.innerHTML = errorBox(ERR[r.error] || ERR.server_error); return; }
+      if (S.survey && S.survey.key) store(S.survey.key, null);
       if (kind === 'pre') { S.plan.preSurveyDone = true; return next(); }
       showDone(r.status);
     });

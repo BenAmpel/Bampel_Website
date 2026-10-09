@@ -147,6 +147,9 @@ export function cleanAnswers(d, items) {
     if (it.type === 'scale') { const n = Number(v); if (Number.isInteger(n) && n >= 1 && n <= it.n) out[it.id] = String(n); }
     else if (it.type === 'confidence') { const n = Number(v); if (Number.isFinite(n) && n >= 0 && n <= 100) out[it.id] = String(Math.round(n)); }
     else if (it.type === 'choice' || it.type === 'select') { if (it.options.some(o => o.value === v)) out[it.id] = v; }
+    // An open number is kept exactly as entered (no range check): an impossible age or a count of 5,000 surveys is data.
+    else if (it.type === 'number') { const t = String(v).trim().replace(/,/g, ''), n = Number(t); if (t !== '' && Number.isFinite(n) && Math.abs(n) < 1e12) out[it.id] = t; }
+    else if (it.type === 'multi') { const vals = (Array.isArray(v) ? v : [v]).filter(x => it.options.some(o => o.value === x)); if (vals.length) out[it.id] = [...new Set(vals)]; }
     else out[it.id] = String(v).slice(0, 4000);
   }
   return out;

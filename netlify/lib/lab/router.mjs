@@ -11,7 +11,7 @@ import * as content from './content.mjs';
 import * as admin from './admin.mjs';
 import * as backup from './backup.mjs';
 import { runSelfTest } from './selftest.mjs';
-import { getStudy, listStudies, createStudy, updateStudy } from './registry.mjs';
+import { getStudy, listStudies, createStudy, updateStudy, typeFor } from './registry.mjs';
 import { TYPES } from './types/index.mjs';
 
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
@@ -49,7 +49,7 @@ export async function handle(req, { getStore, env }) {
 
     const study = await getStudy(registry, studyId);
     if (!study) return json({ error: 'no_study' }, 404);
-    const type = TYPES[study.type];
+    const type = typeFor(study);
     const S = { store: blobsStore(getStore, study.storeName), type, study };
     const backupStore = () => blobsStore(getStore, study.backupName);
 

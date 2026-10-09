@@ -158,13 +158,15 @@ export default {
       if (q.type === 'scale') answers[q.id] = String(1 + Math.floor(rand() * q.n));
       else if (q.type === 'choice' || q.type === 'select') answers[q.id] = pick(q.options).value;
       else if (q.type === 'confidence') answers[q.id] = String(Math.floor(rand() * 101));
+      else if (q.type === 'number') answers[q.id] = String(Math.floor(rand() * 90));
+      else if (q.type === 'multi') answers[q.id] = [pick(q.options).value];
       else answers[q.id] = 'self-test note';
     }
     return { answers, rtMs: 1500, traces: { durationMs: 1500 }, selfTest: true, rawEvents: [{ t: 1, type: 'self_test' }] };
   },
   checkRow(row, sent) {
     const problems = [];
-    for (const [k, v] of Object.entries(sent.answers)) if (row[`a_${k}`] !== v) problems.push(`answer ${k}`);
+    for (const [k, v] of Object.entries(sent.answers)) if (row[`a_${k}`] !== (Array.isArray(v) ? v.join('|') : v)) problems.push(`answer ${k}`);
     return problems;
   },
   checkSession(rows, session, condition, c) {

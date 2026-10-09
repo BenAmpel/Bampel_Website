@@ -3,6 +3,7 @@
 // "lab-registry" Blobs store (studies/{id}). Each study has its own Blobs store for data and one for
 // its backup mirror, so studies never share participants or data.
 import { TYPES } from './types/index.mjs';
+import { seed as dataQualitySeed } from './studies/data-quality.mjs';
 
 export const BUILT_IN = {
   verification: {
@@ -10,8 +11,23 @@ export const BUILT_IN = {
     storeName: 'verification-study', backupName: 'verification-backup', codePrefix: 'VC', seedId: 'verification-v1',
     paths: { participant: '/lab/studies/verification/', admin: '/lab/studies/verification/admin.html' }, listed: true, builtIn: true,
     description: 'Four weekly sessions of security alert triage, with and without an AI assistant.'
+  },
+  // Survey-only battery (attention checks, Big Five, conspiracist beliefs, consistency checks, demographics).
+  // Starting content comes from studies/data-quality.mjs until the first save on the admin page. Unlisted
+  // (reach it by its address) and closed to self sign-up until it is switched on there.
+  'data-quality': {
+    id: 'data-quality', name: 'Online survey data quality', type: 'vignettes', seed: dataQualitySeed,
+    storeName: 'data-quality-study', backupName: 'data-quality-backup', codePrefix: 'DQ', seedId: 'data-quality-v1',
+    paths: { participant: '/lab/s/data-quality', admin: '/lab/admin/data-quality' }, listed: false, builtIn: true,
+    description: 'One survey session: attention checks, Big Five, conspiracist beliefs, consistency checks, demographics.'
   }
 };
+
+// The study type for a study: the registered type, with the study's own starting content when it has one.
+export function typeFor(study) {
+  const t = TYPES[study.type];
+  return t && study.seed ? { ...t, defaultContent: study.seed } : t;
+}
 
 const ID_RE = /^[a-z][a-z0-9-]{2,30}$/;
 const RESERVED = ['lab', 'admin', 's', 'studies', 'engine', 'assets', 'tracelab', 'api', 'new'];

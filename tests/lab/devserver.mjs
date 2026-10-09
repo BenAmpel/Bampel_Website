@@ -26,6 +26,8 @@ createServer(async (req, res) => {
   if (/^\/lab\/admin\/[^/]+\/?$/.test(p)) p = '/lab/admin/index.html';
   let file = normalize(join(ROOT, p));
   if (!file.startsWith(ROOT)) { res.writeHead(403); return res.end(); }
-  try { if ((await stat(file)).isDirectory()) file = join(file, 'index.html'); res.writeHead(200, { 'content-type': TYPES[extname(file)] || 'application/octet-stream', 'cache-control': 'no-store' }); res.end(await readFile(file)); }
-  catch { res.writeHead(404); res.end('not found'); }
+  let data;
+  try { if ((await stat(file)).isDirectory()) file = join(file, 'index.html'); data = await readFile(file); }   // read first: headers go out only once the file exists
+  catch { res.writeHead(404); return res.end('not found'); }
+  res.writeHead(200, { 'content-type': TYPES[extname(file)] || 'application/octet-stream', 'cache-control': 'no-store' }); res.end(data);
 }).listen(PORT, () => console.log(`Lab dev server: http://localhost:${PORT}/lab/  (admin key: ${env.LAB_ADMIN_KEY})`));

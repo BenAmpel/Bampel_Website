@@ -35,6 +35,9 @@ Study types today:
 
 - **`alert-triage`**: security alerts with click-to-reveal evidence and scheduled AI advice (AI-first, evidence-first, control). Used by the verification study.
 - **`vignettes`** (general purpose): scenarios as plain text or emails (optionally with an image), each followed by configurable questions (rating scales, multiple choice, confidence line, text). Conditions are defined in the content, and each item can have different wording per condition, so manipulations need no code. Links written `[text](url)` are shown as links that do not open; pointing at one shows its address at the bottom of the screen, and hovers and clicks are recorded. Sessions without items make a survey-only (for example, longitudinal) study.
+- **Built-in `data-quality` study** (type `vignettes`, survey-only): the online-survey data-quality battery from SurveyItemsList.docx. Its starting content is code (`netlify/lib/lab/studies/data-quality.mjs`); the first save on its admin page takes over. Unlisted, closed to self sign-up, draft consent: turn those on in the admin page. Columns: CODEBOOK.
+
+Question types for surveys and per-item questions: rating scale, multiple choice, dropdown, text, confidence line, typed number, and select-all. Survey questions can carry a `page` number to split a long survey into pages.
 
 ## Adding a study
 

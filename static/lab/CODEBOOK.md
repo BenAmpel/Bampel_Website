@@ -90,3 +90,35 @@ Trials CSV columns after `trial_index` (the generic identifier, behavior, and co
 | `a_{question}` | Answer to each item question (scale point, option value, 0–100 confidence, or text) |
 
 Per-link detail (`link:<url>` targets) is in the full JSON export under `records[].data.traces.hovers` and `clickTargets`.
+
+## Question types and survey pages (all studies)
+
+| Type | Participant sees | Saved in the CSV cell |
+|---|---|---|
+| `scale` | Rating points, each labeled | The point number (1 is the first label) |
+| `choice`, `select` | One option | The option's saved value |
+| `multi` | Checkboxes, "select all that apply" | Ticked options' saved values joined with `\|`; empty if none |
+| `number` | A box for a typed number | The number exactly as entered (commas removed), with no range check, so an impossible age is still recorded |
+| `confidence` | A 0 to 100 line | 0 to 100 |
+| `text` | A text box | The text |
+
+A survey question can have a `page` number: questions with the same number appear together, pages in ascending order (blank = page 1). Answers are saved when the last page is finished; reloading the tab keeps earlier pages' answers on that device.
+
+## Data-quality survey (study `data-quality`)
+
+One session, one start-of-session survey, no items. The surveys CSV has a `pre` row with every answer below and an empty `post` row (filter on `survey == pre`). Source list: SurveyItemsList.docx, from Douglas, Ewell, and Brauer (2023), Brotherton, French, and Pickering (2013), and Chmielewski and Kucker (2020). Every question is optional.
+
+| Columns | Meaning |
+|---|---|
+| `se_week`, `se_year` | Surveys taken in the past 7 days and past year (typed numbers) |
+| `age`, `birth_year` | Age (page 1) and birth year (page 8); compare for the response-inconsistency check |
+| `bf_{n,e,o,a,c}_{p,n}{1-5}` | Big Five, 5-point agree scale (1 strongly disagree, 5 strongly agree). Trait: n neuroticism, e extraversion, o openness, a agreeableness, c conscientiousness. After the trait, `p` = positively worded, `n` = negatively worded (reverse-score: 6 minus the answer) |
+| `ac_agree` | Attention check inside the personality items: correct answer is 5 (strongly agree) |
+| `ac_math` | Attention check "What is 3 x 4?": correct answer is 12 |
+| `ac_color` | Attention check on the consent form: correct answer is `Teal` (the consent text must keep the sentence "the color of this study is teal") |
+| `test_retest_1`, `test_retest_2` | "The government should invest in green energy", asked 21 questions apart; compare for test-retest reliability |
+| `gcb_1` to `gcb_15` | Generic Conspiracist Beliefs, 5-point scale (1 definitely not true, 5 definitely true) |
+| `gender`, `transgender`, `ethnicity` (select all), `sexual_orientation`, `income`, `education` | Demographics |
+| `political_affiliation` (1 strong Republican to 7 strong Democrat), `party`, `political_social`, `political_economic` (1 very conservative to 5 very liberal) | Political items |
+| `dq_low_quality` | Self-reported data quality: `Yes` = "my data should be considered low quality" |
+| `final_comments` | Open-ended bot check |

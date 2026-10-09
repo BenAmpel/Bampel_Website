@@ -37,6 +37,8 @@ export const ENGINE_TEXT = [
   ['Surveys', 'pre_title', 'Start-of-session survey title', 'A few questions about you'],
   ['Surveys', 'post_title', 'End-of-session survey title', 'About this session'],
   ['Surveys', 'continue_button', 'Continue button', 'Continue'],
+  ['Surveys', 'survey_page', 'Page indicator on a multi-page survey ({i}, {n})', 'Page {i} of {n}'],
+  ['Surveys', 'number_invalid', 'Reminder when a number answer is not a number', 'Enter a number using digits only (for example 25).'],
   ['Surveys', 'skip_prompt', 'Reminder about skipped questions ({n})', 'You left {n} question(s) unanswered. Your answers help the study, but you can continue without them.'],
   ['Surveys', 'skip_continue', 'Continue without answering', 'Continue anyway'],
   ['Surveys', 'required_prompt', 'Reminder about required questions', 'Please answer the highlighted question(s) to continue.'],
@@ -69,7 +71,7 @@ export function engineDefaults() {
 export function defaultContent(type) {
   const base = engineDefaults(), t = type.defaultContent();
   const c = { ...base, ...t, consent: { ...base.consent, ...(t.consent || {}) }, enrollment: { ...base.enrollment, ...(t.enrollment || {}) }, survey: { ...base.survey, ...(t.survey || {}) } };
-  c.text = Object.fromEntries(textFieldsFor(type).map(f => [f.key, f.def]));
+  c.text = { ...Object.fromEntries(textFieldsFor(type).map(f => [f.key, f.def])), ...(t.text || {}) };
   return c;
 }
 
@@ -116,7 +118,7 @@ export function publicContent(c, type, study) {
     text: c.text, sessions: type.sessionCount(c), signup: c.enrollment.open ? c.enrollment.domains : [], ...(type.publicContent ? type.publicContent(c) : {}) };
 }
 
-export const QUESTION_TYPES = ['scale', 'choice', 'select', 'text', 'confidence'];
+export const QUESTION_TYPES = ['scale', 'choice', 'select', 'text', 'confidence', 'number', 'multi'];
 const str = (v, max = 4000) => typeof v === 'string' && v.trim().length > 0 && v.length <= max;
 const intIn = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi;
 const RESERVED = ['code', 'condition', 'test', 'label', 'self_signup', 'session', 'survey', 'content_version', 'received_at', 'trial_index', 'item_id'];
@@ -140,7 +142,8 @@ export function validateQuestions(items, where, e, { nSessions, conditions, rule
       if (!intIn(it.n, 2, 11)) e.push(`${w}: a scale needs 2 to 11 points.`);
       if (it.labels != null && it.labels.length && (!Array.isArray(it.labels) || it.labels.length !== it.n || !it.labels.every(x => str(x, 120)))) e.push(`${w}: give one label per point (${it.n}), or leave the labels empty to label only the ends.`);
     }
-    if (it.type === 'choice' || it.type === 'select') {
+    if (it.page != null && !intIn(it.page, 1, 99)) e.push(`${w}: the page must be a whole number from 1 to 99.`);
+    if (it.type === 'choice' || it.type === 'select' || it.type === 'multi') {
       if (!Array.isArray(it.options) || it.options.length < 2) e.push(`${w}: add at least two options.`);
       else if (!it.options.every(o => str(o.value, 200) && str(o.label, 300))) e.push(`${w}: every option needs text.`);
       else if (new Set(it.options.map(o => o.value)).size !== it.options.length) e.push(`${w}: two options have the same value.`);

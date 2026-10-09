@@ -23,6 +23,8 @@ function answerFor(it, r) {
   if (it.type === 'scale') return String(1 + Math.floor(r() * it.n));
   if (it.type === 'confidence') return String(Math.floor(r() * 101));
   if (it.type === 'choice' || it.type === 'select') return it.options[Math.floor(r() * it.options.length)].value;
+  if (it.type === 'number') return String(Math.floor(r() * 90));
+  if (it.type === 'multi') return it.options.filter(() => r() < 0.5).map(o => o.value).concat(it.options[0].value).filter((v, i, a) => a.indexOf(v) === i);
   return 'self-test note';
 }
 
@@ -132,7 +134,7 @@ async function verify(S, c, st, ok) {
   for (const e of expect.filter(x => x.kind !== 'trial')) {
     const row = surveysCsv.find(x => +x.session === e.session && x.survey === e.kind);
     if (!row) { bad.push(`s${e.session} ${e.kind}: missing`); continue; }
-    for (const [k, v] of Object.entries(e.data)) if (row[k] !== v) bad.push(`s${e.session} ${e.kind} ${k}`);
+    for (const [k, v] of Object.entries(e.data)) if (row[k] !== (Array.isArray(v) ? v.join('|') : v)) bad.push(`s${e.session} ${e.kind} ${k}`);
   }
   ok(!bad.length, bad.length ? `Survey answers match (problems: ${bad.slice(0, 5).join('; ')})` : `Survey answers match (${expect.filter(x => x.kind !== 'trial').length} surveys)`);
   ok(trialsCsv.every(x => x.content_version === String(c.version || 0)), `Rows are tagged with content version ${c.version || 0}`);
