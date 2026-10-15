@@ -1,4 +1,8 @@
 [build]
+  # Builds are batched to save Netlify build minutes (2026-10-15): a push does not build unless its commit message
+  # contains [deploy now]. Ben's Mac publishes waiting changes at 09:00 and 17:00 Phoenix time through the
+  # "scheduled" build hook (~/.purplelink/bin/netlify-batch-build.sh); hook builds are never skipped by this line.
+  ignore = "git log -1 --format=%B | grep -qF '[deploy now]' && exit 1 || exit 0"
   command = "npm install && npm run build:ccair && hugo --gc --minify"
   publish = "public"
 
