@@ -33,6 +33,17 @@
     "tier": "strategic"
   },
   {
+    "title": "Identifying Protected Health Information in Hacker Communities: A Multi-Task Relation Learning Approach",
+    "authors": "Dacosta, C., Ampel, B.M., Hashim, M., Chen, H.",
+    "venue": "Journal of Management Information Systems",
+    "year": 2026,
+    "type": "journal",
+    "doi": null,
+    "pdf": null,
+    "abstract": "A multi-task relation learning framework (PHI-NEXT) that finds sales of stolen protected health information in hacker discussions on Telegram and Discord.",
+    "tier": "core"
+  },
+  {
     "title": "Large Language Models for Conducting Advanced Text Analytics Information Systems Research",
     "authors": "Ampel, B.M., Yang, C., Hu, J., Chen, H.",
     "venue": "ACM Transactions on Management Information Systems",
@@ -108,6 +119,94 @@
     "pdf": null,
     "abstract": "Domain-adaptive soft prompting for detecting multiple types of bias in news articles.",
     "tier": "exploratory"
+  },
+  {
+    "title": "HackerSignal: A Large-Scale Multi-Source Dataset Linking Hacker Community Discourse to the CVE Vulnerability Lifecycle",
+    "authors": "Ampel, B.M., Samtani, S.",
+    "venue": "NeurIPS ED Track",
+    "year": 2026,
+    "type": "conference",
+    "doi": null,
+    "pdf": null,
+    "abstract": "A benchmark of 7.45 million hacker community documents from 1990 to 2026 that links exploit discussion to the CVE vulnerability lifecycle.",
+    "tier": "core"
+  },
+  {
+    "title": "Prosody Training for Lowering Vishing Susceptibility",
+    "authors": "Ampel, B.M., Buckman, J.",
+    "venue": "ICIS",
+    "year": 2026,
+    "type": "conference",
+    "doi": null,
+    "pdf": null,
+    "abstract": "A pilot test of audio-based prosody training for voice phishing, compared against human-audio and text-only training with signal detection theory.",
+    "tier": "strategic"
+  },
+  {
+    "title": "Vendor-Conditioned Contrastive Learning for Predicting Organizational Cyber Threat Targets",
+    "authors": "Ampel, B.M.",
+    "venue": "IEEE CARS",
+    "year": 2026,
+    "type": "conference",
+    "doi": null,
+    "pdf": null,
+    "abstract": "A vendor-conditioned contrastive learning framework (TRACE) that predicts which organizations hacker forum exploits target.",
+    "tier": "core"
+  },
+  {
+    "title": "Automated Cross-Repository Vulnerability Variant Retrieval Using Patch-Weighted Contrastive Learning",
+    "authors": "Chen, J., Ampel, B.M., Ullman, S., Reyes, R.Y., Chen, H.",
+    "venue": "IEEE CARS",
+    "year": 2026,
+    "type": "conference",
+    "doi": null,
+    "pdf": null,
+    "abstract": "A patch-weighted contrastive retrieval model (AVA) that finds unremediated variants of known vulnerable code across open-source repositories.",
+    "tier": "core"
+  },
+  {
+    "title": "A Four-Signal Learned Fusion for Near-Real-Time Phishing URL Detection",
+    "authors": "Darko, A.M., Ampel, B.M.",
+    "venue": "IEEE CARS",
+    "year": 2026,
+    "type": "conference",
+    "doi": null,
+    "pdf": null,
+    "abstract": "A multi-signal fusion model that adds reputation context to URL-only classification for near-real-time phishing URL detection.",
+    "tier": "strategic"
+  },
+  {
+    "title": "Adaptive Phishing URL Classification: A Generative Adversarial Approach",
+    "authors": "Abdellatif, N., Wagner, M., Ampel, B.M., Hu, J., Ahmad-Post, Z., Chen, H.",
+    "venue": "IEEE CARS",
+    "year": 2026,
+    "type": "conference",
+    "doi": null,
+    "pdf": null,
+    "abstract": "A generative adversarial approach that makes phishing URL classifiers more robust to current, unseen phishing patterns.",
+    "tier": "strategic"
+  },
+  {
+    "title": "Performance Transfer and Behavioral Reliance in AI-Assisted Cybersecurity Training",
+    "authors": "Clark, K., Ampel, B.M., Ramesh, B.",
+    "venue": "IEEE CARS",
+    "year": 2026,
+    "type": "conference",
+    "doi": null,
+    "pdf": null,
+    "abstract": "A six-week pilot study of whether better performance in AI-assisted cybersecurity training carries over to unaided skill.",
+    "tier": "strategic"
+  },
+  {
+    "title": "Understanding the Role of Prompt Template in Knowledge Distillation for Safety Alignment",
+    "authors": "Budathoki, A., Dhakal, M., Ampel, B.M., Ding, Y.",
+    "venue": "EMNLP Findings",
+    "year": 2026,
+    "type": "conference",
+    "doi": null,
+    "pdf": null,
+    "abstract": "An analysis of how prompt template choices during knowledge distillation affect a student model's safety alignment.",
+    "tier": "strategic"
   },
   {
     "title": "Examining the Robustness of ML-based Phishing Website Detection: Action-Masked Reinforcement Learning for Automated Red Teaming",
@@ -209,6 +308,39 @@
     "tier": "core"
   },
   {
+    "title": "Identifying Vulnerable GitHub Repositories and Users in Scientific Cyberinfrastructure: An Unsupervised Graph Embedding Approach",
+    "authors": "Lazarine, B., Samtani, S., Patton, M., Zhu, H., Ullman, S., Ampel, B.M., Chen, H.",
+    "venue": "IEEE ISI",
+    "year": 2020,
+    "type": "conference",
+    "doi": null,
+    "pdf": null,
+    "abstract": "Unsupervised graph embeddings for identifying vulnerable GitHub repositories and users in scientific cyberinfrastructure.",
+    "tier": "core"
+  },
+  {
+    "title": "Smart Vulnerability Assessment for Scientific Cyberinfrastructure: An Unsupervised Graph Embedding Approach",
+    "authors": "Ullman, S., Samtani, S., Lazarine, B., Zhu, H., Ampel, B.M., Patton, M., Chen, H.",
+    "venue": "IEEE ISI",
+    "year": 2020,
+    "type": "conference",
+    "doi": null,
+    "pdf": null,
+    "abstract": "Unsupervised graph embeddings for assessing vulnerabilities in the virtual machine images used across scientific cyberinfrastructure.",
+    "tier": "core"
+  },
+  {
+    "title": "Predicting organizational cybersecurity risk: a deep learning approach",
+    "authors": "Ampel, B.M.",
+    "venue": "arXiv preprint arXiv:2012.14425",
+    "year": 2020,
+    "type": "conference",
+    "doi": null,
+    "pdf": null,
+    "abstract": "A hacker forum entity recognition framework (HackER) with a BiLSTM model that predicts which companies hacker exploits will target.",
+    "tier": "core"
+  },
+  {
     "title": "Performance Modeling of Hyperledger Sawtooth Blockchain",
     "authors": "Ampel, B.M., Patton, M., Chen, H.",
     "venue": "IEEE ISI",
@@ -218,6 +350,17 @@
     "pdf": null,
     "abstract": "Performance benchmarking and modeling of the Hyperledger Sawtooth blockchain platform.",
     "tier": "exploratory"
+  },
+  {
+    "title": "Cyber Threat Classification Under Non-Stationary Environments: An Adapt In-Context Learning (Adapt-ICL) Approach",
+    "authors": "Zhang, C., Gao, Y., Ampel, B.M., Samtani, S.",
+    "venue": "INFORMS WDS",
+    "year": 2026,
+    "type": "workshop",
+    "doi": null,
+    "pdf": null,
+    "abstract": "An inference-time in-context learning method (Adapt-ICL) that keeps LLM cyber threat classification reliable as threat data shifts over time.",
+    "tier": "core"
   },
   {
     "title": "Large Language Models for Infrastructure as Code Vulnerability Remediation",
@@ -251,6 +394,17 @@
     "pdf": null,
     "abstract": "Framework for using multi-agent AI systems to augment information systems research processes.",
     "tier": "exploratory"
+  },
+  {
+    "title": "Generating Adversarial Phishing Websites to Evade Machine Learning-based Anti-Phishing Detectors: A Reinforcement Learning Approach",
+    "authors": "Gao, Y., Samtani, S., Zhu, H., Ampel, B.M., Chai, Y.",
+    "venue": "WDS",
+    "year": 2023,
+    "type": "workshop",
+    "doi": null,
+    "pdf": null,
+    "abstract": "A reinforcement learning approach that generates adversarial phishing websites to expose weaknesses in ML-based anti-phishing detectors.",
+    "tier": "strategic"
   },
   {
     "title": "Linking Common Vulnerabilities and Exposures to the MITRE ATT&CK Framework: A Self-Distillation Approach",
