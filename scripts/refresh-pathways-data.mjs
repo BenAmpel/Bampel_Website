@@ -203,7 +203,8 @@ async function onetWages(soc) {
   const code = `${soc.slice(0, 2)}-${soc.slice(2)}.00`;
   const res = await get(`https://www.onetonline.org/link/localwages/${code}`);
   if (!res.ok) throw new Error(`O*NET ${code}: HTTP ${res.status}`);
-  const text = (await res.text()).replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+  // Join the page's text nodes; the regexes below only read numbers out of this, it is never rendered.
+  const text = [...(await res.text()).matchAll(/>([^<]+)</g)].map((m) => m[1]).join(' ').replace(/\s+/g, ' ');
   const year = Number((text.match(/Bureau of Labor Statistics (\d{4}) wage data/) || [])[1]);
   const row = text.match(/Annual High \(90%\) United States \$([\d,]+) \$([\d,]+) \$([\d,]+)/);
   if (!year || !row) throw new Error(`O*NET ${code}: could not read the national annual wage row`);
@@ -443,7 +444,7 @@ if (!failures.length) {
 for (const id of changedRefs) setAccessed(id);
 if (changes.length) D.updated = today.toISOString().slice(0, 10);
 
-const esc = (v) => String(v).replace(/\|/g, '\\|');
+const esc = (v) => String(v).replace(/\\/g, '\\\\').replace(/\|/g, '\\|'); // markdown table cell
 const out = [
   `## Pathway Finder data refresh, ${today.toISOString().slice(0, 10)}${DRY ? ' (dry run)' : ''}\n`,
   failures.length ? `**A sanity check failed, so nothing was written.**\n\n${failures.map((f) => `- ${f}`).join('\n')}\n` : '',
