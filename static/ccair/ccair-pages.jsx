@@ -395,6 +395,24 @@ function AboutPage({ onNavigate }) {
         </div>
       </PageSection>
 
+      <PageSection title="Career Guidance" accent="// pathways" subtitle="Helping students who are new to the field find the cybersecurity role that fits them.">
+        <GlassCard style={{ padding: 28, display: 'flex', flexWrap: 'wrap', gap: 24, alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ flex: '1 1 380px' }}>
+            <div className="mono" style={{ fontSize: 11, letterSpacing: 1.5, color: 'var(--accent)', marginBottom: 8 }}>FREE · 5 MINUTES · NOTHING STORED</div>
+            <div style={{ fontWeight: 700, fontSize: 20, marginBottom: 8 }}>Cyber Career Pathway Finder</div>
+            <div style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.7 }}>
+              A plain-language quiz built on the NIST NICE Workforce Framework. It ranks 14 cybersecurity roles by a
+              student's interests and gives the realistic first job, starter certifications, free practice and US pay for
+              each. It complements CIS 3620 Career Pathways.
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <CButton primary href="/ccair/pathways/">Take the finder →</CButton>
+            <CButton href="/ccair/pathways/#roles">Browse the 14 role guides</CButton>
+          </div>
+        </GlassCard>
+      </PageSection>
+
       <PageSection title="Courses" accent="// curriculum">
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
           {courses.map((c, i) => (
