@@ -1,0 +1,1096 @@
+{
+  "updated": "2026-10-17",
+  "sources": {
+    "nice": "https://www.nist.gov/itl/applied-cybersecurity/nice/nice-framework-resource-center",
+    "cyberseek": "https://www.cyberseek.org/pathway.html",
+    "blsDate": "May 2025"
+  },
+  "bls": {
+    "isa": {
+      "occupation": "Information Security Analysts",
+      "median": 129180,
+      "url": "https://www.bls.gov/ooh/computer-and-information-technology/information-security-analysts.htm"
+    },
+    "ncsa": {
+      "occupation": "Network and Computer Systems Administrators",
+      "median": 99130,
+      "url": "https://www.bls.gov/ooh/computer-and-information-technology/network-and-computer-systems-administrators.htm"
+    },
+    "sd": {
+      "occupation": "Software Developers",
+      "median": 135980,
+      "url": "https://www.bls.gov/ooh/computer-and-information-technology/software-developers.htm"
+    },
+    "cna": {
+      "occupation": "Computer Network Architects",
+      "median": 134050,
+      "url": "https://www.bls.gov/ooh/computer-and-information-technology/computer-network-architects.htm"
+    },
+    "aa": {
+      "occupation": "Accountants and Auditors",
+      "median": 83680,
+      "url": "https://www.bls.gov/ooh/business-and-financial/accountants-and-auditors.htm"
+    },
+    "tds": {
+      "occupation": "Training and Development Specialists",
+      "median": 69280,
+      "url": "https://www.bls.gov/ooh/business-and-financial/training-and-development-specialists.htm"
+    }
+  },
+  "habits": [
+    "Build a small home lab (an old laptop or free virtual machines is enough) and write up what you try.",
+    "Do beginner capture-the-flag challenges and keep a simple public portfolio of what you learned.",
+    "Go to a local ISSA, ISACA, OWASP or BSides meeting. Most are free for students, and many jobs come from people you meet there."
+  ],
+  "roles": [
+    {
+      "slug": "soc-analyst",
+      "name": "SOC Analyst",
+      "tagline": "The organization's lookout: you watch for signs of trouble and raise the alarm.",
+      "hiring": "entry",
+      "nice": [
+        "Defensive Cybersecurity"
+      ],
+      "code": "little",
+      "bls": "isa",
+      "summary": "A Security Operations Center (SOC) analyst watches alerts from an organization's computers and networks, decides which ones are real problems, and passes serious ones to responders. It is the most common first job in cybersecurity.",
+      "day": [
+        "Review a queue of alerts and decide which are false alarms and which need action",
+        "Look up a suspicious email, website or file to see whether it is harmful",
+        "Write short notes so the next shift knows what happened"
+      ],
+      "feeder": "IT help desk or support roles are the usual way in, but many SOCs hire graduates directly.",
+      "steps": [
+        "Learn the basics of networks and operating systems (CompTIA Network+ material is a good map).",
+        "Practise reading alerts on free blue-team labs.",
+        "Earn one starter certification, then apply to SOC, security operations and managed security provider jobs."
+      ],
+      "certsStart": [
+        "CompTIA Security+",
+        "ISC2 Certified in Cybersecurity (CC)",
+        "Google Cybersecurity Certificate"
+      ],
+      "certsLater": [
+        "CompTIA CySA+",
+        "GIAC GCIA"
+      ],
+      "resources": [
+        {
+          "name": "TryHackMe",
+          "url": "https://tryhackme.com/",
+          "note": "Free beginner rooms, including SOC basics"
+        },
+        {
+          "name": "LetsDefend",
+          "url": "https://letsdefend.io/",
+          "note": "Practise working a SOC alert queue"
+        },
+        {
+          "name": "Blue Team Labs Online",
+          "url": "https://blueteamlabs.online/",
+          "note": "Free defensive challenges"
+        }
+      ],
+      "items": [
+        "Watching for anything unusual on a team's screens and raising the alarm",
+        "Working on a team that keeps watch over an organization day and night",
+        "Sorting through lots of alerts to find the few that are real problems"
+      ]
+    },
+    {
+      "slug": "incident-responder",
+      "name": "Incident Responder",
+      "tagline": "The emergency team: when an attack gets through, you contain it and clean up.",
+      "hiring": "step",
+      "nice": [
+        "Incident Response"
+      ],
+      "code": "some",
+      "bls": "isa",
+      "summary": "Incident responders take over when an attack is confirmed. They stop it from spreading, remove the attacker, get systems back to normal and explain what happened to leaders.",
+      "day": [
+        "Join a call when a ransomware alert fires and decide what to shut off first",
+        "Collect evidence from affected computers before it is lost",
+        "Write the after-action report and recommend fixes"
+      ],
+      "feeder": "Most responders spend 1 to 3 years as a SOC analyst first.",
+      "steps": [
+        "Start as a SOC analyst and volunteer for incident work.",
+        "Learn how attacks unfold, step by step, using MITRE ATT&CK.",
+        "Practise on free investigation challenges."
+      ],
+      "certsStart": [
+        "CompTIA Security+"
+      ],
+      "certsLater": [
+        "CompTIA CySA+",
+        "GIAC GCIH"
+      ],
+      "resources": [
+        {
+          "name": "CyberDefenders",
+          "url": "https://cyberdefenders.org/",
+          "note": "Free investigation challenges"
+        },
+        {
+          "name": "NIST SP 800-61",
+          "url": "https://csrc.nist.gov/pubs/sp/800/61/r3/final",
+          "note": "The standard US guide to incident response"
+        },
+        {
+          "name": "MITRE ATT&CK",
+          "url": "https://attack.mitre.org/",
+          "note": "How real attackers operate, step by step"
+        }
+      ],
+      "items": [
+        "Being the person called in when something goes badly wrong",
+        "Leading a calm cleanup after a cyberattack",
+        "Staying calm and making quick decisions when everyone else is stressed"
+      ]
+    },
+    {
+      "slug": "digital-forensics-investigator",
+      "short": "Digital Forensics Investigator",
+      "name": "Digital Forensics and Cybercrime Investigator",
+      "tagline": "The detective: you recover digital evidence and work out exactly what happened.",
+      "hiring": "entry",
+      "nice": [
+        "Digital Forensics",
+        "Cybercrime Investigation",
+        "Digital Evidence Analysis"
+      ],
+      "code": "little",
+      "bls": "isa",
+      "summary": "Forensic investigators recover and examine data from computers, phones and online accounts, then explain what it shows in a way that holds up with managers, lawyers or a court. Jobs exist in police labs, government, consulting firms and legal services.",
+      "day": [
+        "Make an exact copy of a phone or laptop without changing the original",
+        "Rebuild a timeline of what a user or attacker did",
+        "Write a report a lawyer or judge can follow"
+      ],
+      "feeder": "Some police labs, e-discovery firms and consultancies hire graduates as forensic technicians; others want SOC or IT experience first.",
+      "steps": [
+        "Learn how files, operating systems and phones store data.",
+        "Practise with free forensics tools and challenges.",
+        "Look for forensic technician, e-discovery and law enforcement civilian analyst postings."
+      ],
+      "certsStart": [
+        "CompTIA Security+"
+      ],
+      "certsLater": [
+        "GIAC GCFE",
+        "GIAC GCFA"
+      ],
+      "resources": [
+        {
+          "name": "Autopsy",
+          "url": "https://www.autopsy.com/",
+          "note": "Free, open-source forensics tool"
+        },
+        {
+          "name": "CyberDefenders",
+          "url": "https://cyberdefenders.org/",
+          "note": "Free forensics challenges"
+        },
+        {
+          "name": "NIST SP 800-86",
+          "url": "https://csrc.nist.gov/pubs/sp/800/86/final",
+          "note": "Guide to adding forensics to incident response"
+        }
+      ],
+      "items": [
+        "Recovering deleted files to find out what really happened",
+        "Helping police or lawyers build a case from evidence on a phone or computer",
+        "Piecing together a timeline from small clues, like a detective"
+      ]
+    },
+    {
+      "slug": "threat-intelligence-analyst",
+      "name": "Threat Intelligence Analyst",
+      "tagline": "The researcher: you study attackers so the organization can see them coming.",
+      "hiring": "step",
+      "nice": [
+        "Threat Analysis",
+        "All-Source Analysis"
+      ],
+      "code": "little",
+      "bls": "isa",
+      "summary": "Threat intelligence analysts research criminal and state-backed hacking groups: who they target, how they operate and what they are likely to do next. They turn that research into briefings and warnings that help defenders prepare.",
+      "day": [
+        "Read reports, news and hacker forums for signs of new attacks",
+        "Match a group's methods to known techniques",
+        "Brief leaders on which threats matter most to the organization"
+      ],
+      "feeder": "Most start as SOC analysts, or as intelligence analysts in government or the military.",
+      "steps": [
+        "Read public threat reports and summarize them in your own words.",
+        "Learn MITRE ATT&CK, the shared language for attacker behaviour.",
+        "Strong writing matters as much as technical skill, so practise it."
+      ],
+      "certsStart": [
+        "CompTIA Security+"
+      ],
+      "certsLater": [
+        "GIAC GCTI"
+      ],
+      "resources": [
+        {
+          "name": "MITRE ATT&CK",
+          "url": "https://attack.mitre.org/",
+          "note": "Catalogue of real attacker groups and techniques"
+        },
+        {
+          "name": "SANS Institute on YouTube",
+          "url": "https://www.youtube.com/@SANSInstitute",
+          "note": "Free talks, including threat intelligence summits"
+        },
+        {
+          "name": "CyberSeek career pathway",
+          "url": "https://www.cyberseek.org/pathway.html",
+          "note": "How analysts move between roles"
+        }
+      ],
+      "items": [
+        "Researching a criminal hacking group and writing up how it operates",
+        "Following world news to predict who might attack next and why",
+        "Turning reports and news into a short briefing for leaders"
+      ]
+    },
+    {
+      "slug": "penetration-tester",
+      "name": "Penetration Tester",
+      "tagline": "The ethical hacker: you break in, with permission, so the real attackers can't.",
+      "hiring": "step",
+      "nice": [
+        "Vulnerability Analysis"
+      ],
+      "code": "some",
+      "bls": "isa",
+      "summary": "Penetration testers are hired to attack an organization's systems with permission, find weaknesses before criminals do, and explain how to fix them. It is a popular goal, but few people are hired into it straight from school.",
+      "day": [
+        "Scan a client's network for weak spots agreed in advance",
+        "Try to get from an ordinary account to full control",
+        "Write a report that ranks what to fix first"
+      ],
+      "feeder": "Common first jobs are vulnerability management analyst, systems administrator or SOC analyst.",
+      "steps": [
+        "Learn networking and Linux first; most testing builds on them.",
+        "Do capture-the-flag challenges and write up each one.",
+        "Look for vulnerability management or junior security analyst jobs while you build skills."
+      ],
+      "certsStart": [
+        "INE eJPT",
+        "CompTIA PenTest+"
+      ],
+      "certsLater": [
+        "OffSec OSCP"
+      ],
+      "resources": [
+        {
+          "name": "picoCTF",
+          "url": "https://picoctf.org/",
+          "note": "Free beginner hacking challenges from Carnegie Mellon"
+        },
+        {
+          "name": "PortSwigger Web Security Academy",
+          "url": "https://portswigger.net/web-security",
+          "note": "Free web hacking course"
+        },
+        {
+          "name": "OverTheWire",
+          "url": "https://overthewire.org/wargames/",
+          "note": "Free games that teach Linux and hacking"
+        },
+        {
+          "name": "Hack The Box",
+          "url": "https://www.hackthebox.com/",
+          "note": "Practice machines; free tier"
+        }
+      ],
+      "items": [
+        "Being hired to break into a company, with permission, to show its weak spots",
+        "Solving puzzle-style hacking challenges for fun",
+        "Thinking like a criminal to find the gaps nobody else noticed"
+      ]
+    },
+    {
+      "slug": "application-security-engineer",
+      "name": "Application Security Engineer",
+      "tagline": "The builder-defender: you make sure software is safe before it ships.",
+      "hiring": "step",
+      "nice": [
+        "Secure Software Development",
+        "Software Security Assessment"
+      ],
+      "code": "lots",
+      "bls": "sd",
+      "summary": "Application security (AppSec) engineers help developers write safe code. They review designs and code, run security tests and fix or explain the weaknesses they find.",
+      "day": [
+        "Review a new feature's code for mistakes attackers could use",
+        "Set up automated security checks that run on every code change",
+        "Teach developers how to avoid a common mistake"
+      ],
+      "feeder": "Most move in after time as a software developer.",
+      "steps": [
+        "Learn one programming language well and build something real.",
+        "Study the OWASP Top 10, the most common web app weaknesses.",
+        "Practise finding bugs in deliberately broken apps."
+      ],
+      "certsStart": [
+        "A portfolio of code and write-ups matters more than certificates here"
+      ],
+      "certsLater": [
+        "ISC2 CSSLP"
+      ],
+      "resources": [
+        {
+          "name": "OWASP Top 10",
+          "url": "https://owasp.org/www-project-top-ten/",
+          "note": "The most common web app risks"
+        },
+        {
+          "name": "OWASP Juice Shop",
+          "url": "https://owasp.org/www-project-juice-shop/",
+          "note": "A deliberately insecure app to practise on"
+        },
+        {
+          "name": "PortSwigger Web Security Academy",
+          "url": "https://portswigger.net/web-security",
+          "note": "Free hands-on labs"
+        }
+      ],
+      "items": [
+        "Writing code and making sure it can't be misused",
+        "Reviewing an app before launch to catch mistakes that could let attackers in",
+        "Building websites or apps with security designed in from the start"
+      ]
+    },
+    {
+      "slug": "cloud-security-engineer",
+      "name": "Cloud Security Engineer",
+      "tagline": "The cloud guardian: you keep services on AWS, Azure and Google Cloud locked down.",
+      "hiring": "step",
+      "nice": [
+        "Cybersecurity Architecture",
+        "Systems Security Analysis"
+      ],
+      "code": "some",
+      "bls": "cna",
+      "summary": "Cloud security engineers design and check the security of systems that run on cloud platforms such as Amazon Web Services, Microsoft Azure and Google Cloud. Much of the work is setting things up correctly and automating checks.",
+      "day": [
+        "Find a storage bucket that was accidentally left open to the internet",
+        "Write rules that stop risky settings from being deployed",
+        "Decide who should have access to which systems"
+      ],
+      "feeder": "Usually reached from cloud, systems administration or developer roles.",
+      "steps": [
+        "Start with one cloud provider's free beginner training.",
+        "Build a small project in the cloud and lock it down.",
+        "Learn basic scripting (Python or Bash) for automation."
+      ],
+      "certsStart": [
+        "AWS Certified Cloud Practitioner",
+        "Microsoft SC-900"
+      ],
+      "certsLater": [
+        "AWS Certified Security – Specialty",
+        "Microsoft AZ-500",
+        "ISC2 CCSP"
+      ],
+      "resources": [
+        {
+          "name": "flAWS",
+          "url": "http://flaws.cloud/",
+          "note": "Free game teaching common AWS mistakes"
+        },
+        {
+          "name": "AWS Skill Builder",
+          "url": "https://skillbuilder.aws/",
+          "note": "Free AWS training"
+        },
+        {
+          "name": "CIS Benchmarks",
+          "url": "https://www.cisecurity.org/cis-benchmarks",
+          "note": "Free secure-setup guides"
+        }
+      ],
+      "items": [
+        "Setting up online services on Amazon, Microsoft or Google cloud",
+        "Automating how computer systems are built and locked down",
+        "Working with the online services that apps and websites run on"
+      ]
+    },
+    {
+      "slug": "grc-analyst",
+      "name": "GRC Analyst",
+      "tagline": "The planner: you set the rules and priorities that keep a business safe.",
+      "hiring": "entry",
+      "nice": [
+        "Security Control Assessment",
+        "Systems Authorization",
+        "Cybersecurity Policy and Planning"
+      ],
+      "code": "little",
+      "bls": "isa",
+      "summary": "Governance, risk and compliance (GRC) analysts help an organization decide which risks matter, write the policies everyone follows, and show regulators and customers that security is under control. It suits people who like structure, writing and working with business teams.",
+      "day": [
+        "Update a security policy after a new law or contract requirement",
+        "Run a risk assessment with a business team",
+        "Gather evidence for an upcoming audit"
+      ],
+      "feeder": "Often hired straight from business, IS or accounting programs.",
+      "steps": [
+        "Learn one framework well, such as the NIST Cybersecurity Framework.",
+        "Practise writing a short policy or risk register for a made-up company.",
+        "Apply to GRC, risk, compliance and security analyst roles."
+      ],
+      "certsStart": [
+        "ISC2 Certified in Cybersecurity (CC)",
+        "CompTIA Security+"
+      ],
+      "certsLater": [
+        "ISACA CRISC",
+        "ISC2 CISSP"
+      ],
+      "resources": [
+        {
+          "name": "NIST Cybersecurity Framework 2.0",
+          "url": "https://www.nist.gov/cyberframework",
+          "note": "The most widely used security framework"
+        },
+        {
+          "name": "CIS Controls",
+          "url": "https://www.cisecurity.org/controls",
+          "note": "A prioritized list of protections"
+        },
+        {
+          "name": "NIST SP 800-53",
+          "url": "https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final",
+          "note": "The detailed catalogue of security controls"
+        }
+      ],
+      "items": [
+        "Writing the safety rules and plans a company follows",
+        "Deciding which risks matter most to a business and what to fix first",
+        "Turning complicated rules into clear checklists people can follow"
+      ],
+      "close": {
+        "role": "it-auditor",
+        "note": "GRC and IT audit are close cousins. GRC builds and runs the security program from the inside; IT audit checks it, often from outside, and grades it."
+      }
+    },
+    {
+      "slug": "it-auditor",
+      "name": "IT Auditor",
+      "tagline": "The independent checker: you test whether an organization really does what it says.",
+      "hiring": "entry",
+      "nice": [
+        "Technology Program Auditing"
+      ],
+      "code": "little",
+      "bls": "aa",
+      "summary": "IT auditors test whether an organization's technology controls actually work, then report what they find to leaders, boards or regulators. Large accounting firms and internal audit departments hire many graduates each year.",
+      "day": [
+        "Interview a team about how they grant and remove system access",
+        "Test a sample of records to see whether the rule was followed",
+        "Write findings with a clear rating and recommendation"
+      ],
+      "feeder": "Commonly hired straight from accounting, business or IS programs, especially by large accounting firms.",
+      "steps": [
+        "Take an auditing or internal controls course if your program offers one.",
+        "Join ISACA as a student; chapters often run student nights with employers.",
+        "Apply to IT audit, technology risk and internal audit graduate programs."
+      ],
+      "certsStart": [
+        "ISACA student membership (not a certification, but a good first step)"
+      ],
+      "certsLater": [
+        "ISACA CISA (you can sit the exam early; the certificate needs 5 years' experience, partly waivable)"
+      ],
+      "resources": [
+        {
+          "name": "ISACA",
+          "url": "https://www.isaca.org/",
+          "note": "The main professional body for IT audit"
+        },
+        {
+          "name": "The Institute of Internal Auditors",
+          "url": "https://www.theiia.org/",
+          "note": "Internal audit standards and student resources"
+        },
+        {
+          "name": "CIS Controls",
+          "url": "https://www.cisecurity.org/controls",
+          "note": "Controls auditors often test against"
+        }
+      ],
+      "items": [
+        "Checking whether a company really does what its rules say",
+        "Visiting different organizations to review how they protect themselves and write a report card",
+        "Testing whether a process really works by checking samples of real records"
+      ],
+      "close": {
+        "role": "grc-analyst",
+        "note": "GRC and IT audit are close cousins. GRC builds and runs the security program from the inside; IT audit checks it, often from outside, and grades it."
+      }
+    },
+    {
+      "slug": "privacy-analyst",
+      "name": "Privacy Analyst",
+      "tagline": "The data rights advocate: you make sure personal information is handled fairly and legally.",
+      "hiring": "entry",
+      "nice": [
+        "Privacy Compliance"
+      ],
+      "code": "little",
+      "bls": null,
+      "summary": "Privacy analysts make sure an organization collects, uses and shares personal information legally and fairly. They interpret privacy laws, review new products and handle requests from people who want to see or delete their data.",
+      "day": [
+        "Review a new app feature for what personal data it collects",
+        "Answer a customer's request to see the data held about them",
+        "Explain a new state privacy law to a product team"
+      ],
+      "feeder": "Some graduates are hired directly; others come from GRC, legal or compliance roles.",
+      "steps": [
+        "Learn the basics of US state privacy laws and Europe's GDPR.",
+        "Read companies' privacy policies critically and note what they reveal.",
+        "Look for privacy analyst, privacy operations and compliance analyst roles."
+      ],
+      "certsStart": [
+        "IAPP CIPP/US"
+      ],
+      "certsLater": [
+        "IAPP CIPT",
+        "IAPP CIPM"
+      ],
+      "resources": [
+        {
+          "name": "IAPP Resource Center",
+          "url": "https://iapp.org/resources/",
+          "note": "Privacy news and guides from the main professional body"
+        },
+        {
+          "name": "NIST Privacy Framework",
+          "url": "https://www.nist.gov/privacy-framework",
+          "note": "A free framework for managing privacy risk"
+        }
+      ],
+      "items": [
+        "Making sure people's personal information is collected and used fairly",
+        "Reading privacy laws and explaining what a company has to change",
+        "Speaking up for people whose personal information is being collected"
+      ]
+    },
+    {
+      "slug": "security-awareness-specialist",
+      "short": "Security Awareness Specialist",
+      "name": "Security Awareness Specialist",
+      "tagline": "The teacher: you help people spot scams and make safer choices.",
+      "hiring": "entry",
+      "nice": [
+        "Cybersecurity Instruction",
+        "Cybersecurity Curriculum Development"
+      ],
+      "code": "little",
+      "bls": "tds",
+      "summary": "Most attacks start with a person: a scam email, a fake phone call, a reused password. Security awareness specialists design training, simulated phishing and campaigns that change how people behave, and measure whether it works.",
+      "day": [
+        "Run a simulated phishing email and review who clicked",
+        "Make a short video or game about spotting scam calls",
+        "Present to new employees about protecting their accounts"
+      ],
+      "feeder": "Often reached from training, communications, education or help desk roles.",
+      "steps": [
+        "Learn how common scams work: phishing, smishing and voice phishing.",
+        "Create a sample training piece for your portfolio.",
+        "Apply to security awareness, human risk and security training roles."
+      ],
+      "certsStart": [
+        "CompTIA Security+",
+        "ISC2 Certified in Cybersecurity (CC)"
+      ],
+      "certsLater": [
+        "SANS Security Awareness Professional (SSAP)"
+      ],
+      "resources": [
+        {
+          "name": "NIST SP 800-50",
+          "url": "https://csrc.nist.gov/pubs/sp/800/50/r1/final",
+          "note": "Guide to building a security learning program"
+        },
+        {
+          "name": "SANS Security Awareness resources",
+          "url": "https://www.sans.org/security-awareness-training/",
+          "note": "Free reports and planning materials"
+        }
+      ],
+      "items": [
+        "Teaching people how to spot scam emails, texts and calls",
+        "Making videos, games or posters that help people stay safe online",
+        "Explaining tech risks to people in plain, friendly language"
+      ]
+    },
+    {
+      "slug": "systems-security-administrator",
+      "short": "Systems Security Administrator",
+      "name": "Network and Systems Security Administrator",
+      "tagline": "The keeper of the systems: you run networks and servers and keep them secure.",
+      "hiring": "entry",
+      "nice": [
+        "Systems Administration",
+        "Network Operations",
+        "Systems Security Analysis"
+      ],
+      "code": "some",
+      "bls": "ncsa",
+      "summary": "Network and systems administrators keep an organization's computers, servers, accounts and networks running, updated and secure. It is one of the most common doors into cybersecurity, and the skills carry into almost every other role.",
+      "day": [
+        "Install security updates across hundreds of computers",
+        "Set up accounts and permissions for a new employee",
+        "Fix a network problem stopping an office from working"
+      ],
+      "feeder": "IT support and help desk are the usual first jobs; many graduates start here directly.",
+      "steps": [
+        "Learn networking basics and practise in a free network simulator.",
+        "Get comfortable with the Linux and Windows command line.",
+        "Apply to IT support, systems administrator and network technician roles."
+      ],
+      "certsStart": [
+        "CompTIA Network+",
+        "CompTIA Linux+",
+        "Cisco CCNA"
+      ],
+      "certsLater": [
+        "CompTIA Security+, then a specialist certification"
+      ],
+      "resources": [
+        {
+          "name": "Cisco Packet Tracer",
+          "url": "https://www.netacad.com/cisco-packet-tracer",
+          "note": "Free network simulator"
+        },
+        {
+          "name": "OverTheWire Bandit",
+          "url": "https://overthewire.org/wargames/bandit/",
+          "note": "A free game that teaches the Linux command line"
+        }
+      ],
+      "items": [
+        "Setting up computers, networks and user accounts so everything runs smoothly",
+        "Fixing computer problems and keeping systems up to date",
+        "Setting up computers and home networks just to see how they work"
+      ]
+    },
+    {
+      "slug": "ot-ics-security-specialist",
+      "name": "OT / ICS Security Specialist",
+      "tagline": "The infrastructure protector: you secure power, water and factory systems.",
+      "hiring": "step",
+      "nice": [
+        "Operational Technology (OT) Cybersecurity Engineering"
+      ],
+      "code": "little",
+      "bls": "isa",
+      "summary": "Operational technology (OT) and industrial control systems (ICS) run power grids, water treatment, pipelines and factories. Specialists here protect equipment where a cyberattack can cause physical harm, so safety and reliability come first.",
+      "day": [
+        "Map which plant machines are connected to which networks",
+        "Plan a security update that cannot interrupt production",
+        "Work with engineers to separate safety systems from office networks"
+      ],
+      "feeder": "Often reached from controls engineering, field technician or IT and security roles in utilities and manufacturing.",
+      "steps": [
+        "Learn how industrial systems differ from office IT.",
+        "Take CISA's free industrial control systems training.",
+        "Look at utilities, manufacturers and engineering firms, which often train new hires."
+      ],
+      "certsStart": [
+        "CompTIA Security+"
+      ],
+      "certsLater": [
+        "GIAC GICSP"
+      ],
+      "resources": [
+        {
+          "name": "CISA ICS training",
+          "url": "https://www.cisa.gov/resources-tools/programs/ics-training-available-through-cisa",
+          "note": "Free online industrial security courses"
+        },
+        {
+          "name": "MITRE ATT&CK for ICS",
+          "url": "https://attack.mitre.org/matrices/ics/",
+          "note": "How attackers target industrial systems"
+        }
+      ],
+      "items": [
+        "Protecting power plants, water systems or factories",
+        "Working with real machines and equipment, not just office computers",
+        "Finding out how factories, power grids or vehicles are controlled by computers"
+      ]
+    },
+    {
+      "slug": "ai-security-specialist",
+      "name": "AI Security Specialist",
+      "tagline": "The new frontier: you find ways AI systems can be tricked and help make them safer.",
+      "hiring": "emerging",
+      "nice": [
+        "No single NICE work role yet; draws on Vulnerability Analysis and Secure Software Development"
+      ],
+      "code": "lots",
+      "bls": "isa",
+      "summary": "AI security specialists test and protect AI systems such as chatbots and machine learning models: tricking them into misbehaving, stopping data leaks and defending against attacks that target the models themselves. The field is new, so few entry-level postings exist yet.",
+      "day": [
+        "Try to trick a company's chatbot into revealing private data",
+        "Review how an AI feature handles untrusted input",
+        "Write guidance for teams building with AI"
+      ],
+      "feeder": "Usually reached from AppSec, machine learning engineering, data science or SOC roles.",
+      "steps": [
+        "Learn how AI language models work at a basic level.",
+        "Play free prompt-injection games and write up what worked.",
+        "Build a security foundation first; most AI security work rests on it."
+      ],
+      "certsStart": [
+        "No widely recognized entry certification yet; focus on projects"
+      ],
+      "certsLater": [],
+      "resources": [
+        {
+          "name": "OWASP Top 10 for LLM Applications",
+          "url": "https://genai.owasp.org/llm-top-10/",
+          "note": "The most common AI app risks"
+        },
+        {
+          "name": "MITRE ATLAS",
+          "url": "https://atlas.mitre.org/",
+          "note": "Catalogue of real attacks on AI systems"
+        },
+        {
+          "name": "NIST AI Risk Management Framework",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework",
+          "note": "How organizations manage AI risk"
+        },
+        {
+          "name": "Gandalf by Lakera",
+          "url": "https://gandalf.lakera.ai/",
+          "note": "A free game: trick an AI into revealing a password"
+        }
+      ],
+      "items": [
+        "Testing whether an AI chatbot can be tricked into misbehaving",
+        "Learning how AI systems work and where they go wrong",
+        "Thinking up ways AI tools could go wrong or be misused"
+      ]
+    }
+  ],
+  "pairs": [
+    {
+      "a": [
+        "Steady shifts watching for trouble",
+        "soc-analyst"
+      ],
+      "b": [
+        "On call for emergencies, then the deep cleanup",
+        "incident-responder"
+      ]
+    },
+    {
+      "a": [
+        "Build a company's security plan",
+        "grc-analyst"
+      ],
+      "b": [
+        "Check someone else's plan and grade it",
+        "it-auditor"
+      ]
+    },
+    {
+      "a": [
+        "Break into many different companies' systems",
+        "penetration-tester"
+      ],
+      "b": [
+        "Make one product safer from the inside",
+        "application-security-engineer"
+      ]
+    },
+    {
+      "a": [
+        "Classic computers and networks",
+        "penetration-tester"
+      ],
+      "b": [
+        "AI systems and chatbots",
+        "ai-security-specialist"
+      ]
+    },
+    {
+      "a": [
+        "Pin down exactly what happened on one device",
+        "digital-forensics-investigator"
+      ],
+      "b": [
+        "See the big picture across many attacks",
+        "threat-intelligence-analyst"
+      ]
+    },
+    {
+      "a": [
+        "People's personal information and their rights",
+        "privacy-analyst"
+      ],
+      "b": [
+        "Protecting the whole business from every kind of risk",
+        "grc-analyst"
+      ]
+    },
+    {
+      "a": [
+        "Brand-new cloud services",
+        "cloud-security-engineer"
+      ],
+      "b": [
+        "Keeping an office's computers and network running",
+        "systems-security-administrator"
+      ]
+    },
+    {
+      "a": [
+        "Teaching people to protect themselves",
+        "security-awareness-specialist"
+      ],
+      "b": [
+        "Making sure companies respect people's data",
+        "privacy-analyst"
+      ]
+    },
+    {
+      "a": [
+        "Physical machines and equipment",
+        "ot-ics-security-specialist"
+      ],
+      "b": [
+        "Office computers and servers",
+        "systems-security-administrator"
+      ]
+    },
+    {
+      "a": [
+        "Catch problems as they happen",
+        "soc-analyst"
+      ],
+      "b": [
+        "Dig into what happened afterwards",
+        "digital-forensics-investigator"
+      ]
+    },
+    {
+      "a": [
+        "Handle the attack in front of you",
+        "incident-responder"
+      ],
+      "b": [
+        "Research the attackers behind it",
+        "threat-intelligence-analyst"
+      ]
+    },
+    {
+      "a": [
+        "Write the app's code",
+        "application-security-engineer"
+      ],
+      "b": [
+        "Set up and secure the systems it runs on",
+        "cloud-security-engineer"
+      ]
+    },
+    {
+      "a": [
+        "AI systems and chatbots",
+        "ai-security-specialist"
+      ],
+      "b": [
+        "Machines in factories, power plants and water systems",
+        "ot-ics-security-specialist"
+      ]
+    },
+    {
+      "a": [
+        "Review and grade how an organization works",
+        "it-auditor"
+      ],
+      "b": [
+        "Teach and inspire the people in it",
+        "security-awareness-specialist"
+      ]
+    }
+  ],
+  "context": [
+    {
+      "id": "code",
+      "q": "How do you feel about learning to code?",
+      "options": [
+        {
+          "label": "Excited about it",
+          "w": {
+            "application-security-engineer": 0.5,
+            "cloud-security-engineer": 0.5,
+            "ai-security-specialist": 0.5,
+            "penetration-tester": 0.5
+          }
+        },
+        {
+          "label": "Fine if I need to",
+          "w": {}
+        },
+        {
+          "label": "I'd rather not",
+          "w": {
+            "application-security-engineer": -0.5,
+            "cloud-security-engineer": -0.5,
+            "ai-security-specialist": -0.5,
+            "penetration-tester": -0.5
+          }
+        }
+      ]
+    },
+    {
+      "id": "background",
+      "q": "What are you studying, or strongest in?",
+      "options": [
+        {
+          "label": "Computer science or software",
+          "w": {
+            "application-security-engineer": 0.5,
+            "ai-security-specialist": 0.5,
+            "penetration-tester": 0.5
+          }
+        },
+        {
+          "label": "IT or networking",
+          "w": {
+            "systems-security-administrator": 0.5,
+            "soc-analyst": 0.5,
+            "cloud-security-engineer": 0.5,
+            "incident-responder": 0.5
+          }
+        },
+        {
+          "label": "Business, IS or accounting",
+          "w": {
+            "grc-analyst": 0.5,
+            "it-auditor": 0.5,
+            "privacy-analyst": 0.5
+          }
+        },
+        {
+          "label": "Criminal justice, law or political science",
+          "w": {
+            "digital-forensics-investigator": 0.5,
+            "threat-intelligence-analyst": 0.5
+          }
+        },
+        {
+          "label": "Psychology, communications or education",
+          "w": {
+            "security-awareness-specialist": 0.5
+          }
+        },
+        {
+          "label": "Engineering",
+          "w": {
+            "ot-ics-security-specialist": 0.5
+          }
+        },
+        {
+          "label": "Undecided or something else",
+          "w": {}
+        }
+      ]
+    },
+    {
+      "id": "shifts",
+      "q": "Night, weekend or shift work for your first couple of years?",
+      "options": [
+        {
+          "label": "Fine, if it gets me in",
+          "w": {
+            "soc-analyst": 0.5
+          }
+        },
+        {
+          "label": "I'd rather not",
+          "w": {
+            "soc-analyst": -0.5
+          }
+        },
+        {
+          "label": "That's a dealbreaker",
+          "w": {
+            "soc-analyst": -1.5,
+            "incident-responder": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "setting",
+      "q": "Where would you most like to work?",
+      "options": [
+        {
+          "label": "Government or law enforcement",
+          "w": {
+            "digital-forensics-investigator": 0.5,
+            "threat-intelligence-analyst": 0.5,
+            "ot-ics-security-specialist": 0.5
+          },
+          "note": "clearance"
+        },
+        {
+          "label": "A consulting firm with many clients",
+          "w": {
+            "penetration-tester": 0.5,
+            "it-auditor": 0.5,
+            "grc-analyst": 0.5
+          }
+        },
+        {
+          "label": "One organization's own team",
+          "w": {
+            "soc-analyst": 0.5,
+            "incident-responder": 0.5,
+            "systems-security-administrator": 0.5,
+            "security-awareness-specialist": 0.5
+          }
+        },
+        {
+          "label": "A tech company or startup",
+          "w": {
+            "application-security-engineer": 0.5,
+            "cloud-security-engineer": 0.5,
+            "ai-security-specialist": 0.5,
+            "privacy-analyst": 0.5
+          }
+        },
+        {
+          "label": "Not sure yet",
+          "w": {}
+        }
+      ]
+    },
+    {
+      "id": "soon",
+      "q": "How soon do you need a job in the field?",
+      "options": [
+        {
+          "label": "Within a year",
+          "w": {},
+          "entryBoost": 1.1
+        },
+        {
+          "label": "I can build skills for 2 to 3 years",
+          "w": {}
+        }
+      ]
+    }
+  ]
+}

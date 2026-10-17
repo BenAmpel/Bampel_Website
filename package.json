@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "build:ccair": "node scripts/build-ccair.js",
+    "build:ccair": "node scripts/build-ccair.js && node scripts/build-pathways.mjs",
     "test:lab": "node tests/lab/run.mjs",
     "lab:dev": "node tests/lab/devserver.mjs"
   },

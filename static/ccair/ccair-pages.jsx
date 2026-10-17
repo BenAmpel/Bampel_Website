@@ -47,7 +47,7 @@ function HomePage({ onNavigate, tweaks }) {
         <NetworkCanvas scheme={tweaks.colorScheme} />
 
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 860, animation: 'fadeInUp 0.8s ease' }}>
-          <img src="uploads/care-logo.png" alt="CCAIR" style={{ height: tweaks.heroStyle === 'full' ? 100 : 64, marginBottom: 24, filter: 'drop-shadow(0 0 30px rgba(var(--accent-rgb),0.2))' }} />
+          <img src="uploads/ccair-logo.png" alt="CCAIR" style={{ height: tweaks.heroStyle === 'full' ? 100 : 64, marginBottom: 24, filter: 'drop-shadow(0 0 30px rgba(var(--accent-rgb),0.2))' }} />
           <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.8rem)', marginBottom: 16, lineHeight: 1.1 }}>
             Center for <span style={{ color: 'var(--accent)' }}>CyberAI</span> Research
           </h1>
@@ -57,6 +57,7 @@ function HomePage({ onNavigate, tweaks }) {
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <CButton primary onClick={() => onNavigate('research')}>Explore Research →</CButton>
             <CButton onClick={() => onNavigate('people')}>Join CCAIR</CButton>
+            <CButton href="/ccair/pathways/">Find your cyber career path</CButton>
           </div>
         </div>
 

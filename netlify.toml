@@ -80,16 +80,17 @@
   HUGO_ENABLEGITINFO = "true"
   NODE_VERSION = "22"
 
-# Old CCAIR center URL -> new CARE URL (renamed June 2026)
+# The center was briefly called CARE (/care/) in June 2026; it is CCAIR again (Oct 2026).
+# Send old /care/ links to /ccair/.
 [[redirects]]
-  from = "/ccair/*"
-  to = "/care/:splat"
+  from = "/care/*"
+  to = "/ccair/:splat"
   status = 301
   force = true
 
 [[redirects]]
-  from = "/ccair"
-  to = "/care/"
+  from = "/care"
+  to = "/ccair/"
   status = 301
   force = true
 

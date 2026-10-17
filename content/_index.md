@@ -31,7 +31,7 @@ sections:
 
         [📄 Download CV (PDF) →](/uploads/cv.pdf) · [📖 Google Scholar →](https://scholar.google.com/citations?user=XDdwaZUAAAAJ&hl=en)
 
-        [🔬 Explore Research →](/research/) · [🧪 CCAIR — Center for CyberAI Research →](/care/)
+        [🔬 Explore Research →](/research/) · [🧪 CCAIR — Center for CyberAI Research →](/ccair/) · [🧭 Cyber Career Pathway Finder →](/ccair/pathways/)
     design:
       columns: '1'
 ---

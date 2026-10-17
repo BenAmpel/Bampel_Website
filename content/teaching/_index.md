@@ -13,6 +13,8 @@ sections:
 
         {{< teaching_courses >}}
 
+        **For students exploring cyber careers:** the [Cyber Career Pathway Finder](/ccair/pathways/) is a free 5-minute quiz that ranks 14 cybersecurity roles by your interests and shows the realistic first job, starter certifications and free practice for each. It pairs with CIS 3620 Career Pathways.
+
         **Notable:** Co-developed CIS 4730: Deep Learning for Business (2025); Proposed and developed CIS 8684: Cyber Threat Intelligence (2024)
     design:
       columns: '1'
