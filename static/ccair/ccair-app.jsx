@@ -85,12 +85,14 @@ function CCAIRApp() {
   return (
     <TweakCtx.Provider value={{ cardStyle: tweaks.cardStyle, colorScheme: tweaks.colorScheme }}>
       <DataProvider>
+        <ScrollFX />
         <CCAIRNav currentPage={currentPage} onNavigate={navigate} />
 
         <main id="main-content" style={{
           opacity: transitioning ? 0 : 1,
-          transform: transitioning ? 'translateY(12px)' : 'translateY(0)',
-          transition: 'opacity 0.25s ease, transform 0.25s ease',
+          transform: transitioning ? 'translateY(12px) scale(0.995)' : 'none',
+          filter: transitioning ? 'blur(6px)' : 'none',
+          transition: 'opacity 0.25s ease, transform 0.25s ease, filter 0.25s ease',
           minHeight: '100vh',
         }}>
           <ErrorBoundary>{renderPage()}</ErrorBoundary>

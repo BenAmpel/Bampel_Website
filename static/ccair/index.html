@@ -80,6 +80,42 @@
 
     .sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0; }
 
+    /* ---------- Motion layer (shared with the Pathway Finder) ---------- */
+    :root { --ease-out: cubic-bezier(0.22, 1, 0.36, 1); }
+    /* Headlines rise word by word once their section is in view (the hero runs on load). */
+    .cw { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: 0.1em; margin-bottom: -0.1em; }
+    .cw > span { display: inline-block; transform: translateY(105%); opacity: 0; }
+    .is-in .cw > span { animation: cwUp 0.9s var(--ease-out) forwards; animation-delay: calc(0.08s + var(--i, 0) * 0.06s); }
+    @keyframes cwUp { to { transform: none; opacity: 1; } }
+    /* Kicker labels draw a short line, subtitles fade up, cards enter one after another. */
+    .ccair-kicker::before { content: ''; display: inline-block; vertical-align: middle; height: 1px; width: 0; margin-right: 0; background: var(--accent);
+      transition: width 0.8s var(--ease-out) 0.15s, margin 0.8s var(--ease-out) 0.15s; }
+    .is-in .ccair-kicker::before { width: 26px; margin-right: 10px; }
+    .ccair-sub { opacity: 0; transform: translateY(14px); transition: opacity 0.8s var(--ease-out) 0.3s, transform 0.8s var(--ease-out) 0.3s; }
+    .is-in .ccair-sub { opacity: 1; transform: none; }
+    .ccair-stagger > * > * { opacity: 0; transform: translateY(22px); }
+    .is-in .ccair-stagger > * > * { animation: cardIn 0.8s var(--ease-out) forwards; animation-delay: calc(0.25s + var(--s, 0) * 0.07s); }
+    .ccair-stagger > * > :nth-child(2) { --s: 1; } .ccair-stagger > * > :nth-child(3) { --s: 2; } .ccair-stagger > * > :nth-child(4) { --s: 3; }
+    .ccair-stagger > * > :nth-child(5) { --s: 4; } .ccair-stagger > * > :nth-child(6) { --s: 5; } .ccair-stagger > * > :nth-child(7) { --s: 6; }
+    .ccair-stagger > * > :nth-child(8) { --s: 7; } .ccair-stagger > * > :nth-child(n+9) { --s: 8; }
+    @keyframes cardIn { to { opacity: 1; transform: none; } }
+    /* Hero: logo settles in, then the headline, subtitle and buttons. */
+    .ccair-hero-logo { animation: logoIn 1s var(--ease-out) both; }
+    @keyframes logoIn { from { opacity: 0; transform: scale(0.85); filter: blur(6px); } }
+    .ccair-hero-rise { animation: cardIn 0.9s var(--ease-out) both; animation-delay: var(--d, 0s); opacity: 0; transform: translateY(18px); }
+    /* Pointer spotlight on cards. */
+    .ccair-card::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+      background: radial-gradient(380px circle at var(--mx, -400px) var(--my, -400px), rgba(var(--accent-rgb), 0.10), transparent 60%);
+      opacity: 0; transition: opacity 0.4s; }
+    .ccair-card:hover::after { opacity: 1; }
+    /* Reading progress along the top edge. */
+    .ccair-progress { position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 200; transform-origin: 0 50%; transform: scaleX(0); pointer-events: none;
+      background: linear-gradient(90deg, var(--accent), var(--accent2)); box-shadow: 0 0 12px var(--accent-glow); }
+    @media (prefers-reduced-motion: reduce) {
+      .cw > span, .ccair-sub, .ccair-stagger > * > *, .ccair-hero-rise { opacity: 1 !important; transform: none !important; }
+      .ccair-kicker::before { width: 26px; margin-right: 10px; }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
     }

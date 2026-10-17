@@ -33,6 +33,17 @@ function useCounter(end, duration = 1800) {
   return [count, ref];
 }
 
+const REDUCE_MOTION = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Headline text that rises in word by word (CSS: .cw). `start` offsets the word index for multi-part titles.
+function SplitWords({ text, start = 0 }) {
+  const words = String(text).split(/(\s+)/);
+  let i = start;
+  return words.map((w, k) => /^\s+$/.test(w) || !w ? w : (
+    <span key={k} className="cw"><span style={{ '--i': i++ }}>{w}</span></span>
+  ));
+}
+
 function useInView(threshold = 0.15) {
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
@@ -125,6 +136,29 @@ const NetworkCanvas = memo(function NetworkCanvas({ scheme = 'teal' }) {
   return <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} aria-hidden="true" />;
 });
 
+// Reading progress along the top edge, plus gentle parallax for elements marked data-parallax="<speed>".
+function ScrollFX() {
+  const bar = useRef(null);
+  useEffect(() => {
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      const y = window.scrollY, h = document.documentElement.scrollHeight - window.innerHeight;
+      if (bar.current) bar.current.style.transform = 'scaleX(' + (h > 0 ? y / h : 0).toFixed(4) + ')';
+      if (REDUCE_MOTION) return;
+      document.querySelectorAll('[data-parallax]').forEach((el) => {
+        el.style.translate = '0 ' + (y * parseFloat(el.getAttribute('data-parallax'))).toFixed(1) + 'px';
+      });
+    };
+    const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    update();
+    return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); };
+  }, []);
+  return <div ref={bar} className="ccair-progress" aria-hidden="true"></div>;
+}
+
 function CCAIRNav({ currentPage, onNavigate }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -156,7 +190,7 @@ function CCAIRNav({ currentPage, onNavigate }) {
     border: 'none', cursor: 'pointer', padding: '8px 14px', borderRadius: 6,
     fontFamily: "'Manrope', sans-serif", fontSize: 13.5, fontWeight: 600,
     color: active ? 'var(--accent)' : 'var(--text-secondary)',
-    transition: 'all 0.2s', width: '100%', textAlign: 'left',
+    transition: 'all 0.2s', width: '100%', textAlign: 'left', whiteSpace: 'nowrap',
   });
 
   return (
@@ -198,20 +232,18 @@ function CCAIRNav({ currentPage, onNavigate }) {
 function PageSection({ title, subtitle, children, noPad, accent, id }) {
   const [ref, visible] = useInView();
   return (
-    <section ref={ref} id={id} className="grid-bg" style={{
+    <section ref={ref} id={id} className={'grid-bg ccair-section' + (visible ? ' is-in' : '')} style={{
       padding: noPad ? 0 : 'clamp(60px,8vw,100px) clamp(20px,5vw,80px)',
-      opacity: visible ? 1 : 0, transform: visible ? 'none' : 'translateY(24px)',
-      transition: 'opacity 0.6s ease, transform 0.6s ease',
     }}>
       <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%', position: 'relative', zIndex: 1 }}>
         {title && (
           <div style={{ marginBottom: 48 }}>
-            {accent && <div className="mono" style={{ color: 'var(--accent)', fontSize: 13, fontWeight: 700, letterSpacing: 2, marginBottom: 8, textTransform: 'uppercase' }}>{accent}</div>}
-            <h2 style={{ fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', marginBottom: subtitle ? 12 : 0 }}>{title}</h2>
-            {subtitle && <p style={{ color: 'var(--text-secondary)', fontSize: 16, maxWidth: 640, lineHeight: 1.7 }}>{subtitle}</p>}
+            {accent && <div className="mono ccair-kicker" style={{ color: 'var(--accent)', fontSize: 13, fontWeight: 700, letterSpacing: 2, marginBottom: 8, textTransform: 'uppercase' }}>{accent}</div>}
+            <h2 style={{ fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', marginBottom: subtitle ? 12 : 0 }}>{typeof title === 'string' ? <SplitWords text={title} /> : title}</h2>
+            {subtitle && <p className="ccair-sub" style={{ color: 'var(--text-secondary)', fontSize: 16, maxWidth: 640, lineHeight: 1.7 }}>{subtitle}</p>}
           </div>
         )}
-        {children}
+        <div className="ccair-stagger">{children}</div>
       </div>
     </section>
   );
@@ -238,7 +270,8 @@ function GlassCard({ children, style, onClick, hover = true, glow = false }) {
   if (glow && hovered) base.boxShadow = `0 0 40px rgba(var(--accent-rgb),0.12), 0 8px 32px rgba(0,0,0,0.3)`;
 
   return (
-    <div style={base} onClick={onClick}
+    <div className="ccair-card" style={base} onClick={onClick}
+      onMouseMove={REDUCE_MOTION ? undefined : (e) => { const r = e.currentTarget.getBoundingClientRect(); e.currentTarget.style.setProperty('--mx', (e.clientX - r.left) + 'px'); e.currentTarget.style.setProperty('--my', (e.clientY - r.top) + 'px'); }}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
       onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } } : undefined}
@@ -481,12 +514,12 @@ window.CCAIR = window.CCAIR || {};
 Object.assign(window.CCAIR, {
   TweakCtx, useTweakCtx, ACCENT_RGB, useCounter, useInView,
   NetworkCanvas, CCAIRNav, PageSection, GlassCard, StatCard, Badge, StatusDot,
-  PersonCard, PublicationCard, ResourceCard, Timeline, FilterBar, PipelineStep,
+  PersonCard, PublicationCard, ResourceCard, Timeline, FilterBar, PipelineStep, SplitWords, ScrollFX,
   CButton, CCAIRFooter,
 });
 Object.assign(window, {
   TweakCtx, useTweakCtx, ACCENT_RGB, useCounter, useInView,
   NetworkCanvas, CCAIRNav, PageSection, GlassCard, StatCard, Badge, StatusDot,
-  PersonCard, PublicationCard, ResourceCard, Timeline, FilterBar, PipelineStep,
+  PersonCard, PublicationCard, ResourceCard, Timeline, FilterBar, PipelineStep, SplitWords, ScrollFX,
   CButton, CCAIRFooter,
 });

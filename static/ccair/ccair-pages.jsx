@@ -41,20 +41,20 @@ function HomePage({ onNavigate, tweaks }) {
         display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
         textAlign: 'center', padding: '100px clamp(20px,5vw,80px) 60px', overflow: 'hidden',
       }}>
-        <div style={{ position: 'absolute', top: '15%', left: '20%', width: 400, height: 400, borderRadius: '50%', background: `radial-gradient(circle, rgba(var(--accent-rgb),0.08), transparent 70%)`, animation: 'float1 22s ease-in-out infinite', pointerEvents: 'none' }}></div>
-        <div style={{ position: 'absolute', bottom: '10%', right: '15%', width: 350, height: 350, borderRadius: '50%', background: `radial-gradient(circle, rgba(var(--accent2-rgb),0.06), transparent 70%)`, animation: 'float2 18s ease-in-out infinite', pointerEvents: 'none' }}></div>
+        <div data-parallax="0.18" style={{ position: 'absolute', top: '15%', left: '20%', width: 400, height: 400, borderRadius: '50%', background: `radial-gradient(circle, rgba(var(--accent-rgb),0.08), transparent 70%)`, animation: 'float1 22s ease-in-out infinite', pointerEvents: 'none' }}></div>
+        <div data-parallax="-0.12" style={{ position: 'absolute', bottom: '10%', right: '15%', width: 350, height: 350, borderRadius: '50%', background: `radial-gradient(circle, rgba(var(--accent2-rgb),0.06), transparent 70%)`, animation: 'float2 18s ease-in-out infinite', pointerEvents: 'none' }}></div>
 
         <NetworkCanvas scheme={tweaks.colorScheme} />
 
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: 860, animation: 'fadeInUp 0.8s ease' }}>
-          <img src="uploads/ccair-logo.png" alt="CCAIR" style={{ height: tweaks.heroStyle === 'full' ? 100 : 64, marginBottom: 24, filter: 'drop-shadow(0 0 30px rgba(var(--accent-rgb),0.2))' }} />
+        <div className="ccair-hero is-in" style={{ position: 'relative', zIndex: 1, maxWidth: 860 }}>
+          <img className="ccair-hero-logo" src="uploads/ccair-logo.png" alt="CCAIR" style={{ height: tweaks.heroStyle === 'full' ? 100 : 64, marginBottom: 24, filter: 'drop-shadow(0 0 30px rgba(var(--accent-rgb),0.2))' }} />
           <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.8rem)', marginBottom: 16, lineHeight: 1.1 }}>
-            Center for <span style={{ color: 'var(--accent)' }}>CyberAI</span> Research
+            <SplitWords text="Center for" /> <span style={{ color: 'var(--accent)' }}><SplitWords text="CyberAI" start={2} /></span> <SplitWords text="Research" start={3} />
           </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: 'clamp(15px, 2vw, 18px)', maxWidth: 600, margin: '0 auto 36px', lineHeight: 1.7 }}>
+          <p className="ccair-hero-rise" style={{ '--d': '0.45s', color: 'var(--text-secondary)', fontSize: 'clamp(15px, 2vw, 18px)', maxWidth: 600, margin: '0 auto 36px', lineHeight: 1.7 }}>
             Advancing the theory and practice of proactive cyber threat intelligence under adversarial uncertainty.
           </p>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div className="ccair-hero-rise" style={{ '--d': '0.6s', display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <CButton primary onClick={() => onNavigate('research')}>Explore Research →</CButton>
             <CButton onClick={() => onNavigate('people')}>Join CCAIR</CButton>
             <CButton href="/ccair/pathways/">Find your cyber career path</CButton>
@@ -62,7 +62,7 @@ function HomePage({ onNavigate, tweaks }) {
         </div>
 
         {tweaks.heroStyle === 'full' && (
-          <div style={{ position: 'relative', zIndex: 1, marginTop: 60, display: 'flex', gap: 'clamp(30px,5vw,60px)', animation: 'fadeInUp 1s ease 0.2s both' }}>
+          <div style={{ position: 'relative', zIndex: 1, marginTop: 60, display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 'clamp(24px,5vw,60px)', maxWidth: '100%', animation: 'fadeInUp 1s ease 0.8s both' }}>
             <StatCard value={publications.length} label="Publications" />
             <StatCard value={(people.students || []).length + (people.mentees || []).length} label="Ph.D. Students Mentored" />
             <StatCard value={2} label="Best Paper Awards" />
