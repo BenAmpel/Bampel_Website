@@ -339,6 +339,23 @@ function ResourcesPage() {
   return (
     <div style={{ paddingTop: 64 }}>
       <h1 className="sr-only">Resources — CCAIR</h1>
+      <PageSection title="For Students" accent="// careers" subtitle="Free guides for students deciding where they fit in cybersecurity.">
+        <GlassCard style={{ padding: 28, display: 'flex', flexWrap: 'wrap', gap: 24, alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ flex: '1 1 380px' }}>
+            <div className="mono" style={{ fontSize: 11, letterSpacing: 1.5, color: 'var(--accent)', marginBottom: 8 }}>RELEASED · FREE · NOTHING STORED</div>
+            <div style={{ fontWeight: 700, fontSize: 20, marginBottom: 8 }}>Cyber Career Pathway Finder</div>
+            <div style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.7 }}>
+              A 5-minute, jargon-free quiz that ranks 14 cybersecurity roles by your interests, with the realistic first job,
+              starter certifications, free practice and US pay for each. Every role also has its own guide.
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <CButton primary href="/ccair/pathways/">Take the finder →</CButton>
+            <CButton href="/ccair/pathways/#roles">Browse the 14 role guides</CButton>
+          </div>
+        </GlassCard>
+      </PageSection>
+
       <PageSection title="Research Assets" accent="// resources" subtitle="Persistent artifacts designed to outlive individual grants and serve as shared infrastructure for the CyberAI community.">
         <FilterBar filters={['datasets', 'benchmarks', 'tools']} active={tab} onFilter={setTab} label="View:" />
 
