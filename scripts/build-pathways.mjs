@@ -201,8 +201,38 @@ ${top('hub')}
 ${foot()}`;
 }
 
+/* ---------- Citations ----------
+   D.refs: { id: { title, publisher, url, period } }. Each role page numbers its references in order of
+   first use and renders them as [1], [2] links to the References list at the bottom of the page. */
+function makeCiter() {
+  const order = [];
+  const cite = (ids) => (ids || []).map((id) => {
+    if (!D.refs || !D.refs[id]) throw new Error(`Unknown reference id: ${id}`);
+    let n = order.indexOf(id); if (n < 0) { order.push(id); n = order.length - 1; }
+    return `<sup class="cite"><a href="#ref-${n + 1}" aria-label="Source ${n + 1}">[${n + 1}]</a></sup>`;
+  }).join('');
+  const list = () => order.length ? `<section id="references"><h2 class="reveal">References</h2>
+    <p class="body reveal">Every figure on this page comes from these sources. Figures for broad government categories cover the whole occupation, not only this specialty.</p>
+    <ol class="refs">${order.map((id, i) => { const x = D.refs[id];
+      return `<li id="ref-${i + 1}"><span class="mono">[${i + 1}]</span> ${esc(x.publisher)}. <a href="${esc(x.url)}" rel="noopener" target="_blank">${esc(x.title)}</a>${x.period ? `. ${esc(x.period)}` : ''}.</li>`; }).join('')}</ol></section>` : '';
+  return { cite, list };
+}
+
+function numbersHtml(r, cite) {
+  const N = r.numbers;
+  if (!N) return '';
+  const row = (f) => `<div class="reveal"><dt>${esc(f.label)}</dt><dd>${f.value}${cite(f.refs)}${f.note ? `<small>${esc(f.note)}</small>` : ''}</dd></div>`;
+  return `<section id="numbers"><h2 class="reveal">By the numbers</h2>
+    <dl class="numbers">${N.stats.map(row).join('')}</dl>
+    ${N.where ? `<h3 class="reveal sub-h">Where the jobs are</h3><p class="body reveal">${N.where.text}${cite(N.where.refs)}</p>` : ''}
+    ${N.who ? `<h3 class="reveal sub-h">Who hires</h3><ul class="list">${N.who.map((w) => `<li class="reveal">${w.text}${cite(w.refs)}</li>`).join('')}</ul>` : ''}
+    ${N.caveat ? `<p class="reviewed reveal">${esc(N.caveat)}</p>` : ''}
+  </section>`;
+}
+
 /* ---------- Role guide ---------- */
 function rolePage(r) {
+  const { cite, list } = makeCiter();
   const url = `${HUB}${r.slug}/`;
   const pay = r.bls ? D.bls[r.bls] : null;
   const firstJob = { entry: `Often, yes. ${r.feeder}`, step: `Usually not. ${r.feeder}`, emerging: `Rarely, so far. ${r.feeder}` }[r.hiring];
@@ -246,9 +276,11 @@ ${top('role')}
       <div><dt>First job?</dt><dd>${HIRING[r.hiring]}<small>${esc(r.feeder)}</small></dd></div>
       <div><dt>Coding</dt><dd>${CODE_SHORT[r.code]}</dd></div>
       <div><dt>Start with</dt><dd>${esc(r.certsStart[0])}</dd></div>
-      <div><dt>Median US pay</dt><dd>${pay ? `${money(pay.median)}<small>BLS ${esc(D.sources.blsDate)}, ${esc(pay.occupation)}</small>` : 'No BLS category<small>See IAPP salary surveys</small>'}</dd></div>
+      <div><dt>Median US pay</dt><dd>${pay ? `${money(pay.median)}${pay.ref ? cite([pay.ref]) : ''}<small>BLS ${esc(D.sources.blsDate)}, ${esc(pay.occupation)}</small>` : 'No BLS category<small>See IAPP salary surveys</small>'}</dd></div>
     </dl>
   </div>
+
+  ${numbersHtml(r, cite)}
 
   <section><h2 class="reveal">What the job is like</h2>
     <p class="body reveal">${esc(r.tagline)} A typical week might include:</p>
@@ -277,6 +309,8 @@ ${top('role')}
   </section>
 
   <section><h2 class="reveal">Questions about this role</h2>${faqHtml(faq)}</section>
+
+  ${list()}
 
   ${related.length ? `<section><h2 class="reveal">Related roles</h2><div class="related reveal">${related.map((x) => `<a href="/ccair/pathways/${x.slug}/">${esc(x.name)}</a>`).join('')}</div></section>` : ''}
 

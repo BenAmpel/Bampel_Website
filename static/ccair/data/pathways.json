@@ -9,32 +9,44 @@
     "isa": {
       "occupation": "Information Security Analysts",
       "median": 129180,
-      "url": "https://www.bls.gov/ooh/computer-and-information-technology/information-security-analysts.htm"
+      "url": "https://www.bls.gov/ooh/computer-and-information-technology/information-security-analysts.htm",
+      "ref": "bls-ooh-isa"
     },
     "ncsa": {
       "occupation": "Network and Computer Systems Administrators",
       "median": 99130,
-      "url": "https://www.bls.gov/ooh/computer-and-information-technology/network-and-computer-systems-administrators.htm"
+      "url": "https://www.bls.gov/ooh/computer-and-information-technology/network-and-computer-systems-administrators.htm",
+      "ref": "bls-ooh-ncsa"
     },
     "sd": {
       "occupation": "Software Developers",
       "median": 135980,
-      "url": "https://www.bls.gov/ooh/computer-and-information-technology/software-developers.htm"
+      "url": "https://www.bls.gov/ooh/computer-and-information-technology/software-developers.htm",
+      "ref": "bls-ooh-sd"
     },
     "cna": {
       "occupation": "Computer Network Architects",
       "median": 134050,
-      "url": "https://www.bls.gov/ooh/computer-and-information-technology/computer-network-architects.htm"
+      "url": "https://www.bls.gov/ooh/computer-and-information-technology/computer-network-architects.htm",
+      "ref": "bls-ooh-cna"
     },
     "aa": {
       "occupation": "Accountants and Auditors",
       "median": 83680,
-      "url": "https://www.bls.gov/ooh/business-and-financial/accountants-and-auditors.htm"
+      "url": "https://www.bls.gov/ooh/business-and-financial/accountants-and-auditors.htm",
+      "ref": "bls-ooh-aa"
     },
     "tds": {
       "occupation": "Training and Development Specialists",
       "median": 69280,
-      "url": "https://www.bls.gov/ooh/business-and-financial/training-and-development-specialists.htm"
+      "url": "https://www.bls.gov/ooh/business-and-financial/training-and-development-specialists.htm",
+      "ref": "bls-ooh-tds"
+    },
+    "co": {
+      "occupation": "Compliance Officers",
+      "median": 80730,
+      "url": "https://www.bls.gov/ooh/business-and-financial/compliance-officers.htm",
+      "ref": "bls-ooh-co"
     }
   },
   "habits": [
@@ -95,7 +107,74 @@
         "Watching for anything unusual on a team's screens and raising the alarm",
         "Working on a team that keeps watch over an organization day and night",
         "Sorting through lots of alerts to find the few that are real problems"
-      ]
+      ],
+      "numbers": {
+        "stats": [
+          {
+            "label": "Unemployment rate",
+            "value": "3.3%",
+            "note": "2025 average for all computer and mathematical occupations (all US workers: 4.3%). BLS does not publish a rate for this specific job.",
+            "refs": [
+              "bls-cps25"
+            ]
+          },
+          {
+            "label": "Early-career pay (estimate)",
+            "value": "$75,090 – $97,810",
+            "note": "Lowest 10% to 25% of pay for all information security analysts, May 2025. BLS does not publish entry-level pay, so this lower band is a common stand-in.",
+            "refs": [
+              "onet-isa"
+            ]
+          },
+          {
+            "label": "Median pay",
+            "value": "$129,180",
+            "note": "All information security analysts, May 2025.",
+            "refs": [
+              "bls-ooh-isa"
+            ]
+          },
+          {
+            "label": "Job outlook, 2025–35",
+            "value": "+21%",
+            "note": "About 14,100 openings a year.",
+            "refs": [
+              "bls-ooh-isa"
+            ]
+          },
+          {
+            "label": "Job postings: Cybersecurity Analyst",
+            "value": "25,612 postings",
+            "note": "Average advertised salary $121,131. CyberSeek also counts 6,576 postings for its entry-level \"Cybersecurity Specialist\" role. Advertised salaries include experienced hires, so first offers are usually lower.",
+            "refs": [
+              "cyberseek-pathway"
+            ]
+          },
+          {
+            "label": "What hiring managers say",
+            "value": "90% would consider IT experience alone",
+            "note": "and 89% would consider a candidate whose only credential is an entry-level cybersecurity certification (929 hiring managers surveyed).",
+            "refs": [
+              "isc2-hiring"
+            ]
+          }
+        ],
+        "where": {
+          "text": "Cybersecurity job postings cluster in a few states: Virginia (53,855 postings), California (44,344), Texas (42,559), Maryland (27,050) and Florida (23,792). The top 10 states hold about 55% of all postings, so the rest are spread across every other state.",
+          "refs": [
+            "cyberseek-2025"
+          ]
+        },
+        "who": [
+          {
+            "text": "Largest employers of information security analysts: computer systems design and related services (22%), finance and insurance (17%), management of companies (9%), information and media (9%) and consulting services (6%).",
+            "refs": [
+              "bls-ooh-isa"
+            ]
+          }
+        ],
+        "caveat": "Government figures cover all information security analysts, the closest official category; they are not specific to this job title."
+      }
     },
     {
       "slug": "incident-responder",
@@ -147,7 +226,74 @@
         "Being the person called in when something goes badly wrong",
         "Leading a calm cleanup after a cyberattack",
         "Staying calm and making quick decisions when everyone else is stressed"
-      ]
+      ],
+      "numbers": {
+        "stats": [
+          {
+            "label": "Unemployment rate",
+            "value": "3.3%",
+            "note": "2025 average for all computer and mathematical occupations (all US workers: 4.3%). BLS does not publish a rate for this specific job.",
+            "refs": [
+              "bls-cps25"
+            ]
+          },
+          {
+            "label": "Early-career pay (estimate)",
+            "value": "$75,090 – $97,810",
+            "note": "Lowest 10% to 25% of pay for all information security analysts, May 2025. BLS does not publish entry-level pay, so this lower band is a common stand-in.",
+            "refs": [
+              "onet-isa"
+            ]
+          },
+          {
+            "label": "Median pay",
+            "value": "$129,180",
+            "note": "All information security analysts, May 2025.",
+            "refs": [
+              "bls-ooh-isa"
+            ]
+          },
+          {
+            "label": "Job outlook, 2025–35",
+            "value": "+21%",
+            "note": "About 14,100 openings a year.",
+            "refs": [
+              "bls-ooh-isa"
+            ]
+          },
+          {
+            "label": "Job postings: Incident and Intrusion Analyst",
+            "value": "6,427 postings",
+            "note": "Average advertised salary $100,617. Advertised salaries include experienced hires, so first offers are usually lower.",
+            "refs": [
+              "cyberseek-pathway"
+            ]
+          },
+          {
+            "label": "What hiring managers say",
+            "value": "90% would consider IT experience alone",
+            "note": "and 89% would consider a candidate whose only credential is an entry-level cybersecurity certification (929 hiring managers surveyed).",
+            "refs": [
+              "isc2-hiring"
+            ]
+          }
+        ],
+        "where": {
+          "text": "Cybersecurity job postings cluster in a few states: Virginia (53,855 postings), California (44,344), Texas (42,559), Maryland (27,050) and Florida (23,792). The top 10 states hold about 55% of all postings, so the rest are spread across every other state.",
+          "refs": [
+            "cyberseek-2025"
+          ]
+        },
+        "who": [
+          {
+            "text": "Largest employers of information security analysts: computer systems design and related services (22%), finance and insurance (17%), management of companies (9%), information and media (9%) and consulting services (6%).",
+            "refs": [
+              "bls-ooh-isa"
+            ]
+          }
+        ],
+        "caveat": "Government figures cover all information security analysts, the closest official category; they are not specific to this job title."
+      }
     },
     {
       "slug": "digital-forensics-investigator",
@@ -202,7 +348,80 @@
         "Recovering deleted files to find out what really happened",
         "Helping police or lawyers build a case from evidence on a phone or computer",
         "Piecing together a timeline from small clues, like a detective"
-      ]
+      ],
+      "numbers": {
+        "stats": [
+          {
+            "label": "Unemployment rate",
+            "value": "3.3%",
+            "note": "2025 average for all computer and mathematical occupations (all US workers: 4.3%). BLS does not publish a rate for this specific job.",
+            "refs": [
+              "bls-cps25"
+            ]
+          },
+          {
+            "label": "Early-career pay (estimate)",
+            "value": "$75,090 – $97,810",
+            "note": "Lowest 10% to 25% of pay for all information security analysts, May 2025. BLS does not publish entry-level pay, so this lower band is a common stand-in.",
+            "refs": [
+              "onet-isa"
+            ]
+          },
+          {
+            "label": "Median pay",
+            "value": "$129,180",
+            "note": "All information security analysts, May 2025.",
+            "refs": [
+              "bls-ooh-isa"
+            ]
+          },
+          {
+            "label": "Job outlook, 2025–35",
+            "value": "+21%",
+            "note": "About 14,100 openings a year.",
+            "refs": [
+              "bls-ooh-isa"
+            ]
+          },
+          {
+            "label": "Job postings: Cyber Crime Analyst",
+            "value": "2,467 postings",
+            "note": "Average advertised salary $105,280. This CyberSeek role mixes forensics and threat intelligence titles. Advertised salaries include experienced hires, so first offers are usually lower.",
+            "refs": [
+              "cyberseek-pathway"
+            ]
+          },
+          {
+            "label": "What hiring managers say",
+            "value": "90% would consider IT experience alone",
+            "note": "and 89% would consider a candidate whose only credential is an entry-level cybersecurity certification (929 hiring managers surveyed).",
+            "refs": [
+              "isc2-hiring"
+            ]
+          }
+        ],
+        "where": {
+          "text": "Cybersecurity job postings cluster in a few states: Virginia (53,855 postings), California (44,344), Texas (42,559), Maryland (27,050) and Florida (23,792). The top 10 states hold about 55% of all postings, so the rest are spread across every other state.",
+          "refs": [
+            "cyberseek-2025"
+          ]
+        },
+        "who": [
+          {
+            "text": "Largest employers of information security analysts: computer systems design and related services (22%), finance and insurance (17%), management of companies (9%), information and media (9%) and consulting services (6%).",
+            "refs": [
+              "bls-ooh-isa"
+            ]
+          },
+          {
+            "text": "Federal law enforcement: the FBI hires digital forensic examiners for its Computer Analysis and Response Team (CART); the posting asks for related coursework or experience and the ability to get a Top Secret clearance.",
+            "refs": [
+              "usajobs-fbi"
+            ]
+          }
+        ],
+        "caveat": "Government figures cover all information security analysts, the closest official category; they are not specific to this job title."
+      }
     },
     {
       "slug": "threat-intelligence-analyst",
@@ -254,7 +473,74 @@
         "Researching a criminal hacking group and writing up how it operates",
         "Following world news to predict who might attack next and why",
         "Turning reports and news into a short briefing for leaders"
-      ]
+      ],
+      "numbers": {
+        "stats": [
+          {
+            "label": "Unemployment rate",
+            "value": "3.3%",
+            "note": "2025 average for all computer and mathematical occupations (all US workers: 4.3%). BLS does not publish a rate for this specific job.",
+            "refs": [
+              "bls-cps25"
+            ]
+          },
+          {
+            "label": "Early-career pay (estimate)",
+            "value": "$75,090 – $97,810",
+            "note": "Lowest 10% to 25% of pay for all information security analysts, May 2025. BLS does not publish entry-level pay, so this lower band is a common stand-in.",
+            "refs": [
+              "onet-isa"
+            ]
+          },
+          {
+            "label": "Median pay",
+            "value": "$129,180",
+            "note": "All information security analysts, May 2025.",
+            "refs": [
+              "bls-ooh-isa"
+            ]
+          },
+          {
+            "label": "Job outlook, 2025–35",
+            "value": "+21%",
+            "note": "About 14,100 openings a year.",
+            "refs": [
+              "bls-ooh-isa"
+            ]
+          },
+          {
+            "label": "Job postings: Cyber Crime Analyst",
+            "value": "2,467 postings",
+            "note": "Average advertised salary $105,280. CyberSeek groups threat intelligence analysts with cybercrime analysts. Advertised salaries include experienced hires, so first offers are usually lower.",
+            "refs": [
+              "cyberseek-pathway"
+            ]
+          },
+          {
+            "label": "What hiring managers say",
+            "value": "90% would consider IT experience alone",
+            "note": "and 89% would consider a candidate whose only credential is an entry-level cybersecurity certification (929 hiring managers surveyed).",
+            "refs": [
+              "isc2-hiring"
+            ]
+          }
+        ],
+        "where": {
+          "text": "Cybersecurity job postings cluster in a few states: Virginia (53,855 postings), California (44,344), Texas (42,559), Maryland (27,050) and Florida (23,792). The top 10 states hold about 55% of all postings, so the rest are spread across every other state.",
+          "refs": [
+            "cyberseek-2025"
+          ]
+        },
+        "who": [
+          {
+            "text": "Largest employers of information security analysts: computer systems design and related services (22%), finance and insurance (17%), management of companies (9%), information and media (9%) and consulting services (6%).",
+            "refs": [
+              "bls-ooh-isa"
+            ]
+          }
+        ],
+        "caveat": "Government figures cover all information security analysts, the closest official category; they are not specific to this job title."
+      }
     },
     {
       "slug": "penetration-tester",
@@ -311,7 +597,80 @@
         "Being hired to break into a company, with permission, to show its weak spots",
         "Solving puzzle-style hacking challenges for fun",
         "Thinking like a criminal to find the gaps nobody else noticed"
-      ]
+      ],
+      "numbers": {
+        "stats": [
+          {
+            "label": "Unemployment rate",
+            "value": "3.3%",
+            "note": "2025 average for all computer and mathematical occupations (all US workers: 4.3%). BLS does not publish a rate for this specific job.",
+            "refs": [
+              "bls-cps25"
+            ]
+          },
+          {
+            "label": "Early-career pay (estimate)",
+            "value": "$75,090 – $97,810",
+            "note": "Lowest 10% to 25% of pay for all information security analysts, May 2025. BLS does not publish entry-level pay, so this lower band is a common stand-in.",
+            "refs": [
+              "onet-isa"
+            ]
+          },
+          {
+            "label": "Median pay",
+            "value": "$129,180",
+            "note": "All information security analysts, May 2025.",
+            "refs": [
+              "bls-ooh-isa"
+            ]
+          },
+          {
+            "label": "Job outlook, 2025–35",
+            "value": "+21%",
+            "note": "About 14,100 openings a year.",
+            "refs": [
+              "bls-ooh-isa"
+            ]
+          },
+          {
+            "label": "Job postings: Penetration and Vulnerability Tester",
+            "value": "4,666 postings",
+            "note": "Average advertised salary $139,554. CyberSeek places this role at mid-level, not entry-level. Advertised salaries include experienced hires, so first offers are usually lower.",
+            "refs": [
+              "cyberseek-pathway"
+            ]
+          },
+          {
+            "label": "What hiring managers say",
+            "value": "90% would consider IT experience alone",
+            "note": "and 89% would consider a candidate whose only credential is an entry-level cybersecurity certification (929 hiring managers surveyed).",
+            "refs": [
+              "isc2-hiring"
+            ]
+          }
+        ],
+        "where": {
+          "text": "Cybersecurity job postings cluster in a few states: Virginia (53,855 postings), California (44,344), Texas (42,559), Maryland (27,050) and Florida (23,792). The top 10 states hold about 55% of all postings, so the rest are spread across every other state.",
+          "refs": [
+            "cyberseek-2025"
+          ]
+        },
+        "who": [
+          {
+            "text": "Largest employers of information security analysts: computer systems design and related services (22%), finance and insurance (17%), management of companies (9%), information and media (9%) and consulting services (6%).",
+            "refs": [
+              "bls-ooh-isa"
+            ]
+          },
+          {
+            "text": "Consulting firms: \"Security Consultants/Penetration Testers\" is one of the most common job titles CyberSeek finds for this role.",
+            "refs": [
+              "cyberseek-pathway"
+            ]
+          }
+        ],
+        "caveat": "Government figures cover all information security analysts, the closest official category; they are not specific to this job title."
+      }
     },
     {
       "slug": "application-security-engineer",
@@ -363,7 +722,74 @@
         "Writing code and making sure it can't be misused",
         "Reviewing an app before launch to catch mistakes that could let attackers in",
         "Building websites or apps with security designed in from the start"
-      ]
+      ],
+      "numbers": {
+        "stats": [
+          {
+            "label": "Unemployment rate",
+            "value": "3.3%",
+            "note": "2025 average for all computer and mathematical occupations (all US workers: 4.3%). BLS does not publish a rate for this specific job.",
+            "refs": [
+              "bls-cps25"
+            ]
+          },
+          {
+            "label": "Early-career pay (estimate)",
+            "value": "$82,460 – $105,210",
+            "note": "Lowest 10% to 25% of pay for all software developers, May 2025. BLS does not publish entry-level pay, so this lower band is a common stand-in.",
+            "refs": [
+              "onet-sd"
+            ]
+          },
+          {
+            "label": "Median pay",
+            "value": "$135,980",
+            "note": "All software developers, May 2025.",
+            "refs": [
+              "bls-ooh-sd"
+            ]
+          },
+          {
+            "label": "Job outlook, 2025–35",
+            "value": "+10%",
+            "note": "About 106,100 openings a year. Software developers, QA analysts and testers combined.",
+            "refs": [
+              "bls-ooh-sd"
+            ]
+          },
+          {
+            "label": "Job postings: Cybersecurity Engineer",
+            "value": "46,271 postings",
+            "note": "Average advertised salary $146,069. CyberSeek treats this as an advanced role and includes application security engineers in it. Advertised salaries include experienced hires, so first offers are usually lower.",
+            "refs": [
+              "cyberseek-pathway"
+            ]
+          },
+          {
+            "label": "What hiring managers say",
+            "value": "90% would consider IT experience alone",
+            "note": "and 89% would consider a candidate whose only credential is an entry-level cybersecurity certification (929 hiring managers surveyed).",
+            "refs": [
+              "isc2-hiring"
+            ]
+          }
+        ],
+        "where": {
+          "text": "Cybersecurity job postings cluster in a few states: Virginia (53,855 postings), California (44,344), Texas (42,559), Maryland (27,050) and Florida (23,792). The top 10 states hold about 55% of all postings, so the rest are spread across every other state.",
+          "refs": [
+            "cyberseek-2025"
+          ]
+        },
+        "who": [
+          {
+            "text": "Largest employers of software developers: computer systems design and related services (29%), finance and insurance (11%), software publishers (10%), manufacturing (8%) and management of companies (6%).",
+            "refs": [
+              "bls-ooh-sd"
+            ]
+          }
+        ],
+        "caveat": "Government figures cover all software developers, the closest official category; they are not specific to this job title."
+      }
     },
     {
       "slug": "cloud-security-engineer",
@@ -418,7 +844,82 @@
         "Setting up online services on Amazon, Microsoft or Google cloud",
         "Automating how computer systems are built and locked down",
         "Working with the online services that apps and websites run on"
-      ]
+      ],
+      "numbers": {
+        "stats": [
+          {
+            "label": "Unemployment rate",
+            "value": "3.3%",
+            "note": "2025 average for all computer and mathematical occupations (all US workers: 4.3%). BLS does not publish a rate for this specific job.",
+            "refs": [
+              "bls-cps25"
+            ]
+          },
+          {
+            "label": "Early-career pay (estimate)",
+            "value": "$79,900 – $104,620",
+            "note": "Lowest 10% to 25% of pay for all computer network architects, May 2025. BLS does not publish entry-level pay, so this lower band is a common stand-in.",
+            "refs": [
+              "onet-cna"
+            ]
+          },
+          {
+            "label": "Median pay",
+            "value": "$134,050",
+            "note": "All computer network architects, May 2025.",
+            "refs": [
+              "bls-ooh-cna"
+            ]
+          },
+          {
+            "label": "Job outlook, 2025–35",
+            "value": "+8%",
+            "note": "About 9,600 openings a year. BLS lists 5 or more years of related experience for this category.",
+            "refs": [
+              "bls-ooh-cna"
+            ]
+          },
+          {
+            "label": "Job postings: Cybersecurity Engineer",
+            "value": "46,271 postings",
+            "note": "Average advertised salary $146,069. CyberSeek treats this as an advanced role and includes cloud security engineers in it. Advertised salaries include experienced hires, so first offers are usually lower.",
+            "refs": [
+              "cyberseek-pathway"
+            ]
+          },
+          {
+            "label": "Skill demand",
+            "value": "Cloud security: #2 skill need",
+            "note": "36% of cybersecurity professionals named cloud security as a top skill need, second only to AI (41%).",
+            "refs": [
+              "isc2-2025"
+            ]
+          },
+          {
+            "label": "What hiring managers say",
+            "value": "90% would consider IT experience alone",
+            "note": "and 89% would consider a candidate whose only credential is an entry-level cybersecurity certification (929 hiring managers surveyed).",
+            "refs": [
+              "isc2-hiring"
+            ]
+          }
+        ],
+        "where": {
+          "text": "Cybersecurity job postings cluster in a few states: Virginia (53,855 postings), California (44,344), Texas (42,559), Maryland (27,050) and Florida (23,792). The top 10 states hold about 55% of all postings, so the rest are spread across every other state.",
+          "refs": [
+            "cyberseek-2025"
+          ]
+        },
+        "who": [
+          {
+            "text": "Largest employers of computer network architects: computer systems design and related services (25%), finance and insurance (11%), telecommunications (9%), management of companies (9%) and administrative and support services (6%).",
+            "refs": [
+              "bls-ooh-cna"
+            ]
+          }
+        ],
+        "caveat": "Government figures cover all computer network architects, the closest official category; they are not specific to this job title."
+      }
     },
     {
       "slug": "grc-analyst",
@@ -477,6 +978,73 @@
       "close": {
         "role": "it-auditor",
         "note": "GRC and IT audit are close cousins. GRC builds and runs the security program from the inside; IT audit checks it, often from outside, and grades it."
+      },
+      "numbers": {
+        "stats": [
+          {
+            "label": "Unemployment rate",
+            "value": "3.3%",
+            "note": "2025 average for all computer and mathematical occupations (all US workers: 4.3%). BLS does not publish a rate for this specific job.",
+            "refs": [
+              "bls-cps25"
+            ]
+          },
+          {
+            "label": "Early-career pay (estimate)",
+            "value": "$75,090 – $97,810",
+            "note": "Lowest 10% to 25% of pay for all information security analysts, May 2025. BLS does not publish entry-level pay, so this lower band is a common stand-in.",
+            "refs": [
+              "onet-isa"
+            ]
+          },
+          {
+            "label": "Median pay",
+            "value": "$129,180",
+            "note": "All information security analysts, May 2025.",
+            "refs": [
+              "bls-ooh-isa"
+            ]
+          },
+          {
+            "label": "Job outlook, 2025–35",
+            "value": "+21%",
+            "note": "About 14,100 openings a year.",
+            "refs": [
+              "bls-ooh-isa"
+            ]
+          },
+          {
+            "label": "Job postings: governance work",
+            "value": "355,590 postings",
+            "note": "Postings mapped to the NICE \"Oversight and Governance\" category, the largest of five; categories overlap, so this is a measure of demand, not a count of GRC jobs.",
+            "refs": [
+              "cyberseek-2025"
+            ]
+          },
+          {
+            "label": "What hiring managers say",
+            "value": "90% would consider IT experience alone",
+            "note": "and 89% would consider a candidate whose only credential is an entry-level cybersecurity certification (929 hiring managers surveyed).",
+            "refs": [
+              "isc2-hiring"
+            ]
+          }
+        ],
+        "where": {
+          "text": "Cybersecurity job postings cluster in a few states: Virginia (53,855 postings), California (44,344), Texas (42,559), Maryland (27,050) and Florida (23,792). The top 10 states hold about 55% of all postings, so the rest are spread across every other state.",
+          "refs": [
+            "cyberseek-2025"
+          ]
+        },
+        "who": [
+          {
+            "text": "Largest employers of information security analysts: computer systems design and related services (22%), finance and insurance (17%), management of companies (9%), information and media (9%) and consulting services (6%).",
+            "refs": [
+              "bls-ooh-isa"
+            ]
+          }
+        ],
+        "caveat": "Government figures cover all information security analysts, the closest official category; they are not specific to this job title."
       }
     },
     {
@@ -532,6 +1100,79 @@
       "close": {
         "role": "grc-analyst",
         "note": "GRC and IT audit are close cousins. GRC builds and runs the security program from the inside; IT audit checks it, often from outside, and grades it."
+      },
+      "numbers": {
+        "stats": [
+          {
+            "label": "Unemployment rate",
+            "value": "2.7%",
+            "note": "2025 average for all business and financial operations occupations (all US workers: 4.3%). BLS does not publish a rate for this specific job.",
+            "refs": [
+              "bls-cps25"
+            ]
+          },
+          {
+            "label": "Early-career pay (estimate)",
+            "value": "$56,020 – $67,020",
+            "note": "Lowest 10% to 25% of pay for all accountants and auditors, May 2025. BLS does not publish entry-level pay, so this lower band is a common stand-in.",
+            "refs": [
+              "onet-aa"
+            ]
+          },
+          {
+            "label": "Median pay",
+            "value": "$83,680",
+            "note": "All accountants and auditors, May 2025.",
+            "refs": [
+              "bls-ooh-aa"
+            ]
+          },
+          {
+            "label": "Job outlook, 2025–35",
+            "value": "+5%",
+            "note": "About 115,300 openings a year.",
+            "refs": [
+              "bls-ooh-aa"
+            ]
+          },
+          {
+            "label": "IT auditor pay (salary guide)",
+            "value": "$78,000 – $102,750",
+            "note": "US range from a staffing firm's 2027 guide; $78,000 is its figure for someone new to the role.",
+            "refs": [
+              "robert-half-ita"
+            ]
+          },
+          {
+            "label": "What hiring managers say",
+            "value": "90% would consider IT experience alone",
+            "note": "and 89% would consider a candidate whose only credential is an entry-level cybersecurity certification (929 hiring managers surveyed).",
+            "refs": [
+              "isc2-hiring"
+            ]
+          }
+        ],
+        "where": {
+          "text": "Cybersecurity job postings cluster in a few states: Virginia (53,855 postings), California (44,344), Texas (42,559), Maryland (27,050) and Florida (23,792). The top 10 states hold about 55% of all postings, so the rest are spread across every other state.",
+          "refs": [
+            "cyberseek-2025"
+          ]
+        },
+        "who": [
+          {
+            "text": "Largest employers of accountants and auditors: accounting, tax and bookkeeping firms (21%), finance and insurance (8%), government (8%), management of companies (6%), with 5% self-employed.",
+            "refs": [
+              "bls-ooh-aa"
+            ]
+          },
+          {
+            "text": "Inside companies: internal auditors are employed by the organization they audit, and IT auditors review the controls on its IT systems.",
+            "refs": [
+              "bls-ooh-aa"
+            ]
+          }
+        ],
+        "caveat": "Government figures cover all accountants and auditors, the closest official category; they are not specific to this job title."
       }
     },
     {
@@ -543,7 +1184,7 @@
         "Privacy Compliance"
       ],
       "code": "little",
-      "bls": null,
+      "bls": "co",
       "summary": "Privacy analysts make sure an organization collects, uses and shares personal information legally and fairly. They interpret privacy laws, review new products and handle requests from people who want to see or delete their data.",
       "day": [
         "Review a new app feature for what personal data it collects",
@@ -579,7 +1220,72 @@
         "Making sure people's personal information is collected and used fairly",
         "Reading privacy laws and explaining what a company has to change",
         "Speaking up for people whose personal information is being collected"
-      ]
+      ],
+      "numbers": {
+        "stats": [
+          {
+            "label": "Unemployment rate",
+            "value": "2.7%",
+            "note": "2025 average for all business and financial operations occupations (all US workers: 4.3%). BLS does not publish a rate for this specific job.",
+            "refs": [
+              "bls-cps25"
+            ]
+          },
+          {
+            "label": "Early-career pay (estimate)",
+            "value": "$48,220 – $61,280",
+            "note": "Lowest 10% to 25% of pay for all compliance officers, May 2025. BLS does not publish entry-level pay, so this lower band is a common stand-in.",
+            "refs": [
+              "onet-co"
+            ]
+          },
+          {
+            "label": "Median pay",
+            "value": "$80,730",
+            "note": "All compliance officers, May 2025.",
+            "refs": [
+              "bls-ooh-co"
+            ]
+          },
+          {
+            "label": "Job outlook, 2025–35",
+            "value": "+4%",
+            "note": "About 32,700 openings a year.",
+            "refs": [
+              "bls-ooh-co"
+            ]
+          },
+          {
+            "label": "What hiring managers say",
+            "value": "90% would consider IT experience alone",
+            "note": "and 89% would consider a candidate whose only credential is an entry-level cybersecurity certification (929 hiring managers surveyed).",
+            "refs": [
+              "isc2-hiring"
+            ]
+          }
+        ],
+        "where": {
+          "text": "Cybersecurity job postings cluster in a few states: Virginia (53,855 postings), California (44,344), Texas (42,559), Maryland (27,050) and Florida (23,792). The top 10 states hold about 55% of all postings, so the rest are spread across every other state.",
+          "refs": [
+            "cyberseek-2025"
+          ]
+        },
+        "who": [
+          {
+            "text": "Largest employers of compliance officers: government (35%), finance and insurance (12%), professional, scientific and technical services (9%), healthcare (8%) and manufacturing (5%).",
+            "refs": [
+              "bls-ooh-co"
+            ]
+          },
+          {
+            "text": "BLS names data protection as one of the specialties within compliance work.",
+            "refs": [
+              "bls-ooh-co"
+            ]
+          }
+        ],
+        "caveat": "Government figures cover all compliance officers, the closest official category; privacy roles are a specialty within it."
+      }
     },
     {
       "slug": "security-awareness-specialist",
@@ -628,7 +1334,74 @@
         "Teaching people how to spot scam emails, texts and calls",
         "Making videos, games or posters that help people stay safe online",
         "Explaining tech risks to people in plain, friendly language"
-      ]
+      ],
+      "numbers": {
+        "stats": [
+          {
+            "label": "Unemployment rate",
+            "value": "2.7%",
+            "note": "2025 average for all business and financial operations occupations (all US workers: 4.3%). BLS does not publish a rate for this specific job.",
+            "refs": [
+              "bls-cps25"
+            ]
+          },
+          {
+            "label": "Early-career pay (estimate)",
+            "value": "$38,760 – $50,110",
+            "note": "Lowest 10% to 25% of pay for all training and development specialists, May 2025. BLS does not publish entry-level pay, so this lower band is a common stand-in.",
+            "refs": [
+              "onet-tds"
+            ]
+          },
+          {
+            "label": "Median pay",
+            "value": "$69,280",
+            "note": "All training and development specialists, May 2025.",
+            "refs": [
+              "bls-ooh-tds"
+            ]
+          },
+          {
+            "label": "Job outlook, 2025–35",
+            "value": "+11%",
+            "note": "About 46,000 openings a year.",
+            "refs": [
+              "bls-ooh-tds"
+            ]
+          },
+          {
+            "label": "Security awareness pay (survey)",
+            "value": "$129,961 average",
+            "note": "North American average for people working in security awareness, all experience levels (SANS 2025 survey).",
+            "refs": [
+              "sans-awareness"
+            ]
+          },
+          {
+            "label": "What hiring managers say",
+            "value": "90% would consider IT experience alone",
+            "note": "and 89% would consider a candidate whose only credential is an entry-level cybersecurity certification (929 hiring managers surveyed).",
+            "refs": [
+              "isc2-hiring"
+            ]
+          }
+        ],
+        "where": {
+          "text": "Cybersecurity job postings cluster in a few states: Virginia (53,855 postings), California (44,344), Texas (42,559), Maryland (27,050) and Florida (23,792). The top 10 states hold about 55% of all postings, so the rest are spread across every other state.",
+          "refs": [
+            "cyberseek-2025"
+          ]
+        },
+        "who": [
+          {
+            "text": "Largest employers of training and development specialists: healthcare and social assistance (12%), professional, scientific and technical services (11%), schools and colleges (11%), finance and insurance (8%) and administrative and support services (7%).",
+            "refs": [
+              "bls-ooh-tds"
+            ]
+          }
+        ],
+        "caveat": "Government figures cover all training and development specialists, the closest official category; security awareness roles usually pay more, as the SANS survey shows."
+      }
     },
     {
       "slug": "systems-security-administrator",
@@ -679,7 +1452,74 @@
         "Setting up computers, networks and user accounts so everything runs smoothly",
         "Fixing computer problems and keeping systems up to date",
         "Setting up computers and home networks just to see how they work"
-      ]
+      ],
+      "numbers": {
+        "stats": [
+          {
+            "label": "Unemployment rate",
+            "value": "3.3%",
+            "note": "2025 average for all computer and mathematical occupations (all US workers: 4.3%). BLS does not publish a rate for this specific job.",
+            "refs": [
+              "bls-cps25"
+            ]
+          },
+          {
+            "label": "Early-career pay (estimate)",
+            "value": "$62,640 – $78,010",
+            "note": "Lowest 10% to 25% of pay for all network and computer systems administrators, May 2025. BLS does not publish entry-level pay, so this lower band is a common stand-in.",
+            "refs": [
+              "onet-ncsa"
+            ]
+          },
+          {
+            "label": "Median pay",
+            "value": "$99,130",
+            "note": "All network and computer systems administrators, May 2025.",
+            "refs": [
+              "bls-ooh-ncsa"
+            ]
+          },
+          {
+            "label": "Job outlook, 2025–35",
+            "value": "−4%",
+            "note": "About 13,400 openings a year.",
+            "refs": [
+              "bls-ooh-ncsa"
+            ]
+          },
+          {
+            "label": "Job postings: networking",
+            "value": "197,399 postings",
+            "note": "CyberSeek counts networking jobs as one of the most common ways into cybersecurity (a \"feeder\" role); IT support adds 176,177 more.",
+            "refs": [
+              "cyberseek-pathway"
+            ]
+          },
+          {
+            "label": "What hiring managers say",
+            "value": "90% would consider IT experience alone",
+            "note": "and 89% would consider a candidate whose only credential is an entry-level cybersecurity certification (929 hiring managers surveyed).",
+            "refs": [
+              "isc2-hiring"
+            ]
+          }
+        ],
+        "where": {
+          "text": "Cybersecurity job postings cluster in a few states: Virginia (53,855 postings), California (44,344), Texas (42,559), Maryland (27,050) and Florida (23,792). The top 10 states hold about 55% of all postings, so the rest are spread across every other state.",
+          "refs": [
+            "cyberseek-2025"
+          ]
+        },
+        "who": [
+          {
+            "text": "Largest employers of network and computer systems administrators: computer systems design and related services (16%), schools and colleges (13%), finance and insurance (9%), information and media (7%) and management of companies (7%).",
+            "refs": [
+              "bls-ooh-ncsa"
+            ]
+          }
+        ],
+        "caveat": "BLS expects the number of these jobs to shrink slightly by 2035, but about 13,400 openings a year remain as people retire or move up, often into security roles."
+      }
     },
     {
       "slug": "ot-ics-security-specialist",
@@ -725,7 +1565,73 @@
         "Protecting power plants, water systems or factories",
         "Working with real machines and equipment, not just office computers",
         "Finding out how factories, power grids or vehicles are controlled by computers"
-      ]
+      ],
+      "numbers": {
+        "stats": [
+          {
+            "label": "Unemployment rate",
+            "value": "3.3%",
+            "note": "2025 average for all computer and mathematical occupations (all US workers: 4.3%). BLS does not publish a rate for this specific job.",
+            "refs": [
+              "bls-cps25"
+            ]
+          },
+          {
+            "label": "Early-career pay (estimate)",
+            "value": "$75,090 – $97,810",
+            "note": "Lowest 10% to 25% of pay for all information security analysts, May 2025. BLS does not publish entry-level pay, so this lower band is a common stand-in.",
+            "refs": [
+              "onet-isa"
+            ]
+          },
+          {
+            "label": "Median pay",
+            "value": "$129,180",
+            "note": "All information security analysts, May 2025.",
+            "refs": [
+              "bls-ooh-isa"
+            ]
+          },
+          {
+            "label": "Job outlook, 2025–35",
+            "value": "+21%",
+            "note": "About 14,100 openings a year.",
+            "refs": [
+              "bls-ooh-isa"
+            ]
+          },
+          {
+            "label": "What hiring managers say",
+            "value": "90% would consider IT experience alone",
+            "note": "and 89% would consider a candidate whose only credential is an entry-level cybersecurity certification (929 hiring managers surveyed).",
+            "refs": [
+              "isc2-hiring"
+            ]
+          }
+        ],
+        "where": {
+          "text": "OT jobs follow critical infrastructure: power plants, water systems, factories and pipelines. Across cybersecurity as a whole, postings cluster in Virginia, California, Texas, Maryland and Florida, which together with five more states hold about 55% of postings.",
+          "refs": [
+            "cisa-ics",
+            "cyberseek-2025"
+          ]
+        },
+        "who": [
+          {
+            "text": "Largest employers of information security analysts: computer systems design and related services (22%), finance and insurance (17%), management of companies (9%), information and media (9%) and consulting services (6%).",
+            "refs": [
+              "bls-ooh-isa"
+            ]
+          },
+          {
+            "text": "Critical infrastructure: industrial control systems run sectors such as energy, water and wastewater, transportation, critical manufacturing, chemicals and nuclear, so utilities, manufacturers and their engineering firms hire OT security staff.",
+            "refs": [
+              "cisa-ics"
+            ]
+          }
+        ],
+        "caveat": "Government figures cover all information security analysts, the closest official category; they are not specific to this job title."
+      }
     },
     {
       "slug": "ai-security-specialist",
@@ -779,7 +1685,88 @@
         "Testing whether an AI chatbot can be tricked into misbehaving",
         "Learning how AI systems work and where they go wrong",
         "Thinking up ways AI tools could go wrong or be misused"
-      ]
+      ],
+      "numbers": {
+        "stats": [
+          {
+            "label": "Unemployment rate",
+            "value": "3.3%",
+            "note": "2025 average for all computer and mathematical occupations (all US workers: 4.3%). BLS does not publish a rate for this specific job.",
+            "refs": [
+              "bls-cps25"
+            ]
+          },
+          {
+            "label": "Early-career pay (estimate)",
+            "value": "$75,090 – $97,810",
+            "note": "Lowest 10% to 25% of pay for all information security analysts, May 2025. BLS does not publish entry-level pay, so this lower band is a common stand-in.",
+            "refs": [
+              "onet-isa"
+            ]
+          },
+          {
+            "label": "Median pay",
+            "value": "$129,180",
+            "note": "All information security analysts, May 2025.",
+            "refs": [
+              "bls-ooh-isa"
+            ]
+          },
+          {
+            "label": "Job outlook, 2025–35",
+            "value": "+21%",
+            "note": "About 14,100 openings a year.",
+            "refs": [
+              "bls-ooh-isa"
+            ]
+          },
+          {
+            "label": "AI skills in cyber postings",
+            "value": "About 10%",
+            "note": "Share of cybersecurity job postings that list AI as a requirement (May 2024 to April 2025). There is no separate count for AI security jobs yet.",
+            "refs": [
+              "cyberseek-2025"
+            ]
+          },
+          {
+            "label": "Skill demand",
+            "value": "AI: #1 skill need",
+            "note": "41% of cybersecurity professionals named AI as a top skill needed.",
+            "refs": [
+              "isc2-2025"
+            ]
+          },
+          {
+            "label": "What hiring managers say",
+            "value": "90% would consider IT experience alone",
+            "note": "and 89% would consider a candidate whose only credential is an entry-level cybersecurity certification (929 hiring managers surveyed).",
+            "refs": [
+              "isc2-hiring"
+            ]
+          }
+        ],
+        "where": {
+          "text": "Cybersecurity job postings cluster in a few states: Virginia (53,855 postings), California (44,344), Texas (42,559), Maryland (27,050) and Florida (23,792). The top 10 states hold about 55% of all postings, so the rest are spread across every other state.",
+          "refs": [
+            "cyberseek-2025"
+          ]
+        },
+        "who": [
+          {
+            "text": "Largest employers of information security analysts: computer systems design and related services (22%), finance and insurance (17%), management of companies (9%), information and media (9%) and consulting services (6%).",
+            "refs": [
+              "bls-ooh-isa"
+            ]
+          },
+          {
+            "text": "Standards bodies are still defining the field: NIST published its taxonomy of attacks on machine learning systems in 2025.",
+            "refs": [
+              "nist-aml"
+            ]
+          }
+        ],
+        "caveat": "Government figures cover all information security analysts, the closest official category; they are not specific to this job title."
+      }
     }
   ],
   "pairs": [
@@ -1092,5 +2079,151 @@
         }
       ]
     }
-  ]
+  ],
+  "refs": {
+    "bls-ooh-isa": {
+      "publisher": "U.S. Bureau of Labor Statistics",
+      "title": "Information Security Analysts, Occupational Outlook Handbook",
+      "url": "https://www.bls.gov/ooh/computer-and-information-technology/information-security-analysts.htm",
+      "period": "pay May 2025, projections 2025-35; accessed Oct 17, 2026"
+    },
+    "bls-ooh-ncsa": {
+      "publisher": "U.S. Bureau of Labor Statistics",
+      "title": "Network and Computer Systems Administrators, Occupational Outlook Handbook",
+      "url": "https://www.bls.gov/ooh/computer-and-information-technology/network-and-computer-systems-administrators.htm",
+      "period": "pay May 2025, projections 2025-35; accessed Oct 17, 2026"
+    },
+    "bls-ooh-sd": {
+      "publisher": "U.S. Bureau of Labor Statistics",
+      "title": "Software Developers, Quality Assurance Analysts, and Testers, Occupational Outlook Handbook",
+      "url": "https://www.bls.gov/ooh/computer-and-information-technology/software-developers.htm",
+      "period": "pay May 2025, projections 2025-35; accessed Oct 17, 2026"
+    },
+    "bls-ooh-cna": {
+      "publisher": "U.S. Bureau of Labor Statistics",
+      "title": "Computer Network Architects, Occupational Outlook Handbook",
+      "url": "https://www.bls.gov/ooh/computer-and-information-technology/computer-network-architects.htm",
+      "period": "pay May 2025, projections 2025-35; accessed Oct 17, 2026"
+    },
+    "bls-ooh-aa": {
+      "publisher": "U.S. Bureau of Labor Statistics",
+      "title": "Accountants and Auditors, Occupational Outlook Handbook",
+      "url": "https://www.bls.gov/ooh/business-and-financial/accountants-and-auditors.htm",
+      "period": "pay May 2025, projections 2025-35; accessed Oct 17, 2026"
+    },
+    "bls-ooh-co": {
+      "publisher": "U.S. Bureau of Labor Statistics",
+      "title": "Compliance Officers, Occupational Outlook Handbook",
+      "url": "https://www.bls.gov/ooh/business-and-financial/compliance-officers.htm",
+      "period": "pay May 2025, projections 2025-35; accessed Oct 17, 2026"
+    },
+    "bls-ooh-tds": {
+      "publisher": "U.S. Bureau of Labor Statistics",
+      "title": "Training and Development Specialists, Occupational Outlook Handbook",
+      "url": "https://www.bls.gov/ooh/business-and-financial/training-and-development-specialists.htm",
+      "period": "pay May 2025, projections 2025-35; accessed Oct 17, 2026"
+    },
+    "onet-isa": {
+      "publisher": "O*NET OnLine (U.S. Department of Labor), using BLS data",
+      "title": "National wages: Information Security Analysts (15-1212)",
+      "url": "https://www.onetonline.org/link/localwages/15-1212.00",
+      "period": "BLS 2025 wage data; accessed Oct 17, 2026"
+    },
+    "onet-ncsa": {
+      "publisher": "O*NET OnLine (U.S. Department of Labor), using BLS data",
+      "title": "National wages: Network and Computer Systems Administrators (15-1244)",
+      "url": "https://www.onetonline.org/link/localwages/15-1244.00",
+      "period": "BLS 2025 wage data; accessed Oct 17, 2026"
+    },
+    "onet-sd": {
+      "publisher": "O*NET OnLine (U.S. Department of Labor), using BLS data",
+      "title": "National wages: Software Developers (15-1252)",
+      "url": "https://www.onetonline.org/link/localwages/15-1252.00",
+      "period": "BLS 2025 wage data; accessed Oct 17, 2026"
+    },
+    "onet-cna": {
+      "publisher": "O*NET OnLine (U.S. Department of Labor), using BLS data",
+      "title": "National wages: Computer Network Architects (15-1241)",
+      "url": "https://www.onetonline.org/link/localwages/15-1241.00",
+      "period": "BLS 2025 wage data; accessed Oct 17, 2026"
+    },
+    "onet-aa": {
+      "publisher": "O*NET OnLine (U.S. Department of Labor), using BLS data",
+      "title": "National wages: Accountants and Auditors (13-2011)",
+      "url": "https://www.onetonline.org/link/localwages/13-2011.00",
+      "period": "BLS 2025 wage data; accessed Oct 17, 2026"
+    },
+    "onet-co": {
+      "publisher": "O*NET OnLine (U.S. Department of Labor), using BLS data",
+      "title": "National wages: Compliance Officers (13-1041)",
+      "url": "https://www.onetonline.org/link/localwages/13-1041.00",
+      "period": "BLS 2025 wage data; accessed Oct 17, 2026"
+    },
+    "onet-tds": {
+      "publisher": "O*NET OnLine (U.S. Department of Labor), using BLS data",
+      "title": "National wages: Training and Development Specialists (13-1151)",
+      "url": "https://www.onetonline.org/link/localwages/13-1151.00",
+      "period": "BLS 2025 wage data; accessed Oct 17, 2026"
+    },
+    "bls-cps25": {
+      "publisher": "U.S. Bureau of Labor Statistics, Current Population Survey",
+      "title": "Table 25: Unemployed people by occupation and sex",
+      "url": "https://www.bls.gov/cps/cpsaat25.htm",
+      "period": "2025 annual averages (11 months; October 2025 not collected); accessed Oct 17, 2026"
+    },
+    "cyberseek-2025": {
+      "publisher": "CyberSeek (NICE, Lightcast, CompTIA)",
+      "title": "CyberSeek expands cybersecurity workforce data coverage and enhances user experience",
+      "url": "https://www.cyberseek.org/docs/06-02-2025_CyberSeek_June_2025.pdf",
+      "period": "press release, June 2, 2025; postings May 2024 to April 2025; accessed Oct 17, 2026"
+    },
+    "cyberseek-pathway": {
+      "publisher": "CyberSeek (NICE, Lightcast, CompTIA)",
+      "title": "Cybersecurity Career Pathway",
+      "url": "https://www.cyberseek.org/pathway.html",
+      "period": "role data file dated May 20, 2025; accessed Oct 17, 2026"
+    },
+    "isc2-hiring": {
+      "publisher": "ISC2",
+      "title": "2025 Cybersecurity Hiring Trends",
+      "url": "https://www.isc2.org/Insights/2025/06/cybersecurity-hiring-trends-study",
+      "period": "survey of 929 hiring managers, December 2024; accessed Oct 17, 2026"
+    },
+    "isc2-2025": {
+      "publisher": "ISC2",
+      "title": "ISC2 Publishes 2025 Cybersecurity Workforce Study",
+      "url": "https://www.isc2.org/Insights/2025/12/ISC2-Publishes-2025-Cybersecurity-Workforce-Study",
+      "period": "December 4, 2025; accessed Oct 17, 2026"
+    },
+    "usajobs-fbi": {
+      "publisher": "Federal Bureau of Investigation, via USAJOBS",
+      "title": "Digital Forensic Examiner (IT Specialist) job announcement",
+      "url": "https://www.usajobs.gov/job/870041400",
+      "period": "posted May 2026; accessed Oct 17, 2026"
+    },
+    "cisa-ics": {
+      "publisher": "Cybersecurity and Infrastructure Security Agency (CISA)",
+      "title": "Industrial Control Systems",
+      "url": "https://www.cisa.gov/topics/industrial-control-systems",
+      "period": "accessed Oct 17, 2026"
+    },
+    "robert-half-ita": {
+      "publisher": "Robert Half",
+      "title": "IT Auditor Salary (2027 Salary Guide)",
+      "url": "https://www.roberthalf.com/us/en/job-details/it-auditor",
+      "period": "2027 Salary Guide; accessed Oct 17, 2026"
+    },
+    "sans-awareness": {
+      "publisher": "SANS Institute",
+      "title": "SANS Security Awareness Report 2025 (press release)",
+      "url": "https://www.sans.org/press/announcements/security-awareness-report-2025",
+      "period": "August 13, 2025; accessed Oct 17, 2026"
+    },
+    "nist-aml": {
+      "publisher": "NIST",
+      "title": "Adversarial Machine Learning: A Taxonomy and Terminology of Attacks and Mitigations (NIST AI 100-2 E2025)",
+      "url": "https://csrc.nist.gov/pubs/ai/100/2/e2025/final",
+      "period": "March 2025; accessed Oct 17, 2026"
+    }
+  }
 }
