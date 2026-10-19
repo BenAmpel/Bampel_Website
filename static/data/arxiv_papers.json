@@ -1,347 +1,339 @@
 {
-  "refresh_date": "2026-10-12",
+  "refresh_date": "2026-10-19",
   "days_back": 60,
   "papers": [
     {
-      "title": "A Multi-Agent LLM System for Automated Tuning of Specialized Neural Network Models",
-      "summary": "Many machine learning approaches are two-level: an expert selects a class of methods, within this class the choice of key components is critical and usually manual. This paper addresses the automatic tuning of these components and proposes a framework transferable across models of different nature. The multi-agent large language model (LLM) framework has three roles---analyst, coder, and recorder~---with an experiment log and a sandboxed execution environment. Unlike systems that optimize the entire ML script or search architectures in a discrete space, the framework operates over an open but semantically narrow space: the agent generates code only for the specified components, leaving the overall network structure unchanged. The approach is validated in two directions: tuning a classification spiking neural network with correlation learning, and solving high-order differential equations with Physics-Informed Neural Networks (PINN). Across five tasks---spiking classification on MNIST and Digits, and boundary-value problems for the generalized nonlinear Schr\u00f6dinger equation (GNLSE) and Kuramoto--Sivashinsky (KS) equations---the agent outperforms the baselines: classification accuracy is 13 percentage points (MNIST) and 6 percentage points (Digits) higher; the error against the analytical single-soliton solution is reduced approximately 2491-fold; the invariant-preservation error drops approximately 325-fold in the selected GNLSE run with a Gaussian perturbation and by more than 100-fold on average over repeated initializations; and the mass drift drops 14-fold for the KS problem with a Gaussian perturbation. The framework thus tunes key components on tasks of different nature without changing its internal structure.",
-      "published": "2026-10-09T14:34:22Z",
-      "link": "https://arxiv.org/abs/2610.13663v1",
+      "title": "On the possibilities and limitations of LLM-based multi-agent systems for multi-criteria decision-making in healthcare operations management",
+      "summary": "Multi-criteria models for healthcare operations need weights that express how stakeholders trade off patient waiting time, provider workload, and operating cost, but these weights are difficult to quantify. Teams of large language model (LLM) agents, each prompted to represent a stakeholder, have been used to supply them. We propose a framework for assessing the reliability of LLM-generated preferences as inputs to multi-objective optimization and quantifying how their uncertainty affects decisions. We study explicit preferences by asking agents to rate the importance of the criteria in an outpatient appointment scheduling problem, and implicit preferences by inferring trade-offs from the agents' pairwise choices between emergency department configurations. The computational experiments show that the explicit preferences respond to the clinic's operating conditions and differ across roles, but deliberation among the agents can erase these differences, whereas simple averaging preserves them. The pairwise choices used to reveal the agents' implicit preferences depend largely on which option is presented first, and we find limited evidence that a statistical model using contextual information alongside presentation order predicts the agents' choices on new comparison pairs better than a model using presentation order alone. We then formulate robust weighted-sum optimization models to account for preference uncertainty. In most cases, these models select different schedules or configurations from those obtained using average preference weights. These results indicate that LLM-generated preferences need an audit of this kind before they are used as optimization weights in healthcare decision support.",
+      "published": "2026-10-16T16:05:15Z",
+      "link": "https://arxiv.org/abs/2610.23673v1",
       "authors": [
-        "Ivan Moloshnikov",
-        "Dmitry Kunitsyn",
-        "Alexander Sboev",
-        "Maksim Skorokhodov",
-        "Roman Rybka",
-        "Yuanchao Liu"
+        "Marco Boresta",
+        "Tommaso Giovannelli",
+        "Sepehr Namirad",
+        "Giulia Riccardi"
       ],
       "cats": [
+        "math.OC",
         "cs.AI",
-        "cs.CL",
+        "cs.MA"
+      ]
+    },
+    {
+      "title": "DLite: History-free Speculative Decoding for Agentic AI",
+      "summary": "Speculative decoding has become a mainstream technique for accelerating large language model (LLM) inference by using a lightweight draft model to generate candidate tokens that are subsequently verified by the target model. However, agentic workloads introduce long and continuously evolving contexts and frequent multi-turn interactions. Under such workloads, we observe that existing draft models suffer from up to an 80% degradation in acceptance length, while maintaining their historical KV cache introduces substantial system overhead. In this paper, we identify the growing historical context as a common source of both problems and introduce DLite, a history-free speculative decoding framework for agentic AI. DLite directly reuses contextual hidden states from the target model and performs local speculative prediction without explicitly maintaining the historical context, transforming an increasingly complex modeling problem into local simple prediction problem. A lightweight sequential head further restores intra-block causal dependencies with low overhead. To effectively train this heterogeneous history-free architecture, we introduce a tailored two-stage training strategy. Experiments on general-purpose, long-context and agentic workloads show that DLite achieves 2-6 acceptance length and outperforms the state-of-the-art speculative decoding method, DSpark, up to 70%.",
+      "published": "2026-10-16T17:18:54Z",
+      "link": "https://arxiv.org/abs/2610.23787v1",
+      "authors": [
+        "Jiaming Xu",
+        "Hanzhen Wang",
+        "Tianlang Zhao",
+        "Jiewen Xiao",
+        "Chengze Yuan",
+        "Jiayi Pan",
+        "Yongkang Zhou",
+        "Jiancai Ye",
+        "Yu Wang",
+        "Guohao Dai"
+      ],
+      "cats": [
+        "cs.CL"
+      ]
+    },
+    {
+      "title": "Deep LLM layers expose passage-level context in EEG during silent reading",
+      "summary": "In a previous report we showed that a decoder can recover open-vocabulary word-level information from 19-channel EEG recorded during silent reading, by aligning short EEG windows with hidden-state embeddings of the presented word taken from a large language model (LLM). That analysis contrasted two of the model's 33 layers: the context-free input embedding and one mid-depth layer. Here we ask how EEG-decodable structure is distributed over the full depth of the language model. We trained one decoder per layer of Llama-3.1-8B, with and without a causal transformer over the sequence of EEG windows. We distinguish word-level decodability from a context-tracking component. Word-level decodability peaks in early layers and declines steadily towards the last layer. In contrast, the context-tracking component of the retrieval gain rises with depth, both with and without a causal transformer. Unexpectedly, a decoder that sees a single 0.5-s window at a time tracks the text passage too. Two new controls dissect this component. A target-geometry control, a synthetic predictor made of the true target plus noise calibrated to each decoder's word-level accuracy, shows that context tracking is not a by-product of word decoding and target geometry. A control that permutes predictions across runs from either the same or from different sessions shows that most of the observed context-tracking is not caused by an EEG recording session signature. Instead, context tracking mostly follows the text. A single EEG window therefore carries passage-level information that a contextual target can absorb. The results locate word identity in the early layers of the language model, discourse state in the deeper layers, and make the choice of target layer a design dial for EEG language decoders.",
+      "published": "2026-10-16T15:41:19Z",
+      "link": "https://arxiv.org/abs/2610.23638v1",
+      "authors": [
+        "Ingo Marquardt",
+        "Anthilia Alchanat",
+        "Priyanka Jain"
+      ],
+      "cats": [
         "cs.LG",
-        "cs.MA",
-        "cs.NE"
+        "q-bio.NC"
       ]
     },
     {
-      "title": "ToFu: Exploiting and Fuzzing the LLM-Orchestrator-Tool Trust Boundary",
-      "summary": "Large language models (LLMs) are increasingly deployed as agents that interact with external software through tools, with an orchestration layer translating model outputs into structured tool invocations. This architecture creates an LLM-orchestrator-tool trust boundary where tool semantics may go unenforced and LLM-generated arguments may be incorrectly treated as trusted. We present ToFu, a tool-aware framework that automatically derives semantic security checks for LLM tools from their existing metadata and a CWE-guided sanitizer corpus. ToFu specializes these checks to individual tools and automatically generates fuzzing harnesses and semantic oracles using runtime introspection and outcome sanitization. We evaluated ToFu across 273 MCP servers containing 3405 tools and identified verified bugs corresponding to CWE weakness classes in 343 tools across 118 of the servers. Our findings show that real-world tools frequently fail to enforce their documented input semantics, making it unsafe to treat LLM-generated arguments as trusted.",
-      "published": "2026-10-09T14:27:32Z",
-      "link": "https://arxiv.org/abs/2610.13651v1",
+      "title": "Trapped in Your Story: Evaluating Narrative-Induced Sycophancy in Large Language Models",
+      "summary": "Large language models (LLMs) are known to exhibit sycophancy by adjusting their responses toward users' expressed views. However, real users often justify their opinions through reasons, personal experiences, causal explanations, and broader narratives, raising the question of whether such narratives can further steer model judgments. We construct a controlled benchmark of 500 debatable questions across ten domains, where the user stance is held fixed while its justification is systematically varied without introducing new task-relevant evidence. Each question is instantiated under 11 matched conditions: one neutral baseline and five mirrored narrative levels for each of two opposing positions, yielding 5,500 evaluation instances. We evaluate seven LLMs and observe substantial differences in narrative-induced agreement. The effect is not monotonic with narrative elaboration: personal experience can reduce agreement, whereas causal framing and worldview-based synthesis increase it. Controlled GPT-5.1 ablations further show that causal framing produces the strongest positive effect, while claim-preserving bullet presentation also increases agreement over paragraph form. These findings suggest that sycophancy is shaped not only by user stance, but also by how supporting explanations are structured and presented.",
+      "published": "2026-10-16T14:26:44Z",
+      "link": "https://arxiv.org/abs/2610.23525v1",
       "authors": [
-        "Md Nazmul Islam Ananto",
-        "Pierre Prevost-Avenel",
-        "Colin Smith",
-        "Kyungtae Kim",
-        "Taegyu Kim",
-        "Arslan Khan"
+        "Runtai Yang",
+        "Dandan Zhu",
+        "Kaiwei Zhang",
+        "Guangtao Zhai"
       ],
       "cats": [
-        "cs.CR"
+        "cs.AI"
       ]
     },
     {
-      "title": "EviRepair: Evidence-Driven Agents for Reliable Vulnerability Repair",
-      "summary": "Recent advances in large language models (LLMs) have enabled agent-based approaches for repository-level automated vulnerability repair (AVR), showing promising repair capabilities. However, an important issue has received limited attention: how can we ensure that the evidence generated during the repair process is reliable enough to support accurate vulnerability understanding and patch generation? In this paper, we propose EviRepair, an evidence-driven multi-agent framework for repository-level AVR. EviRepair introduces evidence review into the repair process by enabling agents to collaboratively collect vulnerability evidence, verify evidence consistency, and construct a reviewed vulnerability model for patch synthesis and validation. Extensive experiments on PatchEval and SecBench benchmarks with multiple agent frameworks and LLMs demonstrate that EviRepair consistently outperforms existing agent-based baselines, achieving average improvements of 16.37% and 40.33% in resolved rates on PatchEval and SecBench, respectively. Codes are available at https://github.com/lly-s/EviRepair",
-      "published": "2026-10-09T12:22:43Z",
-      "link": "https://arxiv.org/abs/2610.13491v1",
+      "title": "Perceive, Solve, Reason: Progressive Capability Formation in Time Series-LLMs",
+      "summary": "Large language models (LLMs) can now perceive, describe, and reason about images and audio, yet time series understanding remains underestimated: most work uses LLMs as forecasters and classifiers, reasoning studies are few and narrow, and no suite trains and evaluates the full range of capabilities. In this paper, we build the first such suite, with 337K training and 44K evaluation samples across three progressive capabilities, Perceive, Solve, and Reason, and use it to ask how time series should enter an LLM that must master all three, and in what order. We find that a dedicated encoder is essential: with one, a 4B model surpasses GPT-4o on every perception attribute we test, whereas textualizing the series costs 8--10 points in reasoning accuracy. The capabilities then build on one another: learning them in order beats mixing the same data and rivals reasoning-only training with over three times the reasoning data, but only when an encoder is used. Analyses further reveal that capabilities are transferred through distinct network depths rather than simply stacked, and that a stage converged on its own benchmark is not necessarily ready for the next. Distilled into a simple recipe, these findings yield 4B TS-LLMs that, without any target-domain data, outperform four recent 7B TS-LLMs on seven of eight out-of-domain metrics, by up to 11 points. We therefore advocate treating time series as a first-class modality for LLMs, read through dedicated encoders and taught to perceive before they reason.",
+      "published": "2026-10-16T14:23:23Z",
+      "link": "https://arxiv.org/abs/2610.23521v1",
       "authors": [
-        "Yilian Shi",
-        "Qingyu Liu",
-        "Tianyi Zhou",
-        "Wende Tan",
-        "Chenyang Si",
-        "Yueming Lyu",
-        "Xia Hu",
-        "Dongrui Liu"
+        "Xin Qiu",
+        "Junlong Tong",
+        "Wei Zhang",
+        "Xiaoyu Shen"
       ],
       "cats": [
-        "cs.CR"
+        "cs.CL"
       ]
     },
     {
-      "title": "Not All Correct Fixes Run Alike: An Empirical Study of Patch Performance in Repository-Level Issue Resolution",
-      "summary": "Repository-level issue-resolution benchmarks such as SWE-bench evaluate submitted patches primarily based on whether they pass the correctness tests, leaving the runtime performance of different test-passing patches largely unexplored. Evaluating patch performance is essential but challenging since designing performance workloads for each benchmark instance is costly. However, these benchmarks already provide a natural candidate: the built-in \\emph{FAIL\\_TO\\_PASS} (F2P) tests, which exercise the behavior affected by the issue fix. We therefore investigate whether the provided F2P tests can be repurposed to evaluate patch performance. Overall, we choose four frontier models, Claude Opus~5, GPT~5.6, DeepSeek V4 Pro, and Qwen~3.8 Max, paired with SWE-agent to resolve the pre-filtered measurable corpus from verified splits of SWE-bench and SWE-bench-Live, yielding 262 cases with at least two different correct solutions, including the developer ground-truth patch. We then measure each solution's runtime performance in instruction count and wall-clock time on the native F2P test, and use Welch ANOVA instead of the RSD proposed in prior work as a more robust statistical discrimination criterion. We find that this methodology exhibits notable discrimination capability in runtime performance and identifies performance differences among patches in almost half of the instances. Our empirical study shows that the runtime performance of generated patches is independent of the issue resolution rate of LLMs, with nearly reversed model rankings. The case study also shows that the performance analysis reveals architectural regression in some patches that the correctness evaluation overlooked. These findings suggest that resolution rate does not adequately characterize LLMs' capability for repository-level issue resolution, motivating future evaluations to consider patch performance alongside it.",
-      "published": "2026-10-09T13:17:53Z",
-      "link": "https://arxiv.org/abs/2610.13563v1",
+      "title": "S-GAP: Stealthy Graph Attack Primitives for Graph Large Language Models",
+      "summary": "Graph Large Language Models (GraphLLMs) enable powerful semantic understanding and reasoning over Text-Attributed Graphs (TAGs), while their semantic reasoning may exhibit vulnerabilities to perturbations in node text and graph structure under adversarial attack evaluation. Existing attacks typically construct textual and structural perturbations in separate stages guided by distinct realization intents. However, this separation results in attack-intent fragmentation, causing semantic incoherence between the two perturbation types, thereby undermining attack stealth and making them easier for GraphLLMs to identify and disregard, ultimately weakening attack effectiveness. To avoid attack-intent fragmentation, we propose the Graph Attack Primitive (GAP), an atomic semantic representation that unifies textual and structural perturbations under a coherent attack intent. By carefully calibrating the semantic composition of a GAP, we can achieve strong attack effectiveness while maintaining sufficient attack stealth. Furthermore, we introduce S-GAP (Stealthy GAP), a multi-agent framework that iteratively refines the semantic content of the GAP. The framework unifies GAP planning and realization and continuously refines this process through surrogate evaluation and textual feedback. Extensive experiments across four datasets, three GraphLLMs, and two attack settings show that S-GAP improves ASR over the strongest baselines by 7.02% on average while producing more relationally plausible perturbations, exposing critical vulnerabilities in current GraphLLMs and motivating more robust defenses.",
+      "published": "2026-10-16T13:45:23Z",
+      "link": "https://arxiv.org/abs/2610.23465v1",
       "authors": [
-        "Han Peng",
-        "Xing Hu",
-        "Feifei Niu",
+        "Wenda Li",
+        "Tongya Zheng",
+        "Shunyu Liu",
+        "Hanyang Yuan",
+        "Kaixuan Chen",
+        "Yu Wang",
+        "Yuchen Ying",
+        "Haoze Jiang",
         "Huan Li",
-        "Xin Xia"
-      ],
-      "cats": [
-        "cs.SE",
-        "cs.CL"
-      ]
-    },
-    {
-      "title": "Taking Tokenization off the Host for Agentic LLM Serving",
-      "summary": "Agentic workloads resend long contexts that barely change between calls. Prefix caching now skips most of their prefill, yet every request must still be tokenized in full before the cache can even be consulted. Tokenization, a CPU stage long treated as negligible, becomes the largest part of time-to-first-token (TTFT), and a frontend that tokenizes for a whole GPU fleet limits how many GPUs it can feed. We present GraphTok, a GPU tokenizer that runs the entire encoding pipeline, from pre-tokenization through byte-pair encoding (BPE) merging to token-ID assembly, as one replayable CUDA graph. GraphTok reproduces the reference token IDs bit-for-bit on GPT-2, Llama 3, Qwen 2.5, DeepSeek-V3, and Gemma 3, hands short inputs to a CPU engine where the GPU cannot win, and plugs into unmodified vLLM and NVIDIA Dynamo. GraphTok encodes one million GPT-2 tokens in 1.7-3.2 ms including data transfers, and on Llama 3 it is 4.7-6.0x faster than gigatoken, the strongest CPU tokenizer. On TokTier's own single-request benchmark, it is 2.6-3.9x faster than gigatoken and up to 18.1x faster than TokTier. In vLLM with a cached prefix, it lowers mean TTFT by 2.1-2.4x. The largest gain is capacity. Within a 2 s P99 target, one Dynamo frontend with GraphTok sustains 518 requests/s of 121k-token traffic, the busiest-hour load of 56 GPUs, against 296 with gigatoken and 18.5 with the default tokenizer. Across 121k to one million tokens, this is 1.75-2.5x the load gigatoken sustains, with a P99 up to 64x lower where gigatoken's tail breaks.",
-      "published": "2026-10-09T10:05:09Z",
-      "link": "https://arxiv.org/abs/2610.13325v1",
-      "authors": [
-        "Mohammad Siavashi",
-        "Pascal Schwinte",
-        "Ali Banaei",
-        "Gerald Q. Maguire",
-        "Marco Chiesa",
-        "Dejan Kosti\u0107"
-      ],
-      "cats": [
-        "cs.DC",
-        "cs.CL",
-        "cs.LG",
-        "cs.PF"
-      ]
-    },
-    {
-      "title": "Agent4Spec: An LLM-based Agentic System to Optimize API Specifications through Automated Validation and Market Analysis",
-      "summary": "API specifications serve as critical documentation for modern software development, directly impacting integration efficiency and client code generation. While recent advancements have leveraged Large Language Models (LLMs) to generate initial specifications from source code, existing approaches treat this process as a one-time event - overlooking the needs for continuous validation, long-term maintenance, and market-driven evolution of these artifacts. To address this issue, we present Agent4Spec, an autonomous multi-agent framework featuring two distinct pipelines: (1) a validation pipeline that detects and self-corrects OpenAPI syntax errors, and (2) a market analysis pipeline that conducts competitive research, identifies functional gaps against industry leaders, and automatically generates missing API-spec functionalities. We evaluate Agent4Spec on two curated datasets of API specifications spanning both general-purpose and industrial scenarios. Among 9 SOTA LLMs, the top-performer achieves 100% syntax error detection rates and over 95% implementation success for proposed corrections, while securing over 50% adoption rates for suggested endpoint improvements, representing a practical tool for API development.",
-      "published": "2026-10-09T09:25:30Z",
-      "link": "https://arxiv.org/abs/2610.13273v1",
-      "authors": [
-        "Yongjian Tang",
-        "Costel Moraru",
-        "Doruk Tuncel",
-        "Hanya Elhashemy",
-        "Steffen Klepke",
-        "Thomas Runkler"
-      ],
-      "cats": [
-        "cs.SE",
-        "cs.AI"
-      ]
-    },
-    {
-      "title": "Forgetting is Not Always Bad: A Neuro-Inspired Memory Repair Mechanism for Poisoned LLM Agents",
-      "summary": "Large language model (LLM) agents are highly vulnerable to memory-poisoning attacks. Existing defenses primarily rely on external modules for either static memory isolation or continuous online auditing, resulting in low memory efficiency and high computational overhead. To address these limitations, inspired by neuroscientific mechanisms that weak reactivation can destabilize memories and induce decay in the absence of reinforcement, we propose an agent-intrinsic training-free memory repair framework, DREAM (Dynamic Reactivation for Engram Attenuation in Memory), that enables selective functional forgetting of poisoned memories. Specifically, DREAM implements a three-stage pipeline: perturbation-induced implicit reactivation to reveal the structural fragility of malicious memories, adaptive anomaly diagnosis based on multi-dimensional activation patterns to detect topological anomalies, and a dynamic memory repair module that selectively suppresses harmful memories while reinforcing benign ones. Extensive experiments across diverse attackers and real-world tasks demonstrate that DREAM reduces attack success rates by over 95\\% against backdoor poisoning while preserving strong benign utility. DREAM also achieves competitive robustness against injection attacks. In terms of runtime and token consumption, DREAM achieves up to a 2.13$\\times$ speedup and a 37.7\\% reduction in token consumption compared with A-MemGuard. Furthermore, DREAM also achieves a task success rate of 92.96\\% on poisoned multi-agent systems.",
-      "published": "2026-10-09T09:17:00Z",
-      "link": "https://arxiv.org/abs/2610.13267v1",
-      "authors": [
-        "Lei Liu",
-        "Yunji Liang",
-        "Xiaowen Zhang",
-        "Jingqi Liu",
-        "Qi Li",
-        "Bin Guo",
-        "Zhiwen Yu"
+        "Gang Chen",
+        "Zujie Ren"
       ],
       "cats": [
         "cs.AI"
       ]
     },
     {
-      "title": "RATED: Reliability-Aware AI Agent Tool Retrieval via Execution Dynamics",
-      "summary": "As AI agents increasingly rely on external tools, accurate retrieval is essential for reliable behavior. Existing methods optimize semantic relevance but largely ignore tool availability during execution. To address this gap, we propose RATED (Reliability-Aware Tool Retrieval via Execution Dynamics), a retrieval framework that combines robust semantic matching with dynamic reliability adaptation. RATED employs a frozen dual-encoder with contrastive fine-tuning for semantic matching, and a lightweight contextual bandit module that re-ranks candidates based on real-time execution feedback. This design enables rapid adaptation to runtime tool failures without expensive model retraining. We introduce EcoAgent, a benchmark of 5,172 real-world tools and over 210,000 query-tool pairs for offline retrieval and dynamic reliability evaluation. Experimental results demonstrate that RATED achieves a 52.2% relative MRR improvement over the ToolLLM API retriever on real-world queries, and reduces fault selection rate from 86.2% to 2.9% under severe API outage scenarios with a 30% failure rate, while incurring negligible latency overhead of less than 1 ms over encode-only inference. The code and dataset are available at https://github.com/Elliotes/EcoAgent.",
-      "published": "2026-10-09T17:38:11Z",
-      "link": "https://arxiv.org/abs/2610.13889v1",
+      "title": "Self-Reflective Chain-of-Thought (SRCoT): Evidence-Based Text Generation via a Closed-Loop Retrieve--Reflect--Revise Pipeline on Edge LLMs",
+      "summary": "Large language models (LLMs) can generate fluent outputs that lack source support or conflict with local operational constraints. We introduce Self-Reflective Chain-of-Thought (SRCoT), a modular architecture that organizes generation as a closed Retrieve--Reflect--Revise loop. SRCoT separates environment state, persistent knowledge, accumulated experience, and short-term memory into provenance-labeled stores. BM25 retrieval supplies local context; subsequent passes expose intermediate drafts, missing-information markers, follow-up queries, and optional claim--evidence mappings. These artifacts inform retrieval, revision, clarification, or abstention decisions. We examine the architecture through qualitative, trace-based case studies in two fully synthetic settings: emergency medical services and Munich-Sim, an emergency-operations simulation. Local prototype runs on an Apple M4-family laptop with 128 GB memory illustrate source-labeled documentation, explicit gap marking, and structured dispatch-style outputs. The traces also reveal provenance-assignment errors, incomplete evidence coverage, and unsafe assumptions that remain possible despite prompting constraints. These cases demonstrate report-level inspectability and local execution, not comparative superiority, hallucination reduction, clinical validity, or operational safety. The architecture separates retrieval and control from the model interface, but behavior across different models remains to be evaluated. SRCoT is a research proof of concept requiring human review, with its principal contribution lying in an inspectable control procedure rather than a new model.",
+      "published": "2026-10-16T11:14:52Z",
+      "link": "https://arxiv.org/abs/2610.23311v1",
       "authors": [
-        "Weiliang Chen",
-        "Song Liao"
+        "Fabian Broszio",
+        "Michael Hoffmann",
+        "Adrian Paschke"
       ],
       "cats": [
         "cs.AI",
-        "cs.IR"
-      ]
-    },
-    {
-      "title": "QTestBench: A Test Framework for Evaluating LLM-Generated Quantum Code",
-      "summary": "Large language models (LLMs) have shown strong results in classical code generation and are increasingly used to write the unit tests that safeguard that code. Whether they can do the same for quantum software is less clear, because quantum programs are probabilistic, depend on numerical tolerances, and are judged by domain-specific checkers, so a well-formed test can still disagree with the benchmark's verdict. Existing quantum benchmarks measure whether a model produces a correct solution, but not whether its tests can distinguish correct implementations from faulty ones. We introduce QTestBench, a framework that evaluates LLM-generated quantum test suites against independent benchmark checkers, never treating the tests themselves as ground truth. For each task, QTestBench prompts models to produce syntactic, semantic, and behavioral tests, injects candidate solutions at runtime, and compares each test verdict with the checker's label under three validation cohorts, each answering a distinct diagnostic question. We benchmark five LLMs on eight PennyLane QHack challenges and ten Qiskit HumanEval tasks. Generated suites almost always execute, but discrimination lags behind: the best generator reaches a test quality of 0.71 on QHack and 0.34 on Qiskit HumanEval, so executability alone overstates test quality. Oracle-verified synthetic mutants stabilize bug-detection estimates when natural faulty solutions are scarce, as on three of ten Qiskit tasks that yield none. QTestBench offers a reproducible, cross-framework benchmark for the trustworthiness of LLM-generated quantum tests.",
-      "published": "2026-10-09T16:23:46Z",
-      "link": "https://arxiv.org/abs/2610.13811v1",
-      "authors": [
-        "Meriem Terki",
-        "Nouhaila Innan",
-        "Minghao Shao",
-        "Muhammad Kashif",
-        "Alberto Marchisio",
-        "Muhammad Shafique"
-      ],
-      "cats": [
-        "cs.LG",
-        "cs.CL",
-        "quant-ph"
-      ]
-    },
-    {
-      "title": "Tracing and Taming Hallucinated Terms via Subsequence-Association Filtering and Breadth-Aware Selection for LLM Query Expansion",
-      "summary": "Large language models (LLMs) are now a standard source of query expansion terms but they hallucinate. They inject non existent entities and off-topic terms that add ranking noise and can hurt strong retrievers. Existing remedies such as corpus grounding, mutual verification and preference alignment treat hallucinated terms as an undifferentiated nuisance to be filtered by agreement heuristics, without a mechanistic account of why a given term appears or a principled criterion for how many terms to keep. We propose Subsequence-Association Filtered, breadth-aware query expansion (SAFE-QE), a training-free, retriever agnostic method that draws on the subsequence-association account of hallucination. We score each candidate expansion term by its corpus conditioned cross-context reproducibility, terms that reappear under randomised query contexts yet lack support in the pseudo-relevant set are flagged as products of dominant hallucinatory associations and down-weighted. Drawing on the characterisation of language generation as a trade-off between consistency (no hallucination) and breadth (coverage), we cast term selection as constrained coverage maximisation over the pseudo-relevant set, keeping a set that is approximately broad but consistent and stable across resampling. We also introduce the Hallucinated Expansion Term Rate, a query side faithfulness metric that counts injected expansion terms no relevant document supports. We evaluate our approach on benchmarked TREC and BEIR collections. Our SAFE-QE is statistically indistinguishable from generative and corpus-steered expansion on nDCG@10 while injecting fewer unsupported terms 4.3 per query against 27.8 for Query2doc and 57.5 for HyDE and on a strong learned sparse retriever, where every expansion method regresses. Faithfulness is therefore available at no measurable cost in ranking quality.",
-      "published": "2026-10-09T16:22:16Z",
-      "link": "https://arxiv.org/abs/2610.13810v1",
-      "authors": [
-        "Amit Kumar Jaiswal",
-        "Sagar Uprety",
-        "Prayag Tiwari"
-      ],
-      "cats": [
-        "cs.IR",
         "cs.CL"
       ]
     },
     {
-      "title": "Inject a Turn, Not a Token: Learning Where to Redirect LLM Reasoning for Self-Correction",
-      "summary": "Large language models struggle to reliably identify and correct errors in their own reasoning. Unlike prior training-based approaches that fine-tune an LLM to generate revisions or feedback, we learn where to intervene in failed rollouts and determine how to redirect them. To choose where to intervene, we train a 130K-parameter MLP head on a frozen encoder using only final-answer correctness. For redirection, we find that under a fixed generation budget, the tested inline injections fail to reliably redirect reasoning, whereas presenting the same instruction in a new user turn changes the model's course. The resulting correction framework, UPTURN (User-Prompt TURN injection at a learned position), requires no LLM fine-tuning: it retains a selected prefix, injects an instruction as a new user turn, and regenerates the suffix. Across four reasoners and six math benchmarks, UPTURN improves average accuracy in every setting over a 32-rollout baseline. It outperforms self-correction and reflection-token injection baselines under matched correction budgets, transfers across reasoners and to GPQA-Diamond without retraining, and complements GRPO and self-correction methods.",
-      "published": "2026-10-09T14:37:51Z",
-      "link": "https://arxiv.org/abs/2610.13672v1",
+      "title": "MobileInject: Evaluating Reasoning-to-Action Security of MLLM-Based Mobile Agents under Cross-Modal Consistency Injection",
+      "summary": "Multimodal large language model (MLLM)-based mobile agents are rapidly evolving from conversational assistants into autonomous systems that perceive, reason over, and act on smartphone environments. This capability also exposes a new security risk: adversaries can embed malicious objectives in cross-application mobile content and steer agent behavior through indirect multimodal injection. Although prompt injection has been studied in desktop and web settings, its cross-modal properties in mobile ecosystems remain poorly understood, and existing security analyses are still limited. To close this gap, we introduce MobileInject, the first benchmark for evaluating mobile agents against multimodal injection attacks and reasoning-to-action security risks. MobileInject provides a high-fidelity interactive mobile evaluation framework covering 11 scenarios, 9 security-risk categories, and 108 executable risk instances. It further introduces Cross-Modal Consistency Injection to exploit corroboration across modalities, two enhanced attack methods, Multi-Role Collaborative Deception and Reasoning-Camouflage Injection, to intensify trust manipulation and reasoning hijacking, and a Reasoning Security Diagnosis Framework for fine-grained failure analysis. Systematic experiments show that mobile agents are broadly vulnerable to multimodal injection, and that many failures stem from reasoning hijacking at early stages. These findings establish MobileInject as a systematic cross-modal benchmark for studying and improving the security of mobile agents. Code release details are provided in the Appendix Open Science section.",
+      "published": "2026-10-16T11:10:30Z",
+      "link": "https://arxiv.org/abs/2610.23307v1",
       "authors": [
-        "Jiwon Jeon",
-        "Myungsik Cho",
-        "Jeonghye Kim",
-        "Youngchul Sung"
+        "Songping Wang",
+        "Peiyang Li",
+        "Yi Huang",
+        "Fengting Li",
+        "Xuhao Ran",
+        "Yueming Lyu",
+        "Chao Feng",
+        "Caifeng Shan"
       ],
       "cats": [
-        "cs.CL",
+        "cs.CR",
         "cs.AI"
       ]
     },
     {
-      "title": "AMLworld-Compact: Importance-Weighted Downsampling for Cost-Effective LLM Evaluation and Error Diagnosis",
-      "summary": "Evaluating large language models (LLMs) on AMLworld's smallest test splits is costly because each of over a million targets requires a separate graph prompt. Sampling reduces this cost, but small balanced subsets change unweighted precision and F1. We introduce AMLworld-Compact, an evaluation set that retains every illicit test transaction and samples benign transactions from supervised-score strata. Its HT-Coreset protocol reduces evaluation targets by 271x and 611x on HI-Small and LI-Small. Horvitz-Thompson weights give unbiased full-test confusion-count estimates for fixed predictions; recall is exact, while precision and F1 are ratio estimates. In a held-out study using Graph Feature Preprocessor (GFP) features, one boosted-tree family defines strata for evaluating the other over 500 draws per configuration. At the released sizes, F1 RMSE is 0.00-2.58 percentage points versus 4.44-7.41 for uniform sampling with HT weights; conservative intervals remain broad. Under the evaluated graph prompts, seven open-weight LLMs have weighted precision near the predict-all-illicit baseline. In an outcome-stratified audit of 1,000 HI-Small few-shot outputs from one run per model, lexical checks pass for 84.5% of correct and 56.2% of incorrect binary verdicts, so these markers do not establish correctness. We release the evaluation sets, construction code, and audit tools at https://huggingface.co/datasets/typhoon-ai/AMLworldCompactEval and https://github.com/nat-nischw/AMLworld-Compact.",
-      "published": "2026-10-09T14:09:32Z",
-      "link": "https://arxiv.org/abs/2610.13627v1",
+      "title": "Beyond Large Language Models: A Mental World Model Framework for Mental Modeling, Simulation, Evolution, and Interpretability",
+      "summary": "Understanding and simulating how subjective cognition and mental states emerge, evolve, and shape behavior is essential for advancing artificial intelligence toward deeper social cognition and general intelligence. Existing large language models (LLMs) and Theory of Mind (ToM) methods primarily infer mental states from linguistic information, lacking unified mechanisms for subjective world construction, cognitive-psychological interactions, dynamic evolution, and historical dependencies. This paper introduces the Mental World Model (MWM) and its implementation, the Multi-Branch Mental Evolution Architecture (MMEA), which explicitly constructs subjective worlds, models interactions between cognition and mental states, and simulates continuous mental evolution shaped by historical experiences. On DynToM and RecToM, MMEA achieves 96.48% and 94.00% accuracy, respectively, outperforming leading LLMs and specialized ToM methods. Additional experiments demonstrate improvements of 28.7, 39.3, and 16.6 percentage points in mental state and behavior prediction, long-sequence prediction, and implicit mental state inference, respectively. The results demonstrate that MMEA provides an interpretable framework for continuous mental modeling, enabling AI to move beyond surface-level semantic representations to infer individuals' underlying mental states from linguistic information and dynamically simulate their internal cognitive processes and evolution over time. MWM also provides a promising foundation for causal reasoning, personalized AI, sustained human-AI interaction, and future advances toward artificial general intelligence (AGI).",
+      "published": "2026-10-16T16:42:11Z",
+      "link": "https://arxiv.org/abs/2610.23722v1",
       "authors": [
-        "Natapong Nitarach",
-        "Phume Ngampornsukswadi",
-        "Pittawat Taveekitworachai",
-        "Surapon Nonesung",
-        "Warit Sirichotedumrong",
-        "Kunat Pipatanakul"
+        "Qingshi Wang"
+      ],
+      "cats": [
+        "cs.AI"
+      ]
+    },
+    {
+      "title": "The Cognitive Cost of LLM Writing: A Reading-Time Comparison with Human Text",
+      "summary": "Although linguistic differences between human-written and Large Language Model (LLM)-generated texts have been extensively studied, their implications for the cognitive effort involved in reading remain less explored. In psycholinguistics, reading time is commonly used as an indirect measure of cognitive processing effort. Building on this perspective, we investigate whether human-written texts and their LLM-generated rewrites exhibit differences in predicted reading time that may reflect differences in processing demands for readers. To this end, we introduce RoBERTa-RT, a model trained on human eye-tracking data to predict word-level reading times. We evaluate the model on both internal and external test sets, construct a paired dataset of 496 human-written articles and their LLM-generated rewrites, and apply RoBERTa-RT to compare their predicted reading times. Our findings show that LLM-generated rewrites tend to be shorter and have slightly lower predicted total reading times, while exhibiting higher predicted reading times per word. These differences are associated with systematic linguistic changes, including longer and less frequent words, greater lexical diversity, and higher contextual predictability. From a cognitive perspective, our findings suggest that LLM-generated writing may redistribute reading demands: reducing the amount of text to process while increasing the predicted processing effort associated with individual words. This highlights the importance of considering not only the linguistic characteristics of machine-generated content, but also its potential implications for human cognitive processing.",
+      "published": "2026-10-16T16:35:41Z",
+      "link": "https://arxiv.org/abs/2610.23715v1",
+      "authors": [
+        "Kamer Cekini",
+        "Elisabetta Biondi",
+        "Chiara Boldrini",
+        "Andrea Passarella",
+        "Marco Conti"
       ],
       "cats": [
         "cs.CL"
       ]
     },
     {
-      "title": "SWE-DeceptionBench: Benchmarking Deceptive Behaviors of LLMs Across the Software Development Lifecycle",
-      "summary": "Large Language Models (LLMs) are increasingly used throughout the software development lifecycle. This growing reliance on LLMs raises concerns about their trustworthiness, with deception posing a particularly important risk. Deceptive behavior takes the form of misleading responses or assistance in fabricating, concealing, or distorting information. To study this behavior, we introduce SWE-DeceptionBench, a benchmark for evaluating LLM deception in software engineering. The benchmark covers six lifecycle stages and two deception triggers: Active Deception, where models recognize infeasible or conflicting requirements but still present them as achievable, and Passive Deception, where models help fulfill explicit user requests to mislead others. We further introduce Neutral, Reward, and Pressure conditions to study the effect of external inducements, resulting in 720 test instances in Chinese and English. Evaluating seven mainstream LLMs, we find substantial deception even under the Neutral condition, with aggregate rates of 49.88% for Active Deception and 64.29% for Passive Deception. Deception rates vary across lifecycle stages, and external inducements affect Active and Passive Deception to different extents. We also evaluate lightweight defenses, finding that guard models miss many deceptive requests, and Self-Reminder reduces but does not eliminate deceptive responses. These findings highlight the need for more effective deception detection and mitigation methods to support trustworthy LLM-based software engineering.",
-      "published": "2026-10-09T14:09:09Z",
-      "link": "https://arxiv.org/abs/2610.13626v1",
+      "title": "From Billion-Scale to Million-Scale Language Models: Operational Capabilities for Embedded Post-Exploitation",
+      "summary": "Small Language Models (SLMs) are increasingly attractive for resource-constrained environments due to their low computational footprint. These characteristics also make them candidates for future autonomous malware, where connectivity, latency, privacy, or operational constraints may preclude cloud-based inference. Yet the ability of ultra-compact models to support malware during post-exploitation remains poorly understood.   We systematically evaluate seven open-source SLMs (20M-1.5B parameters) on two post-exploitation code-generation tasks: Directory Enumeration and Backdoor Generation. We compare Python (high-resource) and Lua (low-resource) across prompting strategies, task formulations, iterative reasoning, grammar-constrained decoding, and execution-feedback loops.   Results show that offensive code-generation capabilities do not increase linearly with model size. Successful execution depends on the interaction of model capacity, task formulation, and prompting strategy, with task formulation exerting a greater influence than prompt engineering alone. Algorithmic formulation combined with few-shot prompting enables Qwen2.5-Coder 1.5B to reach Pass@5 of 100% in both Python and Lua for Directory Enumeration, 100% in Python for Backdoor Generation, and 99.2% in Lua.   Although the evaluated models remain too computationally demanding for widespread deployment in contemporary malware, rapid progress in compact models may reduce this barrier. These findings help anticipate AI-assisted malware and inform future countermeasures.",
+      "published": "2026-10-16T14:33:17Z",
+      "link": "https://arxiv.org/abs/2610.23534v1",
       "authors": [
-        "Xiting Liu",
-        "Lin Yang",
-        "Yitong Zhang",
-        "Jia Li",
-        "Shi-Min Hu"
+        "Gabriel Hortea",
+        "Simon Pietro Romano",
+        "Juan Tapiador",
+        "Mario Varlese"
       ],
       "cats": [
-        "cs.SE",
+        "cs.CR",
         "cs.AI"
       ]
     },
     {
-      "title": "A Local Agentic AI Framework to Generate Edge Case Scenarios for Safety Assurance",
-      "summary": "Generating edge case scenarios is crucial for training, testing and safety assuring autonomous systems. This identifies hazardous failures to increase system reliability and robustness, ensures the system can still function safely on the boundaries of its operational design domain and learns the expected system behaviour for these edge cases. The rapid advancement in the generation and analysis capabilities of language models (LMs) has expanded their applicability and recent work has investigated LM scenario generation. However, many recent approaches rely on human-in-the-loop or rule-based strategies. This restricts the LM's ability to generate diverse and edge case scenarios; the long tail of the distribution. Our work uses local LMs in a laptop-based agentic AI framework for adaptive scenario generation. This is cheap, fully-controlled, ensures data privacy and security. It uses think, act, observe, update, and continue loops with lightweight JSON encoding to generate scenarios. We use the system requirements, system description and environment description as knowledge bases in contextual prompts for an LM to ensure scenario realism. A second, independent LM critiques each scenario using domain specific criteria so it can be refined. The refined scenarios are run in simulation and evaluation metrics collected. These metric scores are analysed and similar scenarios are created for edge cases (exploitation) or novel scenarios are generated to explore the scenario space. Post-hoc clustering using metric scores and thematic-type analysis of the rich-text scenario descriptions produced by the LM pinpoints functional gaps and their triggering conditions. This creates traceable evidence for the safety assurance case. Our work highlights the potential of a flexible and adaptive local agentic AI framework for automating edge case generation and producing traceable safety assurance evidence.",
-      "published": "2026-10-09T12:13:17Z",
-      "link": "https://arxiv.org/abs/2610.13479v1",
+      "title": "LocalIntent: Outcome-Specific Structured Generation for Backend-Compatible Smart Building Automation with Local LLMs",
+      "summary": "Locally deployed large language models (LLMs) can reduce reliance on remote cloud services for natural language smart building automation, but backend-facing processing requires correct outcome selection, alignment with local capabilities, and valid structured outputs. We investigate whether a complete outcome-specific prompting design improves compact-model outputs beyond generic route-then-generate prompting. The proposed LocalIntent approach routes requests to ordinary or persistent-rule branches: the former produces commands, clarifications, or rejections, while the latter generates trigger-action rules, followed by deterministic validation. We evaluate four locally executed Gemma and Qwen models spanning 2B-9B parameters on 101 non-persistent and 54 persistent-rule records, comparing Monolithic prompting, generic two-stage prompting, LocalIntent, and validation-guided repair. Across the evaluated datasets, LocalIntent achieves higher intent understanding, device identification, and action/parameter correctness than generic two-stage prompting, while clarification/mode correctness remains model-dependent. The largest gains occur for rules, where LocalIntent improves intent understanding from 26.4% to 80.6%, device identification from 59.3% to 84.7%, rule-mode correctness from 49.1% to 98.6%, and action/parameter correctness from 5.6% to 44.9%. For non-persistent requests, pooled gains are smaller: intent understanding increases from 39.6% to 53.2%, and action/parameter correctness from 30.7% to 42.8%.",
+      "published": "2026-10-16T14:19:22Z",
+      "link": "https://arxiv.org/abs/2610.23511v1",
       "authors": [
-        "Victoria J. Hodge",
-        "Colin Paterson",
-        "Rob Alexander"
+        "Tianyang Liu",
+        "Jiayue Wang",
+        "Zhanhao Cheng",
+        "Changyang Wang",
+        "Shaoshu Zhu",
+        "Zhenghao Wu",
+        "Hadi Tabatabaee Malazi"
       ],
       "cats": [
+        "cs.AI"
+      ]
+    },
+    {
+      "title": "\"You\" Is Not Toxic: How LLM Labelers Rewrite the Web's Conversation Laws",
+      "summary": "What the Web community believes about toxic conversations, such as that toxicity rises in longer and deeper threads, was measured mostly with Google's Perspective API, which is shutting down; large language models (LLMs) will make the next measurements. We find that LLM labelers mistake second-person address for toxicity, and that this one bias manufactures laws that human labels do not show. On 1.25 million news comments with crowd labels, Claude Haiku flags 12% of the non-toxic comments that contain no \"you\" and 51% of those with four or more; a single crowd rater flags 6% and 10%. Deeper replies address someone more often, so under Haiku toxicity rises with reply depth (+0.93 percentage points per level), while under the crowd's labels it slightly declines (-0.12). Rewriting \"you\" in the third person removes two thirds of the false rise; flagging only as many comments as the crowd does not remove it, and showing Haiku the parent comment enlarges it. All seven LLMs we test over-flag \"you\", and at the crowd's flag rate, without the parent, any false rise of the open ones vanishes at a fixed number of second-person words; Haiku also over-flags \"you\" on Reddit, Gab and Wikipedia talk pages. Agreement with human labels does not reveal the bias: we prove that a fixed Cohen's kappa leaves a law nearly unconstrained. We therefore certify the law instead of the labeler. Threadsafe uses the labeler's scores to choose which comments human raters label and to predict the others, and corrects the predictions with the human labels; linear laws are estimated without bias whatever the labeler does. In simulated audits its intervals for the laws keep nominal coverage from 250 labels on, where uniform-sample methods such as PPI++ fall short, and at 1,000 to 8,000 labels are 0.75 times as wide as those of design-based supervised learning (DSL); a thousand human labels rule out Haiku's rising law.",
+      "published": "2026-10-16T13:29:30Z",
+      "link": "https://arxiv.org/abs/2610.23446v1",
+      "authors": [
+        "Liang Yue",
+        "Eric A. Vance"
+      ],
+      "cats": [
+        "cs.SI",
+        "cs.CL"
+      ]
+    },
+    {
+      "title": "Designing for Imperfect Prompts: A Simulation-Based Evaluation of an LLM-Based Enterprise Data Assistant Using Knowledge Graphs",
+      "summary": "Enterprise data assistants using large language models (LLMs) promise democratized data access in organizations. Yet in our real-world deployment within the CFO unit's data lake at an industry partner, we observed that business users frequently pose imperfect prompts that include domain-specific vocabulary and lack schema references or structural information. This Design Science Research study examines automatic resolution using a semantic mediation layer. We design and evaluate two design variants: schema-based mediation via semantic similarity, and knowledge graph-based mediation leveraging an automatically constructed knowledge graph from the data lake. Our simulation-based evaluation using real-world data, supported by LLM-as-a-Judge assessments and human validation, shows that knowledge graph-based mediation outperforms the schema-based approach in Precision, Recall, F1, and preserving user intent. We propose a design principle for knowledge graph-based mediation, demonstrating that structured knowledge representation bridges user intent and database structure and guides the design of enterprise data assistants across skill levels.",
+      "published": "2026-10-16T11:07:04Z",
+      "link": "https://arxiv.org/abs/2610.23304v1",
+      "authors": [
+        "Niklas Wagner",
+        "Alexander M\u00e4dche"
+      ],
+      "cats": [
+        "cs.HC",
         "cs.AI",
-        "cs.RO"
+        "cs.DB"
       ]
     },
     {
-      "title": "Agentic Large Language Models",
-      "summary": "Large language models (LLMs) have taken the world by storm. Their ability to communicate with us in our own language, and to reason about our world, has made them a favorite tool for writing, answering questions, and much more. Their answers already influence our decisions and our actions. What would happen if LLMs themselves could act in the world directly? What would happen if LLMs could interact with each other? Agentic LLMs combine the power of large language models with the ability to act in the real world. In this book we will discuss how agentic LLMs work, how they act, how they interact, and what this means for us, as users.",
-      "published": "2026-10-09T11:57:04Z",
-      "link": "https://arxiv.org/abs/2610.13455v1",
+      "title": "CoTA++: Understanding the Repeat Curse in dMLLMs from an Information Flow Perspective",
+      "summary": "Diffusion-based multimodal large language models (dMLLMs) decode by iterative denoising with bidirectional attention, which precludes the standard autoregressive key--value cache. Practical deployments therefore rely on approximate caching that reuses intermediate states across denoising steps. Such caching, however, often makes a response repeat one token at adjacent positions in a run that breaks the sentence, a failure we term the \\emph{Repeat Curse}. Tracing the context-token information flow reveals three disruptions. Within a step, caching disperses the attention that anchors a position on nearby context tokens. Across steps, similarity-based refresh is not staleness-aware, so some positions are decoded against stale key--value states. Across layers, the deep-layer entropy of the context fails to converge where repetition arises. We accordingly propose CoTA++, a training-free, plug-and-play framework that counteracts each disruption where it originates: Context-Token Attention Re-anchoring re-forms the attention routing against the current context, Decode-Aware Refresh reserves part of the cache's refresh budget for the positions about to be committed, and Context-Token Entropy-Guided Voting discounts the confidence of a position by the deep-layer entropy of its context, which reorders the unmasking. The three components act at non-overlapping stages of a decoding step and compose freely with existing dMLLMs and caches. Across three dMLLMs and two caching backends, CoTA++ reduces the sample repetition rate of long responses from up to 99.6\\% to at most 17.0\\%, recovers most of the accuracy lost to caching on nine benchmarks, and keeps the speedup of caching at under 15\\% overhead, making approximate caching reliable for dMLLMs.",
+      "published": "2026-10-16T10:58:03Z",
+      "link": "https://arxiv.org/abs/2610.23290v1",
       "authors": [
-        "Max van Duijn",
-        "Michiel van der Meer",
-        "Aske Plaat",
-        "Niki van Stein"
+        "Qiyan Zhao",
+        "Xiaofeng Zhang",
+        "Xu-Yao Zhang",
+        "Shijie Han",
+        "Zhepeng Li",
+        "Shunzhi Zhu",
+        "Da-Han Wang"
       ],
       "cats": [
         "cs.AI"
       ]
     },
     {
-      "title": "Polarization Dynamics under Algorithmic Recommendations in LLM-based Online Social Networks",
-      "summary": "How do recommendation algorithms contribute to the formation of polarized opinions in online social networks? This question has been studied through empirical analyses of real platforms and mathematical models of opinion dynamics. Empirical studies capture user behavior but are often limited by noisy, incomplete, or inaccessible platform data, while mathematical models offer control and interpretability but usually rely on simplified opinion update rules. More recently, large language model (LLM)-based social simulations have provided an alternative for studying recommendation and opinion dynamics through natural-language interactions. However, how different ways of applying recommendations shape opinion dynamics remains underexplored.   In this work, we provide a controlled comparison of two different recommendation mechanisms in an LLM-based online social network simulation. Edge Recommendation (ER) introduces new connections in the network, while Content-Exposure Recommendation (CR) exposes additional users to individual posts without modifying the underlying graph. Our framework represents users as LLM-based agents who interact in natural language while maintaining evolving opinion states. We measure polarization as opinion dispersion, extremization as the average distance of opinions from the neutral midpoint, and reinforcement as interactions that amplify already aligned opinions. Our results show higher mean polarization and extremization across recommendation conditions compared with the no-recommendation baseline, with absolute differences of up to $0.12$ in our main experiments.",
-      "published": "2026-10-09T10:28:04Z",
-      "link": "https://arxiv.org/abs/2610.13351v1",
+      "title": "CocoRNA: Collective RNA Design with Cooperative Multi-agent Reinforcement Learning",
+      "summary": "Designing RNA sequences that reliably fold into specific secondary structures is essential for understanding their biological functions but remains a challenging computational problem. We propose CocoRNA, a cooperative multi-agent reinforcement learning framework for RNA inverse design. CocoRNA simplifies the design task by decomposing it into smaller sub-problems, each solved collaboratively by multiple agents. This approach reduces the complexity of the problem and improves the exploration of design policies. During training, a centralized critic uses global structural information to guide the agents, enabling them to jointly optimize their design strategies. As a result, CocoRNA learns high-quality RNA design policies that generalize effectively to unseen structures without additional training. Experiments on the Rfam dataset demonstrate that CocoRNA substantially outperforms state-of-the-art methods in both success rate and design speed. Further experiments on other biological sequence design tasks highlight the effectiveness and broad potential of CocoRNA for complex design tasks.",
+      "published": "2026-10-16T17:43:25Z",
+      "link": "https://arxiv.org/abs/2610.23820v1",
       "authors": [
-        "Ali Safarpoor Dehkordi",
-        "Mohammad Shirzadi",
-        "Mehwish Nasim",
-        "Ahad N. Zehmakan"
-      ],
-      "cats": [
-        "cs.SI"
-      ]
-    },
-    {
-      "title": "Host-Aware Web Crawling for LLM Pretraining Data",
-      "summary": "Web crawling is a major source of large language model (LLM) pretraining data, yet data-selection pipelines discard a large share of crawled pages. We investigate how a crawler should allocate its budget across and within hosts to collect more high-quality pretraining data. Combining document-level quality classifier scores, web-graph centrality metrics, and Common Crawl's per-host crawl coverage, we find that roughly half of the variation in classifier scores occurs between hosts. In the crawls we analyze, a few pages from a host also provide a useful estimate of the quality of its remaining pages. Common Crawl uses harmonic centrality, a graph centrality metric, to guide its crawl allocation. In our simulations, using centrality to choose which hosts to crawl yields limited gains over random ordering and performs worse for some classifiers. For deciding how deeply to crawl each host, sampling a few pages and then fetching more from hosts with higher-scoring samples collects several times more high-quality pages per fetch than uniform depth or centrality-based allocation. Finally, Common Crawl's observed per-host coverage has little correlation with the evaluated quality signals. We estimate that tens of millions of high-quality pages remain among known but uncrawled URLs in each crawl examined, with most concentrated on a small share of hosts.",
-      "published": "2026-10-09T10:03:04Z",
-      "link": "https://arxiv.org/abs/2610.13321v1",
-      "authors": [
-        "Malte Ostendorff"
-      ],
-      "cats": [
-        "cs.CL"
-      ]
-    },
-    {
-      "title": "SharP: Soft and Hard Prompt-Guided Augmentation with LLM for Low Resource Fake News Detection",
-      "summary": "Fake news detection under low resource conditions is challenged by the scarcity of labeled data and the difficulty of capturing subtle deceptive patterns. In this work, we focus on low resource fake news detection, where only a small labeled set is available for training, while evaluation is performed under a fixed and unchanged test protocol. This setting is motivated by costly, ambiguous fact-checking and emerging topics and domains that are poorly covered by existing benchmarks. Existing data augmentation methods, such as synonym substitution, generative adversarial networks, and large language model (LLM)-based generation, often produce fluent but overly generic content, lacking the task-specific relevance needed for accurate detection. To address this, we propose SharP, a boundary-aware text generation framework guided by soft and hard prompts, which leverages LLMs as tools adapted to produce task-specific synthetic samples. SharP employs a dual prompt mechanism: hard prompts provide structured guidance and factual constraints, while soft prompts introduce learned semantic patterns from the data. These two types of prompts are combined to guide the generation process, enabling the model to produce samples that closely align with the characteristics of news. To further enhance detection performance, we incorporate a boundary-aware strategy that steers generation toward areas where the classifier is less confident, helping to clarify subtle distinctions between real and fake content. In addition, we adopt a dual objective optimization that balances semantic alignment with the source data and classifier feedback. This encourages the generation of samples that are both domain-consistent and helpful for refining decision boundaries, ultimately improving model robustness and generalization in low resource fake news detection.",
-      "published": "2026-10-09T08:25:34Z",
-      "link": "https://arxiv.org/abs/2610.13207v1",
-      "authors": [
-        "Ziyu Luo",
-        "Wei Li",
-        "Haoping Huang",
-        "Kecheng Liu",
-        "Min Gao"
-      ],
-      "cats": [
-        "cs.CL"
-      ]
-    },
-    {
-      "title": "SafeDiSTL: Decomposing Joint Constraints for Safe Multi-Agent Reinforcement Learning",
-      "summary": "Cooperative multi-agent tasks often impose constraints on a shared objective or collective safety. A team level violation cost function can measure this constraint outcome, but does not distinguish which agents' actions most strongly influence that violation. We present SafeDiSTL, a constrained multi-agent reinforcement learning framework that allows for credit assignment even with joint constraint measurements. We use Signal Temporal Logic (STL) robustness to measure episode-level violation through running-maximum cost increments. Smooth full-episode robustness and differentiable dynamics provide action sensitivities, which allocate each cost increment across agents at the same decision time. These sensitivities account for delayed effects when weighting agents' shares of each cost increment. We study the framework in cooperative payload transport, connected navigation, and networked traffic control tasks. SafeDiSTL achieves 1.6-5.1x the safe-success rate in transport, improves navigation safe-success by 11.1%, and delivers 50-68% more throughput in traffic when compared to constrained baselines. Results demonstrate a strong improvement of the learned policy in dealing with shared constraint while retaining the performance of unconstrained policies.",
-      "published": "2026-10-09T15:32:06Z",
-      "link": "https://arxiv.org/abs/2610.13737v1",
-      "authors": [
-        "Hongrui Zheng",
-        "Aditya Singh",
-        "Rahul Mangharam"
+        "Tianmeng Hu",
+        "Biao Luo",
+        "Ke Li"
       ],
       "cats": [
         "cs.LG",
+        "cs.MA"
+      ]
+    },
+    {
+      "title": "PresenceBench: An Exploratory Evaluation of Large Language Model Adaptation to User State",
+      "summary": "Presence-aware intelligence is the capacity of an AI system's intelligence layer to adapt appropriately to the functional state of the person it serves (here readiness, flow, and stability) while preserving task quality and safety. We introduce PresenceBench, an instrument for measuring it. PresenceBench evaluates how the intelligence layer uses a supplied state, not how that state is sensed, and breaks the capability into measurable properties. Two are tested here. Receptivity: does the model take up the state and give a better response than with no signal? Specificity: does any improvement depend on the correct state, rather than on extra structured context? A third, adaptation across states, is a required endpoint not measured in this release. A five-arm causal design answers both questions, against each model's own baseline and an equally structured mismatched-state control, scored by a correctness-gated human paired comparison. The exploratory evaluation covered four models across eighteen single-turn, six fixed three-turn and six simulated natural-conversation scenarios. Supplying a synthetic state, raw or translated into a response policy, gave human-preference point estimates above 0.5 for all four models (Claude Sonnet 5, DeepSeek V4 Pro, Gemini 3.6 Flash, GPT-5.6 Terra), with three of eight 95% intervals excluding chance. Specificity was not resolved: no per-model interval excluded chance, and the design cannot yet separate the state values from a generic instruction to adapt. Policy delivery reduced priced cost and output tokens against each model's baseline; these are resource-use changes, not efficiency gains, because correctness non-inferiority was not established. Safety-floor failures were rare (13 of 360 cases), with a non-significant excess under policy delivery. We report the instrument, the frozen results, and the controls a confirmatory study needs.",
+      "published": "2026-10-16T15:33:04Z",
+      "link": "https://arxiv.org/abs/2610.23625v1",
+      "authors": [
+        "Pe\u00f1a Arroyo Gallego",
+        "Mauro Ruiz Moreno",
+        "Alejandro Acien",
+        "Sergio Romero-Tapiador",
+        "Teresa Arroyo-Gallego"
+      ],
+      "cats": [
+        "cs.HC",
+        "cs.AI",
+        "cs.CL"
+      ]
+    },
+    {
+      "title": "Token-Level Attribution of Multi-Mode LLM Watermarks: Optimal Rule and Belief Weighting",
+      "summary": "A watermark verifier may hold many modes, i.e., secret keys, and a document may mix spans of different modes with unwatermarked text. Directly reporting the mode with the largest pivotal statistic (pivot) inflates the Type I error, and restoring the nominal level reduces power as candidate modes are added. We formulate token-level multi-mode attribution for the Gumbel-max watermark as maximizing correct-label power under a Type I error constraint given a mode prior. We show that the optimal rule reports the mode with the largest prior-weighted alternative density and rejects when this density exceeds one common threshold. Based on this rule, we propose the Belief-weighted Likelihood Attribution with Density Estimation (BLADE) detector. It estimates the mode prior from neighboring pivots and the alternative density from reference token probabilities. Under a conditional product model of the pivots, it keeps the exact Type I error. We further show that BLADE approaches the optimal rule as its prior and density estimates improve, with a sharp coefficient on the density error. On OPT-1.3B and other open-weight large language models, BLADE attains higher correct-label power than the compared detectors across candidate counts, token-substitution rates, generation temperatures and generator models.",
+      "published": "2026-10-16T15:18:28Z",
+      "link": "https://arxiv.org/abs/2610.23601v1",
+      "authors": [
+        "Rui Zhou",
+        "Licheng Zhao",
+        "Chao Shen",
+        "Wenqiang Pu"
+      ],
+      "cats": [
+        "cs.CR",
+        "eess.SP",
+        "stat.AP"
+      ]
+    },
+    {
+      "title": "Darwin-Claw: Environment-Adaptive Experience Consolidation for Recursively Self-Evolving Agents",
+      "summary": "While Large Language Model (LLM) agents have demonstrated remarkable capabilities across complex tasks, they predominantly operate in isolated sessions, lacking the ability to continually learn from historical interactions or adapt to user-specific environments. Existing self-evolution paradigms often indiscriminately inject raw interaction trajectories into memory or skill modules, leading to obscured behavioral patterns and compromised update controllability. Furthermore, as foundational LLM reasoning improves, the bottleneck for agentic evolution shifts from accumulating generic knowledge to effectively managing situational experience. To address this, we propose Darwin-Claw, an environment-adaptive self-evolving framework that systematically distills episodic experiences to drive the comprehensive evolution of operational skills and durable memory. Theoretically grounded in an iterative agent-actor and evolver-critic co-adaptation, Darwin-Claw introduces a Hierarchical Experience Consolidation System that extracts fine-grained error attributions and generalizes them into dynamically updated prototype vectors. This structured situational experience serves as interaction patches for context-sensitive perception and explicit optimization signals for skill refinement. Practically, Darwin-Claw is a readily deployable, automated framework compatible with mainstream agent systems without requiring manual curation. Extensive experiments on WildClawBench demonstrate that Darwin-Claw yields substantial performance improvements, establishing a controllable and stable pathway for the continual, user-centric adaptation of autonomous agents in real-world ecosystems.",
+      "published": "2026-10-16T14:57:21Z",
+      "link": "https://arxiv.org/abs/2610.23574v1",
+      "authors": [
+        "Mingze Yin",
+        "Xiaohan Wang",
+        "Dian Li",
+        "Longfei Luo",
+        "Jiahong Yan",
+        "Yiheng Zhu",
+        "Chang-Yu Hsieh"
+      ],
+      "cats": [
         "cs.AI"
       ]
     },
     {
-      "title": "Humanize MLE Agents: Multi-Agent Session Alternation Beyond Single-Agent Limits",
-      "summary": "Existing LLM-based agent approaches for long-horizon machine learning engineering (MLE) often use context engineering, implemented through custom harnesses that manage tools, skills, and accumulated experience. However, we find that as single-session execution lengthens, the agent's reasoning intensity declines alongside slowing progress, summarized as long-horizon deceleration, and the benefits of these custom harnesses vanish as the underlying model improves, summarized as harness staleness. These findings suggest that their benefits may not persist across versions, which motivates a workflow-level approach in which agents build on one another's work across sessions. We model these alternating agent sessions as a context-reset semi-Markov decision process (CR-SMDP) and establish sufficient conditions for alternation to exceed single-agent reference limits, derive an explicit experiment-budget bound, and characterize when session caps preserve this advantage. Guided by this analysis, we introduce Humanize MLE Agents (HMA), which alternates two agents on a shared workspace, limits each session to at most k experiments and resets the context between sessions, without additional task-specific harness or prior knowledge supplements. Across 75 Kaggle tasks in MLE-bench, HMA reaches a state-of-the-art any-medal rate of 78.2%, exceeding the strongest open-source baseline by 8.0 points with a quarter of its time budget. Moreover, among six configurations spanning five heterogeneous agent pairs, HMA improves any-medal rate over the constituent baselines by 6.4 points on average, demonstrating cross-pair generality. A supplementary case on kernel optimization reaches 878 cycles, within 1.6% of the community leaderboard leader, demonstrating applicability beyond MLE.",
-      "published": "2026-10-09T12:26:34Z",
-      "link": "https://arxiv.org/abs/2610.13494v1",
+      "title": "On the Tip of the Tongue: First-Token Cueing as a Behavioral Probe of Recall Failures in LLMs",
+      "summary": "Large language models often answer factual questions incorrectly in closed-book settings, and such errors are usually attributed to missing knowledge. Yet models often encode answers they fail to produce. We show that many closed-book errors are first-token recall failures: the model commits to a wrong first token, but once given the right one it completes the answer and often recognizes it as correct. We study this with First-Token Cueing, a behavioral probe that prefills the response with the first token of the gold answer. Model uncertainty peaks at the first answer token, where it already predicts correctness, and among gold prefixes of any length the first token alone accounts for the largest share of recovered errors. Across 16 open models, this one token corrects between a fifth and a half of the errors on multi-token answers in English QA and improves accuracy in all seven languages of a multilingual benchmark. Most of the errors it corrects are also solved by the model's own sampled reasoning, a criterion for encoded knowledge, and models recognize correct starts they do not produce: they continue a correct start more confidently than an incorrect start of the same answer type and prior probability, yet rarely find it without the gold answer. These results locate a recoverable class of factual errors at the first decoding step, where inference-time methods may gain the most.",
+      "published": "2026-10-16T12:55:36Z",
+      "link": "https://arxiv.org/abs/2610.23400v1",
       "authors": [
-        "Changye Li",
-        "Zijian Zhang",
-        "Muheng Li",
-        "Yiduo Pang",
-        "Tingjun Wu",
-        "Menghan Li",
-        "Yitong Liu",
-        "Hongkai Guo",
-        "Mengchi Chen",
-        "Chenyu He",
-        "Kaisheng Ma",
-        "Wei Xu",
-        "Song Han",
-        "Sihao Liu",
-        "Ligeng Zhu"
+        "Jaewon Sok",
+        "Jewon Yeom",
+        "Seonghyeon Park",
+        "Jeongjae Park",
+        "Hwiyeong Lee",
+        "Taesup Kim"
       ],
       "cats": [
-        "cs.AI"
+        "cs.CL"
       ]
     }
   ]
