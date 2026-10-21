@@ -237,5 +237,6 @@ console.log('content validation: unknown names, wrong roles, bad limits, async r
     assert(!R.validateStepValues(spec, params, role, { index: 0, stages }, 0, {}, v).error, `${action} gives valid values for ${role}`);
   }
 }
+assert.equal(load('public-goods').game.pollSeconds, 2, 'the default refresh is every 2 seconds');
 console.log('treatments, matching schedules, cohort formation (determinism, order, mixing), payment and the paid-round draw');
 console.log('ALL GAME RULES TESTS PASSED');

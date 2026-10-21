@@ -173,16 +173,6 @@ async function gameFallback(S, pid, body, now) {
   return { ok: true, to: w.value.to };
 }
 
-// External IDs (for example Prolific's PROLIFIC_PID, STUDY_ID, SESSION_ID) read from the address at the start.
-// The other branch may add a general embedded-data feature; this keeps the one thing payments need.
-async function gameExt(S, pid, body, now) {
-  const clean = v => (typeof v === 'string' && /^[A-Za-z0-9_-]{1,64}$/.test(v) ? v : '');
-  const ext = { prolificPid: clean(body.prolificPid), studyId: clean(body.studyId), sessionId: clean(body.sessionId), at: now };
-  if (!ext.prolificPid) return { ok: true, ignored: true };
-  const w = await writeOnce(S.store, K.ext(pid), ext);
-  return { ok: true, repeat: !w.created };
-}
-
 async function gameSummary(S, pid, body, now) {
   const p = await S.store.get(`participants/${pid}`);
   if (!p) return bad('invalid_code', 401);
@@ -192,7 +182,7 @@ async function gameSummary(S, pid, body, now) {
   return { ok: true, method: pay.method, paidRound: row.paid_round, points: row.points === '' ? null : row.points, bonus: row.bonus === '' ? null : row.bonus, fee: row.show_up_fee, currency: pay.currency, status: row.match_status, capped: !!row.capped };
 }
 
-const routes = { 'game/poll': gamePoll, 'game/move': gameMove, 'game/ready': gameReady, 'game/check': gameCheck, 'game/fallback': gameFallback, 'game/ext': gameExt, 'game/summary': gameSummary };
+const routes = { 'game/poll': gamePoll, 'game/move': gameMove, 'game/ready': gameReady, 'game/check': gameCheck, 'game/fallback': gameFallback, 'game/summary': gameSummary };
 
 // ---------- admin routes (roles checked by the router) ----------
 const adminRoutes = {
@@ -222,7 +212,8 @@ export default {
   conditionsOf: c => (c.conditions || []).map(x => x.id),
   sessionCount: () => 1,
   editorMeta: () => ({ presets: presetList().map(p => ({ ...p, content: presetContent(p.id) })) }),
-  defaultContent: () => defaultGame(),
+  // The Prolific ID comes from the engine's embedded data (URL parameter PROLIFIC_PID, kept in the plan at session start).
+  defaultContent: () => ({ ...defaultGame(), embedded: [{ name: 'prolific_pid', source: 'url', param: 'PROLIFIC_PID' }] }),
   normalize: (c, d) => normalizeGame(c, d),
   validate: (c, e) => validateGame(c, e),
   publicContent: () => ({ game: true }),

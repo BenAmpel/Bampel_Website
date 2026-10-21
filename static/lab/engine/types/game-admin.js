@@ -51,6 +51,14 @@
       }).join('');
   }
 
+  // Function invocations a live session costs: one poll per interval plus about three other requests per round.
+  function costLine(G) {
+    var poll = Number(G.pollSeconds) || 2, steps = G.stages.filter(function (s, i) { return i === 0 || !s.parallel; }).length;
+    var roundSec = 0.5 * (Number(G.decisionSeconds) || 60) + 8, perRound = 2 + steps, perMin = 60 / poll + perRound * 60 / roundSec;
+    var minutes = (Number(G.practiceRounds) || 0) + (Number(G.rounds) || 0), sessionMin = minutes * roundSec / 60 + 3, total = 40 * sessionMin * perMin;
+    if (G.mode !== 'live') return 'Asynchronous play does not poll: about ' + ((Number(G.rounds) || 0) + (Number(G.practiceRounds) || 0) + 6) + ' requests per participant.';
+    return 'Estimated function invocations for live play: about ' + Math.round(perMin) + ' per participant-minute (' + poll + ' s refresh, ' + (G.players || '?') + ' per group, ' + (Number(G.rounds) || 0) + ' rounds); a 40-person session of about ' + Math.round(sessionMin) + ' minutes is about ' + (Math.round(total / 1000) * 1000).toLocaleString() + '. Compare with the plan\'s monthly allowance (README, "Polling cost on Netlify").';
+  }
   function renderGame(A) {
     var G = g(A), esc = A.esc, f = A.field, n = A.num, sel = A.sel, btn = A.btn;
     var players = G.roles.reduce(function (a, r) { return a + (Number(r.count) || 0); }, 0);
@@ -76,7 +84,7 @@
       f('After the longest wait, offer', sel('game.waitFallback', G.waitFallback, [['fee', 'Finish with the show-up fee only'], ['async', 'Play against stored decisions (asynchronous)']])) +
       f('If a player runs out of time, the server decides', sel('game.timeoutAction', G.timeoutAction, [['default', 'The default value of each decision'], ['random', 'A random valid value'], ['repeatLast', 'Their previous value (default at first)']])) +
       f('Timeouts in a row before a player counts as having left (0 = never)', n('game.dropAfterTimeouts', G.dropAfterTimeouts, 0, 10)) + '</div>' +
-      '<p class="muted">A player who has left is played by the timeout rule from then on, and the others are told that a participant left. The fallback to asynchronous play needs stored decisions to match with: run an asynchronous batch first, or the match stays pending.</p>';
+      '<p class="muted"><strong>' + A.esc(costLine(G)) + '</strong></p><p class="muted">A player who has left is played by the timeout rule from then on, and the others are told that a participant left. The fallback to asynchronous play needs stored decisions to match with: run an asynchronous batch first, or the match stays pending.</p>';
     return h;
   }
 

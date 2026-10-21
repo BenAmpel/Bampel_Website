@@ -10,7 +10,7 @@
   'use strict';
   var link = document.createElement('link'); link.rel = 'stylesheet'; link.href = '/lab/engine/types/game.css'; document.head.appendChild(link);
 
-  var G = { run: null, history: [], key: null, extSent: false, feeShown: false, roleShown: false, summary: null, seq: 0 };
+  var G = { run: null, history: [], key: null, feeShown: false, roleShown: false, summary: null, seq: 0 };
 
   function fmtTime(ms) { var s = Math.max(0, Math.ceil(ms / 1000)); return Math.floor(s / 60) + ':' + (s % 60 < 10 ? '0' : '') + (s % 60); }
   function num(x) { return typeof x === 'number' ? String(Math.round(x * 1e6) / 1e6) : String(x); }
@@ -142,13 +142,6 @@
     if (G.run) endRun(G.run);
     var run = G.run = { index: ctx.index, ctx: ctx, hb: null, timers: [], key: null, skew: 0, offerHiddenUntil: 0, t0: 0, hidden: 0, hiddenAt: null, needHistory: ctx.index > 0 && G.history.filter(Boolean).length < ctx.index };
     setProgress(ctx);
-    if (!G.extSent) {
-      G.extSent = true;
-      try {
-        var q = new URLSearchParams(location.search), pid = q.get('PROLIFIC_PID');
-        if (pid) ui.call('game/ext', { prolificPid: pid, studyId: q.get('STUDY_ID') || '', sessionId: q.get('SESSION_ID') || '' });
-      } catch (e) { /* the address had no external IDs */ }
-    }
     run.visHandler = function () { if (document.hidden) run.hiddenAt = performance.now(); else { if (run.hiddenAt != null) run.hidden += performance.now() - run.hiddenAt; run.hiddenAt = null; if (G.run === run) pollNow(run); } };
     document.addEventListener('visibilitychange', run.visHandler);
     poll(run);
@@ -194,7 +187,7 @@
     if (s.phase === 'sync') return schedule(run, 1000);
     schedule(run, 1500);
   }
-  function pollMs(run) { return (run.ctx.plan.game.pollSeconds || 1) * 1000; }
+  function pollMs(run) { return (run.ctx.plan.game.pollSeconds || 2) * 1000; }
 
   // ----- comprehension check -----
   function screenComp(run, s) {

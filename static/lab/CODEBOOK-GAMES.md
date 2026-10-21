@@ -33,7 +33,7 @@ One row per participant x round x stage. Practice rounds are included (`practice
 | `wait_ms` | Live: time from entering the waiting room to the group being formed (or to the fallback). Repeated on every row of the participant |
 | `dropped` | 1 = the participant was marked as having left the game |
 | `fallback` | `fee` or `async` if the participant took the waiting-room fallback |
-| `external_id` | The external ID (for example `PROLIFIC_PID`) read from the address, if any |
+| `external_id` | The embedded-data field `prolific_pid` (URL parameter `PROLIFIC_PID`), if present and well formed |
 | `received_at` | When the round record was written by the server |
 | `content_version` | Version of the study content the participant's game rules came from |
 
