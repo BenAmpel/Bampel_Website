@@ -13,16 +13,18 @@ import * as backup from './backup.mjs';
 import { runSelfTest } from './selftest.mjs';
 import { getStudy, listStudies, createStudy, updateStudy, typeFor } from './registry.mjs';
 import { TYPES } from './types/index.mjs';
+import { importSurvey, ImportError } from './import/index.mjs';
 
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
 const csv = (text, name) => new Response(text, { headers: { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': `attachment; filename="${name}"`, 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
 const reply = r => r && r.error ? json(r, r.status || 400) : json(r);
 const MAX_BODY = 4_000_000;
+const MAX_IMPORT_BODY = 8_000_000;   // a survey file as JSON text (an .xlsx is base64); Netlify itself caps a request near 6 MB
 
 const NEED = {
   me: 'viewer', participants: 'viewer', 'export.csv': 'viewer', 'export-surveys.csv': 'viewer', 'export.json': 'viewer', rows: 'viewer', records: 'viewer', raw: 'viewer',
   content: 'viewer', 'content-history': 'viewer',
-  'content-save': 'editor', 'content-restore': 'editor',
+  'content-save': 'editor', 'content-restore': 'editor', import: 'editor',
   roster: 'manager', lookup: 'manager', 'credit.csv': 'manager', create: 'manager', 'set-test': 'manager',
   delete: 'owner', 'delete-test': 'owner', 'self-test': 'owner', 'backup-status': 'owner', 'backup-run': 'owner', 'backup-part': 'owner',
   team: 'owner', 'team-add': 'owner', 'team-remove': 'owner', activity: 'owner'
@@ -37,9 +39,10 @@ export async function handle(req, { getStore, env }) {
 
   let body = {};
   if (req.method === 'POST') {
-    if (Number(req.headers.get('content-length') || 0) > MAX_BODY) return json({ error: 'too_large' }, 413);
+    const limit = /\/admin\/import$/.test(url.pathname) ? MAX_IMPORT_BODY : MAX_BODY;
+    if (Number(req.headers.get('content-length') || 0) > limit) return json({ error: 'too_large', hint: limit === MAX_IMPORT_BODY ? 'This file is too large to import (the limit is about 5 MB).' : undefined }, 413);
     const text = await req.text();
-    if (text.length > MAX_BODY) return json({ error: 'too_large' }, 413);
+    if (text.length > limit) return json({ error: 'too_large', hint: limit === MAX_IMPORT_BODY ? 'This file is too large to import (the limit is about 5 MB).' : undefined }, 413);
     try { body = JSON.parse(text || '{}'); } catch { return json({ error: 'bad_json' }, 400); }
   }
   const registry = blobsStore(getStore, 'lab-registry');
@@ -62,7 +65,7 @@ export async function handle(req, { getStore, env }) {
       switch (route) {
         case 'resume': return reply(await E.resume(S, pid));
         case 'consent': return reply(await E.consent(S, pid, body.agree === true));
-        case 'session': return reply(await E.startSession(S, pid));
+        case 'session': return reply(await E.startSession(S, pid, Date.now(), { embedded: body.embedded }));
         case 'view': return reply(await E.viewTrial(S, pid, Number(body.session), idx));
         case 'trial': return reply(await E.saveTrial(S, pid, Number(body.session), idx, body.data));
         case 'survey': return reply(await E.saveSurvey(S, pid, Number(body.session), body.kind, body.data));
@@ -127,6 +130,14 @@ export async function handle(req, { getStore, env }) {
           const r = await content.saveContent(S.store, type, body.content, who.name, body.baseVersion);
           if (r.ok) await admin.audit(S.store, who, 'content.save', `version ${r.version}${body.note ? ': ' + body.note : ''}`);
           return reply(r);
+        }
+        case 'import': {   // preview only: nothing is saved; the admin page loads the result into its draft and the normal save makes a version
+          if (type.id !== 'vignettes') return json({ error: 'import_not_supported', hint: `Survey import works for studies of the type "${TYPES.vignettes.label}". This study's type is "${type.label}", which has no survey content to replace.` }, 400);
+          try {
+            const r = importSurvey(body);
+            await admin.audit(S.store, who, 'survey.import_preview', `survey import previewed: ${r.report.detected}, ${r.report.counts.questions} questions${r.report.filename ? ' (' + r.report.filename.replace(/[^\w. -]/g, '').slice(0, 60) + ')' : ''}`);
+            return json(r);
+          } catch (e) { if (e instanceof ImportError) return json({ error: 'import_failed', hint: e.userMessage }, 400); throw e; }
         }
         case 'content-restore': {
           const r = await content.restoreContent(S.store, type, Number(body.version), who.name);

@@ -3,6 +3,8 @@
 // screen text the participant shell uses. Each study type adds its own parts (contentKeys), text fields,
 // defaults, normalization, validation, and survey "show when" rules. Saved edits are numbered versions.
 
+import { OPS, NO_VALUE_OPS } from './logic.mjs';
+
 // Screen text used by the shared participant app (types add or override fields).
 export const ENGINE_TEXT = [
   ['Sign-in', 'login_title', 'Page title', 'Research study'],
@@ -61,6 +63,7 @@ export function textFieldsFor(type) {
 export function engineDefaults() {
   return {
     version: 0,
+    embedded: [],
     minutesPerSession: 15,
     consent: { approved: false, paragraphs: ['[Paste the IRB-approved consent text here. Leave a blank line between paragraphs.]'], agreeLabel: 'I am 18 or older and I agree to participate.' },
     enrollment: { open: true, domains: ['gsu.edu', 'student.gsu.edu'], gapDays: 0, label: 'self-signup' },
@@ -75,7 +78,7 @@ export function defaultContent(type) {
   return c;
 }
 
-const ENGINE_KEYS = ['minutesPerSession', 'consent', 'enrollment', 'survey', 'text'];
+const ENGINE_KEYS = ['minutesPerSession', 'consent', 'enrollment', 'survey', 'text', 'embedded'];
 
 // Survey "show when" rules: always, by condition (it.conditions), plus the type's own rules.
 export function itemsFor(items, kind, ctx, type) {
@@ -95,6 +98,7 @@ export function normalize(c, type) {
   c.consent = { ...d.consent, ...(c.consent || {}) };
   c.enrollment = { ...d.enrollment, ...(c.enrollment || {}) };
   c.survey = { pre: c.survey?.pre || d.survey.pre, post: c.survey?.post || d.survey.post };
+  c.embedded = Array.isArray(c.embedded) ? c.embedded : [];
   c.text = { ...d.text, ...(c.text || {}) };
   for (const kind of ['pre', 'post']) for (const it of c.survey[kind]) if (!Array.isArray(it.sessions)) it.sessions = kind === 'pre' ? [1] : [];
   for (const k of type.contentKeys) if (c[k] === undefined) c[k] = structuredClone(d[k]);
@@ -115,25 +119,76 @@ export function clearContentCache(store) { if (store) caches.delete(store.name);
 // What participants' browsers receive: no answer keys or type-private parts.
 export function publicContent(c, type, study) {
   return { study: study.id, type: type.id, name: study.name, version: c.version, minutesPerSession: c.minutesPerSession, consent: c.consent,
-    text: c.text, sessions: type.sessionCount(c), signup: c.enrollment.open ? c.enrollment.domains : [], ...(type.publicContent ? type.publicContent(c) : {}) };
+    text: c.text, sessions: type.sessionCount(c), signup: c.enrollment.open ? c.enrollment.domains : [],
+    embedded: (c.embedded || []).map(x => (x.source === 'url' ? { name: x.name, source: 'url', param: x.param || x.name } : { name: x.name, source: 'value', value: x.value })),
+    ...(type.publicContent ? type.publicContent(c) : {}) };
 }
 
-export const QUESTION_TYPES = ['scale', 'choice', 'select', 'text', 'confidence', 'number', 'multi'];
+export const QUESTION_TYPES = ['scale', 'choice', 'select', 'text', 'confidence', 'number', 'multi', 'info'];
 const str = (v, max = 4000) => typeof v === 'string' && v.trim().length > 0 && v.length <= max;
 const intIn = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi;
 const RESERVED = ['code', 'condition', 'test', 'label', 'self_signup', 'session', 'survey', 'content_version', 'received_at', 'trial_index', 'item_id'];
+const NAME_RE = /^[a-z][a-z0-9_]{0,40}$/;
+const PARAM_RE = /^[A-Za-z][A-Za-z0-9_.-]{0,40}$/;
+const PIPE_ANY = /\{\{(q|ed):([^}]*)\}\}/g;
+
+// Checks one displayIf tree (see logic.mjs). `at(q)` -> { item, earlier } for a variable in this list.
+function validateDisplayIf(node, w, e, ctx, depth = 0, count = { n: 0 }) {
+  if (!node || typeof node !== 'object' || Array.isArray(node)) { e.push(`${w}: the display rule is not valid.`); return; }
+  const kids = node.all ?? node.any;
+  if (node.all !== undefined || node.any !== undefined) {
+    if ((node.all !== undefined && node.any !== undefined) || !Array.isArray(kids) || !kids.length || kids.length > 20) { e.push(`${w}: a display rule needs "all" or "any" with 1 to 20 conditions.`); return; }
+    if (depth >= 2) { e.push(`${w}: display rules can nest all/any only one level deep.`); return; }
+    kids.forEach(k => validateDisplayIf(k, w, e, ctx, depth + 1, count));
+    return;
+  }
+  if (++count.n > 40) { if (count.n === 41) e.push(`${w}: a display rule can have at most 40 conditions.`); return; }
+  const kinds = ['q', 'ed', 'condition'].filter(k => node[k] != null);
+  if (kinds.length !== 1) { e.push(`${w}: each display condition names one question ("q"), embedded data ("ed"), or the participant's condition ("condition").`); return; }
+  const kind = kinds[0], ref = node[kind];
+  if (kind === 'condition') {
+    if (!['eq', 'neq'].includes(node.op)) e.push(`${w}: a test on the condition must be "eq" or "neq".`);
+    if (!ctx.conditions.includes(ref)) e.push(`${w}: the display rule refers to an unknown condition "${ref}".`);
+    return;
+  }
+  if (!OPS.includes(node.op)) { e.push(`${w}: unknown display operator "${node.op}".`); return; }
+  const needsValue = !NO_VALUE_OPS.includes(node.op);
+  if (needsValue) {
+    const vals = node.op === 'in' || node.op === 'notIn' ? node.value : [node.value];
+    if (!Array.isArray(vals) || !vals.length || vals.length > 50 || !vals.every(v => (typeof v === 'string' && v.length <= 300) || (typeof v === 'number' && Number.isFinite(v)))) { e.push(`${w}: a display condition needs a value (for "in" and "notIn", a list of up to 50).`); return; }
+    if (['gt', 'gte', 'lt', 'lte'].includes(node.op) && !Number.isFinite(Number(vals[0]))) e.push(`${w}: "${node.op}" compares numbers, but the value is not a number.`);
+  }
+  if (kind === 'ed') {
+    if (!ctx.embedded.includes(ref)) e.push(`${w}: the display rule uses embedded data "${ref}", which is not defined.`);
+    return;
+  }
+  const hit = ctx.at(ref);
+  if (!hit) { e.push(`${w}: the display rule refers to "${ref}", which is not a question in this list.`); return; }
+  if (!hit.earlier) { e.push(`${w}: the display rule refers to "${ref}", which does not come earlier (the question must be on an earlier page, or earlier on the same page).`); return; }
+  const it = hit.item;
+  if (it.type === 'info') { e.push(`${w}: the display rule refers to "${ref}", which has no answer (descriptive text).`); return; }
+  if (needsValue && (it.type === 'choice' || it.type === 'select' || it.type === 'multi') && Array.isArray(it.options)) {
+    const vals = (node.op === 'in' || node.op === 'notIn' ? node.value : [node.value]).map(String);
+    for (const v of vals) if (!it.options.some(o => o.value === v)) e.push(`${w}: "${v}" is not one of the options of "${ref}".`);
+  }
+  if (needsValue && it.type === 'scale' && ['eq', 'neq', 'in', 'notIn'].includes(node.op)) {
+    for (const v of (node.op === 'in' || node.op === 'notIn' ? node.value : [node.value]).map(String)) if (!(/^\d+$/.test(v) && Number(v) >= 1 && Number(v) <= it.n)) e.push(`${w}: "${v}" is not a point on the ${it.n}-point scale "${ref}".`);
+  }
+}
 
 // Validates one list of questions (surveys, or a type's per-item questions).
-export function validateQuestions(items, where, e, { nSessions, conditions, rules, allowSessions = true }) {
-  if (!Array.isArray(items)) { e.push(`${where} are missing.`); return; }
-  const ids = new Set();
+// opts: nSessions, conditions, rules, allowSessions (surveys), embedded (declared embedded-data names).
+export function validateQuestions(items, where, e, { nSessions, conditions, rules, allowSessions = true, embedded = [] }) {
+  if (!Array.isArray(items)) { e.push(`${where}s are missing.`); return; }
+  const ids = new Set(), rank = new Map();
   items.forEach((it, i) => {
     const w = `${where} ${i + 1}`;
-    if (!/^[a-z][a-z0-9_]{0,40}$/.test(it.id || '')) e.push(`${w}: the variable name must start with a letter and use only lowercase letters, numbers, and underscores.`);
+    if (!NAME_RE.test(it.id || '')) e.push(`${w}: the variable name must start with a letter and use only lowercase letters, numbers, and underscores.`);
     else if (ids.has(it.id)) e.push(`${w}: variable name "${it.id}" is used twice.`);
     else if (RESERVED.includes(it.id)) e.push(`${w}: "${it.id}" is reserved for an export column; choose another variable name.`);
     ids.add(it.id);
-    if (!str(it.text, 1000)) e.push(`${w}: question text is empty.`);
+    if (!rank.has(it.id)) rank.set(it.id, { item: it, page: allowSessions ? (it.page || 1) : 1, index: i });
+    if (!str(it.text, 4000)) e.push(`${w}: question text is empty.`);
     if (!QUESTION_TYPES.includes(it.type)) e.push(`${w}: unknown question type.`);
     if (it.showIf && it.showIf !== 'always' && !rules.includes(it.showIf)) e.push(`${w}: unknown "show when" setting.`);
     if (it.conditions != null && (!Array.isArray(it.conditions) || !it.conditions.every(x => conditions.includes(x)))) e.push(`${w}: conditions must be among ${conditions.join(', ')}.`);
@@ -148,6 +203,49 @@ export function validateQuestions(items, where, e, { nSessions, conditions, rule
       else if (!it.options.every(o => str(o.value, 200) && str(o.label, 300))) e.push(`${w}: every option needs text.`);
       else if (new Set(it.options.map(o => o.value)).size !== it.options.length) e.push(`${w}: two options have the same value.`);
     }
+    if (it.long != null && typeof it.long !== 'boolean') e.push(`${w}: "long" must be true or false.`);
+    if (it.min != null && !Number.isFinite(it.min)) e.push(`${w}: the minimum must be a number.`);
+    if (it.max != null && !Number.isFinite(it.max)) e.push(`${w}: the maximum must be a number.`);
+    if (Number.isFinite(it.min) && Number.isFinite(it.max) && it.min > it.max) e.push(`${w}: the minimum is above the maximum.`);
+    if (it.group != null && !NAME_RE.test(it.group)) e.push(`${w}: the group ID must start with a letter and use only lowercase letters, numbers, and underscores.`);
+    if (it.groupText != null && !(typeof it.groupText === 'string' && it.groupText.length <= 2000)) e.push(`${w}: the group heading is too long.`);
+    if (it.source != null && !(typeof it.source === 'string' && it.source.length <= 300)) e.push(`${w}: the source note is too long.`);
+  });
+  const at = ref => { const r = rank.get(ref); return r ? { item: r.item, ref: r } : null; };
+  items.forEach((it, i) => {
+    const w = `${where} ${i + 1}`, me = rank.get(it.id);
+    if (it.displayIf != null && me && me.item === it) {
+      const lookup = ref => { const h = at(ref); return h ? { item: h.item, earlier: h.ref.page < me.page || (h.ref.page === me.page && h.ref.index < me.index) } : null; };
+      validateDisplayIf(it.displayIf, w, e, { conditions, embedded, at: lookup });
+    } else if (it.displayIf != null) validateDisplayIf(it.displayIf, w, e, { conditions, embedded, at: () => null });
+    // Piped text: {{q:variable}} (an earlier question) and {{ed:name}} (declared embedded data).
+    const texts = [it.text, it.groupText, it.lo, it.hi, ...(Array.isArray(it.labels) ? it.labels : []), ...(Array.isArray(it.options) ? it.options : []).map(o => o && o.label)].filter(x => typeof x === 'string');
+    for (const t of texts) for (const m of t.matchAll(PIPE_ANY)) {
+      if (!NAME_RE.test(m[2])) { e.push(`${w}: "{{${m[1]}:${m[2]}}}" is not a valid piped-text name.`); continue; }
+      if (m[1] === 'ed') { if (!embedded.includes(m[2])) e.push(`${w}: piped text {{ed:${m[2]}}} uses embedded data that is not defined.`); }
+      else {
+        const h = at(m[2]);
+        if (!h) e.push(`${w}: piped text {{q:${m[2]}}} refers to a question that does not exist in this list.`);
+        else if (h.item.type === 'info' || !(h.ref.page < me.page || (h.ref.page === me.page && h.ref.index < me.index))) e.push(`${w}: piped text {{q:${m[2]}}} must refer to an earlier question that has an answer.`);
+      }
+    }
+  });
+}
+
+// Embedded data: values captured when a session starts (URL parameters such as PROLIFIC_PID, or constants).
+function validateEmbedded(list, e) {
+  if (list == null) return;
+  if (!Array.isArray(list) || list.length > 30) { e.push('Embedded data must be a list of at most 30 fields.'); return; }
+  const seen = new Set();
+  list.forEach((d, i) => {
+    const w = `Embedded data ${i + 1}`;
+    if (!d || typeof d !== 'object') { e.push(`${w}: not valid.`); return; }
+    if (!NAME_RE.test(d.name || '')) e.push(`${w}: the name must start with a letter and use only lowercase letters, numbers, and underscores.`);
+    else if (seen.has(d.name)) e.push(`${w}: the name "${d.name}" is used twice.`);
+    seen.add(d.name);
+    if (d.source === 'url') { if (d.param != null && !PARAM_RE.test(d.param)) e.push(`${w}: the URL parameter name is not valid.`); }
+    else if (d.source === 'value') { if (!str(d.value, 300)) e.push(`${w}: a constant needs a value of up to 300 characters.`); }
+    else e.push(`${w}: the source must be "url" or "value".`);
   });
 }
 
@@ -168,7 +266,8 @@ export function validateContent(c, type) {
   const typeErrors = [];
   if (type.validate) type.validate(c, typeErrors);
   const nS = typeErrors.length ? 99 : type.sessionCount(c);
-  const opts = { nSessions: nS, conditions: type.conditionsOf(c), rules: (type.surveyRules || []).map(r => r[0]) };
+  validateEmbedded(c.embedded, e);
+  const opts = { nSessions: nS, conditions: type.conditionsOf(c), rules: (type.surveyRules || []).map(r => r[0]), embedded: (Array.isArray(c.embedded) ? c.embedded : []).map(x => x && x.name) };
   validateQuestions(c.survey?.pre, 'Start-of-session question', e, opts);
   validateQuestions(c.survey?.post, 'End-of-session question', e, opts);
   if (!c.text || typeof c.text !== 'object') e.push('Screen text is missing.');

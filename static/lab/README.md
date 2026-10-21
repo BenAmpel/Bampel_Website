@@ -8,6 +8,7 @@ static/lab/
   assets/study.css              plain, light styling for participant pages
   tracelab/tracelab.js          passive trace capture (no dependencies)
   engine/participant.js, .css   shared participant app (every server-backed study)
+  engine/logic.js               survey display logic and piped text (browser copy of netlify/lib/lab/logic.mjs)
   engine/admin.js, .css         shared admin page and lab console
   engine/types/<type>.js        a study type's item screen
   engine/types/<type>-admin.js  a study type's content-editor tabs and report sections
@@ -15,6 +16,7 @@ static/lab/
   admin/index.html              admin page for /lab/admin/<study>; lab console at /lab/admin/
   studies/demo-phishing/        demo study; data never leaves the browser
   studies/verification/         original URLs of the verification study (thin pages on the engine)
+  templates/survey-template.csv the spreadsheet template for importing a survey
   CODEBOOK.md                   column definitions for the exports
 ```
 
@@ -26,7 +28,8 @@ Every server-backed study runs on one engine; a study is data (its content, edit
 |---|---|
 | HTTP | `netlify/functions/lab-api.mjs` → `netlify/lib/lab/router.mjs`: `/api/lab/<study>/*` (participant and admin routes), `/api/lab/_lab/*` (studies list, create, update), `/api/vc/*` (original verification URLs) |
 | Registry | `netlify/lib/lab/registry.mjs`: built-in studies in code; studies created in the lab console are stored in the `lab-registry` Blobs store. Each study gets its own stores (`lab-<id>`, `lab-<id>-backup`). |
-| Engine | `engine.mjs` (identity, sessions, plans, saving, exports, deletes), `content.mjs` (engine content, validation, versions), `admin.mjs` (keys, roles, audit), `backup.mjs`, `selftest.mjs`, `store.mjs` |
+| Engine | `engine.mjs` (identity, sessions, plans, saving, exports, deletes), `content.mjs` (engine content, validation, versions), `logic.mjs` (display logic, piped text), `admin.mjs` (keys, roles, audit), `backup.mjs`, `selftest.mjs`, `store.mjs` |
+| Survey import | `netlify/lib/lab/import/`: `index.mjs` (format detection, limits), `qsf.mjs`, `lss.mjs`, `redcap.mjs`, `sheet.mjs` (CSV and .xlsx), shared `common.mjs`, `expr.mjs`, `xml.mjs`, `csv.mjs`, `xlsx.mjs`. Route: `POST /api/lab/<study>/admin/import` (see "Importing a survey") |
 | Study types | `netlify/lib/lab/types/<type>.mjs` (server) + `static/lab/engine/types/<type>.js` and `<type>-admin.js` (browser), registered in `types/index.mjs` |
 | Backups | `netlify/functions/lab-backup.mjs`: hourly, every study in the registry |
 | Tests | `npm run test:lab` (in-memory stores); `npm run lab:dev` runs the pages and API locally on in-memory stores at `http://localhost:8899/lab/admin/` (owner key `local-owner-key-0123456789`) |
@@ -37,7 +40,52 @@ Study types today:
 - **`vignettes`** (general purpose): scenarios as plain text or emails (optionally with an image), each followed by configurable questions (rating scales, multiple choice, confidence line, text). Conditions are defined in the content, and each item can have different wording per condition, so manipulations need no code. Links written `[text](url)` are shown as links that do not open; pointing at one shows its address at the bottom of the screen, and hovers and clicks are recorded. Sessions without items make a survey-only (for example, longitudinal) study.
 - **Built-in `data-quality` study** (type `vignettes`, survey-only): the online-survey data-quality battery from SurveyItemsList.docx. Its starting content is code (`netlify/lib/lab/studies/data-quality.mjs`); the first save on its admin page takes over. Unlisted, closed to self sign-up, draft consent: turn those on in the admin page. Columns: CODEBOOK.
 
-Question types for surveys and per-item questions: rating scale, multiple choice, dropdown, text, confidence line, typed number, and select-all. Survey questions can carry a `page` number to split a long survey into pages.
+Question types for surveys and per-item questions: rating scale, multiple choice, dropdown, text (single line, or multi-line with `long: true`), confidence line, typed number (optional `min` and `max` shown as a hint, never enforced), select-all, and **descriptive text** (`info`: text only, no answer, never required, no column in any export). Survey questions can carry a `page` number to split a long survey into pages. Survey logic (below) is available on both survey questions and per-item questions.
+
+### Survey logic
+
+Added so that an existing survey can be rebuilt as it was. All of it is validated when content is saved, enforced again by the server when answers are saved, and shown by the participant page as the participant answers.
+
+- **`displayIf`** on a question: `{ "all": [...] }` or `{ "any": [...] }` of conditions, with one more level of all/any allowed inside. A condition is `{ "q": "<variable>", "op": ..., "value": ... }` (an answer to an earlier question), `{ "ed": "<name>", "op": ..., "value": ... }` (embedded data), or `{ "condition": "<id>", "op": "eq" | "neq" }` (the participant's condition). Operators: `eq`, `neq`, `in`, `notIn` (value is a list), `gt`, `gte`, `lt`, `lte` (numbers), `answered`, `notAnswered`. A select-all answer is a list: `eq` means "includes", `in` means "includes any of". An unanswered question makes `eq`, `in`, and the number tests false, and `neq`, `notIn`, and `notAnswered` true.
+- **Order.** A rule may only refer to a question on an earlier page, or earlier on the same page, so there are no cycles. Pages are in ascending `page` order; a question without a page is on page 1. A rule cannot refer to descriptive text. An `eq` value must be one of the question's option values, or a point on its scale; the condition and embedded-data names must exist. The editor shows a rule in plain words and accepts it as JSON.
+- **Hidden means gone.** A question whose rule is not met is not shown. If it was answered and then hidden, the participant page clears the answer. On saving, the server drops the answer to any hidden question whatever the browser sent, evaluating questions in page order, so a question that depends on a hidden question sees it as unanswered. A page whose questions are all hidden is skipped, and hidden questions are never "required".
+- **The condition is not exposed.** Tests on the participant's condition are settled on the server before the plan is sent (`{ "const": true | false }`), so the browser never learns condition names from the logic.
+- **Embedded data** (`embedded` in the content): `[{ "name": "prolific_pid", "source": "url", "param": "PROLIFIC_PID" }, { "name": "wave", "source": "value", "value": "2" }]`. A `url` field is read from the study link (`/lab/s/<study>?PROLIFIC_PID=...`) when a session starts, kept in the session's plan, and written to the surveys CSV as `ed_<name>`. A `value` field is a constant from the content. Only declared names are read; values are cleaned and capped at 200 characters; a constant cannot be changed from the browser. Embedded data never takes part in sign-in or in the study ID.
+- **Piped text:** `{{q:<variable>}}` (the answer: an option's label, a scale point's label, or what was typed) and `{{ed:<name>}}` in question text, descriptive text, group headings, and option labels. The participant page fills these in with `textContent`, so an answer can never add markup. The variable must be an earlier question that has an answer; the name must be declared.
+- **Groups:** optional `group` (an ID) and `groupText` on a question. Consecutive questions with the same `group` are shown under `groupText` once. The lab has no grid question ([B] below): an imported matrix is one question per row (`<base>_<row>`) under one heading.
+- **`source`**: a free-text note on where an imported question came from (for example `QID12 (Q3)`); it is not shown to participants.
+
+The same rules are written twice, in `netlify/lib/lab/logic.mjs` (server) and `static/lab/engine/logic.js` (browser, no modules); `tests/lab/display-logic.test.mjs` runs both on one table of cases.
+
+## Importing a survey
+
+Studies of the type "Vignettes and surveys" can start from an existing survey. On the study's admin page, Study content, **Import a survey**: choose a file, click Preview, read what was understood and what was not, then **Load into the editor as an unsaved draft** and click Save changes like any other edit (that makes a numbered version). The lab console (`/lab/admin/`) also has **Create a study from a survey file**, which creates the study and opens this page with the file already previewed. Editors and above can import; nothing is saved by the preview (`POST /api/lab/<study>/admin/import`, body `{ format?, filename, data, encoding? }`, returns `{ content, report }`; the activity log records "survey import previewed"). Loading replaces the survey questions, conditions and sessions, and embedded data in the draft; consent, sign-up, and screen text stay unless "replace the consent text too" is ticked (the imported consent is a marked DRAFT placeholder). If real participants have started, the page warns first.
+
+Limits: files up to 5 MB (about 4.5 MB for an .xlsx, since it is sent as base64 and Netlify caps a request near 6 MB) and 500 questions. A file that cannot be read gives a plain message, never a stack trace. XML is read by a small built-in reader that refuses a DOCTYPE or entity declaration; HTML in question text is reduced to plain text (scripts and styles removed, line breaks kept).
+
+Every import returns a report: `counts` (`questions`, `pages`, `conditions`, `embedded`), `mapped`, `approximated` (the lab does something close), `unsupported` (not reproduced; each entry has the source ID), `warnings`, and an `outline` of pages and questions with their display logic in words. Nothing that cannot be reproduced is dropped silently. A display rule the importer cannot express is left out, so that question is shown to everyone, and the report says so.
+
+| Format | How it maps | Reported as unsupported |
+|---|---|---|
+| **Qualtrics `.qsf`** | Multiple choice (single answer, select-all, dropdown, Net Promoter) to choice, select, multi, an 11-point scale; recode values or export tags become option values. Matrix Likert to one scale (or choice) question per row under one heading. Text entry: single line, essay (`long`), form (several text questions), valid-number validation to number. Slider to a scale when it has up to 11 steps, otherwise a number with min and max. Descriptive text to `info`. Blocks and Page Breaks to pages. Randomizer (even presentation, subset) to conditions, one per block combination, up to 8. Embedded data (flow) to `embedded`. Branches, question and block display logic, and skip logic (to end of block, end of survey, or a later block) to `displayIf`. A choice with a text box gets a follow-up text question. Piped `${q://QID/ChoiceGroup/SelectedChoices}`, text-entry values, and `${e://Field/name}` to tokens. | Custom JavaScript (the question is imported without it), timing and meta-info questions (dropped), quotas, scoring, workflows, loop and merge, randomized question or choice order (the listed order is used), carry-forward choices, rank order, other question types, authenticators, redirects, contains/regex tests in logic, piped text other than the forms above, graphic-only descriptive blocks |
+| **LimeSurvey `.lss`** | Groups to pages (group descriptions to descriptive text). Types L, ! (list, dropdown), O (list with comment), Y, G, 5, M and P (multiple choice), S, T, U (text), N (number with min/max), D (date as text), X (boilerplate to `info`), F, A, B, C, E, K, Q (arrays, one question per row). "Other" becomes an option plus a follow-up text question. Relevance equations of the form `Q1.NAOK == "A1"`, `>`, `>=`, `<`, `<=`, `!=`, joined by and/or with parentheses, on a question or a group, become `displayIf`. `{Q1}` piping becomes a token. | Ranking, equation, file upload, language switch, array of texts or numbers, quotas, assessments, answer or group randomization, array filters, answer-count limits, custom validation equations, relevance with functions or arithmetic, hidden questions |
+| **REDCap data dictionary `.csv`** | Forms to pages (or, with the option, one session per form). radio, dropdown, checkbox (one select-all question), yesno, truefalse, text (integer and number validation to number with min and max), notes (long text), slider (a typed number 0 to 100), descriptive (`info`; section headers become descriptive text, or the heading of a matrix group). Matrix group names to groups. Branching logic such as `[sex] = '2'`, `[sx(1)] = '1'`, `<>`, `>`, `<`, `and`, `or`, parentheses becomes `displayIf`. `[field]` piping becomes a token. Fields marked **Identifier? = y** are listed in `report.identifiers` and in a warning: the lab stores their answers like any other answer. | Calculated fields, file upload, SQL fields, action tags such as `@HIDDEN`, branching with functions or smart variables, branching across forms when forms are sessions, date and email validation (a plain text box), REDCap's one-column-per-checkbox-option export |
+| **Lab spreadsheet** (`.csv` or `.xlsx`, first sheet) | One row per question, see below. | Anything outside the columns; a bad row is reported with its row number and nothing is imported until the sheet is fixed |
+
+### The spreadsheet template
+
+`static/lab/templates/survey-template.csv` (also linked from the import page) has the header row, comment lines starting with `#`, and example rows. Save as CSV (comma or semicolon separated, quoted fields may hold commas and line breaks) or as .xlsx; only the first sheet is read. Columns:
+
+- `page`: page number; blank repeats the previous row's page.
+- `variable`: variable name (letters, digits, underscores; changed to fit the lab's rule if needed, and reported).
+- `type`: `choice`, `select`, `multi`, `scale`, `text` (single line), `long` (multi-line), `number`, `slider`, `confidence`, `info` (descriptive text), or `embedded`.
+- `text`: the question or the descriptive text; may use `{{q:variable}}` and `{{ed:name}}`. For `embedded`: `param:PROLIFIC_PID` (read from the link) or `value:something` (a constant).
+- `options`: `value=label` pairs separated by a vertical bar, or just labels. If every option has an `=`, the left part is the saved value. A literal bar in a label is written `\|`.
+- `required`: `yes`, `y`, `true`, `1`, or `x`.
+- `scale_points`, `low_label`, `high_label`, `labels`: a rating scale of 2 to 11 points. `labels` is one label per point separated by a vertical bar (recommended: label every point).
+- `min`, `max`: for `number`, a hint shown to participants. For `slider`, the range: up to 11 whole steps (or `scale_points`) gives a rating scale, otherwise a number.
+- `show_if`: `variable op value`, with `=`, `==`, `!=`, `<>`, `>`, `>=`, `<`, `<=`; or `variable in a|b` and `variable not in a|b` (values separated by a vertical bar); or `variable answered` and `variable not answered`; or `ed:name = x`; or `condition = c1`. Join tests with `and` or with `or`, not both in one cell. An option's label can stand for its value.
+- `condition`: condition IDs (separated by a vertical bar, comma, or semicolon) in which the question appears; blank means all. The conditions listed here, and those used in `show_if`, become the study's conditions.
 
 ## Adding a study
 

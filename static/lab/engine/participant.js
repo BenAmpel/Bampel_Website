@@ -60,6 +60,40 @@
   function Tp(key, vars, cls) { return T(key, vars).split(/\n\s*\n/).map(function (x) { return '<p' + (cls ? ' class="' + cls + '"' : '') + '>' + linkify(esc(x.trim())) + '</p>'; }).join(''); }
   var uid = 0; function nextId(p) { return (p || 'id') + (++uid); }
 
+  // ---------- piped text and display logic ----------
+  // {{q:variable}} shows an earlier answer (the option's label, or what was typed) and {{ed:name}} shows
+  // embedded data. Text is filled in with textContent, never as HTML, so an answer cannot inject markup.
+  // Display logic comes from /lab/engine/logic.js (the server applies the same rules when it saves).
+  var LL = null;
+  function lib() { return LL || window.LabLogic || null; }
+  var pipeEnv = { items: {}, lookup: null, ed: {} };
+  function setPipeEnv(items, lookup, ed) {
+    var byId = {};
+    (items || []).forEach(function (i) { byId[i.id] = i; });
+    pipeEnv = { items: byId, lookup: lookup || null, ed: ed || (S.plan && S.plan.embedded) || {} };
+  }
+  function answerText(id) {
+    var it = pipeEnv.items[id], v = pipeEnv.lookup ? pipeEnv.lookup(id) : undefined;
+    if (v == null || v === '' || (Array.isArray(v) && !v.length)) return '';
+    function label(x) { var o = it && it.options ? it.options.filter(function (p) { return p.value === x; })[0] : null; return o ? o.label : x; }
+    if (!it) return String(v);
+    if (it.type === 'choice' || it.type === 'select') return label(v);
+    if (it.type === 'multi') return (Array.isArray(v) ? v : [v]).map(label).join(', ');
+    if (it.type === 'scale') return it.labels && it.labels[Number(v) - 1] ? it.labels[Number(v) - 1] : String(v);
+    return String(v);
+  }
+  function fillPipes(s) {
+    s = String(s == null ? '' : s);
+    if (s.indexOf('{{') < 0) return s;
+    return s.replace(/\{\{(q|ed):([a-z][a-z0-9_]{0,40})\}\}/g, function (m, kind, name) { return kind === 'ed' ? String((pipeEnv.ed || {})[name] || '') : answerText(name); });
+  }
+  // Escaped text, with a data-tpl copy of the template when it has tokens so it can be refreshed live.
+  function txt(s) {
+    s = String(s == null ? '' : s);
+    return s.indexOf('{{') < 0 ? esc(s) : '<span data-tpl="' + esc(s) + '">' + esc(fillPipes(s)) + '</span>';
+  }
+  function tplAttr(s) { return String(s).indexOf('{{') < 0 ? '' : ' data-tpl="' + esc(s) + '"'; }
+
   // ---------- question components ----------
   // Single choice as large tap targets in a fieldset (WCAG 1.3.1; Antoun et al. 2018).
   function choiceGroup(name, legend, opts, traceName) {
@@ -73,15 +107,15 @@
     var labels = it.labels && it.labels.length === it.n ? it.labels : null, cells = '';
     for (var i = 1; i <= it.n; i++) {
       var lab = labels ? labels[i - 1] : i === 1 ? it.lo : i === it.n ? it.hi : '';
-      cells += '<label class="option scale-pt" data-trace="' + it.id + ':' + i + '"><input type="radio" name="' + it.id + '" value="' + i + '"><span class="pt-num">' + i + '</span>' + (lab ? '<span class="pt-lab">' + esc(lab) + '</span>' : '') + '</label>';
+      cells += '<label class="option scale-pt" data-trace="' + it.id + ':' + i + '"><input type="radio" name="' + it.id + '" value="' + i + '"><span class="pt-num">' + i + '</span>' + (lab ? '<span class="pt-lab">' + txt(lab) + '</span>' : '') + '</label>';
     }
-    return '<fieldset class="q-group" data-name="' + it.id + '"><legend class="q">' + esc(it.text) + '</legend><div class="likert' + (labels ? ' labeled' : '') + '" style="--n:' + it.n + '">' + cells + '</div></fieldset>';
+    return '<fieldset class="q-group" data-name="' + it.id + '"><legend class="q">' + txt(it.text) + '</legend><div class="likert' + (labels ? ' labeled' : '') + '" style="--n:' + it.n + '">' + cells + '</div></fieldset>';
   }
   // Confidence line: click anywhere, no starting handle (no default to anchor on: Liu & Conrad 2019;
   // Funke 2016); keyboard arrows, Page Up/Down, Home/End; no dragging required (WCAG 2.5.7).
-  function vas(name, legend) {
+  function vas(name, legend, ariaText) {
     return '<fieldset class="q-group" data-name="' + name + '"><legend class="q">' + legend + '</legend>' +
-      '<div class="vas" data-name="' + name + '" data-trace="' + name + '" role="slider" tabindex="0" aria-label="' + legend + '" aria-valuemin="0" aria-valuemax="100" aria-valuetext="Not set">' +
+      '<div class="vas" data-name="' + name + '" data-trace="' + name + '" role="slider" tabindex="0" aria-label="' + (ariaText != null ? ariaText : legend) + '" aria-valuemin="0" aria-valuemax="100" aria-valuetext="Not set">' +
       '<div class="vas-track"><div class="vas-fill"></div><div class="vas-thumb" hidden></div></div>' +
       '<div class="vas-ends"><span>' + Th('conf_low') + '</span><output class="vas-val" aria-hidden="true">–</output><span>' + Th('conf_high') + '</span></div></div>' +
       '<p class="muted help">' + Th('conf_help') + '</p></fieldset>';
@@ -104,6 +138,10 @@
     el.addEventListener('pointermove', function (e) { if (dragging) set(fromEvent(e), false); });
     function end() { if (!dragging) return; dragging = false; if (val != null) onAnswer(el.getAttribute('data-name'), val); }
     el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
+    el._reset = function () {   // a question that becomes hidden loses its answer
+      val = null; thumb.hidden = true; thumb.style.left = ''; fill.style.width = ''; out.textContent = '–';
+      el.removeAttribute('aria-valuenow'); el.setAttribute('aria-valuetext', 'Not set'); el.classList.remove('set');
+    };
     el.addEventListener('keydown', function (e) {
       if (el.getAttribute('aria-disabled') === 'true') return;
       var step = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1, PageUp: 10, PageDown: -10 }[e.key];
@@ -115,26 +153,52 @@
   }
   // Any question from a study's content (surveys, or a type's per-item questions). Radio buttons, not
   // dropdowns, for short lists (Couper et al. 2004).
+  function infoHtml(it) {
+    return '<div class="q-group q-info" data-name="' + esc(it.id) + '">' + String(it.text).split(/\n\s*\n/).map(function (para) {
+      return '<p>' + para.split('\n').map(txt).join('<br>') + '</p>';
+    }).join('') + '</div>';
+  }
   function questionHtml(it) {
+    if (it.type === 'info') return infoHtml(it);
     if (it.type === 'scale') return scaleGroup(it);
-    if (it.type === 'confidence') return vas(it.id, esc(it.text));
-    if (it.type === 'choice' || (it.type === 'select' && it.options.length <= 10)) return choiceGroup(it.id, esc(it.text), it.options.map(function (o) { return [o.value, esc(o.label)]; }));
+    if (it.type === 'confidence') return vas(it.id, txt(it.text), esc(fillPipes(it.text)));
+    if (it.type === 'choice' || (it.type === 'select' && it.options.length <= 10)) return choiceGroup(it.id, txt(it.text), it.options.map(function (o) { return [o.value, txt(o.label)]; }));
     if (it.type === 'multi') {
-      return '<fieldset class="q-group" data-name="' + it.id + '"><legend class="q">' + esc(it.text) + '</legend><div class="checks">' + it.options.map(function (o) {
-        return '<label class="option" data-trace="' + it.id + ':' + esc(o.value) + '"><input type="checkbox" name="' + it.id + '" value="' + esc(o.value) + '"><span>' + esc(o.label) + '</span></label>';
+      return '<fieldset class="q-group" data-name="' + it.id + '"><legend class="q">' + txt(it.text) + '</legend><div class="checks">' + it.options.map(function (o) {
+        return '<label class="option" data-trace="' + it.id + ':' + esc(o.value) + '"><input type="checkbox" name="' + it.id + '" value="' + esc(o.value) + '"><span>' + txt(o.label) + '</span></label>';
       }).join('') + '</div></fieldset>';
     }
     if (it.type === 'number') {
-      var nid = nextId('num');
-      return '<div class="q-group" data-name="' + it.id + '"><label class="q" for="' + nid + '">' + esc(it.text) + '</label><input type="text" id="' + nid + '" class="num" name="' + it.id + '" inputmode="decimal" autocomplete="off" data-trace="num:' + it.id + '"></div>';
+      var nid = nextId('num'), range = it.min != null && it.max != null ? 'Enter a number from ' + it.min + ' to ' + it.max + '.' : it.min != null ? 'Enter a number, ' + it.min + ' or more.' : it.max != null ? 'Enter a number, ' + it.max + ' or less.' : '';
+      return '<div class="q-group" data-name="' + it.id + '"><label class="q" for="' + nid + '">' + txt(it.text) + '</label><input type="text" id="' + nid + '" class="num" name="' + it.id + '" inputmode="decimal" autocomplete="off" data-trace="num:' + it.id + '"' + (range ? ' aria-describedby="' + nid + 'h"' : '') + '>' +
+        (range ? '<p class="muted help" id="' + nid + 'h">' + esc(range) + '</p>' : '') + '</div>';
     }
     if (it.type === 'select') {
       var sid = nextId('sel');
-      return '<div class="q-group" data-name="' + it.id + '"><label class="q" for="' + sid + '">' + esc(it.text) + '</label><select id="' + sid + '" name="' + it.id + '"><option value="">Select…</option>' +
-        it.options.map(function (o) { return '<option value="' + esc(o.value) + '">' + esc(o.label) + '</option>'; }).join('') + '</select></div>';
+      return '<div class="q-group" data-name="' + it.id + '"><label class="q" for="' + sid + '">' + txt(it.text) + '</label><select id="' + sid + '" name="' + it.id + '"><option value="">Select…</option>' +
+        it.options.map(function (o) { return '<option value="' + esc(o.value) + '"' + tplAttr(o.label) + '>' + esc(fillPipes(o.label)) + '</option>'; }).join('') + '</select></div>';
     }
     var tid = nextId('txt');
-    return '<div class="q-group" data-name="' + it.id + '"><label class="q" for="' + tid + '">' + esc(it.text) + '</label><textarea id="' + tid + '" name="' + it.id + '" data-trace="text:' + it.id + '"></textarea></div>';
+    if (it.long === false) return '<div class="q-group" data-name="' + it.id + '"><label class="q" for="' + tid + '">' + txt(it.text) + '</label><input type="text" id="' + tid + '" class="line" name="' + it.id + '" autocomplete="off" data-trace="text:' + it.id + '"></div>';
+    return '<div class="q-group" data-name="' + it.id + '"><label class="q" for="' + tid + '">' + txt(it.text) + '</label><textarea id="' + tid + '" name="' + it.id + '"' + (it.long ? ' rows="7"' : '') + ' data-trace="text:' + it.id + '"></textarea></div>';
+  }
+  // A list of questions. Consecutive questions that share a "group" ID get the group's heading once, above them
+  // (an imported matrix is a group of one-row questions, never a grid). env (optional): { items, lookup, ed } for piped text.
+  function questionsHtml(list, env) {
+    env = env || {};
+    setPipeEnv(env.items || list, env.lookup, env.ed);
+    var out = '', cur = null;
+    list.forEach(function (it) {
+      var g = it.group || null;
+      if (cur && g !== cur) { out += '</div>'; cur = null; }
+      if (g && g !== cur) {
+        var hid = nextId('gh');
+        out += '<div class="q-groupwrap" role="group" data-group="' + esc(g) + '"' + (it.groupText ? ' aria-labelledby="' + hid + '"' : '') + '>' + (it.groupText ? '<p class="q-grouphead" id="' + hid + '">' + String(it.groupText).split('\n').map(txt).join('<br>') + '</p>' : '');
+        cur = g;
+      }
+      out += questionHtml(it);
+    });
+    return out + (cur ? '</div>' : '');
   }
   function wire(root, onAnswer) {
     root.querySelectorAll('input[type=radio]').forEach(function (r) { r.addEventListener('change', function () { onAnswer(r.name, r.value); }); });
@@ -147,7 +211,7 @@
     root.querySelectorAll('.vas').forEach(function (v) { wireVas(v, onAnswer); });
     root.querySelectorAll('select').forEach(function (s) { s.addEventListener('change', function () { onAnswer(s.name, s.value); }); });
     root.querySelectorAll('textarea').forEach(function (t) { t.addEventListener('input', function () { onAnswer(t.name, t.value); }); });
-    root.querySelectorAll('input.num').forEach(function (t) { t.addEventListener('input', function () { onAnswer(t.name, t.value); }); });
+    root.querySelectorAll('input.num, input.line').forEach(function (t) { t.addEventListener('input', function () { onAnswer(t.name, t.value); }); });
   }
   function flag(root, names, scroll) {
     root.querySelectorAll('.q-group').forEach(function (g) { g.classList.toggle('missing', names.indexOf(g.getAttribute('data-name')) >= 0); });
@@ -157,18 +221,46 @@
   function blank(answers, ids) { return ids.filter(function (k) { var v = answers[k]; return v == null || String(v).trim() === '' || (Array.isArray(v) && !v.length); }); }
   // A question set with hard-required items and one gentle reminder for skipped optional ones
   // (de Leeuw et al. 2016; Sischka et al. 2022). Returns { answers, check() -> true when ready }.
-  function questionSet(root, items, msgEl, button, onAnswer) {
-    var answers = {}, prompted = false, ids = items.map(function (i) { return i.id; });
+  // ctx (optional): { answers: object to fill, prior: answers from earlier pages, items: every question of the
+  // survey (for piped text), ed: embedded data }. Questions with a displayIf are shown and hidden live; a hidden
+  // question is cleared, skipped by check(), and never part of answers.
+  function clearInputs(el) {
+    el.querySelectorAll('input[type=radio], input[type=checkbox]').forEach(function (i) { i.checked = false; });
+    el.querySelectorAll('select').forEach(function (x) { x.value = ''; });
+    el.querySelectorAll('textarea, input[type=text]').forEach(function (x) { x.value = ''; });
+    el.querySelectorAll('.vas').forEach(function (v) { if (v._reset) v._reset(); });
+  }
+  function questionSet(root, items, msgEl, button, onAnswer, ctx) {
+    ctx = ctx || {};
+    var answers = ctx.answers || {}, prior = ctx.prior || {}, ed = ctx.ed || (S.plan && S.plan.embedded) || {}, prompted = false, hidden = {};
+    function active() { return items.filter(function (i) { return i.type !== 'info' && !hidden[i.id]; }); }
+    function ids(list) { return list.map(function (i) { return i.id; }); }
+    setPipeEnv(ctx.items || items, function (id) { return answers[id] !== undefined ? answers[id] : prior[id]; }, ed);
+    function applyLogic() {
+      hidden = lib() ? lib().resolve(items, answers, { ed: ed }, prior).hidden : {};
+      items.forEach(function (it) {
+        var el = root.querySelector('.q-group[data-name="' + it.id + '"]');
+        if (!el) return;
+        var h = !!hidden[it.id];
+        el.hidden = h;
+        if (h) { el.classList.remove('missing'); if (answers[it.id] !== undefined) { delete answers[it.id]; clearInputs(el); } }
+      });
+      root.querySelectorAll('.q-groupwrap').forEach(function (w) { w.hidden = !w.querySelector('.q-group:not([hidden])'); });
+      root.querySelectorAll('[data-tpl]').forEach(function (n) { n.textContent = fillPipes(n.getAttribute('data-tpl')); });
+    }
     wire(root, function (n, v) {
       answers[n] = v; if (onAnswer) onAnswer(n, v);
-      if (root.querySelector('.missing')) { var m = blank(answers, ids); flag(root, m); if (!m.length) msgEl.innerHTML = ''; }
+      applyLogic();
+      if (root.querySelector('.missing')) { var m = blank(answers, ids(active())); flag(root, m); if (!m.length) msgEl.innerHTML = ''; }
     });
+    applyLogic();
     return {
       answers: answers,
       check: function () {
-        var hard = blank(answers, items.filter(function (i) { return i.required; }).map(function (i) { return i.id; }));
-        var soft = blank(answers, items.filter(function (i) { return !i.required; }).map(function (i) { return i.id; }));
-        var badNum = items.filter(function (i) { var v = answers[i.id]; return i.type === 'number' && v != null && String(v).trim() !== '' && !isFinite(Number(String(v).replace(/,/g, ''))); }).map(function (i) { return i.id; });
+        var act = active();
+        var hard = blank(answers, ids(act.filter(function (i) { return i.required; })));
+        var soft = blank(answers, ids(act.filter(function (i) { return !i.required; })));
+        var badNum = act.filter(function (i) { var v = answers[i.id]; return i.type === 'number' && v != null && String(v).trim() !== '' && !isFinite(Number(String(v).replace(/,/g, ''))); }).map(function (i) { return i.id; });
         if (badNum.length) { flag(root, badNum, true); msgEl.innerHTML = errorBox(T('number_invalid')); return false; }
         if (hard.length) { flag(root, hard, true); msgEl.innerHTML = errorBox(hard.length === 1 && items.filter(function (i) { return i.id === hard[0]; })[0].type === 'confidence' ? T('conf_needed') : T('required_prompt')); return false; }
         if (soft.length && !prompted) {
@@ -286,8 +378,23 @@
   }
 
   // ---------- session ----------
+  // Embedded data from the address (for example ?PROLIFIC_PID=...): only the names the study declares, kept for
+  // this tab so a reload without the parameters still has them. Sent when the session starts; never used to sign in.
+  function embeddedFromUrl() {
+    var defs = (S.content.embedded || []).filter(function (d) { return d.source === 'url'; }), out = {}, kept = {}, key = 'lab_ed_' + studyId;
+    if (!defs.length) return out;
+    try { kept = JSON.parse(store(key) || '{}') || {}; } catch (e) { kept = {}; }
+    var qs = null; try { qs = new URLSearchParams(location.search); } catch (e) {}
+    defs.forEach(function (d) {
+      var v = qs ? qs.get(d.param || d.name) : null;
+      if (v) kept[d.name] = v;
+      if (kept[d.name]) out[d.name] = String(kept[d.name]).slice(0, 200);
+    });
+    store(key, JSON.stringify(kept));
+    return out;
+  }
   function startSession() {
-    api('session', { token: S.token }).then(function (r) {
+    api('session', { token: S.token, embedded: embeddedFromUrl() }).then(function (r) {
       if (r.error === 'not_yet' || r.error === 'finished') return refresh();
       if (r.error) return showLogin(ERR[r.error] || ERR.server_error);
       S.plan = r;
@@ -350,21 +457,31 @@
   function surveyPage(title, items, kind) {
     if (!items.length) return submitSurvey({}, kind, null);
     // Questions with the same "page" number are shown together, pages in ascending order. Answers from earlier
-    // pages are kept in this tab (sessionStorage) so a reload part-way through does not lose them.
-    var pages = [], byPage = {}, all = {}, idx = 0, saveKey = 'lab_sv_' + studyId + '_s' + S.plan.session + '_' + kind;
+    // pages are kept in this tab (sessionStorage) so a reload part-way through does not lose them. A page whose
+    // questions are all hidden by display logic is skipped.
+    var pages = [], byPage = {}, all = {}, idx = 0, saveKey = 'lab_sv_' + studyId + '_s' + S.plan.session + '_' + kind, ed = S.plan.embedded || {};
     items.forEach(function (it) { var k = it.page || 1; if (!byPage[k]) { byPage[k] = []; pages.push(k); } byPage[k].push(it); });
     pages.sort(function (a, b) { return a - b; });
     try { var kept = JSON.parse(store(saveKey) || 'null'); if (kept && kept.all && kept.idx < pages.length) { all = kept.all; idx = kept.idx; } } catch (e) {}
     S.survey = { key: saveKey };
+    function pageVisible(k) {
+      var r = lib() ? lib().resolve(byPage[k], {}, { ed: ed }, all) : { hidden: {} };
+      return byPage[k].some(function (it) { return !r.hidden[it.id]; });
+    }
+    function skipHidden() { while (idx < pages.length && !pageVisible(pages[idx])) idx++; }
     function showPage() {
-      var list = byPage[pages[idx]], last = idx === pages.length - 1;
+      skipHidden();
+      if (idx >= pages.length) return submitSurvey(all, kind, null);
+      var list = byPage[pages[idx]], mine = {};
       progress.textContent = T('start_title', { session: S.plan.session, total: S.content.sessions }) + (pages.length > 1 ? ' · ' + T('survey_page', { i: idx + 1, n: pages.length }) : '');
-      show('<h1>' + esc(title) + '</h1>' + list.map(questionHtml).join('') + '<div id="surveymsg"></div><div class="actions"><button id="go">' + Th('continue_button') + '</button></div>');
-      var go = document.getElementById('go'), qs = questionSet(stage, list, document.getElementById('surveymsg'), go);
+      show('<h1>' + esc(title) + '</h1>' + questionsHtml(list, { items: items, ed: ed, lookup: function (id) { return mine[id] !== undefined ? mine[id] : all[id]; } }) +
+        '<div id="surveymsg"></div><div class="actions"><button id="go">' + Th('continue_button') + '</button></div>');
+      var go = document.getElementById('go'), qs = questionSet(stage, list, document.getElementById('surveymsg'), go, null, { answers: mine, prior: all, items: items, ed: ed });
       go.addEventListener('click', function () {
         if (!qs.check()) return;
         Object.keys(qs.answers).forEach(function (k) { all[k] = qs.answers[k]; });
-        if (!last) { idx++; store(saveKey, JSON.stringify({ all: all, idx: idx })); return showPage(); }
+        idx++; skipHidden();
+        if (idx < pages.length) { store(saveKey, JSON.stringify({ all: all, idx: idx })); return showPage(); }
         go.disabled = true; submitSurvey(all, kind, go);
       });
     }
@@ -388,7 +505,7 @@
   }
 
   // ---------- what study types get ----------
-  var ui = { esc: esc, T: T, Th: Th, Tp: Tp, show: show, errorBox: errorBox, choiceGroup: choiceGroup, scaleGroup: scaleGroup, vas: vas, questionHtml: questionHtml,
+  var ui = { esc: esc, T: T, Th: Th, Tp: Tp, show: show, errorBox: errorBox, choiceGroup: choiceGroup, scaleGroup: scaleGroup, vas: vas, questionHtml: questionHtml, questionsHtml: questionsHtml, fillPipes: fillPipes,
     wire: wire, flag: flag, blank: blank, questionSet: questionSet, nextId: nextId, reduceMotion: reduceMotion, stage: stage };
   window.LabEngine = { registerType: function (id, impl) { types[id] = impl; }, ui: ui };
 
@@ -397,14 +514,19 @@
   fetch(API + 'content', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (c) {
     S.content = c;
     document.title = c.text.login_title || c.name || 'Research study';
-    var s = document.createElement('script'); s.src = '/lab/engine/types/' + c.type + '.js';
-    s.onload = function () {
-      S.type = types[c.type];
-      if (!S.type) return show('<h1>' + esc(c.name) + '</h1>' + errorBox(ERR.server_error));
-      S.token = store(tokenKey);
-      if (S.token) refresh(); else showLogin();
-    };
-    s.onerror = function () { show('<h1>' + esc(c.name) + '</h1>' + errorBox(ERR.network)); };
-    document.head.appendChild(s);
+    function loadType() {
+      var s = document.createElement('script'); s.src = '/lab/engine/types/' + c.type + '.js';
+      s.onload = function () {
+        S.type = types[c.type];
+        if (!S.type) return show('<h1>' + esc(c.name) + '</h1>' + errorBox(ERR.server_error));
+        S.token = store(tokenKey);
+        if (S.token) refresh(); else showLogin();
+      };
+      s.onerror = function () { show('<h1>' + esc(c.name) + '</h1>' + errorBox(ERR.network)); };
+      document.head.appendChild(s);
+    }
+    var lg = document.createElement('script'); lg.src = '/lab/engine/logic.js';   // display logic; without it every question shows (the server still drops hidden answers)
+    lg.onload = function () { LL = window.LabLogic; loadType(); }; lg.onerror = loadType;
+    document.head.appendChild(lg);
   }, function () { show('<h1>Study not found</h1><p>Check the link you were given, or try again in a minute.</p>'); });
 })();

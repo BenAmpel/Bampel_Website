@@ -1,0 +1,1496 @@
+{
+ "SurveyEntry": {
+  "SurveyID": "SV_synthetic0001",
+  "SurveyName": "Synthetic demo survey",
+  "SurveyDescription": null,
+  "SurveyOwnerID": "UR_synthetic",
+  "SurveyBrandID": "synthetic",
+  "DivisionID": null,
+  "SurveyLanguage": "EN",
+  "SurveyActiveResponseSet": "RS_1",
+  "SurveyStatus": "Inactive",
+  "SurveyStartDate": "0000-00-00 00:00:00",
+  "SurveyExpirationDate": "0000-00-00 00:00:00",
+  "SurveyCreationDate": "2026-01-01 00:00:00",
+  "CreatorID": "UR_synthetic",
+  "LastModified": "2026-01-01 00:00:00",
+  "LastAccessed": "0000-00-00 00:00:00",
+  "LastActivated": "0000-00-00 00:00:00",
+  "Deleted": null
+ },
+ "SurveyElements": [
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "BL",
+   "PrimaryAttribute": "Survey Blocks",
+   "SecondaryAttribute": null,
+   "TertiaryAttribute": null,
+   "Payload": {
+    "0": {
+     "Type": "Standard",
+     "Description": "Intro",
+     "ID": "BL_intro",
+     "BlockElements": [
+      {
+       "Type": "Question",
+       "QuestionID": "QID1"
+      },
+      {
+       "Type": "Question",
+       "QuestionID": "QID2"
+      },
+      {
+       "Type": "Page Break"
+      },
+      {
+       "Type": "Question",
+       "QuestionID": "QID3"
+      },
+      {
+       "Type": "Question",
+       "QuestionID": "QID4"
+      },
+      {
+       "Type": "Question",
+       "QuestionID": "QID5"
+      },
+      {
+       "Type": "Question",
+       "QuestionID": "QID6"
+      },
+      {
+       "Type": "Question",
+       "QuestionID": "QID7"
+      },
+      {
+       "Type": "Question",
+       "QuestionID": "QID8"
+      },
+      {
+       "Type": "Question",
+       "QuestionID": "QID9"
+      },
+      {
+       "Type": "Question",
+       "QuestionID": "QID10"
+      },
+      {
+       "Type": "Question",
+       "QuestionID": "QID11"
+      },
+      {
+       "Type": "Question",
+       "QuestionID": "QID12"
+      },
+      {
+       "Type": "Question",
+       "QuestionID": "QID13"
+      },
+      {
+       "Type": "Question",
+       "QuestionID": "QID14"
+      },
+      {
+       "Type": "Question",
+       "QuestionID": "QID15"
+      },
+      {
+       "Type": "Question",
+       "QuestionID": "QID16"
+      },
+      {
+       "Type": "Question",
+       "QuestionID": "QID17"
+      },
+      {
+       "Type": "Question",
+       "QuestionID": "QID18"
+      }
+     ],
+     "Options": {
+      "BlockLocking": "false",
+      "RandomizeQuestions": "false",
+      "BlockVisibility": "Expanded"
+     }
+    },
+    "1": {
+     "Type": "Standard",
+     "Description": "Version A",
+     "ID": "BL_a",
+     "BlockElements": [
+      {
+       "Type": "Question",
+       "QuestionID": "QID20"
+      },
+      {
+       "Type": "Question",
+       "QuestionID": "QID21"
+      }
+     ],
+     "Options": {
+      "BlockLocking": "false",
+      "RandomizeQuestions": "false",
+      "BlockVisibility": "Expanded"
+     }
+    },
+    "2": {
+     "Type": "Standard",
+     "Description": "Version B",
+     "ID": "BL_b",
+     "BlockElements": [
+      {
+       "Type": "Question",
+       "QuestionID": "QID22"
+      },
+      {
+       "Type": "Question",
+       "QuestionID": "QID23"
+      }
+     ],
+     "Options": {
+      "BlockLocking": "false",
+      "RandomizeQuestions": "false",
+      "BlockVisibility": "Expanded"
+     }
+    },
+    "3": {
+     "Type": "Standard",
+     "Description": "Skip block",
+     "ID": "BL_skip",
+     "BlockElements": [
+      {
+       "Type": "Question",
+       "QuestionID": "QID30"
+      },
+      {
+       "Type": "Question",
+       "QuestionID": "QID31"
+      },
+      {
+       "Type": "Question",
+       "QuestionID": "QID32"
+      }
+     ],
+     "Options": {
+      "BlockLocking": "false",
+      "RandomizeQuestions": "false",
+      "BlockVisibility": "Expanded",
+      "Looping": "None"
+     }
+    },
+    "4": {
+     "Type": "Standard",
+     "Description": "Social branch",
+     "ID": "BL_branch",
+     "BlockElements": [
+      {
+       "Type": "Question",
+       "QuestionID": "QID40"
+      }
+     ],
+     "Options": {
+      "BlockLocking": "false",
+      "RandomizeQuestions": "false",
+      "BlockVisibility": "Expanded"
+     }
+    },
+    "5": {
+     "Type": "Standard",
+     "Description": "End skip",
+     "ID": "BL_eos",
+     "BlockElements": [
+      {
+       "Type": "Question",
+       "QuestionID": "QID50"
+      },
+      {
+       "Type": "Question",
+       "QuestionID": "QID51"
+      },
+      {
+       "Type": "Question",
+       "QuestionID": "QID52"
+      },
+      {
+       "Type": "Question",
+       "QuestionID": "QID53"
+      }
+     ],
+     "Options": {
+      "BlockLocking": "false",
+      "RandomizeQuestions": "false",
+      "BlockVisibility": "Expanded",
+      "Looping": "Question"
+     }
+    },
+    "6": {
+     "Type": "Trash",
+     "Description": "Trash",
+     "ID": "BL_trash",
+     "BlockElements": [],
+     "Options": {
+      "BlockLocking": "false",
+      "RandomizeQuestions": "false",
+      "BlockVisibility": "Expanded"
+     }
+    }
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID1",
+   "SecondaryAttribute": "<p>Welcome to the <b>demo survey</b>.</p",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "<p>Welcome to the <b>demo survey</b>.</p><script>alert(1)</script><style>p{color:red}</style><p>It takes about 5 minutes.<br>Thank you &amp; enjoy.</p>",
+    "DataExportTag": "intro",
+    "QuestionType": "DB",
+    "Selector": "TB",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "<p>Welcome to the <b>demo survey</b>.</p",
+    "Validation": {
+     "Settings": {
+      "Type": "None"
+     }
+    },
+    "Language": [],
+    "QuestionID": "QID1"
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID2",
+   "SecondaryAttribute": "What is your first name?",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "What is your first name?",
+    "DataExportTag": "first_name",
+    "QuestionType": "TE",
+    "Selector": "SL",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "What is your first name?",
+    "Validation": {
+     "Settings": {
+      "ForceResponse": "ON",
+      "ForceResponseType": "ON",
+      "Type": "None"
+     }
+    },
+    "Language": [],
+    "QuestionID": "QID2"
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID3",
+   "SecondaryAttribute": "Do you use social media?",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "Do you use social media?",
+    "DataExportTag": "social",
+    "QuestionType": "MC",
+    "Selector": "SAVR",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "Do you use social media?",
+    "Validation": {
+     "Settings": {
+      "ForceResponse": "ON",
+      "ForceResponseType": "ON",
+      "Type": "None"
+     }
+    },
+    "Language": [],
+    "QuestionID": "QID3",
+    "Choices": {
+     "1": {
+      "Display": "Yes"
+     },
+     "2": {
+      "Display": "No"
+     }
+    },
+    "ChoiceOrder": [
+     1,
+     2
+    ],
+    "RecodeValues": {
+     "1": "1",
+     "2": "0"
+    }
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID4",
+   "SecondaryAttribute": "Which platforms do you use, ${q://QID2/C",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "Which platforms do you use, ${q://QID2/ChoiceTextEntryValue}?",
+    "DataExportTag": "platforms",
+    "QuestionType": "MC",
+    "Selector": "MAVR",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "Which platforms do you use, ${q://QID2/C",
+    "Validation": {
+     "Settings": {
+      "Type": "None"
+     }
+    },
+    "Language": [],
+    "QuestionID": "QID4",
+    "Choices": {
+     "1": {
+      "Display": "Facebook"
+     },
+     "2": {
+      "Display": "Instagram"
+     },
+     "3": {
+      "Display": "Other",
+      "TextEntry": "true"
+     }
+    },
+    "ChoiceOrder": [
+     1,
+     2,
+     3
+    ],
+    "DisplayLogic": {
+     "0": {
+      "0": {
+       "LogicType": "Question",
+       "QuestionID": "QID3",
+       "QuestionIsInLoop": "no",
+       "ChoiceLocator": "q://QID3/SelectableChoice/1",
+       "Operator": "Selected",
+       "QuestionIDFromLocator": "QID3",
+       "LeftOperand": "q://QID3/SelectableChoice/1",
+       "Type": "Expression",
+       "Description": "<span>logic</span>"
+      },
+      "Type": "If"
+     },
+     "Type": "BooleanExpression",
+     "inPage": false
+    }
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID5",
+   "SecondaryAttribute": "<p>How much do you agree?</p>",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "<p>How much do you agree?</p>",
+    "DataExportTag": "trust",
+    "QuestionType": "Matrix",
+    "Selector": "Likert",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "<p>How much do you agree?</p>",
+    "Validation": {
+     "Settings": {
+      "Type": "None"
+     }
+    },
+    "Language": [],
+    "QuestionID": "QID5",
+    "SubSelector": "SingleAnswer",
+    "Choices": {
+     "1": {
+      "Display": "I trust news online"
+     },
+     "2": {
+      "Display": "I check sources"
+     },
+     "3": {
+      "Display": "I share articles"
+     }
+    },
+    "ChoiceOrder": [
+     1,
+     2,
+     3
+    ],
+    "Answers": {
+     "1": {
+      "Display": "Strongly disagree"
+     },
+     "2": {
+      "Display": "Disagree"
+     },
+     "3": {
+      "Display": "Neutral"
+     },
+     "4": {
+      "Display": "Agree"
+     },
+     "5": {
+      "Display": "Strongly agree"
+     }
+    },
+    "AnswerOrder": [
+     1,
+     2,
+     3,
+     4,
+     5
+    ]
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID6",
+   "SecondaryAttribute": "Rate your mood today.",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "Rate your mood today.",
+    "DataExportTag": "mood",
+    "QuestionType": "Slider",
+    "Selector": "HSLIDER",
+    "Configuration": {
+     "CSSliderMin": 0,
+     "CSSliderMax": 10,
+     "GridLines": 10,
+     "SnapToGrid": true,
+     "NumDecimals": 0
+    },
+    "QuestionDescription": "Rate your mood today.",
+    "Validation": {
+     "Settings": {
+      "Type": "None"
+     }
+    },
+    "Language": [],
+    "QuestionID": "QID6",
+    "Choices": {
+     "1": {
+      "Display": "Mood"
+     }
+    },
+    "ChoiceOrder": [
+     1
+    ],
+    "Labels": {
+     "1": {
+      "Display": "Low"
+     },
+     "2": {
+      "Display": "High"
+     }
+    }
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID7",
+   "SecondaryAttribute": "How confident are you (0 to 100)?",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "How confident are you (0 to 100)?",
+    "DataExportTag": "confidence",
+    "QuestionType": "Slider",
+    "Selector": "HSLIDER",
+    "Configuration": {
+     "CSSliderMin": 0,
+     "CSSliderMax": 100,
+     "GridLines": 0,
+     "SnapToGrid": false
+    },
+    "QuestionDescription": "How confident are you (0 to 100)?",
+    "Validation": {
+     "Settings": {
+      "Type": "None"
+     }
+    },
+    "Language": [],
+    "QuestionID": "QID7",
+    "Choices": {
+     "1": {
+      "Display": "Confidence"
+     }
+    },
+    "ChoiceOrder": [
+     1
+    ]
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID8",
+   "SecondaryAttribute": "Contact preferences",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "Contact preferences",
+    "DataExportTag": "contact",
+    "QuestionType": "TE",
+    "Selector": "FORM",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "Contact preferences",
+    "Validation": {
+     "Settings": {
+      "Type": "None"
+     }
+    },
+    "Language": [],
+    "QuestionID": "QID8",
+    "Choices": {
+     "1": {
+      "Display": "Preferred time"
+     },
+     "2": {
+      "Display": "Preferred channel"
+     }
+    },
+    "ChoiceOrder": [
+     1,
+     2
+    ]
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID9",
+   "SecondaryAttribute": "Any comments?",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "Any comments?",
+    "DataExportTag": "comments",
+    "QuestionType": "TE",
+    "Selector": "ESTB",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "Any comments?",
+    "Validation": {
+     "Settings": {
+      "Type": "None"
+     }
+    },
+    "Language": [],
+    "QuestionID": "QID9"
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID10",
+   "SecondaryAttribute": "How old are you?",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "How old are you?",
+    "DataExportTag": "age",
+    "QuestionType": "TE",
+    "Selector": "SL",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "How old are you?",
+    "Validation": {
+     "Settings": {
+      "ForceResponse": "OFF",
+      "Type": "ContentType",
+      "ContentType": "ValidNumber",
+      "MinNumber": "0",
+      "MaxNumber": "120"
+     }
+    },
+    "Language": [],
+    "QuestionID": "QID10"
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID11",
+   "SecondaryAttribute": "Where do you live?",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "Where do you live?",
+    "DataExportTag": "country",
+    "QuestionType": "MC",
+    "Selector": "DL",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "Where do you live?",
+    "Validation": {
+     "Settings": {
+      "Type": "None"
+     }
+    },
+    "Language": [],
+    "QuestionID": "QID11",
+    "Choices": {
+     "1": {
+      "Display": "Canada"
+     },
+     "2": {
+      "Display": "Mexico"
+     },
+     "3": {
+      "Display": "United States"
+     }
+    },
+    "ChoiceOrder": [
+     1,
+     2,
+     3
+    ]
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID12",
+   "SecondaryAttribute": "How likely are you to recommend us?",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "How likely are you to recommend us?",
+    "DataExportTag": "nps",
+    "QuestionType": "MC",
+    "Selector": "NPS",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "How likely are you to recommend us?",
+    "Validation": {
+     "Settings": {
+      "Type": "None"
+     }
+    },
+    "Language": [],
+    "QuestionID": "QID12",
+    "Choices": {
+     "1": {
+      "Display": "0"
+     },
+     "2": {
+      "Display": "1"
+     },
+     "3": {
+      "Display": "2"
+     },
+     "4": {
+      "Display": "3"
+     },
+     "5": {
+      "Display": "4"
+     },
+     "6": {
+      "Display": "5"
+     },
+     "7": {
+      "Display": "6"
+     },
+     "8": {
+      "Display": "7"
+     },
+     "9": {
+      "Display": "8"
+     },
+     "10": {
+      "Display": "9"
+     },
+     "11": {
+      "Display": "10"
+     }
+    },
+    "ChoiceOrder": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10,
+     11
+    ]
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID13",
+   "SecondaryAttribute": "Timing",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "Timing",
+    "DataExportTag": "page_timer",
+    "QuestionType": "Timing",
+    "Selector": "PageTimer",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "Timing",
+    "Validation": {
+     "Settings": {
+      "Type": "None"
+     }
+    },
+    "Language": [],
+    "QuestionID": "QID13"
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID14",
+   "SecondaryAttribute": "Browser meta",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "Browser meta",
+    "DataExportTag": "browser_meta",
+    "QuestionType": "Meta",
+    "Selector": "Meta",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "Browser meta",
+    "Validation": {
+     "Settings": {
+      "Type": "None"
+     }
+    },
+    "Language": [],
+    "QuestionID": "QID14"
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID15",
+   "SecondaryAttribute": "Pick one (has custom script)",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "Pick one (has custom script)",
+    "DataExportTag": "js_question",
+    "QuestionType": "MC",
+    "Selector": "SAVR",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "Pick one (has custom script)",
+    "Validation": {
+     "Settings": {
+      "Type": "None"
+     }
+    },
+    "Language": [],
+    "QuestionID": "QID15",
+    "QuestionJS": "Qualtrics.SurveyEngine.addOnload(function(){ this.hideNextButton(); });",
+    "Choices": {
+     "1": {
+      "Display": "A"
+     },
+     "2": {
+      "Display": "B"
+     }
+    },
+    "ChoiceOrder": [
+     1,
+     2
+    ]
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID16",
+   "SecondaryAttribute": "Carry-forward question",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "Carry-forward question",
+    "DataExportTag": "carry",
+    "QuestionType": "MC",
+    "Selector": "MAVR",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "Carry-forward question",
+    "Validation": {
+     "Settings": {
+      "Type": "None"
+     }
+    },
+    "Language": [],
+    "QuestionID": "QID16",
+    "DynamicChoices": {
+     "DynamicType": "SelectedChoicesFromQuestion",
+     "Source": "QID4"
+    },
+    "Choices": {
+     "1": {
+      "Display": "x"
+     },
+     "2": {
+      "Display": "y"
+     }
+    },
+    "ChoiceOrder": [
+     1,
+     2
+    ]
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID17",
+   "SecondaryAttribute": "Rank these",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "Rank these",
+    "DataExportTag": "rank",
+    "QuestionType": "RO",
+    "Selector": "DND",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "Rank these",
+    "Validation": {
+     "Settings": {
+      "Type": "None"
+     }
+    },
+    "Language": [],
+    "QuestionID": "QID17",
+    "Choices": {
+     "1": {
+      "Display": "one"
+     },
+     "2": {
+      "Display": "two"
+     },
+     "3": {
+      "Display": "three"
+     }
+    },
+    "ChoiceOrder": [
+     1,
+     2,
+     3
+    ]
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID18",
+   "SecondaryAttribute": "Hello ${q://QID2/ChoiceTextEntryValue}, ",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "Hello ${q://QID2/ChoiceTextEntryValue}, your id is ${e://Field/PROLIFIC_PID} and ${rand://Dice} and ${q://QID5/ChoiceGroup/SelectedAnswers}.",
+    "DataExportTag": "echo",
+    "QuestionType": "DB",
+    "Selector": "TB",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "Hello ${q://QID2/ChoiceTextEntryValue}, ",
+    "Validation": {
+     "Settings": {
+      "Type": "None"
+     }
+    },
+    "Language": [],
+    "QuestionID": "QID18"
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID20",
+   "SecondaryAttribute": "You are reading version A.",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "You are reading version A.",
+    "DataExportTag": "cond_a_text",
+    "QuestionType": "DB",
+    "Selector": "TB",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "You are reading version A.",
+    "Validation": {
+     "Settings": {
+      "Type": "None"
+     }
+    },
+    "Language": [],
+    "QuestionID": "QID20"
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID21",
+   "SecondaryAttribute": "Version A question",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "Version A question",
+    "DataExportTag": "cond_a_q",
+    "QuestionType": "MC",
+    "Selector": "SAVR",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "Version A question",
+    "Validation": {
+     "Settings": {
+      "Type": "None"
+     }
+    },
+    "Language": [],
+    "QuestionID": "QID21",
+    "Choices": {
+     "1": {
+      "Display": "Fine"
+     },
+     "2": {
+      "Display": "Not fine"
+     }
+    },
+    "ChoiceOrder": [
+     1,
+     2
+    ]
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID22",
+   "SecondaryAttribute": "You are reading version B.",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "You are reading version B.",
+    "DataExportTag": "cond_b_text",
+    "QuestionType": "DB",
+    "Selector": "TB",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "You are reading version B.",
+    "Validation": {
+     "Settings": {
+      "Type": "None"
+     }
+    },
+    "Language": [],
+    "QuestionID": "QID22"
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID23",
+   "SecondaryAttribute": "Version B question",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "Version B question",
+    "DataExportTag": "cond_b_q",
+    "QuestionType": "MC",
+    "Selector": "SAVR",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "Version B question",
+    "Validation": {
+     "Settings": {
+      "Type": "None"
+     }
+    },
+    "Language": [],
+    "QuestionID": "QID23",
+    "Choices": {
+     "1": {
+      "Display": "Fine"
+     },
+     "2": {
+      "Display": "Not fine"
+     }
+    },
+    "ChoiceOrder": [
+     1,
+     2
+    ]
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID30",
+   "SecondaryAttribute": "Continue with this block?",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "Continue with this block?",
+    "DataExportTag": "skipper",
+    "QuestionType": "MC",
+    "Selector": "SAVR",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "Continue with this block?",
+    "Validation": {
+     "Settings": {
+      "Type": "None"
+     }
+    },
+    "Language": [],
+    "QuestionID": "QID30",
+    "Choices": {
+     "1": {
+      "Display": "Yes"
+     },
+     "2": {
+      "Display": "No",
+      "Skip": "EndOfBlock"
+     }
+    },
+    "ChoiceOrder": [
+     1,
+     2
+    ]
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID31",
+   "SecondaryAttribute": "Tell us why.",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "Tell us why.",
+    "DataExportTag": "after_skip_1",
+    "QuestionType": "TE",
+    "Selector": "SL",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "Tell us why.",
+    "Validation": {
+     "Settings": {
+      "Type": "None"
+     }
+    },
+    "Language": [],
+    "QuestionID": "QID31"
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID32",
+   "SecondaryAttribute": "Tell us more.",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "Tell us more.",
+    "DataExportTag": "after_skip_2",
+    "QuestionType": "TE",
+    "Selector": "SL",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "Tell us more.",
+    "Validation": {
+     "Settings": {
+      "Type": "None"
+     }
+    },
+    "Language": [],
+    "QuestionID": "QID32"
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID40",
+   "SecondaryAttribute": "Branch question for social media users",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "Branch question for social media users",
+    "DataExportTag": "social_followup",
+    "QuestionType": "MC",
+    "Selector": "SAVR",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "Branch question for social media users",
+    "Validation": {
+     "Settings": {
+      "Type": "None"
+     }
+    },
+    "Language": [],
+    "QuestionID": "QID40",
+    "Choices": {
+     "1": {
+      "Display": "Daily"
+     },
+     "2": {
+      "Display": "Weekly"
+     }
+    },
+    "ChoiceOrder": [
+     1,
+     2
+    ]
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID50",
+   "SecondaryAttribute": "Do you want to stop here?",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "Do you want to stop here?",
+    "DataExportTag": "eos",
+    "QuestionType": "MC",
+    "Selector": "SAVR",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "Do you want to stop here?",
+    "Validation": {
+     "Settings": {
+      "Type": "None"
+     }
+    },
+    "Language": [],
+    "QuestionID": "QID50",
+    "Choices": {
+     "1": {
+      "Display": "Keep going"
+     },
+     "2": {
+      "Display": "Stop",
+      "Skip": "EndOfSurvey"
+     }
+    },
+    "ChoiceOrder": [
+     1,
+     2
+    ]
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID51",
+   "SecondaryAttribute": "Final thoughts?",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "Final thoughts?",
+    "DataExportTag": "last_q",
+    "QuestionType": "TE",
+    "Selector": "SL",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "Final thoughts?",
+    "Validation": {
+     "Settings": {
+      "Type": "None"
+     }
+    },
+    "Language": [],
+    "QuestionID": "QID51",
+    "DisplayLogic": {
+     "0": {
+      "0": {
+       "LogicType": "EmbeddedField",
+       "LeftOperand": "STUDY_ID",
+       "Operator": "EqualTo",
+       "RightOperand": "pilot",
+       "Type": "Expression"
+      },
+      "Type": "If"
+     },
+     "Type": "BooleanExpression",
+     "inPage": false
+    }
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID52",
+   "SecondaryAttribute": "Only for people over 17",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "Only for people over 17",
+    "DataExportTag": "bigstuff",
+    "QuestionType": "TE",
+    "Selector": "SL",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "Only for people over 17",
+    "Validation": {
+     "Settings": {
+      "Type": "None"
+     }
+    },
+    "Language": [],
+    "QuestionID": "QID52",
+    "DisplayLogic": {
+     "0": {
+      "0": {
+       "LogicType": "Question",
+       "QuestionID": "QID10",
+       "QuestionIsInLoop": "no",
+       "ChoiceLocator": "q://QID10/ChoiceTextEntryValue",
+       "Operator": "GreaterThan",
+       "QuestionIDFromLocator": "QID10",
+       "LeftOperand": "q://QID10/ChoiceTextEntryValue",
+       "Type": "Expression",
+       "Description": "<span>logic</span>",
+       "RightOperand": "17"
+      },
+      "Type": "If"
+     },
+     "Type": "BooleanExpression",
+     "inPage": false
+    }
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID53",
+   "SecondaryAttribute": "Shown when comment contains 'x'",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "Shown when comment contains 'x'",
+    "DataExportTag": "contains_q",
+    "QuestionType": "TE",
+    "Selector": "SL",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "Shown when comment contains 'x'",
+    "Validation": {
+     "Settings": {
+      "Type": "None"
+     }
+    },
+    "Language": [],
+    "QuestionID": "QID53",
+    "DisplayLogic": {
+     "0": {
+      "0": {
+       "LogicType": "Question",
+       "QuestionID": "QID9",
+       "QuestionIsInLoop": "no",
+       "ChoiceLocator": "q://QID9/ChoiceTextEntryValue",
+       "Operator": "Contains",
+       "QuestionIDFromLocator": "QID9",
+       "LeftOperand": "q://QID9/ChoiceTextEntryValue",
+       "Type": "Expression",
+       "Description": "<span>logic</span>",
+       "RightOperand": "x"
+      },
+      "Type": "If"
+     },
+     "Type": "BooleanExpression",
+     "inPage": false
+    }
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "FL",
+   "PrimaryAttribute": "Survey Flow",
+   "SecondaryAttribute": null,
+   "TertiaryAttribute": null,
+   "Payload": {
+    "Type": "Root",
+    "FlowID": "FL_1",
+    "Flow": [
+     {
+      "Type": "EmbeddedData",
+      "FlowID": "FL_2",
+      "EmbeddedData": [
+       {
+        "Description": "PROLIFIC_PID",
+        "Type": "Recipient",
+        "Field": "PROLIFIC_PID",
+        "VariableType": "String",
+        "DataVisibility": [],
+        "AnalyzeText": false
+       },
+       {
+        "Description": "STUDY_ID",
+        "Type": "Custom",
+        "Field": "STUDY_ID",
+        "VariableType": "String",
+        "DataVisibility": [],
+        "AnalyzeText": false,
+        "Value": "pilot"
+       },
+       {
+        "Description": "SESSION_ID",
+        "Type": "Custom",
+        "Field": "SESSION_ID",
+        "VariableType": "String",
+        "DataVisibility": [],
+        "AnalyzeText": false
+       },
+       {
+        "Description": "computed",
+        "Type": "Custom",
+        "Field": "computed",
+        "VariableType": "String",
+        "DataVisibility": [],
+        "AnalyzeText": false,
+        "Value": "${q://QID2/ChoiceTextEntryValue}-x"
+       }
+      ]
+     },
+     {
+      "Type": "Standard",
+      "ID": "BL_intro",
+      "FlowID": "FL_3"
+     },
+     {
+      "Type": "Randomizer",
+      "FlowID": "FL_4",
+      "SubSet": 1,
+      "EvenPresentation": true,
+      "Flow": [
+       {
+        "Type": "Standard",
+        "ID": "BL_a",
+        "FlowID": "FL_5"
+       },
+       {
+        "Type": "Standard",
+        "ID": "BL_b",
+        "FlowID": "FL_6"
+       }
+      ]
+     },
+     {
+      "Type": "Standard",
+      "ID": "BL_skip",
+      "FlowID": "FL_7"
+     },
+     {
+      "Type": "Branch",
+      "FlowID": "FL_8",
+      "Description": "Social media users",
+      "BranchLogic": {
+       "0": {
+        "0": {
+         "LogicType": "Question",
+         "QuestionID": "QID3",
+         "QuestionIsInLoop": "no",
+         "ChoiceLocator": "q://QID3/SelectableChoice/1",
+         "Operator": "Selected",
+         "QuestionIDFromLocator": "QID3",
+         "LeftOperand": "q://QID3/SelectableChoice/1",
+         "Type": "Expression",
+         "Description": "<span>logic</span>"
+        },
+        "Type": "If"
+       },
+       "Type": "BooleanExpression",
+       "inPage": false
+      },
+      "Flow": [
+       {
+        "Type": "Standard",
+        "ID": "BL_branch",
+        "FlowID": "FL_9"
+       }
+      ]
+     },
+     {
+      "Type": "Branch",
+      "FlowID": "FL_10",
+      "Description": "Too young",
+      "BranchLogic": {
+       "0": {
+        "0": {
+         "LogicType": "Question",
+         "QuestionID": "QID10",
+         "QuestionIsInLoop": "no",
+         "ChoiceLocator": "q://QID10/ChoiceTextEntryValue",
+         "Operator": "LessThan",
+         "QuestionIDFromLocator": "QID10",
+         "LeftOperand": "q://QID10/ChoiceTextEntryValue",
+         "Type": "Expression",
+         "Description": "<span>logic</span>",
+         "RightOperand": "13"
+        },
+        "Type": "If"
+       },
+       "Type": "BooleanExpression",
+       "inPage": false
+      },
+      "Flow": [
+       {
+        "Type": "EndSurvey",
+        "FlowID": "FL_11"
+       }
+      ]
+     },
+     {
+      "Type": "Authenticator",
+      "FlowID": "FL_12"
+     },
+     {
+      "Type": "Standard",
+      "ID": "BL_eos",
+      "FlowID": "FL_13"
+     }
+    ]
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "SO",
+   "PrimaryAttribute": "Survey Options",
+   "SecondaryAttribute": null,
+   "TertiaryAttribute": null,
+   "Payload": {
+    "BackButton": "true",
+    "SurveyProtection": "PublicSurvey",
+    "PartialData": "+1 week"
+   }
+  },
+  {
+   "SurveyID": "SV_synthetic0001",
+   "Element": "QO",
+   "PrimaryAttribute": "Survey Quotas",
+   "SecondaryAttribute": null,
+   "TertiaryAttribute": null,
+   "Payload": []
+  }
+ ]
+}

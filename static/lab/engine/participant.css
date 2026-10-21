@@ -72,3 +72,11 @@ select { font: inherit; min-height: 48px; padding: 8px; border-radius: 8px; bord
 .statusbar.show { display: block; }
 
 input[type=text].num { max-width: 200px; }
+/* Survey logic and layout: hidden questions, group headings (an imported matrix is one question per row under one heading), descriptive text. */
+.q-group[hidden], .q-groupwrap[hidden] { display: none; }
+.q-groupwrap { margin: 28px 0 8px; }
+.q-grouphead { font-weight: 600; margin: 0 0 4px; }
+.q-groupwrap > .q-group { margin-top: 18px; }
+.q-info { border-left-color: transparent; }
+.q-info p { margin: 0 0 10px; }
+input[type=text].line { max-width: 100%; }

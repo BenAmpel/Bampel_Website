@@ -21,6 +21,77 @@
     [A.draft.questions || [], A.draft.survey.pre || [], A.draft.survey.post || []].forEach(function (l) { l.forEach(function (q) { q.conditions = (q.conditions || []).filter(function (c) { return c !== id; }); }); });
   }
 
+  // ---------- Import a survey (Qualtrics .qsf, LimeSurvey .lss, REDCap dictionary, lab spreadsheet template) ----------
+  // The server reads the file and returns { content, report }; nothing is saved. "Load" puts the survey, design,
+  // and embedded data into the editor's draft, and the normal Save makes a version.
+  var imp = { file: null, result: null, busy: false, replaceConsent: false, formsAs: 'pages', format: 'auto', focus: false, pendingChecked: false };
+  var FORMAT_NAMES = { qsf: 'Qualtrics (.qsf)', lss: 'LimeSurvey (.lss)', redcap: 'REDCap data dictionary (.csv)', sheet: 'Lab spreadsheet template (.csv or .xlsx)' };
+  function guessFormat(name) {
+    name = String(name || '').toLowerCase();
+    return /\.qsf$/.test(name) ? 'qsf' : /\.lss$/.test(name) ? 'lss' : /\.xlsx$/.test(name) ? 'sheet' : /\.(csv|txt|tsv)$/.test(name) ? 'csv' : null;
+  }
+  function detectedText() {
+    if (!imp.file) return 'No file chosen.';
+    var g = guessFormat(imp.file.filename), kb = Math.max(1, Math.round(imp.file.size / 1024));
+    var what = imp.format !== 'auto' ? FORMAT_NAMES[imp.format] : g === 'csv' ? 'a REDCap data dictionary or the lab template (decided from the first row when you click Preview)' : g ? FORMAT_NAMES[g] : 'format not recognized from the file name (it is checked when you click Preview)';
+    return 'Chosen: ' + imp.file.filename + ' (' + kb + ' KB). Format: ' + what + '.';
+  }
+  function list(A, items, cls) {
+    return '<ul class="imp-list">' + items.map(function (x) { return '<li>' + (x.source ? '<code>' + A.esc(x.source) + '</code> ' : '') + A.esc(x.what != null ? x.what : x) + '</li>'; }).join('') + '</ul>';
+  }
+  function renderImport(A) {
+    var esc = A.esc, r = imp.result, h = '<h3 style="margin:0 0 8px">Import a survey</h3>' +
+      '<p class="muted">Upload a survey you already have and get a working copy: a Qualtrics export (<code>.qsf</code>), a LimeSurvey structure (<code>.lss</code>), a REDCap data dictionary (<code>.csv</code>), or the lab\'s spreadsheet template (<code>.csv</code> or <code>.xlsx</code>; <a href="/lab/templates/survey-template.csv" download>download the template</a>). The file is read on the server and <strong>nothing is saved</strong>. You see what was understood and what was not, then load it into the editor as an unsaved draft, check it, and click Save changes (that makes a new version).</p>';
+    if (A.started) h += '<div class="warn">' + A.started + ' real participant' + (A.started === 1 ? ' has' : 's have') + ' already started this study. Loading a different survey changes the questions and variable names they see in later sessions, and the survey export will mix versions. Pilot with test participants first, or make a new study.</div>';
+    h += '<div class="row"><label>Survey file <input type="file" id="imp-file" accept=".qsf,.lss,.csv,.xlsx,.txt"></label>' +
+      '<label>Format <select id="imp-format"><option value="auto"' + (imp.format === 'auto' ? ' selected' : '') + '>Detect from the file</option>' +
+      Object.keys(FORMAT_NAMES).map(function (k) { return '<option value="' + k + '"' + (imp.format === k ? ' selected' : '') + '>' + esc(FORMAT_NAMES[k]) + '</option>'; }).join('') + '</select></label>' +
+      '<label class="check"><input type="checkbox" id="imp-sessions"' + (imp.formsAs === 'sessions' ? ' checked' : '') + '> REDCap: one session per form (otherwise one page per form)</label>' +
+      A.btn('data-imp-preview="1"', imp.busy ? 'Reading…' : 'Preview', null, !imp.file || imp.busy) + '</div>' +
+      '<p class="muted" id="imp-detected" role="status">' + esc(detectedText()) + '</p>';
+    if (!r) return h + '<p class="muted">Limits: files up to 5 MB and up to 500 questions. Matrix questions become one question per row under one heading (the lab has no grids). Anything that cannot be reproduced is listed after the preview, never dropped silently.</p>';
+    var rp = r.report, c = rp.counts;
+    h += '<h3 id="imp-result-h" tabindex="-1" style="margin:20px 0 8px">Preview: ' + esc(FORMAT_NAMES[rp.detected] || rp.format) + '</h3>' +
+      '<p><strong>' + c.questions + '</strong> items (' + (c.questions - (c.info || 0)) + ' questions, ' + (c.info || 0) + ' descriptive text) on <strong>' + c.pages + '</strong> page' + (c.pages === 1 ? '' : 's') + ', <strong>' + c.conditions + '</strong> condition' + (c.conditions === 1 ? '' : 's') +
+      ', <strong>' + c.embedded + '</strong> embedded data field' + (c.embedded === 1 ? '' : 's') + (c.sessions > 1 ? ', <strong>' + c.sessions + '</strong> sessions' : '') + '. <strong>' + rp.unsupported.length + '</strong> thing' + (rp.unsupported.length === 1 ? '' : 's') + ' could not be reproduced, <strong>' + rp.approximated.length + '</strong> were approximated.</p>';
+    if (rp.warnings.length) h += '<div class="warn"><strong>Check before using</strong>' + list(A, rp.warnings) + '</div>';
+    h += '<details' + (rp.unsupported.length ? ' open' : '') + '><summary><strong>Not reproduced (' + rp.unsupported.length + ')</strong></summary>' + (rp.unsupported.length ? list(A, rp.unsupported) : '<p class="muted">Nothing.</p>') + '</details>' +
+      '<details><summary><strong>Approximated (' + rp.approximated.length + ')</strong></summary>' + (rp.approximated.length ? list(A, rp.approximated) : '<p class="muted">Nothing.</p>') + '</details>' +
+      '<details><summary><strong>Mapped (' + rp.mapped.length + ')</strong></summary>' + list(A, rp.mapped.slice(0, 400).map(function (m) { return { source: m.source, what: '→ ' + m.as + (m.variable ? ' (' + m.variable + ')' : '') }; })) + '</details>' +
+      '<h3 style="margin:20px 0 8px">Outline</h3><p class="muted">Read-only. Pages in the order participants meet them; display logic in plain words; conditions limit a question to those groups.</p>' +
+      (r.report.outline || []).map(function (pg) {
+        return '<details open class="vcard"><summary><strong>' + (c.sessions > 1 ? 'Session ' + pg.session + ', ' : '') + 'Page ' + pg.page + '</strong> · ' + pg.questions.length + ' item' + (pg.questions.length === 1 ? '' : 's') + '</summary><ol class="imp-outline">' +
+          pg.questions.map(function (q) {
+            return '<li><span class="mono">' + esc(q.id) + '</span> <span class="pill">' + esc(q.type) + (q.required ? ', required' : '') + '</span> ' + esc(q.text) +
+              (q.group ? ' <span class="muted">(group ' + esc(q.group) + ')</span>' : '') + (q.conditions ? ' <span class="muted">(only in ' + esc(q.conditions.join(', ')) + ')</span>' : '') + (q.logic ? '<br><span class="muted">' + esc(q.logic) + '</span>' : '') + '</li>';
+          }).join('') + '</ol></details>';
+      }).join('');
+    h += '<div class="section"><h3 style="margin:0 0 8px">Load it</h3><p class="muted">This replaces the survey questions, the conditions and sessions, and the embedded data in the editor draft. Consent text, sign-up settings, and screen text are kept unless you tick the box. Nothing changes for participants until you click Save changes.</p>' +
+      '<label class="check"><input type="checkbox" id="imp-consent"' + (imp.replaceConsent ? ' checked' : '') + '> Replace the consent text too (the imported consent is a marked draft placeholder; the minutes per session are set from the number of questions)</label>' +
+      '<div class="row" style="margin-top:8px">' + A.btn('data-imp-load="1"', 'Load into the editor as an unsaved draft') + '</div></div>';
+    return h;
+  }
+  function runPreview(A) {
+    if (!imp.file || imp.busy) return;
+    imp.busy = true; imp.result = null; A.err(''); A.rerender();
+    var body = { format: imp.format, filename: imp.file.filename, data: imp.file.data, options: { formsAs: imp.formsAs } };
+    if (imp.file.encoding === 'base64') body.encoding = 'base64';
+    A.post('import', body).then(function (res) { imp.result = res; imp.focus = true; A.say('Preview ready: ' + res.report.counts.questions + ' items found.'); })
+      .catch(function (e) { A.err(e.message); })
+      .then(function () { imp.busy = false; A.rerender(); });
+  }
+  function loadDraft(A) {
+    var r = imp.result; if (!r) return;
+    var c = r.content, d = A.draft, hasSurvey = (d.survey.pre.length + d.survey.post.length + (d.questions || []).length) > 0;
+    if (!window.confirm((A.started ? A.started + ' real participant(s) have already started this study. ' : '') + (hasSurvey ? 'This replaces the survey questions in the draft with the imported ones (your saved version is not changed until you click Save changes). Continue?' : 'Load the imported survey into the draft?'))) return;
+    d.survey = A.clone(c.survey); d.design = A.clone(c.design); d.embedded = A.clone(c.embedded || []); d.items = A.clone(c.items); d.questions = A.clone(c.questions);
+    if (imp.replaceConsent) { d.consent = A.clone(c.consent); d.minutesPerSession = c.minutesPerSession; }
+    A.markDirty(); A.err('');
+    A.say('Loaded ' + c.survey.pre.length + ' items into the draft. Review them under Start-of-session survey, then click Save changes.');
+    A.goto('pre');
+    var tab = document.querySelector('#subtabs button[aria-selected="true"]'); if (tab) tab.focus();
+  }
+
   function renderDesign(A) {
     var d = A.draft.design, esc = A.esc, btn = A.btn;
     var h = '<h3 style="margin:0 0 8px">Conditions</h3><p class="muted">Each participant is assigned one condition, keeping the groups balanced. An item can have different wording per condition (Items tab), and questions can be limited to some conditions. The ID is saved in the <code>condition</code> column; keep it short.</p>' +
@@ -78,17 +149,41 @@
   }
 
   LabAdmin.registerType('vignettes', {
-    subtabs: [['design', 'Conditions & sessions'], ['items', 'Items'], ['questions', 'Item questions']],
+    subtabs: [['design', 'Conditions & sessions'], ['items', 'Items'], ['questions', 'Item questions'], ['import', 'Import a survey']],
     conditions: conds,
-    onLoad: function (A) { if (!itemById(A, itemSel)) itemSel = (items(A)[0] || { id: 'practice' }).id; },
+    onLoad: function (A) {
+      if (!itemById(A, itemSel)) itemSel = (items(A)[0] || { id: 'practice' }).id;
+      // A file chosen in the lab console ("Create a study from a survey file") arrives through this tab's sessionStorage.
+      if (!imp.pendingChecked) {
+        imp.pendingChecked = true;
+        try {
+          var raw = sessionStorage.getItem('lab_import_pending'), p = raw ? JSON.parse(raw) : null;
+          if (p && p.study === A.studyId && p.file) { sessionStorage.removeItem('lab_import_pending'); imp.file = p.file; setTimeout(function () { runPreview(A); }, 0); }
+        } catch (e) {}
+      }
+    },
+    afterRender: function (sub, A) {
+      if (sub === 'import' && imp.focus) { imp.focus = false; var h = document.getElementById('imp-result-h'); if (h) h.focus(); }
+    },
     render: function (sub, A) {
       if (sub === 'design') return renderDesign(A);
       if (sub === 'items') return renderItems(A);
+      if (sub === 'import') return renderImport(A);
       return '<p class="muted">Asked after every item (practice included). Tick conditions to ask a question only in those conditions. The variable name becomes the CSV column <code>a_&lt;name&gt;</code>: keep it if you only reword a question, and use a new name if it now measures something different.</p>' +
         A.qlist('questions', { sessions: false, rules: [], conditions: conds(A.draft) });
     },
     select: function (t, A) {
       if (t.id === 'itemsel') { itemSel = t.value; return true; }
+      if (t.id === 'imp-file') {
+        imp.result = null; imp.file = null;
+        if (!t.files || !t.files[0]) return true;
+        A.readFile(t.files[0]).then(function (f) { imp.file = f; A.err(''); A.rerender(); })
+          .catch(function (e) { A.err(e.message); A.rerender(); });
+        return false;
+      }
+      if (t.id === 'imp-format') { imp.format = t.value; return true; }
+      if (t.id === 'imp-sessions') { imp.formsAs = t.checked ? 'sessions' : 'pages'; return true; }
+      if (t.id === 'imp-consent') { imp.replaceConsent = t.checked; return true; }
       return false;
     },
     applyEdit: function (t, A) {
@@ -121,6 +216,8 @@
       return undefined;
     },
     click: function (t, A) {
+      if (t.hasAttribute('data-imp-preview')) { runPreview(A); return false; }
+      if (t.hasAttribute('data-imp-load')) { loadDraft(A); return false; }
       var v, draft = A.draft, d = draft.design;
       if (t.hasAttribute('data-condadd')) {
         var n = d.conditions.length + 1, id = 'cond' + n;
