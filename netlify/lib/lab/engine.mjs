@@ -259,6 +259,8 @@ export async function saveTrial(S, code, session, index, data, now = Date.now())
   if (st.finished || session !== st.nextSession || !plan) return { error: 'wrong_session', status: 409 };
   const t = kind === 'trial' ? plan.trials[index] : plan.practice;
   if (!t) return { error: 'bad_index', status: 400 };
+  // Hook: a study type that owns a trial's data (the economic game writes its round records on the server) takes over the save.
+  if (kind === 'trial' && S.type.saveTrialHook) { const h = await S.type.saveTrialHook(S, p, plan, index, data, now); if (h) return h; }
   const clean = S.type.cleanTrialData(data, t, plan);
   if (kind === 'trial') {
     const raw = Array.isArray(data?.rawEvents) ? data.rawEvents.slice(0, 20000) : [];
@@ -424,6 +426,8 @@ export async function exportRows(S, kind, codes) {
   const { records, participants } = await exportRecords(S, codes);
   const byCode = Object.fromEntries(participants.map(p => [p.code, p]));
   if (kind === 'surveys') return records.filter(r => /\/survey-(pre|post)$/.test(r.key)).map(r => surveyRow(r, byCode[r.code]));
+  // Hook: a study type may build its own trial rows (the economic game writes one row per round and stage).
+  if (S.type.exportTrials) return S.type.exportTrials(S, records.filter(r => /\/t\d+$/.test(r.key)), byCode, codes);
   return records.filter(r => /\/t\d+$/.test(r.key)).map(r => trialRow(S, r, byCode[r.code]));
 }
 
@@ -446,15 +450,17 @@ export async function deleteParticipant(S, id) {
   const store = S.store, p = await store.get(pKey(id));
   if (!p) return { error: 'not_found', status: 404 };
   const keys = (await Promise.all(['data', 'raw', 'plans', 'started', 'done', 'views'].map(k => store.list(`${k}/${p.code}/`)))).flat();
-  await deleteKeys(store, keys.concat([`consent/${p.code}`, `cond/${p.condition}/${p.code}`, `cond-test/${p.condition}/${p.code}`, contactKey(p.code)]));
+  // Hook: a study type may hold more keys for this participant (the economic game: matching, moves, payments).
+  const extra = S.type.purgeParticipant ? await S.type.purgeParticipant(S, p) : [];
+  await deleteKeys(store, keys.concat(extra, [`consent/${p.code}`, `cond/${p.condition}/${p.code}`, `cond-test/${p.condition}/${p.code}`, contactKey(p.code)]));
   await store.delete(pKey(p.code));
-  return { ok: true, code: p.code, condition: p.condition, test: !!p.test, records: keys.filter(k => k.startsWith('data/')).length };
+  return { ok: true, code: p.code, condition: p.condition, test: !!p.test, extraKeys: extra, records: keys.filter(k => k.startsWith('data/')).length };
 }
 
 export async function deleteTestParticipants(S) {
   let participants = 0, records = 0; const deleted = [];
   for (const [, p] of await getMany(S.store, await S.store.list('participants/'))) {
-    if (p && p.test) { const r = await deleteParticipant(S, p.code); participants++; records += r.records || 0; deleted.push({ code: p.code, condition: p.condition }); }
+    if (p && p.test) { const r = await deleteParticipant(S, p.code); participants++; records += r.records || 0; deleted.push({ code: p.code, condition: p.condition, extraKeys: r.extraKeys || [] }); }
   }
   return { ok: true, participants, records, deleted };
 }

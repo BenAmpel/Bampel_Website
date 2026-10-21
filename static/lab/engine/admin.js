@@ -114,7 +114,10 @@
     if (name === 'content') loadContent();
     if (name === 'team') loadTeam();
     if (name === 'activity') loadActivity();
+    // A study type may add top-level tabs (plugin.tabs: [{ id, label, role, render(sectionEl, api) }]), for example the economic game's operations tab.
+    (plugin && plugin.tabs || []).forEach(function (t) { if (t.id === name) t.render(document.querySelector('section[data-tab="' + name + '"]'), pluginApi()); });
   }
+  function pluginApi() { return { getJSON: getJSON, postJSON: postJSON, call: call, saveFile: saveFile, toCsv: toCsv, esc: esc, err: err, day: day, can: can, fmt: fmt, median: median, mean: mean, studyId: studyId, me: me }; }
   function loadPlugin(type) {
     return new Promise(function (res) {
       if (types[type]) return res(types[type]);
@@ -129,6 +132,11 @@
       me = m;
       return loadPlugin(m.study.type).then(function (p) {
         plugin = p;
+        (plugin.tabs || []).forEach(function (t) {
+          if (TABS.some(function (x) { return x[0] === t.id; })) return;
+          TABS.push([t.id, t.label, t.role || 'viewer']);
+          var sec = document.createElement('section'); sec.setAttribute('data-tab', t.id); sec.hidden = true; $('app').appendChild(sec);
+        });
         document.title = m.study.name + ': admin';
         $('title').textContent = m.study.name + ': admin';
         $('links').innerHTML = esc(m.study.typeLabel) + ' · participant page: <a href="' + esc(m.study.paths.participant) + '" target="_blank" rel="noopener">' + esc(location.origin + m.study.paths.participant) + '</a>' +
@@ -277,7 +285,7 @@
           return getJSON('backup-part?part=meta').then(function (meta) {
             meta.contentHistory = history;
             var flat = function (k) { return [].concat.apply([], parts.map(function (p) { return p[k] || []; })); };
-            var all = { kind: studyId + ' complete backup', exportedAt: new Date().toISOString(), meta: meta, participants: flat('participants'), contacts: flat('contacts'), plans: flat('plans'), records: flat('records'), raw: raw };
+            var all = { kind: studyId + ' complete backup', exportedAt: new Date().toISOString(), meta: meta, participants: flat('participants'), contacts: flat('contacts'), plans: flat('plans'), extras: flat('extras'), records: flat('records'), raw: raw };
             var text = JSON.stringify(all), name = studyId + '_backup_' + day() + '.json';
             if (window.CompressionStream) return new Response(new Blob([text]).stream().pipeThrough(new CompressionStream('gzip'))).blob().then(function (b) {
               saveFile(b, name + '.gz'); $('bkprog').textContent = 'Downloaded ' + all.participants.length + ' participants, ' + all.records.length + ' records (' + Math.round(b.size / 1024) + ' KB compressed). Save it to GSU-approved storage.';
@@ -441,7 +449,7 @@
   }
   // What type plugins get.
   var A = { draft: null, meta: function () { return META.type; }, conditions: conditionsNow, esc: esc, field: field, checkbox: checkbox, inp: inp, num: num, area: area, sel: sel, btn: btn,
-    getPath: getPath, setPath: setPath, clone: clone, qlist: qlist, can: can };
+    getPath: getPath, setPath: setPath, clone: clone, qlist: qlist, can: can, api: { getJSON: getJSON, postJSON: postJSON } };
 
   function renderEditor() {
     $('subtabs').innerHTML = subs().map(function (s) { return '<button type="button" data-sub="' + s[0] + '" aria-selected="' + (s[0] === sub) + '">' + s[1] + '</button>'; }).join('');
