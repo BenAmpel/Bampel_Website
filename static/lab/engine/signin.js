@@ -46,18 +46,10 @@
       document.getElementById('go').disabled = true;
       A.api('auth/accept', { token: token, name: invite ? document.getElementById('name').value : undefined, password: pw, password2: pw2 }, true).then(function (r) {
         if (!r.ok) { document.getElementById('go').disabled = false; document.getElementById('err').textContent = A.message(r.data); return; }
-        if (r.data.kind === 'reset') return signinView('Password changed. Sign in with the new password.', info.email);
-        store(r.data); totpOffer();
+        // Accepting a link never signs anyone in: sign in with the new password (and a code, if the account has an authenticator).
+        signinView(invite ? 'Account created. Sign in with your new password. You can set up an authenticator app afterwards, on the account page.' : 'Password changed. Sign in with the new password.', info.email);
       });
     });
-  }
-
-  // After an invitation: the authenticator is optional, and can be added later on the account page.
-  function totpOffer() {
-    view('<h1>Account created</h1><p>You are signed in. An authenticator app adds a second step at sign-in and is recommended for anyone who can download participant data. You can set it up now or later on the account page.</p>' +
-      '<div class="row"><button type="button" id="yes">Set up an authenticator</button><button type="button" class="secondary" id="no">Not now</button></div><div id="totp"></div>');
-    document.getElementById('no').addEventListener('click', go);
-    document.getElementById('yes').addEventListener('click', function () { this.hidden = true; document.getElementById('no').hidden = true; A.setupTotp(document.getElementById('totp'), go, go); });
   }
 
   var m = location.hash.match(/^#(invite|reset)=([A-Za-z0-9_-]{20,80})$/);

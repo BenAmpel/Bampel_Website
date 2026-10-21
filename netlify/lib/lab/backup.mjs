@@ -10,11 +10,17 @@ const MUTABLE = [/^participants\//, /^content\/current$/, /^meta\//, /^admins\//
 const PREFIXES = ['participants/', 'consent/', 'plans/', 'started/', 'done/', 'views/', 'data/', 'raw/', 'contact/', 'cond/', 'cond-test/', 'content/', 'admins/', 'audit/', 'meta/', 'g/'];
 const STATE = 'state/backup';
 
-export async function runBackup(main, backup, { budgetMs = 20000, now = Date.now() } = {}) {
+// The lab registry (researcher accounts with their password hashes and authenticator secrets, the studies list, the account activity log) is
+// mirrored the same way into 'lab-registry-backup'. Not copied: the session secret, links, sign-in counters, and revocation keys, which are
+// disposable (people sign in again after a restore). The recovery key is copied: without it recovery codes could not be checked.
+export const REGISTRY_PREFIXES = ['accounts/', 'studies/', 'audit/', 'meta/recovery-key'];
+export const REGISTRY_MUTABLE = [/^accounts\//, /^studies\//, /^meta\//];
+
+export async function runBackup(main, backup, { budgetMs = 20000, now = Date.now(), prefixes = PREFIXES, mutable = MUTABLE } = {}) {
   const t0 = Date.now();
-  const mainKeys = (await Promise.all(PREFIXES.map(p => main.list(p)))).flat();
+  const mainKeys = (await Promise.all(prefixes.map(p => main.list(p)))).flat();
   const have = new Set((await backup.list('m/')).map(k => k.slice(2)));
-  const todo = mainKeys.filter(k => !have.has(k) || MUTABLE.some(re => re.test(k)));
+  const todo = mainKeys.filter(k => !have.has(k) || mutable.some(re => re.test(k)));
   let copied = 0, done = true;
   for (let i = 0; i < todo.length; i += 25) {
     if (Date.now() - t0 > budgetMs) { done = false; break; }

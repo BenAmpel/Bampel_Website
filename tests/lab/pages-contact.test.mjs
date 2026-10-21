@@ -100,8 +100,10 @@ console.log('contact links: encoding, templates, participant link without email,
     assert.equal(inv.status, 200);
     const pw = 'a long dev passphrase 123';
     const acc = await api('_lab/auth/accept', { body: { token: inv.json.link.path.split('=')[1], password: pw, password2: pw } });
-    assert.equal(acc.status, 200);
-    const mine = await api('_lab/mystudies', { token: acc.json.token });
+    assert.equal(acc.status, 200); assert(!acc.json.token, 'accepting a link does not sign in');
+    const si = await api('_lab/auth/signin', { body: { email: 'dev@example.edu', password: pw } });
+    assert.equal(si.status, 200);
+    const mine = await api('_lab/mystudies', { token: si.json.token });
     assert.deepEqual(mine.json.map(s => [s.id, s.role]), [['verification', 'viewer']]);
     console.log('dev server: pages and scripts served (200); invite, accept, and My studies work');
   } finally { child.kill(); }

@@ -5,6 +5,7 @@ import { handle } from '../../netlify/lib/lab/router.mjs';
 import * as acc from '../../netlify/lib/lab/accounts.mjs';
 import assert from 'node:assert/strict';
 import { memStore } from './memstore.mjs';
+import { createHash } from 'node:crypto';
 
 const OWNER = 'owner-key-0123456789abcdef';
 const T0 = 1_800_000_000_000;
@@ -36,6 +37,8 @@ function harness({ latency = 0 } = {}) {
 const L = '/api/lab/_lab/';
 const ok = r => { assert(r.status >= 200 && r.status < 300, `${r.status} ${r.text}`); return r.json; };
 const tokenOf = link => link.path.split('=')[1];
+// accepting a link sets the password and returns no session; the person then signs in
+const signup = async (c, link, name, pw) => { const r = ok(await c(L + 'auth/accept', { body: { token: tokenOf(link), name, password: pw, password2: pw } })); assert(!r.token && !r.expiresAt, 'accepting a link never returns a session'); return ok(await c(L + 'auth/signin', { body: { email: r.email, password: pw } })).token; };
 
 // ---------- hashing ----------
 {
@@ -73,7 +76,10 @@ const tokenOf = link => link.path.split('=')[1];
   assert.equal(acc.totpMatch(b32, '08180', at), null); assert.equal(acc.totpMatch(b32, 'abcdef', at), null);
   assert.match(acc.otpauthUri('ABCD', 'a@b.edu'), /^otpauth:\/\/totp\/CCAIR%20Behavioral%20Lab:a%40b\.edu\?secret=ABCD&issuer=CCAIR%20Behavioral%20Lab&algorithm=SHA1&digits=6&period=30$/);
   const codes = acc.newRecoveryCodes(); assert.equal(codes.length, 8); assert.equal(new Set(codes).size, 8); assert(codes.every(c => /^[a-z2-9]{5}-[a-z2-9]{5}$/.test(c)));
-  assert.equal(acc.recoveryHash('ABCDE-fghjk'), acc.recoveryHash('abcdefghjk'), 'recovery codes ignore case and the dash');
+  { const m = memStore(), a = await acc.recoveryHash(m, 'id1', 'ABCDE-fghjk', true);
+    assert.equal(a, await acc.recoveryHash(m, 'id1', 'abcdefghjk'), 'recovery codes ignore case and the dash');
+    assert.notEqual(a, await acc.recoveryHash(m, 'id2', 'abcdefghjk'), 'the hash depends on the account');
+    assert.notEqual(a, createHash('sha256').update('abcdefghjk').digest('hex'), 'not a bare hash'); }
   console.log('TOTP: RFC 6238 vectors, base32, window of one step, recovery code format');
 }
 
@@ -105,7 +111,7 @@ assert.equal((await call(L + 'auth/accept', { body: { token: annToken, name: 'An
 assert.equal((await call(L + 'auth/accept', { body: { token: annToken, name: 'Ann Lee', password: PW, password2: PW + '!' } })).json.error, 'mismatch');
 secrets.push(PW, 'password1234');
 const acc1 = ok(await call(L + 'auth/accept', { body: { token: annToken, name: 'Ann Lee', password: PW, password2: PW } }));
-assert.equal(acc1.kind, 'invite'); assert.match(acc1.token, /^s1\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]{43}$/); assert.equal(acc1.expiresAt, NOW + 8 * 3600000);
+assert.equal(acc1.kind, 'invite'); assert(!acc1.token && !acc1.expiresAt, 'accepting a link never returns a session');
 assert.equal((await call(L + 'auth/accept', { body: { token: annToken, name: 'Ann Lee', password: PW, password2: PW } })).json.error, 'used_link', 'a link works once');
 assert.equal((await call(L + 'auth/link-info', { body: { token: annToken } })).json.error, 'used_link');
 assert.equal((await call(L + 'researchers/invite', { key: OWNER, body: { name: 'Ann', email: 'ann.lee@example.edu' } })).json.error, 'exists');
@@ -196,7 +202,7 @@ let boss;
 {
   const i = ok(await call(L + 'researchers/invite', { key: OWNER, body: { name: 'Dr Boss', email: 'boss@x.edu', labOwner: true } }));
   const bp = 'this passphrase is long enough 1'; secrets.push(bp);
-  boss = ok(await call(L + 'auth/accept', { body: { token: tokenOf(i.link), name: 'Dr Boss', password: bp, password2: bp } })).token;
+  boss = await signup(call, i.link, 'Dr Boss', bp);
   assert.equal(ok(await call(L + 'me', { token: boss })).role, 'owner');
   assert.equal(ok(await call('/api/lab/verification/admin/me', { token: boss })).role, 'owner', 'a lab owner is owner of every study');
   assert.equal(ok(await call('/api/lab/data-quality/admin/team', { token: boss })).length, 0);
@@ -272,7 +278,7 @@ console.log('sign out, sign out everywhere (tokenEpoch), password change, rename
   ok(await R.call(L + 'create', { key: OWNER, body: { id: 'phish-pilot', name: 'P', type: 'vignettes' } }));
   const i = ok(await R.call(L + 'researchers/invite', { key: OWNER, body: { name: 'Tia', email: 'tia@x.edu', studyRoles: { verification: 'viewer' } } }));
   const pw = 'tia likes a long passphrase 5'; secrets.push(pw);
-  let tok = ok(await R.call(L + 'auth/accept', { body: { token: tokenOf(i.link), name: 'Tia', password: pw, password2: pw } })).token;
+  let tok = await signup(R.call, i.link, 'Tia', pw);
   assert.equal((await R.call(L + 'account/totp-enable', { token: tok, body: { code: '123456' } })).json.error, 'no_setup');
   const setup = ok(await R.call(L + 'account/totp-setup', { token: tok, body: {} }));
   assert.match(setup.secret, /^[A-Z2-7]{32}$/); assert(setup.uri.includes('secret=' + setup.secret) && setup.uri.startsWith('otpauth://totp/'));
@@ -366,7 +372,7 @@ console.log('lockout: 10 failures in 15 minutes lock an email for 15 minutes (kn
   ok(await R.call(L + 'create', { key: OWNER, body: { id: 'phish-pilot', name: 'P', type: 'vignettes' } }));
   const i = ok(await R.call(L + 'researchers/invite', { key: OWNER, body: { name: 'Dee', email: 'dee@x.edu', studyRoles: { verification: 'editor' } } }));
   const pw = 'dee has a long passphrase 9', id = acc.accountId('dee@x.edu'); secrets.push(pw);
-  const tok = ok(await R.call(L + 'auth/accept', { body: { token: tokenOf(i.link), name: 'Dee', password: pw, password2: pw } })).token;
+  const tok = await signup(R.call, i.link, 'Dee', pw);
   ok(await R.call('/api/lab/verification/admin/me', { token: tok }));
   ok(await R.call(L + 'researchers/update', { key: OWNER, body: { id, disabled: true } }));
   assert.equal((await R.call('/api/lab/verification/admin/me', { token: tok })).status, 401, 'a disabled account loses its session');
