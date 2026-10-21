@@ -285,6 +285,7 @@ export function validateGame(c, e) {
         else if (qids.has(q.id)) e.push(`Two comprehension questions share the name "${q.id}".`);
         qids.add(q.id);
         if (!str(q.text, 500)) e.push(`Comprehension question ${i + 1}: the text is empty.`);
+        if (q.displayIf != null || q.type === 'info' || (q.type != null && q.type !== 'number')) e.push(`Comprehension question ${i + 1}: these are plain numeric questions; conditional display, information text, and other question types belong in the start- and end-of-session surveys.`);
         if (!fin(q.answer)) e.push(`Comprehension question ${i + 1}: the correct answer must be a number.`);
         if (q.tolerance != null && (!fin(q.tolerance) || q.tolerance < 0)) e.push(`Comprehension question ${i + 1}: the tolerance must be a number, 0 or more.`);
       });

@@ -24,7 +24,9 @@ const strategyText = s => {
 
 // Everything about one participant that is not in their round records.
 export async function participantExtras(S, pid) {
-  const [lobby, fb, ext, pay, adone, plan] = await Promise.all([K.lobby(pid), K.fallback(pid), K.ext(pid), K.pay(pid), K.adone(pid), K.plan(pid)].map(k => getOnce(S.store, k)));
+  const [lobby, fb, pay, adone, plan] = await Promise.all([K.lobby(pid), K.fallback(pid), K.pay(pid), K.adone(pid), K.plan(pid)].map(k => getOnce(S.store, k)));
+  // External ID: the embedded-data field prolific_pid (the engine reads it from the address when the session starts). Anything but letters, digits, _ and - is ignored.
+  const rawId = plan && plan.embedded && plan.embedded.prolific_pid, ext = typeof rawId === 'string' && /^[A-Za-z0-9_-]{1,64}$/.test(rawId) ? { prolificPid: rawId } : null;
   const ctx = plan && plan.game ? await loadCtx(S, pid) : null;
   let cohort = null, droppedAny = false, cids = [];
   for (let n = 0; n < 5; n++) { const m = await getOnce(S.store, K.member(pid, n)); if (!m) break; cids.push(m.cid); }

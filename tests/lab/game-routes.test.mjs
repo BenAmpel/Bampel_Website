@@ -36,7 +36,7 @@ console.log('game study created over HTTP; presets served to the editor; bad for
 // ----- participants: the token is required, and only the participant's own game is reachable -----
 r = await call(A + 'create', { key: OWNER, body: { count: 3, gapDays: 0 } }); const codes = r.json.created.map(c => c.code);
 assert.equal(r.json.created.length, 3);
-for (const route of ['poll', 'move', 'ready', 'check', 'fallback', 'ext', 'summary']) {
+for (const route of ['poll', 'move', 'ready', 'check', 'fallback', 'summary']) {
   assert.equal((await call(P + 'game/' + route, { body: {} })).status, 401, route + ' needs a token');
   assert.equal((await call(P + 'game/' + route, { body: { token: 'P-0000000000000000.1.abc' } })).status, 401, route + ' rejects a forged token');
   assert.equal((await call(P + 'game/' + route)).status, 405, route + ' is POST only');
@@ -45,7 +45,8 @@ const login = async code => (await call(P + 'login', { body: { code } })).json.t
 const tokens = {}; for (const c of codes) { tokens[c] = await login(c); assert((await call(P + 'consent', { body: { token: tokens[c], agree: true } })).json.ok); }
 // a poll before the session starts has nothing to read
 assert.equal((await call(P + 'game/poll', { body: { token: tokens[codes[0]], round: 0 } })).json.error, 'no_session');
-for (const c of codes) { const plan = (await call(P + 'session', { body: { token: tokens[c] } })).json; assert.equal(plan.total, 3); assert(plan.game.payoffTable, 'a payoff table for a 2x2 game'); assert(!JSON.stringify(plan).includes('payoff"'), 'formulas not sent');
+const embeddedFor = { [codes[0]]: { prolific_pid: '5f1c0ffee00000PROLIFIC1' }, [codes[1]]: { prolific_pid: '=HYPERLINK("http://x")' } };
+for (const c of codes) { const plan = (await call(P + 'session', { body: { token: tokens[c], embedded: embeddedFor[c] } })).json; if (c === codes[0]) assert.equal(plan.embedded.prolific_pid, '5f1c0ffee00000PROLIFIC1', 'the engine kept the embedded Prolific ID'); assert.equal(plan.total, 3); assert(plan.game.payoffTable, 'a payoff table for a 2x2 game'); assert(!JSON.stringify(plan).includes('payoff"'), 'formulas not sent');
   assert.equal(plan.game.mode, 'live'); assert.equal(plan.game.players, 2); assert(!JSON.stringify(plan.game).includes('"payoff"') && !JSON.stringify(plan.game).includes('answer')); }
 // a token for one study does nothing in another
 const other = await call('/api/vc/login', { body: { email: 'a@gsu.edu', confirm: true } }); assert.equal((await call(P + 'game/poll', { body: { token: other.json.token, round: 0 } })).status, 401);
@@ -70,8 +71,6 @@ const pair = codes.slice(0, 2), rand = rng('http');
 const sims = pair.map(code => new SimClient(code, {
   rand: rng('d' + code), call: (route, body) => call(P + route, { body: { token: tokens[code], ...body } }).then(x => x.json),
   save: (round, values) => call(P + 'trial', { body: { token: tokens[code], session: 1, index: round, data: values ? { values, rtMs: 400 } : {} } }).then(x => x.json) }));
-assert((await call(P + 'game/ext', { body: { token: tokens[pair[0]], prolificPid: '5f1c0ffee00000PROLIFIC1', studyId: 'STUDY1', sessionId: 'SESS1' } })).json.ok);
-assert((await call(P + 'game/ext', { body: { token: tokens[pair[1]], prolificPid: '=HYPERLINK("http://x")' } })).json.ignored, 'an ID with unsafe characters is ignored');
 let ticks = 0;
 while (sims.some(s => !s.finished) && ticks++ < 500) {
   await Promise.all(sims.map(s => s.tick(clock.v)));
@@ -115,7 +114,7 @@ const sum = await call(A + 'payments', { key: manager }); assert(sum.json.summar
 const summ = await call(P + 'game/summary', { body: { token: tokens[pair[0]] } }); assert.equal(summ.json.points, Number(myPoints)); assert.equal(summ.json.currency, 'USD');
 // status
 const stat = await call(A + 'game-status', { key: viewer }); assert.equal(stat.json.cohorts.length, 1); assert.equal(stat.json.cohorts[0].status, 'playing'); assert(stat.json.cohorts[0].finished);
-console.log('full live game over HTTP: 2 participants, 3 rounds; trials, groups, payments, and Prolific CSVs; Prolific ID kept only when well formed; no emails');
+console.log('full live game over HTTP: 2 participants, 3 rounds; trials, groups, payments, and Prolific CSVs; Prolific ID from the engine embedded data, used only when well formed; no emails');
 
 // ----- a larger group over HTTP, polling concurrently, one participant stops responding -----
 {

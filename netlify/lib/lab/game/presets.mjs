@@ -28,7 +28,7 @@ const COMMON = () => ({
   payment: { method: 'randomRound', pointsPerUnit: 0.1, currency: 'USD', showUpFee: 0, maxBonus: null },
   comprehension: { enabled: false, maxAttempts: 2, questions: [] }
 });
-const live = { mode: 'live', practiceRounds: 0, decisionSeconds: 60, waitMaxSeconds: 180, waitFallback: 'fee', timeoutAction: 'default', dropAfterTimeouts: 3, readySeconds: 45, feedbackSeconds: 30, cohortGroups: 1, pollSeconds: 1 };
+const live = { mode: 'live', practiceRounds: 0, decisionSeconds: 60, waitMaxSeconds: 180, waitFallback: 'fee', timeoutAction: 'default', dropAfterTimeouts: 3, readySeconds: 45, feedbackSeconds: 30, cohortGroups: 1, pollSeconds: 2 };
 
 export const PRESETS = {
   'prisoners-dilemma-1': {

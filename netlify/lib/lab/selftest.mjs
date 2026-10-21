@@ -7,6 +7,7 @@
 // through the website.
 import * as E from './engine.mjs';
 import { getContent } from './content.mjs';
+import { evalDisplay, orderItems } from './logic.mjs';
 
 function parseCsv(text) {
   const rows = []; let row = [], cur = '', q = false;
@@ -20,12 +21,23 @@ function parseCsv(text) {
   const h = rows[0] || []; return rows.slice(1).map(r => Object.fromEntries(r.map((v, i) => [h[i], v])));
 }
 function answerFor(it, r) {
-  if (it.type === 'scale') return String(1 + Math.floor(r() * it.n));
+  if (it.type === 'scale') return String((Number.isInteger(it.start) ? it.start : 1) + Math.floor(r() * it.n));
   if (it.type === 'confidence') return String(Math.floor(r() * 101));
   if (it.type === 'choice' || it.type === 'select') return it.options[Math.floor(r() * it.options.length)].value;
   if (it.type === 'number') return String(Math.floor(r() * 90));
   if (it.type === 'multi') return it.options.filter(() => r() < 0.5).map(o => o.value).concat(it.options[0].value).filter((v, i, a) => a.indexOf(v) === i);
   return 'self-test note';
+}
+
+// Answers for a survey the way a participant would give them: nothing for descriptive text, nothing for
+// a question the display logic hides (embedded data comes from the plan; condition tests are already settled).
+function surveyAnswers(items, plan, r) {
+  const answers = {};
+  for (const it of orderItems(items)) {
+    if (it.type === 'info' || !evalDisplay(it.displayIf, { answers, ed: plan.embedded })) continue;
+    answers[it.id] = answerFor(it, r);
+  }
+  return answers;
 }
 
 export async function runSelfTest(S, { condition, code, keep = false, budgetMs = 2500 } = {}) {
@@ -68,7 +80,7 @@ export async function runSelfTest(S, { condition, code, keep = false, budgetMs =
         ok(!/"truth"|"supports"|misleading|"variant"|"alertId"|"itemId"/.test(JSON.stringify(plan.trials.concat(plan.practice || []))) && plan.trials.every(t => !('id' in (t.alert || t.item || {}))),
           `Session ${s}: no answer keys or item IDs sent to the browser`);
         if (!plan.preSurveyDone) {
-          const data = Object.fromEntries(plan.preItems.map(it => [it.id, answerFor(it, r)]));
+          const data = surveyAnswers(plan.preItems, plan, r);
           ok((await E.saveSurvey(S, code, s, 'pre', data)).ok, `Session ${s}: start-of-session survey saved`);
           st.expect.push({ kind: 'pre', session: s, data });
         }
@@ -92,7 +104,7 @@ export async function runSelfTest(S, { condition, code, keep = false, budgetMs =
         } else ok((await E.saveTrial(S, code, s, pending[0].index, make(pending[0]))).ok, `Session ${s}, item ${pending[0].index + 1}: saved`);
         continue;
       }
-      const data = Object.fromEntries(plan.postItems.map(it => [it.id, answerFor(it, r)]));
+      const data = surveyAnswers(plan.postItems, plan, r);
       const done = await E.saveSurvey(S, code, s, 'post', data);
       ok(done.ok, `Session ${s}: end-of-session survey saved`);
       ok((await E.saveSurvey(S, code, s, 'post', data)).repeat, `Session ${s}: a re-sent survey is acknowledged`);

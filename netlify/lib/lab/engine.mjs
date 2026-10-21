@@ -17,6 +17,7 @@
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { setNew, update, getMany, inBatches, deleteKeys } from './store.mjs';
 import { getContent, itemsFor, domainAllowed } from './content.mjs';
+import { resolve as resolveLogic, publicQuestions } from './logic.mjs';
 
 export const TOKEN_HOURS = 12;
 const DEFAULT_GAP = 6;
@@ -138,19 +139,35 @@ async function statusOf(S, p, now, c, prog) {
 async function getPlan(S, p, n) { return p.sessions?.[n]?.plan || await S.store.get(planKey(p.code, n)); }
 
 // ---------- validation of survey answers ----------
-export function cleanAnswers(d, items) {
+// ctx (optional): { condition, embedded } for display logic. A question hidden by its displayIf loses its
+// answer (the browser clears it too), and later questions that depend on it see it as unanswered.
+// Descriptive text (type "info") never has an answer.
+export function cleanAnswers(d, items, ctx = {}) {
   d = d && typeof d === 'object' ? d : {};
-  const out = {};
+  let out = {};
   for (const it of items) {
-    const v = d[it.id];
+    if (it.type === 'info') continue;
+    const v = Object.hasOwn(d, it.id) ? d[it.id] : undefined;   // own properties only (never "constructor" or "__proto__")
     if (v == null || v === '') continue;
-    if (it.type === 'scale') { const n = Number(v); if (Number.isInteger(n) && n >= 1 && n <= it.n) out[it.id] = String(n); }
+    if (it.type === 'scale') { const n = Number(v), lo = Number.isInteger(it.start) ? it.start : 1; if (Number.isInteger(n) && n >= lo && n <= lo + it.n - 1) out[it.id] = String(n); }
     else if (it.type === 'confidence') { const n = Number(v); if (Number.isFinite(n) && n >= 0 && n <= 100) out[it.id] = String(Math.round(n)); }
     else if (it.type === 'choice' || it.type === 'select') { if (it.options.some(o => o.value === v)) out[it.id] = v; }
     // An open number is kept exactly as entered (no range check): an impossible age or a count of 5,000 surveys is data.
     else if (it.type === 'number') { const t = String(v).trim().replace(/,/g, ''), n = Number(t); if (t !== '' && Number.isFinite(n) && Math.abs(n) < 1e12) out[it.id] = t; }
     else if (it.type === 'multi') { const vals = (Array.isArray(v) ? v : [v]).filter(x => it.options.some(o => o.value === x)); if (vals.length) out[it.id] = [...new Set(vals)]; }
     else out[it.id] = String(v).slice(0, 4000);
+  }
+  if (items.some(it => it.displayIf)) out = resolveLogic(items, out, { ed: ctx.embedded, condition: ctx.condition }).answers;
+  return out;
+}
+
+// Embedded data for a session: URL parameters the browser sent (only names declared in the content, cleaned
+// and capped) and constants from the content. Never used for sign-in or identity.
+export function resolveEmbedded(defs, sent) {
+  const out = {}, src = sent && typeof sent === 'object' ? sent : {};
+  for (const d of defs || []) {
+    if (d.source === 'value') out[d.name] = String(d.value ?? '').slice(0, 300);
+    else { const v = src[d.name]; out[d.name] = typeof v === 'string' ? v.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 200) : ''; }
   }
   return out;
 }
@@ -197,12 +214,12 @@ export async function consent(S, code, agree, now = Date.now()) {
 }
 
 // The plan for session n: built by the study type, plus the survey questions this participant sees.
-export function buildPlan(S, p, n, c) {
+export function buildPlan(S, p, n, c, extra = {}) {
   const seedId = S.study.seedId || S.study.id;
   const rand = seeded(`${p.code}|${seedId}|s${n}`);
   const plan = S.type.buildPlan(p, n, c, rand, { seeded, shuffle, studyId: seedId });
   const ctx = { session: n, condition: p.condition, ...(plan.surveyCtx || {}) };
-  return { ...plan, session: n, contentVersion: c.version || 0, createdAt: Date.now(),
+  return { ...plan, session: n, contentVersion: c.version || 0, createdAt: Date.now(), condition: p.condition, embedded: resolveEmbedded(c.embedded, extra.embedded),
     preItems: itemsFor(c.survey.pre, 'pre', ctx, S.type), postItems: itemsFor(c.survey.post, 'post', ctx, S.type) };
 }
 
@@ -213,13 +230,13 @@ export function publicPlan(S, plan, state) {
     session: plan.session, total: plan.trials.length,
     practice: plan.practice ? { index: 'practice', ...S.type.publicTrial(plan.practice, plan) } : null,
     practiceDone: !!state.practiceDone, preSurveyDone: !!state.preSurveyDone,
-    preItems: plan.preItems || [], postItems: plan.postItems || [],
+    preItems: publicQuestions(plan.preItems, plan.condition), postItems: publicQuestions(plan.postItems, plan.condition), embedded: plan.embedded || {},
     trials: plan.trials.map(t => ({ index: t.index, done: done.has(t.index), ...S.type.publicTrial(t, plan) })),
     ...(S.type.publicPlanExtras ? S.type.publicPlanExtras(plan) : {})
   };
 }
 
-export async function startSession(S, code, now = Date.now()) {
+export async function startSession(S, code, now = Date.now(), extra = {}) {
   const p = await loadParticipant(S, code);
   if (!p) return { error: 'invalid_code', status: 401 };
   if (!p.consentedAt && !(await S.store.get(`consent/${p.code}`))) return { error: 'no_consent', status: 403 };
@@ -230,7 +247,7 @@ export async function startSession(S, code, now = Date.now()) {
   const n = st.nextSession;
   let plan = await getPlan(S, p, n);
   if (!plan) {   // written once: whoever writes first wins and everyone reads that copy
-    if (await setNew(S.store, planKey(p.code, n), buildPlan(S, p, n, c))) await S.store.set(`started/${p.code}/s${n}-${now}`, { at: now });
+    if (await setNew(S.store, planKey(p.code, n), buildPlan(S, p, n, c, extra))) await S.store.set(`started/${p.code}/s${n}-${now}`, { at: now });
     plan = await S.store.get(planKey(p.code, n));
     if (n === 1 && p.totalSessions == null) await update(S.store, pKey(p.code), d => { if (d.totalSessions == null) d.totalSessions = S.type.sessionCount(c); });
   }
@@ -284,7 +301,8 @@ export async function saveSurvey(S, code, session, kind, data, now = Date.now())
   if (st.finished || session !== st.nextSession || !plan) return { error: 'wrong_session', status: 409 };
   if (kind === 'post' && (prog.sessions[session]?.trialsDone.length || 0) < plan.trials.length) return { error: 'trials_incomplete', status: 409 };
   const items = (kind === 'pre' ? plan.preItems : plan.postItems) || [];
-  const created = await setNew(store, key, { code: p.code, condition: p.condition, session, kind, contentVersion: plan.contentVersion, receivedAt: now, data: cleanAnswers(data, items) });
+  const created = await setNew(store, key, { code: p.code, condition: p.condition, session, kind, contentVersion: plan.contentVersion, receivedAt: now,
+    ...(plan.embedded && Object.keys(plan.embedded).length ? { embedded: plan.embedded } : {}), data: cleanAnswers(data, items, { condition: p.condition, embedded: plan.embedded }) });
   if (created && kind === 'post') await store.set(`done/${p.code}/s${session}-${now}`, { at: now });
   const after = await progressOf(S, p);
   return { ok: true, repeat: !created || undefined, status: status(p, now, totalFor(S, p, c, after), after.completed) };
@@ -418,6 +436,7 @@ export function trialRow(S, r, p) {
 export function surveyRow(r, p) {
   const row = { code: r.code, condition: r.condition, test: p?.test ? 1 : 0, label: p?.label || '', self_signup: p?.selfSignup ? 1 : 0,
     session: r.session, survey: r.kind, content_version: r.contentVersion ?? 0, received_at: r.receivedAt ? new Date(r.receivedAt).toISOString() : '' };
+  for (const [k, v] of Object.entries(r.embedded || {})) if (/^[a-z][a-z0-9_]{0,40}$/.test(k)) row[`ed_${k}`] = v;   // embedded data (URL parameters, constants)
   for (const [k, v] of Object.entries(r.data || {})) if (/^[a-z][a-z0-9_]{0,40}$/.test(k)) row[k in row ? `q_${k}` : k] = v;
   return row;
 }

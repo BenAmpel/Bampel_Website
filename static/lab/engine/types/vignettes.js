@@ -25,7 +25,7 @@
         : '';
       var img = it.image ? '<img src="' + esc(it.image) + '" alt="' + esc(it.imageAlt || '') + '" data-trace="image">' : '';
       ui.show('<h2>' + esc(it.title) + '</h2><div class="vg-item vg-' + esc(it.kind) + '" data-trace="item">' + head + img + '<div class="vg-body mail-body">' + body(it.body, esc) + '</div></div>' +
-        qs.map(ui.questionHtml).join('') + '<div id="trialmsg"></div><div class="actions"><button id="submit">' + Th(ctx.isPractice ? 'practice_submit' : 'submit_button') + '</button></div>' +
+        ui.questionsHtml(qs) + '<div id="trialmsg"></div><div class="actions"><button id="submit">' + Th(ctx.isPractice ? 'practice_submit' : 'submit_button') + '</button></div>' +
         '<div class="statusbar" id="statusbar" aria-hidden="true"></div>');
 
       var bar = document.getElementById('statusbar');

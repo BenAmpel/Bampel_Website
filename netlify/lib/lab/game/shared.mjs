@@ -4,7 +4,7 @@
 // atomic, so every piece of shared state is a write-once key and state is derived from which keys exist.
 // Nothing here updates a record in place. Keys that never change once written are cached per function instance.
 //
-//   g/p/<pid>/...        one participant: lobby, member/<n>, role, fallback, comp/<n>, comp-pass, comp-fail, ext, pay,
+//   g/p/<pid>/...        one participant: lobby, member/<n>, role, fallback, comp/<n>, comp-pass, comp-fail, pay,
 //                        adone, amatch
 //   g/slot/<slot>        the groups formed in one 5-second matching slot (one record, so a slot has one outcome)
 //   g/claim/<slot>       who is running the slot (reduces duplicate work; not needed for correctness)
@@ -30,7 +30,6 @@ export const K = {
   comp: (pid, n) => `g/p/${pid}/comp/${n}`,
   compPass: pid => `g/p/${pid}/comp-pass`,
   compFail: pid => `g/p/${pid}/comp-fail`,
-  ext: pid => `g/p/${pid}/ext`,
   pay: pid => `g/p/${pid}/pay`,
   adone: pid => `g/p/${pid}/adone`,
   amatch: pid => `g/p/${pid}/amatch`,
