@@ -4,7 +4,7 @@
 // participants in real time and runs round by round; asynchronous play has people decide alone and matches them
 // with stored decisions afterwards (strategy method for later movers). Rules and design: netlify/lib/lab/game/*.mjs
 // and static/lab/README.md ("Economic games"). Participant renderer: static/lab/engine/types/game.js.
-import { gameOf, paramsFor, payoffTable, totalRounds, fillText, textVars, stepsOf, stageActs, autoValues } from '../game/rules.mjs';
+import { gameOf, roundsTextAll, paramsFor, payoffTable, totalRounds, fillText, textVars, stepsOf, stageActs, autoValues } from '../game/rules.mjs';
 import { defaultGame, normalizeGame, validateGame, validateComprehensionInput } from '../game/model.mjs';
 import { presetList, presetContent } from '../game/presets.mjs';
 import { setNew } from '../store.mjs';
@@ -16,10 +16,11 @@ import { purgeGameKeys } from '../game/purge.mjs';
 import { runSelfTest } from '../game/selftest.mjs';
 import { normalize as normalizeContent, validateContent } from '../content.mjs';
 
+const OLD_INTRO = 'Read how the game works below before you start. Rounds in this session, practice rounds included: {n}.';
 const F = (group, key, label, def) => ({ group, key, label, def });
 const textFields = [
   F('Instructions', 'instr_title', 'Title', 'How the game works'),
-  F('Instructions', 'instr_intro', 'Instructions ({n} = rounds, including practice)', 'Read how the game works below before you start. Rounds in this session, practice rounds included: {n}.'),
+  F('Instructions', 'instr_intro', 'Instructions ({rounds_text} = for example "12 rounds, including 2 practice rounds"; {n} = number of rounds including practice)', 'Read how the game works below before you start. This session has {rounds_text}.'),
   F('Instructions', 'start_body', 'Before starting ({minutes})', 'This session takes about {minutes} minutes. Please finish it in one sitting and keep this page open. Other participants may be waiting for your decisions.\n\nIf you get disconnected, sign in again and you will return to your game.'),
   F('Instructions', 'game_payoff_table', 'Payoff table heading', 'Points for each pair of choices'),
   F('Instructions', 'game_payoff_you', 'Payoff table: how a cell is read', 'Each cell shows your points first, then the other participant\'s points.'),
@@ -94,7 +95,7 @@ const lockedKeys = ['game', 'payoff', 'params', 'conditions', 'feedback', 'payme
 function publicGame(g) {
   const { spec, params } = g, steps = stepsOf(spec), tv = textVars(spec, params);
   return {
-    mode: spec.mode, players: spec.players, roles: spec.roles, rounds: spec.rounds, practiceRounds: spec.practiceRounds, matching: spec.matching,
+    mode: spec.mode, players: spec.players, roles: spec.roles, rounds: spec.rounds, practiceRounds: spec.practiceRounds, roundsTextAll: roundsTextAll(spec), matching: spec.matching,
     decisionSeconds: spec.decisionSeconds, readySeconds: spec.readySeconds, waitMaxSeconds: spec.waitMaxSeconds, waitFallback: spec.waitFallback, feedbackSeconds: spec.feedbackSeconds, pollSeconds: spec.pollSeconds,
     stages: spec.stages.map((st, si) => ({ id: st.id, label: st.label, role: st.role, step: steps.findIndex(s => s.stages.includes(si)), prompt: fillText(st.prompt, tv), show: st.show || [],
       strategy: st.strategyMethod ? { on: st.strategyMethod.on, form: st.strategyMethod.form } : null,
@@ -228,7 +229,10 @@ export default {
   editorMeta: () => ({ presets: presetList().map(p => ({ ...p, content: presetContent(p.id) })) }),
   // The Prolific ID comes from the engine's embedded data (URL parameter PROLIFIC_PID, kept in the plan at session start).
   defaultContent: () => ({ ...defaultGame(), embedded: [{ name: 'prolific_pid', source: 'url', param: 'PROLIFIC_PID' }] }),
-  normalize: (c, d) => normalizeGame(c, d),
+  normalize: (c, d) => {
+    if (c.text && c.text.instr_intro === OLD_INTRO) c.text.instr_intro = d.text.instr_intro;   // the wording before October 2026, if it was never edited
+    return normalizeGame(c, d);
+  },
   validate: (c, e) => validateGame(c, e),
   publicContent: () => ({ game: true }),
 

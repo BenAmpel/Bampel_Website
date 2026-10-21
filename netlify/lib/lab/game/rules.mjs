@@ -59,6 +59,8 @@ export function paramsFor(content, condition) {
 
 // Fills {name} in text with the constants of the game (a treatment's own values).
 // Names available in instruction text besides the game's constants.
+// "1 round", "12 rounds, including 2 practice rounds": for the opening instructions ({rounds_text} there), which count practice rounds too.
+export const roundsTextAll = spec => { const n = spec.rounds + (spec.practiceRounds || 0); return `${n} ${n === 1 ? 'round' : 'rounds'}` + (spec.practiceRounds > 0 ? `, including ${spec.practiceRounds} practice ${spec.practiceRounds === 1 ? 'round' : 'rounds'}` : ''); };
 export const textVars = (spec, params) => ({ ...params, rounds: spec.rounds, practiceRounds: spec.practiceRounds, players: spec.players, rounds_text: `${spec.rounds} ${spec.rounds === 1 ? 'round' : 'rounds'}` });
 export const fillText = (text, params) => String(text || '').replace(/\{([A-Za-z][A-Za-z0-9_]*)\}/g, (m, k) => (Object.prototype.hasOwnProperty.call(params || {}, k) ? String(params[k]) : m));
 

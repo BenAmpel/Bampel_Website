@@ -1,4 +1,5 @@
 // CCAIR Behavioral Lab: admin access (lab owner + per-study team members) and the activity log.
+// Researcher accounts (accounts.mjs) are resolved by the router and passed in as ctx.account.
 // The lab owner signs in with the LAB_ADMIN_KEY environment variable (VC_ADMIN_KEY also works). The owner gives team
 // members their own key per study; only a SHA-256 hash of each key is stored, in that study's store.
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
@@ -14,7 +15,13 @@ export const can = (role, need) => ROLES.indexOf(role) >= ROLES.indexOf(need);
 
 const sha = s => createHash('sha256').update(s).digest('hex');
 
-export async function authAdmin(store, key, ownerKey, now = Date.now()) {
+// ctx.account: a researcher account already resolved from a valid bearer session (router.mjs). Its role for ctx.studyId comes
+// from the account's studyRoles; a lab owner account is owner everywhere. With ctx.account set the key is not looked at.
+export async function authAdmin(store, key, ownerKey, now = Date.now(), ctx = {}) {
+  if (ctx.account) {
+    const a = ctx.account, role = a.labOwner ? 'owner' : (ctx.studyId && a.studyRoles && Object.hasOwn(a.studyRoles, ctx.studyId) ? a.studyRoles[ctx.studyId] : null);
+    return role && ROLES.includes(role) ? { id: 'account', name: a.name, role, accountId: a.id } : null;
+  }
   key = String(key || '');
   if (!key) return null;
   if (ownerKey && ownerKey.length >= 16 && key.length === ownerKey.length && timingSafeEqual(Buffer.from(key), Buffer.from(ownerKey))) return { id: 'owner', name: 'Owner', role: 'owner' };

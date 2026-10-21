@@ -38,8 +38,18 @@
   function show(html) {
     stage.innerHTML = html;
     window.scrollTo(0, 0);
+    updateContact();
     var h = stage.querySelector('h1, h2');
     if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
+  }
+  // "Questions about this study? Contact the lab": a mailto link under the card. It carries the study name and, once signed in,
+  // the study ID taken from the sign-in token (never the email address). Nothing is sent from this page.
+  function updateContact() {
+    var LC = window.LabContact, el = document.getElementById('contact-note');
+    if (!LC) return;
+    if (!el) { if (!stage.parentNode || !document.createElement) return; el = document.createElement('p'); el.id = 'contact-note'; el.className = 'muted contact-note'; stage.parentNode.appendChild(el); }
+    var id = S.token && /^[A-Za-z0-9-]+\./.test(S.token) ? S.token.split('.')[0] : '';
+    el.innerHTML = 'Questions about this study? <a href="' + esc(LC.participant(S.content && S.content.name, id)) + '">Contact the lab</a>';
   }
   function errorBox(msg, id) { return '<p class="error" role="alert"' + (id ? ' id="' + id + '"' : '') + '>' + esc(msg) + '</p>'; }
   var ERR = {
@@ -416,7 +426,7 @@
   function showInstructions() {
     var p = S.plan, extra = S.type.instructions ? S.type.instructions(p, ui) : '';
     progress.textContent = T('start_title', { session: p.session, total: S.content.sessions });
-    show('<h1>' + Th('instr_title') + '</h1>' + Tp('instr_intro', { n: p.total }) + extra + (p.practice && !p.practiceDone ? Tp('instr_practice') : '') +
+    show('<h1>' + Th('instr_title') + '</h1>' + Tp('instr_intro', p.game && p.game.roundsTextAll ? { n: p.total, rounds_text: p.game.roundsTextAll } : { n: p.total }) + extra + (p.practice && !p.practiceDone ? Tp('instr_practice') : '') +
       '<div class="actions"><button id="go">' + Th('begin_button') + '</button></div>');
     document.getElementById('go').addEventListener('click', function () { p._instructed = true; next(); });
   }

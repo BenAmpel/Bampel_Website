@@ -1,0 +1,36 @@
+/* CCAIR Behavioral Lab: shared layout for the guide, support, sign-in, and account pages (with study.css and admin.css). */
+.labbar { border-bottom: 1px solid var(--line); background: var(--card); margin: -24px -16px 24px; padding: 12px 16px; }
+.labbar .inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.labbar .brand { font-weight: 700; color: var(--text); text-decoration: none; }
+.labbar nav a { margin-left: 16px; color: var(--link); }
+.labbar nav a:first-child { margin-left: 0; }
+.labfoot { max-width: 760px; margin: 24px auto 0; color: var(--muted); font-size: 14px; }
+.labfoot a, .card a { color: var(--link); }
+.card a.btn, .card a.btn:visited { color: var(--accent-text); }
+.card a.btn.secondary { color: var(--accent); }
+.wrap.wide { max-width: 860px; }
+.page h1 { font-size: 26px; }
+.page h2 { margin-top: 28px; font-size: 20px; }
+.page h3 { font-size: 16px; margin: 18px 0 6px; }
+.page ul, .page ol { padding-left: 22px; margin: 0 0 12px; }
+.page li { margin: 4px 0; }
+.toc { border: 1px solid var(--line); border-radius: 8px; padding: 10px 16px; margin: 16px 0; background: var(--status-bg); }
+.toc ol { columns: 2; column-gap: 28px; margin: 6px 0; }
+@media (max-width: 640px) { .toc ol { columns: 1; } }
+.note { border-left: 4px solid var(--accent); background: var(--status-bg); padding: 10px 14px; border-radius: 4px; margin: 14px 0; }
+.page table { margin: 10px 0 16px; }
+.page th, .page td { white-space: normal; }
+.page details { border: 1px solid var(--line); border-radius: 8px; padding: 8px 14px; margin: 8px 0; }
+.page summary { cursor: pointer; font-weight: 600; }
+.page summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.page code { background: var(--status-bg); padding: 1px 5px; border-radius: 4px; }
+.cta { display: flex; gap: 12px; flex-wrap: wrap; margin: 14px 0; }
+.form-narrow { max-width: 420px; }
+.form-narrow label { display: grid; gap: 4px; margin: 12px 0; font-size: 14px; color: var(--muted); }
+.form-narrow input[type=text], .form-narrow input[type=password], .form-narrow input[type=email] { width: 100%; font-size: 16px; }
+.codes { font-family: ui-monospace, Menlo, monospace; font-size: 15px; background: var(--status-bg); border-radius: 8px; padding: 10px 14px; columns: 2; list-style: none; margin: 8px 0; }
+.codes li { margin: 2px 0; }
+.setupkey { font-family: ui-monospace, Menlo, monospace; font-size: 16px; letter-spacing: .08em; overflow-wrap: anywhere; background: var(--status-bg); border-radius: 8px; padding: 8px 12px; }
+.statusline { min-height: 1.4em; }
+input[type=password], input[type=email] { font: inherit; padding: 8px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--card); color: var(--text); }
+input[type=text] { border-color: var(--line-strong); }
