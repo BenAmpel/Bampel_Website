@@ -4,6 +4,9 @@
 // builds complete vignettes-type content (survey only, one session unless the importer asks for more), checks it
 // with validateContent, and writes the report. Nothing here saves anything.
 import { defaultContent, validateContent, validateQuestions } from '../content.mjs';
+
+// An own property of a parsed object, never an inherited one ("constructor", "__proto__").
+export const own = (o, k) => (o && typeof o === 'object' && Object.hasOwn(o, k) ? o[k] : undefined);
 import { TYPES } from '../types/index.mjs';
 import { describe } from '../logic.mjs';
 
@@ -33,7 +36,7 @@ export function decodeEntities(s) {
       const n = e[1].toLowerCase() === 'x' ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10);
       return Number.isInteger(n) && n > 0 && n < 0x110000 && !(n >= 0xd800 && n < 0xe000) ? String.fromCodePoint(n) : '';
     }
-    return ENTITIES[e.toLowerCase()] ?? m;
+    return Object.hasOwn(ENTITIES, e.toLowerCase()) ? ENTITIES[e.toLowerCase()] : m;
   });
 }
 
@@ -74,7 +77,7 @@ export const hasMarkup = html => /<\s*(img|video|audio|iframe|embed|object|table
 const clip = (s, n) => (String(s).length > n ? String(s).slice(0, n - 1) + '…' : String(s));
 
 // ---------- variable names ----------
-export const RESERVED_NAMES = ['code', 'condition', 'test', 'label', 'self_signup', 'session', 'survey', 'content_version', 'received_at', 'trial_index', 'item_id'];
+export const RESERVED_NAMES = ['constructor', 'prototype', '__proto__', 'hasownproperty', 'tostring', 'valueof', 'code', 'condition', 'test', 'label', 'self_signup', 'session', 'survey', 'content_version', 'received_at', 'trial_index', 'item_id'];
 // The lab's variable rule: a lowercase letter, then lowercase letters, digits, and underscores, 41 characters at most.
 export function sanitizeName(raw, fallback = 'q') {
   let s = String(raw ?? '').normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
@@ -150,7 +153,7 @@ function cleanQuestion(q, report) {
     });
   }
   if (q.type === 'scale') {
-    out.n = q.n; out.lo = q.lo ? clip(q.lo, 120) : ''; out.hi = q.hi ? clip(q.hi, 120) : '';
+    out.n = q.n; if (Number.isInteger(q.start) && q.start !== 1) out.start = q.start; out.lo = q.lo ? clip(q.lo, 120) : ''; out.hi = q.hi ? clip(q.hi, 120) : '';
     if (q.labels && q.labels.length === q.n && q.labels.every(x => String(x).trim())) out.labels = q.labels.map(x => clip(String(x), 120));
   }
   if (q.type === 'text' && q.long != null) out.long = !!q.long;

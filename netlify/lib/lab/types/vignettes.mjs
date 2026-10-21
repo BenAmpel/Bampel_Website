@@ -157,7 +157,7 @@ export default {
     const answers = {};
     for (const q of orderItems(plan.questions || [])) {   // answers only to questions this participant would see
       if (q.type === 'info' || !evalDisplay(q.displayIf, { answers, ed: plan.embedded })) continue;
-      if (q.type === 'scale') answers[q.id] = String(1 + Math.floor(rand() * q.n));
+      if (q.type === 'scale') answers[q.id] = String((Number.isInteger(q.start) ? q.start : 1) + Math.floor(rand() * q.n));
       else if (q.type === 'choice' || q.type === 'select') answers[q.id] = pick(q.options).value;
       else if (q.type === 'confidence') answers[q.id] = String(Math.floor(rand() * 101));
       else if (q.type === 'number') answers[q.id] = String(Math.floor(rand() * 90));

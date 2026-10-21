@@ -152,6 +152,27 @@ assert(validate([{ id: 'a1', text: 'A', type: 'text', group: 'Bad Group', sessio
 assert(validate([{ id: 'n1', text: 'N', type: 'number', min: 5, max: 1, sessions: [1] }]).some(m => /minimum is above/.test(m)));
 console.log('display logic: evaluation table (server = browser), resolve order, public copy, hidden answers dropped, validation, piped text');
 
+
+// ---------- scale numbering, own properties, per-item pages ----------
+{
+  const zero = { id: 's0', type: 'scale', n: 11, start: 0 };
+  assert.deepEqual(cleanAnswers({ s0: '0' }, [zero]), { s0: '0' }); assert.deepEqual(cleanAnswers({ s0: '10' }, [zero]), { s0: '10' }); assert.deepEqual(cleanAnswers({ s0: '11' }, [zero]), {}); assert.deepEqual(cleanAnswers({ s0: '-1' }, [zero]), {});
+  assert.deepEqual(cleanAnswers({ s1: '0' }, [{ id: 's1', type: 'scale', n: 5 }]), {}, 'no start: points are 1 to n as before');
+  assert.deepEqual(cleanAnswers({ s1: '5' }, [{ id: 's1', type: 'scale', n: 5 }]), { s1: '5' });
+  assert.deepEqual(validate([{ id: 's0', text: 'S', type: 'scale', n: 11, start: 0, sessions: [1] }]), []);
+  assert(validate([{ id: 's0', text: 'S', type: 'scale', n: 11, start: 95, sessions: [1] }]).some(m => /between -10 and 100/.test(m)));
+  assert(validate([{ id: 's0', text: 'S', type: 'scale', n: 5, start: -11, sessions: [1] }]).length);
+  assert(validate([{ id: 's0', text: 'S', type: 'scale', n: 5, start: 1.5, sessions: [1] }]).length);
+  const zl = [{ ...zero, text: 'S', sessions: [1] }, { id: 'z', text: 'Z', type: 'text', sessions: [1], displayIf: q('s0', 'eq', '0') }];
+  assert.deepEqual(validate(zl), [], 'a rule can use the first number');
+  assert(validate([zl[0], { ...zl[1], displayIf: q('s0', 'eq', '11') }]).some(m => /not a point/.test(m)));
+  assert.deepEqual(cleanAnswers(Object.create({ constructor: 'x' }), [{ id: 'constructor', type: 'text' }]), {}, 'inherited names are never read');
+  assert.equal(S.evalDisplay({ q: 'constructor', op: 'answered' }, { answers: {} }), false); assert.equal(B.evalDisplay({ q: 'constructor', op: 'answered' }, { answers: {} }), false);
+  assert.equal(S.evalDisplay({ ed: 'toString', op: 'answered' }, { ed: {} }), false); assert.equal(B.evalDisplay({ ed: 'toString', op: 'answered' }, { ed: {} }), false);
+  assert(validate([{ id: 'constructor', text: 'x', type: 'text', sessions: [1] }]).some(m => /reserved/.test(m)));
+  assert(validate([{ id: 'a', text: 'x', type: 'text', page: 2 }], { allowSessions: false }).some(m => /cannot have a page number/.test(m)), 'per-item questions reject page');
+  assert.deepEqual(validate([{ id: 'a', text: 'x', type: 'text' }], { allowSessions: false }), []);
+}
 // malformed content never throws from the validator
 assert.doesNotThrow(() => validate([{ id: 'a', text: 'A', type: 'choice', options: 'oops', labels: 'x', displayIf: 'bad', sessions: [1] }, { id: 'b', text: 'B', type: 'text', displayIf: { all: 'x' }, sessions: [1] }]));
 console.log('ALL DISPLAY LOGIC TESTS PASSED');

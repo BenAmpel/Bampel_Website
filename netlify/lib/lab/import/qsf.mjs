@@ -6,7 +6,7 @@
 //               becomes embedded data; piped text becomes {{q:...}} and {{ed:...}} tokens.
 // Anything else (custom JavaScript, quotas, loop & merge, carry-forward choices, per-choice randomization,
 // authenticators, redirects, ...) is listed in the report with the question ID.
-import { ImportError, newReport, mapped, approximated, unsupported, Names, finishImport, htmlToText, hasMarkup, sanitizeName, andNodes, orNodes, negate } from './common.mjs';
+import { ImportError, LIMITS, own, newReport, mapped, approximated, unsupported, Names, finishImport, htmlToText, hasMarkup, sanitizeName, andNodes, orNodes, negate } from './common.mjs';
 import { Unsupported } from './expr.mjs';
 
 const numKeys = o => Object.keys(o || {}).filter(k => /^\d+$/.test(k)).sort((a, b) => a - b);
@@ -150,9 +150,9 @@ export function importQsf(text, { sourceName } = {}) {
     return order.filter(k => byKey.has(k)).map(k => ({ key: k, ...byKey.get(k) }));
   };
   const optionValue = (p, key, c) => {
-    const rc = p.RecodeValues && p.RecodeValues[key];
+    const rc = own(p.RecodeValues, key);
     if (rc != null && String(rc) !== '') return String(rc);
-    const tag = p.ChoiceDataExportTags && typeof p.ChoiceDataExportTags === 'object' ? p.ChoiceDataExportTags[key] : null;
+    const tag = own(p.ChoiceDataExportTags, key);
     return tag ? String(tag) : String(key);
   };
 
@@ -182,9 +182,9 @@ export function importQsf(text, { sourceName } = {}) {
         if (sel === 'NPS') {
           const id = names.make(tag, 'q'); info.kind = 'mc'; info.id = id; info.scale = true;
           const nums = chs.map(c => htmlToText(c.Display));
-          put({ id, type: 'scale', text, n: 11, lo: nums.length === 11 && !/^\d+$/.test(nums[0]) ? nums[0] : 'Not at all likely', hi: nums.length === 11 && !/^\d+$/.test(nums[10]) ? nums[10] : 'Extremely likely' });
-          info.optVals = new Map(); for (let i = 0; i < 11; i++) info.optVals.set(chs[i] ? chs[i].key : String(i + 1), String(i + 1));
-          mapped(report, src, 'scale (11 points)', id); approximated(report, src, 'The Net Promoter question became an 11-point scale numbered 1 to 11 (source 0 to 10: subtract 1).'); break;
+          put({ id, type: 'scale', text, n: 11, start: 0, lo: nums.length === 11 && !/^\d+$/.test(nums[0]) ? nums[0] : 'Not at all likely', hi: nums.length === 11 && !/^\d+$/.test(nums[10]) ? nums[10] : 'Extremely likely' });
+          info.optVals = new Map(); for (let i = 0; i < 11; i++) info.optVals.set(chs[i] ? chs[i].key : String(i + 1), String(i));
+          mapped(report, src, 'scale (11 points)', id); approximated(report, src, 'The Net Promoter question became an 11-point scale numbered 0 to 10, as in the source.'); break;
         }
         const multi = ['MAVR', 'MAHR', 'MACOL', 'MSB'].includes(sel), dd = sel === 'DL' || sel === 'SB';
         const single = ['SAVR', 'SAHR', 'SACOL', 'DL', 'SB', undefined, ''].includes(sel);
@@ -213,10 +213,10 @@ export function importQsf(text, { sourceName } = {}) {
         cols.forEach((c, i) => info.colPoint.set(c.key, multiAns ? String(optionValue({ RecodeValues: p.RecodeValues }, c.key)) : String(i + 1)));
         const labels = cols.map(c => htmlToText(c.Display || '') || c.key);
         const asScale = !multiAns && cols.length <= 11;
-        if (p.RecodeValues && !multiAns) approximated(report, src, 'Recode values of the matrix columns were not kept; scale points are numbered 1 to ' + cols.length + ' in the order shown.');
+        if (p.RecodeValues && !multiAns) approximated(report, src, 'Recode values of the matrix columns were not kept; scale points are numbered 1 to ' + cols.length + ' in the order shown (check the codes against your source if they differ).');
         const ids = [];
         for (const r of rows) {
-          const tagR = p.ChoiceDataExportTags && typeof p.ChoiceDataExportTags === 'object' && p.ChoiceDataExportTags[r.key] ? p.ChoiceDataExportTags[r.key] : (p.VariableNaming && p.VariableNaming[r.key]) || r.key;
+          const tagR = own(p.ChoiceDataExportTags, r.key) || own(p.VariableNaming, r.key) || r.key;
           const rid = names.make(`${tag}_${tagR}`, 'q');
           ids.push(rid); info.rows.set(r.key, { id: rid });
           const row = asScale ? { type: 'scale', n: cols.length, lo: labels[0], hi: labels[labels.length - 1], labels }
@@ -239,7 +239,7 @@ export function importQsf(text, { sourceName } = {}) {
           info.kind = 'form'; info.id = baseId; info.rows = new Map();
           const ids = [];
           for (const r of rows) {
-            const rid = names.make(`${tag}_${(p.ChoiceDataExportTags && p.ChoiceDataExportTags[r.key]) || r.key}`, 'q');
+            const rid = names.make(`${tag}_${own(p.ChoiceDataExportTags, r.key) || r.key}`, 'q');
             ids.push(rid); info.rows.set(r.key, { id: rid, type: 'text' });
             put({ id: rid, type: 'text', long: false, text: htmlToText(r.Display || '') || `Field ${r.key}`, group: grp, groupText: text });
           }
@@ -264,7 +264,8 @@ export function importQsf(text, { sourceName } = {}) {
         let n = 0;
         if (snap && grid > 0 && grid + 1 <= 11) n = grid + 1; else if (Number.isInteger(mn) && Number.isInteger(mx) && mx - mn + 1 <= 11) n = mx - mn + 1;
         const lab = p.Labels ? asList(p.Labels).map(l => htmlToText((l && l.Display) || '')) : [];
-        info.kind = 'slider'; info.rows = new Map(); info.min = mn; info.max = mx; info.n = n;
+        const zeroStep = !!n && Number.isInteger(mn) && mx - mn === n - 1;
+        info.kind = 'slider'; info.rows = new Map(); info.min = mn; info.max = mx; info.n = n; info.zeroStep = zeroStep;
         const multi = rows.length > 1, baseId = names.make(tag, 'q'), grp = sanitizeName(baseId), ids = [];
         info.id = baseId;
         for (const r of rows) {
@@ -273,9 +274,9 @@ export function importQsf(text, { sourceName } = {}) {
           const stmt = htmlToText(r.Display || '');
           const t = multi ? stmt || `Statement ${r.key}` : text || stmt;
           const gb = multi ? { group: grp, groupText: text } : {};
-          put(n ? { id: rid, type: 'scale', n, lo: lab[0] || String(mn), hi: lab[lab.length - 1] || String(mx), text: t, ...gb } : { id: rid, type: 'number', min: mn, max: mx, text: t, ...gb });
+          put(n ? { id: rid, type: 'scale', n, ...(zeroStep ? { start: mn } : {}), lo: lab[0] || String(mn), hi: lab[lab.length - 1] || String(mx), text: t, ...gb } : { id: rid, type: 'number', min: mn, max: mx, text: t, ...gb });
         }
-        if (n) approximated(report, src, `Slider ${mn} to ${mx} became a ${n}-point rating scale numbered from 1 (no handle to drag, in line with the lab's rules).`);
+        if (n) approximated(report, src, `Slider ${mn} to ${mx} became a ${n}-point rating scale${zeroStep ? ` numbered ${mn} to ${mx}, as in the source` : ' numbered from 1 (the source steps are not one apart)'} (no handle to drag, in line with the lab's rules).`);
         else approximated(report, src, `Slider ${mn} to ${mx} has more than 11 steps, so each statement is a typed number question with a ${mn} to ${mx} hint (the range is not enforced).`);
         mapped(report, src, n ? 'scale' : 'number', ids.join(', '));
         break;
@@ -313,6 +314,8 @@ export function importQsf(text, { sourceName } = {}) {
   const stray = [...sq.keys()].filter(q => !usedSq.has(q));
   if (stray.length) report.warnings.push(`${stray.length} question${stray.length > 1 ? 's are' : ' is'} in blocks the flow does not reach (${stray.slice(0, 6).join(', ')}) and was not imported.`);
 
+  // The limits are checked here, before the work that grows with questions times rules.
+  if (items.length > LIMITS.questions) throw new ImportError(`This survey has ${items.length} questions. Surveys over ${LIMITS.questions} questions are not imported; split it into parts.`);
   // ---------- pass 2: logic ----------
   const leafCache = new Map();
   function leafOf(expr) {
@@ -344,7 +347,8 @@ export function importQsf(text, { sourceName } = {}) {
       const rk = (rest.match(/\/(\d+)$/) || [])[1], target = info.kind === 'te' ? { id: info.id } : info.rows.get(rk) || (info.rows.size === 1 ? [...info.rows.values()][0] : null);
       if (!target) throw new Unsupported('a field that is not in the question');
       let rv = expr.RightOperand;
-      if (info.kind === 'slider' && info.n && rv != null && Number.isFinite(Number(rv))) {
+      if (info.kind === 'slider' && info.zeroStep && rv != null && Number.isFinite(Number(rv))) rv = String(Math.round(Number(rv)));
+      else if (info.kind === 'slider' && info.n && rv != null && Number.isFinite(Number(rv))) {
         // slider answers are points 1..n over min..max
         const span = (info.max - info.min) / (info.n - 1);
         rv = String(Math.max(1, Math.min(info.n, Math.round((Number(rv) - info.min) / span) + 1)));
@@ -393,7 +397,8 @@ export function importQsf(text, { sourceName } = {}) {
   for (const it of items) { const l = itemsByQid.get(it._qid) || []; l.push(it); itemsByQid.set(it._qid, l); }
 
   // skip logic: after question X, hide the following questions when the condition holds
-  const skipRules = [];
+  const skipRules = [], qIndex = new Map(qOrder.map((q, i) => [q, i])), lastSegOf = new Map();
+  for (const it of items) lastSegOf.set(it._qid, it._seg);
   for (const qid of qOrder) {
     const p = sq.get(qid), info = qmap.get(qid);
     const rules = [];
@@ -407,8 +412,9 @@ export function importQsf(text, { sourceName } = {}) {
     for (const [k, c] of chs) if (c && c.Skip && info.optVals && info.optVals.has(String(k))) rules.push({ cond: { q: info.id, op: 'eq', value: info.optVals.get(String(k)) }, dest: c.Skip });
     for (const k of Object.keys(p)) if (/skip/i.test(k) && !['SkipLogic'].includes(k) && p[k] && typeof p[k] === 'object' && Object.keys(p[k]).length && !rules.length) { unsupported(report, qid, `Skip logic ("${k}") is in a format the importer does not read; it is ignored.`); break; }
     for (const r of rules) {
-      const lastSeg = items.filter(i => i._qid === qid).slice(-1)[0]._seg;
-      const here = qOrder.indexOf(qid);
+      if (skipRules.length >= 3000) throw new ImportError('This survey has more than 3000 skip rules; it is too large to import.');
+      const lastSeg = lastSegOf.get(qid);
+      const here = qIndex.get(qid);
       let reach;
       if (r.dest === 'EndOfSurvey') reach = () => true;
       else if (r.dest === 'EndOfBlock') reach = (it) => it._seg === lastSeg;
@@ -436,7 +442,7 @@ export function importQsf(text, { sourceName } = {}) {
       const logic = e.branches.map(b => { if (!branchLogic.has(b)) branchLogic.set(b, logicNode(b.logic, `branch "${b.desc}"`)); return branchLogic.get(b); }).filter(Boolean).reduce((a, n) => andNodes(a, n) || a, null);
       if (logic) merge(negate(logic));
     }
-    for (const r of skipRules) if (qOrder.indexOf(it._qid) > r.here && r.reach(it)) merge(negate(r.cond));
+    for (const r of skipRules) if (qIndex.get(it._qid) > r.here && r.reach(it)) merge(negate(r.cond));
     if (dropped) fail(it.source);
     if (it._follow) merge(it._follow.q ? { q: it._follow.q, op: 'eq', value: it._follow.value } : null);
     if (node) it.displayIf = node;

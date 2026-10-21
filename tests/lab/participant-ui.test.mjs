@@ -34,7 +34,7 @@ const items = [
 ];
 // ---------- markup ----------
 const html = ui.questionsHtml(items, { items, lookup: id => ({ name: '<img src=x onerror=alert(1)>' })[id], ed: { pid: '"><svg onload=1>' } });
-assert(!/<script|<img|<svg|<b>|<i>/.test(html.replace(/data-tpl="[^"]*"/g, '')), 'no element from question text or answers reaches the markup');
+assert(!/<\s*(script|img|svg|b|i)\b/i.test(html.replace(/data-tpl="[^"]*"/g, '')), 'no element from question text or answers reaches the markup');
 assert(html.includes('Hello &lt;b&gt;there&lt;/b&gt; &quot;&gt;&lt;svg onload=1&gt;') && html.includes('Second paragraph'), 'info text escaped, piped embedded data escaped, paragraphs kept');
 assert(html.includes('&lt;img src=x onerror=alert(1)&gt;'), 'a piped answer is escaped text');
 assert(/data-tpl="Packs for \{\{q:name\}\}\?"/.test(html), 'the template is kept for live updates');
@@ -91,5 +91,15 @@ assert.equal(qs2.check(), false, 'visible and required: blocks'); assert(/role="
 // answers from earlier pages count (prior)
 const root3 = makeRoot([reqSet[1]]), qs3 = ui.questionSet(root3, [reqSet[1]], { innerHTML: '' }, null, null, { prior: { gate: 'n' } });
 assert.equal(root3.groups.must.hidden, true, 'hidden because of an answer on an earlier page');
+
+// scale numbers follow `start`; a confidence line's accessible name follows piped text
+{
+  const z = ui.questionsHtml([{ id: 'z', type: 'scale', n: 3, start: 0, text: 'Z', lo: 'a', hi: 'b' }]);
+  assert.deepEqual([...z.matchAll(/<input type="radio" name="z" value="(\d+)"/g)].map(m => m[1]), ['0', '1', '2']); assert(z.includes('data-trace="z:0"') && z.includes('<span class="pt-num">0</span>'));
+  const o = ui.questionsHtml([{ id: 'o', type: 'scale', n: 3, text: 'O' }]);
+  assert.deepEqual([...o.matchAll(/<input type="radio" name="o" value="(\d+)"/g)].map(m => m[1]), ['1', '2', '3'], 'no start: as before');
+  const c = ui.questionsHtml([{ id: 'c', type: 'confidence', text: 'How sure, {{q:name}}?' }], { items: [items[1]], lookup: () => 'Ann' });
+  assert(c.includes('data-aria-tpl="How sure, {{q:name}}?"') && c.includes('aria-label="How sure, Ann?"'));
+}
 console.log('participant page: escaping, piped text as text, groups, info, live show/hide/clear, required only when visible');
 console.log('ALL PARTICIPANT UI TESTS PASSED');

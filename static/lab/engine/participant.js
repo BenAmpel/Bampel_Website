@@ -105,17 +105,18 @@
   // Presser 2010; Tourangeau et al. 2007; Antoun et al. 2018).
   function scaleGroup(it) {
     var labels = it.labels && it.labels.length === it.n ? it.labels : null, cells = '';
-    for (var i = 1; i <= it.n; i++) {
-      var lab = labels ? labels[i - 1] : i === 1 ? it.lo : i === it.n ? it.hi : '';
+    var first = typeof it.start === 'number' && isFinite(it.start) ? Math.floor(it.start) : 1;   // numbers shown and stored: first .. first + n - 1
+    for (var k = 1; k <= it.n; k++) {
+      var i = first + k - 1, lab = labels ? labels[k - 1] : k === 1 ? it.lo : k === it.n ? it.hi : '';
       cells += '<label class="option scale-pt" data-trace="' + it.id + ':' + i + '"><input type="radio" name="' + it.id + '" value="' + i + '"><span class="pt-num">' + i + '</span>' + (lab ? '<span class="pt-lab">' + txt(lab) + '</span>' : '') + '</label>';
     }
     return '<fieldset class="q-group" data-name="' + it.id + '"><legend class="q">' + txt(it.text) + '</legend><div class="likert' + (labels ? ' labeled' : '') + '" style="--n:' + it.n + '">' + cells + '</div></fieldset>';
   }
   // Confidence line: click anywhere, no starting handle (no default to anchor on: Liu & Conrad 2019;
   // Funke 2016); keyboard arrows, Page Up/Down, Home/End; no dragging required (WCAG 2.5.7).
-  function vas(name, legend, ariaText) {
+  function vas(name, legend, ariaText, ariaTpl) {
     return '<fieldset class="q-group" data-name="' + name + '"><legend class="q">' + legend + '</legend>' +
-      '<div class="vas" data-name="' + name + '" data-trace="' + name + '" role="slider" tabindex="0" aria-label="' + (ariaText != null ? ariaText : legend) + '" aria-valuemin="0" aria-valuemax="100" aria-valuetext="Not set">' +
+      '<div class="vas" data-name="' + name + '" data-trace="' + name + '" role="slider" tabindex="0"' + (ariaTpl ? ' data-aria-tpl="' + esc(ariaTpl) + '"' : '') + ' aria-label="' + (ariaText != null ? ariaText : legend) + '" aria-valuemin="0" aria-valuemax="100" aria-valuetext="Not set">' +
       '<div class="vas-track"><div class="vas-fill"></div><div class="vas-thumb" hidden></div></div>' +
       '<div class="vas-ends"><span>' + Th('conf_low') + '</span><output class="vas-val" aria-hidden="true">–</output><span>' + Th('conf_high') + '</span></div></div>' +
       '<p class="muted help">' + Th('conf_help') + '</p></fieldset>';
@@ -161,7 +162,7 @@
   function questionHtml(it) {
     if (it.type === 'info') return infoHtml(it);
     if (it.type === 'scale') return scaleGroup(it);
-    if (it.type === 'confidence') return vas(it.id, txt(it.text), esc(fillPipes(it.text)));
+    if (it.type === 'confidence') return vas(it.id, txt(it.text), esc(fillPipes(it.text)), tplAttr(it.text) ? it.text : null);
     if (it.type === 'choice' || (it.type === 'select' && it.options.length <= 10)) return choiceGroup(it.id, txt(it.text), it.options.map(function (o) { return [o.value, txt(o.label)]; }));
     if (it.type === 'multi') {
       return '<fieldset class="q-group" data-name="' + it.id + '"><legend class="q">' + txt(it.text) + '</legend><div class="checks">' + it.options.map(function (o) {
@@ -247,6 +248,7 @@
       });
       root.querySelectorAll('.q-groupwrap').forEach(function (w) { w.hidden = !w.querySelector('.q-group:not([hidden])'); });
       root.querySelectorAll('[data-tpl]').forEach(function (n) { n.textContent = fillPipes(n.getAttribute('data-tpl')); });
+      root.querySelectorAll('[data-aria-tpl]').forEach(function (n) { n.setAttribute('aria-label', fillPipes(n.getAttribute('data-aria-tpl'))); });
     }
     wire(root, function (n, v) {
       answers[n] = v; if (onAnswer) onAnswer(n, v);

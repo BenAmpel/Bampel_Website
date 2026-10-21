@@ -6,6 +6,7 @@
   'use strict';
   var PIPE_SRC = '\\{\\{(q|ed):([a-z][a-z0-9_]{0,40})\\}\\}';
   function isAnswered(v) { return Array.isArray(v) ? v.length > 0 : v != null && String(v).trim() !== ''; }
+  function own(o, k) { return o && Object.prototype.hasOwnProperty.call(o, k) ? o[k] : undefined; }
   function num(v) { var t = String(v).trim().replace(/,/g, ''), n = Number(t); return t !== '' && isFinite(n) ? n : null; }
   function strs(a) { return a.map(String); }
 
@@ -39,8 +40,8 @@
     if (Array.isArray(node.all)) return node.all.every(function (n) { return evalDisplay(n, env); });
     if (Array.isArray(node.any)) return node.any.some(function (n) { return evalDisplay(n, env); });
     if ('const' in node) return !!node.const;
-    if (node.q != null) return test(node.op, (env.answers || {})[node.q], node.value);
-    if (node.ed != null) return test(node.op, (env.ed || {})[node.ed], node.value);
+    if (node.q != null) return test(node.op, own(env.answers, node.q), node.value);
+    if (node.ed != null) return test(node.op, own(env.ed, node.ed), node.value);
     if (node.condition != null) return node.op === 'neq' ? env.condition !== node.condition : env.condition === node.condition;
     return true;
   }
@@ -58,7 +59,7 @@
     for (k in (seed || {})) kept[k] = seed[k];
     orderItems(items).forEach(function (it) {
       if (!evalDisplay(it.displayIf, { answers: kept, ed: env.ed, condition: env.condition })) { hidden[it.id] = true; return; }
-      if (it.type !== 'info' && answers && answers[it.id] !== undefined) kept[it.id] = answers[it.id];
+      if (it.type !== 'info' && answers && own(answers, it.id) !== undefined) kept[it.id] = answers[it.id];
     });
     return { hidden: hidden, answers: kept };
   }

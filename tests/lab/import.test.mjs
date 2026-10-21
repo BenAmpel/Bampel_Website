@@ -35,7 +35,7 @@ const check = r => {
   const r = check(run('demo.qsf', fx('demo.qsf')));
   assert.equal(r.report.detected, 'qsf'); assert.deepEqual(r.report.counts, { questions: 30, pages: 7, conditions: 2, embedded: 3, info: 4, sessions: 1 });
   // text and HTML
-  assert.equal(byId(r, 'intro').text, 'Welcome to the demo survey.\nIt takes about 5 minutes.\nThank you & enjoy.'.replace('survey.\n', 'survey.\n'), 'HTML stripped, line breaks kept, entities decoded, script and style dropped');
+  assert.equal(byId(r, 'intro').text, 'Welcome to the demo survey.\nIt takes about 5 minutes.\nThank you & enjoy.', 'HTML stripped, line breaks kept, entities decoded, script and style dropped');
   // types
   const social = byId(r, 'social');
   assert.equal(social.type, 'choice'); assert.deepEqual(social.options.map(o => o.value), ['1', '0'], 'recode values become option values'); assert.equal(social.required, true);
@@ -213,6 +213,49 @@ assert.deepEqual(parseXml('<a x="1 &amp; 2"><b><![CDATA[<raw>]]></b><c/>t &#65;<
   assert.throws(() => parseExpr('datediff([a],[b])', { brackets: true }), Unsupported);
   assert.throws(() => parseExpr('Q1 + 2 == 3'), Unsupported);
   assert.throws(() => toDisplayIf(parseExpr('A == 1 and (B == 2 or (C == 3 and (D == 4 or E == 5)))'), l => ({ q: l.left.v, op: 'eq', value: '1' })), Unsupported, 'nested too deeply');
+}
+
+// ---------- scale numbering follows the source ----------
+{
+  const q = run('demo.qsf', fx('demo.qsf'));
+  assert.deepEqual([byId(q, 'nps').start, byId(q, 'mood').start, byId(q, 'trust_1').start], [0, 0, undefined], 'NPS and the 0-10 slider start at 0; a matrix starts at 1');
+  assert.equal(byId(q, 'social').options[1].value, '0');
+  const t = run('survey-template.csv', template);
+  assert.equal(byId(t, 'mood').start, 0); assert.equal(byId(t, 'trust').start, undefined);
+  const sc = run('s.csv', 'variable,type,text,scale_points,scale_start,show_if\nr,scale,Rate,5,0,\nz,text,Z,,,r >= 3\n');
+  assert.deepEqual([byId(sc, 'r').start, byId(sc, 'z').displayIf], [0, { q: 'r', op: 'gte', value: '3' }]);
+  bad(() => run('s.csv', 'variable,type,text,scale_points,scale_start\nr,scale,Rate,5,99\n'), /scale_start/);
+  assert(!/subtract 1/.test(JSON.stringify(q.report)));
+}
+// ---------- hostile input stays fast and readable ----------
+{
+  const t0 = Date.now(), spaces = ' '.repeat(1_000_000);
+  bad(() => run('x.csv', `variable,type,text,show_if\na,text,A,\nb,text,B,"a${spaces}answered${spaces}x"\n`), /longer than 4000/);
+  bad(() => run('d.csv', `Variable / Field Name,Form Name,Field Type,Field Label,"Choices, Calculations, OR Slider Labels"\nf,x,radio,L,"1,${spaces}${' '.repeat(100000)}"\n`), /too long/);
+  const wide = run('x.csv', `variable,type,text,show_if\na,text,A,\nb,text,B,"a${' '.repeat(3000)}answered"\n`);
+  assert.deepEqual(byId(wide, 'b').displayIf, { q: 'a', op: 'answered' });
+  assert(Date.now() - t0 < 200 + 1500, 'long cells are handled quickly');
+  const t1 = Date.now(); try { run('x.csv', `variable,type,text,show_if\nb,text,B,"${'a answered and '.repeat(50000)}"\n`); } catch {} assert(Date.now() - t1 < 200, 'many clauses in 1 cell: ' + (Date.now() - t1));
+}
+{   // a large QSF: over the limit it is refused before the slow pass; near the limit it is quick
+  const mk = (n) => {
+    const els = [], list = [], payloadQ = i => ({ QuestionID: 'QID' + i, DataExportTag: 'q' + i, QuestionType: 'MC', Selector: 'SAVR', QuestionText: 'Q' + i, Choices: { 1: { Display: 'a', Skip: 'EndOfBlock' }, 2: { Display: 'b' } }, ChoiceOrder: [1, 2] });
+    for (let i = 1; i <= n; i++) { els.push({ Element: 'SQ', PrimaryAttribute: 'QID' + i, Payload: payloadQ(i) }); list.push({ Type: 'Question', QuestionID: 'QID' + i }); }
+    els.push({ Element: 'BL', Payload: { 0: { Type: 'Standard', ID: 'BL1', BlockElements: list } } }, { Element: 'FL', Payload: { Flow: [{ Type: 'Standard', ID: 'BL1' }] } });
+    return JSON.stringify({ SurveyElements: els });
+  };
+  let t = Date.now(); bad(() => run('big.qsf', mk(15000)), /15000 questions/); assert(Date.now() - t < 1500, 'refused early');
+  t = Date.now(); run('big.qsf', mk(500)); assert(Date.now() - t < 2500, 'a 500-question survey with skip logic on every question: ' + (Date.now() - t) + ' ms');
+}
+// ---------- inherited property names ----------
+{
+  const q = JSON.parse(fx('demo.qsf')), mc = q.SurveyElements.find(e => e.PrimaryAttribute === 'QID3').Payload;
+  mc.Choices = { constructor: { Display: 'Yes' }, toString: { Display: 'No' } }; mc.ChoiceOrder = ['constructor', 'toString']; mc.RecodeValues = {}; mc.ChoiceDataExportTags = {};
+  q.SurveyElements.find(e => e.PrimaryAttribute === 'QID2').Payload.DataExportTag = 'constructor';
+  const r = run('p.qsf', JSON.stringify(q));
+  assert.deepEqual(byId(r, 'social').options.map(o => o.value), ['constructor', 'toString'], 'own keys still work as option values');
+  assert.equal(byId(r, 'constructor'), undefined, 'a variable called "constructor" is renamed'); assert(r.content.survey.pre.some(x => x.id === 'constructor_q'));
+  assert.equal(htmlToText('&constructor; &toString; &amp;'), '&constructor; &toString; &');
 }
 console.log('importers: QSF, LSS, REDCap, CSV, xlsx, template, safety and limits');
 console.log('ALL IMPORT TESTS PASSED');

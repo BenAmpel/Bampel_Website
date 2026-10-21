@@ -21,7 +21,7 @@ function parseCsv(text) {
   const h = rows[0] || []; return rows.slice(1).map(r => Object.fromEntries(r.map((v, i) => [h[i], v])));
 }
 function answerFor(it, r) {
-  if (it.type === 'scale') return String(1 + Math.floor(r() * it.n));
+  if (it.type === 'scale') return String((Number.isInteger(it.start) ? it.start : 1) + Math.floor(r() * it.n));
   if (it.type === 'confidence') return String(Math.floor(r() * 101));
   if (it.type === 'choice' || it.type === 'select') return it.options[Math.floor(r() * it.options.length)].value;
   if (it.type === 'number') return String(Math.floor(r() * 90));

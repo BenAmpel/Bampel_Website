@@ -9,7 +9,7 @@ const decode = s => (s.indexOf('&') < 0 ? s : s.replace(/&(#x[0-9a-fA-F]+|#\d+|[
     const n = e[1] === 'x' || e[1] === 'X' ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10);
     return Number.isInteger(n) && n > 0 && n < 0x110000 && !(n >= 0xd800 && n < 0xe000) ? String.fromCodePoint(n) : '';
   }
-  return NAMED[e] ?? m;
+  return Object.hasOwn(NAMED, e) ? NAMED[e] : m;
 }));
 
 const NAME_CHAR = /[A-Za-z0-9_:.\-]/;

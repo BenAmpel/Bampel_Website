@@ -73,12 +73,12 @@ Device details (touch, screen size, user agent) are in the full JSON export, on 
 
 ## Surveys CSV
 
-`code`, `condition`, `test`, `label`, `self_signup`, `session`, `survey` (`pre` = start of session, `post` = end of session), `content_version`, `received_at`, then one column per question variable name. Scale answers are the point number (1 = left/first). A question variable that would collide with one of these columns is exported as `q_{name}`. Blank = skipped (survey questions are not forced unless marked required).
+`code`, `condition`, `test`, `label`, `self_signup`, `session`, `survey` (`pre` = start of session, `post` = end of session), `content_version`, `received_at`, then one column per question variable name. Scale answers are the point number as shown (the first point is the question's `start`, 1 unless set, for example 0 for a 0 to 10 scale). A question variable that would collide with one of these columns is exported as `q_{name}`. Blank = skipped (survey questions are not forced unless marked required).
 
 - `ed_{name}`: embedded data captured when the session started, one column per field the study declares (a URL parameter such as `PROLIFIC_PID` gives `ed_prolific_pid`; a constant gives its value). Blank = the parameter was not in the link.
 - Descriptive text questions (`info`) have no answer and no column.
 - Blank also means the question was hidden by its display logic for that participant (the server drops answers to hidden questions). A blank cannot tell "hidden" from "skipped" by itself; the rule is in the study content (`displayIf`).
-- Select-all (`multi`) answers list the ticked option values joined with `|`. A question imported from another system keeps that system's option codes (Qualtrics recode values, REDCap and LimeSurvey codes) as the values; a rating scale is always numbered from 1 in the order shown, even if the source numbered it from 0.
+- Select-all (`multi`) answers list the ticked option values joined with `|`. A question imported from another system keeps that system's option codes (Qualtrics recode values, REDCap and LimeSurvey codes) as the values. A rating scale is numbered from its `start` (1 unless the question sets another first number; an imported 0 to 10 scale exports as 0 to 10).
 - Imported matrix questions are one column per row, named `<base>_<row>`.
 
 ## Vignettes studies

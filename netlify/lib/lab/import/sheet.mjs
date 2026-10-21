@@ -6,7 +6,7 @@ import { ImportError, newReport, mapped, approximated, unsupported, Names, finis
 import { parseCsv } from './csv.mjs';
 import { readXlsx } from './xlsx.mjs';
 
-export const COLUMNS = ['page', 'variable', 'type', 'text', 'options', 'required', 'scale_points', 'low_label', 'high_label', 'labels', 'min', 'max', 'show_if', 'condition'];
+export const COLUMNS = ['page', 'variable', 'type', 'text', 'options', 'required', 'scale_points', 'scale_start', 'low_label', 'high_label', 'labels', 'min', 'max', 'show_if', 'condition'];
 const TYPE_ALIAS = {
   choice: 'choice', radio: 'choice', single: 'choice', select: 'select', dropdown: 'select', multi: 'multi', multiple: 'multi', checkbox: 'multi', scale: 'scale', likert: 'scale',
   text: 'text', short: 'text', long: 'long', longtext: 'long', essay: 'long', textarea: 'long', number: 'number', numeric: 'number', confidence: 'confidence', slider: 'slider',
@@ -34,7 +34,7 @@ function parseOptions(s) {
 //   q1 = yes | q2 != no | age >= 18 | q3 in a|b|c | q3 not in a|b | q1 answered | q1 not answered
 //   ed:prolific_pid = abc | condition = c1
 function parseShowIf(src, resolveVar, where) {
-  const text = src.trim();
+  const text = src.replace(/\s+/g, ' ').trim();   // whitespace collapsed before any pattern is tried
   if (!text) return null;
   // split on and/or outside double quotes
   const clauses = [], joiners = [];
@@ -87,6 +87,7 @@ export function importRows(rows, { sourceName = 'sheet' } = {}) {
   const optionsOf = new Map();
   let page = 1, infoN = 0;
   rows.slice(1).forEach((r, k) => {
+    if (r.some(c => String(c ?? '').length > 4000)) { problems.push(`Row ${k + 2}: a cell is longer than 4000 characters; shorten it.`); return; }
     const rowNo = k + 2, v = cell(r, col.variable), typeRaw = cell(r, col.type).toLowerCase().replace(/\s+/g, '_');
     const where = `Row ${rowNo}${v ? ` (${v})` : ''}`;
     const type = TYPE_ALIAS[typeRaw];
@@ -123,17 +124,20 @@ export function importRows(rows, { sourceName = 'sheet' } = {}) {
       if (type === 'slider') {
         const lo = Number(mn), hi = Number(mx);
         if (!n && mn !== '' && mx !== '' && Number.isInteger(lo) && Number.isInteger(hi) && hi > lo && hi - lo + 1 <= 11) n = hi - lo + 1;
+        if (n && Number.isInteger(lo) && mn !== '' && Number.isInteger(hi) && hi - lo + 1 === n) q.start = lo;   // the scale is numbered as the slider was
         if (!n) {
           if (!(mn !== '' && mx !== '' && Number.isFinite(lo) && Number.isFinite(hi) && hi > lo)) { problems.push(`${where}: a slider needs min and max (or scale_points).`); return; }
           q.type = 'number'; q.min = lo; q.max = hi;
           approximated(report, where, `Slider from ${lo} to ${hi} has more than 11 steps, so it is a typed number question with a ${lo} to ${hi} hint (the range is not enforced).`);
           delete q.options;
-        } else approximated(report, where, `Slider became a rating scale with ${n} points (points are numbered from 1).`);
+        } else approximated(report, where, `Slider became a rating scale with ${n} points, numbered ${q.start != null ? q.start + ' to ' + (q.start + n - 1) : 'from 1'}.`);
       }
       if (q.type !== 'number') {
         if (!n && labels.length) n = labels.length;
         if (!(n >= 2 && n <= 11)) { problems.push(`${where}: a scale needs scale_points from 2 to 11 (or a labels list).`); return; }
         q.type = 'scale'; q.n = n;
+        const st = cell(r, col.scale_start);
+        if (st !== '') { if (!Number.isInteger(Number(st)) || Number(st) < -10 || Number(st) + n - 1 > 100) { problems.push(`${where}: scale_start must be a whole number, with the numbers staying between -10 and 100.`); return; } q.start = Number(st); }
         if (labels.length) { if (labels.length !== n) { problems.push(`${where}: ${labels.length} labels for ${n} points. Give one label per point, or use low_label and high_label.`); return; } q.labels = labels; q.lo = labels[0]; q.hi = labels[n - 1]; }
         else { q.lo = cell(r, col.low_label); q.hi = cell(r, col.high_label); if (!q.lo || !q.hi) report.warnings.push(`${where}: label the end points (low_label, high_label) or every point (labels).`); }
         if (cell(r, col.low_label) && labels.length) q.lo = cell(r, col.low_label);

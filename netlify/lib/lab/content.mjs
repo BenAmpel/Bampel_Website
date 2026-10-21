@@ -127,7 +127,7 @@ export function publicContent(c, type, study) {
 export const QUESTION_TYPES = ['scale', 'choice', 'select', 'text', 'confidence', 'number', 'multi', 'info'];
 const str = (v, max = 4000) => typeof v === 'string' && v.trim().length > 0 && v.length <= max;
 const intIn = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi;
-const RESERVED = ['code', 'condition', 'test', 'label', 'self_signup', 'session', 'survey', 'content_version', 'received_at', 'trial_index', 'item_id'];
+const RESERVED = ['constructor', 'prototype', '__proto__', 'hasownproperty', 'tostring', 'valueof', 'code', 'condition', 'test', 'label', 'self_signup', 'session', 'survey', 'content_version', 'received_at', 'trial_index', 'item_id'];
 const NAME_RE = /^[a-z][a-z0-9_]{0,40}$/;
 const PARAM_RE = /^[A-Za-z][A-Za-z0-9_.-]{0,40}$/;
 const PIPE_ANY = /\{\{(q|ed):([^}]*)\}\}/g;
@@ -172,7 +172,8 @@ function validateDisplayIf(node, w, e, ctx, depth = 0, count = { n: 0 }) {
     for (const v of vals) if (!it.options.some(o => o.value === v)) e.push(`${w}: "${v}" is not one of the options of "${ref}".`);
   }
   if (needsValue && it.type === 'scale' && ['eq', 'neq', 'in', 'notIn'].includes(node.op)) {
-    for (const v of (node.op === 'in' || node.op === 'notIn' ? node.value : [node.value]).map(String)) if (!(/^\d+$/.test(v) && Number(v) >= 1 && Number(v) <= it.n)) e.push(`${w}: "${v}" is not a point on the ${it.n}-point scale "${ref}".`);
+    const lo = Number.isInteger(it.start) ? it.start : 1;
+    for (const v of (node.op === 'in' || node.op === 'notIn' ? node.value : [node.value]).map(String)) if (!(/^-?\d+$/.test(v) && Number(v) >= lo && Number(v) <= lo + it.n - 1)) e.push(`${w}: "${v}" is not a point on the ${it.n}-point scale "${ref}" (${lo} to ${lo + it.n - 1}).`);
   }
 }
 
@@ -195,9 +196,11 @@ export function validateQuestions(items, where, e, { nSessions, conditions, rule
     if (allowSessions && (!Array.isArray(it.sessions) || !it.sessions.every(n => intIn(n, 1, nSessions)))) e.push(`${w}: sessions must be numbers from 1 to ${nSessions}.`);
     if (it.type === 'scale') {
       if (!intIn(it.n, 2, 11)) e.push(`${w}: a scale needs 2 to 11 points.`);
+      if (it.start != null && !(intIn(it.start, -10, 100) && intIn(it.n, 2, 11) && it.start + it.n - 1 <= 100)) e.push(`${w}: the first scale number must be a whole number, and the numbers must stay between -10 and 100.`);
       if (it.labels != null && it.labels.length && (!Array.isArray(it.labels) || it.labels.length !== it.n || !it.labels.every(x => str(x, 120)))) e.push(`${w}: give one label per point (${it.n}), or leave the labels empty to label only the ends.`);
     }
-    if (it.page != null && !intIn(it.page, 1, 99)) e.push(`${w}: the page must be a whole number from 1 to 99.`);
+    if (it.page != null && !allowSessions) e.push(`${w}: questions asked after an item are all on one screen, so they cannot have a page number.`);
+    else if (it.page != null && !intIn(it.page, 1, 99)) e.push(`${w}: the page must be a whole number from 1 to 99.`);
     if (it.type === 'choice' || it.type === 'select' || it.type === 'multi') {
       if (!Array.isArray(it.options) || it.options.length < 2) e.push(`${w}: add at least two options.`);
       else if (!it.options.every(o => str(o.value, 200) && str(o.label, 300))) e.push(`${w}: every option needs text.`);

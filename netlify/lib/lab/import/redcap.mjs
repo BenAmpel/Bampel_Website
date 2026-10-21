@@ -19,8 +19,8 @@ export function looksLikeRedcap(rows) {
 // "1, Yes | 2, No" -> [{value:'1', label:'Yes'}, ...]
 export function parseChoices(s) {
   return String(s || '').split('|').map(x => x.trim()).filter(Boolean).map(x => {
-    const m = x.match(/^([^,]*?)\s*,\s*([\s\S]*)$/);
-    return m && m[1] !== '' ? { value: m[1].trim(), label: m[2].trim() } : { value: x, label: x };
+    const c = x.indexOf(',');   // no regex: a long cell cannot make this slow
+    return c > 0 && x.slice(0, c).trim() !== '' ? { value: x.slice(0, c).trim(), label: x.slice(c + 1).trim() } : { value: x, label: x };
   });
 }
 
@@ -32,6 +32,7 @@ export function importRedcap(text, { formsAs = 'pages', sourceName } = {}) {
   rows[0].forEach((h, i) => { for (const [key, re] of HEADERS) if (!(key in idx) && re.test(String(h))) { idx[key] = i; break; } });
   const get = (r, k) => (idx[k] != null && r[idx[k]] != null ? String(r[idx[k]]).trim() : '');
   const fields = rows.slice(1).filter(r => get(r, 'name'));
+  fields.forEach((r, i) => r.forEach((c, j) => { if (String(c).length > (j === idx.choices ? 50000 : 4000)) throw new ImportError(`Field ${get(r, 'name') || i + 2}: a cell is too long to import (over ${j === idx.choices ? 50000 : 4000} characters).`); }));
   if (!fields.length) throw new ImportError('The data dictionary has no fields.');
 
   const names = new Names(), forms = [], byVar = new Map(), identifiers = [], questions = [];

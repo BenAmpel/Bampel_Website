@@ -147,9 +147,9 @@ export function cleanAnswers(d, items, ctx = {}) {
   let out = {};
   for (const it of items) {
     if (it.type === 'info') continue;
-    const v = d[it.id];
+    const v = Object.hasOwn(d, it.id) ? d[it.id] : undefined;   // own properties only (never "constructor" or "__proto__")
     if (v == null || v === '') continue;
-    if (it.type === 'scale') { const n = Number(v); if (Number.isInteger(n) && n >= 1 && n <= it.n) out[it.id] = String(n); }
+    if (it.type === 'scale') { const n = Number(v), lo = Number.isInteger(it.start) ? it.start : 1; if (Number.isInteger(n) && n >= lo && n <= lo + it.n - 1) out[it.id] = String(n); }
     else if (it.type === 'confidence') { const n = Number(v); if (Number.isFinite(n) && n >= 0 && n <= 100) out[it.id] = String(Math.round(n)); }
     else if (it.type === 'choice' || it.type === 'select') { if (it.options.some(o => o.value === v)) out[it.id] = v; }
     // An open number is kept exactly as entered (no range check): an impossible age or a count of 5,000 surveys is data.

@@ -17,6 +17,7 @@ export const NO_VALUE_OPS = ['answered', 'notAnswered'];
 export const PIPE_RE = /\{\{(q|ed):([a-z][a-z0-9_]{0,40})\}\}/g;
 
 export const isAnswered = v => (Array.isArray(v) ? v.length > 0 : v != null && String(v).trim() !== '');
+const own = (o, k) => (o && Object.hasOwn(o, k) ? o[k] : undefined);
 const num = v => { const t = String(v).trim().replace(/,/g, ''); const n = Number(t); return t !== '' && Number.isFinite(n) ? n : null; };
 
 function test(op, have, want) {
@@ -46,8 +47,8 @@ export function evalDisplay(node, env = {}) {
   if (Array.isArray(node.all)) return node.all.every(n => evalDisplay(n, env));
   if (Array.isArray(node.any)) return node.any.some(n => evalDisplay(n, env));
   if ('const' in node) return !!node.const;
-  if (node.q != null) return test(node.op, (env.answers || {})[node.q], node.value);
-  if (node.ed != null) return test(node.op, (env.ed || {})[node.ed], node.value);
+  if (node.q != null) return test(node.op, own(env.answers, node.q), node.value);
+  if (node.ed != null) return test(node.op, own(env.ed, node.ed), node.value);
   if (node.condition != null) return node.op === 'neq' ? env.condition !== node.condition : env.condition === node.condition;
   return true;
 }
@@ -64,7 +65,7 @@ export function resolve(items, answers, env = {}, seed = {}) {
   const kept = { ...seed }, hidden = {};
   for (const it of orderItems(items)) {
     if (!evalDisplay(it.displayIf, { answers: kept, ed: env.ed, condition: env.condition })) { hidden[it.id] = true; continue; }
-    if (it.type !== 'info' && answers && answers[it.id] !== undefined) kept[it.id] = answers[it.id];
+    if (it.type !== 'info' && answers && Object.hasOwn(answers, it.id) && answers[it.id] !== undefined) kept[it.id] = answers[it.id];
   }
   return { hidden, answers: kept };
 }

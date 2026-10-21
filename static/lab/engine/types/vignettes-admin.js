@@ -66,7 +66,7 @@
               (q.group ? ' <span class="muted">(group ' + esc(q.group) + ')</span>' : '') + (q.conditions ? ' <span class="muted">(only in ' + esc(q.conditions.join(', ')) + ')</span>' : '') + (q.logic ? '<br><span class="muted">' + esc(q.logic) + '</span>' : '') + '</li>';
           }).join('') + '</ol></details>';
       }).join('');
-    h += '<div class="section"><h3 style="margin:0 0 8px">Load it</h3><p class="muted">This replaces the survey questions, the conditions and sessions, and the embedded data in the editor draft. Consent text, sign-up settings, and screen text are kept unless you tick the box. Nothing changes for participants until you click Save changes.</p>' +
+    h += '<div class="section"><h3 style="margin:0 0 8px">Load it</h3><p class="muted">This replaces the survey questions, any vignette items and item questions, the conditions and sessions, and the embedded data in the editor draft. Consent text, sign-up settings, and screen text are kept unless you tick the box. Nothing changes for participants until you click Save changes.</p>' +
       '<label class="check"><input type="checkbox" id="imp-consent"' + (imp.replaceConsent ? ' checked' : '') + '> Replace the consent text too (the imported consent is a marked draft placeholder; the minutes per session are set from the number of questions)</label>' +
       '<div class="row" style="margin-top:8px">' + A.btn('data-imp-load="1"', 'Load into the editor as an unsaved draft') + '</div></div>';
     return h;
@@ -82,8 +82,8 @@
   }
   function loadDraft(A) {
     var r = imp.result; if (!r) return;
-    var c = r.content, d = A.draft, hasSurvey = (d.survey.pre.length + d.survey.post.length + (d.questions || []).length) > 0;
-    if (!window.confirm((A.started ? A.started + ' real participant(s) have already started this study. ' : '') + (hasSurvey ? 'This replaces the survey questions in the draft with the imported ones (your saved version is not changed until you click Save changes). Continue?' : 'Load the imported survey into the draft?'))) return;
+    var c = r.content, d = A.draft, hasSurvey = (d.survey.pre.length + d.survey.post.length + (d.questions || []).length + (d.items || []).length) > 0;
+    if (!window.confirm((A.started ? A.started + ' real participant(s) have already started this study. ' : '') + (hasSurvey ? 'This replaces the survey questions, the vignette items and item questions, the conditions and sessions, and the embedded data in the draft with the imported ones. Your saved version is not changed until you click Save changes. Continue?' : 'Load the imported survey into the draft?'))) return;
     d.survey = A.clone(c.survey); d.design = A.clone(c.design); d.embedded = A.clone(c.embedded || []); d.items = A.clone(c.items); d.questions = A.clone(c.questions);
     if (imp.replaceConsent) { d.consent = A.clone(c.consent); d.minutesPerSession = c.minutesPerSession; }
     A.markDirty(); A.err('');
