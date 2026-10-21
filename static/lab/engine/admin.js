@@ -14,17 +14,25 @@
   function can(need) { return !!me && ROLES.indexOf(me.role) >= ROLES.indexOf(need); }
   function getKey() { try { return sessionStorage.getItem('lab_admin_key') || ($('key') ? $('key').value : ''); } catch (e) { return $('key') ? $('key').value : ''; } }
   function setKey(k) { try { if (k) sessionStorage.setItem('lab_admin_key', k); else sessionStorage.removeItem('lab_admin_key'); } catch (e) {} }
+  // A researcher account signs in on /lab/signin/ and its session is kept here (this tab only), like the key. When both exist the session is used.
+  function getSession() { try { var s = JSON.parse(sessionStorage.getItem('lab_session') || 'null'); return s && s.token && s.expiresAt > Date.now() ? s : null; } catch (e) { return null; } }
+  function setSession(s) { try { if (s) sessionStorage.setItem('lab_session', JSON.stringify(s)); else sessionStorage.removeItem('lab_session'); } catch (e) {} }
+  function signInLink() { return '/lab/signin/?next=' + encodeURIComponent(location.pathname + location.hash); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function fmt(ms) { return ms ? new Date(ms).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : ''; }
   function err(msg) { $('err').textContent = msg || ''; if (msg) $('err').scrollIntoView({ block: 'nearest' }); }
   function clone(x) { return JSON.parse(JSON.stringify(x)); }
   var BASE = studyId ? '/api/lab/' + studyId + '/admin/' : '/api/lab/_lab/';
   function call(path, body) {
-    return fetch(BASE + path, { method: body ? 'POST' : 'GET', headers: Object.assign({ 'x-admin-key': getKey() }, body ? { 'content-type': 'application/json' } : {}), body: body ? JSON.stringify(body) : undefined })
+    var ses = getSession(), auth = ses ? { authorization: 'Bearer ' + ses.token } : { 'x-admin-key': getKey() };
+    return fetch(BASE + path, { method: body ? 'POST' : 'GET', headers: Object.assign(auth, body ? { 'content-type': 'application/json' } : {}), body: body ? JSON.stringify(body) : undefined })
       .then(function (r) {
         if (r.ok) return r;
         return r.json().catch(function () { return {}; }).then(function (j) {
+          if (j.error === 'session_expired') setSession(null);
           var msg = r.status === 503 ? 'Admin is disabled: set LAB_ADMIN_KEY (16+ characters) in Netlify and redeploy.'
+            : j.error === 'session_expired' ? 'Your sign-in expired. Sign in again.'
+            : j.error === 'forbidden' && ses ? 'Your account does not have access to ' + (studyId ? 'this study. Ask the lab owner to add you.' : 'this page.')
             : j.error === 'forbidden' ? 'That key was not recognized' + (studyId ? ' for this study.' : '. The lab console needs the owner key.')
             : j.error === 'no_study' ? 'There is no study called "' + studyId + '". Check the address, or create it in the lab console (/lab/admin/).'
             : j.error === 'not_allowed' ? 'Your access level cannot do that.'
@@ -56,7 +64,8 @@
   var mean = function (a) { return a.length ? a.reduce(function (x, y) { return x + y; }, 0) / a.length : null; };
   window.LabAdmin = { registerType: function (id, impl) { types[id] = impl; } };
 
-  var SIGNIN = '<form class="row" id="keyform" style="margin-top:12px"><label>Admin key <input type="password" id="key" autocomplete="off" size="36"></label><button type="submit">Sign in</button></form>' +
+  var SIGNIN = '<div id="signinbox"><p style="margin-top:12px"><a class="btn" href="' + esc(signInLink()) + '">Sign in with your researcher account</a></p>' +
+    '<form class="row" id="keyform" style="margin-top:12px"><label>Or use an admin key <input type="password" id="key" autocomplete="off" size="36"></label><button type="submit" class="secondary">Use key</button></form></div>' +
     '<p class="muted" id="keyhelp"></p><p class="error" id="err" role="alert"></p>';
 
   if (!studyId) return labConsole();
@@ -99,7 +108,7 @@
       '<form class="row" id="teamform"><label>Name <input type="text" id="tname" style="width:200px"></label><label>Access <select id="trole"></select></label><button type="submit">Create key</button></form>' +
       '<p class="muted" id="roledesc"></p><div id="newkey" hidden></div><div class="table-wrap"><table id="teamtbl"></table></div></section>' +
     '<section data-tab="activity" hidden><p class="muted">Who added students, changed content, ran self-tests, deleted data, or changed the team.</p><div class="table-wrap"><table id="acttbl"></table></div></section></div>';
-  $('keyhelp').innerHTML = 'Use the lab owner key (the <code>LAB_ADMIN_KEY</code> or <code>VC_ADMIN_KEY</code> Netlify variable) or the team key the owner gave you. It is kept in this tab only.';
+  $('keyhelp').innerHTML = 'Sign in with your researcher account, or use the lab owner key (the <code>LAB_ADMIN_KEY</code> or <code>VC_ADMIN_KEY</code> Netlify variable) or the team key the owner gave you. Keys and sign-ins are kept in this tab only. New here? Read the <a href="/lab/guide/">researcher guide</a>.';
 
   // ---------- sign-in and tabs ----------
   var TABS = [['participants', 'Participants', 'viewer'], ['report', 'Pilot report', 'viewer'], ['students', 'Students', 'manager'], ['content', 'Study content', 'viewer'], ['team', 'Team', 'owner'], ['activity', 'Activity', 'owner']];
@@ -143,10 +152,10 @@
         document.title = m.study.name + ': admin';
         $('title').textContent = m.study.name + ': admin';
         $('links').innerHTML = esc(m.study.typeLabel) + ' · participant page: <a href="' + esc(m.study.paths.participant) + '" target="_blank" rel="noopener">' + esc(location.origin + m.study.paths.participant) + '</a>' +
-          (m.role === 'owner' ? ' · <a href="/lab/admin/">All studies</a>' : '');
-        $('keyform').hidden = true; $('keyhelp').hidden = true; $('app').hidden = false;
-        $('whoami').innerHTML = esc(m.name) + ' <span class="pill">' + esc(m.role) + '</span> <button type="button" class="secondary small" id="signout">Sign out</button>';
-        $('signout').addEventListener('click', function () { if (dirty && !confirm('Discard unsaved content changes?')) return; dirty = false; setKey(''); location.reload(); });
+          (getSession() ? ' · <a href="/lab/admin/">My studies</a>' : m.role === 'owner' ? ' · <a href="/lab/admin/">All studies</a>' : '') + ' · <a href="/lab/guide/">Researcher guide</a>';
+        $('signinbox').hidden = true; $('keyhelp').hidden = true; $('app').hidden = false;
+        $('whoami').innerHTML = esc(m.name) + ' <span class="pill">' + esc(m.role) + '</span>' + (getSession() ? ' <a href="/lab/admin/">My studies</a> · <a href="/lab/account/">Account</a>' : '') + ' <button type="button" class="secondary small" id="signout">Sign out</button>';
+        $('signout').addEventListener('click', function () { if (dirty && !confirm('Discard unsaved content changes?')) return; dirty = false; endSession().then(function () { location.reload(); }); });
         document.querySelectorAll('[data-role]').forEach(function (el) { el.hidden = !can(el.getAttribute('data-role')); });
         $('tabs').innerHTML = TABS.filter(function (t) { return can(t[2]); }).map(function (t) { return '<button type="button" data-tab="' + t[0] + '">' + t[1] + '</button>'; }).join('');
         $('tabs').querySelectorAll('button').forEach(function (b) { b.addEventListener('click', function () { showTab(b.getAttribute('data-tab')); }); });
@@ -158,9 +167,15 @@
         if (location.hash === '#import' && can('editor') && plugin.subtabs && plugin.subtabs.some(function (s) { return s[0] === 'import'; })) { sub = 'import'; last = 'content'; }   // opened from the lab console's "create from a survey file"
         showTab(TABS.some(function (t) { return t[0] === last && can(t[2]); }) ? last : 'participants');
       });
-    }).catch(function (e) { if (e.code !== 'no_study') setKey(''); $('keyform').hidden = false; $('app').hidden = true; err(e.message); });
+    }).catch(function (e) { if (e.code !== 'no_study') { setKey(''); if (e.code !== 'forbidden' || !getSession()) setSession(null); } $('signinbox').hidden = false; $('app').hidden = true; err(e.message); });
   }
-  $('keyform').addEventListener('submit', function (e) { e.preventDefault(); setKey($('key').value.trim()); start(); });
+  // Signing out of a researcher session also revokes the token on the server, so a copy of it stops working.
+  function endSession() {
+    var ses = getSession(); setKey(''); setSession(null);
+    if (!ses) return Promise.resolve();
+    return fetch('/api/lab/_lab/account/signout', { method: 'POST', headers: { authorization: 'Bearer ' + ses.token, 'content-type': 'application/json' }, body: '{}' }).catch(function () {});
+  }
+  $('keyform').addEventListener('submit', function (e) { e.preventDefault(); setSession(null); setKey($('key').value.trim()); start(); });
 
   // ---------- participants and exports ----------
   // Exports are assembled here from small batches of participants, so no single server request has to
@@ -622,15 +637,17 @@
     }).catch(function (e) { err(e.message); });
   }
 
-  if (getKey()) start();
+  if (getKey() || getSession()) start();
 
   // ======================= lab console =======================
+  // Owner (the owner key, or a lab owner account): every study, the researchers, new studies.
+  // Any other signed-in researcher: "My studies", the studies their account can open.
   function labConsole() {
     document.title = 'Lab console';
-    root.innerHTML = '<div class="who"><h1 style="margin:0">CCAIR Lab: studies</h1><span id="whoami" class="muted"></span></div>' + SIGNIN + '<div id="app" hidden>' +
-      '<p class="muted">Every study runs on the same engine: sign-in, consent, sessions, surveys, behavior traces, exports, backups, team access, and the live self-test. A new study gets its own data store, admin page, and participant link. Studies start unlisted; list one on <a href="/lab/">the lab page</a> once its consent text is IRB-approved and it is ready to recruit.</p>' +
+    root.innerHTML = '<div class="who"><h1 style="margin:0" id="ctitle">CCAIR Lab: studies</h1><span id="whoami" class="muted"></span></div>' + SIGNIN + '<div id="app" hidden>' +
+      '<p class="muted" id="cintro"></p>' +
       '<div class="table-wrap"><table id="stbl"></table></div>' +
-      '<div class="section"><h2>New study</h2><form id="newform"><div class="grid3">' +
+      '<div data-owner><div class="section"><h2>New study</h2><form id="newform"><div class="grid3">' +
       '<label class="f">Name<input type="text" id="nname" placeholder="Phishing email judgments"></label>' +
       '<label class="f">ID (in the link; lowercase letters, numbers, dashes)<input type="text" id="nid" class="mono" placeholder="phishing-judgments"></label>' +
       '<label class="f">Study type<select id="ntype"></select></label></div><p class="muted" id="ntypedesc"></p>' +
@@ -639,35 +656,135 @@
       '<div class="section"><h2 id="impheading">Create a study from a survey file</h2><p class="muted">Start from a survey you already have: a Qualtrics export (.qsf), a LimeSurvey structure (.lss), a REDCap data dictionary (.csv), or the lab\'s spreadsheet template (.csv or .xlsx; <a href="/lab/templates/survey-template.csv" download>download the template</a>). This creates a survey study (type "Vignettes and surveys") and opens its Study content, Import a survey page with your file already read and previewed. Nothing is saved to the study until you load the preview into the editor and click Save.</p>' +
       '<form id="impform"><div class="grid3"><label class="f">Name<input type="text" id="iname" placeholder="Attitudes survey"></label>' +
       '<label class="f">ID (in the link)<input type="text" id="iid" class="mono" placeholder="attitudes-survey"></label>' +
-      '<label class="f">Survey file<input type="file" id="ifile" accept=".qsf,.lss,.csv,.xlsx,.txt"></label></div><div class="row"><button type="submit">Create study and open the import page</button></div></form><div id="impout" role="status"></div></div></div>';
-    $('keyhelp').innerHTML = 'Use the lab owner key (the <code>LAB_ADMIN_KEY</code> or <code>VC_ADMIN_KEY</code> Netlify variable). It is kept in this tab only.';
-    var TYPES = [], idTouched = false;
+      '<label class="f">Survey file<input type="file" id="ifile" accept=".qsf,.lss,.csv,.xlsx,.txt"></label></div><div class="row"><button type="submit">Create study and open the import page</button></div></form><div id="impout" role="status"></div></div>' +
+      '<div class="section" id="researchers"><h2>Researchers</h2><p class="muted">Each researcher has their own account (email and password, with an optional authenticator app) and a role in each study: viewer, editor, manager, or owner. There is no email service here: an invitation is a link you copy or send from your own mail app. A link works once. Invitations last 7 days and password-reset links 24 hours. The owner key always works, whatever happens to accounts.</p>' +
+      '<div class="table-wrap"><table id="rtbl"></table></div><div id="redit"></div>' +
+      '<h3>Invite a researcher</h3><form id="invform"><div class="grid3"><label class="f">Name<input type="text" id="invname" autocomplete="off"></label><label class="f">Email<input type="text" id="invemail" autocomplete="off" inputmode="email"></label>' +
+      '<label class="f check"><input type="checkbox" id="invowner"> Lab owner (owner of every study, and can invite researchers)</label></div>' +
+      '<fieldset class="roles"><legend>Access to studies</legend><div id="invroles" class="rolegrid"></div></fieldset><div class="row" style="margin-top:8px"><button type="submit">Create invitation link</button></div></form><div id="invout" role="status"></div></div>' +
+      '<div class="section" id="labactivity"><h2>Account activity</h2><p class="muted">Sign-ins, sign-outs, invitations, password and authenticator changes, role changes. Passwords are never logged.</p><div class="row"><button type="button" class="secondary" id="actload">Show recent activity</button></div><div class="table-wrap"><table id="acttbl2"></table></div></div></div></div>';
+    $('keyhelp').innerHTML = 'Sign in with your researcher account, or use the lab owner key (the <code>LAB_ADMIN_KEY</code> or <code>VC_ADMIN_KEY</code> Netlify variable). Keys and sign-ins are kept in this tab only. New here? Read the <a href="/lab/guide/">researcher guide</a>.';
+    var TYPES = [], idTouched = false, ME = null, ROWS = [], PEOPLE = [];
     function slug(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').replace(/^[^a-z]+/, '').slice(0, 31); }
+    var isOwner = function () { return ME && ME.role === 'owner'; };
+    function btn2(attr, label) { return '<button type="button" class="secondary small" ' + attr + '>' + label + '</button>'; }
+    function testText(t) { return t ? (t.failed ? '<span class="error">' + t.passed + ' passed, ' + t.failed + ' failed</span>' : t.passed + ' passed') + '<br><span class="muted">' + esc(fmt(t.at)) + '</span>' : '<span class="muted">not run</span>'; }
     function list() {
-      getJSON('studies').then(function (rows) {
-        $('stbl').innerHTML = '<tr><th>Study</th><th>Type</th><th>Links</th><th>On lab page</th><th></th></tr>' + rows.map(function (s) {
-          var t = TYPES.filter(function (x) { return x.id === s.type; })[0];
-          return '<tr><td class="wrap-cell"><strong>' + esc(s.name) + '</strong> <span class="muted mono">' + esc(s.id) + '</span>' + (s.archived ? ' <span class="pill">archived</span>' : '') + (s.builtIn ? ' <span class="pill">built in</span>' : '') + '</td><td>' + esc(t ? t.label : s.type) + '</td>' +
-            '<td class="links"><a href="' + esc(s.paths.admin) + '">Admin</a><a href="' + esc(s.paths.participant) + '" target="_blank" rel="noopener">Participant page</a></td><td>' + (s.listed && !s.archived ? 'yes' : 'no') + '</td><td>' +
-            (s.builtIn ? '<span class="muted">set in code</span>' : btn2('data-list="' + esc(s.id) + '|' + (s.listed ? '0' : '1') + '"', s.listed ? 'Unlist' : 'List') + ' ' + btn2('data-arch="' + esc(s.id) + '|' + (s.archived ? '0' : '1') + '"', s.archived ? 'Restore' : 'Archive')) + '</td></tr>';
-        }).join('');
+      getJSON('mystudies').then(function (rows) {
+        ROWS = rows;
+        var owner = isOwner();
+        $('stbl').innerHTML = '<tr><th>Study</th><th>Type</th><th>Your role</th><th>Last backup</th><th>Last self-test</th><th>Participants</th><th>Links</th>' + (owner ? '<th>On lab page</th><th></th>' : '') + '</tr>' + rows.map(function (s) {
+          return '<tr><td class="wrap-cell"><strong>' + esc(s.name) + '</strong> <span class="muted mono">' + esc(s.id) + '</span>' + (s.archived ? ' <span class="pill">archived</span>' : '') + (s.builtIn ? ' <span class="pill">built in</span>' : '') + '</td><td>' + esc(s.typeLabel) + '</td><td><span class="pill">' + esc(s.role) + '</span></td>' +
+            '<td>' + (s.lastBackupAt ? esc(fmt(s.lastBackupAt)) : '<span class="muted">none yet</span>') + '</td><td>' + testText(s.lastSelfTest) + '</td>' +
+            '<td id="sum-' + esc(s.id) + '">' + btn2('data-sum="' + esc(s.id) + '"', 'Load counts') + '</td>' +
+            '<td class="links"><a href="' + esc(s.paths.admin) + '">Admin</a><a href="' + esc(s.paths.participant) + '" target="_blank" rel="noopener">Participant page</a></td>' +
+            (owner ? '<td>' + (s.listed && !s.archived ? 'yes' : 'no') + '</td><td>' + (s.builtIn ? '<span class="muted">set in code</span>' : btn2('data-list="' + esc(s.id) + '|' + (s.listed ? '0' : '1') + '"', s.listed ? 'Unlist' : 'List') + ' ' + btn2('data-arch="' + esc(s.id) + '|' + (s.archived ? '0' : '1') + '"', s.archived ? 'Restore' : 'Archive')) + '</td>' : '') + '</tr>';
+        }).join('') + (rows.length ? '' : '<tr><td colspan="9" class="muted">No studies yet. Ask the lab owner to give your account access to a study.</td></tr>');
       }).catch(function (e) { err(e.message); });
     }
-    function btn2(attr, label) { return '<button type="button" class="secondary small" ' + attr + '>' + label + '</button>'; }
+    // Participant counts are read when asked for: they list the study's participants, which is too much work to do for every study on every page load.
+    function loadSum(id) {
+      var cell = $('sum-' + id); cell.textContent = 'Loading…';
+      getJSON('study-summary?id=' + encodeURIComponent(id)).then(function (r) {
+        cell.innerHTML = 'Real: ' + r.real.started + ' started, ' + r.real.completed + ' completed<br>Test: ' + r.test.started + ' started, ' + r.test.completed + ' completed<br><span class="muted">Last activity ' + (r.lastActivityAt ? esc(fmt(r.lastActivityAt)) : 'none') + '</span>';
+      }).catch(function (e) { cell.innerHTML = btn2('data-sum="' + esc(id) + '"', 'Load counts'); err(e.message); });
+    }
+    // ----- researchers -----
+    var ROLE_NAMES = ['', 'viewer', 'editor', 'manager', 'owner'];
+    function roleSelects(prefix, current) {
+      return ROWS.filter(function (s) { return !s.archived; }).map(function (s) {
+        return '<label class="f">' + esc(s.name) + '<select data-study="' + esc(s.id) + '" id="' + prefix + esc(s.id) + '">' + ROLE_NAMES.map(function (r) { return '<option value="' + r + '"' + ((current || {})[s.id] === r ? ' selected' : '') + '>' + (r || 'No access') + '</option>'; }).join('') + '</select></label>';
+      }).join('') || '<p class="muted">No studies yet.</p>';
+    }
+    function pickedRoles(box) { var o = {}; box.querySelectorAll('select[data-study]').forEach(function (x) { if (x.value) o[x.getAttribute('data-study')] = x.value; }); return o; }
+    function rolesText(r) { var k = Object.keys(r || {}); return k.length ? k.map(function (id) { var st = ROWS.filter(function (x) { return x.id === id; })[0]; return esc(st ? st.name : id) + ': ' + esc(r[id]); }).join('<br>') : '<span class="muted">none</span>'; }
+    function people() {
+      getJSON('researchers').then(function (rows) {
+        PEOPLE = rows;
+        $('rtbl').innerHTML = '<tr><th>Researcher</th><th>Status</th><th>Authenticator</th><th>Studies</th><th></th></tr>' + rows.map(function (a) {
+          return '<tr><td class="wrap-cell"><strong>' + esc(a.name) + '</strong>' + (a.labOwner ? ' <span class="pill">lab owner</span>' : '') + '<br><span class="muted">' + esc(a.email) + '</span></td><td>' + esc(a.status) + '</td><td>' + (a.totp ? 'on' : 'off') + '</td><td class="wrap-cell">' + rolesText(a.studyRoles) + '</td><td class="acts">' +
+            btn2('data-pedit="' + a.id + '"', 'Edit access') + ' ' + btn2('data-preset="' + a.id + '"', a.status === 'invited' ? 'New invitation link' : 'Reset password link') + ' ' + btn2('data-prevoke="' + a.id + '"', 'Sign out everywhere') + ' ' +
+            (a.totp ? btn2('data-pclear="' + a.id + '"', 'Remove authenticator') + ' ' : '') + btn2('data-pdis="' + a.id + '|' + (a.disabled ? '0' : '1') + '"', a.disabled ? 'Enable' : 'Disable') + ' ' + btn2('data-prem="' + a.id + '"', 'Remove') + '</td></tr>';
+        }).join('') + (rows.length ? '' : '<tr><td colspan="5" class="muted">No researchers yet. Invite one below.</td></tr>');
+      }).catch(function (e) { err(e.message); });
+    }
+    // The link is shown with a Copy button and a mailto link to the invitee, so the owner sends it from their own mail app.
+    function linkPanel(r, what, email, name) {
+      var url = location.origin + r.link.path, days = Math.round((r.link.expiresAt - Date.now()) / 3600000);
+      var body = 'Hello ' + (name || '') + ',\n\nHere is your link for the CCAIR Behavioral Lab (' + what + '). It works once and expires in ' + (days >= 48 ? Math.round(days / 24) + ' days' : days + ' hours') + ':\n\n' + url + '\n\nBen';
+      return '<div class="warn"><strong>' + esc(what) + ' for ' + esc(email) + '.</strong> Copy it now: it is not shown again, though you can make a new one at any time.' +
+        '<p><input type="text" readonly class="mono" id="linkbox" value="' + esc(url) + '" style="width:100%" aria-label="Link"></p>' +
+        '<div class="row"><button type="button" id="linkcopy">Copy link</button><a href="mailto:' + encodeURIComponent(email).replace(/%40/g, '@') + '?subject=' + encodeURIComponent('CCAIR Behavioral Lab') + '&amp;body=' + esc(encodeURIComponent(body)) + '">Email this invitation</a></div><p class="muted" id="linkstate" role="status"></p></div>';
+    }
+    function wireCopy() {
+      var b = $('linkcopy'); if (!b) return;
+      b.addEventListener('click', function () {
+        var box = $('linkbox'); box.select();
+        (navigator.clipboard ? navigator.clipboard.writeText(box.value) : Promise.reject()).then(function () { $('linkstate').textContent = 'Copied.'; }, function () { try { document.execCommand('copy'); $('linkstate').textContent = 'Copied.'; } catch (e) { $('linkstate').textContent = 'Press Ctrl+C or Cmd+C to copy the selected link.'; } });
+      });
+    }
+    function wireResearchers() {
+      $('invform').addEventListener('submit', function (e) {
+        e.preventDefault(); err();
+        postJSON('researchers/invite', { name: $('invname').value.trim(), email: $('invemail').value.trim(), labOwner: $('invowner').checked, studyRoles: pickedRoles($('invroles')) }).then(function (r) {
+          $('invout').innerHTML = linkPanel(r, 'Invitation (valid 7 days)', r.account.email, r.account.name); wireCopy();
+          $('invname').value = ''; $('invemail').value = ''; $('invowner').checked = false; $('invroles').innerHTML = roleSelects('inv-'); people();
+        }).catch(function (x) { err(x.message); });
+      });
+      $('rtbl').addEventListener('click', function (e) {
+        var t = e.target, a = t.getAttribute && t.getAttribute.bind(t); if (!a) return;
+        var who = function (id) { return PEOPLE.filter(function (x) { return x.id === id; })[0] || {}; };
+        if (a('data-pedit')) {
+          var p = who(a('data-pedit'));
+          $('redit').innerHTML = '<div class="qcard"><h3>Access for ' + esc(p.name) + ' (' + esc(p.email) + ')</h3><div class="row"><label class="f check"><input type="checkbox" id="ed-owner"' + (p.labOwner ? ' checked' : '') + '> Lab owner</label></div><div class="rolegrid">' + roleSelects('ed-', p.studyRoles) + '</div>' +
+            '<div class="row" style="margin-top:8px"><button type="button" id="ed-save">Save</button><button type="button" class="secondary" id="ed-cancel">Cancel</button></div></div>';
+          $('ed-cancel').addEventListener('click', function () { $('redit').innerHTML = ''; });
+          $('ed-save').addEventListener('click', function () { err(); postJSON('researchers/update', { id: p.id, labOwner: $('ed-owner').checked, studyRoles: pickedRoles($('redit')) }).then(function () { $('redit').innerHTML = ''; people(); }).catch(function (x) { err(x.message); }); });
+          $('redit').scrollIntoView({ block: 'nearest' });
+        } else if (a('data-preset')) {
+          var q = who(a('data-preset'));
+          postJSON('researchers/reset-link', { id: q.id }).then(function (r) { $('invout').innerHTML = linkPanel(r, q.status === 'invited' ? 'Invitation (valid 7 days)' : 'Password reset (valid 24 hours)', r.email, r.name); wireCopy(); $('invout').scrollIntoView({ block: 'nearest' }); }).catch(function (x) { err(x.message); });
+        } else if (a('data-prevoke')) {
+          postJSON('researchers/revoke', { id: a('data-prevoke') }).then(function () { err(); alert('Every session for that account has ended.'); }).catch(function (x) { err(x.message); });
+        } else if (a('data-pclear')) {
+          if (confirm('Remove the authenticator from this account? They will sign in with the password alone until they set it up again.')) postJSON('researchers/clear-totp', { id: a('data-pclear') }).then(people).catch(function (x) { err(x.message); });
+        } else if (a('data-pdis')) {
+          var d = a('data-pdis').split('|'); postJSON('researchers/update', { id: d[0], disabled: d[1] === '1' }).then(people).catch(function (x) { err(x.message); });
+        } else if (a('data-prem')) {
+          var r2 = who(a('data-prem'));
+          if (confirm('Remove ' + r2.name + ' (' + r2.email + ')? Their account is deleted and their sessions stop working. Study data is not touched.')) postJSON('researchers/remove', { id: r2.id }).then(people).catch(function (x) { err(x.message); });
+        }
+      });
+      $('actload').addEventListener('click', function () {
+        getJSON('activity').then(function (rows) {
+          $('acttbl2').innerHTML = '<tr><th>When</th><th>Who</th><th>What</th><th>Detail</th></tr>' + rows.slice(0, 200).map(function (r) { return '<tr><td>' + esc(fmt(r.at)) + '</td><td>' + esc(r.who) + '</td><td>' + esc(r.action) + '</td><td class="wrap-cell">' + esc(r.detail) + '</td></tr>'; }).join('') + (rows.length ? '' : '<tr><td colspan="4" class="muted">Nothing yet.</td></tr>');
+        }).catch(function (e) { err(e.message); });
+      });
+    }
     function begin() {
       err();
-      Promise.all([getJSON('me'), getJSON('types')]).then(function (res) {
-        TYPES = res[1];
-        $('keyform').hidden = true; $('keyhelp').hidden = true; $('app').hidden = false;
-        $('whoami').innerHTML = esc(res[0].name) + ' <span class="pill">owner</span> <button type="button" class="secondary small" id="signout">Sign out</button>';
-        $('signout').addEventListener('click', function () { setKey(''); location.reload(); });
-        $('ntype').innerHTML = TYPES.map(function (t) { return '<option value="' + esc(t.id) + '"' + (t.id === 'vignettes' ? ' selected' : '') + '>' + esc(t.label) + '</option>'; }).join('');
-        var d = function () { var t = TYPES.filter(function (x) { return x.id === $('ntype').value; })[0]; $('ntypedesc').textContent = t ? t.description : ''; };
-        $('ntype').addEventListener('change', d); d();
-        list();
-      }).catch(function (e) { setKey(''); $('keyform').hidden = false; $('app').hidden = true; err(e.message); });
+      getJSON('me').then(function (me) {
+        ME = me;
+        $('signinbox').hidden = true; $('keyhelp').hidden = true; $('app').hidden = false;
+        var ses = getSession();
+        $('whoami').innerHTML = esc(me.name) + ' <span class="pill">' + esc(me.role === 'owner' ? 'owner' : 'researcher') + '</span>' + (ses ? ' <a href="/lab/account/">Account</a>' : '') + ' <a href="/lab/guide/">Researcher guide</a> <button type="button" class="secondary small" id="signout">Sign out</button>';
+        $('signout').addEventListener('click', function () { endSession().then(function () { location.reload(); }); });
+        document.querySelectorAll('[data-owner]').forEach(function (el) { el.hidden = !isOwner(); });
+        $('ctitle').textContent = isOwner() ? 'CCAIR Lab: studies' : 'My studies';
+        $('cintro').innerHTML = isOwner()
+          ? 'Every study runs on the same engine: sign-in, consent, sessions, surveys, behavior traces, exports, backups, team access, and the live self-test. A new study gets its own data store, admin page, and participant link. Studies start unlisted; list one on <a href="/lab/">the lab page</a> once its consent text is IRB-approved and it is ready to recruit. New to the lab? Send researchers to the <a href="/lab/guide/">researcher guide</a>.'
+          : 'The studies your account can open, with your role in each. Open a study\'s admin page to see participants, edit content, and download data (what you can do depends on your role). Backup and self-test times come from the study itself; click "Load counts" to count participants. New to the lab? Read the <a href="/lab/guide/">researcher guide</a>.';
+        if (!isOwner()) { list(); return; }
+        return getJSON('types').then(function (t) {
+          TYPES = t;
+          $('ntype').innerHTML = TYPES.map(function (x) { return '<option value="' + esc(x.id) + '"' + (x.id === 'vignettes' ? ' selected' : '') + '>' + esc(x.label) + '</option>'; }).join('');
+          var d = function () { var y = TYPES.filter(function (x) { return x.id === $('ntype').value; })[0]; $('ntypedesc').textContent = y ? y.description : ''; };
+          $('ntype').addEventListener('change', d); d();
+          return getJSON('mystudies');
+        }).then(function (rows) { ROWS = rows; $('invroles').innerHTML = roleSelects('inv-'); wireResearchers(); list(); people(); });
+      }).catch(function (e) { setKey(''); if (e.code === 'session_expired') setSession(null); $('signinbox').hidden = false; $('app').hidden = true; err(e.message); });
     }
-    $('keyform').addEventListener('submit', function (e) { e.preventDefault(); setKey($('key').value.trim()); begin(); });
+    $('keyform').addEventListener('submit', function (e) { e.preventDefault(); setSession(null); setKey($('key').value.trim()); begin(); });
     $('nname').addEventListener('input', function () { if (!idTouched) $('nid').value = slug($('nname').value); });
     $('nid').addEventListener('input', function () { idTouched = true; });
     $('newform').addEventListener('submit', function (e) {
@@ -695,12 +812,13 @@
       }).catch(function (x) { err(x.message); $('ifile').focus(); });
     });
     $('stbl').addEventListener('click', function (e) {
+      var sum = e.target.getAttribute && e.target.getAttribute('data-sum'); if (sum) return loadSum(sum);
       var v = e.target.getAttribute && (e.target.getAttribute('data-list') || e.target.getAttribute('data-arch')); if (!v) return;
       var p = v.split('|'), on = p[1] === '1', key = e.target.hasAttribute('data-list') ? 'listed' : 'archived';
       if (key === 'archived' && on && !confirm('Archive "' + p[0] + '"? Its participant page and admin page stop working, but no data is deleted. You can restore it here.')) return;
       var body = { id: p[0] }; body[key] = on;
       postJSON('update', body).then(list).catch(function (x) { err(x.message); });
     });
-    if (getKey()) begin();
+    if (getKey() || getSession()) begin();
   }
 })();

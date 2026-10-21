@@ -13,7 +13,10 @@ static/lab/
   engine/types/<type>.js        a study type's item screen
   engine/types/<type>-admin.js  a study type's content-editor tabs and report sections
   s/index.html                  participant page for /lab/s/<study>
-  admin/index.html              admin page for /lab/admin/<study>; lab console at /lab/admin/
+  admin/index.html              admin page for /lab/admin/<study>; lab console (owner) and "My studies" (researcher) at /lab/admin/
+  signin/, account/             researcher sign-in, invitation and reset links; account settings (engine/auth.js, signin.js, account.js)
+  guide/, support/              researcher guide; support and FAQ (static pages)
+  assets/contact.js             builds the mailto: contact links; assets/pages.css is the layout for the four pages above
   studies/demo-phishing/        demo study; data never leaves the browser
   studies/verification/         original URLs of the verification study (thin pages on the engine)
   templates/survey-template.csv the spreadsheet template for importing a survey
@@ -166,7 +169,7 @@ Key schema: `participants/{id}`, `consent/{id}`, `plans/{id}/s{n}`, `started/{id
 
 ### Admin page (`/lab/studies/verification/admin.html`, the same for every study at `/lab/admin/<study>`)
 
-Set `LAB_ADMIN_KEY` (or the original `VC_ADMIN_KEY`; 16+ characters) in the Netlify environment variables; that is the lab owner key, valid for every study and the lab console. Team keys are per study. Tabs:
+Set `LAB_ADMIN_KEY` (or the original `VC_ADMIN_KEY`; 16+ characters) in the Netlify environment variables; that is the lab owner key, valid for every study and the lab console. Team keys are per study. Researchers can also sign in with an account (see "Researcher accounts"). Tabs:
 
 - *Participants*: progress; the live self-test (also checks the storage itself); trials CSV, surveys CSV, full JSON, and raw-trace JSONL downloads (assembled in the browser in batches of participants, so they work at any study size; optionally real participants only); mark test/real; delete one or all test participants; the live self-test.
 - *Pilot report*: per-alert accuracy without the AI (flags alerts that are too easy or too hard), accuracy when the AI is right vs wrong, agreement and evidence checking by AI behavior, accuracy by condition and session, session length vs the promised minutes, and drop-off by session. Filter by label to look at one pilot batch; download the per-alert table as CSV.
@@ -201,6 +204,54 @@ Choices that change measured behavior are marked [B]; keep them identical across
 ### Reusing this for a future study
 
 Done: the generic parts now live in the engine (see "Study engine" above), and this study is one instance of the `alert-triage` type. A new alert-triage study (different alerts, sessions, or AI schedule) needs no code: create it in the lab console and edit its content.
+
+## Researcher accounts
+
+Researchers sign in with their own account instead of sharing keys. The owner key and the per-study team keys still work exactly as before; an account is one more way to reach the same admin routes. Code: `netlify/lib/lab/accounts.mjs` (accounts, passwords, authenticator, links, sessions, lockout), `admin.mjs` (`authAdmin` takes a resolved account), `router.mjs` (`/api/lab/_lab/auth/*`, `account/*`, `researchers/*`, `mystudies`, `study-summary`, `activity`). Pages: `/lab/signin/`, `/lab/account/`, `/lab/admin/` (console and My studies), `/lab/guide/`, `/lab/support/`. Tests: `tests/lab/accounts.test.mjs`, `pages-contact.test.mjs`.
+
+### What an account is
+
+`accounts/<sha256(lowercased email)>` in the `lab-registry` store: `{ email, name, pwHash, pwSalt, pwParams, totp?: { secret, enabledAt }, recovery: [sha256 of each unused-or-used code], studyRoles: { <studyId>: 'viewer' | 'editor' | 'manager' | 'owner' }, labOwner, disabled, createdAt, createdBy, tokenEpoch, passwordChangedAt }`. A lab owner account (`labOwner: true`) is owner of every study and of the console. Anyone else has the role listed for a study and no access to the others. The lab owner (owner key or lab owner account) creates studies and invites researchers; a study owner role manages that study only.
+
+- **Passwords:** Node `crypto.scrypt`, N = 2^16, r = 8, p = 1, 64-byte output, a random 16-byte salt per account, the parameters stored with the hash, constant-time compare. One hash takes about 0.1 s on a laptop (the test asserts under 1 s); it uses 64 MiB of memory. At least 12 characters (200 at most); refused: the account's email or name (or the part of the email before the @), a very short list of common passwords, and passwords of one or two distinct characters. Passwords and hashes are never logged or returned (a test scans every response and the audit log).
+- **Authenticator (optional):** TOTP, RFC 6238, SHA-1, 30 seconds, 6 digits, one step either side, implemented with `node:crypto` (tests use the RFC's vectors). Setup shows the base32 key and the `otpauth://` address as text (no QR code, no outside origin) and turns on only after a correct code. Each accepted 30-second step is written once (`totp-used/<id>/<step>`), so a code cannot be used twice. Eight recovery codes are shown once; only their hashes are stored; each use writes `recovery-used/<id>/<hash>` once, so a code works once even under simultaneous requests. The TOTP secret is stored in the account record in the clear (it must be, to check codes); like the participant pepper, anyone with Netlify access can read it.
+- **Sign-in failures:** the same answer and about the same time for an unknown email, a disabled account, an account that has not accepted its invitation, and a wrong password (the unknown cases hash a dummy password). Failures are write-once keys `signin-fail/<sha256(email)>/<minute>-<rand>`; the tenth failure within 15 minutes writes `signin-lock/...` and the email is locked for 15 minutes (HTTP 429), whether or not the account exists. If the request carries `x-nf-client-connection-ip`, failures are also counted per address (`signin-fail-ip/`), with a higher limit (40) because a campus shares addresses; the address is stored only as a hash. Locked attempts are refused before any password work and are not counted again.
+
+### Sessions
+
+A session token is `s1.<payload>.<signature>`; the payload holds the account ID, `tokenEpoch`, issue and expiry times (8 hours), and a random ID. The signature is HMAC-SHA256 over `lab-session|<payload>` with a 32-byte secret in the registry store (`meta/session-secret`, created once with a write-once key on first use). **Anyone with Netlify site access can read that secret** (and so could mint sessions), exactly as they can read the participant pepper; the access list for Netlify is therefore part of the security model. The token travels in the `Authorization: Bearer` header and is kept in the tab's `sessionStorage` (`lab_session`); it is not a cookie, so no other site can make the browser send it.
+
+Every request with a token checks the signature, the expiry, that the account exists, is not disabled, has the same `tokenEpoch`, and that `revoked/<tokenId>` does not exist. **Sign out** writes that write-once key. **Sign out everywhere**, a password change or reset, and disabling an account bump `tokenEpoch`, which ends every older token. The epoch is a field on the account record, written with the usual compare-and-swap. That is acceptable because the record changes rarely and only through the account's own actions or the owner's: two changes to one account in the same instant are very unlikely, and the one case that matters, a lost epoch bump, is handled by re-reading after the write and repeating until the new value is visible. A stolen token also expires on its own within 8 hours.
+
+Researcher tokens and participant tokens are different formats signed with different secrets (the registry's session secret and a study's pepper). The participant routes never read the `Authorization` header and a researcher token fails their check; the admin routes refuse a participant token. Both directions are tested.
+
+### Invitations and reset links
+
+The owner invites a researcher in the console (Researchers): name, email, per-study roles, optional lab owner. The server creates the account (no password yet) and returns a one-time link `/lab/signin/#invite=<token>` valid 7 days; only `sha256(token)` is stored (`invites/<hash>`, write-once). Opening it asks for a name and a password twice, then signs the person in and offers the authenticator. A password-reset link (`#reset=<token>`, 24 hours) works the same way but signs nobody in, so an authenticator is still asked for at the next sign-in. A link is consumed by writing `invites-used/<hash>` once before anything changes; of two simultaneous redemptions only one creates the key, and the other is refused (tested with racing requests on fast and slow stores). A weak password is rejected before the link is consumed. The token is in the address fragment, which browsers do not send to servers or in referrers, and the page removes it from the address bar.
+
+There is no email service. The console shows the link with a Copy button and an "Email this invitation" `mailto:` link addressed to the invitee, so the owner sends it from their own mail app. The same console section changes a researcher's study roles (effective on the next request), disables or enables, issues a reset link, signs the account out everywhere, removes its authenticator (for someone who lost the device and the codes), and removes the account. The owner cannot disable or remove their own account or take away their own lab owner access. All of this, and every sign-in, sign-out, password and authenticator change, goes to the registry audit log (`audit/` in `lab-registry`; Account activity in the console). Study-level actions by a researcher go to that study's audit log under the researcher's name and role, as before.
+
+### My studies
+
+`/lab/admin/` shows, for a researcher, the studies their account can open; for an owner, all studies. One request (`mystudies`) returns, per study, what is cheap: name, type, role, links, whether it is listed, the time of the last completed backup (one read of the backup store's state), and the last self-test (`meta/last-selftest` in the study's store, written when a self-test finishes; a study that never ran one shows "not run"). **Participant counts and last activity are loaded on request** ("Load counts" per study, `study-summary?id=`): they list the study's participants and their progress, which is too much work for every page load. Real and test participants are counted separately; "started" means consented or has progress, "completed" means all sessions done.
+
+### Contact links
+
+Every contact, request-access, and trouble-signing-in action is a `mailto:bampel@gsu.edu?subject=CCAIR%20Behavioral%20Lab&body=...` link with the body percent-encoded, so it opens the visitor's own email app. Nothing is submitted to a server and nothing is stored. `assets/contact.js` builds the links (the static pages carry the same links written out, and a test checks they match). The participant footer link ("Questions about this study? Contact the lab", on `/lab/s/<study>` and the original verification URLs) puts the study name in the body, and the study ID only when the participant is signed in (taken from the sign-in token); it never includes an email address. If the lab owner's address changes, change `TO` in `contact.js` and the links in the HTML pages (the test fails until they agree).
+
+### Runbook
+
+**First researcher.** With the owner key: `/lab/admin/` > use the owner key > Researchers > Invite a researcher. Tick "Lab owner" for a second owner, or choose a role for each study. Copy the link, or use "Email this invitation". The link works once for 7 days. The first thing to do is invite yourself as a lab owner account, so day-to-day work does not need the key.
+
+**Locked out or lost a password.** The owner key always works, whatever the state of accounts: the key does not depend on any account record, the session secret, or the lockout. In the console choose "Reset password link" for the researcher and send it. A forgotten authenticator with no recovery codes: "Remove authenticator", then the researcher sets it up again. A locked email unlocks by itself after 15 minutes; to clear it now, delete the account's `signin-lock/<sha256(email)>/` keys from the `lab-registry` store (Netlify access needed).
+
+**If the owner key itself is lost:** set a new `LAB_ADMIN_KEY` in Netlify (16+ characters) and redeploy. If a lab owner account is the only way in, the key is the fallback; keep it where you keep other secrets.
+
+**Ending a researcher's access.** Disable the account (sessions stop at once), or remove it. A team key given earlier to the same person is separate: remove it on the study's Team tab.
+
+**Rotating the session secret** (if it may have leaked): delete `meta/session-secret` in the `lab-registry` store. Every session ends and the next sign-in creates a new secret.
+
+**Limits.** Sessions last 8 hours with no sliding renewal. There is no email verification beyond the invitation link, no self sign-up, and no single sign-on. The audit log lists attempts only for known accounts, so a flood against unknown addresses is visible only as `signin-fail/` keys.
 
 ## Economic games
 

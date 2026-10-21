@@ -2,14 +2,17 @@
 //   /api/lab/{study}/{route}   participant and admin routes for one study
 //   /api/vc/{route}            the same, for the built-in verification study (original URLs)
 //   /api/lab/_lab/{route}      lab-level routes: list, create, and update studies
-// Participant routes need a token from login. Admin routes need a key in the x-admin-key header: the
-// lab owner key (LAB_ADMIN_KEY, or VC_ADMIN_KEY) or a team key for that study. Each route has a
-// minimum role (NEED).
+// Participant routes need a token from login. Admin routes need either a key in the x-admin-key header (the
+// lab owner key LAB_ADMIN_KEY or VC_ADMIN_KEY, or a team key for that study) or a researcher session in the
+// Authorization header ("Bearer <token>", from /api/lab/_lab/auth/signin; its role for the study comes from the
+// account's studyRoles, and a lab owner account is owner everywhere). Each route has a minimum role (NEED).
+// The two kinds of token are different formats signed with different secrets, so neither works in the other's place.
 import { blobsStore, getMany as E_getMany } from './store.mjs';
 import * as E from './engine.mjs';
 import * as content from './content.mjs';
 import * as admin from './admin.mjs';
 import * as backup from './backup.mjs';
+import * as acc from './accounts.mjs';
 import { runSelfTest } from './selftest.mjs';
 import { getStudy, listStudies, createStudy, updateStudy, typeFor } from './registry.mjs';
 import { TYPES } from './types/index.mjs';
@@ -49,7 +52,7 @@ export async function handle(req, { getStore, env, now }) {
   const registry = blobsStore(getStore, 'lab-registry');
 
   try {
-    if (studyId === '_lab') return await labRoute(route, req, body, { registry, getStore, ownerKey });
+    if (studyId === '_lab') return await labRoute(route, req, body, { registry, getStore, ownerKey, clock });
 
     const study = await getStudy(registry, studyId);
     if (!study) return json({ error: 'no_study' }, 404);
@@ -82,8 +85,11 @@ export async function handle(req, { getStore, env, now }) {
     }
 
     if (route.startsWith('admin/')) {
-      if (!ownerKey) return json({ error: 'admin_disabled', hint: 'Set LAB_ADMIN_KEY (16+ characters) in Netlify environment variables.' }, 503);
-      const who = await admin.authAdmin(S.store, req.headers.get('x-admin-key'), ownerKey);
+      const bearer = acc.bearerOf(req);
+      let session = null;
+      if (bearer) { session = await acc.sessionAccount(registry, bearer, clock()); if (!session) return json({ error: 'session_expired', hint: 'Your sign-in expired. Sign in again.' }, 401); }
+      else if (!ownerKey) return json({ error: 'admin_disabled', hint: 'Set LAB_ADMIN_KEY (16+ characters) in Netlify environment variables.' }, 503);
+      const who = await admin.authAdmin(S.store, req.headers.get('x-admin-key'), ownerKey, clock(), { account: session && session.account, studyId: study.id });
       if (!who) return json({ error: 'forbidden' }, 403);
       const action = route.slice(6), typeRoute = type.adminRoutes && Object.hasOwn(type.adminRoutes, action) ? type.adminRoutes[action] : null, need = NEED[action] || (typeRoute && typeRoute.need);
       if (!need) return json({ error: 'not_found' }, 404);
@@ -179,7 +185,10 @@ export async function handle(req, { getStore, env, now }) {
         }
         case 'self-test': {
           const r = await runSelfTest(S, { condition: String(body.condition || ''), code: body.code ? String(body.code) : undefined, keep: body.keep === true });
-          if (r.done) await admin.audit(S.store, who, 'self_test', `${r.condition}: ${r.passed} passed, ${r.failed} failed${r.kept ? ', kept ' + r.code : ''}`);
+          if (r.done) {
+            await admin.audit(S.store, who, 'self_test', `${r.condition}: ${r.passed} passed, ${r.failed} failed${r.kept ? ', kept ' + r.code : ''}`);
+            await S.store.set('meta/last-selftest', { at: clock(), condition: r.condition, passed: r.passed, failed: r.failed, by: who.name });   // shown on "My studies"
+          }
           return reply(r);
         }
         case 'backup-run': {
@@ -210,21 +219,131 @@ export async function handle(req, { getStore, env, now }) {
   }
 }
 
-// Lab-level routes: the public list of studies, and (owner only) study types, creating and updating studies.
-async function labRoute(route, req, body, { registry, ownerKey }) {
-  if (route === 'studies' && req.method === 'GET' && !req.headers.get('x-admin-key')) {
+// Lab-level routes.
+//   public:        studies (the listed studies), auth/* (sign in; open an invitation or reset link)
+//   any signed-in: me, mystudies, study-summary (a researcher session, or the owner key)
+//   researcher:    account/* (their own settings; a session only)
+//   owner:         types, studies (all), create, update, researchers/*, activity (owner key or a lab owner account)
+async function labRoute(route, req, body, { registry, getStore, ownerKey, clock }) {
+  const now = clock(), key = req.headers.get('x-admin-key'), bearer = acc.bearerOf(req);
+  if (route === 'studies' && req.method === 'GET' && !key && !bearer) {
     return json((await listStudies(registry)).map(s => ({ id: s.id, name: s.name, description: s.description, type: s.type, paths: { participant: s.paths.participant } })));
   }
-  if (!ownerKey) return json({ error: 'admin_disabled', hint: 'Set LAB_ADMIN_KEY (16+ characters) in Netlify environment variables.' }, 503);
-  const who = await admin.authAdmin(registry, req.headers.get('x-admin-key'), ownerKey);
-  if (!who || who.role !== 'owner') return json({ error: 'forbidden' }, 403);
+  if (route.startsWith('auth/')) return authRoute(route.slice(5), req, body, { registry, now });
+
+  // Who is asking: a researcher session, or the owner key.
+  let who, session = null;
+  if (bearer) {
+    session = await acc.sessionAccount(registry, bearer, now);
+    if (!session) return json({ error: 'session_expired', hint: 'Your sign-in expired. Sign in again.' }, 401);
+    const a = session.account;
+    who = { id: 'account', name: a.name, role: a.labOwner ? 'owner' : 'researcher', accountId: a.id };
+  } else {
+    if (!ownerKey) return json({ error: 'admin_disabled', hint: 'Set LAB_ADMIN_KEY (16+ characters) in Netlify environment variables.' }, 503);
+    who = await admin.authAdmin(registry, key, ownerKey, now);
+    if (!who || who.role !== 'owner') return json({ error: 'forbidden' }, 403);
+  }
+  const isOwner = who.role === 'owner', post = req.method === 'POST';
+  const needPost = () => (post ? null : json({ error: 'post_required' }, 405));
+
+  if (route.startsWith('account/')) {
+    if (!session) return json({ error: 'account_required', hint: 'These settings belong to a researcher account. Sign in with one.' }, 403);
+    return accountRoute(route.slice(8), req, body, { registry, session, now, getStore });
+  }
   switch (route) {
-    case 'me': return json({ name: who.name, role: who.role });
+    case 'me': return json(session ? { ...acc.me(session.account), role: who.role } : { name: who.name, role: who.role });
+    case 'mystudies': return json(await studiesFor(registry, getStore, session ? session.account : null));
+    case 'study-summary': {
+      const id = new URL(req.url).searchParams.get('id') || '';
+      const a = session ? session.account : null;
+      if (a && !a.labOwner && !Object.hasOwn(a.studyRoles || {}, id)) return json({ error: 'forbidden' }, 403);
+      const study = await getStudy(registry, id);
+      if (!study) return json({ error: 'no_study' }, 404);
+      return json(await studySummary({ store: blobsStore(getStore, study.storeName), type: typeFor(study), study }));
+    }
+  }
+  if (!isOwner) return json({ error: 'forbidden' }, 403);
+  const studyIds = async () => (await listStudies(registry, { all: true })).map(s => s.id);
+  switch (route) {
     case 'studies': return json(await listStudies(registry, { all: true }));
     case 'types': return json(Object.values(TYPES).map(t => ({ id: t.id, label: t.label, description: t.description })));
-    case 'create': return req.method === 'POST' ? reply(await createStudy(registry, body, who)) : json({ error: 'post_required' }, 405);
-    case 'update': return req.method === 'POST' ? reply(await updateStudy(registry, String(body.id || ''), body)) : json({ error: 'post_required' }, 405);
+    case 'create': return needPost() || reply(await createStudy(registry, body, who));
+    case 'update': return needPost() || reply(await updateStudy(registry, String(body.id || ''), body));
+    case 'researchers': return json(await acc.listResearchers(registry));
+    case 'researchers/invite': return needPost() || reply(await acc.inviteResearcher(registry, body, who, await studyIds(), now));
+    case 'researchers/update': return needPost() || reply(await acc.updateResearcher(registry, String(body.id || ''), body, who, await studyIds(), now));
+    case 'researchers/reset-link': return needPost() || reply(await acc.resetLink(registry, String(body.id || ''), who, now));
+    case 'researchers/revoke': return needPost() || reply(await acc.revokeAll(registry, String(body.id || ''), who, now));
+    case 'researchers/clear-totp': return needPost() || reply(await acc.clearTotp(registry, String(body.id || ''), who, now));
+    case 'researchers/remove': return needPost() || reply(await acc.removeResearcher(registry, String(body.id || ''), who, now));
+    case 'activity': return json(await admin.auditLog(registry));
   }
   return json({ error: 'not_found' }, 404);
 }
 
+// Sign-in and links. No credentials needed; these never say whether an email has an account.
+async function authRoute(route, req, body, { registry, now }) {
+  if (req.method !== 'POST') return json({ error: 'post_required' }, 405);
+  switch (route) {
+    case 'signin': return reply(await acc.signIn(registry, body, { now, ip: req.headers.get('x-nf-client-connection-ip') || '' }));
+    case 'link-info': return reply(await acc.linkInfo(registry, body.token, now));
+    case 'accept': return reply(await acc.acceptLink(registry, body, now));
+  }
+  return json({ error: 'not_found' }, 404);
+}
+
+// The signed-in researcher's own account.
+async function accountRoute(route, req, body, { registry, session, now }) {
+  const a = session.account;
+  if (route === 'me') {
+    const studies = [];
+    for (const [id, role] of Object.entries(a.studyRoles || {})) { const st = await getStudy(registry, id); if (st) studies.push({ id, name: st.name, role }); }
+    return json({ ...acc.me(a), studies, recoveryRemaining: await acc.recoveryRemaining(registry, a), passwordChangedAt: a.passwordChangedAt || null, expiresAt: session.claims.x });
+  }
+  if (req.method !== 'POST') return json({ error: 'post_required' }, 405);
+  switch (route) {
+    case 'name': return reply(await acc.renameSelf(registry, a, body.name));
+    case 'password': return reply(await acc.changePassword(registry, a, body, now));
+    case 'totp-setup': return reply(await acc.totpSetup(registry, a));
+    case 'totp-enable': return reply(await acc.totpEnable(registry, a, body.code, now));
+    case 'totp-disable': return reply(await acc.totpDisable(registry, a, body.password, now));
+    case 'recovery': return reply(await acc.regenRecovery(registry, a, body.password, now));
+    case 'signout':
+      await acc.revokeSession(registry, session.claims, now);
+      await admin.audit(registry, { name: a.name, role: 'researcher' }, 'signout', a.email, now);
+      return json({ ok: true });
+    case 'signout-all': {
+      const r = await acc.bumpEpoch(registry, a.id);
+      if (r.error) return reply(r);
+      await admin.audit(registry, { name: a.name, role: 'researcher' }, 'signout.all', a.email, now);
+      return json({ ok: true });
+    }
+  }
+  return json({ error: 'not_found' }, 404);
+}
+
+// "My studies": the studies this caller can open (all of them for an owner), with what is cheap to read: one get for the
+// last backup and one for the last self-test per study. Participant counts are not here (see studySummary).
+async function studiesFor(registry, getStore, account) {
+  const all = await listStudies(registry, { all: true });
+  const rows = account && !account.labOwner ? all.filter(s => Object.hasOwn(account.studyRoles || {}, s.id) && !s.archived) : all;
+  return Promise.all(rows.map(async s => {
+    const bk = await backup.backupStatus(blobsStore(getStore, s.backupName)), st = await blobsStore(getStore, s.storeName).get('meta/last-selftest');
+    return { id: s.id, name: s.name, type: s.type, typeLabel: (TYPES[s.type] || {}).label || s.type, role: account && !account.labOwner ? account.studyRoles[s.id] : 'owner', paths: s.paths, listed: !!s.listed, archived: !!s.archived, builtIn: !!s.builtIn,
+      lastBackupAt: bk.lastCompleteAt || null, lastBackupTriedAt: bk.lastRunAt || null, lastSelfTest: st || null };
+  }));
+}
+
+// Participant counts for one study, read when asked for: it lists the study's participants, which is too much work for every page load.
+async function studySummary(S) {
+  const rows = await E.listParticipants(S), agg = () => ({ started: 0, completed: 0, total: 0 });
+  const real = agg(), test = agg(); let last = null;
+  for (const p of rows) {
+    const g = p.test ? test : real;
+    g.total++;
+    if (p.consented || p.completedSessions > 0 || p.inProgress > 0) g.started++;
+    if (p.totalSessions > 0 && p.completedSessions >= p.totalSessions) g.completed++;
+    if (p.lastSeenAt && (!last || p.lastSeenAt > last)) last = p.lastSeenAt;
+  }
+  return { real, test, lastActivityAt: last };
+}
