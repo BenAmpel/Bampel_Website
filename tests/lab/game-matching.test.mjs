@@ -43,10 +43,10 @@ console.log('slot race: 60 runs, two instances with different views of the listi
   // nobody has run the matcher yet; the first attempt arrives in bucket 13 and must settle slot 12 before slot 13
   await matchAttempt(S, pids[0], 13 * 5000 + 100);
   const s12 = await base.get(K.slot(12)); assert(s12 && s12.cohorts.length === 1 && s12.cohorts[0].members.length === 8);
-  assert.equal(await base.get(K.slot(13)), null, 'slot 13: the same eight were already placed in slot 12');
-  assert.equal(await base.get(K.slot(11)), null);
+  assert.deepEqual((await base.get(K.slot(13))).cohorts, [], 'slot 13: the same eight were already placed in slot 12 (an empty record is stored)');
+  assert.deepEqual((await base.get(K.slot(11))).cohorts, []);
   await matchAttempt(S, pids[1], 14 * 5000 + 100);
-  assert.equal(await base.get(K.slot(14)), null, 'slot 14: still nobody left'); for (const p of pids) assert.equal(await base.get(K.member(p, 1)), null);
+  assert.deepEqual((await base.get(K.slot(14))).cohorts, [], 'slot 14: still nobody left'); for (const p of pids) assert.equal(await base.get(K.member(p, 1)), null);
   for (const p of pids) assert.equal((await findMembership(S, p)).cid, s12.cohorts[0].id);
 }
 console.log('chain: a person placed in slot 12 is not placed again in slots 13 or 14, even if nobody ran slots 12 or 13 before');

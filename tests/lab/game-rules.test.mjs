@@ -219,11 +219,11 @@ console.log('content validation: unknown names, wrong roles, bad limits, async r
   assert.deepEqual(R.paymentFor(pay, [-5, 3], 0), { points: -5, bonus: 0 }, 'a bonus is never negative');
   assert.deepEqual(R.paymentFor(pay, [10, null], 1), { points: null, bonus: null }, 'unknown payoffs give no amount');
   assert.equal(R.round2(1.005), 1.01); assert.equal(R.round2(0.1 + 0.2), 0.3);
-  // the draw is a pure function of participant and study
-  for (const pid of ['P-1', 'P-2', 'P-abc']) assert.equal(R.drawPaidRound(pid, 's', 10), R.drawPaidRound(pid, 's', 10));
-  const counts = Array(5).fill(0); for (let i = 0; i < 2000; i++) counts[R.drawPaidRound('P-' + i, 'study', 5)]++;
+  // the draw is a pure function of a server-side secret, participant, and study
+  for (const pid of ['P-1', 'P-2', 'P-abc']) assert.equal(R.drawPaidRound('sec', pid, 's', 10), R.drawPaidRound('sec', pid, 's', 10));
+  const counts = Array(5).fill(0); for (let i = 0; i < 2000; i++) counts[R.drawPaidRound('sec', 'P-' + i, 'study', 5)]++;
   assert(counts.every(n => n > 300 && n < 500), 'roughly uniform: ' + counts);
-  assert(R.drawPaidRound('P-1', 'a', 1000) !== R.drawPaidRound('P-1', 'b', 1000) || R.drawPaidRound('P-1', 'a', 1000000) !== R.drawPaidRound('P-1', 'b', 1000000), 'depends on the study');
+  assert(R.drawPaidRound('a', 'P-1', 's', 1000000) !== R.drawPaidRound('b', 'P-1', 's', 1000000), 'depends on the secret, so it cannot be worked out from the ID and study alone');
 }
 // ----- timeout values -----
 {

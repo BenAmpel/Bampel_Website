@@ -10,7 +10,7 @@ import { seeded, shuffle } from '../engine.mjs';
 import { setNew } from '../store.mjs';
 import { parse, identifiers } from './expr.mjs';
 import * as R from './rules.mjs';
-import { K, SESSION, getOnce, writeOnce, loadCtx, roundInfo, writeUnplayed } from './shared.mjs';
+import { K, SESSION, getOnce, writeOnce, loadCtx, roundInfo, writeUnplayed, ensurePay } from './shared.mjs';
 
 export const ALL_STAGES = spec => ({ index: -1, stages: spec.stages.map((_, i) => i) });
 
@@ -72,7 +72,7 @@ export async function completeAsync(S, ctx, role, now) {
   await writeOnce(S.store, K.adone(pid), { at: now });
   const person = await S.store.get(`participants/${pid}`);
   await writeOnce(S.store, K.pool(!!(person && person.test), ctx.condition, role, pid), { at: now });
-  await setNew(S.store, K.pay(pid), { round: R.drawPaidRound(pid, ctx.studyId, spec.rounds), at: now });
+  await ensurePay(S, ctx, pid, now);
   return matchAsync(S, ctx, now);
 }
 

@@ -12,9 +12,8 @@
 import { seeded } from '../engine.mjs';
 import { setNew } from '../store.mjs';
 import * as R from './rules.mjs';
-import { K, SESSION, GRACE_MS, bucketOf, tail, getOnce, writeOnce, contentAt, loadCtx, roundInfo, writeUnplayed, seedId } from './shared.mjs';
+import { K, SESSION, GRACE_MS, bucketOf, tail, getOnce, writeOnce, contentAt, loadCtx, roundInfo, writeUnplayed, seedId, ensurePay } from './shared.mjs';
 
-const MAX_MEMBERSHIPS = 5;
 const WINDOW = 3;
 
 // ---------- matching ----------
@@ -28,26 +27,55 @@ async function slotRecord(S, u) { return getOnce(S.store, K.slot(u)); }
 // Creates the record for slot u if it does not exist yet; returns the winning record (or null if nobody was matched).
 export async function computeSlot(S, u, known) {
   const keys = await S.store.list(K.hbPrefix(u - R.SETTLE_BUCKETS));
-  if (!keys.length) return null;
   const taken = new Set();
   for (let v = u - WINDOW; v < u; v++) for (const c of (known[v] && known[v].cohorts) || []) for (const m of c.members) taken.add(m.pid);
   const best = new Map();
   for (const k of keys) { const h = parseHb(k); if (taken.has(h.pid)) continue; const cur = best.get(h.pid); if (!cur || h.entry < cur.entry) best.set(h.pid, h); }
-  const cands = [...best.values()], games = new Map();
+  // Not placed again: people who took the waiting-room fallback or finished asynchronously, and people who were placed in a
+  // group and never confirmed it (until they press the rejoin button).
+  const checked = await Promise.all([...best.values()].map(async h => ((await eligible(S, h.pid)) ? h : null)));
+  const cands = checked.filter(Boolean), games = new Map();
   for (const v of new Set(cands.map(c => c.ver))) { const c = await contentAt(S, v); if (c) games.set(v, R.gameOf(c)); }
   const usable = cands.filter(c => games.has(c.ver) && games.get(c.ver).mode === 'live');
   const cohorts = R.formCohorts(v => games.get(v), u, usable, seedId(S));
-  if (!cohorts.length) return null;
-  return (await writeOnce(S.store, K.slot(u), { slot: u, createdAt: u * R.SLOT_MS, cohorts }, { verify: true })).value;
+  // An empty slot is recorded too (write-once), so it is not listed again by every later attempt.
+  const rec = (await writeOnce(S.store, K.slot(u), { slot: u, createdAt: u * R.SLOT_MS, cohorts }, { verify: true })).value;
+  return rec;
+}
+
+// Membership history: the newest membership that is not an abandoned cohort, and whether the participant was a no-show
+// in the newest abandoned one (placed there but not on the confirmed list, and not rejoined since).
+export async function membershipState(S, pid) {
+  let active = null, lastAbandoned = null;
+  for (let n = 0; n < 100000; n++) {
+    const m = await getOnce(S.store, K.member(pid, n));
+    if (!m) break;
+    const dec = await getOnce(S.store, K.decision(m.cid));
+    if (dec && dec.go === false) { lastAbandoned = { cid: m.cid, ready: dec.ready || [] }; active = null; continue; }
+    active = { n, cid: m.cid, decision: dec };
+  }
+  let noshow = null, rejoinAt = null;
+  if (lastAbandoned) {
+    const rj = await getOnce(S.store, K.rejoin(pid, lastAbandoned.cid));
+    if (rj) rejoinAt = rj.at; else if (!lastAbandoned.ready.includes(pid)) noshow = lastAbandoned.cid;
+  }
+  return { active, noshow, rejoinAt };
+}
+async function eligible(S, pid) {
+  const [fb, done] = await Promise.all([getOnce(S.store, K.fallback(pid)), getOnce(S.store, K.adone(pid))]);
+  if (fb || done) return false;
+  const st = await membershipState(S, pid);
+  return !st.noshow && !st.active;
 }
 
 // Writes each cohort's record and a pointer from each member to it. All writes are idempotent.
 export async function publishSlot(S, rec) {
-  if (await getOnce(S.store, `g/slotdone/${rec.slot}`)) return;
+  if (!rec.cohorts.length || await getOnce(S.store, `g/slotdone/${rec.slot}`)) return;
   for (const c of rec.cohorts) {
     await writeOnce(S.store, K.cohort(c.id), c, { verify: true });
+    await writeOnce(S.store, K.cidx(c.id), { slot: rec.slot });
     await Promise.all(c.members.map(async m => {
-      for (let n = 0; n < MAX_MEMBERSHIPS; n++) {
+      for (let n = 0; n < 100000; n++) {
         const cur = await S.store.get(K.member(m.pid, n));
         if (!cur) { const w = await writeOnce(S.store, K.member(m.pid, n), { cid: c.id, slot: rec.slot }); if (w.value.cid === c.id) return; continue; }
         if (cur.cid === c.id) return;
@@ -69,19 +97,12 @@ export async function matchAttempt(S, pid, now) {
     if (!known[u]) { const r = await computeSlot(S, u, known); if (r) known[u] = r; }
     if (known[u]) await publishSlot(S, known[u]);
   }
+  // Heartbeats older than the matcher can use are removed (one bucket per attempt), so they do not pile up.
+  for (const k of await S.store.list(K.hbPrefix(b - WINDOW - 2 - R.SETTLE_BUCKETS))) await S.store.delete(k);
 }
 
 // The newest membership that is not an abandoned cohort.
-export async function findMembership(S, pid) {
-  for (let n = 0; n < MAX_MEMBERSHIPS; n++) {
-    const m = await getOnce(S.store, K.member(pid, n));
-    if (!m) return null;
-    const dec = await getOnce(S.store, K.decision(m.cid));
-    if (dec && dec.go === false) continue;
-    return { n, cid: m.cid, decision: dec };
-  }
-  return null;
-}
+export async function findMembership(S, pid) { return (await membershipState(S, pid)).active; }
 
 // ---------- reading moves ----------
 const stageOfDecision = (spec, id) => spec.stages.find(st => st.decisions.some(d => d.id === id));
@@ -140,7 +161,7 @@ async function writeAuto(S, ctx, cohort, r, s, step, m, seen, deadline, why, now
     if (prev) { const mv = await getOnce(S.store, K.move(cohort.id, prev[0], prev[1], m.pid)); last = mv ? mv.values : null; }
   }
   const values = R.autoValues(spec, params, m.role, step, r, seen, spec.timeoutAction, last, seeded(`${cohort.id}|r${r}|s${s}|${m.pid}`));
-  const w = await writeOnce(S.store, K.move(cohort.id, r, s, m.pid), { values, auto: true, why, at: why === 'timeout' ? deadline : now }, { verify: true });
+  const w = await writeOnce(S.store, K.move(cohort.id, r, s, m.pid), { values, auto: true, why, at: why === 'timeout' ? deadline : now, ...(R.stepFellBack(spec, params, m.role, step, r, seen) ? { limitFallback: true } : {}) }, { verify: true });
   if (w.created && why === 'timeout') await maybeDrop(S, ctx, cohort, r, s, m.pid, m.role, now);
   return w.value;
 }
@@ -209,7 +230,7 @@ async function finishRound(S, ctx, cohort, r, j, members, now) {
     const values = {}, strat = {};
     if (acting && res) for (const d of st.decisions) { values[d.id] = res.concrete[m.pid][d.id]; if (st.strategyMethod) strat[d.id] = raw[m.pid][d.id]; }
     return { stage: st.id, step, acting, values, strategy: st.strategyMethod && acting ? strat : undefined, auto: acting ? !!mv.auto : false, why: acting && mv.auto ? mv.why : undefined,
-      rtMs: acting ? (mv.rtMs ?? null) : null, hiddenMs: acting ? (mv.hiddenMs ?? null) : null };
+      rtMs: acting ? (mv.rtMs ?? null) : null, hiddenMs: acting ? (mv.hiddenMs ?? null) : null, limitFallback: acting && mv.limitFallback ? true : undefined };
   };
   const total_ = res ? Object.values(res.payoffs).reduce((a, b) => a + b, 0) : null;
   const all = members.map(m => ({ m, stages: spec.stages.map((st, si) => stageRow(m, st, si)) }));
@@ -220,7 +241,7 @@ async function finishRound(S, ctx, cohort, r, j, members, now) {
       autos: stages.filter(x => x.auto).length, payoffError: err || undefined };
     const rec = { code: m.pid, condition: cohort.cond, session: SESSION, index: r, role: m.role, practice, cohort: cid, group: j, contentVersion: ctx.version, receivedAt: now, data };
     await setNew(S.store, K.rec(m.pid, r), rec);
-    if (r === total - 1) await setNew(S.store, K.pay(m.pid), { round: R.drawPaidRound(m.pid, ctx.studyId, spec.rounds), at: now });
+    if (r === total - 1) await ensurePay(S, ctx, m.pid, now);
   });
   await Promise.all(writes);
 }
@@ -250,9 +271,13 @@ async function lobbyState(S, ctx, pid, body, now) {
   const { spec } = ctx;
   let lobby = await getOnce(S.store, K.lobby(pid));
   if (!lobby) { const person = await S.store.get(`participants/${pid}`); lobby = (await writeOnce(S.store, K.lobby(pid), { at: now, cond: ctx.condition, ver: ctx.version, test: !!(person && person.test) })).value; }
-  const b = bucketOf(now);
+  const b = bucketOf(now);   // always the server's own clock; nothing the browser sends decides whether work is done
+  const ms = await membershipState(S, pid);
+  if (ms.active) return null;
+  if (ms.noshow) return { ...publicBase(ctx, now), phase: 'lobby', noshow: true, hb: b, present: null, needed: spec.players, waitedMs: now - lobby.at, waitMaxMs: spec.waitMaxSeconds * 1000, fallback: now - lobby.at >= spec.waitMaxSeconds * 1000 ? spec.waitFallback : null };
+  const entry = Math.max(lobby.at, ms.rejoinAt || 0), hbKey = K.hb(b, ctx.condition, ctx.version, lobby.test, entry, pid);
   let first = false;
-  if (body.hb !== b) { await setNew(S.store, K.hb(b, ctx.condition, ctx.version, lobby.test, lobby.at, pid), { at: now }); first = true; }
+  if (!(await getOnce(S.store, hbKey))) { await setNew(S.store, hbKey, { at: now }); first = true; }
   let present = null;
   if (first) {
     await matchAttempt(S, pid, now);
@@ -260,7 +285,7 @@ async function lobbyState(S, ctx, pid, body, now) {
     if (m) return null;   // matched: the caller reads the membership again
     present = (await S.store.list(K.hbGroup(b - 1, ctx.condition, ctx.version, lobby.test))).length;
   }
-  const waited = now - lobby.at, over = waited >= spec.waitMaxSeconds * 1000;
+  const waited = now - entry, over = waited >= spec.waitMaxSeconds * 1000;
   return { ...publicBase(ctx, now), phase: 'lobby', hb: b, first, present, needed: spec.players, waitedMs: waited, waitMaxMs: spec.waitMaxSeconds * 1000, fallback: over ? spec.waitFallback : null };
 }
 
@@ -300,6 +325,7 @@ export async function livePoll(S, ctx, pid, body, now) {
   const done = await getOnce(S.store, K.rec(pid, r));
   const base = { ...publicBase(ctx, now), cid: cohort.id, round: r, ...roundInfo(spec, r), role: me.role, roleLabel: R.roleLabel(spec, me.role), last: r === total - 1 };
   if (done) {
+    if (r === total - 1) await ensurePay(S, ctx, pid, now);   // repairs a pay record lost if a server stopped between the two writes
     const dropped = (await S.store.list(K.droppedPrefix(cohort.id))).map(tail).includes(pid);
     return { ...base, phase: 'feedback', record: feedbackView(spec, ctx.g.feedback, done), dropped, history: body.needHistory ? await historyOf(S, ctx, r) : undefined };
   }
@@ -308,6 +334,7 @@ export async function livePoll(S, ctx, pid, body, now) {
   const adv = await advanceGroup(S, ctx, cohort, r, grp.index, grp.members, now, { viewer: pid });
   if (adv.complete) {
     await finishRound(S, ctx, cohort, r, grp.index, grp.members, now);
+    if (r === total - 1) await ensurePay(S, ctx, pid, now);
     const rec = await getOnce(S.store, K.rec(pid, r));
     return { ...base, phase: 'feedback', record: feedbackView(spec, ctx.g.feedback, rec), dropped: adv.dropped.has(pid), history: body.needHistory ? await historyOf(S, ctx, r) : undefined, notices: notices(adv, grp.members) };
   }
@@ -363,14 +390,14 @@ export async function submitMove(S, ctx, pid, body, now) {
   const v = R.validateStepValues(spec, params, me.role, steps[s], r, seen, body.values);
   if (v.error) return { error: 'bad_values', status: 400, message: v.error };
   const num = (x, hi) => { x = Number(x); return Number.isFinite(x) ? Math.min(hi, Math.max(0, Math.round(x))) : null; };
-  const w = await writeOnce(S.store, K.move(cohort.id, r, s, pid), { values: v.values, auto: false, at: now, rtMs: num(body.rtMs, 864e5), hiddenMs: num(body.hiddenMs, 864e5) }, { verify: true });
+  const w = await writeOnce(S.store, K.move(cohort.id, r, s, pid), { values: v.values, auto: false, at: now, rtMs: num(body.rtMs, 864e5), hiddenMs: num(body.hiddenMs, 864e5), ...(R.stepFellBack(spec, params, me.role, steps[s], r, seen) ? { limitFallback: true } : {}) }, { verify: true });
   return { ok: true, repeat: !w.created, late: !w.created && !!w.value.auto };
 }
 
 // The engine's trial route for a live round: the round record is written by the server when the round is over, so
 // this only confirms that it exists (and finishes the round if this request is the first to notice).
 export async function confirmRound(S, ctx, pid, index, now) {
-  if (await getOnce(S.store, K.rec(pid, index))) return { ok: true, repeat: true };
+  if (await getOnce(S.store, K.rec(pid, index))) { if (index === ctx.spec.practiceRounds + ctx.spec.rounds - 1) await ensurePay(S, ctx, pid, now); return { ok: true, repeat: true }; }
   const mem = await findMembership(S, pid);
   if (!mem || !mem.decision || mem.decision.go !== true) return { error: 'round_not_complete', status: 409 };
   const cohort = await getOnce(S.store, K.cohort(mem.cid)), grp = R.groupOf(cohort, index, pid);
@@ -378,6 +405,7 @@ export async function confirmRound(S, ctx, pid, index, now) {
   const adv = await advanceGroup(S, ctx, cohort, index, grp.index, grp.members, now, {});
   if (!adv.complete) return { error: 'round_not_complete', status: 409 };
   await finishRound(S, ctx, cohort, index, grp.index, grp.members, now);
+  if (index === ctx.spec.practiceRounds + ctx.spec.rounds - 1) await ensurePay(S, ctx, pid, now);
   return { ok: true };
 }
 

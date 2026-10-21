@@ -6,6 +6,7 @@
 //
 //   g/p/<pid>/...        one participant: lobby, member/<n>, role, fallback, comp/<n>, comp-pass, comp-fail, pay,
 //                        adone, amatch
+//   g/cidx/<cohort>      index of cohorts (so listings do not scan every move)
 //   g/slot/<slot>        the groups formed in one 5-second matching slot (one record, so a slot has one outcome)
 //   g/claim/<slot>       who is running the slot (reduces duplicate work; not needed for correctness)
 //   g/c/<cohort>/...     one cohort: cohort, ready/<pid>, decision, arrive/r<r>/<ms>~<pid>, start/r<r>/s<s>/g<j>,
@@ -16,7 +17,8 @@
 //   data/<pid>/s1/t<r>   the round record the engine's exports read (written by the server, once)
 import { setNew } from '../store.mjs';
 import { defaultContent, normalize } from '../content.mjs';
-import { SLOT_MS } from './rules.mjs';
+import { randomBytes } from 'node:crypto';
+import { SLOT_MS, drawPaidRound } from './rules.mjs';
 
 export const SESSION = 1;
 export const GRACE_MS = 2500;   // a decision sent just after the clock ran out is still accepted
@@ -33,6 +35,8 @@ export const K = {
   pay: pid => `g/p/${pid}/pay`,
   adone: pid => `g/p/${pid}/adone`,
   amatch: pid => `g/p/${pid}/amatch`,
+  rejoin: (pid, cid) => `g/p/${pid}/rejoin/${cid}`,
+  cidx: cid => `g/cidx/${cid}`,
   slot: u => `g/slot/${u}`,
   claim: u => `g/claim/${u}`,
   cohort: cid => `g/c/${cid}/cohort`,
@@ -117,4 +121,14 @@ export async function writeUnplayed(S, ctx, reason, now) {
       contentVersion: ctx.version, receivedAt: now, data: { played: false, reason, practice, roundNo, stages: [], payoff: null } }));
   }
   await Promise.all(writes);
+}
+
+// The paid round is drawn once, at completion, from a server-side secret (the study's pepper), so it cannot be worked out
+// from public information before the last round. Write-once: whoever writes first fixes it.
+export async function ensurePay(S, ctx, pid, now) {
+  const have = await getOnce(S.store, K.pay(pid));
+  if (have) return have;
+  const pep = await getOnce(S.store, 'meta/pepper');
+  const secret = (pep && pep.value) || randomBytes(16).toString('hex');
+  return (await writeOnce(S.store, K.pay(pid), { round: drawPaidRound(secret, pid, ctx.studyId, ctx.spec.rounds), at: now })).value;
 }

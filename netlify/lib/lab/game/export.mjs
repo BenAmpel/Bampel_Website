@@ -75,7 +75,7 @@ export async function exportTrials(S, records, byCode, codes) {
         row['o_' + dec.id] = others.join('|');
       }
       row.auto = sr.acting ? (sr.auto ? 1 : 0) : ''; row.auto_why = sr.auto ? sr.why || '' : '';
-      row.rt_ms = sr.rtMs ?? ''; row.hidden_ms = sr.hiddenMs ?? '';
+      row.limit_fallback = sr.limitFallback ? 1 : 0; row.rt_ms = sr.rtMs ?? ''; row.hidden_ms = sr.hiddenMs ?? '';
       row.payoff = payoff ?? ''; row.group_total = gtotal ?? '';
       const paidIdx = x.pay ? x.pay.round : null, method = x.ctx && x.ctx.g.payment.method;
       row.in_payment = d.practice ? 0 : method === 'randomRound' ? (paidIdx === rho ? 1 : 0) : 1;
@@ -95,10 +95,11 @@ export async function exportTrials(S, records, byCode, codes) {
 }
 
 // ---------- groups ----------
-export async function listCohortIds(S) { return (await S.store.list('g/c/')).filter(k => k.endsWith('/cohort')).map(k => k.split('/')[2]).sort(); }
+// Cohorts are listed from a small index (one key each), not by scanning every move key.
+export async function listCohortIds(S) { return (await S.store.list('g/cidx/')).map(k => k.slice('g/cidx/'.length)).sort(); }
 
-export async function groupRows(S, { offset = 0, limit = 25 } = {}) {
-  const ids = (await listCohortIds(S)).slice(offset, offset + limit), rows = [];
+export async function groupRows(S, { offset = 0, limit = 25, all = null } = {}) {
+  const everyId = all || await listCohortIds(S), ids = everyId.slice(offset, offset + limit), rows = [];
   for (const cid of ids) {
     const cohort = await getOnce(S.store, K.cohort(cid)), dec = await getOnce(S.store, K.decision(cid));
     const status = !dec ? 'waiting_to_start' : dec.go ? 'started' : dec.closed ? 'closed_before_start' : 'abandoned';
@@ -116,11 +117,11 @@ export async function groupRows(S, { offset = 0, limit = 25 } = {}) {
       }
     }
   }
-  return { rows, total: (await listCohortIds(S)).length };
+  return { rows, total: everyId.length };
 }
 export async function groupsCsv(S) {
-  const all = []; let off = 0;
-  for (;;) { const { rows, total } = await groupRows(S, { offset: off, limit: 25 }); all.push(...rows); off += 25; if (off >= total) break; }
+  const all = [], ids = await listCohortIds(S); let off = 0;
+  while (off < ids.length) { const { rows } = await groupRows(S, { offset: off, limit: 25, all: ids }); all.push(...rows); off += 25; }
   return toCsv(all, ['cohort', 'slot', 'round', 'group']);
 }
 

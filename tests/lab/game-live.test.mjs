@@ -155,7 +155,7 @@ for (const action of ['default', 'random', 'repeatLast']) {
   assert(sigs.size >= 3, 'groups differ across rounds: ' + sigs.size);
   const rec0 = await S.store.get(K.rec(codes[0], 0)), rec2 = await S.store.get(K.rec(codes[0], 2)), rec5 = await S.store.get(K.rec(codes[0], 5));
   assert.equal(rec0.data.practice, true); assert.equal(rec0.data.roundNo, 1); assert.equal(rec2.data.practice, false); assert.equal(rec2.data.roundNo, 1); assert.equal(rec5.data.roundNo, 4);
-  for (const cc of codes) { const pay = await S.store.get(K.pay(cc)); assert(pay.round >= 0 && pay.round < 4, 'paid round is one of the 4 real rounds'); assert.equal(pay.round, R.drawPaidRound(cc, 'game-test-v1', 4)); }
+  for (const cc of codes) { const pay = await S.store.get(K.pay(cc)); assert(pay.round >= 0 && pay.round < 4, 'paid round is one of the 4 real rounds'); const pep = (await S.store.get('meta/pepper')).value; assert.equal(pay.round, R.drawPaidRound(pep, cc, 'game-test-v1', 4), 'seeded by the study pepper'); }
   // writing the records again changes nothing (the paid round is write-once)
   const before = JSON.stringify(await S.store.get(K.pay(codes[0]))); await type.routes['game/poll'](S, codes[0], { round: 5 }, now.v + 99999); assert.equal(JSON.stringify(await S.store.get(K.pay(codes[0]))), before);
   console.log('strangers: groups re-form each round (' + sigs.size + ' different arrangements in 6 rounds); practice rounds are flagged; the paid round is drawn from the real rounds only, write-once');

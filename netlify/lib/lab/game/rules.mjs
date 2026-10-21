@@ -59,7 +59,7 @@ export function paramsFor(content, condition) {
 
 // Fills {name} in text with the constants of the game (a treatment's own values).
 // Names available in instruction text besides the game's constants.
-export const textVars = (spec, params) => ({ ...params, rounds: spec.rounds, practiceRounds: spec.practiceRounds, players: spec.players });
+export const textVars = (spec, params) => ({ ...params, rounds: spec.rounds, practiceRounds: spec.practiceRounds, players: spec.players, rounds_text: `${spec.rounds} ${spec.rounds === 1 ? 'round' : 'rounds'}` });
 export const fillText = (text, params) => String(text || '').replace(/\{([A-Za-z][A-Za-z0-9_]*)\}/g, (m, k) => (Object.prototype.hasOwnProperty.call(params || {}, k) ? String(params[k]) : m));
 
 // ---------- decision specs, bounds, and domains ----------
@@ -72,11 +72,31 @@ export function envFor(params, round, seen = {}, n = 0) {
   env.seen = envOf(seen);
   return env;
 }
-export function specOf(decision, env) {
+// Limits are formulas and can fail for some earlier decisions (a division by zero, a root of a negative number). At run time
+// a failing limit never stops a group: the decision falls back to its static bounds and its default, and the spec is flagged
+// (fallback: true). Saving the study checks the formulas over the earlier decisions' values (strict), so this is a safety net.
+export function specOf(decision, env, strict = false) {
   if (decision.kind === 'choice') return { id: decision.id, label: decision.label, kind: 'choice', options: decision.options };
-  const min = bound(decision.min, env), max = bound(decision.max, env), step = Number(decision.step) || 1;
-  if (!Number.isFinite(min) || !Number.isFinite(max)) throw new ExprError(`The limits of "${decision.id}" are not numbers.`);
-  return { id: decision.id, label: decision.label, kind: 'number', min, max, step };
+  const step = Number(decision.step) || 1;
+  try {
+    const min = bound(decision.min, env), max = bound(decision.max, env);
+    if (!Number.isFinite(min) || !Number.isFinite(max)) throw new ExprError(`The limits of "${decision.id}" are not numbers.`);
+    if (min > max) throw new ExprError(`The minimum of "${decision.id}" (${min}) is above the maximum (${max}).`);
+    return { id: decision.id, label: decision.label, kind: 'number', min, max, step };
+  } catch (e) {
+    if (strict) throw e;
+    const def = Number(decision.default) || 0;
+    let lo = isStatic(decision.min) ? Number(decision.min) : def, hi = isStatic(decision.max) ? Number(decision.max) : def;
+    if (lo > hi) [lo, hi] = [hi, lo];
+    lo = Math.min(lo, def); hi = Math.max(hi, def);
+    return { id: decision.id, label: decision.label, kind: 'number', min: lo, max: hi, step, fallback: true };
+  }
+}
+// Did any limit of this step fall back to its static bounds?
+export function stepFellBack(game, params, roleId, step, round, seen) {
+  try {
+    return stepPrompt(game, params, roleId, step, round, seen).some(e => e.decisions.some(d => d.fallback) || (e.strategy && e.strategy.rows && e.strategy.rows.some(r => r.spec.fallback)));
+  } catch { return true; }
 }
 function onGrid(v, min, step) { const q = (v - min) / step; return Math.abs(q - Math.round(q)) < 1e-6; }
 export function checkAgainst(spec, v) {
@@ -330,8 +350,8 @@ export function paymentFor(payment, payoffs, paid) {
   if (payment.maxBonus != null && Number.isFinite(Number(payment.maxBonus))) bonus = Math.min(bonus, Number(payment.maxBonus));
   return { points, bonus: round2(bonus) };
 }
-// The paid round: seeded by participant and study, so it is the same wherever it is computed. Written once.
-export const drawPaidRound = (pid, studyId, rounds) => Math.floor(seeded(`${pid}|${studyId}|paidround`)() * rounds);
+// The paid round: seeded by a server-side secret, participant, and study. Drawn at completion and written once (shared.ensurePay).
+export const drawPaidRound = (secret, pid, studyId, rounds) => Math.floor(seeded(`${secret}|${pid}|${studyId}|paidround`)() * rounds);
 
 // ---------- payoff table for two-player choice games ----------
 export function payoffTable(game, params) {

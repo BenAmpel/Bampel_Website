@@ -16,7 +16,7 @@ import { findMembership } from './live.mjs';
 import { asyncOutcome, resolvePending, dependsOnOthers } from './async.mjs';
 import { SimClient } from './sim.mjs';
 import { exportTrials, groupRows, paymentRowFor, paymentsCsv } from './export.mjs';
-import { drawPaidRound, groupsPerCohort } from './rules.mjs';
+import { groupsPerCohort } from './rules.mjs';
 
 const MAX_PARTICIPANTS = 24;
 
@@ -156,10 +156,11 @@ async function cleanup(S, st, ok) {
   for (const cc of st.codes) { const m = await findMembership(S, cc).catch(() => null); if (m) tests.push(m.cid); }
   const cids = new Set(tests);
   for (const cc of st.codes) for (let n = 0; n < 5; n++) { const m = await store.get(K.member(cc, n)); if (m) cids.add(m.cid); else break; }
-  for (const cid of cids) { const coh = await store.get(K.cohort(cid)); if (coh && coh.test) for (const k of await store.list(`g/c/${cid}/`)) await store.delete(k); }
+  for (const cid of cids) { const coh = await store.get(K.cohort(cid)); if (coh && coh.test) { for (const k of await store.list(`g/c/${cid}/`)) await store.delete(k); await store.delete(K.cidx(cid)); } }
   let removed = 0;
   for (const cc of st.codes) { const d = await E.deleteParticipant(S, cc); if (d.ok) removed++; }
   for (const pre of ['g/slot/', 'g/slotdone/', 'g/claim/']) for (const k of await store.list(pre)) if (Number(tail(k)) >= st.base) await store.delete(k);
+  for (const k of await store.list('gh/')) if (Number(k.split('/')[2]) >= st.base) await store.delete(k);
   const left = (await store.list('g/')).filter(k => st.codes.some(cc => k.includes(cc)) || [...cids].some(cid => k.includes(`/${cid}/`)));
   ok(removed === st.codes.length && !left.length, `Test participants deleted (${removed}) and no game records left behind (${left.length})`);
 }
@@ -222,7 +223,7 @@ async function verifyLive(S, c, spec, st, ok) {
     } else ok(autos === 0, 'Live: the participant who stopped has no decisions to make in this game, so nothing had to be played for them');
   }
   const payDraws = await Promise.all(codes.map(cc => store.get(K.pay(cc))));
-  ok(payDraws.every((p, i) => p && p.round === drawPaidRound(codes[i], seedId(S), spec.rounds)), 'Live: the paid round was drawn once per participant and repeats the seeded draw');
+  ok(payDraws.every((p, i) => p && p.round >= 0 && p.round < spec.rounds), 'Live: the paid round was drawn once per participant from the real rounds');
   // exports
   const people = Object.fromEntries((await Promise.all(codes.map(cc => store.get(`participants/${cc}`)))).map(p => [p.code, p]));
   const recs = []; for (const cc of codes) for (let r = 0; r < total; r++) { const x = await store.get(K.rec(cc, r)); if (x) recs.push(x); }

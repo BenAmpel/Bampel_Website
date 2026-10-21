@@ -7,8 +7,9 @@
 import { gameOf, paramsFor, payoffTable, totalRounds, fillText, textVars, stepsOf, stageActs, autoValues } from '../game/rules.mjs';
 import { defaultGame, normalizeGame, validateGame, validateComprehensionInput } from '../game/model.mjs';
 import { presetList, presetContent } from '../game/presets.mjs';
+import { setNew } from '../store.mjs';
 import { K, SESSION, getOnce, writeOnce, loadCtx, writeUnplayed, roundInfo } from '../game/shared.mjs';
-import { livePoll, confirmReady, submitMove, confirmRound, closeCohort } from '../game/live.mjs';
+import { livePoll, confirmReady, submitMove, confirmRound, closeCohort, findMembership, membershipState } from '../game/live.mjs';
 import { asyncState, asyncSave, assignRole, effectiveMode, ALL_STAGES, resolvePending } from '../game/async.mjs';
 import { exportTrials, groupRows, groupsCsv, paymentRows, paymentsCsv, prolificRows, prolificCsv, paymentSummary, paymentRowFor, statusReport } from '../game/export.mjs';
 import { purgeGameKeys } from '../game/purge.mjs';
@@ -18,7 +19,7 @@ import { normalize as normalizeContent, validateContent } from '../content.mjs';
 const F = (group, key, label, def) => ({ group, key, label, def });
 const textFields = [
   F('Instructions', 'instr_title', 'Title', 'How the game works'),
-  F('Instructions', 'instr_intro', 'Instructions ({n} = rounds, including practice)', 'You will play {n} round(s) of a decision game. Read how it works below before you start.'),
+  F('Instructions', 'instr_intro', 'Instructions ({n} = rounds, including practice)', 'Read how the game works below before you start. Rounds in this session, practice rounds included: {n}.'),
   F('Instructions', 'start_body', 'Before starting ({minutes})', 'This session takes about {minutes} minutes. Please finish it in one sitting and keep this page open. Other participants may be waiting for your decisions.\n\nIf you get disconnected, sign in again and you will return to your game.'),
   F('Instructions', 'game_payoff_table', 'Payoff table heading', 'Points for each pair of choices'),
   F('Instructions', 'game_payoff_you', 'Payoff table: how a cell is read', 'Each cell shows your points first, then the other participant\'s points.'),
@@ -26,7 +27,7 @@ const textFields = [
   F('Instructions', 'begin_button', 'Begin button', 'Continue'),
   F('End of session', 'finished_body', 'Last session: text', 'Thank you. Your decisions are saved. Your bonus is paid after the study closes, using the points from your paid round.'),
   F('Understanding check', 'game_comp_title', 'Title', 'Check your understanding'),
-  F('Understanding check', 'game_comp_intro', 'Introduction ({n} = attempts)', 'Answer these questions about the instructions. You have {n} attempt(s). Type numbers only.'),
+  F('Understanding check', 'game_comp_intro', 'Introduction ({n} = attempts)', 'Answer these questions about the instructions. Attempts allowed: {n}. Type numbers only.'),
   F('Understanding check', 'game_comp_button', 'Button', 'Check my answers'),
   F('Understanding check', 'game_comp_wrong', 'After a wrong answer ({left} = attempts left)', 'Some answers are not correct. Read the instructions again and try once more. Attempts left: {left}.'),
   F('Understanding check', 'game_comp_failed_title', 'Failed: title', 'You cannot take part in the game'),
@@ -43,6 +44,9 @@ const textFields = [
   F('Waiting room', 'game_fallback_async', 'Button: play against stored decisions', 'Play now against decisions other participants have already made'),
   F('Waiting room', 'game_fee_title', 'After finishing with the fee: title', 'You will receive the show-up fee'),
   F('Waiting room', 'game_fee_body', 'After finishing with the fee: text', 'No group could be formed, so there is no game for you. You will receive the show-up fee. Continue to the last questions.'),
+  F('Waiting room', 'game_noshow_title', 'Did not confirm a match: title', 'You were not in the group'),
+  F('Waiting room', 'game_noshow_body', 'Did not confirm a match: text', 'You were matched with other participants but did not confirm in time, so that group could not start. Press the button to go back to the waiting room.'),
+  F('Waiting room', 'game_noshow_button', 'Did not confirm a match: button', 'Wait for a new group'),
   F('Match', 'game_ready_title', 'Title', 'You have been matched'),
   F('Match', 'game_ready_body', 'Text ({role})', 'Your role: {role}. Read what your role does, then press the button when you are ready. The game starts when everyone has pressed it.'),
   F('Match', 'game_ready_button', 'Button', 'I am ready'),
@@ -149,7 +153,9 @@ async function gameCheck(S, pid, body, now) {
   const answers = {};
   for (const q of cp.questions) { const t = String((body.answers || {})[q.id] ?? '').trim().replace(/,/g, ''); answers[q.id] = t.slice(0, 40); }
   const wrong = validateComprehensionInput(cp, answers);
-  await writeOnce(S.store, K.comp(pid, used), { at: now, wrong, answers });
+  // Only the request that creates this attempt's write-once key is scored; parallel requests for the same attempt change nothing.
+  const mine = await setNew(S.store, K.comp(pid, used), { at: now, wrong, answers });
+  if (!mine) return { ok: true, passed: false, retry: true, attemptsLeft: cp.maxAttempts - used };
   if (!wrong.length) { await writeOnce(S.store, K.compPass(pid), { at: now }); return { ok: true, passed: true }; }
   if (used + 1 >= cp.maxAttempts) { await writeOnce(S.store, K.compFail(pid), { at: now }); await writeUnplayed(S, ctx, 'comprehension', now); return { ok: true, failed: true }; }
   return { ok: true, passed: false, wrong, attemptsLeft: cp.maxAttempts - used - 1 };
@@ -165,12 +171,13 @@ async function gameFallback(S, pid, body, now) {
   if (body.to !== spec.waitFallback) return bad('bad_fallback');
   const lobby = await getOnce(S.store, K.lobby(pid));
   if (!lobby || now - lobby.at < spec.waitMaxSeconds * 1000) return bad('too_early', 409);
-  const { findMembership } = await import('../game/live.mjs');
   if (await findMembership(S, pid)) return bad('already_matched', 409);
   const w = await writeOnce(S.store, K.fallback(pid), { to: spec.waitFallback, at: now });
   if (w.value.to === 'fee') await writeUnplayed(S, ctx, 'no_match', now);
   else await assignRole(S, ctx, now);
-  return { ok: true, to: w.value.to };
+  // A matcher may have placed them in a group in the meantime. They will not confirm it (the browser has left), the group's confirm
+  // guard abandons it, and the fallback key keeps them out of every later slot.
+  return { ok: true, to: w.value.to, matchedMeanwhile: !!(await findMembership(S, pid)) };
 }
 
 async function gameSummary(S, pid, body, now) {
@@ -182,7 +189,14 @@ async function gameSummary(S, pid, body, now) {
   return { ok: true, method: pay.method, paidRound: row.paid_round, points: row.points === '' ? null : row.points, bonus: row.bonus === '' ? null : row.bonus, fee: row.show_up_fee, currency: pay.currency, status: row.match_status, capped: !!row.capped };
 }
 
-const routes = { 'game/poll': gamePoll, 'game/move': gameMove, 'game/ready': gameReady, 'game/check': gameCheck, 'game/fallback': gameFallback, 'game/summary': gameSummary };
+// A participant who was placed in a group and did not confirm it presses this to enter the waiting room again (at the back of the line).
+async function gameRejoin(S, pid, body, now) {
+  const ms = await membershipState(S, pid);
+  if (ms.noshow) await writeOnce(S.store, K.rejoin(pid, ms.noshow), { at: now });
+  return { ok: true };
+}
+
+const routes = { 'game/rejoin': gameRejoin, 'game/poll': gamePoll, 'game/move': gameMove, 'game/ready': gameReady, 'game/check': gameCheck, 'game/fallback': gameFallback, 'game/summary': gameSummary };
 
 // ---------- admin routes (roles checked by the router) ----------
 const adminRoutes = {

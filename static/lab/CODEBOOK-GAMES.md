@@ -25,6 +25,7 @@ One row per participant x round x stage. Practice rounds are included (`practice
 | `o_<decision>` | What the others decided in this round for that decision (all stages), values joined with `\|` in group order. For asynchronous play: the partners' concrete decisions. Blank for a decision nobody else makes |
 | `auto` | 1 = the decision was made by the server, not the participant (time ran out, the participant had left, or an administrator closed the group). Blank when `acting = 0` |
 | `auto_why` | `timeout`, `dropped` (the participant had already been marked as having left), or `admin` |
+| `limit_fallback` | 1 = a decision limit formula could not be evaluated for this decision, so the static bounds and default applied (should not happen for saved studies) |
 | `rt_ms`, `hidden_ms` | Time from the decision screen appearing to sending, and the time the tab was hidden in between. Blank for automatic decisions |
 | `payoff` | The participant's points for the round (same on every stage row of the round). Asynchronous play: blank until the participant has been matched |
 | `group_total` | The group's points for the round |

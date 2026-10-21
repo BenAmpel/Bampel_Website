@@ -184,6 +184,7 @@ function call(name, a) {
     }
     case 'num': {
       if (a.length !== 1) throw new ExprError('num() takes one argument.');
+      if (typeof a[0] === 'string' && a[0].trim() === '') throw new ExprError('num() cannot turn empty text into a number.');
       const v = typeof a[0] === 'string' ? Number(a[0].trim()) : a[0];
       if (typeof v !== 'number' || !Number.isFinite(v)) throw new ExprError(`num() cannot turn ${JSON.stringify(a[0])} into a number.`);
       return v;

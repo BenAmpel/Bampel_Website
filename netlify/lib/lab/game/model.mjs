@@ -247,6 +247,20 @@ export function validateGame(c, e) {
           else if (d.default < spec.min || d.default > spec.max) e.push(`Decision "${d.label}" (condition ${cond.id}): the default ${d.default} is outside ${spec.min} to ${spec.max}.`);
         } catch (x) { e.push(`Decision "${d.label}" (condition ${cond.id}): the limits fail (${x.message}).`); }
       }
+      // limits that depend on an earlier decision are tried over that decision's values (every option, or a grid of numbers)
+      for (const [id, info] of idx) {
+        const d = info.decision;
+        if (d.kind !== 'number') continue;
+        const refs = [...new Set([...(String(d.min) + ' ' + String(d.max)).matchAll(/seen\.([a-z][a-z0-9_]*)/g)].map(m => m[1]))].filter(x => idx.has(x));
+        if (!refs.length) continue;
+        const doms = refs.map(x => sampleDomain(idx.get(x).decision, pr, g.players));
+        let combos = [{}];
+        for (let i = 0; i < refs.length; i++) combos = combos.flatMap(cmb => doms[i].map(v => ({ ...cmb, [refs[i]]: v }))).slice(0, 400);
+        for (const cmb of combos) {
+          try { specOf(d, envFor(pr, 0, cmb, g.players), true); }
+          catch (x) { e.push(`Decision "${d.label}" (condition ${cond.id}): its limit fails when ${Object.entries(cmb).map(([k, v]) => `${k} is ${v}`).join(' and ')} (${x.message}). Change the formula so it works for every earlier value.`); break; }
+        }
+      }
       try { sampleOutcome(g, c, pr); }
       catch (x) { if (!/Division by zero/.test(x.message)) e.push(`The formulas fail when tried with default decisions (condition ${cond.id}): ${x.message}`); }
     }
@@ -320,3 +334,11 @@ export function validateComprehensionInput(cp, answers) {
 
 // The rules in one object (game settings plus payoff formulas): what plans snapshot and the rules module reads.
 export const gameSpecOf = c => structuredClone(gameOf(c));
+
+// Values of a decision to try when checking limits that depend on it: every option, or up to six numbers across its range.
+function sampleDomain(d, params, players) {
+  if (d.kind === 'choice') return d.options.map(o => o.value);
+  const sp = specOf(d, envFor(params, 0, {}, players)), n = Math.min(5, Math.floor((sp.max - sp.min) / sp.step)), out = new Set();
+  for (let i = 0; i <= n; i++) out.add(Math.round((sp.min + Math.round(i * (sp.max - sp.min) / sp.step / Math.max(n, 1)) * sp.step) * 1e9) / 1e9);
+  return [...out];
+}

@@ -55,7 +55,7 @@ export function instance(base, { rand = Math.random, jitter = 0, lagMs = 0, cloc
 // Pilot-code participants who have consented and opened their session.
 export async function participants(S, n, now, { test = false, cond } = {}) {
   const made = (await E.createParticipants(S, n, { gapDays: 0, test, label: 'tester' }, now)).created;
-  for (const p of made) { await E.consent(S, p.code, true, now); const plan = await E.startSession(S, p.code, now); if (plan.error) throw new Error(JSON.stringify(plan)); }
+  for (const p of made) { await E.login(S, { code: p.code }, now); await E.consent(S, p.code, true, now); const plan = await E.startSession(S, p.code, now); if (plan.error) throw new Error(JSON.stringify(plan)); }
   return made.map(p => p.code);
 }
 

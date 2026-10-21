@@ -101,7 +101,7 @@
       if (e.prompt) html += '<p>' + esc(e.prompt) + '</p>';
       if (e.strategy && e.strategy.form === 'threshold') {
         var s = e.strategy, nm = 'th' + ei, id = 'gm' + (++cid);
-        html += '<div class="q-group" data-name="' + nm + '"><label class="q" for="' + id + '">' + ui.Th('game_threshold_label', { what: esc(s.onLabel.toLowerCase()) }) + '</label><input type="text" inputmode="decimal" autocomplete="off" class="num" id="' + id + '" data-name="' + nm + '" aria-describedby="' + id + 'h">' +
+        html += '<div class="q-group" data-name="' + nm + '"><label class="q" for="' + id + '">' + ui.Th('game_threshold_label', { what: s.onLabel.toLowerCase() }) + '</label><input type="text" inputmode="decimal" autocomplete="off" class="num" id="' + id + '" data-name="' + nm + '" aria-describedby="' + id + 'h">' +
           '<p class="muted help" id="' + id + 'h">' + num(s.min) + ' to ' + num(s.max + s.step) + '. ' + esc((s.options || []).filter(function (o) { return o.value === s.above; }).map(function (o) { return o.label; })[0] || '') + ' at or above your number, ' + esc((s.options || []).filter(function (o) { return o.value === s.below; }).map(function (o) { return o.label; })[0] || '') + ' below it.</p></div>';
         parts.push({ kind: 'threshold', e: e, name: nm, spec: { kind: 'number', min: s.min, max: s.max + s.step, step: s.step } });
       } else if (e.strategy) {
@@ -205,6 +205,7 @@
       ui.call('game/check', { answers: answers }).then(function (r) {
         if (!alive(run)) return;
         if (r.error) { btn.disabled = false; document.getElementById('gm-msg').innerHTML = ui.errorBox('Could not check your answers. Try again.'); return; }
+        if (r.retry) { btn.disabled = false; return; }   // a duplicate request for the same attempt: nothing was scored
         if (r.passed || r.failed) { run.key = null; return poll(run); }
         run.compMsg = ui.T('game_comp_wrong', { left: r.attemptsLeft }); run.compWrong = r.wrong; run.key = null; poll(run);
       });
@@ -214,6 +215,14 @@
   // ----- waiting room -----
   function screenLobby(run, s) {
     var ctx = run.ctx, ui = ctx.ui, g = ctx.plan.game, now = Date.now() + run.skew;
+    if (s.noshow) {
+      clearTimers(run);
+      if (fresh(run, 'lobby:noshow')) {
+        ui.show('<h1>' + ui.Th('game_noshow_title') + '</h1><p>' + ui.Th('game_noshow_body') + '</p><div id="gm-msg" role="alert"></div><div class="actions"><button id="gm-go">' + ui.Th('game_noshow_button') + '</button></div>');
+        document.getElementById('gm-go').addEventListener('click', function () { this.disabled = true; ui.call('game/rejoin', {}).then(function () { if (alive(run)) { run.key = null; poll(run); } }); });
+      }
+      return;
+    }
     if (s.present != null) run.present = s.present;
     run.waitStart = now - s.waitedMs;
     var over = !!s.fallback && Date.now() >= run.offerHiddenUntil;
@@ -241,7 +250,7 @@
   function screenReady(run, s) {
     var ctx = run.ctx, ui = ctx.ui, g = ctx.plan.game;
     if (fresh(run, 'ready:' + s.iAmReady)) {
-      ui.show('<h1>' + ui.Th('game_ready_title') + '</h1><p>' + ui.Th('game_ready_body', { role: ui.esc(s.roleLabel) }) + '</p>' + roleBlock(ctx, s.role, s.roleLabel) +
+      ui.show('<h1>' + ui.Th('game_ready_title') + '</h1><p>' + ui.Th('game_ready_body', { role: s.roleLabel }) + '</p>' + roleBlock(ctx, s.role, s.roleLabel) +
         (s.iAmReady ? '<p aria-live="polite" id="gm-rw">' + ui.Th('game_ready_wait', { k: s.ready, n: s.size }) + '</p>' : '<div class="actions"><button id="gm-go">' + ui.Th('game_ready_button') + '</button></div>') + '<div id="gm-msg" role="alert"></div>');
       var b = document.getElementById('gm-go');
       if (b) b.addEventListener('click', function () {
@@ -342,7 +351,7 @@
     var out = '<h3>' + ui.Th('game_summary_title') + '</h3>';
     if (r.points == null) return out + '<p>' + ui.Th('game_summary_pending') + '</p>';
     out += '<p>' + (r.method === 'randomRound' ? ui.Th('game_summary_round', { round: r.paidRound, points: num(r.points) }) : ui.Th('game_summary_total', { points: num(r.points) })) + '</p>';
-    out += '<p>' + ui.Th('game_summary_bonus', { bonus: Number(r.bonus).toFixed(2), currency: ui.esc(r.currency) }) + (r.fee ? ' ' + ui.Th('game_summary_fee', { fee: Number(r.fee).toFixed(2), currency: ui.esc(r.currency) }) : '') + '</p>';
+    out += '<p>' + ui.Th('game_summary_bonus', { bonus: Number(r.bonus).toFixed(2), currency: r.currency }) + (r.fee ? ' ' + ui.Th('game_summary_fee', { fee: Number(r.fee).toFixed(2), currency: r.currency }) : '') + '</p>';
     return out;
   }
   function screenFeedback(run, s) {

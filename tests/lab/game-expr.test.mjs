@@ -48,6 +48,7 @@ assert.match(err('"abc'), /closing quote/);
 assert.match(err('sum(5, s)'), /needs numbers/);
 assert.match(err('others.contribution + 1'), /needs numbers/);
 assert.match(err('min()'), /empty/);
+assert.match(err("num('')"), /empty text/); assert.match(err("num('   ')"), /empty text/); assert.match(err("num('x')"), /cannot turn/); assert.equal(ev("num(' 0 ')"), 0);
 assert.match(err('sqrt(-1)'), /negative/);
 assert.match(err('10 ^ 1000'), /finite/);
 assert.match(err('a ? 1 : 2'), /true\/false/);

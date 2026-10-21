@@ -50,7 +50,7 @@ export const PRESETS = {
     content() {
       const c = PRESETS['prisoners-dilemma-1'].content();
       c.game.rounds = 10; c.game.matching = 'partners'; c.minutesPerSession = 12;
-      c.instructions.general = 'You and one other participant play {rounds} round(s) together. In each round you each choose Cooperate or Defect at the same time. Your points depend on both choices, as the table shows. One round is chosen at random at the end, and only that round is paid.';
+      c.instructions.general = 'You and one other participant play {rounds_text} together. In each round you each choose Cooperate or Defect at the same time. Your points depend on both choices, as the table shows. One round is chosen at random at the end, and only that round is paid.';
       return c;
     }
   },
