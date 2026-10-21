@@ -58,5 +58,5 @@ const d=await core.deleteParticipant(store,c); assert.equal(d.records,before);
 assert.equal((await store.list(`data/${c}/`)).length,0); assert.equal(await store.get(`participants/${c}`),null);
 const dt=await core.deleteTestParticipants(store); assert.equal(dt.participants,2);
 const left=await core.listParticipants(store); assert.deepEqual(left.map(x=>x.code),[real]); console.log('delete one + delete all test ok (real participant kept)');
-await admin.audit(store,owner,'participant.delete','x',now); assert.equal((await admin.auditLog(store))[0].action,'participant.delete');
+await admin.audit(store,owner,'participant.delete','x',Date.now()+60000);   // later than the earlier team.remove entry, which uses the real clock assert.equal((await admin.auditLog(store))[0].action,'participant.delete');
 console.log('ALL ADMIN TESTS PASSED');

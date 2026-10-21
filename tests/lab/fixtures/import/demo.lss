@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+ <LimeSurveyDocType>Survey</LimeSurveyDocType>
+ <DBVersion>450</DBVersion>
+ <languages><language>en</language></languages>
+ <surveys>
+  <fields><fieldname>sid</fieldname><fieldname>language</fieldname></fields>
+  <rows><row><sid>100001</sid><language><![CDATA[en]]></language><anonymized><![CDATA[Y]]></anonymized></row></rows>
+ </surveys>
+ <surveys_languagesettings>
+  <rows><row><surveyls_survey_id>100001</surveyls_survey_id><surveyls_language><![CDATA[en]]></surveyls_language><surveyls_title><![CDATA[Synthetic LimeSurvey demo]]></surveyls_title></row></rows>
+ </surveys_languagesettings>
+ <groups>
+  <rows>
+   <row><gid>1</gid><sid>100001</sid><group_order>1</group_order><randomization_group></randomization_group><grelevance></grelevance></row>
+   <row><gid>2</gid><sid>100001</sid><group_order>2</group_order><randomization_group></randomization_group><grelevance><![CDATA[((Q1.NAOK == "Y"))]]></grelevance></row>
+   <row><gid>3</gid><sid>100001</sid><group_order>3</group_order><randomization_group><![CDATA[rg1]]></randomization_group><grelevance>1</grelevance></row>
+  </rows>
+ </groups>
+ <group_l10ns>
+  <rows>
+   <row><id>1</id><gid>1</gid><group_name><![CDATA[About you]]></group_name><description><![CDATA[<p>Please answer <i>honestly</i>.</p>]]></description><language>en</language></row>
+   <row><id>2</id><gid>2</gid><group_name><![CDATA[Follow-up]]></group_name><description></description><language>en</language></row>
+   <row><id>3</id><gid>3</gid><group_name><![CDATA[Extras]]></group_name><description></description><language>en</language></row>
+  </rows>
+ </group_l10ns>
+ <questions>
+  <rows>
+   <row><qid>1</qid><parent_qid>0</parent_qid><sid>100001</sid><gid>1</gid><type>Y</type><title>Q1</title><preg></preg><other>N</other><mandatory>Y</mandatory><question_order>1</question_order><relevance>1</relevance><scale_id>0</scale_id></row>
+   <row><qid>2</qid><parent_qid>0</parent_qid><sid>100001</sid><gid>1</gid><type>L</type><title>Q2</title><other>Y</other><mandatory>N</mandatory><question_order>2</question_order><relevance>1</relevance><scale_id>0</scale_id></row>
+   <row><qid>3</qid><parent_qid>0</parent_qid><sid>100001</sid><gid>1</gid><type>M</type><title>Q3</title><other>N</other><mandatory>N</mandatory><question_order>3</question_order><relevance>1</relevance><scale_id>0</scale_id></row>
+   <row><qid>31</qid><parent_qid>3</parent_qid><sid>100001</sid><gid>1</gid><type>T</type><title>SQ001</title><question_order>1</question_order><scale_id>0</scale_id></row>
+   <row><qid>32</qid><parent_qid>3</parent_qid><sid>100001</sid><gid>1</gid><type>T</type><title>SQ002</title><question_order>2</question_order><scale_id>0</scale_id></row>
+   <row><qid>33</qid><parent_qid>3</parent_qid><sid>100001</sid><gid>1</gid><type>T</type><title>SQ003</title><question_order>3</question_order><scale_id>0</scale_id></row>
+   <row><qid>4</qid><parent_qid>0</parent_qid><sid>100001</sid><gid>1</gid><type>F</type><title>Q4</title><other>N</other><mandatory>Y</mandatory><question_order>4</question_order><relevance>1</relevance><scale_id>0</scale_id></row>
+   <row><qid>41</qid><parent_qid>4</parent_qid><sid>100001</sid><gid>1</gid><type>T</type><title>SQ001</title><question_order>1</question_order><scale_id>0</scale_id></row>
+   <row><qid>42</qid><parent_qid>4</parent_qid><sid>100001</sid><gid>1</gid><type>T</type><title>SQ002</title><question_order>2</question_order><scale_id>0</scale_id></row>
+   <row><qid>5</qid><parent_qid>0</parent_qid><sid>100001</sid><gid>2</gid><type>N</type><title>Q5</title><other>N</other><mandatory>N</mandatory><question_order>1</question_order><relevance>1</relevance><scale_id>0</scale_id></row>
+   <row><qid>6</qid><parent_qid>0</parent_qid><sid>100001</sid><gid>2</gid><type>T</type><title>Q6</title><other>N</other><mandatory>N</mandatory><question_order>2</question_order><relevance><![CDATA[(Q2.NAOK == "A2" or Q5.NAOK > 3)]]></relevance><scale_id>0</scale_id></row>
+   <row><qid>7</qid><parent_qid>0</parent_qid><sid>100001</sid><gid>2</gid><type>X</type><title>Q7</title><other>N</other><mandatory>N</mandatory><question_order>3</question_order><relevance>1</relevance><scale_id>0</scale_id></row>
+   <row><qid>8</qid><parent_qid>0</parent_qid><sid>100001</sid><gid>2</gid><type>5</type><title>Q8</title><other>N</other><mandatory>N</mandatory><question_order>4</question_order><relevance><![CDATA[Q3_SQ002.NAOK == "Y"]]></relevance><scale_id>0</scale_id></row>
+   <row><qid>9</qid><parent_qid>0</parent_qid><sid>100001</sid><gid>2</gid><type>S</type><title>Q9</title><other>N</other><mandatory>N</mandatory><question_order>5</question_order><relevance><![CDATA[if(Q5.NAOK > 2, 1, 0) == 1]]></relevance><scale_id>0</scale_id></row>
+   <row><qid>10</qid><parent_qid>0</parent_qid><sid>100001</sid><gid>2</gid><type>R</type><title>Q10</title><other>N</other><mandatory>N</mandatory><question_order>6</question_order><relevance>1</relevance><scale_id>0</scale_id></row>
+   <row><qid>11</qid><parent_qid>0</parent_qid><sid>100001</sid><gid>3</gid><type>S</type><title>Q11</title><other>N</other><mandatory>N</mandatory><question_order>1</question_order><relevance><![CDATA[Q4_SQ001.NAOK == "A3" and Q1 == "Y"]]></relevance><scale_id>0</scale_id></row>
+   <row><qid>12</qid><parent_qid>0</parent_qid><sid>100001</sid><gid>3</gid><type>S</type><title>Q12</title><other>N</other><mandatory>N</mandatory><question_order>2</question_order><relevance><![CDATA[Q1 == "Y" and Q5.NAOK >= 1 and (Q2 != "A1" or Q5 < 100)]]></relevance><scale_id>0</scale_id></row>
+  </rows>
+ </questions>
+ <question_l10ns>
+  <rows>
+   <row><id>1</id><qid>1</qid><question><![CDATA[<p>Do you work full time?</p>]]></question><help></help><language>en</language></row>
+   <row><id>2</id><qid>2</qid><question><![CDATA[Which best describes your role{Q1}?]]></question><help></help><language>en</language></row>
+   <row><id>3</id><qid>3</qid><question><![CDATA[Which tools do you use?]]></question><help></help><language>en</language></row>
+   <row><id>31</id><qid>31</qid><question><![CDATA[Email]]></question><help></help><language>en</language></row>
+   <row><id>32</id><qid>32</qid><question><![CDATA[Chat]]></question><help></help><language>en</language></row>
+   <row><id>33</id><qid>33</qid><question><![CDATA[Calendar]]></question><help></help><language>en</language></row>
+   <row><id>4</id><qid>4</qid><question><![CDATA[How much do you agree?]]></question><help></help><language>en</language></row>
+   <row><id>41</id><qid>41</qid><question><![CDATA[I like my job]]></question><help></help><language>en</language></row>
+   <row><id>42</id><qid>42</qid><question><![CDATA[I like my team]]></question><help></help><language>en</language></row>
+   <row><id>5</id><qid>5</qid><question><![CDATA[How many hours do you work per week?]]></question><help></help><language>en</language></row>
+   <row><id>6</id><qid>6</qid><question><![CDATA[Describe a typical day]]></question><help></help><language>en</language></row>
+   <row><id>7</id><qid>7</qid><question><![CDATA[<p>Thank you. <img src="x.png"> The next part is short.</p>]]></question><help></help><language>en</language></row>
+   <row><id>8</id><qid>8</qid><question><![CDATA[Rate your satisfaction]]></question><help></help><language>en</language></row>
+   <row><id>9</id><qid>9</qid><question><![CDATA[Anything else?]]></question><help></help><language>en</language></row>
+   <row><id>10</id><qid>10</qid><question><![CDATA[Rank these]]></question><help></help><language>en</language></row>
+   <row><id>11</id><qid>11</qid><question><![CDATA[Extra one]]></question><help></help><language>en</language></row>
+   <row><id>12</id><qid>12</qid><question><![CDATA[Extra two]]></question><help></help><language>en</language></row>
+  </rows>
+ </question_l10ns>
+ <answers>
+  <rows>
+   <row><aid>1</aid><qid>2</qid><code>A1</code><sortorder>1</sortorder><assessment_value>0</assessment_value><scale_id>0</scale_id></row>
+   <row><aid>2</aid><qid>2</qid><code>A2</code><sortorder>2</sortorder><assessment_value>0</assessment_value><scale_id>0</scale_id></row>
+   <row><aid>3</aid><qid>2</qid><code>A3</code><sortorder>3</sortorder><assessment_value>0</assessment_value><scale_id>0</scale_id></row>
+   <row><aid>4</aid><qid>4</qid><code>A1</code><sortorder>1</sortorder><scale_id>0</scale_id></row>
+   <row><aid>5</aid><qid>4</qid><code>A2</code><sortorder>2</sortorder><scale_id>0</scale_id></row>
+   <row><aid>6</aid><qid>4</qid><code>A3</code><sortorder>3</sortorder><scale_id>0</scale_id></row>
+   <row><aid>7</aid><qid>4</qid><code>A4</code><sortorder>4</sortorder><scale_id>0</scale_id></row>
+  </rows>
+ </answers>
+ <answer_l10ns>
+  <rows>
+   <row><id>1</id><aid>1</aid><answer><![CDATA[Student]]></answer><language>en</language></row>
+   <row><id>2</id><aid>2</aid><answer><![CDATA[Manager]]></answer><language>en</language></row>
+   <row><id>3</id><aid>3</aid><answer><![CDATA[Engineer]]></answer><language>en</language></row>
+   <row><id>4</id><aid>4</aid><answer><![CDATA[Disagree]]></answer><language>en</language></row>
+   <row><id>5</id><aid>5</aid><answer><![CDATA[Neutral]]></answer><language>en</language></row>
+   <row><id>6</id><aid>6</aid><answer><![CDATA[Agree]]></answer><language>en</language></row>
+   <row><id>7</id><aid>7</aid><answer><![CDATA[Strongly agree]]></answer><language>en</language></row>
+  </rows>
+ </answer_l10ns>
+ <question_attributes>
+  <rows>
+   <row><qaid>1</qaid><qid>5</qid><attribute>min_num_value_n</attribute><value>0</value></row>
+   <row><qaid>2</qaid><qid>5</qid><attribute>max_num_value_n</attribute><value>80</value></row>
+   <row><qaid>3</qaid><qid>2</qid><attribute>random_order</attribute><value>1</value></row>
+  </rows>
+ </question_attributes>
+ <quota><rows><row><id>1</id><name>Q1</name></row></rows></quota>
+</document>

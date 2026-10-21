@@ -91,7 +91,7 @@
       '<div class="section"><h2>Create pilot access codes</h2><p class="muted">For pilots and team testing without a roster. Mark them as test so they are excluded from the counts and can be deleted in one step. Gap days sets the minimum wait between sessions (0 for piloting).</p>' +
       '<form class="row" id="createform"><label>How many <input type="number" id="count" min="1" max="300" value="3" style="width:90px"></label><label>Label (optional) <input type="text" id="label" placeholder="pilot-oct" style="width:160px"></label>' +
       '<label>Gap days <input type="number" id="gap" min="0" max="60" placeholder="default" style="width:90px"></label><label class="check"><input type="checkbox" id="test" checked> Test codes</label><button type="submit">Create</button></form><div id="created" class="keybox" hidden></div></div></section>' +
-    '<section data-tab="content" hidden><p class="muted" id="contentinfo"></p><div id="contentwarn"></div><nav class="tabs sub" id="subtabs"></nav><fieldset id="editor" style="border:0;padding:0;margin:0;min-width:0"></fieldset>' +
+    '<section data-tab="content" hidden><p class="muted" id="contentinfo"></p><div id="contentwarn"></div><p class="ok" id="say" role="status"></p><nav class="tabs sub" id="subtabs"></nav><fieldset id="editor" style="border:0;padding:0;margin:0;min-width:0"></fieldset>' +
       '<div class="savebar" id="savebar" data-role="editor"><span id="dirty" class="muted">No unsaved changes.</span><input type="text" id="note" class="grow" placeholder="What changed? (optional, shown in the activity log)">' +
       '<button type="button" class="secondary" id="discard" disabled>Discard changes</button><button type="button" id="save" disabled>Save changes</button></div>' +
       '<div class="section"><h2>Versions</h2><p class="muted">Every save makes a new version. Restoring an old version saves it again as the newest version, so nothing is lost. Each answer records the version it was collected under.</p><div class="table-wrap"><table id="vtbl"></table></div></div></section>' +
@@ -123,9 +123,12 @@
       document.head.appendChild(s);
     });
   }
+  function loadScript(src) {
+    return new Promise(function (res) { var s = document.createElement('script'); s.src = src; s.onload = function () { res(true); }; s.onerror = function () { res(false); }; document.head.appendChild(s); });
+  }
   function start() {
     err();
-    getJSON('me').then(function (m) {
+    loadScript('/lab/engine/logic.js').then(function () { return getJSON('me'); }).then(function (m) {
       me = m;
       return loadPlugin(m.study.type).then(function (p) {
         plugin = p;
@@ -144,6 +147,7 @@
         $('selftest').textContent = 'Run self-test (' + (m.conditions.length === 1 ? 'one group' : 'all ' + m.conditions.length + ' groups') + ')';
         $('rpintro').innerHTML = plugin.reportIntro || 'How the items and sessions are performing, for tuning the study after a pilot.';
         var last = null; try { last = sessionStorage.getItem(tabKey); } catch (e) {}
+        if (location.hash === '#import' && can('editor') && plugin.subtabs && plugin.subtabs.some(function (s) { return s[0] === 'import'; })) { sub = 'import'; last = 'content'; }   // opened from the lab console's "create from a survey file"
         showTab(TABS.some(function (t) { return t[0] === last && can(t[2]); }) ? last : 'participants');
       });
     }).catch(function (e) { if (e.code !== 'no_study') setKey(''); $('keyform').hidden = false; $('app').hidden = true; err(e.message); });
@@ -364,7 +368,7 @@
   // ---------- study content editor ----------
   // Engine parts (surveys, consent, screen text) are edited here; each study type adds its own tabs.
   var saved = null, draft = null, dirty = false, sub = null, META = {};
-  var QTYPE_LABEL = { scale: 'Rating scale', choice: 'Multiple choice', select: 'Dropdown', text: 'Text answer', confidence: 'Confidence line (0–100)', number: 'Number (typed in)', multi: 'Select all that apply' };
+  var QTYPE_LABEL = { scale: 'Rating scale', choice: 'Multiple choice', select: 'Dropdown', text: 'Text answer', confidence: 'Confidence line (0–100)', number: 'Number (typed in)', multi: 'Select all that apply', info: 'Descriptive text (no answer)' };
   var AGREE7 = ['Strongly disagree', 'Disagree', 'Somewhat disagree', 'Neither agree nor disagree', 'Somewhat agree', 'Agree', 'Strongly agree'];
   function setDirty(v) { dirty = v; $('dirty').innerHTML = v ? '<strong>Unsaved changes.</strong>' : 'No unsaved changes.'; $('save').disabled = !v; $('discard').disabled = !v; }
   window.addEventListener('beforeunload', function (e) { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
@@ -379,6 +383,7 @@
       if (!sub || !subs().some(function (s) { return s[0] === sub; })) sub = subs()[0][0];
       if (plugin.onLoad) plugin.onLoad(A);
       var started = res[2].filter(function (p) { return !p.test && (p.consented || p.completedSessions); }).length;
+      A.started = started;
       $('contentinfo').textContent = 'Current version: ' + (saved.version || 0) + (saved.version ? ', saved ' + fmt(saved.savedAt) + ' by ' + saved.savedBy : ' (the built-in defaults)') + '.' + (can('editor') ? '' : ' You can view the content but not change it.');
       $('contentwarn').innerHTML = started ? '<div class="warn">' + started + ' real participant' + (started === 1 ? ' has' : 's have') + ' already started. Changes apply from each participant\'s next session (a session in progress keeps the plan it started with). Answers record the version they were collected under, and each answer keeps a copy of the item as shown. Changing the design mid-study makes sessions hard to compare, so check with the team first.</div>' : '';
       $('vtbl').innerHTML = '<tr><th>Version</th><th>Saved</th><th>By</th><th></th></tr>' + res[1].map(function (v) {
@@ -427,21 +432,55 @@
       (opts.sessions ? field('Page (questions with the same number are shown together; blank = page 1)', '<input type="text" data-page="' + b + '" value="' + esc(it.page || '') + '" style="max-width:120px">') : '') +
       (opts.sessions ? field('Sessions (numbers separated by commas; blank = ' + (opts.sessions === 'pre' ? 'session 1 only' : 'every session') + ')', '<input type="text" data-sessions="' + b + '" value="' + esc((it.sessions || []).join(', ')) + '" style="max-width:240px">') : '') +
       (conds.length > 1 ? '<div class="f"><span>Conditions (none ticked = everyone)</span><div class="row">' + conds.map(function (c) { return '<label class="check"><input type="checkbox" data-qcond="' + b + '|' + esc(c) + '"' + ((it.conditions || []).indexOf(c) >= 0 ? ' checked' : '') + '> ' + esc(c) + '</label>'; }).join('') + '</div></div>' : '') +
-      (it.type === 'scale' ? '<div class="grid3">' + field('Points', num(b + '.n', it.n || 7, 2, 11)) + field('Label for 1', inp(b + '.lo', it.lo || '')) + field('Label for the top point', inp(b + '.hi', it.hi || '')) + '</div>' +
+      (it.type === 'scale' ? '<div class="grid3">' + field('Points', num(b + '.n', it.n || 7, 2, 11)) + field('First number (blank = 1; use 0 for a 0-based scale)', '<input type="text" data-optnum="' + b + '.start" value="' + esc(it.start != null ? it.start : '') + '">') + field('Label for the first point', inp(b + '.lo', it.lo || '')) + field('Label for the top point', inp(b + '.hi', it.hi || '')) + '</div>' +
         field('Label every point (recommended): one line per point, from 1 to ' + (it.n || 7) + '. Leave empty to label only the ends.', '<textarea data-labels="' + b + '" rows="' + Math.min(11, it.n || 7) + '" class="mono">' + esc((it.labels || []).join('\n')) + '</textarea>') : '') +
       (it.type === 'choice' || it.type === 'select' || it.type === 'multi' ? field('Options, one per line (optionally "saved value | text shown")', '<textarea data-opts="' + b + '" rows="4" class="mono">' + esc(optText) + '</textarea>') : '') +
       (it.type === 'number' ? '<p class="muted">A box for a typed number, kept exactly as entered (no range check, so an impossible answer is still recorded). Non-numbers are not accepted.</p>' : '') +
       (it.type === 'multi' ? '<p class="muted">Checkboxes. The CSV cell lists the ticked options\' saved values joined with |.</p>' : '') +
       (it.type === 'confidence' ? '<p class="muted">A 0–100 line with no starting point. Its end labels and help text are on the Screen text tab.</p>' : '') +
-      checkbox('data-path="' + b + '.required" data-bool="1"', it.required, 'Required (if unticked, a skipped question gets one gentle reminder)') + '</div>';
+      (it.type === 'info' ? '<p class="muted">Text shown to the participant. It has no answer and no column in the exports.</p>' : checkbox('data-path="' + b + '.required" data-bool="1"', it.required, 'Required (if unticked, a skipped question gets one gentle reminder)')) +
+      advanced(list, it, b, opts) + '</div>';
+  }
+  // Display rule, layout, and source note: the parts an imported survey fills in. Closed unless the question uses them.
+  function advanced(list, it, b, opts) {
+    var used = !!(it.displayIf || it.group || it.long != null || it.min != null || it.max != null || it.source);
+    var shown = it.displayIf && window.LabLogic ? '<p class="muted">Shown when ' + esc(window.LabLogic.describe(it.displayIf, getPath(list))) + '.</p>' : '';
+    return '<details class="vcard"' + (used ? ' open' : '') + '><summary>Display logic and layout' + (it.displayIf ? ' · shown conditionally' : '') + '</summary>' + shown +
+      field('Show this question only when (display rule; leave empty to always show). Written as JSON: {"all": [{"q": "variable", "op": "eq", "value": "x"}]}. Rules can use answers to earlier questions ("q"), embedded data ("ed"), or the condition ("condition"). See the README.',
+        '<textarea data-dif="' + b + '" rows="4" class="mono" spellcheck="false">' + esc(it.displayIf ? JSON.stringify(it.displayIf, null, 1) : '') + '</textarea>') +
+      '<div class="grid3">' + field('Group ID (consecutive questions with the same ID share one heading)', '<input type="text" class="mono" data-opt="' + b + '.group" value="' + esc(it.group || '') + '">') +
+      field('Group heading (shown once above the group)', '<input type="text" data-opt="' + b + '.groupText" value="' + esc(it.groupText || '') + '">') +
+      (it.type === 'text' ? '<label class="f check"><input type="checkbox" data-path="' + b + '.long" data-bool="1"' + (it.long ? ' checked' : '') + '> Multi-line answer box</label>' : '') + '</div>' +
+      (it.type === 'number' ? '<div class="grid3">' + field('Smallest expected number (a hint; answers are kept as typed)', '<input type="text" data-optnum="' + b + '.min" value="' + esc(it.min != null ? it.min : '') + '">') +
+        field('Largest expected number (a hint)', '<input type="text" data-optnum="' + b + '.max" value="' + esc(it.max != null ? it.max : '') + '">') + '</div>' : '') +
+      (it.source ? '<p class="muted">Imported from: ' + esc(it.source) + '</p>' : '') + '</details>';
   }
   function qlist(list, opts) {
     var items = getPath(list);
     return items.map(function (it, i) { return qcard(list, it, i, items.length, opts); }).join('') + '<button type="button" class="secondary" data-add="' + list + '">Add a question</button>';
   }
+  // A survey file chosen in a file input: text, or base64 for .xlsx. Files over 5 MB are refused here and on the server.
+  function readFile(file) {
+    return new Promise(function (res, rej) {
+      if (!file) return rej(new Error('Choose a file first.'));
+      if (file.size > 5 * 1024 * 1024) return rej(new Error('This file is ' + (file.size / 1048576).toFixed(1) + ' MB. Files over 5 MB are not imported.'));
+      var r = new FileReader(), bin = /\.xlsx$/i.test(file.name);
+      r.onerror = function () { rej(new Error('The file could not be read.')); };
+      r.onload = function () {
+        if (!bin) return res({ filename: file.name, data: r.result, encoding: 'text', size: file.size });
+        var bytes = new Uint8Array(r.result), str = '', i;
+        for (i = 0; i < bytes.length; i += 8192) str += String.fromCharCode.apply(null, bytes.subarray(i, i + 8192));
+        res({ filename: file.name, data: btoa(str), encoding: 'base64', size: file.size });
+      };
+      if (bin) r.readAsArrayBuffer(file); else r.readAsText(file);
+    });
+  }
   // What type plugins get.
   var A = { draft: null, meta: function () { return META.type; }, conditions: conditionsNow, esc: esc, field: field, checkbox: checkbox, inp: inp, num: num, area: area, sel: sel, btn: btn,
-    getPath: getPath, setPath: setPath, clone: clone, qlist: qlist, can: can };
+    getPath: getPath, setPath: setPath, clone: clone, qlist: qlist, can: can,
+    // for study types that import or generate content
+    studyId: studyId, started: 0, post: function (p, b) { return postJSON(p, b); }, err: err, say: function (m) { $('say').textContent = m || ''; },
+    markDirty: function () { setDirty(true); }, rerender: function () { renderEditor(); }, goto: function (s) { sub = s; renderEditor(); }, readFile: readFile, fmt: fmt };
 
   function renderEditor() {
     $('subtabs').innerHTML = subs().map(function (s) { return '<button type="button" data-sub="' + s[0] + '" aria-selected="' + (s[0] === sub) + '">' + s[1] + '</button>'; }).join('');
@@ -474,6 +513,7 @@
     } else h = plugin.render(sub, A);
     $('editor').innerHTML = h;
     $('editor').disabled = !can('editor');
+    if (plugin.afterRender) plugin.afterRender(sub, A);
   }
   $('subtabs').addEventListener('click', function (e) { var s = e.target.getAttribute && e.target.getAttribute('data-sub'); if (s) { sub = s; renderEditor(); } });
 
@@ -488,6 +528,13 @@
     }));
     else if ((v = t.getAttribute('data-labels'))) setPath(v + '.labels', t.value.split('\n').map(function (x) { return x.trim(); }).filter(Boolean));
     else if (t.hasAttribute('data-domains')) draft.enrollment.domains = t.value.split(/[\s,;]+/).map(function (x) { return x.trim().toLowerCase().replace(/^@/, ''); }).filter(Boolean);
+    else if ((v = t.getAttribute('data-dif'))) {   // display rule as JSON
+      var dq = getPath(v);
+      if (!t.value.trim()) { delete dq.displayIf; t.removeAttribute('aria-invalid'); }
+      else { try { dq.displayIf = JSON.parse(t.value); t.removeAttribute('aria-invalid'); } catch (x) { t.setAttribute('aria-invalid', 'true'); } }
+    }
+    else if ((v = t.getAttribute('data-opt'))) { var oq = getPath(v.replace(/\.[^.]+$/, '')), ok = v.split('.').pop(); if (t.value.trim()) oq[ok] = t.value.trim(); else delete oq[ok]; }
+    else if ((v = t.getAttribute('data-optnum'))) { var nq = getPath(v.replace(/\.[^.]+$/, '')), nk = v.split('.').pop(), nv = t.value.trim(); if (nv !== '' && isFinite(Number(nv))) nq[nk] = Number(nv); else delete nq[nk]; }
     else if ((v = t.getAttribute('data-page'))) { var pg = parseInt(t.value, 10), pq = getPath(v); if (pg >= 1) pq.page = pg; else delete pq.page; }
     else if ((v = t.getAttribute('data-sessions'))) setPath(v + '.sessions', t.value.split(/[\s,;]+/).filter(Boolean).map(Number).filter(function (x) { return Number.isInteger(x); }));
     else if ((v = t.getAttribute('data-qcond'))) {
@@ -499,6 +546,7 @@
       redraw = t.tagName === 'SELECT' || t.type === 'checkbox';
       if (/\.type$/.test(v)) {
         var it = getPath(v.replace(/\.type$/, ''));
+        if (it.type === 'info') it.required = false;
         if (it.type === 'scale' && !it.n) { it.n = 7; it.lo = it.lo || AGREE7[0]; it.hi = it.hi || AGREE7[6]; }
         if ((it.type === 'choice' || it.type === 'select' || it.type === 'multi') && !(it.options && it.options.length)) it.options = [{ value: 'Option 1', label: 'Option 1' }, { value: 'Option 2', label: 'Option 2' }];
       }
@@ -578,7 +626,11 @@
       '<label class="f">ID (in the link; lowercase letters, numbers, dashes)<input type="text" id="nid" class="mono" placeholder="phishing-judgments"></label>' +
       '<label class="f">Study type<select id="ntype"></select></label></div><p class="muted" id="ntypedesc"></p>' +
       '<label class="f">Description (shown on the lab page when listed)<textarea id="ndesc" rows="2"></textarea></label>' +
-      '<div class="row"><button type="submit">Create study</button></div></form><div id="newout"></div></div></div>';
+      '<div class="row"><button type="submit">Create study</button></div></form><div id="newout"></div></div>' +
+      '<div class="section"><h2 id="impheading">Create a study from a survey file</h2><p class="muted">Start from a survey you already have: a Qualtrics export (.qsf), a LimeSurvey structure (.lss), a REDCap data dictionary (.csv), or the lab\'s spreadsheet template (.csv or .xlsx; <a href="/lab/templates/survey-template.csv" download>download the template</a>). This creates a survey study (type "Vignettes and surveys") and opens its Study content, Import a survey page with your file already read and previewed. Nothing is saved to the study until you load the preview into the editor and click Save.</p>' +
+      '<form id="impform"><div class="grid3"><label class="f">Name<input type="text" id="iname" placeholder="Attitudes survey"></label>' +
+      '<label class="f">ID (in the link)<input type="text" id="iid" class="mono" placeholder="attitudes-survey"></label>' +
+      '<label class="f">Survey file<input type="file" id="ifile" accept=".qsf,.lss,.csv,.xlsx,.txt"></label></div><div class="row"><button type="submit">Create study and open the import page</button></div></form><div id="impout" role="status"></div></div></div>';
     $('keyhelp').innerHTML = 'Use the lab owner key (the <code>LAB_ADMIN_KEY</code> or <code>VC_ADMIN_KEY</code> Netlify variable). It is kept in this tab only.';
     var TYPES = [], idTouched = false;
     function slug(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').replace(/^[^a-z]+/, '').slice(0, 31); }
@@ -616,6 +668,22 @@
         $('newout').innerHTML = '<div class="warn"><strong>' + esc(s.name) + '</strong> is ready, unlisted. Next: open its <a href="' + esc(s.paths.admin) + '">admin page</a>, edit the study content (consent, items, questions), and run the self-test. Participants sign in at <code>' + esc(location.origin + s.paths.participant) + '</code>.</div>';
         $('nname').value = ''; $('nid').value = ''; $('ndesc').value = ''; idTouched = false; list();
       }).catch(function (e) { err(e.message); });
+    });
+    var impTouched = false;
+    $('iname').addEventListener('input', function () { if (!impTouched) $('iid').value = slug($('iname').value); });
+    $('iid').addEventListener('input', function () { impTouched = true; });
+    $('impform').addEventListener('submit', function (e) {
+      e.preventDefault(); err(); $('impout').textContent = '';
+      var f = $('ifile').files[0], name = $('iname').value.trim(), id = $('iid').value.trim();
+      if (!name || !id) return err('Enter a name and an ID for the new study.');
+      readFile(f).then(function (file) {
+        return postJSON('create', { name: name, id: id, type: 'vignettes', description: '' }).then(function (r) {
+          var s = r.study, kept = false;
+          try { sessionStorage.setItem('lab_import_pending', JSON.stringify({ study: s.id, file: file })); kept = true; } catch (x) {}
+          $('impout').textContent = 'Created ' + s.name + '. Opening its import page' + (kept ? '' : ' (choose the file again there)') + '…';
+          location.href = s.paths.admin + '#import';
+        });
+      }).catch(function (x) { err(x.message); $('ifile').focus(); });
     });
     $('stbl').addEventListener('click', function (e) {
       var v = e.target.getAttribute && (e.target.getAttribute('data-list') || e.target.getAttribute('data-arch')); if (!v) return;

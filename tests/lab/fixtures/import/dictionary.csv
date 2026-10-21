@@ -1,0 +1,17 @@
+Variable / Field Name,Form Name,Section Header,Field Type,Field Label,"Choices, Calculations, OR Slider Labels",Field Note,Text Validation Type OR Show Slider Number,Text Validation Min,Text Validation Max,Identifier?,Branching Logic (Show field only if...),Required Field?,Custom Alignment,Question Number (surveys only),Matrix Group Name,Matrix Ranking?,Field Annotation
+record_id,demographics,,text,Record ID,,,,,,y,,,,,,,
+full_name,demographics,,text,Your full name,,,,,,y,,y,,,,,
+age,demographics,About you,text,Age in years,,,integer,0,120,,,y,,,,,
+sex,demographics,,radio,Sex,"1, Male | 2, Female | 3, Other",,,,,,,y,,,,,
+pregnant,demographics,,yesno,Are you pregnant?,,,,,,,[sex] = '2',,,,,,
+symptoms,health,<b>Health check</b>,checkbox,Which symptoms do you have?,"1, Cough | 2, Fever | 3, None",,,,,,,,,,,,
+severity,health,,slider,How severe is it?,Mild | Moderate | Severe,,,,,,[symptoms(1)] = '1' or [symptoms(2)] = '1',,,,,,
+sat_work,health,Rate each statement,radio,I enjoy my work,"1, Disagree | 2, Neutral | 3, Agree",,,,,,,,,,satisfaction,,
+sat_team,health,,radio,"I enjoy my team, [full_name]","1, Disagree | 2, Neutral | 3, Agree",,,,,,,,,,satisfaction,,
+notes,health,,notes,Anything else we should know?,,Optional,,,,,,,,,,,
+bmi,health,,calc,BMI,[weight]/([height]*[height]),,,,,,,,,,,,
+followup,followup_form,Follow-up,text,Follow-up contact,,,email,,,y,[age] >= 18 and ([sex] = '1' or [symptoms(2)] = '1'),,,,,,@HIDDEN-SURVEY
+visit_gap,followup_form,,text,Days since visit,,,,,,,"datediff([visit_date],[today],'d') > 3",,,,,,
+rating,followup_form,,dropdown,Overall rating,"1, Poor | 2, Fair | 3, Good | 4, Excellent",,,,,,[followup] <> '',,,,,,
+upload,followup_form,,file,Upload a document,,,,,,,,,,,,,
+intro,followup_form,,descriptive,Thank you for completing the form.,,,,,,,,,,,,,

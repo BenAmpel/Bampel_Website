@@ -7,6 +7,7 @@
 // study. Participant renderer: static/lab/engine/types/vignettes.js.
 import { cleanAnswers } from '../engine.mjs';
 import { validateQuestions } from '../content.mjs';
+import { publicQuestions, evalDisplay, orderItems } from '../logic.mjs';
 
 const F = (group, key, label, def) => ({ group, key, label, def });
 const textFields = [
@@ -110,7 +111,7 @@ export default {
       if (missing.length) e.push(`Session ${i + 1}: uses items that no longer exist (${missing.join(', ')}).`);
     });
     if ((d?.sessions || []).some(s => (s.items || []).length) && !(c.questions || []).length) e.push('Add at least one question to ask about each item.');
-    validateQuestions(c.questions || [], 'Item question', e, { nSessions: 99, conditions: conds, rules: [], allowSessions: false });
+    validateQuestions(c.questions || [], 'Item question', e, { nSessions: 99, conditions: conds, rules: [], allowSessions: false, embedded: (c.embedded || []).map(x => x && x.name) });
   },
 
   buildPlan(p, session, c, rand, { shuffle }) {
@@ -126,18 +127,18 @@ export default {
   },
 
   publicTrial(t) { const { id, variant, ...item } = t.item; return { item }; },
-  publicPlanExtras: plan => ({ questions: plan.questions }),
+  publicPlanExtras: plan => ({ questions: publicQuestions(plan.questions, plan.condition) }),
 
   cleanTrialData(d, t, plan) {
     d = d && typeof d === 'object' ? d : {};
     const small = (v, max) => v && typeof v === 'object' && jsonSize(v) <= max ? v : null;
     const answerLog = Array.isArray(d.answerLog) ? d.answerLog.slice(0, 1000).map(a => ({ atMs: num(a?.atMs, 0, 864e5), name: typeof a?.name === 'string' ? a.name.slice(0, 40) : null,
       value: typeof a?.value === 'number' ? a.value : String(a?.value ?? '').slice(0, 300) })) : [];
-    return { answers: cleanAnswers(d.answers, plan.questions || []), rtMs: num(d.rtMs, 0, 864e5), answerLog, traces: small(d.traces, 50000),
+    return { answers: cleanAnswers(d.answers, plan.questions || [], { condition: plan.condition, embedded: plan.embedded }), rtMs: num(d.rtMs, 0, 864e5), answerLog, traces: small(d.traces, 50000),
       viewport: d.viewport ? { w: num(d.viewport.w, 0, 20000), h: num(d.viewport.h, 0, 20000) } : null, device: small(d.device, 4000), selfTest: d.selfTest === true || undefined };
   },
 
-  recordFields: (t, plan) => ({ itemId: t.itemId, item: { id: t.item.id, title: t.item.title, kind: t.item.kind, variant: t.item.variant }, questions: (plan.questions || []).map(q => q.id) }),
+  recordFields: (t, plan) => ({ itemId: t.itemId, item: { id: t.item.id, title: t.item.title, kind: t.item.kind, variant: t.item.variant }, questions: (plan.questions || []).filter(q => q.type !== 'info').map(q => q.id) }),
 
   trialRow(r) {
     const d = r.data || {}, tr = d.traces || {};
@@ -154,8 +155,9 @@ export default {
   simulate(trial, plan, rand) {
     const pick = a => a[Math.floor(rand() * a.length)];
     const answers = {};
-    for (const q of plan.questions || []) {
-      if (q.type === 'scale') answers[q.id] = String(1 + Math.floor(rand() * q.n));
+    for (const q of orderItems(plan.questions || [])) {   // answers only to questions this participant would see
+      if (q.type === 'info' || !evalDisplay(q.displayIf, { answers, ed: plan.embedded })) continue;
+      if (q.type === 'scale') answers[q.id] = String((Number.isInteger(q.start) ? q.start : 1) + Math.floor(rand() * q.n));
       else if (q.type === 'choice' || q.type === 'select') answers[q.id] = pick(q.options).value;
       else if (q.type === 'confidence') answers[q.id] = String(Math.floor(rand() * 101));
       else if (q.type === 'number') answers[q.id] = String(Math.floor(rand() * 90));

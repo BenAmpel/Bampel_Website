@@ -1,0 +1,13 @@
+"# Lab survey template. Lines that start with # are comments. One row per question; keep the header row. Types: choice, select, multi, scale, text, long, number, slider, confidence, info, embedded. options: value=label|value=label (or just label|label). show_if: variable op value, joined by and (or by or). See the Survey import section of static/lab/README.md.",,,,,,,,,,,,,,,
+page,variable,type,text,options,required,scale_points,scale_start,low_label,high_label,labels,min,max,show_if,condition
+,prolific_pid,embedded,param:PROLIFIC_PID,,,,,,,,,,,
+1,welcome,info,Welcome. This survey takes about 5 minutes. Your answers are kept under a study ID.,,,,,,,,,,,
+1,use_apps,choice,Do you use a smartphone every day?,yes=Yes|no=No,yes,,,,,,,,,
+1,app_count,number,How many apps do you open on a typical day?,,,,,,,,0,200,use_apps = yes,
+2,trust,scale,I trust the apps I use.,,,5,,Strongly disagree,Strongly agree,Strongly disagree|Disagree|Neutral|Agree|Strongly agree,,,,
+2,platforms,multi,Which platforms do you use?,ios=iOS|android=Android|web=Web,,,,,,,,,use_apps = yes,
+2,mood,slider,"Rate your mood today (0 = low, 10 = high).",,,,0,Low,High,,0,10,,
+3,why,long,Tell us more about how you use your phone.,,,,,,,,,,use_apps = yes and trust >= 4,
+3,name_short,text,What should we call you? (optional),,,,,,,,,,,
+3,version_a_note,info,You are reading version A.,,,,,,,,,,,a
+3,version_b_note,info,You are reading version B.,,,,,,,,,,,b
