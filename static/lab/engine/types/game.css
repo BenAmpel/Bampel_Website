@@ -1,0 +1,28 @@
+/* Study type "game": participant screens. Plain and light on purpose; colors come from the shared variables in
+   ../../assets/study.css, so dark mode follows the rest of the lab. No animation anywhere. */
+.table-scroll { overflow-x: auto; margin: 8px 0 16px; }
+.gm-table { border-collapse: collapse; width: 100%; font-size: 15px; }
+.gm-table th, .gm-table td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: middle; }
+.gm-table thead th { background: var(--status-bg); font-weight: 600; }
+.gm-table tbody th { font-weight: 600; background: transparent; }
+.gm-table td { font-variant-numeric: tabular-nums; }
+.gm-strategy td { min-width: 12em; }
+.gm-strategy .q-group { margin: 4px 0; border-left: 0; }
+.gm-strategy .q-group .q { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.gm-strategy .options { display: flex; flex-wrap: wrap; gap: 6px; }
+.gm-stage { margin: 0 0 8px; }
+.gm-stage h3 { margin: 16px 0 6px; }
+.gm-role { color: var(--muted); font-size: 14px; margin: 0 0 8px; }
+.gm-shown { border: 1px solid var(--line); border-radius: 10px; background: var(--status-bg); padding: 10px 14px; margin: 12px 0 16px; }
+.gm-shown-h { margin: 0 0 4px; font-weight: 600; }
+.gm-shown ul { margin: 0; padding-left: 20px; }
+.gm-time { font-size: 15px; color: var(--muted); font-variant-numeric: tabular-nums; margin: 4px 0 12px; }
+.gm-count { font-size: 20px; font-weight: 600; margin: 16px 0 4px; }
+.gm-points { font-size: 18px; font-weight: 600; margin: 16px 0 8px; }
+.gm-roles { margin: 8px 0 16px; padding-left: 20px; }
+.gm-again { margin: 20px 0 0; }
+.gm-again summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; }
+input.num { min-height: 48px; }
+.gm-table input.num { max-width: 9em; }
+.gm-table .option { min-height: 44px; }
+@media (max-width: 640px) { .gm-table { font-size: 14px; } .gm-table th, .gm-table td { padding: 6px; } }

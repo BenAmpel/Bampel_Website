@@ -41,6 +41,7 @@ function surveyAnswers(items, plan, r) {
 }
 
 export async function runSelfTest(S, { condition, code, keep = false, budgetMs = 2500 } = {}) {
+  if (S.type.runSelfTest) return S.type.runSelfTest(S, { condition, code, keep, budgetMs });   // a type with its own self-test (live games need several participants)
   const t0 = Date.now(), r = Math.random, store = S.store;
   const c = await getContent(store, S.type), nS = S.type.sessionCount(c);
   let st;

@@ -7,7 +7,7 @@
 import { deleteKeys } from './store.mjs';
 
 const MUTABLE = [/^participants\//, /^content\/current$/, /^meta\//, /^admins\//];
-const PREFIXES = ['participants/', 'consent/', 'plans/', 'started/', 'done/', 'views/', 'data/', 'raw/', 'contact/', 'cond/', 'cond-test/', 'content/', 'admins/', 'audit/', 'meta/'];
+const PREFIXES = ['participants/', 'consent/', 'plans/', 'started/', 'done/', 'views/', 'data/', 'raw/', 'contact/', 'cond/', 'cond-test/', 'content/', 'admins/', 'audit/', 'meta/', 'g/'];
 const STATE = 'state/backup';
 
 export async function runBackup(main, backup, { budgetMs = 20000, now = Date.now() } = {}) {
@@ -34,9 +34,9 @@ export async function backupStatus(backup) {
 }
 
 // Removes a participant from the mirror (a withdrawal or test cleanup must not leave copies behind).
-export async function purgeParticipant(backup, code, condition) {
-  const keys = (await Promise.all(['data', 'raw', 'plans', 'started', 'done', 'views'].map(p => backup.list(`m/${p}/${code}/`)))).flat()
-    .concat([`m/participants/${code}`, `m/contact/${code}`, `m/consent/${code}`, `m/cond/${condition}/${code}`, `m/cond-test/${condition}/${code}`]);
+export async function purgeParticipant(backup, code, condition, extraKeys = []) {
+  const keys = (await Promise.all(['data', 'raw', 'plans', 'started', 'done', 'views', 'g/p'].map(p => backup.list(`m/${p}/${code}/`)))).flat()
+    .concat([`m/participants/${code}`, `m/contact/${code}`, `m/consent/${code}`, `m/cond/${condition}/${code}`, `m/cond-test/${condition}/${code}`]).concat(extraKeys.map(k => 'm/' + k));
   await deleteKeys(backup, keys);
   return keys.length;
 }

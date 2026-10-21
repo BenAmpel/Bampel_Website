@@ -30,7 +30,8 @@ const NEED = {
   team: 'owner', 'team-add': 'owner', 'team-remove': 'owner', activity: 'owner'
 };
 
-export async function handle(req, { getStore, env }) {
+export async function handle(req, { getStore, env, now }) {
+  const clock = typeof now === 'function' ? now : Date.now;   // tests inject a clock
   const url = new URL(req.url);
   const ownerKey = env.LAB_ADMIN_KEY || env.VC_ADMIN_KEY || '';
   let studyId, route;
@@ -72,13 +73,27 @@ export async function handle(req, { getStore, env }) {
       }
     }
 
+    // Routes a study type adds for participants (type.routes, for example 'game/poll'); same token as the engine routes.
+    if (type.routes && Object.hasOwn(type.routes, route)) {
+      if (req.method !== 'POST') return json({ error: 'post_required' }, 405);
+      const pid = await E.verifyToken(S, body.token);
+      if (!pid) return json({ error: 'expired' }, 401);
+      return reply(await type.routes[route](S, pid, body, clock()));
+    }
+
     if (route.startsWith('admin/')) {
       if (!ownerKey) return json({ error: 'admin_disabled', hint: 'Set LAB_ADMIN_KEY (16+ characters) in Netlify environment variables.' }, 503);
       const who = await admin.authAdmin(S.store, req.headers.get('x-admin-key'), ownerKey);
       if (!who) return json({ error: 'forbidden' }, 403);
-      const action = route.slice(6), need = NEED[action];
+      const action = route.slice(6), typeRoute = type.adminRoutes && Object.hasOwn(type.adminRoutes, action) ? type.adminRoutes[action] : null, need = NEED[action] || (typeRoute && typeRoute.need);
       if (!need) return json({ error: 'not_found' }, 404);
       if (!admin.can(who.role, need)) return json({ error: 'not_allowed', need }, 403);
+      // Admin routes a study type adds (type.adminRoutes: { need, post?, handler }); a result with csv is sent as a download.
+      if (typeRoute) {
+        if (typeRoute.post && req.method !== 'POST') return json({ error: 'post_required' }, 405);
+        const r = await typeRoute.handler(S, { body, url, who, now: clock(), audit: (a, d) => admin.audit(S.store, who, a, d) });
+        return r && r.csv != null ? csv(r.csv, r.filename || `${study.id}.csv`) : reply(r);
+      }
       const list = v => (Array.isArray(v) ? v : String(v || '').split(/[\s,;]+/)).map(x => String(x).trim()).filter(Boolean).slice(0, 2000);
       const gap = body.gapDays == null || body.gapDays === '' ? undefined : Number(body.gapDays);
       if (gap !== undefined && !(Number.isInteger(gap) && gap >= 0 && gap <= 60)) return json({ error: 'bad_gap', hint: 'Gap days must be a whole number from 0 to 60.' }, 400);
@@ -108,7 +123,8 @@ export async function handle(req, { getStore, env }) {
             const recs = await E.exportRecords(S, codes.length ? codes : ['none']);
             const contacts = (await E_getMany(S.store, codes.map(x => `contact/${x}`))).map(([k, v]) => v ? { code: k.slice(8), ...v } : null).filter(Boolean);
             const plans = (await E_getMany(S.store, (await Promise.all(codes.map(x => S.store.list(`plans/${x}/`)))).flat())).map(([key, v]) => ({ key, ...v }));
-            return json({ ...recs, contacts, plans });
+            const extras = type.backupExtras ? await type.backupExtras(S, codes) : [];   // a study type's own per-participant state (the game: matches, payment draws, external IDs)
+            return json({ ...recs, contacts, plans, extras });
           }
           if (part === 'history') {
             const keys = (await S.store.list('content/history/')).sort(), page = Math.max(0, Number(url.searchParams.get('page')) || 0);
@@ -173,13 +189,13 @@ export async function handle(req, { getStore, env }) {
         }
         case 'delete': {
           const r = await E.deleteParticipant(S, String(body.id || ''));
-          if (r.ok) { await backup.purgeParticipant(backupStore(), r.code, r.condition); await admin.audit(S.store, who, 'participant.delete', `${r.code}${r.test ? ' (test)' : ''}, ${r.records} records`); }
+          if (r.ok) { await backup.purgeParticipant(backupStore(), r.code, r.condition, r.extraKeys); await admin.audit(S.store, who, 'participant.delete', `${r.code}${r.test ? ' (test)' : ''}, ${r.records} records`); }
           return reply(r);
         }
         case 'delete-test': {
           if (body.confirm !== 'DELETE') return json({ error: 'confirm_required' }, 400);
           const r = await E.deleteTestParticipants(S);
-          for (const t of r.deleted) await backup.purgeParticipant(backupStore(), t.code, t.condition);
+          for (const t of r.deleted) await backup.purgeParticipant(backupStore(), t.code, t.condition, t.extraKeys);
           await admin.audit(S.store, who, 'participant.delete_test', `${r.participants} test participants, ${r.records} records`);
           return json({ ok: true, participants: r.participants, records: r.records });
         }

@@ -508,7 +508,9 @@
 
   // ---------- what study types get ----------
   var ui = { esc: esc, T: T, Th: Th, Tp: Tp, show: show, errorBox: errorBox, choiceGroup: choiceGroup, scaleGroup: scaleGroup, vas: vas, questionHtml: questionHtml, questionsHtml: questionsHtml, fillPipes: fillPipes,
-    wire: wire, flag: flag, blank: blank, questionSet: questionSet, nextId: nextId, reduceMotion: reduceMotion, stage: stage };
+    wire: wire, flag: flag, blank: blank, questionSet: questionSet, nextId: nextId, reduceMotion: reduceMotion, stage: stage,
+    // Study types with their own server routes (for example the economic game's polling) call them with the sign-in token.
+    call: function (route, body) { return api(route, Object.assign({ token: S.token }, body)); } };
   window.LabEngine = { registerType: function (id, impl) { types[id] = impl; }, ui: ui };
 
   // ---------- boot ----------

@@ -1,6 +1,6 @@
 # Lab export codebook
 
-Applies to every study on the lab engine. "Identifiers and design" (first rows), "Behavior and context", and "Surveys CSV" are the same for every study; the alert sections are specific to `alert-triage` studies (the verification study), and "Vignettes studies" lists the columns of `vignettes` studies.
+Economic games (study type `game`) have their own export columns in [CODEBOOK-GAMES.md](CODEBOOK-GAMES.md). Applies to every study on the lab engine. "Identifiers and design" (first rows), "Behavior and context", and "Surveys CSV" are the same for every study; the alert sections are specific to `alert-triage` studies (the verification study), and "Vignettes studies" lists the columns of `vignettes` studies.
 
 Trials CSV: one row per item (alert, scenario) answered. Surveys CSV: one row per survey submitted. Times are ISO 8601 UTC; durations are milliseconds. Empty cells mean "not applicable" (for example, AI columns in sessions without the AI).
 
