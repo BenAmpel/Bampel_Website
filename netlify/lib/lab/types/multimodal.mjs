@@ -22,12 +22,14 @@
 // Participant renderer: static/lab/engine/types/multimodal.js. Editor: multimodal-admin.js.
 import { randomBytes } from 'node:crypto';
 import { cleanAnswers, loadParticipant, toCsv } from '../engine.mjs';
-import { validateQuestions } from '../content.mjs';
+import { validateQuestions, getContent } from '../content.mjs';
 import { publicQuestions, evalDisplay, orderItems } from '../logic.mjs';
 import { getMany, setNew, deleteKeys } from '../store.mjs';
 import { trajectoryMetrics, cleanPoints } from '../trajectory.mjs';
 import * as bot from '../voicebot.mjs';
-import { transcribe, saidWord } from '../asr.mjs';
+import { transcribe, saidWord, asrConfigured } from '../asr.mjs';
+import { synthesize } from '../tts.mjs';
+import * as X from './multimodal-study.mjs';
 
 const KINDS = ['text', 'image', 'audio', 'video', 'call', 'check'];
 const CHECKS = ['headphones', 'word'];
@@ -94,8 +96,12 @@ const num = (v, lo, hi) => { if (v == null || v === '') return null; const x = N
 const int = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi;
 const jsonSize = v => { try { return JSON.stringify(v).length; } catch { return Infinity; } };
 export const MEDIA_RE = /^(https:\/\/|\/lab\/|\/api\/lab\/[a-z][a-z0-9-]{2,30}\/file\/)[^\s"'<>]+$/;
-const ITEM_FIELDS = ['title', 'kind', 'body', 'media', 'mediaAlt', 'transcript', 'mustFinish', 'maxPlays', 'autoplay', 'decide', 'decisionPrompt', 'decisionOptions', 'ask', 'recordVoice', 'voicePrompt'];
-const SCRIPT_STATES = ['opener', 'pretext', 'ask', 'pressure1', 'pressure2', 'deflect', 'closeComply', 'closeRefuse', 'close', 'callback'];
+// clips (audio examples inside a text screen), minSeconds (least time on the screen), persona (show the role card),
+// practiceDial (a practice directory to look a number up and call it), live (answer while an audio clip plays).
+const ITEM_FIELDS = ['title', 'kind', 'body', 'media', 'mediaAlt', 'transcript', 'mustFinish', 'maxPlays', 'autoplay', 'decide', 'decisionPrompt', 'decisionOptions', 'ask', 'recordVoice', 'voicePrompt',
+  'clips', 'minSeconds', 'persona', 'practiceDial', 'live'];
+// callback: what the organization's real line says; deflectLine: what the attacker says on the number they gave out.
+const SCRIPT_STATES = ['opener', 'pretext', 'ask', 'pressure1', 'pressure2', 'deflect', 'closeComply', 'closeRefuse', 'close', 'callback', 'deflectLine'];
 
 // The item as this participant sees it: base wording, overridden by their condition's variant.
 function resolve(item, condition) {
@@ -215,7 +221,9 @@ async function callTurn(S, pid, body, now) {
   if (!int(seq, 0, 80)) return { error: 'bad_turn', status: 400 };
   if (!['answer', 'decline', 'say', 'hangup', 'hold', 'resume', 'timeout'].includes(kind)) return { error: 'bad_turn', status: 400 };
   const prefix = `calls/${ctx.tag}/`, key = prefix + String(seq).padStart(3, '0');
-  const pub = r => ({ seq: r.seq, say: r.say || '', state: r.after.state, done: !!r.after.done, audio: r.audio || null });
+  // code: a one-time code "arrives" on the participant's authenticator when the call reaches call.code.at.
+  const pub = (r, heard) => ({ seq: r.seq, say: r.say || '', state: r.after.state, done: !!r.after.done, audio: r.audio || null,
+    ...(heard != null ? { heard } : {}), ...(r.codeSent && ctx.trial.callCode ? { code: { service: call.code.service || call.caller, value: ctx.trial.callCode } } : {}) });
   const existing = await S.store.get(key);
   if (existing && existing.kind === kind) return pub(existing);   // a retried request gets the same answer
   if (existing) return { error: 'out_of_order', status: 409, next: (await S.store.list(prefix)).length };
@@ -226,46 +234,105 @@ async function callTurn(S, pid, body, now) {
   if ((seq === 0) !== ['answer', 'decline', 'timeout'].includes(kind)) return { error: 'bad_turn', status: 400 };
   if (st.done && !['hangup', 'hold', 'resume'].includes(kind)) return { error: 'call_over', status: 409 };
 
-  const said = typeof body.said === 'string' ? body.said.slice(0, 2000) : '';
-  const rec = { seq, kind, at: now, clientMs: num(body.clientMs, 0, 36e5), latencyMs: num(body.latencyMs, 0, 6e4), asr: body.asr === true };
+  // The participant's words: typed, or spoken and transcribed here by the lab's own speech server (audio: WAV, base64).
+  let said = typeof body.said === 'string' ? body.said.slice(0, 2000) : '', asrMs = null;
+  if (kind === 'say' && typeof body.audio === 'string' && body.audio) {
+    if (body.audio.length > 2_000_000 || !/^[A-Za-z0-9+/=]+$/.test(body.audio)) return { error: 'bad_data', status: 400 };
+    const r = await transcribe(Buffer.from(body.audio, 'base64'));
+    if (r.error) return { error: 'asr_unavailable', status: 503 };
+    said = r.text; asrMs = r.ms;
+  }
+  const rec = { seq, kind, at: now, clientMs: num(body.clientMs, 0, 36e5), latencyMs: num(body.latencyMs, 0, 6e4), asr: kind === 'say' && (asrMs != null || body.asr === true), ...(asrMs != null ? { asrServer: true, asrMs } : {}) };
   let after = st, line = '';
   if (kind === 'answer') { after = { ...bot.START, state: 'opener' }; line = call.script.opener; }
   else if (kind === 'decline' || kind === 'timeout') after = { ...bot.START, done: true, outcome: kind === 'decline' ? 'declined' : 'missed' };
   else if (kind === 'hangup') after = { ...st, done: true, outcome: st.outcome || 'hung_up' };
   else if (kind === 'say') {
     const cls = bot.classify(said);
-    after = bot.step(st, cls, { intent: call.intent, maxTurns: call.maxTurns || 8 });
+    // What was disclosed is decided on the raw words, before redaction; only the labels are kept.
+    const disclosed = X.disclosures(said, { code: turns.some(t => t.codeSent) ? ctx.trial.callCode : null, persona: ctx.plan.persona });
+    after = bot.step(st, disclosed.length ? { ...cls, intent: 'comply', disclosed: true } : cls, { intent: call.intent, maxTurns: call.maxTurns || 8 });
     line = call.script[after.state] || '';
-    Object.assign(rec, { heard: bot.redact(said), heardIntent: cls.intent, digits: cls.digits });
+    Object.assign(rec, { heard: bot.redact(said), heardIntent: disclosed.length ? 'comply' : cls.intent, digits: cls.digits, ...(disclosed.length ? { disclosed } : {}) });
   }
+  if (call.code && ctx.trial.callCode && after.state === (call.code.at || 'ask') && !turns.some(t => t.codeSent)) rec.codeSent = true;
   rec.after = after;
   if (line) {
     const history = turns.flatMap(t => [t.heard ? { speaker: 'participant', text: t.heard } : null, t.say ? { speaker: 'caller', text: t.say } : null]).filter(Boolean);
     const recorded = call.audio && call.audio[after.state];
-    const out = recorded || call.llm === false ? { text: line, source: recorded ? 'recorded' : 'script' } : await bot.phrase({ state: after.state, line, persona: call.persona, heard: rec.heard || '', history });
+    const scripted = call.llm === false || !!(ctx.p.flags && ctx.p.flags.scripted);   // pilot: the scripted fallback tree only
+    const out = recorded || scripted ? { text: line, source: recorded ? 'recorded' : 'script' } : await bot.phrase({ state: after.state, line, persona: call.persona, heard: rec.heard || '', history });
     Object.assign(rec, { say: out.text, source: out.source, llmError: out.error, audio: recorded || null });
+    if (!recorded) Object.assign(rec, await voiceFor(S, out.text, call.voice, now));
   }
   rec.serverMs = Date.now() - t0;
   if (!(await setNew(S.store, key, rec))) return pub(await S.store.get(key));
-  return pub(rec);
+  return pub(rec, kind === 'say' ? said.slice(0, 600) : null);
 }
 
-// Calling a number from the directory. The organization's real line resolves the truth for this item's call;
-// any other listed number gets that entry's greeting; an unlisted number is "not in service".
+// The caller's voice: made by the lab's voice service and kept as a study file (the caller's audio track). On any
+// failure the browser speaks the line with its own voice, and the turn records why.
+async function voiceFor(S, text, voice, now) {
+  if (!text) return {};
+  const v = await synthesize(text, { voice: typeof voice === 'string' ? voice : 'af_heart' });
+  if (v.error) return { ttsError: v.error };
+  const name = `f-${randomBytes(6).toString('hex')}.wav`;
+  await S.store.set(`files/${name}`, { mime: 'audio/wav', data: v.audio.toString('base64'), filename: 'caller-line', at: now, bytes: v.audio.length });
+  return { audio: `/api/lab/${S.study.id}/file/${name}`, ttsMs: v.ms };
+}
+
+// Calling a number back (from the directory or the dial pad). The organization's real line resolves the truth for
+// this item's call; the number an attacker gave out reaches the attacker; any other listed number gets that entry's
+// greeting; anything else is "not in service". Numbers match on their last 7 digits (555-0121 = (404) 555-0121).
 const digitsOnly = s => String(s || '').replace(/\D/g, '');
+const sameNumber = (a, b) => { a = digitsOnly(a); b = digitsOnly(b); return a.length >= 7 && b.length >= 7 && a.slice(-7) === b.slice(-7); };
 async function callBack(S, pid, body, now) {
   const ctx = await trialContext(S, pid, body);
   if (ctx.error) return ctx;
   if ((await S.store.list(`callbacks/${ctx.tag}/`)).length >= 20) return { error: 'too_many', status: 429 };
-  const dialed = digitsOnly(body.number).slice(0, 20);
-  const entry = dialed.length >= 3 ? (ctx.plan.directory || []).find(d => digitsOnly(d.number) === dialed) : null;
-  const call = ctx.trial.item.call, resolves = !!(entry && call && digitsOnly(call.callbackNumber) === dialed);
+  const dialed = digitsOnly(body.number).slice(0, 20), source = body.source === 'dialpad' ? 'dialpad' : 'directory';
+  const entry = (ctx.plan.directory || []).find(d => sameNumber(d.number, dialed)) || null;
+  const call = ctx.trial.item.call, resolves = !!(entry && call && sameNumber(call.callbackNumber, dialed));
+  const callerSupplied = !!(call && call.deflectNumber && sameNumber(call.deflectNumber, dialed));
   let say;
-  if (!entry) say = 'The number you have dialed is not in service. Please check the number and try again.';
+  if (callerSupplied) say = call.script.deflectLine || `${call.caller}, this is the person you just spoke with. Go ahead.`;
+  else if (!entry) say = 'The number you have dialed is not in service. Please check the number and try again.';
   else if (resolves) say = call.script.callback || entry.greeting || `Thank you for calling ${entry.name}.`;
   else say = entry.greeting || `Thank you for calling ${entry.name}. How can I help you today?`;
-  await S.store.set(`callbacks/${ctx.tag}/${now}-${randomBytes(2).toString('hex')}`, { at: now, number: dialed, listed: !!entry, name: entry ? entry.name : null, resolves });
-  return { say, name: entry ? entry.name : null };
+  await S.store.set(`callbacks/${ctx.tag}/${now}-${randomBytes(2).toString('hex')}`, { at: now, number: dialed, listed: !!entry, name: entry ? entry.name : null, resolves, callerSupplied, source,
+    duringCall: body.duringCall === true });
+  const voice = resolves || !entry ? 'af_sarah' : callerSupplied ? call.voice : 'af_sarah';
+  const v = entry || callerSupplied ? await voiceFor(S, say, voice, now) : {};
+  return { say, name: callerSupplied ? call.caller : entry ? entry.name : null, audio: v.audio || null };
+}
+
+// Whether a gated item (a practice call) was passed, for the item that retries it.
+async function gateStatus(S, pid, body) {
+  const ctx = await trialContext(S, pid, body);
+  if (ctx.error) return ctx;
+  const of = ctx.trial.item.call && ctx.trial.item.call.gate && ctx.trial.item.call.gate.retryOf;
+  const first = of != null ? ctx.plan.trials.find(t => t.itemId === of) : null;
+  if (!first) return { error: 'not_a_retry', status: 400 };
+  const rec = await S.store.get(`data/${ctx.p.code}/s${ctx.session}/t${first.index}`);
+  return { passed: !!(rec && rec.data && rec.data.callServer && rec.data.callServer.gatePassed) };
+}
+
+// The debrief: each scored call with what happened, the points, and the participant's own (redacted) transcript.
+async function debrief(S, pid) {
+  const p = await loadParticipant(S, pid);
+  if (!p) return { error: 'expired', status: 401 };
+  const out = [];
+  for (const k of (await S.store.list(`plans/${p.code}/`)).sort()) {
+    const plan = await S.store.get(k);
+    for (const t of (plan && plan.trials) || []) {
+      if (t.item.kind !== 'call' || !t.item.call || !t.item.call.scored) continue;
+      const tag = `${p.code}/s${plan.session}/t${t.index}`, s = await callSummary(S, tag, t, plan);
+      const turns = (await getMany(S.store, (await S.store.list(`calls/${tag}/`)).sort())).map(([, v]) => v).filter(Boolean);
+      out.push({ caller: t.item.call.caller, intent: t.item.call.intent, outcome: s ? s.outcome : 'not reached', points: s ? s.points : 0, disclosed: s ? s.disclosed : [], callbacks: s ? s.callbacks : 0,
+        transcript: turns.flatMap(v => [v.heard ? { who: 'you', text: v.heard } : null, v.say ? { who: 'caller', text: v.say } : null]).filter(Boolean) });
+    }
+  }
+  return { calls: out, points: out.reduce((a, c) => a + (c.points || 0), 0) };
 }
 
 // Equipment checks. Attempts run in order and each is written once; attempt n+1 is allowed only after n failed.
@@ -360,18 +427,29 @@ async function mediaUpload(S, pid, body, now) {
 }
 
 // The server's record of a call, attached to the item's answer when it is saved (the browser never sees the outcome).
-export async function callSummary(S, tag) {
+// trial and plan (optional) add what the study scores: points under the payoff, and whether a gate was passed.
+export async function callSummary(S, tag, trial, plan, test = false) {
   const keys = (await S.store.list(`calls/${tag}/`)).sort();
-  if (!keys.length) return null;
+  const cbs = (await getMany(S.store, await S.store.list(`callbacks/${tag}/`))).map(([, v]) => v).filter(Boolean).sort((a, b) => a.at - b.at);
+  if (!keys.length && !cbs.length) return null;
   const turns = (await getMany(S.store, keys)).map(([, v]) => v).filter(Boolean);
-  const cbs = (await getMany(S.store, await S.store.list(`callbacks/${tag}/`))).map(([, v]) => v).filter(Boolean);
   const st = bot.replay(turns), says = turns.filter(t => t.kind === 'say');
   const med = a => { const b = a.filter(x => x != null).sort((x, y) => x - y); return b.length ? b[Math.floor((b.length - 1) / 2)] : null; };
-  return { answered: turns.some(t => t.kind === 'answer'), outcome: st.outcome || (st.done ? 'ended' : 'open'), finalState: st.state, participantTurns: says.length,
-    digitsDisclosed: Math.max(0, ...says.map(t => t.digits || 0)), verifies: st.verifies || 0, refusals: st.refusals || 0,
-    llmTurns: turns.filter(t => t.source === 'llm').length, scriptTurns: turns.filter(t => t.source === 'script' || t.source === 'recorded').length,
+  const disclosed = [...new Set(says.flatMap(t => t.disclosed || []))], first = says.findIndex(t => t.disclosed && t.disclosed.length);
+  const codeAt = turns.findIndex(t => t.codeSent), call = trial && trial.item.call;
+  const s = { answered: turns.some(t => t.kind === 'answer'), outcome: st.outcome || (st.done ? 'ended' : turns.length ? 'open' : 'not_answered'), finalState: st.state, participantTurns: says.length,
+    spokenTurns: says.filter(t => t.asrServer).length, digitsDisclosed: Math.max(0, ...says.map(t => t.digits || 0)), disclosed,
+    // resistance: caller pressure turns (ask, pressure1, pressure2) spoken before the first disclosure, or in the whole call
+    pressureTurns: turns.slice(0, first < 0 ? turns.length : turns.indexOf(says[first])).filter(t => ['ask', 'pressure1', 'pressure2'].includes(t.after && t.after.state) && t.say).length,
+    codeSent: codeAt >= 0, verifies: st.verifies || 0, refusals: st.refusals || 0,
+    llmTurns: turns.filter(t => t.source === 'llm').length, scriptTurns: turns.filter(t => t.source === 'script' || t.source === 'recorded').length, ttsErrors: turns.filter(t => t.ttsError).length,
     medianServerMs: med(turns.map(t => t.serverMs)), medianLatencyMs: med(turns.map(t => t.latencyMs)), holds: turns.filter(t => t.kind === 'hold').length,
-    callbacks: cbs.length, callbackResolved: cbs.some(c => c.resolves) };
+    callbacks: cbs.length, callbackResolved: cbs.some(c => c.resolves), callbacksLookedUp: cbs.filter(c => c.listed && c.source !== 'dialpad').length,
+    callbacksCallerSupplied: cbs.filter(c => c.callerSupplied).length, firstCallbackAt: cbs.length ? cbs[0].at : null,
+    callStartAt: turns.length ? turns[0].at : null };
+  if (call && call.gate) s.gatePassed = s.spokenTurns > 0 || (test && s.participantTurns > 0);
+  if (call && call.scored && plan && plan.payoff) s.points = X.pointsFor(call.intent, s, plan.payoff);
+  return s;
 }
 
 // ---------- admin routes ----------
@@ -422,6 +500,23 @@ const adminRoutes = {
     await audit('file.upload', `${label || name} as ${name}`);
     return { ok: true, name, url: `/api/lab/${S.study.id}/file/${name}`, filename: label };
   } },
+  // Prolific bulk bonus: one "participant_id,amount" line per panel participant, from the points they scored in the
+  // shift (never below zero). Real participants only; managers and up, since it holds panel IDs.
+  'bonus.csv': { need: 'manager', handler: async (S, { audit }) => {
+    const c = await getContent(S.store, S.type);
+    const rate = Number(c.payoff && c.payoff.centsPerPoint) || 0, lines = [];
+    for (const [k, contact] of await getMany(S.store, await S.store.list('contact/'))) {
+      if (!contact || !contact.panelId) continue;
+      const code = k.slice(8), p = await S.store.get(`participants/${code}`);
+      if (!p || p.test) continue;
+      let pts = 0;
+      for (const [, r] of await getMany(S.store, await S.store.list(`data/${code}/`))) if (r && r.data && r.data.callServer && Number.isFinite(r.data.callServer.points)) pts += r.data.callServer.points;
+      const amount = Math.max(0, pts) * rate / 100;
+      if (amount > 0) lines.push(`${contact.panelId},${amount.toFixed(2)}`);
+    }
+    await audit('bonus.export', `${lines.length} bonus lines`);
+    return { csv: lines.join('\n') + (lines.length ? '\n' : ''), filename: `${S.study.id}_prolific_bonus.csv` };
+  } },
   files: { need: 'viewer', handler: async S => {
     const keys = await S.store.list('files/');
     return (await getMany(S.store, keys)).filter(([, v]) => v).map(([k, v]) => ({ name: k.slice(6), url: `/api/lab/${S.study.id}/file/${k.slice(6)}`, filename: v.filename, mime: v.mime, bytes: v.bytes, at: v.at }));
@@ -432,22 +527,30 @@ export default {
   id: 'multimodal',
   label: 'Media, voice, and conversations (multimodal)',
   description: 'Text, images, audio and video clips, and phone calls with an AI voice caller, in blocks shown in order or shuffled, with per-condition wording and media. Each item can ask for a mouse-tracked decision, any questions, and a spoken answer. Records play behavior, decision paths, answer changes, call transcripts, and (with consent) participant audio.',
-  contentKeys: ['design', 'items', 'practice', 'questions', 'decision', 'directory', 'screening'],
+  contentKeys: ['design', 'items', 'practice', 'questions', 'decision', 'directory', 'screening', 'persona', 'clipLibrary', 'shift', 'payoff', 'pilot', 'debrief'],
   textFields,
   surveyRules: [],
   conditionsOf: c => (c.design?.conditions || []).map(x => x.id),
   sessionCount: c => c.design.sessions.length,
   assignAtSession: c => c.design?.assignAtSession || 1,
-  publicContent: c => ({ continuous: !!c.design?.continuous }),
+  assignFlags: X.assignFlags,
+  publicContent: c => ({ continuous: !!c.design?.continuous, noSoundCheck: !!c.design?.noSoundCheck, debrief: c.debrief && c.debrief.body ? { title: c.debrief.title || 'About this study', body: c.debrief.body } : null }),
   // Engine hooks: eligibility answers (start-of-session survey) and failed equipment checks end the study.
   screenSurvey(c, kind, session, answers) {
     if (kind !== 'pre') return null;
     const bad = (c.screening?.rules || []).find(r => (r.session || 1) === session && !(r.pass || []).includes(answers[r.question]));
     return bad ? `ineligible:${bad.question}` : null;
   },
-  screenOutReason: rec => rec.item?.kind === 'check' && rec.data?.checkServer?.passed === false ? `check_failed:${rec.data.checkServer.test}` : null,
+  // A failed check, or a gated call (the practice call) with no speech heard, on its final try.
+  screenOutReason: (rec, t) => {
+    if (rec.item?.kind === 'check' && rec.data?.checkServer?.passed === false) return `check_failed:${rec.data.checkServer.test}`;
+    const g = t && t.item.call && t.item.call.gate, cs = rec.data?.callServer;
+    if (g && g.final && !(cs && (cs.gatePassed || cs.skipped))) return 'practice_call_failed';
+    return null;
+  },
   editorMeta: () => ({ llm: bot.llmConfigured(), scripts: { attack: bot.defaultScript('attack'), benign: bot.defaultScript('benign') }, maxUploadMb: Math.floor(MAX_AUDIO_B64 * 0.75 / 1e5) / 10 }),
-  routes: { 'call/turn': callTurn, 'call/callback': callBack, 'media/upload': mediaUpload, 'check/headphones': checkHeadphones, 'check/word': checkWord, 'check/status': checkStatus },
+  routes: { 'call/turn': callTurn, 'call/callback': callBack, 'media/upload': mediaUpload, 'check/headphones': checkHeadphones, 'check/word': checkWord, 'check/status': checkStatus,
+    'gate/status': gateStatus, debrief: (S, pid) => debrief(S, pid) },
   adminRoutes,
 
   defaultContent() {
@@ -470,7 +573,7 @@ export default {
 
   normalize(c, d) {
     c.design = { ...d.design, ...(c.design || {}) };
-    c.design.sessions = (c.design.sessions || []).map(s => ({ blocks: blocksOf(s, c.design).map(b => ({ title: b.title || '', items: Array.isArray(b.items) ? b.items : [], randomize: !!b.randomize })) }));
+    c.design.sessions = (c.design.sessions || []).map(s => ({ blocks: blocksOf(s, c.design).map(b => ({ title: b.title || '', items: Array.isArray(b.items) ? b.items : [], randomize: !!b.randomize, ...(b.pool ? { pool: b.pool } : {}) })) }));
     c.decision = { ...d.decision, ...(c.decision || {}) };
     c.directory = Array.isArray(c.directory) ? c.directory : [];
     for (const it of (c.items || []).concat(c.practice ? [c.practice] : [])) {
@@ -524,6 +627,18 @@ export default {
       const armed = (c.items || []).filter(it => early.includes(it.id) && Object.keys(it.variants || {}).length).map(it => it.id);
       if (armed.length) e.push(`Items before the arm is assigned cannot vary by arm (${armed.join(', ')}).`);
     }
+    (d && Array.isArray(d.sessions) ? d.sessions : []).forEach((s, i) => (s.blocks || []).forEach(b => {
+      if (!b.pool) return;
+      if (!X.POOLS.includes(b.pool)) e.push(`Session ${i + 1}: unknown pool "${b.pool}".`);
+      else if (b.pool.startsWith('clips:') && !(c.clipLibrary && Array.isArray(c.clipLibrary.lists) && c.clipLibrary.lists.length)) e.push(`Session ${i + 1}: a clip block needs the clip library and its lists.`);
+      else if (b.pool === 'shift' && !(c.shift && c.shift.forms && Object.values(c.shift.forms).every(f => Array.isArray(f) && f.every(id => ids.has(id))))) e.push(`Session ${i + 1}: every shift form must list existing call items.`);
+    }));
+    if (c.clipLibrary) {
+      const cids = new Set((c.clipLibrary.clips || []).map(x => x.id));
+      (c.clipLibrary.clips || []).forEach((x, i) => { if (!x || !x.id || !MEDIA_RE.test(x.media || '')) e.push(`Clip ${i + 1}: needs an ID and an audio file.`); });
+      (c.clipLibrary.lists || []).forEach((l, i) => { if (!l || !['pre', 'post'].every(k => Array.isArray(l[k]) && l[k].every(id => cids.has(id)))) e.push(`Clip list ${i + 1}: pre and post must list clips in the library.`); });
+    }
+    if (c.persona && !(Array.isArray(c.persona.rows) && c.persona.rows.every(r => r && str(r.label, 80) && str(String(r.value || ''), 200)))) e.push('Every persona row needs a label and a value.');
     const preIds = (c.survey?.pre || []).map(q => q.id);
     (c.screening?.rules || []).forEach((r, i) => {
       if (!r || !preIds.includes(r.question)) e.push(`Screening rule ${i + 1}: choose a start-of-session question.`);
@@ -532,16 +647,29 @@ export default {
     validateQuestions(c.questions || [], 'Item question', e, { nSessions: 99, conditions: conds, rules: [], allowSessions: false, embedded: (c.embedded || []).map(x => x && x.name) });
   },
 
-  buildPlan(p, session, c, rand, { shuffle }) {
+  buildPlan(p, session, c, rand, { shuffle, seeded }) {
     const spec = c.design.sessions[session - 1], byId = new Map((c.items || []).map(x => [x.id, x]));
-    const order = spec.blocks.flatMap((b, bi) => { const its = b.items.map(id => byId.get(id)).filter(Boolean).map(it => ({ it, block: bi + 1 })); return b.randomize ? shuffle(its, rand) : its; });
+    const order = spec.blocks.flatMap((b, bi) => {
+      const pooled = X.poolItems(b, c, p, byId);
+      const its = pooled ? pooled.map(x => ({ ...x, block: bi + 1, blockTitle: b.title || '' })) : b.items.map(id => byId.get(id)).filter(Boolean).map(it => ({ it, block: bi + 1, blockTitle: b.title || '', meta: it.meta || null }));
+      return b.randomize ? shuffle(its, rand) : its;
+    });
     const questions = (c.questions || []).filter(q => !q.conditions.length || q.conditions.includes(p.condition));
-    const make = (it, i, block) => { const item = resolve(it, p.condition); return { index: i, itemId: it.id, block, item, decision: decisionOf(c, item), ...(item.kind === 'check' && item.check ? { checkPlan: checkPlan(item.check, rand) } : {}) }; };
+    // The persona's values belong to the participant, not the session: the same card in every session.
+    const persona = c.persona ? X.personaFor(c.persona, seeded(`${p.code}|persona`)) : null;
+    const make = (it, i, block, meta, blockTitle) => {
+      const item = resolve(it, p.condition);
+      return { index: i, itemId: it.id, block, blockTitle, item, decision: decisionOf(c, item), ...(meta ? { meta } : {}),
+        ...(item.kind === 'check' && item.check ? { checkPlan: checkPlan(item.check, rand) } : {}),
+        ...(item.kind === 'call' && item.call && item.call.code ? { callCode: X.codeFor(rand) } : {}) };
+    };
     return {
-      questions, directory: (c.directory || []).map(x => ({ name: x.name, number: x.number, greeting: x.greeting || '' })),
+      questions, directory: (c.directory || []).map(x => ({ name: x.name, number: x.number, greeting: x.greeting || '', dept: x.dept || '' })),
       recording: !!(c.consent && c.consent.recording && c.consent.recording.enabled && p.recordingConsent),
-      trials: order.map(({ it, block }, i) => make(it, i, block)),
-      practice: session === 1 && c.design.practice && c.practice ? make(c.practice, 'practice', 0) : null
+      trials: order.map(({ it, block, meta, blockTitle }, i) => make(it, i, block, meta, blockTitle)),
+      practice: session === 1 && c.design.practice && c.practice ? make(c.practice, 'practice', 0) : null,
+      ...(persona ? { persona } : {}), ...(c.payoff ? { payoff: c.payoff } : {}), flags: p.flags || null,
+      asr: asrConfigured() ? 'server' : 'browser'
     };
   },
 
@@ -549,14 +677,17 @@ export default {
   // (the caller's lines arrive one at a time from call/turn).
   publicTrial(t, plan) {
     const { id, variant, call, check, ...item } = t.item;
-    if (call) item.call = { caller: call.caller, number: call.number || '', ringSeconds: call.ringSeconds || 30, voice: call.voice || null };
+    if (call) item.call = { caller: call.caller, number: call.number || '', ringSeconds: call.ringSeconds || 30, voice: call.voice || null, scored: !!call.scored,
+      ...(call.gate ? { gate: { retryOf: call.gate.retryOf || null, final: !!call.gate.final } } : {}) };
+    if (t.meta && t.meta.slider) item.slider = true;
     // A check gets what the browser must play (tone orders, word audio), never the words themselves.
     const k = t.checkPlan;
     if (k) item.check = k.test === 'headphones' ? { test: k.test, attempts: k.attempts, rounds: k.rounds } : { test: k.test, attempts: k.attempts, media: k.words.map(w => w.media) };
     item.ask = questionsFor(plan, t).map(q => q.id);
     return { item, block: t.block, decision: t.decision };
   },
-  publicPlanExtras: plan => ({ questions: publicQuestions(plan.questions, plan.condition), directory: (plan.directory || []).map(x => ({ name: x.name, number: x.number })), recording: !!plan.recording }),
+  publicPlanExtras: plan => ({ questions: publicQuestions(plan.questions, plan.condition), directory: (plan.directory || []).map(x => ({ name: x.name, number: x.number, dept: x.dept || '' })), recording: !!plan.recording,
+    persona: X.publicPersona(plan.persona), asr: plan.asr || 'browser', payoff: plan.payoff ? { benignComplete: plan.payoff.benignComplete, disclose: plan.payoff.disclose, callback: plan.payoff.callback } : null }),
 
   // Attaches the server's record of a call to the answer before it is cleaned and saved; anything the browser
   // sent under that name is replaced. Returns nothing, so the engine saves as usual.
@@ -564,12 +695,19 @@ export default {
     const t = plan.trials[index];
     const tag = `${p.code}/s${plan.session}/t${index}`;
     if (data && typeof data === 'object') {
-      data.callServer = t && t.item.kind === 'call' ? await callSummary(S, tag) : null;
+      data.callServer = t && t.item.kind === 'call' ? await callSummary(S, tag, t, plan, !!p.test) : null;
       data.checkServer = t && t.checkPlan ? await checkSummary(S, tag, t.checkPlan) : null;
+      // The retry of a gated call is skipped when the first try passed (the server checks, not the browser).
+      const g = t && t.item.call && t.item.call.gate;
+      if (g && g.retryOf) {
+        const first = plan.trials.find(x => x.itemId === g.retryOf), r0 = first && await S.store.get(`data/${p.code}/s${plan.session}/t${first.index}`);
+        if (r0 && r0.data && r0.data.callServer && r0.data.callServer.gatePassed) data.callServer = { ...(data.callServer || {}), skipped: true };
+      }
     }
     return null;
   },
-  purgeParticipant: async (S, p) => (await Promise.all([`calls/${p.code}/`, `callbacks/${p.code}/`, `audio/${p.code}/`, `checks/${p.code}/`].map(k => S.store.list(k)))).flat(),
+  purgeParticipant: async (S, p) => (await Promise.all([`calls/${p.code}/`, `callbacks/${p.code}/`, `audio/${p.code}/`, `checks/${p.code}/`, `alloc/`].map(k => S.store.list(k)))).flat()
+    .filter(k => !k.startsWith('alloc/') || k.endsWith('/' + p.code)),
 
   cleanTrialData(d, t, plan) {
     d = d && typeof d === 'object' ? d : {};
@@ -591,11 +729,16 @@ export default {
       decision, decisionMs: decision ? num(d.decisionMs, 0, 864e5) : null, trajectory: points.length ? points : null, mt: points.length ? trajectoryMetrics(points) : null,
       rtMs: num(d.rtMs, 0, 864e5), answerLog, traces: small(d.traces, 50000), media, call, callServer: small(d.callServer, 4000), checkServer: small(d.checkServer, 2000),
       voice: v ? { recorded: v.recorded === true && !!plan.recording, durationMs: num(v.durationMs, 0, 36e5), typed: typeof v.typed === 'string' ? v.typed.slice(0, 4000) : '' } : null,
-      viewport: d.viewport ? { w: num(d.viewport.w, 0, 20000), h: num(d.viewport.h, 0, 20000) } : null, device: small(d.device, 4000), selfTest: d.selfTest === true || undefined
+      viewport: d.viewport ? { w: num(d.viewport.w, 0, 20000), h: num(d.viewport.h, 0, 20000) } : null, device: small(d.device, 4000), selfTest: d.selfTest === true || undefined,
+      uiEvents: Array.isArray(d.uiEvents) ? d.uiEvents.slice(0, 200).map(x => ({ name: String(x && x.name || '').slice(0, 60), at: num(x && x.at, 0, 864e5) })) : [],
+      live: t.item.live && dec ? X.cleanLive(d.live, num, dec.options) : null, slider: t.meta && t.meta.slider ? X.cleanSlider(d.slider, num) : null,
+      screen: d.screen && typeof d.screen === 'object' ? { dwellMs: num(d.screen.dwellMs, 0, 36e5), clipsPlayed: num(d.screen.clipsPlayed, 0, 50), clipsEnded: num(d.screen.clipsEnded, 0, 50),
+        dialed: Array.isArray(d.screen.dialed) ? d.screen.dialed.slice(0, 20).map(x => String(x).replace(/[^\d-]/g, '').slice(0, 20)) : [], reachedTarget: d.screen.reachedTarget === true } : null
     };
   },
 
-  recordFields: (t, plan) => ({ itemId: t.itemId, block: t.block, item: { id: t.item.id, title: t.item.title, kind: t.item.kind, variant: t.item.variant, media: t.item.media || '', intent: t.item.call ? t.item.call.intent : '' },
+  recordFields: (t, plan) => ({ itemId: t.itemId, block: t.block, blockTitle: t.blockTitle || '', item: { id: t.item.id, title: t.item.title, kind: t.item.kind, variant: t.item.variant, media: t.item.media || '', intent: t.item.call ? t.item.call.intent : '' },
+    meta: t.meta || null, flags: plan.flags || null, codeSent: t.callCode ? true : undefined,
     questions: questionsFor(plan, t).filter(q => q.type !== 'info').map(q => q.id) }),
 
   trialRow(r) {
@@ -611,6 +754,20 @@ export default {
       call_duration_ms: c.durationMs ?? '', call_hold_ms: c.holdMs ?? '', call_median_latency_ms: cs.medianLatencyMs ?? '', call_llm_turns: cs.llmTurns ?? '', call_typed_turns: c.typedTurns ?? '', call_interruptions: c.interruptions ?? '', call_captions: d.call ? (c.captions ? 1 : 0) : '', call_directory_opened: d.call ? (c.directoryOpened ? 1 : 0) : '',
       voice_recorded: d.voice ? (d.voice.recorded ? 1 : 0) : '', voice_ms: d.voice?.durationMs ?? '', voice_typed: d.voice?.typed || '',
       check_test: d.checkServer?.test || '', check_passed: d.checkServer ? (d.checkServer.passed == null ? '' : d.checkServer.passed ? 1 : 0) : '', check_attempts: d.checkServer?.attempts ?? '', check_outages: d.checkServer?.outages ?? '' };
+    // Study design factors (clip cell, phase, list; call slot) and counterbalancing, for trial-level models.
+    const meta = r.meta || {}, f = r.flags || {}, lv = d.live || null, sl = d.slider || null;
+    Object.assign(row, { block_title: r.blockTitle || '', clip_id: meta.clipId || '', phase: meta.phase || '', structure: meta.structure || '', surface: meta.surface || '', topic: meta.topic || '',
+      ask_timing: meta.askTiming || '', ask_ms: meta.askMs ?? '', call_slot: meta.slot || '', caller_id: meta.callerId || '', shift_form: f.shiftForm || '', clip_list: f.clipList ?? '', slider_flag: f.slider ? 1 : f.slider === false ? 0 : '',
+      pilot_scripted: f.scripted ? 1 : f.scripted === false ? 0 : '',
+      live_first: lv && lv.changes[0] ? lv.changes[0].value : '', live_first_ms: lv && lv.changes[0] ? lv.changes[0].ms : '', live_first_clip_ms: lv && lv.changes[0] ? lv.changes[0].clipMs : '',
+      live_changes: lv ? Math.max(0, lv.changes.length - 1) : '', live_final: lv ? lv.final || '' : '', live_decided_ms: lv ? lv.decidedMs ?? '' : '', live_decided_clip_ms: lv ? lv.decidedClipMs ?? '' : '',
+      live_late: lv ? (lv.late ? 1 : 0) : '', live_clip_ms: lv ? lv.clipMs ?? '' : '',
+      slider_samples: sl ? sl.length : '', slider_mean: sl && sl.length ? Math.round(sl.reduce((a, x) => a + (x[1] || 0), 0) / sl.length) : '', slider_last: sl && sl.length ? sl[sl.length - 1][1] : '',
+      call_disclosed: d.callServer ? (cs.disclosed || []).join('|') : '', call_disclosure: d.callServer ? ((cs.disclosed || []).length ? 1 : 0) : '', call_code_sent: d.callServer ? (cs.codeSent ? 1 : 0) : '',
+      call_pressure_turns: cs.pressureTurns ?? '', call_spoken_turns: cs.spokenTurns ?? '', call_callbacks_lookedup: cs.callbacksLookedUp ?? '', call_callbacks_caller_number: cs.callbacksCallerSupplied ?? '',
+      call_callback_latency_ms: cs.firstCallbackAt && cs.callStartAt ? cs.firstCallbackAt - cs.callStartAt : '', call_points: cs.points ?? '', call_tts_errors: cs.ttsErrors ?? '',
+      call_gate_passed: cs.gatePassed == null ? '' : cs.gatePassed ? 1 : 0, call_skipped: cs.skipped ? 1 : '',
+      screen_dwell_ms: d.screen?.dwellMs ?? '', screen_clips_ended: d.screen?.clipsEnded ?? '', screen_reached_target: d.screen ? (d.screen.reachedTarget ? 1 : 0) : '' });
     for (const q of r.questions || Object.keys(d.answers || {})) row[`a_${q}`] = (d.answers || {})[q] ?? '';
     return row;
   },
@@ -645,7 +802,9 @@ export default {
     return problems;
   },
   checkSession(rows, session, condition, c) {
-    const want = c.design.sessions[session - 1].blocks.flatMap(b => b.items);
-    return [[rows.length === want.length && rows.every(x => want.includes(x.item_id)), `Session ${session}: the right items were shown (${want.length})`]];
+    const blocks = c.design.sessions[session - 1].blocks, want = blocks.flatMap(b => b.pool ? [] : b.items);
+    const pooled = blocks.filter(b => b.pool).reduce((n, b) => n + (b.pool === 'shift' ? (Object.values(c.shift.forms)[0] || []).length : (c.clipLibrary.lists[0][b.pool.slice(6)] || []).length), 0);
+    const fixed = rows.filter(x => want.includes(x.item_id)).length;
+    return [[fixed === want.length && rows.length === want.length + pooled, `Session ${session}: the right items were shown (${want.length + pooled})`]];
   }
 };

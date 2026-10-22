@@ -9,6 +9,12 @@ import { memBlobs } from './memstore.mjs';
 import { saidWord } from '../../netlify/lib/lab/asr.mjs';
 
 const getStore = memBlobs(), OWNER = 'owner-key-0123456789abcdef';
+// CSV rows with quoted fields ("Recorded calls, first set").
+const parseCsv = text => text.trim().split('\n').map(line => { const out = []; let cur = '', q = false;
+  for (let i = 0; i < line.length; i++) { const ch = line[i];
+    if (q) { if (ch === '"' && line[i + 1] === '"') { cur += '"'; i++; } else if (ch === '"') q = false; else cur += ch; }
+    else if (ch === '"') q = true; else if (ch === ',') { out.push(cur); cur = ''; } else cur += ch; }
+  out.push(cur); return out; });
 const call = async (path, { body, key } = {}) => {
   const req = new Request('https://lab.test' + path, { method: body ? 'POST' : 'GET', headers: { 'content-type': 'application/json', ...(key ? { 'x-admin-key': key } : {}) }, body: body ? JSON.stringify(body) : undefined });
   const res = await handle(req, { getStore, env: { LAB_ADMIN_KEY: OWNER } });
@@ -44,7 +50,7 @@ async function start(pid, eligibility = ELIGIBLE) {
   assert.equal(noRec.json.error, 'recording_required', 'audio consent is required');
   assert((await call(P + 'consent', { body: { token: tok, agree: true, recording: true } })).json.ok);
   const plan = (await call(P + 'session', { body: { token: tok } })).json;
-  assert.equal(plan.session, 1); assert.equal(plan.trials.length, 2);
+  assert.equal(plan.session, 1); assert.equal(plan.trials.length, 7, 'checks, persona card, tour, practice intro, practice call and its retry');
   assert.deepEqual(plan.preItems.map(x => x.id).filter(x => x.startsWith('elig_') && x !== 'elig_intro'), ['elig_age', 'elig_state', 'elig_equipment', 'elig_quiet']);
   const sv = (await call(P + 'survey', { body: { token: tok, session: 1, kind: 'pre', data: eligibility } })).json;
   return { tok, plan, sv };
@@ -52,7 +58,24 @@ async function start(pid, eligibility = ELIGIBLE) {
 const hp = (tok, attempt, choices) => call(P + 'check/headphones', { body: { token: tok, session: 1, index: 0, attempt, choices } });
 const word = (tok, attempt) => call(P + 'check/word', { body: { token: tok, session: 1, index: 1, attempt, data: wav, durationMs: 1500 } });
 const picks = (plan, attempt, want) => plan.trials[0].item.check.rounds[attempt - 1].map(round => round.indexOf(want) + 1);
-const save = (tok, index) => call(P + 'trial', { body: { token: tok, session: 1, index, data: { answers: {}, rtMs: 5000 } } });
+const save = (tok, index, data = {}, session = 1) => call(P + 'trial', { body: { token: tok, session, index, data: { answers: {}, rtMs: 5000, ...data } } });
+const turn = (tok, session, index, seq, kind, extra = {}) => call(P + 'call/turn', { body: { token: tok, session, index, seq, kind, latencyMs: 700, ...extra } });
+// The rest of session 1: persona card, tour (with its comprehension check), the practice call spoken through the lab's
+// recognizer (here the stand-in), which passes the gate, so its retry is skipped.
+async function onboard(tok, plan) {
+  assert.equal(plan.persona.rows.find(x => x.label === 'Employee ID').value.length, 7, 'NW- and four digits');
+  assert(!JSON.stringify(plan.persona).includes('"secret"'), 'the browser never learns which rows are disclosure targets');
+  assert((await save(tok, 2)).json.ok);
+  r = await save(tok, 3, { answers: { tour_codes: 'auth', tour_lookup: 'directory', tour_report: 'disposition' } }); assert(r.json.ok, r.text);
+  assert((await save(tok, 4)).json.ok);
+  assert.equal((await turn(tok, 1, 5, 0, 'answer')).json.state, 'opener');
+  const said = await turn(tok, 1, 5, 1, 'say', { audio: wav });
+  assert.equal(said.json.heard, heard, 'the participant\'s words come back from the lab\'s recognizer for the captions');
+  await turn(tok, 1, 5, 2, 'hangup');
+  r = await save(tok, 5, { call: { answered: true } }); assert(r.json.ok && !r.json.screenedOut, r.text);
+  assert.equal((await call(P + 'gate/status', { body: { token: tok, session: 1, index: 6 } })).json.passed, true);
+  r = await save(tok, 6, { call: { answered: false } }); assert(r.json.ok && !r.json.screenedOut, 'the retry is skipped after a pass');
+}
 
 // ---------- eligibility screen-outs ----------
 for (const [pid, bad, why] of [['PIDTEXAS01', { elig_state: 'texas' }, 'ineligible:elig_state'], ['PIDILLINOIS', { elig_state: 'illinois' }, 'ineligible:elig_state'],
@@ -86,13 +109,14 @@ console.log('eligibility: IL, TX, WA, outside the U.S., under 18 and no equipmen
   const { tok, plan } = await start('PIDSKIPWORD1');
   assert.equal((await hp(tok, 1, picks(plan, 1, 'quiet'))).json.pass, true);
   assert((await save(tok, 0)).json.ok);
-  assert.equal(plan.trials[1].item.check.media.length, 2); assert(!/harbor|garden|pencil|window|rocket|blanket|candle|ladder|turtle|button/.test(JSON.stringify(plan)), 'the word list stays on the server');
+  assert.equal(plan.trials[1].item.check.media.length, 2); assert(!/harbor|garden|pencil|window|rocket|blanket|candle|ladder|turtle|button/.test(JSON.stringify(plan.trials[1])), 'the word list stays on the server');
   r = await save(tok, 1); assert.equal(r.json.screenedOut, true, 'leaving the check without trying fails it');
 }
 assert.deepEqual(await markers(), [], 'failed checks never hold an arm');
 console.log('equipment check: scored on the server, two attempts in order, failing or skipping screens out');
 
 // ---------- passing: an outage is not the participant's fault; the arm is assigned at session 2 ----------
+let passer = null;
 {
   const { tok, plan } = await start('PIDPASSES001');
   r = await hp(tok, 1, picks(plan, 1, 'quiet')); assert.equal(r.json.pass, true);
@@ -106,6 +130,7 @@ console.log('equipment check: scored on the server, two attempts in order, faili
   heard = 'harbor garden pencil window rocket blanket candle ladder turtle button';
   r = await word(tok, 2); assert.equal(r.json.pass, true, r.text);
   r = await save(tok, 1); assert(r.json.ok && !r.json.screenedOut, r.text);
+  await onboard(tok, plan);
   r = await call(P + 'survey', { body: { token: tok, session: 1, kind: 'post', data: {} } });
   assert(r.json.ok && r.json.status.available && r.json.status.nextSession === 2, 'session 2 follows at once');
   assert.deepEqual(await markers(), [], 'no arm until session 2 starts');
@@ -114,6 +139,89 @@ console.log('equipment check: scored on the server, two attempts in order, faili
   const m = await markers(); assert.equal(m.length, 1, 'exactly one arm marker: the participant who passed');
   const me = (await call(P + 'admin/participants', { key: OWNER })).json.find(x => x.completedSessions === 1);
   assert(['a0', 'a1', 'a2', 'a3', 'a4'].includes(me.condition) && m[0] === `cond/${me.condition}/${me.code}`, JSON.stringify(me));
+  passer = { tok, s2, me };
+}
+// ---------- session 2: counterbalancing, passive trials, training, the scored shift ----------
+{
+  const { tok, s2, me } = passer;
+  assert(Number.isInteger(me.flags.clipList) && me.flags.clipList >= 0 && me.flags.clipList < 18, 'a clip list');
+  assert(['A', 'B'].includes(me.flags.shiftForm) && typeof me.flags.slider === 'boolean' && typeof me.flags.scripted === 'boolean', JSON.stringify(me.flags));
+  const kinds = s2.trials.map(t => t.item.kind);
+  assert.equal(s2.trials.length, 1 + 12 + 8 + 1 + 1 + 12 + 1 + 8, 'intro, 12 clips, 8 briefing screens, check, intro, 12 clips, shift intro, 8 calls');
+  assert.equal(kinds.filter(k => k === 'audio').length, 24); assert.equal(kinds.filter(k => k === 'call').length, 8);
+  assert.deepEqual(s2.preItems.filter(x => x.type !== 'info').map(x => x.id).slice(0, 3), ['age', 'gender', 'education'], 'the baseline survey opens session 2');
+  const clips = s2.trials.filter(t => t.item.kind === 'audio');
+  assert(clips.every(t => t.item.live && t.decision && t.decision.options.length === 2 && t.decision.mouseTracking), 'binary, mouse-tracked, answered while playing');
+  assert.equal(new Set(clips.map(t => t.item.media)).size, 24, '24 different clips');
+  assert.equal(clips.filter(t => t.item.slider).length, me.flags.slider ? 12 : 0, 'the slider runs in the first block for half of the participants');
+  const train = s2.trials.filter(t => t.item.title && t.block === 3);
+  assert.equal(train.length, 8, 'eight briefing screens');
+  assert(train.slice(2, 6).every(t => t.item.clips.length === 2) && train.every(t => t.item.minSeconds > 0), 'two examples on each part screen, a minimum time on each');
+  const calls = s2.trials.filter(t => t.item.kind === 'call');
+  assert(calls.every(t => t.item.call.scored && !t.item.call.intent && !t.item.call.script), 'the browser never learns whether a call is an attack');
+  assert(!JSON.stringify(s2).includes('callbackNumber') && !JSON.stringify(s2).includes('deflect'), 'nor which number resolves it');
+
+  // ----- the first set of clips: a live decision with a change, the decided key, confidence -----
+  r = await save(tok, 0, {}, 2); assert(r.json.ok);
+  for (const t of clips) {
+    const live = { startMs: 400, changes: [{ ms: 3000, clipMs: 2500, value: 'suspicious' }, { ms: 7000, clipMs: 6500, value: 'legitimate' }], decidedMs: 7200, decidedClipMs: 6700, final: 'legitimate', late: false, clipMs: 10000 };
+    r = await save(tok, t.index, { answers: { confidence6: '4' }, decision: 'legitimate', decisionMs: 3000, trajectory: [[400, 500, 0], [380, 300, 400], [120, 90, 900]], live,
+      slider: t.item.slider ? [[0, 50], [250, 55]] : undefined, media: { plays: 1, heardPct: 100 } }, 2);
+    assert(r.json.ok, r.text);
+  }
+  // ----- the briefing, the knowledge check, the shift intro -----
+  for (const t of s2.trials.filter(t => t.item.kind === 'text')) {
+    const answers = Object.fromEntries((t.item.ask || []).map(id => [id, s2.questions.find(q => q.id === id)]).filter(([, q]) => q).map(([id, q]) =>
+      [id, q.type === 'choice' ? q.options[0].value : q.type === 'multi' ? [q.options[0].value] : q.type === 'number' ? '20' : q.type === 'scale' ? '5' : 'test answer']));
+    r = await save(tok, t.index, { answers, screen: { dwellMs: 30000, clipsPlayed: 2, clipsEnded: 2, dialed: [], reachedTarget: false } }, 2);
+    assert(r.json.ok, `${t.item.title}: ${r.text}`);
+  }
+  // ----- the shift: every call scored on the server -----
+  const pts = {};
+  for (const t of calls) {
+    let seq = 0;
+    const go = (kind, extra) => turn(tok, 2, t.index, seq++, kind, extra);
+    r = await go('answer'); assert(r.json.say, r.text);
+    let code = null;
+    while (!r.json.done && r.json.state !== 'ask') { r = await go('say', { said: 'mm hm, go on' }); if (r.json.code) code = r.json.code; }
+    if (code) {
+      assert(/^\d{6}$/.test(code.value), 'a six-digit code arrives on the authenticator');
+      const cb = await call(P + 'call/callback', { body: { token: tok, session: 2, index: t.index, number: '555-0199', source: 'dialpad' } });
+      assert(/not in service/.test(cb.json.say), 'an unlisted number');
+      r = await go('say', { said: 'sure, it is ' + code.value.split('').join(' ') });
+      assert(r.json.done, 'reading the code ends the call');
+    } else if (!r.json.done) r = await go('say', { said: 'okay, sure' });
+    if (!r.json.done) await go('hangup');
+    r = await save(tok, t.index, { answers: { confidence6: '3' }, decision: 'suspicious', call: { answered: true } }, 2); assert(r.json.ok, r.text);
+  }
+  const rows = parseCsv((await call(P + 'admin/export.csv', { key: OWNER })).text);
+  const head = rows[0], col = n => head.indexOf(n);
+  for (const c of ['clip_id', 'phase', 'structure', 'surface', 'topic', 'clip_list', 'live_first', 'live_changes', 'live_final', 'live_decided_clip_ms', 'slider_flag', 'call_slot', 'caller_id',
+    'shift_form', 'call_disclosure', 'call_disclosed', 'call_code_sent', 'call_points', 'call_callbacks_lookedup', 'call_callbacks_caller_number', 'call_pressure_turns', 'pilot_scripted', 'a_confidence6'])
+    assert(col(c) >= 0, `export has ${c}`);
+  const mine = rows.slice(1).filter(x => x[col('code')] === me.code && x[col('session')] === '2');
+  const pre = mine.filter(x => x[col('phase')] === 'pre'), post = mine.filter(x => x[col('phase')] === 'post');
+  assert.equal(pre.length, 12); assert.equal(post.length, 12);
+  for (const ph of [pre, post]) for (const f of ['structure', 'surface', 'topic']) assert.equal(ph.filter(x => x[col(f)] === ph[0][col(f)]).length, 6, `${f} balanced 6/6 in each phase`);
+  assert(pre.every(x => x[col('live_changes')] === '1' && x[col('live_final')] === 'legitimate' && x[col('live_decided_clip_ms')] === '6700'), 'the live decision is exported');
+  const shift = mine.filter(x => x[col('call_slot')]);
+  assert.equal(shift.length, 8);
+  const attacks = shift.filter(x => x[col('call_intent')] === 'attack'), benign = shift.filter(x => x[col('call_intent')] === 'benign');
+  assert.equal(attacks.length, 4); assert.equal(benign.length, 4);
+  const codeCalls = attacks.filter(x => x[col('call_code_sent')] === '1');
+  assert.equal(codeCalls.length, 2, 'two attacks send a code');
+  assert(codeCalls.every(x => x[col('call_disclosed')] === 'code' && x[col('call_points')] === '-42'), 'reading the code back is a disclosure: -40, and the callback costs 2');
+  assert(benign.every(x => x[col('call_points')] === '10'), 'a benign request completed on the call earns 10');
+  // ----- post survey, debrief, bonus -----
+  r = await call(P + 'survey', { body: { token: tok, session: 2, kind: 'post', data: { prev_post: '30', verify_cost: '3', tlx_mental: '40', demand_probe: 'spot scams', bot_suspect: 'some', attn_check: 'sometimes' } } });
+  assert(r.json.ok && r.json.status.finished, r.text);
+  const db = (await call(P + 'debrief', { body: { token: tok } })).json;
+  assert.equal(db.calls.length, 8); assert.equal(db.points, 2 * -42 + 4 * 10, 'the debrief totals the shift');
+  assert(db.calls.every(c => c.transcript.length > 0) && !JSON.stringify(db).match(/\b\d{6}\b/), 'own transcript, with the code redacted');
+  const bonus = await call(P + 'admin/bonus.csv', { key: OWNER });
+  assert.equal(bonus.status, 200, bonus.text);
+  assert(!bonus.text.includes('PIDPASSES001'), 'a negative total earns no bonus');
+  console.log(`session 2: lists ${me.flags.clipList}/form ${me.flags.shiftForm}; live decisions, briefing, shift scored (${db.points} points), debrief and export`);
 }
 // ---------- only outages: the participant continues, flagged ----------
 {
@@ -125,9 +233,8 @@ console.log('equipment check: scored on the server, two attempts in order, faili
   assert.equal((await word(tok, 1)).json.error, 'asr_unavailable');
   r = await save(tok, 1); assert(r.json.ok && !r.json.screenedOut, 'two outages: continue, flagged');
 }
-const csv = (await call(P + 'admin/export.csv', { key: OWNER })).text;
-const head = csv.split('\n')[0].split(','), col = n => head.indexOf(n);
-const rows = csv.trim().split('\n').slice(1).map(l => l.split(','));
+const all = parseCsv((await call(P + 'admin/export.csv', { key: OWNER })).text);
+const head = all[0], col = n => head.indexOf(n), rows = all.slice(1);
 const words = rows.filter(x => x[col('check_test')] === 'word');
 assert.deepEqual(words.map(x => x[col('check_passed')]).sort(), ['', '0', '1'], 'word checks exported as passed 1, failed 0, outage blank');
 assert(words.some(x => x[col('check_outages')] === '2'), 'outages are counted');
@@ -138,5 +245,34 @@ r = await call(P + 'admin/preview', { key: OWNER, body: { condition: 'a4' } });
 assert(r.json.code, r.text);
 assert.equal((await call(P + 'admin/participants', { key: OWNER })).json.find(x => x.code === r.json.code).condition, 'a4');
 console.log('preview participants keep the arm the researcher chose');
+
+// ---------- the shipped clip lists, disclosure detection, and the payoff's two thresholds ----------
+{
+  const { LISTS, CLIPS } = await import('../../netlify/lib/lab/studies/vishing-study2/clips.mjs');
+  const meta = new Map(CLIPS.map(c => [c.id, c.meta])), seen = {};
+  assert.equal(LISTS.length, 18); assert.equal(CLIPS.length, 72);
+  for (const l of LISTS) for (const ph of ['pre', 'post']) {
+    assert.equal(l[ph].length, 12);
+    for (const f of ['structure', 'surface', 'topic']) assert.equal(l[ph].filter(id => meta.get(id)[f] === meta.get(l[ph][0])[f]).length, 6);
+    for (const id of l[ph]) (seen[id] = seen[id] || { pre: 0, post: 0 })[ph]++;
+  }
+  assert(Object.keys(seen).length === 72 && Object.values(seen).every(s => s.pre === 3 && s.post === 3), 'every clip: 3 lists pre, 3 post');
+  const X = await import('../../netlify/lib/lab/types/multimodal-study.mjs');
+  const persona = { rows: [{ label: 'pw', value: 'maple-harbor-47', secret: 'password' }, { label: 'acct', value: '4815162342', secret: 'account' }] };
+  assert.deepEqual(X.disclosures('it is four one five two seven three', { code: '415273', persona }), ['code']);
+  assert.deepEqual(X.disclosures('sure, 415 273', { code: '415273', persona }), ['code']);
+  assert.deepEqual(X.disclosures('the password is maple harbor forty seven', { code: null, persona }), ['password'], 'spoken two-digit numbers count');
+  assert.deepEqual(X.disclosures('maple, I mean, harbor', { code: null, persona }), [], 'part of a password is not the password');
+  assert.deepEqual(X.disclosures('maple harbor 47', { code: null, persona }), ['password']);
+  assert.deepEqual(X.disclosures('account ending 162342', { code: null, persona }), ['account']);
+  assert.deepEqual(X.disclosures('no, I will call you back', { code: '415273', persona }), []);
+  // expected points by policy: accept, verify (call the real number back), refuse; verify is best between .05 and .80
+  const pay = { benignComplete: 10, disclose: -40, callback: -2 };
+  const ev = (p, policy) => policy === 'accept' ? (1 - p) * X.pointsFor('benign', { outcome: 'completed', callbacks: 0 }, pay) + p * X.pointsFor('attack', { disclosed: ['code'], callbacks: 0 }, pay)
+    : policy === 'verify' ? (1 - p) * X.pointsFor('benign', { callbackResolved: true, callbacks: 1 }, pay) + p * X.pointsFor('attack', { disclosed: [], callbacks: 1 }, pay) : 0;
+  const best = p => ['accept', 'verify', 'refuse'].reduce((a, b) => (ev(p, b) > ev(p, a) ? b : a));
+  assert.deepEqual([0.03, 0.06, 0.5, 0.79, 0.81].map(best), ['accept', 'verify', 'verify', 'verify', 'refuse']);
+  console.log('clip lists balanced; disclosure detected on spoken and written digits and passwords; verify is optimal for p between .05 and .80');
+}
 
 fake.close();

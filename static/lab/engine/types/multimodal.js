@@ -246,18 +246,173 @@
     var d = root.querySelector('[data-name="decision"]'); if (d) { d.classList.add('missing'); d.scrollIntoView({ block: 'center' }); }
   }
 
+  // ---------- the persona card (the participant's role and fictional details) ----------
+  function personaHtml(p, esc) {
+    if (!p) return '';
+    return '<section class="mm-persona" aria-label="' + esc(p.title) + '"><h3>' + esc(p.title) + '</h3>' + (p.intro ? paras(p.intro, esc) : '') +
+      '<dl>' + p.rows.map(function (r) { return '<div><dt>' + esc(r.label) + '</dt><dd>' + esc(r.value) + (r.note ? '<span class="muted"> · ' + esc(r.note) + '</span>' : '') + '</dd></div>'; }).join('') + '</dl></section>';
+  }
+  // "My info": the card stays one click away on every screen once the participant has it.
+  function myInfo(plan, ui) {
+    if (!plan.persona || document.getElementById('mm-myinfo')) return;
+    var b = document.createElement('button'); b.type = 'button'; b.id = 'mm-myinfo'; b.className = 'secondary mm-myinfo'; b.textContent = 'My info';
+    var d = document.createElement('dialog'); d.id = 'mm-myinfo-d'; d.className = 'mm-dialog';
+    d.innerHTML = personaHtml(plan.persona, ui.esc) + '<form method="dialog" class="actions"><button>Close</button></form>';
+    b.addEventListener('click', function () { if (d.showModal) d.showModal(); else d.setAttribute('open', ''); logUi('myinfo_open'); });
+    document.body.appendChild(b); document.body.appendChild(d);
+  }
+  // Interface events between saves (My info opened, directory searches): sent with the next item's answer.
+  var uiLog = [];
+  function logUi(name) { uiLog.push({ name: name, at: Math.round(now()) }); }
+  function takeUiLog() { var x = uiLog; uiLog = []; return x; }
+
+  // ---------- a directory with search and a dial pad (calls back through the server) ----------
+  // opts: { entries, onDial(number, source) -> Promise<{ say, audio }>, voice }
+  function directoryWidget(box, ui, opts) {
+    var esc = ui.esc;
+    box.innerHTML = '<h3 tabindex="-1">' + ui.Th('directory_title') + '</h3><label class="sr" for="mm-dsearch">Search</label><input type="search" id="mm-dsearch" placeholder="Search the directory" autocomplete="off">' +
+      '<ul class="directory" id="mm-dlist"></ul><form class="row mm-dialpad" id="mm-dpad"><label for="mm-dnum">Dial a number</label><input id="mm-dnum" inputmode="tel" autocomplete="off" placeholder="555-0100"><button type="submit" class="secondary small">Call</button></form>' +
+      '<p class="muted" id="mm-dstate" aria-live="polite"></p>';
+    var list = box.querySelector('#mm-dlist'), q = box.querySelector('#mm-dsearch'), ds = box.querySelector('#mm-dstate'), busy = false;
+    function render() {
+      var term = q.value.trim().toLowerCase();
+      list.innerHTML = opts.entries.filter(function (d) { return !term || (d.name + ' ' + (d.dept || '')).toLowerCase().indexOf(term) >= 0; }).map(function (d) {
+        return '<li><span><strong>' + esc(d.name) + '</strong>' + (d.dept ? ' <span class="muted">' + esc(d.dept) + '</span>' : '') + '<br><span class="muted">' + esc(d.number) + '</span></span><button type="button" class="secondary small" data-num="' + esc(d.number) + '">' + ui.Th('directory_call') + '</button></li>';
+      }).join('') || '<li class="muted">No matches.</li>';
+    }
+    function dial(number, source) {
+      if (busy || !number) return; busy = true; ds.textContent = 'Calling ' + number + '…';
+      opts.onDial(number, source).then(function (r) {
+        var line = r && r.say ? r.say : 'No answer.';
+        ds.textContent = (r && r.name ? r.name + ': ' : '') + line;
+        speak(line, { voice: opts.voice, audio: r && r.audio }, null, function () { busy = false; ds.textContent += ' (call ended)'; });
+      }, function () { busy = false; ds.textContent = 'The call did not go through.'; });
+    }
+    q.addEventListener('input', function () { render(); if (q.value.trim()) logUi('directory_search:' + q.value.trim().toLowerCase().slice(0, 30)); });
+    list.addEventListener('click', function (e) { var n = e.target.getAttribute && e.target.getAttribute('data-num'); if (n) dial(n, 'directory'); });
+    box.querySelector('#mm-dpad').addEventListener('submit', function (e) { e.preventDefault(); dial(box.querySelector('#mm-dnum').value.trim(), 'dialpad'); });
+    render();
+    var h = box.querySelector('h3'); if (h) h.focus();
+  }
+
+  // ---------- training screens: embedded clips, a minimum time, a practice dialer ----------
+  function clipsHtml(it, esc) {
+    return (it.clips || []).map(function (c, i) {
+      return '<figure class="mm-clip"><figcaption>' + esc(c.label || ('Example ' + (i + 1))) + '</figcaption><audio controls preload="none" src="' + esc(c.media) + '" data-clip="' + i + '"></audio>' +
+        (c.transcript ? '<details class="mm-transcript"><summary>' + ui0('transcript_label') + '</summary><p>' + esc(c.transcript) + '</p></details>' : '') + '</figure>';
+    }).join('');
+  }
+  var ui0 = function (k) { return k === 'transcript_label' ? 'Show transcript' : k; };
+  function dialHtml(it) { return it.practiceDial ? '<div class="mm-pdial" id="mm-pdial"></div>' : ''; }
+
+  // ---------- the live passive decision: answer while the clip plays ----------
+  // Start (centred below) begins the clip and opens the two answers (top corners). The path from Start to the first
+  // answer is the mouse trajectory; the answer can be changed until the clip ends (every change logged with the clip
+  // time); Space marks the moment the participant has decided. Half of each arm also moves a suspicion slider in one block.
+  function renderLive(ctx, ui) {
+    var it = ctx.trial.item, plan = ctx.plan, esc = ui.esc, dec = ctx.trial.decision, qs = answersFor(it, plan);
+    var state = { t0: now(), decision: null }, live = { startMs: null, changes: [], decidedMs: null, decidedClipMs: null, final: null, late: false, clipMs: null }, slider = it.slider ? [] : null;
+    ui.show('<h2>' + esc(it.title) + '</h2><div class="mm-item mm-k-audio" data-trace="item">' + paras(it.body, esc) + '<audio id="mm-el" preload="auto" src="' + esc(it.media) + '"></audio>' +
+      '<div class="mm-bar" aria-hidden="true"><span id="mm-fill"></span></div></div>' +
+      '<fieldset class="q-group mt" data-name="decision"><legend class="q">' + esc(dec.prompt) + '</legend><div class="mt-area" id="mt-area" data-n="' + dec.options.length + '">' +
+      dec.options.map(function (o, i) { return '<button type="button" class="mt-opt" data-value="' + esc(o.value) + '" data-trace="decision:' + esc(o.value) + '" style="--i:' + i + '" disabled>' + esc(o.label) + '</button>'; }).join('') +
+      '<p class="mt-hint muted" id="mt-hint">Click Start to play the call. Choose an answer while it plays; you can change it until the call ends. Press the space bar the moment you have decided.</p>' +
+      '<button type="button" class="mt-start" id="mt-start">' + ui.Th('decision_start') + '</button></div></fieldset>' +
+      (slider ? '<div class="mm-slider"><label for="mm-sl">How suspicious does this call seem right now?</label><input type="range" id="mm-sl" min="0" max="100" value="50" disabled><div class="row muted"><span>Not at all</span><span>Very</span></div></div>' : '') +
+      '<p class="muted" id="mm-livestate" aria-live="polite"></p><fieldset class="mm-answers" id="mm-answers" disabled>' + ui.questionsHtml(qs) + '</fieldset>' +
+      '<div id="trialmsg"></div><div class="actions"><button id="mm-submit" disabled>' + ui.Th('submit_button') + '</button></div>');
+    var el = document.getElementById('mm-el'), start = document.getElementById('mt-start'), area = document.getElementById('mt-area'), opts = area.querySelectorAll('.mt-opt');
+    var fill = document.getElementById('mm-fill'), ls = document.getElementById('mm-livestate'), box = document.getElementById('mm-answers'), submit = document.getElementById('mm-submit'), msg = document.getElementById('trialmsg');
+    var path = [], tracking = false, ended = false, t0 = 0, sl = document.getElementById('mm-sl'), slTimer = null;
+    var m = state.media = { plays: 0, pauses: 0, firstPlayMs: null, endedMs: null, heardPct: 0, durationMs: null, transcriptOpened: false };
+    function clipMs() { return Math.round((el.currentTime || 0) * 1000); }
+    function move(e) { var t = Math.round(now() - t0); if (tracking && path.length < 1400 && t - path[path.length - 1][2] >= 8) path.push([Math.round(e.clientX), Math.round(e.clientY), t]); }
+    function key(e) { if ((e.code === 'Space' || e.key === ' ') && live.startMs != null && live.decidedMs == null && !ended) { e.preventDefault(); live.decidedMs = Math.round(now() - state.t0); live.decidedClipMs = clipMs(); ctx.record('decided', live.decidedClipMs); ls.textContent = 'Marked as decided.'; } }
+    document.addEventListener('keydown', key);
+    start.addEventListener('click', function (e) {
+      t0 = now(); live.startMs = Math.round(t0 - state.t0); path = [[Math.round(e.clientX || 0), Math.round(e.clientY || 0), 0]]; tracking = true;
+      start.hidden = true; document.getElementById('mt-hint').hidden = true; area.classList.add('live');
+      opts.forEach(function (o) { o.disabled = false; }); document.addEventListener('pointermove', move);
+      if (sl) { sl.disabled = false; slTimer = setInterval(function () { slider.push([clipMs(), Number(sl.value)]); }, 250); }
+      el.play().catch(function () { ls.textContent = 'The clip could not play. Click an answer to continue.'; });
+    });
+    el.addEventListener('loadedmetadata', function () { m.durationMs = Math.round(el.duration * 1000); });
+    el.addEventListener('play', function () { m.plays++; if (m.firstPlayMs == null) m.firstPlayMs = Math.round(now() - state.t0); });
+    el.addEventListener('timeupdate', function () { if (el.duration) { var p = el.currentTime / el.duration * 100; fill.style.width = p + '%'; m.heardPct = Math.max(m.heardPct, Math.round(p)); } });
+    opts.forEach(function (o) {
+      o.addEventListener('click', function (e) {
+        if (start.hidden === false) return;
+        var v = o.getAttribute('data-value');
+        if (tracking) { tracking = false; document.removeEventListener('pointermove', move); path.push([Math.round(e.clientX || 0), Math.round(e.clientY || 0), Math.round(now() - t0)]); state.trajectory = path; state.decisionMs = Math.round(now() - state.t0); }
+        if (ended && live.final) return;
+        live.changes.push({ ms: Math.round(now() - state.t0), clipMs: clipMs(), value: v }); ctx.record('decision', v);
+        state.decision = live.final = v; if (ended) live.late = true;
+        opts.forEach(function (x) { x.classList.toggle('chosen', x === o); x.setAttribute('aria-pressed', x === o ? 'true' : 'false'); });
+        if (ended) lock();
+      });
+    });
+    function lock() {
+      opts.forEach(function (x) { x.disabled = true; }); area.classList.remove('live'); area.classList.add('done');
+      box.disabled = false; submit.disabled = false; ls.textContent = '';
+    }
+    el.addEventListener('ended', function () {
+      ended = true; m.endedMs = Math.round(now() - state.t0); m.heardPct = 100; live.clipMs = Math.round(el.duration * 1000);
+      if (slTimer) { clearInterval(slTimer); slTimer = null; if (sl) sl.disabled = true; }
+      document.removeEventListener('keydown', key);
+      if (live.final) lock(); else ls.textContent = 'The call has ended. Choose an answer now.';
+    });
+    var set = ui.questionSet(box, qs, msg, submit, function (n, v) { ctx.record(n, v); });
+    submit.addEventListener('click', function () {
+      if (!state.decision) return missingDecision(dec, msg, ui, ui.stage);
+      if (!set.check()) return;
+      submit.disabled = true; msg.innerHTML = '';
+      ctx.submit({ answers: set.answers, decision: state.decision, decisionMs: state.decisionMs, trajectory: state.trajectory, media: m, live: live, slider: slider, rtMs: Math.round(now() - state.t0) },
+        function (err) { submit.disabled = false; msg.innerHTML = ui.errorBox(err); });
+    });
+  }
+
   // ---------- an item with a stimulus and answers ----------
   function renderItem(ctx, ui) {
     var it = ctx.trial.item, plan = ctx.plan, esc = ui.esc, dec = ctx.trial.decision, qs = answersFor(it, plan);
+    if (it.kind === 'audio' && it.live && dec) return renderLive(ctx, ui);
     var state = { t0: now(), decision: null };
     var media = it.kind === 'image' ? '<figure class="mm-figure"><img src="' + esc(it.media) + '" alt="' + esc(it.mediaAlt || '') + '" data-trace="image"></figure>'
       : it.kind === 'audio' || it.kind === 'video' ? playerHtml(it, ui) : '';
     var gate = (it.kind === 'audio' || it.kind === 'video') && it.mustFinish;
-    ui.show('<h2>' + esc(it.title) + '</h2><div class="mm-item mm-k-' + esc(it.kind) + '" data-trace="item">' + paras(it.body, esc) + media + '</div>' +
-      (gate ? '<p class="muted mm-gate" id="mm-gate">' + ui.Th('media_wait') + '</p>' : '') +
+    // A training screen waits for its minimum time, every example played to the end, and the practice call made.
+    var nClips = (it.clips || []).length, screen = { dwellMs: 0, clipsPlayed: 0, clipsEnded: 0, dialed: [], reachedTarget: false }, ended = {}, timeOk = !(it.minSeconds > 0);
+    var screenGate = nClips > 0 || !timeOk || !!it.practiceDial;
+    ui.show('<h2>' + esc(it.title) + '</h2><div class="mm-item mm-k-' + esc(it.kind) + '" data-trace="item">' + (it.persona ? personaHtml(plan.persona, esc) : '') + paras(it.body, esc) + media + clipsHtml(it, esc) + dialHtml(it) + '</div>' +
+      (gate ? '<p class="muted mm-gate" id="mm-gate">' + ui.Th('media_wait') + '</p>' : '') + (screenGate ? '<p class="muted mm-gate" id="mm-sgate"></p>' : '') +
       '<fieldset class="mm-answers" id="mm-answers"' + (gate ? ' disabled' : '') + '>' + decisionHtml(dec, ui) + ui.questionsHtml(qs) + voiceHtml(it, plan, ui) + '</fieldset>' +
-      '<div id="trialmsg"></div><div class="actions"><button id="mm-submit"' + (gate ? ' disabled' : '') + '>' + ui.Th(ctx.isPractice ? 'practice_submit' : 'submit_button') + '</button></div>');
+      '<div id="trialmsg"></div><div class="actions"><button id="mm-submit"' + (gate || screenGate ? ' disabled' : '') + '>' + ui.Th(ctx.isPractice ? 'practice_submit' : 'submit_button') + '</button></div>');
     var root = ui.stage, submit = document.getElementById('mm-submit'), msg = document.getElementById('trialmsg'), box = document.getElementById('mm-answers');
+    function screenReady() {
+      var left = [];
+      if (!timeOk) left.push('a little more time on this screen');
+      if (screen.clipsEnded < nClips) left.push('every example played to the end (' + screen.clipsEnded + ' of ' + nClips + ')');
+      if (it.practiceDial && !screen.reachedTarget) left.push('the practice call');
+      var g = document.getElementById('mm-sgate'); if (g) g.textContent = left.length ? 'Continue opens after ' + left.join(', ') + '.' : '';
+      if (!left.length && !gate) submit.disabled = false;
+    }
+    if (screenGate) {
+      if (!timeOk) setTimeout(function () { timeOk = true; screenReady(); }, it.minSeconds * 1000);
+      root.querySelectorAll('audio[data-clip]').forEach(function (a) {
+        a.addEventListener('play', function () { screen.clipsPlayed++; ctx.record('clip_play', Number(a.getAttribute('data-clip'))); root.querySelectorAll('audio[data-clip]').forEach(function (o) { if (o !== a) o.pause(); }); });
+        a.addEventListener('ended', function () { var k = a.getAttribute('data-clip'); if (!ended[k]) { ended[k] = true; screen.clipsEnded++; screenReady(); } });
+      });
+      if (it.practiceDial) {
+        var pd = it.practiceDial;
+        directoryWidget(document.getElementById('mm-pdial'), ui, { entries: pd.directory || [], voice: 'af_sarah', onDial: function (number, source) {
+          screen.dialed.push(number);
+          var d = (pd.directory || []).filter(function (x) { return x.number.replace(/\D/g, '').slice(-7) === number.replace(/\D/g, '').slice(-7); })[0];
+          var hit = d && pd.target && d.number.replace(/\D/g, '').slice(-7) === pd.target.replace(/\D/g, '').slice(-7);
+          if (hit) { screen.reachedTarget = true; setTimeout(screenReady, 0); }
+          return Promise.resolve(d ? { name: d.name, say: hit ? pd.say : (d.greeting || 'Thank you for calling ' + d.name + '.'), audio: hit ? pd.media : null } : { say: 'The number you have dialed is not in service.' });
+        } });
+      }
+      screenReady();
+    }
     if (it.kind === 'audio' || it.kind === 'video') wireMedia(root, it, ui, state, function () { box.disabled = false; submit.disabled = false; var g = document.getElementById('mm-gate'); if (g) g.hidden = true; });
     wireDecision(root, dec, state, ctx);
     wireVoice(root, it, plan, ui, state);
@@ -269,7 +424,9 @@
       var el = root.querySelector('#mm-el'); if (el && !el.paused) el.pause();
       (state.voiceRec ? upload(ui, ctx, 'voice', state.voiceRec) : Promise.resolve(false)).then(function (ok) {
         if (state.voice && state.voiceRec && !ok) state.voice.recorded = false;
-        ctx.submit({ answers: set.answers, decision: state.decision, decisionMs: state.decisionMs, trajectory: state.trajectory, media: state.media || null, voice: it.recordVoice ? state.voice : null, rtMs: Math.round(now() - state.t0) },
+        if (screenGate) screen.dwellMs = Math.round(now() - state.t0);
+        ctx.submit({ answers: set.answers, decision: state.decision, decisionMs: state.decisionMs, trajectory: state.trajectory, media: state.media || null, voice: it.recordVoice ? state.voice : null, rtMs: Math.round(now() - state.t0),
+          screen: screenGate ? screen : null, uiEvents: takeUiLog() },
           function (err) { submit.disabled = false; msg.innerHTML = ui.errorBox(err); });
       });
     });
@@ -282,10 +439,11 @@
     var ring = ringer(), voice = null, rec = null, stream = null, recog = null, listening = false, ringTimer = null, busy = false;
     // Turns go one at a time, in order: a hold or hang-up never overtakes a reply still waiting for the caller.
     var queue = Promise.resolve();
-    function turn(kind, said) {
+    function turn(kind, said, audio) {
       var run = queue.then(function () {
         var body = { session: plan.session, index: ctx.index, seq: st.seq, kind: kind, clientMs: Math.round(now() - st.t0), latencyMs: st.lastLatency, asr: kind === 'say' && !!st.lastWasSpoken };
         if (said != null) body.said = said;
+        if (audio) body.audio = audio;
         st.seq++;
         return ui.call('call/turn', body).then(function (r) {
           if (r && r.error === 'out_of_order' && r.next != null) { st.seq = r.next; body.seq = st.seq++; return ui.call('call/turn', body); }
@@ -299,24 +457,59 @@
       return '<h2 class="sr">' + esc(it.title) + '</h2><div class="phone ' + (cls || '') + '"><div class="phone-top"><div class="avatar" aria-hidden="true">' + esc((call.caller || '?').charAt(0)) + '</div>' +
         '<div class="caller"><strong>' + esc(call.caller) + '</strong><span>' + esc(call.number || '') + '</span></div></div>' + inner + '</div>';
     }
-    // 1. ringing
-    ui.show(phone('<p class="phone-status" id="ph-status">' + ui.Th('call_incoming') + '</p><div class="phone-btns"><button type="button" class="decline" id="ph-decline">' + ui.Th('call_decline') + '</button>' +
-      '<button type="button" class="answer" id="ph-answer">' + ui.Th('call_answer') + '</button></div>', 'ringing'));
-    ring.start();
-    ringTimer = setTimeout(function () { ring.stop(); st.endedBy = 'timeout'; turn('timeout').then(function () { afterCall(ui.T('call_missed')); }); }, Math.max(5, Number(call.ringSeconds) || 30) * 1000);
-    document.getElementById('ph-decline').addEventListener('click', function () { clearTimeout(ringTimer); ring.stop(); st.endedBy = 'participant'; st.ringMs = Math.round(now() - st.ringT0); turn('decline').then(function () { afterCall(ui.T('call_missed')); }); });
-    document.getElementById('ph-answer').addEventListener('click', answer);
+    // Codes that "arrive" on the participant's authenticator during this call.
+    var codes = [];
+    function authHtml() {
+      return '<section class="mm-auth" id="ph-auth" aria-live="polite"><h3>Authenticator</h3>' + (codes.length ? '<ul>' + codes.map(function (c) {
+        return '<li><span class="muted">' + esc(c.service) + ' · ' + esc(c.at) + '</span><strong>' + esc(c.value.slice(0, 3) + ' ' + c.value.slice(3)) + '</strong></li>'; }).join('') + '</ul>' : '<p class="muted">No new codes.</p>') + '</section>';
+    }
+    function addCode(c) {
+      codes.push({ service: c.service, value: String(c.value), at: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) });
+      var a = document.getElementById('ph-auth'); if (a) a.outerHTML = authHtml();
+      logUi('code_shown');
+    }
+    // 1. ringing (the retry of a practice call is skipped when the first try worked)
+    if (call.gate && call.gate.retryOf) {
+      ui.call('gate/status', { session: plan.session, index: ctx.index }).then(function (r) {
+        if (r && r.passed) return ctx.submit({ answers: {}, call: { answered: false }, rtMs: 0 }, function (err) { ui.show(ui.errorBox(err)); });
+        ui.show('<h2>' + esc(it.title) + '</h2><p>We could not hear you on that call. Please check that your microphone is on, then try the practice call once more. Speak your reply out loud.</p><div class="actions"><button id="ph-again">Try again</button></div>');
+        document.getElementById('ph-again').addEventListener('click', ringNow);
+      });
+    } else ringNow();
+    function ringNow() {
+      ui.show(phone('<p class="phone-status" id="ph-status">' + ui.Th('call_incoming') + '</p><div class="phone-btns"><button type="button" class="decline" id="ph-decline">' + ui.Th('call_decline') + '</button>' +
+        '<button type="button" class="answer" id="ph-answer">' + ui.Th('call_answer') + '</button></div>', 'ringing'));
+      st.ringT0 = now(); ring.start();
+      ringTimer = setTimeout(function () { ring.stop(); st.endedBy = 'timeout'; turn('timeout').then(function () { afterCall(ui.T('call_missed')); }); }, Math.max(5, Number(call.ringSeconds) || 30) * 1000);
+      document.getElementById('ph-decline').addEventListener('click', function () { clearTimeout(ringTimer); ring.stop(); st.endedBy = 'participant'; st.ringMs = Math.round(now() - st.ringT0); turn('decline').then(function () { afterCall(ui.T('call_missed')); }); });
+      document.getElementById('ph-answer').addEventListener('click', answer);
+    }
+    // Calling a number back, from the directory or the dial pad, during the call (on hold) or after it.
+    function dialOut(number, source) {
+      return ui.call('call/callback', { session: plan.session, index: ctx.index, number: number, source: source, duringCall: !st.ended });
+    }
 
     function answer() {
       clearTimeout(ringTimer); ring.stop(); st.answered = true; st.ringMs = Math.round(now() - st.ringT0); st.callT0 = now();
-      var canSpeak = !!SR && !micBlocked;
+      // Speech goes to the lab's own recognizer when the study has one (audio never leaves the lab's machines);
+      // otherwise the browser's recognizer is used where it exists. Typing is always available.
+      st.serverAsr = plan.asr === 'server';
+      var canSpeak = st.serverAsr ? !!(plan.recording && navigator.mediaDevices && !micBlocked) : !!SR && !micBlocked;
       ui.show(phone(
-        '<p class="phone-status" id="ph-status" aria-live="off">0:00</p>' + (plan.recording ? '<p class="rec-note" id="ph-rec" hidden><span class="dot" aria-hidden="true"></span>' + ui.Th('call_recording') + '</p>' : '') +
+        '<p class="phone-status" id="ph-status" aria-live="off">0:00</p>' + (plan.recording ? '<p class="rec-note" id="ph-rec" hidden><span class="dot" aria-hidden="true"></span>' + ui.Th('call_recording') + '</p>' : '') + authHtml() +
         '<div class="captions" id="ph-captions" aria-live="polite" hidden></div>' +
         '<div class="phone-talk">' + (canSpeak ? '<button type="button" class="talk" id="ph-talk" disabled>' + ui.Th('call_talk') + '</button><p class="interim muted" id="ph-interim" aria-live="polite"></p>' : '') +
         '<form id="ph-typeform" class="typeform"><label for="ph-type">' + ui.Th('call_type_label') + '</label><div class="row"><input type="text" id="ph-type" autocomplete="off" disabled><button type="submit" class="secondary" id="ph-send" disabled>' + ui.Th('call_send') + '</button></div></form></div>' +
         '<div class="phone-btns small"><label class="check"><input type="checkbox" id="ph-cc"> ' + ui.Th('call_captions') + '</label><button type="button" class="secondary" id="ph-hold">' + ui.Th('call_hold') + '</button>' +
-        '<button type="button" class="decline" id="ph-hang">' + ui.Th('call_hangup') + '</button></div>', 'live'));
+        ((plan.directory || []).length ? '<button type="button" class="secondary" id="ph-dirlive">' + ui.Th('directory_open') + '</button>' : '') +
+        '<button type="button" class="decline" id="ph-hang">' + ui.Th('call_hangup') + '</button></div><div id="ph-dirbox-live" hidden></div>', 'live'));
+      var dl = document.getElementById('ph-dirlive');
+      if (dl) dl.addEventListener('click', function () {
+        st.directoryOpened = true; logUi('directory_open_live');
+        if (st.holdAt == null) document.getElementById('ph-hold').click();   // looking a number up puts the caller on hold
+        var b = document.getElementById('ph-dirbox-live'); b.hidden = false; dl.hidden = true;
+        directoryWidget(b, ui, { entries: plan.directory, voice: call.voice, onDial: function (n, src) { st.callbacks = (st.callbacks || 0) + 1; return dialOut(n, src); } });
+      });
       var clock = setInterval(function () { var s = document.getElementById('ph-status'); if (s && !st.ended && st.holdAt == null) s.textContent = fmtTime((now() - st.callT0 - st.holdMs) / 1000); }, 500);
       st.stopClock = function () { clearInterval(clock); };
       if (plan.recording) getMic().then(function (s) { stream = s; rec = recorder(s); if (rec) { rec.start(); var n = document.getElementById('ph-rec'); if (n) n.hidden = false; } });
@@ -332,7 +525,7 @@
         box.value = ''; st.typed++; st.lastWasSpoken = false; say(v);
       });
       var talk = document.getElementById('ph-talk');
-      if (talk) talk.addEventListener('click', function () { if (listening) { if (recog) recog.stop(); } else listen(); });
+      if (talk) talk.addEventListener('click', function () { if (listening) { if (st.stopListen) st.stopListen(); else if (recog) recog.stop(); } else listen(); });
       turn('answer').then(function (r) { if (!r || r.error) return failed(); callerSays(r); });
     }
     function setInput(on) { ['ph-type', 'ph-send', 'ph-talk'].forEach(function (id) { var el = document.getElementById(id); if (el) el.disabled = !on; }); }
@@ -344,6 +537,8 @@
     // speaking, and replying cuts the caller off (counted in "interruptions"). busy = waiting for the server.
     function callerSays(r) {
       busy = false;
+      if (r.heard != null && st.pendingCaption) { st.pendingCaption.textContent = 'You: ' + (r.heard || '(nothing heard)'); st.pendingCaption = null; }
+      if (r.code) addCode(r.code);
       if (r.say) caption('caller', r.say);
       var me = voice = speak(r.say, { voice: call.voice, audio: r.audio },
         function () {
@@ -355,12 +550,34 @@
           if (r.done && !st.ended) { st.endedBy = st.endedBy || 'caller'; hangUp(true); }
         });
     }
-    function say(text) {
+    function say(text, audio) {
       if (voice) { st.interruptions = (st.interruptions || 0) + 1; var v = voice; voice = null; v.stop(); }
-      caption('you', text); busy = true; setInput(false); st.sentAt = now();
-      turn('say', text).then(function (r) { if (!r || r.error) { if (r && r.error === 'call_over') return hangUp(true); return failed(); } callerSays(r); });
+      caption('you', audio ? '…' : text); if (audio) { var c = document.getElementById('ph-captions'); st.pendingCaption = c && c.lastChild; }
+      busy = true; setInput(false); st.sentAt = now();
+      turn('say', audio ? null : text, audio).then(function (r) {
+        if (r && r.error === 'asr_unavailable') { busy = false; setInput(true); var s = document.getElementById('ph-interim'); if (s) s.textContent = 'We could not hear that. Please say it again, or type it.'; return; }
+        if (!r || r.error) { if (r && r.error === 'call_over') return hangUp(true); return failed(); }
+        callerSays(r);
+      });
+    }
+    // Server recognition: tap to start, tap again to send (a WAV of what was said goes to the lab's recognizer).
+    function listenServer() {
+      var talk = document.getElementById('ph-talk'), interim = document.getElementById('ph-interim');
+      (stream ? Promise.resolve(stream) : getMic()).then(function (s) {
+        if (!s) { micBlocked = true; if (talk) talk.hidden = true; return; }
+        var wr; try { wr = wavRecorder(s); } catch (e) { return; }
+        listening = true; talk.classList.add('rec'); talk.textContent = ui.T('call_listening'); if (interim) interim.textContent = '';
+        st.stopListen = function () {
+          listening = false; st.stopListen = null; talk.classList.remove('rec'); talk.textContent = ui.T('call_talk');
+          var out = wr.stop();
+          if (out.durationMs < 300 || st.ended) return;
+          st.spoken++; st.lastWasSpoken = true;
+          blobToBase64(out.blob).then(function (b64) { say(null, b64); });
+        };
+      });
     }
     function listen() {
+      if (st.serverAsr) return listening && st.stopListen ? st.stopListen() : listenServer();
       var talk = document.getElementById('ph-talk'), interim = document.getElementById('ph-interim'), heard = '';
       try { recog = new SR(); } catch (e) { recog = null; }
       if (!recog) return;
@@ -391,28 +608,14 @@
     // 2. after the call: the directory (call a number back), then the decision and questions
     function afterCall(status) {
       var dec = ctx.trial.decision, qs = answersFor(it, plan), state = { t0: now() }, dir = plan.directory || [];
-      ui.show(phone('<p class="phone-status">' + esc(status) + '</p>' + (dir.length ? '<div class="phone-btns small"><button type="button" class="secondary" id="ph-dir">' + ui.Th('directory_open') + '</button></div><div id="ph-dirbox" hidden></div>' : ''), 'ended') +
+      ui.show(phone('<p class="phone-status">' + esc(status) + '</p>' + (codes.length ? authHtml() : '') + (dir.length ? '<div class="phone-btns small"><button type="button" class="secondary" id="ph-dir">' + ui.Th('directory_open') + '</button></div><div id="ph-dirbox" hidden></div>' : ''), 'ended') +
         '<fieldset class="mm-answers" id="mm-answers">' + decisionHtml(dec, ui) + ui.questionsHtml(qs) + '</fieldset>' +
         '<div id="trialmsg"></div><div class="actions"><button id="mm-submit">' + ui.Th('submit_button') + '</button></div>');
       var root = ui.stage, box = document.getElementById('mm-answers'), submit = document.getElementById('mm-submit'), msg = document.getElementById('trialmsg'), dirBtn = document.getElementById('ph-dir');
       if (dirBtn) dirBtn.addEventListener('click', function () {
-        st.directoryOpened = true;
+        st.directoryOpened = true; logUi('directory_open_after');
         var b = document.getElementById('ph-dirbox'); b.hidden = false; dirBtn.hidden = true;
-        b.innerHTML = '<h3 tabindex="-1">' + ui.Th('directory_title') + '</h3><ul class="directory">' + dir.map(function (d, i) {
-          return '<li><span><strong>' + esc(d.name) + '</strong><br><span class="muted">' + esc(d.number) + '</span></span><button type="button" class="secondary small" data-dial="' + i + '">' + ui.Th('directory_call') + '</button></li>';
-        }).join('') + '</ul><p class="muted" id="ph-dialstate" aria-live="polite"></p>';
-        b.querySelector('h3').focus();
-        b.addEventListener('click', function (e) {
-          var i = e.target.getAttribute && e.target.getAttribute('data-dial'); if (i == null) return;
-          var d = dir[Number(i)], ds = document.getElementById('ph-dialstate');
-          b.querySelectorAll('[data-dial]').forEach(function (x) { x.disabled = true; });
-          ds.textContent = 'Calling ' + d.name + '…';
-          ui.call('call/callback', { session: plan.session, index: ctx.index, number: d.number }).then(function (r) {
-            var line = r && r.say ? r.say : 'No answer.';
-            ds.textContent = line;
-            speak(line, { voice: call.voice }, null, function () { ds.textContent = line + ' (call ended)'; b.querySelectorAll('[data-dial]').forEach(function (x) { x.disabled = false; }); });
-          });
-        });
+        directoryWidget(b, ui, { entries: dir, voice: call.voice, onDial: dialOut });
       });
       wireDecision(root, dec, state, ctx);
       var set = ui.questionSet(box, qs, msg, submit, function (n, v) { ctx.record(n, v); });
@@ -423,7 +626,8 @@
         if (window.speechSynthesis) speechSynthesis.cancel();
         (st.recording || Promise.resolve(false)).then(function () {
           ctx.submit({ answers: set.answers, decision: state.decision, decisionMs: state.decisionMs, trajectory: state.trajectory, rtMs: Math.round(now() - st.t0),
-            call: { answered: st.answered, ringMs: st.ringMs, durationMs: st.durationMs || 0, holdMs: Math.round(st.holdMs), typedTurns: st.typed, spokenTurns: st.spoken, interruptions: st.interruptions || 0, captions: st.captions, directoryOpened: st.directoryOpened, endedBy: st.endedBy, latencies: st.latencies } },
+            call: { answered: st.answered, ringMs: st.ringMs, durationMs: st.durationMs || 0, holdMs: Math.round(st.holdMs), typedTurns: st.typed, spokenTurns: st.spoken, interruptions: st.interruptions || 0, captions: st.captions, directoryOpened: st.directoryOpened, endedBy: st.endedBy, latencies: st.latencies },
+            uiEvents: takeUiLog() },
             function (err) { submit.disabled = false; msg.innerHTML = ui.errorBox(err); });
         });
       });
@@ -562,10 +766,24 @@
   }
 
   var impl = {
+    // The end of the study: each scored call with what happened, the points, and the participant's own transcript.
+    debrief: function (ui, box) {
+      if (!box) return;
+      ui.call('debrief', {}).then(function (r) {
+        if (!r || r.error || !r.calls || !r.calls.length) return;
+        var esc = ui.esc;
+        box.innerHTML = '<h2>Your phone shift</h2><p>Total points: <strong>' + esc(String(r.points)) + '</strong></p>' + r.calls.map(function (c, i) {
+          return '<details class="mm-debrief"><summary>Call ' + (i + 1) + ': ' + esc(c.caller) + ' · ' + (c.intent === 'attack' ? 'a scam call' : 'a legitimate call') + ' · ' + esc(String(c.points)) + ' points</summary>' +
+            '<p class="muted">What happened: ' + esc(String(c.outcome).replace(/_/g, ' ')) + (c.disclosed && c.disclosed.length ? '; you shared: ' + esc(c.disclosed.join(', ')) : '') + (c.callbacks ? '; calls back: ' + c.callbacks : '') + '</p>' +
+            c.transcript.map(function (t) { return '<p><strong>' + (t.who === 'you' ? 'You' : esc(c.caller)) + ':</strong> ' + esc(t.text) + '</p>'; }).join('') + '</details>';
+        }).join('');
+      });
+    },
     runTrial: function (ctx, ui) {
       var it = ctx.trial.item;
+      if (it.kind !== 'check') myInfo(ctx.plan, ui);
       if (it.kind === 'check') return runCheck(ctx, ui);
-      if (needsSound(it) && !soundChecked[ctx.plan.session]) return soundCheck(ctx, ui, function () { impl.runTrial(ctx, ui); });
+      if (needsSound(it) && !soundChecked[ctx.plan.session] && !(ctx.content && ctx.content.noSoundCheck)) return soundCheck(ctx, ui, function () { impl.runTrial(ctx, ui); });
       if (it.kind === 'call') return runCall(ctx, ui);
       renderItem(ctx, ui);
     }

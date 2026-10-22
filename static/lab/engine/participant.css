@@ -173,3 +173,35 @@ button.rec::before { content: ""; width: 10px; height: 10px; border-radius: 50%;
 .phone #ph-dialstate { color: #f3e3d6; margin-top: 10px; }
 @media (max-width: 480px) { .mt-opt { width: 44%; } .mt-area[data-n="3"] .mt-opt, .mt-area[data-n="4"] .mt-opt { position: static; transform: none !important; width: 100%; margin: 8px 0 0; } .mt-area[data-n="3"], .mt-area[data-n="4"] { height: auto; padding: 8px 14px 80px; } }
 @media (prefers-reduced-motion: reduce) { .phone.ringing .avatar { animation: none; box-shadow: 0 0 0 6px rgba(246, 201, 168, .4); } }
+
+/* ---------- Persona card, My info, authenticator, directory search, training clips, live trials ---------- */
+.mm-persona { border: 1px solid var(--line); border-radius: var(--radius); background: var(--card, var(--bg)); padding: 16px 18px; margin: 12px 0; }
+.mm-persona h3 { margin: 0 0 6px; }
+.mm-persona dl { display: grid; gap: 6px; margin: 10px 0 0; }
+.mm-persona dl > div { display: grid; grid-template-columns: minmax(130px, 40%) 1fr; gap: 10px; padding: 6px 0; border-top: 1px solid var(--line); }
+.mm-persona dt { color: var(--muted); font-size: .9375rem; }
+.mm-persona dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.mm-myinfo { position: fixed; right: 16px; bottom: 16px; z-index: 20; border-radius: 999px; box-shadow: var(--shadow-lift); }
+.mm-dialog { max-width: min(560px, calc(100vw - 32px)); border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg); color: var(--text); padding: 18px; }
+.mm-dialog::backdrop { background: rgba(20, 14, 22, .45); }
+.mm-auth { text-align: left; background: rgba(255, 247, 239, .1); border-radius: 14px; padding: 10px 14px; margin: 0 0 14px; }
+.mm-auth h3 { font-size: .8125rem; letter-spacing: .04em; text-transform: uppercase; margin: 0 0 4px; opacity: .85; }
+.mm-auth ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.mm-auth li { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.mm-auth strong { font-size: 1.35rem; letter-spacing: .06em; font-variant-numeric: tabular-nums; }
+.mm-auth p { margin: 0; }
+#ph-dirbox-live, #ph-dirbox { text-align: left; margin-top: 14px; }
+input[type="search"]#mm-dsearch { width: 100%; margin: 6px 0 8px; }
+.mm-dialpad { gap: 8px; align-items: center; margin: 10px 0 4px; flex-wrap: wrap; }
+.mm-dialpad input { width: 10em; }
+.mm-clip { margin: 12px 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 14px; }
+.mm-clip figcaption { font-weight: 600; margin-bottom: 6px; }
+.mm-clip audio { width: 100%; }
+.mm-pdial { border: 1px dashed var(--line-strong, var(--line)); border-radius: 14px; padding: 12px 14px; margin: 12px 0; }
+.mm-pdial .directory { max-height: 260px; overflow: auto; }
+.mm-slider { margin: 14px 0; }
+.mm-slider input[type="range"] { width: 100%; }
+.mm-slider .row { display: flex; justify-content: space-between; font-size: .8125rem; }
+.mm-debrief { border: 1px solid var(--line); border-radius: 14px; padding: 10px 14px; margin: 10px 0; }
+.mm-debrief summary { cursor: pointer; font-weight: 600; }
+.debrief { margin-top: 18px; }

@@ -267,6 +267,12 @@ export async function startSession(S, code, now = Date.now(), extra = {}) {
   if (!st.available) return { error: 'not_yet', status: 409, availableAt: st.availableAt };
   const n = st.nextSession;
   if (!p.condition && n >= assignAt(S, c)) p = await assignNow(S, p, now);
+  // Per-participant counterbalancing the type assigns with the arm (for example a clip list), kept on the record.
+  if (p.condition && !p.flags && n >= assignAt(S, c) && S.type.assignFlags) {
+    const flags = await S.type.assignFlags(S, p, c);
+    const u = await update(S.store, pKey(p.code), d => { if (!d.flags) d.flags = flags; });
+    p = u.value || p;
+  }
   let plan = await getPlan(S, p, n);
   if (!plan) {   // written once: whoever writes first wins and everyone reads that copy
     if (await setNew(S.store, planKey(p.code, n), buildPlan(S, p, n, c, extra))) await S.store.set(`started/${p.code}/s${n}-${now}`, { at: now });
@@ -435,7 +441,7 @@ export async function listParticipants(S, now = Date.now()) {
     const cur = st.nextSession && prog.sessions[st.nextSession];
     const plan = cur && cur.startedAt ? await getPlan(S, p, st.nextSession) : null;
     return { code: p.code, type: PID_RE.test(p.code) ? (p.selfSignup ? 'email (self)' : 'email') : 'code', condition: p.condition, label: p.label, test: !!p.test, gapDays: p.gapDays, consented: !!p.consentedAt, declined: !!p.declinedAt,
-      screenedOut: p.screenedOut ? p.screenedOut.reason : null,
+      screenedOut: p.screenedOut ? p.screenedOut.reason : null, flags: p.flags || null,
       completedSessions: st.completed, nextSession: st.nextSession || null, availableAt: st.availableAt || null, lastSeenAt: p.lastSeenAt || null,
       totalSessions: total, inProgress: cur ? cur.trialsDone.length : 0, inProgressOf: plan ? plan.trials.length : 0 };
   });

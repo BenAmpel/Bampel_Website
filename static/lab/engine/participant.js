@@ -397,10 +397,13 @@
   function showFinished(st) {
     progress.textContent = '';
     var back = S.content.panel && S.content.panel.completionUrl && /^https:\/\//.test(S.content.panel.completionUrl) ? S.content.panel.completionUrl : '';
-    show('<h1>' + Th('finished_title') + '</h1>' + (st && st.total ? tracker(st.total, st.total, 0) : '') + Tp('finished_body') +
+    var db = S.content.debrief;   // a study's debrief text, and (for types that have one) the participant's own record
+    show('<h1>' + Th('finished_title') + '</h1>' + (st && st.total && !S.content.continuous ? tracker(st.total, st.total, 0) : '') + Tp('finished_body') +
       (back ? '<div class="actions"><a class="btn" href="' + esc(back) + '" rel="noopener">Return to Prolific to record your completion</a></div>' : '') +
+      (db ? '<section class="debrief"><h2>' + esc(db.title) + '</h2>' + String(db.body).split(/\n\s*\n/).map(function (x) { return '<p>' + linkify(esc(x.trim())) + '</p>'; }).join('') + '</section><div id="debrief-own"></div>' : '') +
       '<div class="actions"><button class="secondary" id="out">' + Th('sign_out') + '</button></div>');
     document.getElementById('out').addEventListener('click', signOut);
+    if (db && S.type && S.type.debrief && S.token) S.type.debrief(ui, document.getElementById('debrief-own'));
   }
   // Screened out (not eligible, or a required check failed): no further sessions; panel participants get the
   // screen-out link (for example Prolific's screen-out code) instead of the completion link.
