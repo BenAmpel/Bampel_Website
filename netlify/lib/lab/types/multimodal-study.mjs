@@ -119,9 +119,18 @@ export function poolItems(block, c, p, byId) {
     const lib = c.clipLibrary, list = lib && lib.lists[f.clipList ?? 0];
     if (!list) return [];
     const phase = block.pool.slice(6), clips = new Map(lib.clips.map(x => [x.id, x]));
-    return list[phase].map(id => clips.get(id)).filter(Boolean).map(clip => ({
+    const picked = list[phase].map(id => clips.get(id)).filter(Boolean);
+    // Locked trials (design.lockedTrials): within each phase, half of the attack clips and half of the legitimate ones,
+    // chosen per participant, open the answer only when the call ends. Interleaved with free trials, this manipulates
+    // the decision threshold within subject (no early commitment possible) at no cost in sample size.
+    const locked = new Set();
+    if (c.design.lockedTrials) for (const s of ['attack', 'benign']) {
+      const ids = shuffle(picked.filter(x => (x.meta || {}).structure === s).map(x => x.id), seeded(`${p.code}|locked|${phase}|${s}`));
+      ids.slice(0, Math.floor(ids.length / 2)).forEach(id => locked.add(id));
+    }
+    return picked.map(clip => ({
       it: { ...(lib.template || {}), id: `clip-${clip.id}`, kind: 'audio', title: (lib.template && lib.template.title) || 'Recorded call', media: clip.media, transcript: clip.transcript || '', variants: {} },
-      meta: { ...(clip.meta || {}), clipId: clip.id, phase, clipList: f.clipList ?? 0, slider: !!(f.slider && c.design.sliderBlock === block.pool) }
+      meta: { ...(clip.meta || {}), clipId: clip.id, phase, clipList: f.clipList ?? 0, slider: !!(f.slider && c.design.sliderBlock === block.pool), locked: locked.has(clip.id) }
     }));
   }
   if (block.pool === 'shift') {

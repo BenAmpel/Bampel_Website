@@ -316,7 +316,8 @@
       '<div class="mm-bar" aria-hidden="true"><span id="mm-fill"></span></div></div>' +
       '<fieldset class="q-group mt" data-name="decision"><legend class="q">' + esc(dec.prompt) + '</legend><div class="mt-area" id="mt-area" data-n="' + dec.options.length + '">' +
       dec.options.map(function (o, i) { return '<button type="button" class="mt-opt" data-value="' + esc(o.value) + '" data-trace="decision:' + esc(o.value) + '" style="--i:' + i + '" disabled>' + esc(o.label) + '</button>'; }).join('') +
-      '<p class="mt-hint muted" id="mt-hint">Click Start to play the call. Choose an answer while it plays; you can change it until the call ends. Press the space bar the moment you have decided.</p>' +
+      '<p class="mt-hint muted" id="mt-hint">' + (it.locked ? 'Click Start to play the call. This time the answers open only when the call ends. Press the space bar the moment you have decided.'
+        : 'Click Start to play the call. Choose an answer while it plays; you can change it until the call ends. Press the space bar the moment you have decided.') + '</p>' +
       '<button type="button" class="mt-start" id="mt-start">' + ui.Th('decision_start') + '</button></div></fieldset>' +
       (slider ? '<div class="mm-slider"><label for="mm-sl">How suspicious does this call seem right now?</label><input type="range" id="mm-sl" min="0" max="100" value="50" disabled><div class="row muted"><span>Not at all</span><span>Very</span></div></div>' : '') +
       '<p class="muted" id="mm-livestate" aria-live="polite"></p><fieldset class="mm-answers" id="mm-answers" disabled>' + ui.questionsHtml(qs) + '</fieldset>' +
@@ -330,6 +331,19 @@
     function key(e) { if ((e.code === 'Space' || e.key === ' ') && live.startMs != null && live.decidedMs == null && !ended) { e.preventDefault(); live.decidedMs = Math.round(now() - state.t0); live.decidedClipMs = clipMs(); ctx.record('decided', live.decidedClipMs); ls.textContent = 'Marked as decided.'; } }
     document.addEventListener('keydown', key);
     start.addEventListener('click', function (e) {
+      // A locked trial: Start only plays the call; when it ends, the same button ("Answer") opens the tracked choice.
+      if (it.locked && !ended) {
+        live.startMs = Math.round(now() - state.t0); start.hidden = true; document.getElementById('mt-hint').hidden = true;
+        if (sl) { sl.disabled = false; slTimer = setInterval(function () { slider.push([clipMs(), Number(sl.value)]); }, 250); }
+        el.play().catch(function () { ls.textContent = 'The clip could not play.'; });
+        return;
+      }
+      if (it.locked && ended) {
+        t0 = now(); path = [[Math.round(e.clientX || 0), Math.round(e.clientY || 0), 0]]; tracking = true;
+        start.hidden = true; area.classList.add('live'); opts.forEach(function (o) { o.disabled = false; }); document.addEventListener('pointermove', move);
+        ls.textContent = '';
+        return;
+      }
       t0 = now(); live.startMs = Math.round(t0 - state.t0); path = [[Math.round(e.clientX || 0), Math.round(e.clientY || 0), 0]]; tracking = true;
       start.hidden = true; document.getElementById('mt-hint').hidden = true; area.classList.add('live');
       opts.forEach(function (o) { o.disabled = false; }); document.addEventListener('pointermove', move);
@@ -346,7 +360,7 @@
         if (tracking) { tracking = false; document.removeEventListener('pointermove', move); path.push([Math.round(e.clientX || 0), Math.round(e.clientY || 0), Math.round(now() - t0)]); state.trajectory = path; state.decisionMs = Math.round(now() - state.t0); }
         if (ended && live.final) return;
         live.changes.push({ ms: Math.round(now() - state.t0), clipMs: clipMs(), value: v }); ctx.record('decision', v);
-        state.decision = live.final = v; if (ended) live.late = true;
+        state.decision = live.final = v; if (ended && !it.locked) live.late = true;
         opts.forEach(function (x) { x.classList.toggle('chosen', x === o); x.setAttribute('aria-pressed', x === o ? 'true' : 'false'); });
         if (ended) lock();
       });
@@ -359,6 +373,7 @@
       ended = true; m.endedMs = Math.round(now() - state.t0); m.heardPct = 100; live.clipMs = Math.round(el.duration * 1000);
       if (slTimer) { clearInterval(slTimer); slTimer = null; if (sl) sl.disabled = true; }
       document.removeEventListener('keydown', key);
+      if (it.locked) { start.textContent = 'Answer'; start.hidden = false; ls.textContent = 'The call has ended. Click Answer, then choose.'; return; }
       if (live.final) lock(); else ls.textContent = 'The call has ended. Choose an answer now.';
     });
     var set = ui.questionSet(box, qs, msg, submit, function (n, v) { ctx.record(n, v); });

@@ -698,6 +698,7 @@ export default {
     if (call) item.call = { caller: call.caller, number: call.number || '', ringSeconds: call.ringSeconds || 30, voice: call.voice || null, scored: !!call.scored,
       ...(call.gate ? { gate: { retryOf: call.gate.retryOf || null, final: !!call.gate.final } } : {}) };
     if (t.meta && t.meta.slider) item.slider = true;
+    if (t.meta && t.meta.locked) item.locked = true;
     // A check gets what the browser must play (tone orders, word audio), never the words themselves.
     const k = t.checkPlan;
     if (k) item.check = k.test === 'headphones' ? { test: k.test, attempts: k.attempts, rounds: k.rounds } : { test: k.test, attempts: k.attempts, media: k.words.map(w => w.media) };
@@ -774,7 +775,7 @@ export default {
       check_test: d.checkServer?.test || '', check_passed: d.checkServer ? (d.checkServer.passed == null ? '' : d.checkServer.passed ? 1 : 0) : '', check_attempts: d.checkServer?.attempts ?? '', check_outages: d.checkServer?.outages ?? '' };
     // Study design factors (clip cell, phase, list; call slot) and counterbalancing, for trial-level models.
     const meta = r.meta || {}, f = r.flags || {}, lv = d.live || null, sl = d.slider || null;
-    Object.assign(row, { block_title: r.blockTitle || '', clip_id: meta.clipId || '', phase: meta.phase || '', structure: meta.structure || '', surface: meta.surface || '', topic: meta.topic || '',
+    Object.assign(row, { block_title: r.blockTitle || '', clip_id: meta.clipId || '', phase: meta.phase || '', locked: meta.phase ? (meta.locked ? 1 : 0) : '', structure: meta.structure || '', surface: meta.surface || '', topic: meta.topic || '',
       ask_timing: meta.askTiming || '', ask_ms: meta.askMs ?? '', call_slot: meta.slot || '', caller_id: meta.callerId || '', shift_form: f.shiftForm || '', clip_list: f.clipList ?? '', slider_flag: f.slider ? 1 : f.slider === false ? 0 : '',
       pilot_scripted: f.scripted ? 1 : f.scripted === false ? 0 : '',
       live_first: lv && lv.changes[0] ? lv.changes[0].value : '', live_first_ms: lv && lv.changes[0] ? lv.changes[0].ms : '', live_first_clip_ms: lv && lv.changes[0] ? lv.changes[0].clipMs : '',

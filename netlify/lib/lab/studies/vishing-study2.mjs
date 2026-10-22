@@ -111,6 +111,9 @@ export const VISHING_STUDY2 = {
       // Exploratory real-time suspicion slider: half of each arm, in the first (pre-training) set of recorded calls, so the
       // post-training clips that carry H1 and H2 are never rated while listening (decided 2026-10-22).
       sliderBlock: 'clips:pre',
+      // Within-subject threshold manipulation from the literature review (2026-10-22): half of each phase's clips are
+      // locked until the call ends (3 attacks, 3 legitimate), interleaved with free-response clips.
+      lockedTrials: true,
       sessions: [
         { blocks: [
           { title: 'Equipment check', items: ['check-headphones', 'check-word'], randomize: false },

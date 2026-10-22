@@ -206,6 +206,9 @@ let passer = null;
   const pre = mine.filter(x => x[col('phase')] === 'pre'), post = mine.filter(x => x[col('phase')] === 'post');
   assert.equal(pre.length, 12); assert.equal(post.length, 12);
   for (const ph of [pre, post]) for (const f of ['structure', 'surface', 'topic']) assert.equal(ph.filter(x => x[col(f)] === ph[0][col(f)]).length, 6, `${f} balanced 6/6 in each phase`);
+  for (const ph of [pre, post]) for (const s of ['attack', 'benign'])
+    assert.equal(ph.filter(x => x[col('structure')] === s && x[col('locked')] === '1').length, 3, 'half of each phase is locked, stratified by structure');
+  assert.equal(clips.filter(t => t.item.locked).length, 12, 'the browser knows which trials are locked');
   assert(pre.every(x => x[col('live_changes')] === '1' && x[col('live_final')] === 'legitimate' && x[col('live_decided_clip_ms')] === '6700'), 'the live decision is exported');
   const shift = mine.filter(x => x[col('call_slot')]);
   assert.equal(shift.length, 8);
