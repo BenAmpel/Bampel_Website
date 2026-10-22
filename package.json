@@ -1,14 +1,19 @@
 {
   "private": true,
   "scripts": {
+    "lab": "node scripts/lab.mjs",
     "build:ccair": "node scripts/build-ccair.js && node scripts/build-pathways.mjs",
     "test:lab": "node tests/lab/run.mjs",
-    "lab:dev": "node tests/lab/devserver.mjs"
+    "lab:dev": "node tests/lab/devserver.mjs",
+    "lab:samples": "bash scripts/lab-samples.sh"
   },
   "devDependencies": {
     "esbuild": "^0.25.0"
   },
   "dependencies": {
     "@netlify/blobs": "^11.0.0"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

@@ -4,5 +4,6 @@
 import alertTriage from './alert-triage.mjs';
 import vignettes from './vignettes.mjs';
 import game from './game.mjs';
+import multimodal from './multimodal.mjs';
 
-export const TYPES = { [alertTriage.id]: alertTriage, [vignettes.id]: vignettes, [game.id]: game };
+export const TYPES = { [alertTriage.id]: alertTriage, [vignettes.id]: vignettes, [game.id]: game, [multimodal.id]: multimodal };

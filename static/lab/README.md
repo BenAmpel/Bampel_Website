@@ -1,6 +1,6 @@
 # CCAIR Behavioral Lab
 
-Browser-based behavioral studies at `bampel.com/lab/`. Everything here is static and needs no build step: Hugo copies `static/lab/` to the site as is.
+Browser-based behavioral studies at `bampel.com/lab/`. Everything here is static and needs no build step: Hugo copies `static/lab/` to the site as is. To run the lab on a laptop, see Quick start below.
 
 ```
 static/lab/
@@ -23,6 +23,40 @@ static/lab/
   CODEBOOK.md                   column definitions for the exports
 ```
 
+## Quick start (one command)
+
+```
+npm run lab
+```
+
+Starts the whole lab on this computer (Node 20 or newer; no `npm install` needed), with studies and data kept in `.lab-data/` (gitignored), and opens the lab console signed in. The first run makes an owner key (`.lab-data/owner-key.txt`) and an example study, "Example: vishing training (5 arms)". On a Mac, `scripts/Start CCAIR Lab.command` does the same on a double-click. Optional settings go in `.env.lab` (gitignored): `ANTHROPIC_API_KEY` (the AI caller rephrases its scripted lines with Claude), `LAB_LLM_MODEL` (default `claude-opus-5-5`; `claude-haiku-5-5` answers faster), `LAB_LLM_TIMEOUT_MS` (default 4000), `PORT` (default 8899; the next free port is used), `LAB_HOST`, `LAB_DATA`. Flags: `--no-open`, `--reset-example`.
+
+| Piece | File |
+|---|---|
+| Launcher | `scripts/lab.mjs` |
+| Local web server (static pages, API, netlify.toml rewrites, byte ranges) | `scripts/lab/server.mjs`, also used by `npm run lab:dev` (in-memory) |
+| File-backed store with Blobs semantics (write-once via atomic `link`, compare-and-swap under a per-key lock) | `scripts/lab/filestore.mjs` |
+| Sample stimuli for the templates | `static/lab/media/samples/`, rebuilt by `npm run lab:samples` (macOS `say`, ffmpeg, Chrome) |
+| Brand assets (logo, icons, illustration; generated with ChatGPT in the lab's palette) | `static/lab/assets/brand/` |
+
+## Templates, preview, and online panels
+
+- **Templates** (`netlify/lib/lab/templates.mjs`, route `GET /api/lab/_lab/templates`): Survey, A/B or multi-arm experiment, Audio clip judgments, Conversation with an AI voice caller, Image and video ratings, Mouse-tracking decision task, Vishing training experiment (5 arms). `POST /api/lab/_lab/create` with `template` stores the template ID on the study; `registry.typeFor()` then uses the template's content as the study's defaults until the first save, like a built-in study's seed. `tests/lab/multimodal.test.mjs` checks that every template validates as created.
+- **Preview as a participant** (route `POST /api/lab/<study>/admin/preview`, editors and up): one test participant with no gap between sessions, optionally in a chosen condition (a fixed condition is only ever given to test participants). It returns `/lab/s/<study>?code=...&preview=1`; the participant page signs in with the code, removes it from the address bar, and shows a "Preview" ribbon.
+- **Online panels** (`enrollment.panel`: `enabled`, `param` such as `PROLIFIC_PID`, `completionUrl`): the participant page signs in with the ID in the link (`login` with `panelId`). The study ID is a keyed hash of the panel ID, the panel ID is kept only under `contact/{id}` (the extra-credit CSV gains a `panel_id` column), and the last page links to the completion URL.
+- **Recording consent** (`consent.recording`: `enabled`, `label`, `required`): a second checkbox on the consent page. The answer is saved with the consent record and as `recordingConsent` on the participant; plans carry `recording`, and the server refuses audio uploads without it.
+
+## Multimodal studies (type `multimodal`)
+
+Server `netlify/lib/lab/types/multimodal.mjs`, browser `static/lab/engine/types/multimodal.js` and `multimodal-admin.js`, voice caller `netlify/lib/lab/voicebot.mjs`, mouse-tracking measures `netlify/lib/lab/trajectory.mjs`.
+
+- **Content:** `design.conditions` (1 to 12), `design.sessions[].blocks[]` (`title`, `items`, `randomize`), `items[]` of kind `text`, `image`, `audio`, `video`, or `call` (with `media`, `mediaAlt`, `transcript`, `mustFinish`, `maxPlays`, `autoplay`, `decide`, `decisionPrompt`, `decisionOptions`, `ask` = `all` / `none` / question IDs, `recordVoice`, `voicePrompt`, `variants` per condition), `decision` (`prompt`, 2 to 4 `options`, `mouseTracking`), `directory[]` (`name`, `number`, `greeting`), `questions`, and `practice`. Media addresses are `https://`, `/lab/...`, or files uploaded to the study (`/api/lab/<study>/file/f-<random>.<ext>`, served with byte ranges).
+- **Calls:** `call` = `caller`, `number`, `callbackNumber` (the organization's real line, which resolves the truth on a callback), `intent` (`attack` or `benign`), `maxTurns`, `ringSeconds`, `persona`, `script` per state, optional `audio` per state (pre-recorded lines, played through a telephone-band filter), `llm: false` to forbid rephrasing. States: `opener → pretext → ask → pressure1 → pressure2`, `deflect` on a request to verify or call back, endings `closeComply`, `closeRefuse`, `close`. Participant words are classified by keyword rules (`classify`), never by a model, so transitions can be reproduced from the transcript; any run of 4+ digits (written or spoken) counts as compliance. The browser never receives the script or the intent: each line arrives from `POST /api/lab/<study>/call/turn` (`seq`, `kind` = `answer`, `say`, `hold`, `resume`, `hangup`, `decline`, `timeout`, `said`, `latencyMs`). Each turn is written once to `calls/{code}/s{n}/t{i}/{seq}` with the state it moved to, so retries get the same reply and the state is replayed from the log. When a call item's answer is saved, `saveTrialHook` replaces anything the browser sent as `callServer` with the server's summary. Callbacks: `POST .../call/callback` → `callbacks/...`.
+- **AI phrasing:** with `ANTHROPIC_API_KEY`, `voicebot.phrase()` asks Claude (Messages API, plain `fetch`, `output_config.effort: low`, server-side fallbacks) to say the current state's scripted line in one or two spoken sentences that answer the participant, never adding requests or claims. On a timeout, an HTTP error, a refusal, or an empty reply, the scripted line is spoken; every turn records `source` (`script`, `llm`, `recorded`).
+- **Participant audio:** `POST .../media/upload` (`kind` = `call` or `voice`, base64, at most about 2.7 MB, audio types only, recording consent required) → `audio/{code}/s{n}/t{i}-{kind}`, write-once. Admin routes: `recordings` and `recording?key=` (manager), `recordings-delete` (owner, confirm `DELETE`), `calls.csv` (viewer), `file-upload` (editor), `files` (viewer). `audio/` is never copied by the hourly backup; `calls/`, `callbacks/`, and `files/` are. Deleting a participant removes their calls, callbacks, and audio.
+- **Privacy:** before a participant's words are stored, digit runs, spoken digit runs, email addresses, and street addresses are replaced (`redact`); the digit count is kept.
+- **Browser:** a sound check before the first item with sound (microphone level meter when recording); a custom player (plays, furthest point heard, transcript use); the mouse-tracking layout (Start at the bottom, options in the top corners, path sampled on `pointermove` until the answer click; keyboard users get the buttons' centres); the softphone (generated ring tone, caller ID, Web Speech API recognition in Chrome and Edge with typing always available, speech synthesis, hold, hang up, captions, talking over the caller, the directory). Everything degrades to typing when there is no microphone or speech recognition.
+
 ## Study engine
 
 Every server-backed study runs on one engine; a study is data (its content, edited on its admin page) plus a **study type** that defines its item screen. The engine provides, for every study: GSU-email sign-in (or pilot codes), consent, multi-session scheduling with gap days, balanced condition assignment, start- and end-of-session surveys, behavior traces, write-once storage, versioned content editing, team roles, the activity log, batched exports, hourly backups, the pilot report, and the live self-test.
@@ -41,6 +75,7 @@ Study types today:
 
 - **`alert-triage`**: security alerts with click-to-reveal evidence and scheduled AI advice (AI-first, evidence-first, control). Used by the verification study.
 - **`vignettes`** (general purpose): scenarios as plain text or emails (optionally with an image), each followed by configurable questions (rating scales, multiple choice, confidence line, text). Conditions are defined in the content, and each item can have different wording per condition, so manipulations need no code. Links written `[text](url)` are shown as links that do not open; pointing at one shows its address at the bottom of the screen, and hovers and clicks are recorded. Sessions without items make a survey-only (for example, longitudinal) study.
+- **`multimodal`** (media, voice, and conversations): text, image, audio, video, and phone-call items in ordered or shuffled blocks, with per-condition versions, a mouse-tracked decision, questions, and spoken answers. See "Multimodal studies" above.
 - **`game`** (economic games): configurable games (prisoner's dilemma, public goods, trust, ultimatum, dictator, or your own) with payoff formulas, treatments, live matching in real time or asynchronous play against stored decisions, and a payments export. See "Economic games" below.
 - **Built-in `data-quality` study** (type `vignettes`, survey-only): the online-survey data-quality battery from SurveyItemsList.docx. Its starting content is code (`netlify/lib/lab/studies/data-quality.mjs`); the first save on its admin page takes over. Unlisted, closed to self sign-up, draft consent: turn those on in the admin page. Columns: CODEBOOK.
 

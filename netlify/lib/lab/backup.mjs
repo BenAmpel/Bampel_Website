@@ -7,7 +7,7 @@
 import { deleteKeys } from './store.mjs';
 
 const MUTABLE = [/^participants\//, /^content\/current$/, /^meta\//, /^admins\//];
-const PREFIXES = ['participants/', 'consent/', 'plans/', 'started/', 'done/', 'views/', 'data/', 'raw/', 'contact/', 'cond/', 'cond-test/', 'content/', 'admins/', 'audit/', 'meta/', 'g/'];
+const PREFIXES = ['participants/', 'consent/', 'plans/', 'started/', 'done/', 'views/', 'data/', 'raw/', 'contact/', 'cond/', 'cond-test/', 'content/', 'admins/', 'audit/', 'meta/', 'g/', 'calls/', 'callbacks/', 'files/'];   // participant audio (audio/) is never copied: it is deleted on the IRB's schedule
 const STATE = 'state/backup';
 
 // The lab registry (researcher accounts with their password hashes and authenticator secrets, the studies list, the account activity log) is
