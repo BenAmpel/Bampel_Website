@@ -437,7 +437,7 @@
     if (draft && !force) return renderEditor();
     Promise.all([getJSON('content'), getJSON('content-history'), getJSON('participants')]).then(function (res) {
       var c = res[0];
-      META = { text: c._textFields, type: c._meta || {}, conditions: c._conditions || [], rules: c._surveyRules || [], qtypes: c._questionTypes || Object.keys(QTYPE_LABEL), presets: c._panelPresets || [] };
+      META = { text: c._textFields, type: c._meta || {}, conditions: c._conditions || [], rules: c._surveyRules || [], qtypes: c._questionTypes || Object.keys(QTYPE_LABEL), presets: c._panelPresets || [], languages: c._languages || null };
       Object.keys(c).forEach(function (k) { if (k[0] === '_') delete c[k]; });
       saved = c; draft = clone(saved); A.draft = draft; setDirty(false);
       if (!sub || !subs().some(function (s) { return s[0] === sub; })) sub = subs()[0][0];
@@ -620,7 +620,23 @@
         checkbox('data-path="consent.approved" data-bool="1"', draft.consent.approved, 'This is the IRB-approved consent text (removes the "draft" banner participants see)');
     } else if (sub === 'environment') {
       var ev = draft.environment || (draft.environment = { preload: false });
-      h = '<h3 style="margin:0 0 8px">Loading and timing</h3>' +
+      h = '<h3 style="margin:0 0 8px">Devices and browsers</h3>' +
+        checkbox('data-path="environment.desktopOnly" data-bool="1"', ev.desktopOnly, 'Computers only: phones and tablets are asked to come back on a laptop or desktop') +
+        checkbox('data-path="environment.speechBrowser" data-bool="1"', ev.speechBrowser, 'A browser that understands speech is needed (Chrome or Edge), for studies where participants talk') +
+        '<p class="muted">Participants who do not meet these see why and can come back with the right device; nothing is saved for them until they do. For panels, set the same requirement in the panel (for example Prolific\'s device filter) so fewer people arrive on the wrong device.</p>' +
+        '<h3 style="margin:20px 0 8px">Microphone and headphones</h3>' +
+        checkbox('data-path="environment.micCheck" data-bool="1"', ev.micCheck, 'Check the microphone before each session (a level meter; participants say a few words)') +
+        (ev.micCheck ? checkbox('data-path="environment.micRequired" data-bool="1"', ev.micRequired, 'Required: after two failed tries the study ends for that participant (screened out)') : '') +
+        checkbox('data-path="environment.headphoneCheck" data-bool="1"', ev.headphoneCheck, 'Headphone check in session 1 (Huggins pitch test, Milne et al. 2021: 6 short trials, passed at 5 correct)') +
+        (ev.headphoneCheck ? field('If the headphone check is not passed', sel('environment.headphoneFail', ev.headphoneFail || 'record', [['record', 'Record the score and continue'], ['screen', 'End the study for that participant (screened out)']])) : '') +
+        '<p class="muted">The results are saved once per session and are in the wide CSV (<code>s1_check_mic_ok</code>, <code>s1_check_headphone_correct</code>, and so on). The headphone test plays noise in both ears; one noise hides a faint tone that only headphones reveal, so it also catches people listening on speakers.</p>' +
+        '<h3 style="margin:20px 0 8px">Full screen</h3>' +
+        checkbox('data-path="environment.fullscreen" data-bool="1"', ev.fullscreen, 'Ask participants to switch to full screen before the first item') +
+        '<p class="muted">Browsers only allow full screen after a click, so participants see a button. Leaving full screen never stops the session: a bar offers the way back, and each trial records whether it was in full screen and every exit (<code>fullscreen</code>, <code>fullscreen_exits</code>, <code>fullscreen_exit_ms</code>).</p>' +
+        '<h3 style="margin:20px 0 8px">Language</h3>' +
+        field('Language of the study (screen readers, and the speech recognizer and voices of phone calls follow it)', sel('environment.language', ev.language || 'en-US', META.languages || [['en-US', 'English (US)']])) +
+        '<p class="muted">Write the study\'s text in that language yourself, on Screen text and the other tabs. The lab does not translate.</p>' +
+        '<h3 style="margin:20px 0 8px">Loading and timing</h3>' +
         checkbox('data-path="environment.preload" data-bool="1"', ev.preload, 'Load every picture, sound, and video before the session starts') +
         '<p class="muted">Participants see a progress bar while the files load, and the session starts only when all of them are ready, so no item waits on the network. If a file fails, they can try again (and, after a second failure, continue without it; the <code>preloaded</code> column then says 0). Use it whenever timing matters. Media you upload are always loaded in full; media on another website can only be warmed up, so upload timing-critical files.</p>' +
         '<p class="muted">Every trial records when its screen first appeared (<code>onset_ms</code>, the first display frame after it was drawn) and the screen\'s frame interval (<code>frame_ms</code>; 16.67 ms is a 60 Hz display). Response times from onset are <code>rt_ms</code> minus <code>onset_delay_ms</code>.</p>';

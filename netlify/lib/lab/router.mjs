@@ -22,6 +22,7 @@ import * as recruit from './recruit.mjs';
 import { exportDesign, importDesign, cloneStudy } from './studyfile.mjs';
 import { buildCodebook, codebookCsv, codebookMarkdown } from './codebook.mjs';
 import { wideRows, WIDE_FIRST } from './wide.mjs';
+import { saveChecks, LANGUAGES } from './envcheck.mjs';
 
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
 const csv = (text, name) => new Response(text, { headers: { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': `attachment; filename="${name}"`, 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
@@ -71,17 +72,23 @@ export async function handle(req, { getStore, env, now }) {
     const fm = route.match(/^file\/(f-[0-9a-f]{12}\.[a-z0-9]{2,4})$/);
     if (fm && (req.method === 'GET' || req.method === 'HEAD')) return await serveFile(S.store, fm[1], req);
     if (route === 'login') return reply(await E.login(S, body.email != null ? { email: body.email, confirm: body.confirm === true } : body.panelId != null ? { panelId: body.panelId, panelMeta: { study: body.panelStudy, session: body.panelSession } } : { code: body.code }));
-    if (['resume', 'consent', 'session', 'view', 'trial', 'survey', 'handoff', 'withdraw'].includes(route)) {
+    if (['resume', 'consent', 'session', 'view', 'trial', 'survey', 'handoff', 'withdraw', 'checks'].includes(route)) {
       const pid = await E.verifyToken(S, body.token);
       if (!pid) return json({ error: 'expired' }, 401);
       const idx = body.index === 'practice' ? 'practice' : Number(body.index);
       switch (route) {
         case 'resume': return reply(await E.resume(S, pid));
         case 'consent': return reply(await E.consent(S, pid, body.agree === true, Date.now(), { recording: typeof body.recording === 'boolean' ? body.recording : undefined }));
-        case 'session': return reply(await E.startSession(S, pid, Date.now(), { embedded: body.embedded }));
+        case 'session': {
+          const r = await E.startSession(S, pid, Date.now(), { embedded: body.embedded });
+          // setup checks already saved for this session (a reload goes straight on)
+          if (!r.error && await S.store.get(`data/${pid}/s${r.session}/checks`)) r.checksDone = true;
+          return reply(r);
+        }
         case 'view': return reply(await E.viewTrial(S, pid, Number(body.session), idx));
         case 'trial': return reply(await E.saveTrial(S, pid, Number(body.session), idx, body.data));
         case 'survey': return reply(await E.saveSurvey(S, pid, Number(body.session), body.kind, body.data));
+        case 'checks': return reply(await saveChecks(S, E, pid, Number(body.session), body.data, (await content.getContent(S.store, type)).environment));   // setup checks (envcheck.mjs)
         case 'withdraw': { const r = await recruit.markReturned(S, pid); if (r.error) return reply(r); }   // then the returned code, as for handoff
         // falls through
         case 'handoff': {   // the code and redirect for the outcome this participant has reached (none while the study goes on)
@@ -142,7 +149,7 @@ export async function handle(req, { getStore, env, now }) {
         case 'records': return json(await E.exportRecords(S, codes.length ? codes : ['none']));
         case 'raw': return json(codes.length === 1 ? await E.exportRaw(S, codes[0]) : { error: 'one_code' });
         case 'content': return json({ ...c, _textFields: content.textFieldsFor(type), _meta: type.editorMeta ? type.editorMeta() : {}, _type: type.id,
-          _conditions: type.conditionsOf(c), _surveyRules: type.surveyRules || [], _questionTypes: content.QUESTION_TYPES, _panelPresets: recruit.presetList() });
+          _conditions: type.conditionsOf(c), _surveyRules: type.surveyRules || [], _questionTypes: content.QUESTION_TYPES, _panelPresets: recruit.presetList(), _languages: LANGUAGES });
         case 'content-history': return json(await content.contentHistory(S.store));
         case 'team': return json(await admin.listMembers(S.store));
         case 'activity': return json(await admin.auditLog(S.store));

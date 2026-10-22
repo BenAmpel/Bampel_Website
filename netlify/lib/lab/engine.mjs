@@ -21,6 +21,7 @@ import { resolve as resolveLogic, publicQuestions } from './logic.mjs';
 import { recordPanelMeta } from './recruit.mjs';
 import { randomizeQuestions, orderColumns } from './order.mjs';
 import { quotaState } from './quota.mjs';
+import { cleanFullscreen } from './envcheck.mjs';
 
 export const TOKEN_HOURS = 12;
 const DEFAULT_GAP = 6;
@@ -319,6 +320,8 @@ export async function saveTrial(S, code, session, index, data, now = Date.now())
   const clean = S.type.cleanTrialData(data, t, plan);
   const timing = cleanTiming(data && data.timing);   // engine-level, for every type: stimulus onset and the display's frame interval
   if (timing) clean.timing = timing;
+  const fsc = cleanFullscreen(data && data.fullscreen);   // full screen at onset, and each exit during the item
+  if (fsc) clean.fullscreen = fsc;
   if (kind === 'trial') {
     const raw = Array.isArray(data?.rawEvents) ? data.rawEvents.slice(0, 20000) : [];
     // The type's record fields include a copy of the item and answer key as scored, so later content
@@ -473,6 +476,7 @@ export function trialRow(S, r, p) {
     ...S.type.trialRow(r),
     trial_ms: d.traces?.durationMs ?? '', mouse_path_px: d.traces?.mousePathPx ?? '', idle_ms: d.traces?.idleMs ?? '', hidden_ms: d.traces?.hiddenMs ?? '',
     onset_ms: d.timing?.onsetMs ?? '', onset_delay_ms: d.timing?.onsetDelayMs ?? '', frame_ms: d.timing?.frameMs ?? '', preloaded: d.timing?.preloaded == null ? '' : d.timing.preloaded ? 1 : 0,
+    fullscreen: d.fullscreen ? (d.fullscreen.atOnset ? 1 : 0) : '', fullscreen_exits: d.fullscreen ? d.fullscreen.exitsMs.length : '', fullscreen_exit_ms: d.fullscreen ? d.fullscreen.exitsMs.join('|') : '',
     views: s.views?.[r.index] ?? '', viewport_w: d.viewport?.w ?? '', viewport_h: d.viewport?.h ?? '',
     received_at: r.receivedAt ? new Date(r.receivedAt).toISOString() : '',
     session_started_at: s.startedAt ? new Date(s.startedAt).toISOString() : '', session_completed_at: s.completedAt ? new Date(s.completedAt).toISOString() : '',

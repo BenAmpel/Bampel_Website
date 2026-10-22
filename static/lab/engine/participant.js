@@ -476,9 +476,119 @@
       S.plan = r;
       if (!S.lab && window.TraceLab) { S.lab = TraceLab.create({ study: studyId, version: '3.0.0', sink: { type: 'local' }, mouseSampleMs: 50 }); S.lab.start(); }
       measureFrames();
-      if (env().preload) return preloadPlan(r, 0);
-      next();
+      runChecks(r.session, function () { if (env().preload) return preloadPlan(S.plan, 0); next(); });
     });
+  }
+
+  // ---------- setup checks and full screen (engine/envcheck.js; Study content → Devices & timing) ----------
+  // Before the first item of a session: device and browser, microphone, headphones (session 1), then full screen.
+  // Results are saved once per session (route "checks"); the server decides whether a failed check ends the study.
+  function loadEnv(then) {
+    if (window.LabEnv) return then(window.LabEnv);
+    var s = document.createElement('script'); s.src = '/lab/engine/envcheck.js';
+    s.onload = function () { then(window.LabEnv); }; s.onerror = function () { then(null); };
+    document.head.appendChild(s);
+  }
+  function runChecks(n, done) {
+    var e = env(), any = e.desktopOnly || e.speechBrowser || e.micCheck || (e.headphoneCheck && n === 1) || e.fullscreen;
+    if (!any) return done();
+    loadEnv(function (L) {
+      if (!L) return done();   // the check script did not load: run the session (the trials still record full screen and device)
+      if ((S.checked && S.checked[n]) || (S.plan && S.plan.checksDone)) return fullscreenGate(L, done);
+      var dv = L.device(), problems = L.deviceProblems(e, dv), results = { device: Object.assign(dv, { problems: problems }) };
+      if (problems.length) {   // no way forward on this device; nothing is saved, so the participant can come back on a computer
+        show('<h1>' + Th('check_title') + '</h1>' + Tp(problems[0] === 'desktop' ? 'check_desktop' : 'check_speech'));
+        if (S.content.panel) stopLink();
+        return;
+      }
+      var steps = [];
+      if (e.micCheck) steps.push(function (go) { micStep(L, results, 0, go); });
+      if (e.headphoneCheck && n === 1) steps.push(function (go) { headphoneStep(L, results, go); });
+      (function step(i) {
+        if (i < steps.length) return steps[i](function () { step(i + 1); });
+        api('checks', { token: S.token, session: n, data: results }).then(function (r) {
+          if (r.screenedOut) return showScreenedOut();
+          S.checked = S.checked || {}; S.checked[n] = true;
+          fullscreenGate(L, done);
+        });
+      })(0);
+    });
+  }
+  function micStep(L, results, tries, go) {
+    show('<h1>' + Th('mic_check_title') + '</h1>' + Tp('mic_check_body') + '<label class="field" for="micm">Microphone level</label><meter id="micm" min="0" max="100" low="40" optimum="70" value="0"></meter>' +
+      '<p id="micmsg" role="status"></p><div class="actions split"><span></span><button id="micgo">' + Th('mic_check_start') + '</button></div>');
+    var btn = document.getElementById('micgo');
+    btn.onclick = function () {
+      btn.disabled = true;
+      L.micLevel(document.getElementById('micm')).then(function (r) {
+        results.mic = { ok: r.ok, peakDb: r.peakDb, error: r.error || null, tries: tries + 1 };
+        var msg = document.getElementById('micmsg');
+        if (r.ok) { msg.textContent = T('mic_check_ok'); btn.disabled = false; btn.textContent = T('continue_button'); btn.onclick = function () { go(); }; return; }
+        msg.innerHTML = errorBox(T('mic_check_fail'));
+        var last = tries >= 1;   // two attempts
+        if (last && env().micRequired) { btn.disabled = false; btn.textContent = T('continue_button'); btn.onclick = function () { go(); }; return; }   // the server screens out
+        btn.disabled = false; btn.textContent = last ? T('continue_button') : T('preload_retry');
+        btn.onclick = function () { if (last) go(); else micStep(L, results, tries + 1, go); };
+      });
+    };
+  }
+  // Six trials of three noises (Milne et al. 2021); the answer buttons open once the noises have played.
+  function headphoneStep(L, results, go) {
+    var N = L.HEADPHONE_TRIALS, targets = [], answers = [], rand = Math.random, ac = null;
+    for (var i = 0; i < N; i++) targets.push(Math.floor(rand() * 3));
+    (function trial(k) {
+      if (k >= N) {
+        var correct = L.score(answers, targets), pass = correct >= L.HEADPHONE_PASS;
+        results.headphone = { correct: correct, of: N, pass: pass, answers: answers, targets: targets };
+        progress.textContent = '';
+        try { if (ac) ac.close(); } catch (e) {}
+        if (pass) return go();
+        show('<h1>' + Th('hp_title') + '</h1>' + errorBox(T('hp_fail')) + '<div class="actions"><button id="hpgo">' + Th('continue_button') + '</button></div>');
+        return document.getElementById('hpgo').addEventListener('click', go);
+      }
+      progress.textContent = (k + 1) + ' / ' + N;
+      show('<h1>' + Th('hp_title') + '</h1>' + (k === 0 ? Tp('hp_body', { n: N }) : '') + '<div class="actions"><button id="hpplay">' + Th('hp_play') + '</button></div>' +
+        choiceGroup('hp', Th('hp_question'), [['0', '1'], ['1', '2'], ['2', '3']]) + '<div class="actions"><button id="hpnext" disabled>' + Th('continue_button') + '</button></div>');
+      var radios = stage.querySelectorAll ? stage.querySelectorAll('input[name=hp]') : [], play = document.getElementById('hpplay'), nx = document.getElementById('hpnext');
+      radios.forEach(function (r) { r.disabled = true; r.addEventListener('change', function () { nx.disabled = false; }); });
+      play.addEventListener('click', function () {
+        play.disabled = true;
+        try { ac = ac || new L.AudioContext(); } catch (e) { ac = null; }
+        if (!ac) { radios.forEach(function (r) { r.disabled = false; }); return; }
+        var src = ac.createBufferSource(); src.buffer = L.trialBuffer(ac, targets[k], rand); src.connect(ac.destination);
+        src.onended = function () { radios.forEach(function (r) { r.disabled = false; }); };
+        if (ac.resume) ac.resume(); src.start();
+      });
+      nx.addEventListener('click', function () {
+        var picked = stage.querySelector('input[name=hp]:checked');
+        if (!picked) return;
+        answers.push(Number(picked.value)); trial(k + 1);
+      });
+    })(0);
+  }
+  // Full screen needs a click. Exits are noted (performance.now()) for the trial they happen in, and a button
+  // offers the way back; the session never stops because of it.
+  function fullscreenGate(L, done) {
+    if (!env().fullscreen || !L.fullscreen.supported() || L.fullscreen.active()) return done();
+    progress.textContent = '';
+    show('<h1>' + Th('fs_title') + '</h1>' + Tp('fs_body') + '<div class="actions"><button id="fsgo">' + Th('fs_button') + '</button></div>');
+    document.getElementById('fsgo').addEventListener('click', function () {
+      L.fullscreen.enter().then(function () {
+        if (!S.fsWatching) { S.fsWatching = true; L.fullscreen.watch(fsExited); }
+        done();
+      });
+    });
+  }
+  function fsExited(t) {
+    (S.fsExits = S.fsExits || []).push(t);
+    var bar = document.getElementById('fs-back');
+    if (!bar) {
+      bar = document.createElement('div'); bar.id = 'fs-back'; bar.className = 'fs-back'; bar.setAttribute('role', 'alert');
+      bar.innerHTML = '<span>You left full screen.</span> <button type="button" class="small">' + Th('fs_back') + '</button>';
+      document.body.insertBefore(bar, document.body.firstChild);
+      bar.querySelector('button').addEventListener('click', function () { window.LabEnv.fullscreen.enter().then(function () { bar.hidden = true; }); });
+    }
+    bar.hidden = false;
   }
 
   // ---------- preloading and stimulus timing ----------
@@ -570,19 +680,20 @@
     var doneCount = p.trials.filter(function (x) { return x.done; }).length;
     progress.textContent = isPractice ? T('progress_practice') : T('progress_trial', { session: p.session, i: doneCount + 1, n: p.total });
     if (!isPractice) api('view', { token: S.token, session: p.session, index: index });   // a reload re-shows it; the server counts views
-    var t0 = performance.now(), answerLog = [], onset = null;
+    var t0 = performance.now(), answerLog = [], onset = null, fsAtOnset = null;
     if (S.lab) { S.lab.events.length = 0; S.lab.beginItem(isPractice ? 'practice' : 't' + index, stage); }
     var ctx = {
       trial: trial, index: index, isPractice: isPractice, plan: p, content: S.content,
       ms: function () { return Math.round(performance.now() - t0); },
       // Stimulus onset: the first animation frame after the screen was drawn (performance.now() clock). A type that
       // reveals its stimulus later (after a Start click, or when a clip starts) calls ctx.markOnset() at that moment.
-      markOnset: function () { if (window.requestAnimationFrame) requestAnimationFrame(function (ts) { onset = ts; }); },
+      markOnset: function () { if (window.requestAnimationFrame) requestAnimationFrame(function (ts) { onset = ts; fsAtOnset = !!(document.fullscreenElement || document.webkitFullscreenElement); }); },
       record: function (name, value) { answerLog.push({ atMs: ctx.ms(), name: name, value: value }); if (S.lab) S.lab.recordAnswer(name, value); },
       submit: function (fields, onError) {
         var feats = S.lab ? S.lab.endItem({}) : null, raw = S.lab ? S.lab.events.splice(0) : [];
         var data = Object.assign({}, fields, { answerLog: answerLog, traces: feats ? feats.features : null, rawEvents: raw, viewport: { w: window.innerWidth, h: window.innerHeight },
-          timing: { onsetMs: onset, onsetDelayMs: onset != null ? onset - t0 : null, frameMs: S.frameMs, preloaded: env().preload ? !!S.preloaded : null } });
+          timing: { onsetMs: onset, onsetDelayMs: onset != null ? onset - t0 : null, frameMs: S.frameMs, preloaded: env().preload ? !!S.preloaded : null },
+          fullscreen: env().fullscreen ? { atOnset: fsAtOnset, exitsMs: (S.fsExits || []).filter(function (x) { return x >= t0; }).map(function (x) { return x - t0; }) } : undefined });
         if (S.lab && !S.deviceSent[p.session] && !isPractice) { data.device = S.lab.device; S.deviceSent[p.session] = true; }
         api('trial', { token: S.token, session: p.session, index: index, data: data }).then(function (r) {
           if (r.error) { if (S.lab) S.lab.beginItem(isPractice ? 'practice' : 't' + index, stage); return onError && onError(ERR[r.error] || ERR.server_error); }
@@ -660,13 +771,16 @@
     // Study types with their own server routes (for example the economic game's polling) call them with the sign-in token.
     call: function (route, body) { return api(route, Object.assign({ token: S.token }, body)); } };
   window.LabEngine = { registerType: function (id, impl) { types[id] = impl; }, ui: ui,
-    internals: { S: S, mediaUrls: mediaUrls, swapUrls: swapUrls, preloadPlan: preloadPlan } };   // for tests (tests/lab/*.test.mjs)
+    internals: { S: S, mediaUrls: mediaUrls, swapUrls: swapUrls, preloadPlan: preloadPlan, runChecks: runChecks } };   // for tests (tests/lab/*.test.mjs)
 
   // ---------- boot ----------
   if (!studyId) { show('<h1>Study not found</h1><p>Check the link you were given.</p>'); return; }
   fetch(API + 'content', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (c) {
     S.content = c;
     document.title = c.text.login_title || c.name || 'Research study';
+    // The study's language: screen readers and the speech recognizer and voices of call items follow it.
+    var lang = (c.environment && c.environment.language) || 'en-US';
+    document.documentElement.setAttribute('lang', lang); document.documentElement.setAttribute('data-speech-lang', lang);
     function loadType() {
       var s = document.createElement('script'); s.src = '/lab/engine/types/' + c.type + '.js';
       s.onload = function () {

@@ -7,6 +7,7 @@ import { OPS, NO_VALUE_OPS } from './logic.mjs';
 import { panelDefaults, validatePanel } from './recruit.mjs';
 import { validateOrder } from './order.mjs';
 import { quotaDefaults, validateQuota } from './quota.mjs';
+import { environmentDefaults, validateEnvironment } from './envcheck.mjs';
 
 // Screen text used by the shared participant app (types add or override fields).
 export const ENGINE_TEXT = [
@@ -65,6 +66,24 @@ export const ENGINE_TEXT = [
   ['Screened out', 'screenout_body', 'Not eligible or a check failed: text', 'Unfortunately you are not able to continue with this study. Thank you for your time.'],
   ['Screened out', 'full_title', 'Study full: title', 'This study is full'],
   ['Screened out', 'full_body', 'Study full: text', 'Thank you for your interest. Enough people have already taken part, so the study is closed to new participants.'],
+  ['Setup checks', 'check_title', 'Checks: title', 'Check your setup'],
+  ['Setup checks', 'check_body', 'Checks: text', 'Before the session starts, a short check makes sure your computer is ready for this study.'],
+  ['Setup checks', 'check_desktop', 'Device needs a computer', 'This study needs a laptop or desktop computer with a mouse or trackpad. Please open the study link again on a computer.'],
+  ['Setup checks', 'check_speech', 'Browser needs speech', 'This study needs a browser that understands speech: Google Chrome or Microsoft Edge on a computer. Please open the study link again in one of them.'],
+  ['Setup checks', 'mic_check_title', 'Microphone: title', 'Check your microphone'],
+  ['Setup checks', 'mic_check_body', 'Microphone: text', 'Click Start, allow the microphone if your browser asks, then say a few words out loud, such as your favorite color. The bar moves when we hear you.'],
+  ['Setup checks', 'mic_check_start', 'Microphone: start button', 'Start'],
+  ['Setup checks', 'mic_check_ok', 'Microphone: worked', 'We can hear you.'],
+  ['Setup checks', 'mic_check_fail', 'Microphone: did not work', 'We could not hear your microphone. Check that it is plugged in and allowed for this page, then try again.'],
+  ['Setup checks', 'hp_title', 'Headphones: title', 'Check your headphones'],
+  ['Setup checks', 'hp_body', 'Headphones: text', 'Put on headphones and set a comfortable volume. Each time you will hear three noises. One of them has a faint tone hidden in it. Choose which one ({n} times).'],
+  ['Setup checks', 'hp_play', 'Headphones: play button', 'Play the three noises'],
+  ['Setup checks', 'hp_question', 'Headphones: question', 'Which noise had the faint tone?'],
+  ['Setup checks', 'hp_fail', 'Headphones: did not pass', 'It seems you are not wearing headphones, or the tone was hard to hear.'],
+  ['Setup checks', 'fs_title', 'Full screen: title', 'This study uses the full screen'],
+  ['Setup checks', 'fs_body', 'Full screen: text', 'Click the button to switch to full screen. Please stay in full screen until the end of the session.'],
+  ['Setup checks', 'fs_button', 'Full screen: button', 'Switch to full screen'],
+  ['Setup checks', 'fs_back', 'Full screen: return button', 'Return to full screen'],
   ['Online panel', 'handoff_code', 'Above the completion code', 'Your code for this study:'],
   ['Online panel', 'handoff_button', 'Link back to the panel ({panel})', 'Return to {panel}'],
   ['Online panel', 'stop_link', 'Link to stop taking part', 'I want to stop taking part'],
@@ -95,8 +114,8 @@ export function engineDefaults() {
       panel: { enabled: false, param: 'PROLIFIC_PID', completionUrl: '', label: 'panel', ...panelDefaults() },
       quota: quotaDefaults() },   // N caps for self sign-ups: quota.mjs
     survey: { pre: [], post: [] },
-    // How sessions run in the browser: preload fetches every media file before the first item (participant.js).
-    environment: { preload: false }
+    // How sessions run in the browser: preloading, setup checks, full screen, language (envcheck.mjs, participant.js).
+    environment: environmentDefaults()
   };
 }
 
@@ -321,7 +340,7 @@ export function validateContent(c, type) {
   if (type.validate) type.validate(c, typeErrors);
   const nS = typeErrors.length ? 99 : type.sessionCount(c);
   validateEmbedded(c.embedded, e);
-  if (c.environment != null && (typeof c.environment !== 'object' || typeof c.environment.preload !== 'boolean')) e.push('Choose whether media are loaded before the session starts.');
+  validateEnvironment(c.environment, e);
   const opts = { nSessions: nS, conditions: type.conditionsOf(c), rules: (type.surveyRules || []).map(r => r[0]), embedded: (Array.isArray(c.embedded) ? c.embedded : []).map(x => x && x.name) };
   validateQuestions(c.survey?.pre, 'Start-of-session question', e, opts);
   validateQuestions(c.survey?.post, 'End-of-session question', e, opts);

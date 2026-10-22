@@ -16,6 +16,14 @@ const NAME = /^[a-z][a-z0-9_]{0,40}$/;
 export const slug = s => String(s ?? '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40) || 'x';
 const iso = ms => (ms ? new Date(ms).toISOString() : '');
 
+const b = v => (v == null ? '' : v ? 1 : 0);
+function checkColumns(n, d) {
+  const dv = d.device || {}, p = `s${n}_check_`, out = { [p + 'device_mobile']: b(dv.mobile), [p + 'device_browser']: dv.browser || '', [p + 'device_speech']: b(dv.speech),
+    [p + 'device_screen']: dv.screenW ? `${dv.screenW}x${dv.screenH}` : '', [p + 'device_problems']: (dv.problems || []).join('|') };
+  if (d.mic) Object.assign(out, { [p + 'mic_ok']: b(d.mic.ok), [p + 'mic_peak_db']: d.mic.peakDb ?? '', [p + 'mic_error']: d.mic.error || '' });
+  if (d.headphone) Object.assign(out, { [p + 'headphone_correct']: d.headphone.correct ?? '', [p + 'headphone_pass']: b(d.headphone.pass) });
+  return out;
+}
 // records and participants as exportRecords returns them (one batch of participants).
 export function wideRows(S, { records, participants }) {
   const byCode = new Map();
@@ -37,7 +45,8 @@ export function wideRows(S, { records, participants }) {
     const hit = byCode.get(r.code);
     if (!hit) continue;
     const row = hit.row, m = String(r.key).match(/\/survey-(pre|post)$/);
-    if (m) {
+    if (/\/checks$/.test(r.key)) Object.assign(row, checkColumns(r.session, r.data || {}));   // setup checks (envcheck.mjs)
+    else if (m) {
       for (const [k, v] of Object.entries(r.embedded || {})) if (NAME.test(k) && !(`ed_${k}` in row)) row[`ed_${k}`] = v;
       for (const [k, v] of Object.entries(r.data || {})) if (NAME.test(k)) row[`s${r.session}_${m[1]}_${k}`] = Array.isArray(v) ? v.join('|') : v;
     } else if (/\/t\d+$/.test(r.key) && !S.type.exportTrials) {   // the economic game's rounds stay in its own long export

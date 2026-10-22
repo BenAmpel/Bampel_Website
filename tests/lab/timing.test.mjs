@@ -64,18 +64,19 @@ console.log('preloading: media found, plan swapped to memory, progress, failure 
 // ---------- the browser sends timing with every trial; preloading off sends none ----------
 const src = readFileSync(here('../../static/lab/engine/participant.js'), 'utf8');
 assert(/timing: \{ onsetMs: onset, onsetDelayMs: onset != null \? onset - t0 : null, frameMs: S\.frameMs, preloaded: env\(\)\.preload \? !!S\.preloaded : null \}/.test(src));
-assert(/if \(env\(\)\.preload\) return preloadPlan\(r, 0\);\n      next\(\);/.test(src), 'without preloading the session starts as before');
+assert(/runChecks\(r\.session, function \(\) \{ if \(env\(\)\.preload\) return preloadPlan\(S\.plan, 0\); next\(\); \}\);/.test(src), 'without preloading (or checks) the session starts as before');
+assert(/if \(!any\) return done\(\);/.test(src), 'no checks configured: straight on');
 
 // ---------- server: cleaned, stored, exported ----------
 assert.equal(E.cleanTiming(null), null); assert.equal(E.cleanTiming({ onsetMs: 'x', frameMs: -3 }), null, 'junk is dropped');
 assert.deepEqual(E.cleanTiming({ onsetMs: 1234.5678, onsetDelayMs: 16.7, frameMs: 16.666, preloaded: true, extra: 1 }), { onsetMs: 1234.57, onsetDelayMs: 16.7, frameMs: 16.67, preloaded: true });
 const type = TYPES.vignettes, store = memStore(), S = { store, type, study: { id: 'tm', name: 'T', type: 'vignettes', codePrefix: 'TM' } };
-const c = C.defaultContent(type); c.environment = { preload: true };
+const c = C.defaultContent(type); c.environment = { ...c.environment, preload: true };
 assert.equal((await C.saveContent(store, type, c, 'T', 0)).version, 1);
 assert.equal((await C.getContent(store, type)).environment.preload, true);
-const bad = structuredClone(c); bad.environment = { preload: 'yes' };
+const bad = structuredClone(c); bad.environment = { ...c.environment, preload: 'yes' };
 assert(C.validateContent(C.normalize(bad, type), type).some(x => /media are loaded/.test(x)));
-assert.deepEqual(C.publicContent(await C.getContent(store, type), type, S.study).environment, { preload: true }, 'the browser learns the setting');
+assert.equal(C.publicContent(await C.getContent(store, type), type, S.study).environment.preload, true, 'the browser learns the setting');
 const [p] = (await E.createParticipants(S, 1, { gapDays: 0 })).created;
 await E.consent(S, p.code, true);
 const pl = await E.startSession(S, p.code);
