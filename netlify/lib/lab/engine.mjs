@@ -18,6 +18,12 @@ import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { setNew, update, getMany, inBatches, deleteKeys } from './store.mjs';
 import { getContent, itemsFor, domainAllowed } from './content.mjs';
 import { resolve as resolveLogic, publicQuestions } from './logic.mjs';
+import { recordPanelMeta } from './recruit.mjs';
+import { randomizeQuestions, orderColumns } from './order.mjs';
+import { quotaState } from './quota.mjs';
+import { cleanFullscreen } from './envcheck.mjs';
+import { chooseRow, applyRow, markerKey, latinColumns } from './latin.mjs';
+import { EXTRA_TYPES, cleanExtra } from './questiontypes.mjs';
 
 export const TOKEN_HOURS = 12;
 const DEFAULT_GAP = 6;
@@ -126,6 +132,8 @@ export function totalFor(S, p, c, prog) {
   return total;
 }
 export function status(p, now, total, completed) {
+  if (p.screenedOut) return { finished: true, screenedOut: true, completed: completed.length, total };
+  if (p.returnedAt) return { finished: true, returned: true, completed: completed.length, total };   // chose to stop (recruit.mjs)
   const next = completed.length + 1;
   if (next > total) return { finished: true, completed: completed.length, total };
   const last = completed[completed.length - 1];
@@ -148,6 +156,7 @@ export function cleanAnswers(d, items, ctx = {}) {
   for (const it of items) {
     if (it.type === 'info') continue;
     const v = Object.hasOwn(d, it.id) ? d[it.id] : undefined;   // own properties only (never "constructor" or "__proto__")
+    if (EXTRA_TYPES.includes(it.type)) { for (const [k, x] of cleanExtra(it, v, d)) out[k] = x; continue; }   // slider, rank, matrix (rows are their own variables)
     if (v == null || v === '') continue;
     if (it.type === 'scale') { const n = Number(v), lo = Number.isInteger(it.start) ? it.start : 1; if (Number.isInteger(n) && n >= lo && n <= lo + it.n - 1) out[it.id] = String(n); }
     else if (it.type === 'confidence') { const n = Number(v); if (Number.isFinite(n) && n >= 0 && n <= 100) out[it.id] = String(Math.round(n)); }
@@ -202,6 +211,7 @@ export async function login(S, creds = {}, now = Date.now()) {
     p = await store.get(pKey(pid));
     if (!p) [p] = await enroll(S, [pid], { gapDays: en.gapDays, label: panel.label || 'panel', selfSignup: true }, now, Math.random);
     await setNew(store, contactKey(p.code), { panelId: id, firstSeenAt: now });
+    await recordPanelMeta(S, p.code, creds.panelMeta, now);   // the panel's study and session IDs (not identifying)
   } else {
     p = await loadParticipant(S, creds.code);
     if (!p || PID_RE.test(p.code)) return { error: 'invalid_code', status: 401 };
@@ -236,10 +246,17 @@ export async function consent(S, code, agree, now = Date.now(), opts = {}) {
 export function buildPlan(S, p, n, c, extra = {}) {
   const seedId = S.study.seedId || S.study.id;
   const rand = seeded(`${p.code}|${seedId}|s${n}`);
-  const plan = S.type.buildPlan(p, n, c, rand, { seeded, shuffle, studyId: seedId });
+  const lsq = extra.latinRow != null ? applyRow(c, n, extra.latinRow) : null;   // Latin-square block order (latin.mjs)
+  const plan = S.type.buildPlan(p, n, lsq ? lsq.content : c, rand, { seeded, shuffle, studyId: seedId });
+  if (lsq) plan.latin = lsq.latin;
   const ctx = { session: n, condition: p.condition, ...(plan.surveyCtx || {}) };
+  // Question and option order (order.mjs), from its own seed so the type's draws above are unchanged.
+  const orand = seeded(`${p.code}|${seedId}|s${n}|order`), order = {};
+  const ordered = (list, k) => { const r = randomizeQuestions(list, orand); if (r.shown) order[k] = r.shown; return r.items; };
+  const preItems = ordered(itemsFor(c.survey.pre, 'pre', ctx, S.type), 'pre'), postItems = ordered(itemsFor(c.survey.post, 'post', ctx, S.type), 'post');
+  if (Array.isArray(plan.questions)) plan.questions = ordered(plan.questions, 'questions');
   return { ...plan, session: n, contentVersion: c.version || 0, createdAt: Date.now(), condition: p.condition, embedded: resolveEmbedded(c.embedded, extra.embedded),
-    preItems: itemsFor(c.survey.pre, 'pre', ctx, S.type), postItems: itemsFor(c.survey.post, 'post', ctx, S.type) };
+    preItems, postItems, ...(Object.keys(order).length ? { order } : {}) };
 }
 
 // What the browser receives for a plan; the type decides what each trial exposes (never answer keys).
@@ -266,7 +283,11 @@ export async function startSession(S, code, now = Date.now(), extra = {}) {
   const n = st.nextSession;
   let plan = await getPlan(S, p, n);
   if (!plan) {   // written once: whoever writes first wins and everyone reads that copy
-    if (await setNew(S.store, planKey(p.code, n), buildPlan(S, p, n, c, extra))) await S.store.set(`started/${p.code}/s${n}-${now}`, { at: now });
+    const latinRow = await chooseRow(S, p, n, c);
+    if (await setNew(S.store, planKey(p.code, n), buildPlan(S, p, n, c, { ...extra, latinRow }))) {
+      await S.store.set(`started/${p.code}/s${n}-${now}`, { at: now });
+      if (latinRow != null) await S.store.set(markerKey(p, n, latinRow), { at: now });
+    }
     plan = await S.store.get(planKey(p.code, n));
     if (n === 1 && p.totalSessions == null) await update(S.store, pKey(p.code), d => { if (d.totalSessions == null) d.totalSessions = S.type.sessionCount(c); });
   }
@@ -281,6 +302,14 @@ export async function viewTrial(S, code, session, index, now = Date.now()) {
   return { ok: true };
 }
 
+// Browser timing for one trial (participant.js): onset on the performance.now() clock, onset after the screen was
+// built, the session's measured frame interval, and whether the session's media were preloaded.
+export function cleanTiming(t) {
+  if (!t || typeof t !== 'object') return null;
+  const n = (v, lo, hi) => (typeof v === 'number' && Number.isFinite(v) && v >= lo && v <= hi ? Math.round(v * 100) / 100 : null);
+  const out = { onsetMs: n(t.onsetMs, 0, 864e5 * 7), onsetDelayMs: n(t.onsetDelayMs, -1000, 600000), frameMs: n(t.frameMs, 1, 1000), preloaded: typeof t.preloaded === 'boolean' ? t.preloaded : null };
+  return Object.values(out).some(v => v != null) ? out : null;
+}
 const jsonSize = v => { try { return JSON.stringify(v).length; } catch { return Infinity; } };
 
 export async function saveTrial(S, code, session, index, data, now = Date.now()) {
@@ -298,11 +327,16 @@ export async function saveTrial(S, code, session, index, data, now = Date.now())
   // Hook: a study type that owns a trial's data (the economic game writes its round records on the server) takes over the save.
   if (kind === 'trial' && S.type.saveTrialHook) { const h = await S.type.saveTrialHook(S, p, plan, index, data, now); if (h) return h; }
   const clean = S.type.cleanTrialData(data, t, plan);
+  const timing = cleanTiming(data && data.timing);   // engine-level, for every type: stimulus onset and the display's frame interval
+  if (timing) clean.timing = timing;
+  const fsc = cleanFullscreen(data && data.fullscreen);   // full screen at onset, and each exit during the item
+  if (fsc) clean.fullscreen = fsc;
   if (kind === 'trial') {
     const raw = Array.isArray(data?.rawEvents) ? data.rawEvents.slice(0, 20000) : [];
     // The type's record fields include a copy of the item and answer key as scored, so later content
     // edits never change this record.
-    const rec = { code: p.code, condition: p.condition, session, index, ...S.type.recordFields(t, plan), contentVersion: plan.contentVersion, receivedAt: now, data: clean };
+    const rec = { code: p.code, condition: p.condition, session, index, ...S.type.recordFields(t, plan), contentVersion: plan.contentVersion, receivedAt: now, data: clean,
+      ...(plan.order?.questions ? { shown: plan.order.questions } : {}), ...(plan.latin ? { latin: plan.latin } : {}) };
     if (!(await setNew(store, key, rec))) return { ok: true, repeat: true };
     if (raw.length && jsonSize(raw) <= 3e6) await store.set(`raw/${p.code}/s${session}/t${index}`, { code: p.code, session, index, events: raw });
   } else if (!(await setNew(store, key, { code: p.code, session, contentVersion: plan.contentVersion, receivedAt: now, data: clean }))) return { ok: true, repeat: true };
@@ -320,7 +354,7 @@ export async function saveSurvey(S, code, session, kind, data, now = Date.now())
   if (st.finished || session !== st.nextSession || !plan) return { error: 'wrong_session', status: 409 };
   if (kind === 'post' && (prog.sessions[session]?.trialsDone.length || 0) < plan.trials.length) return { error: 'trials_incomplete', status: 409 };
   const items = (kind === 'pre' ? plan.preItems : plan.postItems) || [];
-  const created = await setNew(store, key, { code: p.code, condition: p.condition, session, kind, contentVersion: plan.contentVersion, receivedAt: now,
+  const created = await setNew(store, key, { code: p.code, condition: p.condition, session, kind, contentVersion: plan.contentVersion, receivedAt: now, ...(plan.order?.[kind] ? { shown: plan.order[kind] } : {}),
     ...(plan.embedded && Object.keys(plan.embedded).length ? { embedded: plan.embedded } : {}), data: cleanAnswers(data, items, { condition: p.condition, embedded: plan.embedded }) });
   if (created && kind === 'post') await store.set(`done/${p.code}/s${session}-${now}`, { at: now });
   const after = await progressOf(S, p);
@@ -330,8 +364,11 @@ export async function saveSurvey(S, code, session, kind, data, now = Date.now())
 // ---------- enrollment ----------
 // Conditions are assigned by minimization: the condition with the fewest participants so far (ties at
 // random), counted from write-once marker keys. Test participants are counted separately.
-async function pickCondition(S, test, rand) {
-  const conds = S.type.conditionsOf(await getContent(S.store, S.type)), pre = test ? 'cond-test' : 'cond';
+// capped (self sign-ups): conditions at their quota are skipped, and null means the study is full (quota.mjs).
+async function pickCondition(S, test, rand, capped = false) {
+  const c = await getContent(S.store, S.type);
+  let conds = S.type.conditionsOf(c), pre = test ? 'cond-test' : 'cond';
+  if (capped && !test) { conds = (await quotaState(S, c, conds)).open; if (!conds.length) return null; }
   const counts = await Promise.all(conds.map(cn => S.store.list(`${pre}/${cn}/`).then(k => k.length)));
   const min = Math.min(...counts), opts = conds.filter((cn, i) => counts[i] === min);
   return opts[Math.floor(rand() * opts.length)];
@@ -342,9 +379,10 @@ export async function enroll(S, ids, opts, now, rand) {
   const conds = opts.condition ? S.type.conditionsOf(await getContent(S.store, S.type)) : [];
   for (const id of ids) {
     // A fixed condition is only for test participants (previewing one arm); real ones are always balanced.
-    const condition = opts.test && conds.includes(opts.condition) ? opts.condition : await pickCondition(S, !!opts.test, rand);
-    const p = { code: id, condition, createdAt: now, gapDays: opts.gapDays ?? DEFAULT_GAP, label: opts.label || null, test: !!opts.test, selfSignup: !!opts.selfSignup };
-    if (await setNew(S.store, pKey(id), p)) { await S.store.set(`${p.test ? 'cond-test' : 'cond'}/${condition}/${id}`, { at: now }); made.push(p); }
+    const condition = opts.test && conds.includes(opts.condition) ? opts.condition : await pickCondition(S, !!opts.test, rand, !!opts.selfSignup);
+    const p = { code: id, condition, createdAt: now, gapDays: opts.gapDays ?? DEFAULT_GAP, label: opts.label || null, test: !!opts.test, selfSignup: !!opts.selfSignup,
+      ...(condition == null ? { screenedOut: { at: now, reason: 'quota_full' } } : {}) };   // the study (or every open condition) is full
+    if (await setNew(S.store, pKey(id), p)) { if (condition != null) await S.store.set(`${p.test ? 'cond-test' : 'cond'}/${condition}/${id}`, { at: now }); made.push(p); }
     else made.push(await S.store.get(pKey(id)));
   }
   return made;
@@ -446,11 +484,15 @@ export function trialRow(S, r, p) {
     session: r.session, trial_index: r.index,
     ...S.type.trialRow(r),
     trial_ms: d.traces?.durationMs ?? '', mouse_path_px: d.traces?.mousePathPx ?? '', idle_ms: d.traces?.idleMs ?? '', hidden_ms: d.traces?.hiddenMs ?? '',
+    onset_ms: d.timing?.onsetMs ?? '', onset_delay_ms: d.timing?.onsetDelayMs ?? '', frame_ms: d.timing?.frameMs ?? '', preloaded: d.timing?.preloaded == null ? '' : d.timing.preloaded ? 1 : 0,
+    fullscreen: d.fullscreen ? (d.fullscreen.atOnset ? 1 : 0) : '', fullscreen_exits: d.fullscreen ? d.fullscreen.exitsMs.length : '', fullscreen_exit_ms: d.fullscreen ? d.fullscreen.exitsMs.join('|') : '',
     views: s.views?.[r.index] ?? '', viewport_w: d.viewport?.w ?? '', viewport_h: d.viewport?.h ?? '',
     received_at: r.receivedAt ? new Date(r.receivedAt).toISOString() : '',
     session_started_at: s.startedAt ? new Date(s.startedAt).toISOString() : '', session_completed_at: s.completedAt ? new Date(s.completedAt).toISOString() : '',
     days_since_prev_session: prev && s.startedAt ? ((s.startedAt - prev.completedAt) / 864e5).toFixed(2) : '',
-    content_version: r.contentVersion ?? 0
+    content_version: r.contentVersion ?? 0,
+    ...orderColumns(r.shown),   // the order the item's questions and options were shown in, when shuffled
+    ...latinColumns(r.latin)   // the Latin-square row and block order of this session
   };
 }
 
@@ -459,7 +501,7 @@ export function surveyRow(r, p) {
     session: r.session, survey: r.kind, content_version: r.contentVersion ?? 0, received_at: r.receivedAt ? new Date(r.receivedAt).toISOString() : '' };
   for (const [k, v] of Object.entries(r.embedded || {})) if (/^[a-z][a-z0-9_]{0,40}$/.test(k)) row[`ed_${k}`] = v;   // embedded data (URL parameters, constants)
   for (const [k, v] of Object.entries(r.data || {})) if (/^[a-z][a-z0-9_]{0,40}$/.test(k)) row[k in row ? `q_${k}` : k] = v;
-  return row;
+  return Object.assign(row, orderColumns(r.shown, row));
 }
 
 export async function exportRows(S, kind, codes) {
@@ -492,6 +534,7 @@ export async function deleteParticipant(S, id) {
   const keys = (await Promise.all(['data', 'raw', 'plans', 'started', 'done', 'views'].map(k => store.list(`${k}/${p.code}/`)))).flat();
   // Hook: a study type may hold more keys for this participant (the economic game: matching, moves, payments).
   const extra = S.type.purgeParticipant ? await S.type.purgeParticipant(S, p) : [];
+  for (const [, pl] of await getMany(store, keys.filter(k => k.startsWith('plans/')))) if (pl && pl.latin) extra.push(markerKey(p, pl.session, pl.latin.row));   // frees the Latin-square row
   await deleteKeys(store, keys.concat(extra, [`consent/${p.code}`, `cond/${p.condition}/${p.code}`, `cond-test/${p.condition}/${p.code}`, contactKey(p.code)]));
   await store.delete(pKey(p.code));
   return { ok: true, code: p.code, condition: p.condition, test: !!p.test, extraKeys: extra, records: keys.filter(k => k.startsWith('data/')).length };

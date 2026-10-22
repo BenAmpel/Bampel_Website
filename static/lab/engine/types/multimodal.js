@@ -25,7 +25,8 @@
   function loadVoices() { try { voices = window.speechSynthesis ? speechSynthesis.getVoices() : []; } catch (e) { voices = []; } }
   if (window.speechSynthesis) { loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
   function pickVoice(pref) {
-    var en = voices.filter(function (v) { return /^en(-|_)/i.test(v.lang); });
+    var lg = (document.documentElement.getAttribute('data-speech-lang') || 'en-US').split('-')[0];   // the study's language (Devices & timing)
+    var en = voices.filter(function (v) { return new RegExp('^' + lg + '(-|_)', 'i').test(v.lang); });
     if (pref && pref.name) { var m = voices.filter(function (v) { return v.name === pref.name; })[0]; if (m) return m; }
     return en.filter(function (v) { return /Samantha|Google US English|Jenny|Aria|Natural/i.test(v.name); })[0] || en[0] || null;
   }
@@ -364,7 +365,7 @@
       var talk = document.getElementById('ph-talk'), interim = document.getElementById('ph-interim'), heard = '';
       try { recog = new SR(); } catch (e) { recog = null; }
       if (!recog) return;
-      recog.lang = 'en-US'; recog.interimResults = true; recog.continuous = true; recog.maxAlternatives = 1;
+      recog.lang = document.documentElement.getAttribute('data-speech-lang') || 'en-US'; recog.interimResults = true; recog.continuous = true; recog.maxAlternatives = 1;
       recog.onresult = function (e) { var t = ''; for (var i = 0; i < e.results.length; i++) t += e.results[i][0].transcript; heard = t; if (interim) interim.textContent = t; };
       recog.onerror = function (e) { if (e.error === 'not-allowed' || e.error === 'service-not-allowed') { micBlocked = true; talk.hidden = true; } };
       recog.onend = function () {

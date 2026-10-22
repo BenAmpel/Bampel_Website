@@ -4,6 +4,12 @@
 // defaults, normalization, validation, and survey "show when" rules. Saved edits are numbered versions.
 
 import { OPS, NO_VALUE_OPS } from './logic.mjs';
+import { panelDefaults, validatePanel } from './recruit.mjs';
+import { validateOrder } from './order.mjs';
+import { quotaDefaults, validateQuota } from './quota.mjs';
+import { environmentDefaults, validateEnvironment } from './envcheck.mjs';
+import { validateLatin } from './latin.mjs';
+import { EXTRA_TYPES, validateExtra } from './questiontypes.mjs';
 
 // Screen text used by the shared participant app (types add or override fields).
 export const ENGINE_TEXT = [
@@ -50,7 +56,46 @@ export const ENGINE_TEXT = [
   ['End of session', 'finished_title', 'Last session: title', 'Thank you'],
   ['End of session', 'finished_body', 'Last session: text', 'You have completed all sessions of the study. You can close this page.'],
   ['End of session', 'calendar_button', 'Add-to-calendar button', 'Add the next session to my calendar'],
-  ['End of session', 'sign_out', 'Sign-out button', 'Sign out']
+  ['End of session', 'sign_out', 'Sign-out button', 'Sign out'],
+  ['Loading', 'preload_title', 'Loading media: title', 'Getting the study ready'],
+  ['Loading', 'preload_body', 'Loading media: text', 'Loading the pictures and sounds for this session, so everything plays without delay.'],
+  ['Loading', 'preload_progress', 'Loading media: progress ({i}, {n})', 'Loaded {i} of {n} files'],
+  ['Loading', 'preload_failed_title', 'Loading failed: title', 'Some files did not load'],
+  ['Loading', 'preload_failed_body', 'Loading failed: text ({n})', '{n} file(s) could not be loaded. Check your internet connection, then try again.'],
+  ['Loading', 'preload_retry', 'Loading failed: try again button', 'Try again'],
+  ['Loading', 'preload_continue', 'Loading failed: continue button', 'Continue anyway'],
+  ['Screened out', 'screenout_title', 'Not eligible or a check failed: title', 'Thank you for your interest'],
+  ['Screened out', 'screenout_body', 'Not eligible or a check failed: text', 'Unfortunately you are not able to continue with this study. Thank you for your time.'],
+  ['Screened out', 'full_title', 'Study full: title', 'This study is full'],
+  ['Screened out', 'full_body', 'Study full: text', 'Thank you for your interest. Enough people have already taken part, so the study is closed to new participants.'],
+  ['Setup checks', 'check_title', 'Checks: title', 'Check your setup'],
+  ['Setup checks', 'check_body', 'Checks: text', 'Before the session starts, a short check makes sure your computer is ready for this study.'],
+  ['Setup checks', 'check_desktop', 'Device needs a computer', 'This study needs a laptop or desktop computer with a mouse or trackpad. Please open the study link again on a computer.'],
+  ['Setup checks', 'check_speech', 'Browser needs speech', 'This study needs a browser that understands speech: Google Chrome or Microsoft Edge on a computer. Please open the study link again in one of them.'],
+  ['Setup checks', 'mic_check_title', 'Microphone: title', 'Check your microphone'],
+  ['Setup checks', 'mic_check_body', 'Microphone: text', 'Click Start, allow the microphone if your browser asks, then say a few words out loud, such as your favorite color. The bar moves when we hear you.'],
+  ['Setup checks', 'mic_check_start', 'Microphone: start button', 'Start'],
+  ['Setup checks', 'mic_check_ok', 'Microphone: worked', 'We can hear you.'],
+  ['Setup checks', 'mic_check_fail', 'Microphone: did not work', 'We could not hear your microphone. Check that it is plugged in and allowed for this page, then try again.'],
+  ['Setup checks', 'hp_title', 'Headphones: title', 'Check your headphones'],
+  ['Setup checks', 'hp_body', 'Headphones: text', 'Put on headphones and set a comfortable volume. Each time you will hear three noises. One of them has a faint tone hidden in it. Choose which one ({n} times).'],
+  ['Setup checks', 'hp_play', 'Headphones: play button', 'Play the three noises'],
+  ['Setup checks', 'hp_question', 'Headphones: question', 'Which noise had the faint tone?'],
+  ['Setup checks', 'hp_fail', 'Headphones: did not pass', 'It seems you are not wearing headphones, or the tone was hard to hear.'],
+  ['Setup checks', 'timing_wait', 'Display timing: text', 'Measuring your screen. This takes a few seconds; please keep this page in front.'],
+  ['Setup checks', 'fs_title', 'Full screen: title', 'This study uses the full screen'],
+  ['Setup checks', 'fs_body', 'Full screen: text', 'Click the button to switch to full screen. Please stay in full screen until the end of the session.'],
+  ['Setup checks', 'fs_button', 'Full screen: button', 'Switch to full screen'],
+  ['Setup checks', 'fs_back', 'Full screen: return button', 'Return to full screen'],
+  ['Online panel', 'handoff_code', 'Above the completion code', 'Your code for this study:'],
+  ['Online panel', 'handoff_button', 'Link back to the panel ({panel})', 'Return to {panel}'],
+  ['Online panel', 'stop_link', 'Link to stop taking part', 'I want to stop taking part'],
+  ['Online panel', 'stop_title', 'Stop: title', 'Stop taking part?'],
+  ['Online panel', 'stop_body', 'Stop: text', 'You can stop at any time without giving a reason. Answers you have already given are kept unless you ask the research team to delete them.'],
+  ['Online panel', 'stop_keep', 'Stop: keep going button', 'Keep going'],
+  ['Online panel', 'stop_confirm', 'Stop: confirm button', 'Stop taking part'],
+  ['Online panel', 'returned_title', 'After stopping: title', 'You have stopped taking part'],
+  ['Online panel', 'returned_body', 'After stopping: text', 'Thank you for your time. You can close this page.']
 ].map(([group, key, label, def]) => ({ group, key, label, def }));
 
 export function textFieldsFor(type) {
@@ -68,8 +113,12 @@ export function engineDefaults() {
     consent: { approved: false, paragraphs: ['[Paste the IRB-approved consent text here. Leave a blank line between paragraphs.]'], agreeLabel: 'I am 18 or older and I agree to participate.' },
     enrollment: { open: true, domains: ['gsu.edu', 'student.gsu.edu'], gapDays: 0, label: 'self-signup',
       // Online panel sign-in (Prolific and similar): the participant ID comes from the study link; the completion link is shown at the end.
-      panel: { enabled: false, param: 'PROLIFIC_PID', completionUrl: '', label: 'panel' } },
-    survey: { pre: [], post: [] }
+      // Completion codes and the redirect back to the panel: netlify/lib/lab/recruit.mjs.
+      panel: { enabled: false, param: 'PROLIFIC_PID', completionUrl: '', label: 'panel', ...panelDefaults() },
+      quota: quotaDefaults() },   // N caps for self sign-ups: quota.mjs
+    survey: { pre: [], post: [] },
+    // How sessions run in the browser: preloading, setup checks, full screen, language (envcheck.mjs, participant.js).
+    environment: environmentDefaults()
   };
 }
 
@@ -80,7 +129,9 @@ export function defaultContent(type) {
   return c;
 }
 
-const ENGINE_KEYS = ['minutesPerSession', 'consent', 'enrollment', 'survey', 'text', 'embedded'];
+const ENGINE_KEYS = ['minutesPerSession', 'consent', 'enrollment', 'survey', 'text', 'embedded', 'environment'];
+// Every part of a study's content that is saved (engine parts, then the type's own), as the design file keeps them.
+export const contentKeysFor = type => ENGINE_KEYS.concat(type.contentKeys);
 
 // Survey "show when" rules: always, by condition (it.conditions), plus the type's own rules.
 export function itemsFor(items, kind, ctx, type) {
@@ -100,8 +151,10 @@ export function normalize(c, type) {
   c.consent = { ...d.consent, ...(c.consent || {}) };
   c.enrollment = { ...d.enrollment, ...(c.enrollment || {}) };
   c.enrollment.panel = { ...d.enrollment.panel, ...(c.enrollment.panel || {}) };
+  c.enrollment.quota = { ...d.enrollment.quota, ...(c.enrollment.quota && typeof c.enrollment.quota === 'object' ? c.enrollment.quota : {}) };
   c.survey = { pre: c.survey?.pre || d.survey.pre, post: c.survey?.post || d.survey.post };
   c.embedded = Array.isArray(c.embedded) ? c.embedded : [];
+  c.environment = { ...d.environment, ...(c.environment && typeof c.environment === 'object' ? c.environment : {}) };
   c.text = { ...d.text, ...(c.text || {}) };
   for (const kind of ['pre', 'post']) for (const it of c.survey[kind]) if (!Array.isArray(it.sessions)) it.sessions = kind === 'pre' ? [1] : [];
   for (const k of type.contentKeys) if (c[k] === undefined) c[k] = structuredClone(d[k]);
@@ -123,12 +176,15 @@ export function clearContentCache(store) { if (store) caches.delete(store.name);
 export function publicContent(c, type, study) {
   return { study: study.id, type: type.id, name: study.name, version: c.version, minutesPerSession: c.minutesPerSession, consent: c.consent,
     text: c.text, sessions: type.sessionCount(c), signup: c.enrollment.open ? c.enrollment.domains : [],
-    panel: c.enrollment.panel && c.enrollment.panel.enabled ? { param: c.enrollment.panel.param, completionUrl: c.enrollment.panel.completionUrl || '' } : null,
+    // Never the completion codes: the browser asks for its code (route "handoff") once the participant has one.
+    panel: c.enrollment.panel && c.enrollment.panel.enabled ? { param: c.enrollment.panel.param, completionUrl: c.enrollment.panel.redirectUrl ? '' : c.enrollment.panel.completionUrl || '',
+      studyParam: c.enrollment.panel.studyParam || '', sessionParam: c.enrollment.panel.sessionParam || '' } : null,
     embedded: (c.embedded || []).map(x => (x.source === 'url' ? { name: x.name, source: 'url', param: x.param || x.name } : { name: x.name, source: 'value', value: x.value })),
+    environment: c.environment,
     ...(type.publicContent ? type.publicContent(c) : {}) };
 }
 
-export const QUESTION_TYPES = ['scale', 'choice', 'select', 'text', 'confidence', 'number', 'multi', 'info'];
+export const QUESTION_TYPES = ['scale', 'choice', 'select', 'text', 'confidence', 'number', 'multi', 'info', ...EXTRA_TYPES];
 const str = (v, max = 4000) => typeof v === 'string' && v.trim().length > 0 && v.length <= max;
 const intIn = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi;
 const RESERVED = ['constructor', 'prototype', '__proto__', 'hasownproperty', 'tostring', 'valueof', 'code', 'condition', 'test', 'label', 'self_signup', 'session', 'survey', 'content_version', 'received_at', 'trial_index', 'item_id'];
@@ -205,7 +261,8 @@ export function validateQuestions(items, where, e, { nSessions, conditions, rule
     }
     if (it.page != null && !allowSessions) e.push(`${w}: questions asked after an item are all on one screen, so they cannot have a page number.`);
     else if (it.page != null && !intIn(it.page, 1, 99)) e.push(`${w}: the page must be a whole number from 1 to 99.`);
-    if (it.type === 'choice' || it.type === 'select' || it.type === 'multi') {
+    validateExtra(it, w, e, { ids, reserved: RESERVED, allowMatrix: allowSessions });   // slider, rank, matrix (questiontypes.mjs)
+    if (it.type === 'choice' || it.type === 'select' || it.type === 'multi' || it.type === 'rank' || it.type === 'matrix') {
       if (!Array.isArray(it.options) || it.options.length < 2) e.push(`${w}: add at least two options.`);
       else if (!it.options.every(o => str(o.value, 200) && str(o.label, 300))) e.push(`${w}: every option needs text.`);
       else if (new Set(it.options.map(o => o.value)).size !== it.options.length) e.push(`${w}: two options have the same value.`);
@@ -237,6 +294,7 @@ export function validateQuestions(items, where, e, { nSessions, conditions, rule
       }
     }
   });
+  validateOrder(allowSessions ? items : items.map(q => ({ ...q, page: 1 })), where, e);   // shuffled questions and options (order.mjs)
 }
 
 // Embedded data: values captured when a session starts (URL parameters such as PROLIFIC_PID, or constants).
@@ -279,11 +337,15 @@ export function validateContent(c, type) {
       if (!/^[A-Za-z][A-Za-z0-9_]{0,39}$/.test(pn.param || '')) e.push('Online panel: the link parameter must be a name like PROLIFIC_PID (letters, numbers, underscores).');
       if (pn.completionUrl && !/^https:\/\/[^\s"'<>]+$/.test(pn.completionUrl)) e.push('Online panel: the completion link must start with https:// (copy it from Prolific).');
     }
+    validatePanel(pn, e);
+    validateQuota(en.quota, (() => { try { return type.conditionsOf(c); } catch { return []; } })(), e);
   }
   const typeErrors = [];
   if (type.validate) type.validate(c, typeErrors);
   const nS = typeErrors.length ? 99 : type.sessionCount(c);
   validateEmbedded(c.embedded, e);
+  validateEnvironment(c.environment, e);
+  validateLatin(c, e);
   const opts = { nSessions: nS, conditions: type.conditionsOf(c), rules: (type.surveyRules || []).map(r => r[0]), embedded: (Array.isArray(c.embedded) ? c.embedded : []).map(x => x && x.name) };
   validateQuestions(c.survey?.pre, 'Start-of-session question', e, opts);
   validateQuestions(c.survey?.post, 'End-of-session question', e, opts);

@@ -87,10 +87,12 @@
     '<section data-tab="participants"><div class="row">' +
       '<button type="button" class="secondary" id="refresh">Refresh</button>' +
       '<button type="button" class="secondary" data-export="trials">Download trials CSV</button><button type="button" class="secondary" data-export="surveys">Download surveys CSV</button>' +
+      '<button type="button" class="secondary" data-export="wide">Download wide CSV (one row per participant)</button>' +
       '<button type="button" class="secondary" data-export="json">Download full JSON</button><button type="button" class="secondary" data-export="raw">Download raw behavior traces (JSONL)</button>' +
       '<label class="check" style="font-size:13px"><input type="checkbox" id="exreal"> Real participants only</label>' +
       '<button type="button" class="danger secondary" data-role="owner" id="deltest">Delete all test participants</button></div>' +
-      '<p class="muted" id="exprog"></p><p class="muted">Column definitions: <a href="/lab/CODEBOOK.md" target="_blank" rel="noopener">codebook</a>. Test participants are included and marked in the <code>test</code> column unless "Real participants only" is ticked.</p>' +
+      '<p class="muted" id="exprog"></p><div class="row"><button type="button" class="secondary" data-codebook="csv">Download this study\'s codebook (CSV)</button><button type="button" class="secondary" data-codebook="md">Codebook as a document (Markdown)</button></div>' +
+      '<p class="muted">The study\'s codebook lists every column of the downloads: its name, kind, allowed values and their labels, the question text, and the conditions and sessions it applies to. It is made from the current study content, so download it again after you change the questions. General definitions: <a href="/lab/CODEBOOK.md" target="_blank" rel="noopener">lab codebook</a>. Test participants are included and marked in the <code>test</code> column unless "Real participants only" is ticked.</p>' +
       '<p class="muted" id="summary"></p><div class="table-wrap"><table id="tbl"></table></div>' +
       '<div class="section" data-role="owner"><h2>Backups</h2><p class="muted">Every hour the study data is copied to a separate backup store on Netlify (answers once, changing records every time). That protects against mistakes and bugs. For a copy outside Netlify, download a complete backup (every record, raw traces, emails, study content, team, and activity log) and save it to GSU-approved storage, for example weekly. It contains emails, so treat it as identifiable data. Deleting a participant also removes them from the backup store.</p>' +
         '<p id="bkstatus" class="muted"></p><div class="row"><button type="button" class="secondary" id="bkrun">Run backup now</button><button type="button" class="secondary" id="bkdl">Download complete backup (.json.gz)</button></div><p id="bkprog" class="muted"></p></div>' +
@@ -114,7 +116,11 @@
     '<section data-tab="content" hidden><p class="muted" id="contentinfo"></p><div id="contentwarn"></div><p class="ok" id="say" role="status"></p><nav class="tabs sub" id="subtabs"></nav><fieldset id="editor" style="border:0;padding:0;margin:0;min-width:0"></fieldset>' +
       '<div class="savebar" id="savebar" data-role="editor"><span id="dirty" class="muted">No unsaved changes.</span><input type="text" id="note" class="grow" placeholder="What changed? (optional, shown in the activity log)">' +
       '<button type="button" class="secondary" id="discard" disabled>Discard changes</button><button type="button" id="save" disabled>Save changes</button></div>' +
-      '<div class="section"><h2>Versions</h2><p class="muted">Every save makes a new version. Restoring an old version saves it again as the newest version, so nothing is lost. Each answer records the version it was collected under.</p><div class="table-wrap"><table id="vtbl"></table></div></div></section>' +
+      '<div class="section"><h2>Versions</h2><p class="muted">Every save makes a new version. Restoring an old version saves it again as the newest version, so nothing is lost. Each answer records the version it was collected under.</p><div class="table-wrap"><table id="vtbl"></table></div></div>' +
+      '<div class="section"><h2>Study design file</h2><p class="muted">One file with this study\'s whole design: items, questions, conditions, screen text, consent, and settings, with uploaded media up to about 3 MB. It has no participants and no answers. Use it to share the study with another lab, to deposit it with a paper, or to start a new study from it on the lab console (owners). Completion codes are left blank in the file.</p>' +
+      '<div class="row"><button type="button" class="secondary" id="designdl">Download study design (JSON)</button></div><p class="muted" id="designmsg" role="status"></p>' +
+      '<h3>Reproducibility bundle</h3><p class="muted">One .zip to deposit with a paper: the design file, this study\'s codebook (CSV and Markdown), the platform version and code commit, the list of content versions, how to cite, and the fields for a Zenodo upload (which gives it a DOI). It holds no participant data. Make it from the content version you ran.</p>' +
+      '<div class="row"><button type="button" class="secondary" id="bundledl">Download reproducibility bundle (.zip)</button></div></div></section>' +
     '<section data-tab="team" hidden><h2>Add a team member</h2><p class="muted">Each person gets their own key for this study. Share it privately. Removing a person disables their key immediately.</p>' +
       '<form class="row" id="teamform"><label>Name <input type="text" id="tname" style="width:200px"></label><label>Access <select id="trole"></select></label><button type="submit">Create key</button></form>' +
       '<p class="muted" id="roledesc"></p><div id="newkey" hidden></div><div class="table-wrap"><table id="teamtbl"></table></div></section>' +
@@ -207,6 +213,7 @@
   // Exports are assembled here from small batches of participants, so no single server request has to
   // read the whole study (Netlify functions have a time and response-size limit).
   var FIRST = ['code', 'condition', 'test', 'label', 'self_signup', 'session', 'trial_index'];
+  var WIDE_FIRST = ['code', 'condition', 'test', 'label', 'self_signup', 'consented', 'sessions_completed', 'total_sessions', 'finished', 'screened_out', 'returned', 'panel_study', 'panel_sessions'];   // netlify/lib/lab/wide.mjs
   function batched(codes, size, fetchOne, onProgress) {
     var batches = [], out = [];
     for (var i = 0; i < codes.length; i += size) batches.push(codes.slice(i, i + size));
@@ -233,9 +240,15 @@
             saveFile(JSON.stringify({ study: studyId, type: me.study.type, exportedAt: new Date().toISOString(), participants: [].concat.apply([], parts.map(function (r) { return r.participants; })),
               records: [].concat.apply([], parts.map(function (r) { return r.records; })) }), studyId + '_all_' + day() + '.json', 'application/json');
           })
-          : rowsFor(codes, kind, prog).then(function (rows) { saveFile(toCsv(rows, kind === 'trials' ? FIRST : FIRST.slice(0, 6)), studyId + '_' + kind + '_' + day() + '.csv', 'text/csv'); });
+          : rowsFor(codes, kind, prog).then(function (rows) { saveFile(toCsv(rows, kind === 'trials' ? FIRST : kind === 'wide' ? WIDE_FIRST : FIRST.slice(0, 6)), studyId + '_' + kind + '_' + day() + '.csv', 'text/csv'); });
         return work.then(function () { $('exprog').textContent = 'Exported ' + codes.length + ' participants.'; });
       }).catch(function (e) { err(e.message); }).then(function () { buttons.forEach(function (x) { x.disabled = false; }); });
+    });
+  });
+  document.querySelectorAll('[data-codebook]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var ext = b.getAttribute('data-codebook'); err();
+      call('codebook.' + ext).then(function (r) { return r.blob(); }).then(function (blob) { saveFile(blob, studyId + '_codebook_' + day() + '.' + ext); }).catch(function (e) { err(e.message); });
     });
   });
   $('credit').addEventListener('click', function () {
@@ -356,9 +369,25 @@
       var who = $('rpwho').value, label = $('rplabel').value;
       var sel = res[0].filter(function (p) { return (who === 'all' || !p.test) && (!label || p.label === label); });
       return rowsFor(sel.map(function (p) { return p.code; }), 'trials', function (f) { $('rpprog').textContent = 'Reading answers… ' + Math.round(f * 100) + '%'; })
-        .then(function (rows) { renderReport(sel, rows, res[1]); });
+        .then(function (rows) { renderReport(sel, rows, res[1]); return dqReport(sel); });
     }).catch(function (e) { err(e.message); }).then(function () { $('rprun').disabled = false; });
   });
+  // Data quality: how many participants raise each flag (netlify/lib/lab/quality.mjs), with the IDs to review.
+  var DQ_FLAGS = [['dq_honeypot', 'Filled in the hidden box (form-filling software)'], ['dq_webdriver', 'Browser controlled by automation software'], ['dq_paste_count', 'Pasted text into an open answer'],
+    ['dq_injected_chars', 'Text appeared without typing or pasting'], ['dq_fast_typing', 'Typed faster than people type'], ['dq_fast_completion', 'Finished a session in under a quarter of the expected time'],
+    ['dq_duplicate_panel', 'Opened the study more than once from the panel']];
+  function dqReport(sel) {
+    if (!sel.length) return;
+    return rowsFor(sel.map(function (p) { return p.code; }), 'wide').then(function (wide) {
+      var any = wide.filter(function (w) { return w.dq_flags > 0; });
+      var h = '<h3>Data quality</h3><p class="muted">Signals to review, not proof. Attention checks alone no longer catch AI agents that take surveys (Westwood 2025, <em>PNAS</em>), so the lab also records what software does and people rarely do. Column definitions are in this study\'s codebook; every flag is in the wide CSV.</p>' +
+        '<div class="table-wrap"><table><tr><th>Signal</th><th>Participants</th><th>Study IDs</th></tr>' + DQ_FLAGS.map(function (f) {
+          var hit = wide.filter(function (w) { return Number(w[f[0]]) > 0; });
+          return '<tr><td>' + esc(f[1]) + '</td><td>' + hit.length + '</td><td class="wrap-cell mono">' + hit.slice(0, 12).map(function (w) { return esc(w.code); }).join(' ') + (hit.length > 12 ? ' …' : '') + '</td></tr>';
+        }).join('') + '<tr><td><strong>Any flag</strong></td><td><strong>' + any.length + ' of ' + wide.length + '</strong></td><td></td></tr></table></div>';
+      $('rpout').insertAdjacentHTML('beforeend', h);
+    });
+  }
   var RA = { esc: esc, mean: mean, median: median, pct: function (a) { return a.length ? Math.round(mean(a) * 100) + '%' : '–'; }, num: function (v) { return v === '' || v == null || isNaN(Number(v)) ? null : Number(v); } };
   function renderReport(sel, rows, content) {
     $('rpprog').textContent = sel.length + ' participants, ' + rows.length + ' answered items.';
@@ -417,21 +446,29 @@
   // ---------- study content editor ----------
   // Engine parts (surveys, consent, screen text) are edited here; each study type adds its own tabs.
   var saved = null, draft = null, dirty = false, sub = null, META = {};
-  var QTYPE_LABEL = { scale: 'Rating scale', choice: 'Multiple choice', select: 'Dropdown', text: 'Text answer', confidence: 'Confidence line (0–100)', number: 'Number (typed in)', multi: 'Select all that apply', info: 'Descriptive text (no answer)' };
+  var QTYPE_LABEL = { scale: 'Rating scale', choice: 'Multiple choice', select: 'Dropdown', text: 'Text answer', confidence: 'Confidence line (0–100)', number: 'Number (typed in)', multi: 'Select all that apply', info: 'Descriptive text (no answer)', slider: 'Slider (no starting point)', rank: 'Ranking (put in order)', matrix: 'Matrix (several statements, same answers)' };
   var AGREE7 = ['Strongly disagree', 'Disagree', 'Somewhat disagree', 'Neither agree nor disagree', 'Somewhat agree', 'Agree', 'Strongly agree'];
   function setDirty(v) { dirty = v; $('dirty').innerHTML = v ? '<strong>Unsaved changes.</strong>' : 'No unsaved changes.'; $('save').disabled = !v; $('discard').disabled = !v; }
   window.addEventListener('beforeunload', function (e) { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
-  function subs() { return (plugin.subtabs || []).concat([['pre', 'Start-of-session survey'], ['post', 'End-of-session survey'], ['consent', 'Sign-up & consent'], ['text', 'Screen text']]); }
+  function subs() { return (plugin.subtabs || []).concat([['pre', 'Start-of-session survey'], ['post', 'End-of-session survey'], ['consent', 'Sign-up & consent'], ['environment', 'Devices & timing']].concat(me && /^(multimodal|vignettes)$/.test(me.study.type) ? [['order', 'Block order']] : []).concat([['text', 'Screen text']])); }
+  // The rows of a Williams design (as netlify/lib/lab/latin.mjs builds them), for the preview on the Block order tab.
+  function williams(n) {
+    var first = [0], k, rows = [], r;
+    for (k = 1; first.length < n; k++) { first.push(k); if (first.length < n) first.push(n - k); }
+    for (r = 0; r < n; r++) rows.push(first.map(function (x) { return (x + r) % n; }));
+    return n % 2 ? rows.concat(rows.map(function (x) { return x.slice().reverse(); })) : rows;
+  }
   function loadContent(force) {
     if (draft && !force) return renderEditor();
     Promise.all([getJSON('content'), getJSON('content-history'), getJSON('participants')]).then(function (res) {
       var c = res[0];
-      META = { text: c._textFields, type: c._meta || {}, conditions: c._conditions || [], rules: c._surveyRules || [], qtypes: c._questionTypes || Object.keys(QTYPE_LABEL) };
+      META = { text: c._textFields, type: c._meta || {}, conditions: c._conditions || [], rules: c._surveyRules || [], qtypes: c._questionTypes || Object.keys(QTYPE_LABEL), presets: c._panelPresets || [], languages: c._languages || null };
       Object.keys(c).forEach(function (k) { if (k[0] === '_') delete c[k]; });
       saved = c; draft = clone(saved); A.draft = draft; setDirty(false);
       if (!sub || !subs().some(function (s) { return s[0] === sub; })) sub = subs()[0][0];
       if (plugin.onLoad) plugin.onLoad(A);
       var started = res[2].filter(function (p) { return !p.test && (p.consented || p.completedSessions); }).length;
+      A.counts = {}; res[2].forEach(function (p) { if (!p.test && p.condition) A.counts[p.condition] = (A.counts[p.condition] || 0) + 1; });   // for the quota boxes
       A.started = started;
       $('contentinfo').textContent = 'Current version: ' + (saved.version || 0) + (saved.version ? ', saved ' + fmt(saved.savedAt) + ' by ' + saved.savedBy : ' (the built-in defaults)') + '.' + (can('editor') ? '' : ' You can view the content but not change it.');
       $('contentwarn').innerHTML = started ? '<div class="warn">' + started + ' real participant' + (started === 1 ? ' has' : 's have') + ' already started. Changes apply from each participant\'s next session (a session in progress keeps the plan it started with). Answers record the version they were collected under, and each answer keeps a copy of the item as shown. Changing the design mid-study makes sessions hard to compare, so check with the team first.</div>' : '';
@@ -446,6 +483,15 @@
     var v = e.target.getAttribute && e.target.getAttribute('data-restore'); if (v == null) return;
     if (!confirm((dirty ? 'Your unsaved changes will be discarded. ' : '') + 'Restore version ' + v + '? It will be saved as a new version.')) return;
     postJSON('content-restore', { version: Number(v) }).then(function () { loadContent(true); }).catch(function (e) { err(e.message); });
+  });
+  $('bundledl').addEventListener('click', function () {
+    err(); call('bundle.zip').then(function (r) { return r.blob(); }).then(function (blob) { saveFile(blob, studyId + '_materials_v' + (saved ? saved.version || 0 : 0) + '.zip'); }).catch(function (e) { err(e.message); });
+  });
+  $('designdl').addEventListener('click', function () {
+    err(); getJSON('design.json').then(function (d) {
+      saveFile(JSON.stringify(d, null, 2), studyId + '_design_v' + d.contentVersion + '_' + day() + '.json', 'application/json');
+      $('designmsg').textContent = 'Saved version ' + d.contentVersion + (d.filesLeftOut.length ? '. ' + d.filesLeftOut.length + ' media file(s) were too large to include; copy them separately.' : '.');
+    }).catch(function (e) { err(e.message); });
   });
   $('discard').addEventListener('click', function () { if (confirm('Discard all unsaved changes?')) { err(); loadContent(true); } });
   $('save').addEventListener('click', function () {
@@ -483,7 +529,12 @@
       (conds.length > 1 ? '<div class="f"><span>Conditions (none ticked = everyone)</span><div class="row">' + conds.map(function (c) { return '<label class="check"><input type="checkbox" data-qcond="' + b + '|' + esc(c) + '"' + ((it.conditions || []).indexOf(c) >= 0 ? ' checked' : '') + '> ' + esc(c) + '</label>'; }).join('') + '</div></div>' : '') +
       (it.type === 'scale' ? '<div class="grid3">' + field('Points', num(b + '.n', it.n || 7, 2, 11)) + field('First number (blank = 1; use 0 for a 0-based scale)', '<input type="text" data-optnum="' + b + '.start" value="' + esc(it.start != null ? it.start : '') + '">') + field('Label for the first point', inp(b + '.lo', it.lo || '')) + field('Label for the top point', inp(b + '.hi', it.hi || '')) + '</div>' +
         field('Label every point (recommended): one line per point, from 1 to ' + (it.n || 7) + '. Leave empty to label only the ends.', '<textarea data-labels="' + b + '" rows="' + Math.min(11, it.n || 7) + '" class="mono">' + esc((it.labels || []).join('\n')) + '</textarea>') : '') +
-      (it.type === 'choice' || it.type === 'select' || it.type === 'multi' ? field('Options, one per line (optionally "saved value | text shown")', '<textarea data-opts="' + b + '" rows="4" class="mono">' + esc(optText) + '</textarea>') : '') +
+      (it.type === 'slider' ? '<div class="grid3">' + field('Smallest value', '<input type="text" data-optnum="' + b + '.min" value="' + esc(it.min != null ? it.min : '') + '">') + field('Largest value', '<input type="text" data-optnum="' + b + '.max" value="' + esc(it.max != null ? it.max : '') + '">') +
+        field('Step (1 = whole numbers)', '<input type="text" data-optnum="' + b + '.step" value="' + esc(it.step != null ? it.step : '') + '">') + field('Label at the low end', inp(b + '.lo', it.lo || '')) + field('Label at the high end', inp(b + '.hi', it.hi || '')) + '</div>' +
+        '<p class="muted">No handle is shown until the participant clicks or uses the arrow keys, so there is no default answer. Untouched sliders have an empty cell in the CSV.</p>' : '') +
+      (it.type === 'rank' ? '<p class="muted">Participants put the options in order with Up and Down buttons (no dragging), or confirm the order shown with "This order is right". The CSV cell lists the saved values in rank order, joined with |. Tick "Show the options in a random order" (Display logic and layout) to vary the starting order.</p>' : '') +
+      (it.type === 'matrix' ? field('Statements, one per line: "variable name | statement" (each statement is its own column in the CSV)', '<textarea data-rows="' + b + '" rows="4" class="mono">' + esc((it.rows || []).map(function (r) { return r.id + ' | ' + r.text; }).join('\n')) + '</textarea>') : '') +
+      (it.type === 'choice' || it.type === 'select' || it.type === 'multi' || it.type === 'rank' || it.type === 'matrix' ? field(it.type === 'matrix' ? 'Answer columns, one per line (optionally "saved value | text shown")' : 'Options, one per line (optionally "saved value | text shown")', '<textarea data-opts="' + b + '" rows="4" class="mono">' + esc(optText) + '</textarea>') : '') +
       (it.type === 'number' ? '<p class="muted">A box for a typed number, kept exactly as entered (no range check, so an impossible answer is still recorded). Non-numbers are not accepted.</p>' : '') +
       (it.type === 'multi' ? '<p class="muted">Checkboxes. The CSV cell lists the ticked options\' saved values joined with |.</p>' : '') +
       (it.type === 'confidence' ? '<p class="muted">A 0–100 line with no starting point. Its end labels and help text are on the Screen text tab.</p>' : '') +
@@ -492,7 +543,8 @@
   }
   // Display rule, layout, and source note: the parts an imported survey fills in. Closed unless the question uses them.
   function advanced(list, it, b, opts) {
-    var used = !!(it.displayIf || it.group || it.long != null || it.min != null || it.max != null || it.source);
+    var used = !!(it.displayIf || it.group || it.long != null || it.min != null || it.max != null || it.source || it.shuffle || it.shuffleOptions);
+    var hasOpts = it.type === 'choice' || it.type === 'select' || it.type === 'multi';
     var shown = it.displayIf && window.LabLogic ? '<p class="muted">Shown when ' + esc(window.LabLogic.describe(it.displayIf, getPath(list))) + '.</p>' : '';
     return '<details class="vcard"' + (used ? ' open' : '') + '><summary>Display logic and layout' + (it.displayIf ? ' · shown conditionally' : '') + '</summary>' + shown +
       field('Show this question only when (display rule; leave empty to always show). Written as JSON: {"all": [{"q": "variable", "op": "eq", "value": "x"}]}. Rules can use answers to earlier questions ("q"), embedded data ("ed"), or the condition ("condition"). See the README.',
@@ -502,6 +554,12 @@
       (it.type === 'text' ? '<label class="f check"><input type="checkbox" data-path="' + b + '.long" data-bool="1"' + (it.long ? ' checked' : '') + '> Multi-line answer box</label>' : '') + '</div>' +
       (it.type === 'number' ? '<div class="grid3">' + field('Smallest expected number (a hint; answers are kept as typed)', '<input type="text" data-optnum="' + b + '.min" value="' + esc(it.min != null ? it.min : '') + '">') +
         field('Largest expected number (a hint)', '<input type="text" data-optnum="' + b + '.max" value="' + esc(it.max != null ? it.max : '') + '">') + '</div>' : '') +
+      '<h4 style="margin:12px 0 4px">Order</h4>' +
+      checkbox('data-path="' + b + '.shuffle" data-bool="1"', it.shuffle, 'Shuffle: this question trades places at random with the other ticked questions on its page') +
+      (hasOpts ? checkbox('data-path="' + b + '.shuffleOptions" data-bool="1"', it.shuffleOptions, 'Show the options in a random order') : '') +
+      (hasOpts && it.shuffleOptions ? '<div class="f"><span>Options that always stay at the end (for example "Other" or "None of the above")</span><div class="row">' + (it.options || []).map(function (o, k) {
+        return '<label class="check"><input type="checkbox" data-anchor="' + b + '|' + k + '"' + (o.anchor ? ' checked' : '') + '> ' + esc(o.label) + '</label>'; }).join('') + '</div></div>' : '') +
+      '<p class="muted">Each participant keeps the same order for the whole session. The order shown is saved with the answers (<code>order_questions</code>, <code>order_' + esc(it.id) + '</code>).</p>' +
       (it.source ? '<p class="muted">Imported from: ' + esc(it.source) + '</p>' : '') + '</details>';
   }
   function qlist(list, opts) {
@@ -532,6 +590,39 @@
     markDirty: function () { setDirty(true); }, rerender: function () { renderEditor(); }, goto: function (s) { sub = s; renderEditor(); }, readFile: readFile, fmt: fmt,
     api: { getJSON: getJSON, postJSON: postJSON } };
 
+  // Online panel: a preset fills the link parameters and the redirect address; three codes (completed, screened out,
+  // returned) are shown to participants only once they reach that outcome (netlify/lib/lab/recruit.mjs).
+  function panelEditor(pn) {
+    var pre = (META.presets || []).filter(function (x) { return x.id === pn.preset; })[0];
+    var link = location.origin + '/lab/s/' + studyId + (pre ? pre.link : '?' + pn.param + '=...');
+    var sample = (pn.redirectUrl || '').replace(/\{code\}/g, pn.completionCode || '(code)').replace(/\{pid\}/g, '(participant ID)');
+    function code(k, label, help) {
+      return '<div class="f"><span>' + label + '</span><div class="row">' + inp('enrollment.panel.' + k, pn[k] || '', ' class="mono" style="flex:1" aria-label="' + esc(label) + '"') + btn('data-gencode="' + k + '"', 'Generate') + '</div><span class="muted">' + help + '</span></div>';
+    }
+    return '<div class="grid3">' + field('Panel', sel('enrollment.panel.preset', pn.preset || 'custom', [['custom', 'Other (set everything below)']].concat((META.presets || []).map(function (x) { return [x.id, x.label]; })))) + '</div>' +
+      (pre ? '<p class="muted">' + esc(pre.help) + '</p>' : '') +
+      '<p class="muted">Study link to give the panel: <code>' + esc(link) + '</code></p>' +
+      '<div class="grid3">' + field('Link parameter with the participant ID', inp('enrollment.panel.param', pn.param, ' class="mono"')) +
+        field('Link parameter with the panel\'s study ID (optional)', inp('enrollment.panel.studyParam', pn.studyParam || '', ' class="mono" placeholder="STUDY_ID"')) +
+        field('Link parameter with the panel\'s session ID (optional)', inp('enrollment.panel.sessionParam', pn.sessionParam || '', ' class="mono" placeholder="SESSION_ID"')) + '</div>' +
+      '<p class="muted">The participant ID is kept only in the payment list (Students tab, extra-credit list), never in research exports. The study and session IDs are not identifying; they go in the exports and show when one person opened the study more than once.</p>' +
+      field('Address that takes participants back to the panel. Write {code} for the code and {pid} for their panel ID. Leave empty to show the code only.', inp('enrollment.panel.redirectUrl', pn.redirectUrl || '', ' class="mono" placeholder="https://app.prolific.com/submissions/complete?cc={code}"')) +
+      (pn.redirectUrl ? '<p class="muted">A participant who finishes goes to: <code>' + esc(sample) + '</code></p>' : '') +
+      '<div class="grid3">' + code('completionCode', 'Completion code', 'Shown when every session is done.') +
+        code('screenOutCode', 'Screened-out code', 'Shown when a screening question, a failed check, or a full quota ends the study.') +
+        code('returnCode', 'Returned code', 'Shown when the participant chooses "I want to stop taking part".') + '</div>' +
+      '<p class="muted">Codes stay on the server until a participant reaches that point, so they cannot be read from the page.</p>';
+  }
+  // Quotas: caps on how many people who sign themselves up are let in, for the study and for each condition.
+  function quotaEditor(en) {
+    var q = en.quota || (en.quota = { total: null, perCondition: {} }), conds = conditionsNow(), counts = A.counts || {}, total = 0;
+    Object.keys(counts).forEach(function (k) { total += counts[k]; });
+    function capInput(attr, v, label) { return '<input type="number" min="0" ' + attr + ' value="' + (v == null ? '' : esc(v)) + '" style="max-width:140px" aria-label="' + esc(label) + '">'; }
+    return '<h3 style="margin:20px 0 8px">Quotas</h3><p class="muted">The most people who can sign themselves up (by email or from an online panel), counted as real participants assigned to a condition. Leave a box empty for no cap. Someone who arrives when the study, or every condition with room, is full sees "This study is full" and gets the screened-out code. People you add on the Students tab, and test participants, are never capped. When many people arrive in the same second, a cap can be passed by one or two.</p>' +
+      '<div class="grid3">' + field('Whole study (now ' + total + ')', capInput('data-quota="total"', q.total, 'Cap for the whole study')) +
+      conds.map(function (cn) { return field(esc(cn) + ' (now ' + (counts[cn] || 0) + ')', capInput('data-quota="' + esc(cn) + '"', (q.perCondition || {})[cn], 'Cap for ' + cn)); }).join('') + '</div>';
+  }
+  function genCode() { var a = '23456789ABCDEFGHJKMNPQRSTVWXYZ', s = '', r = new Uint32Array(8); (window.crypto || {}).getRandomValues ? crypto.getRandomValues(r) : r.forEach(function (x, i) { r[i] = Math.random() * 4294967296; }); for (var i = 0; i < 8; i++) s += a[r[i] % a.length]; return s; }
   function renderEditor() {
     $('subtabs').innerHTML = subs().map(function (s) { return '<button type="button" data-sub="' + s[0] + '" aria-selected="' + (s[0] === sub) + '">' + s[1] + '</button>'; }).join('');
     var h = '';
@@ -547,10 +638,10 @@
         '<p class="muted">Participants type their email each session; the first time, they confirm it. There is no verification email, so the study relies on people entering their own address. Emails added on the Students tab can always sign in, even with sign-up off.</p>' +
         '<div class="grid3">' + field('Email domains (one per line, no @)', '<textarea data-domains="1" rows="3" class="mono">' + esc(en.domains.join('\n')) + '</textarea>') +
         field('Gap days between sessions (self sign-ups)', num('enrollment.gapDays', en.gapDays, 0, 60)) + field('Label for self sign-ups', inp('enrollment.label', en.label || '')) + '</div>' +
-        '<h3 style="margin:20px 0 8px">Online panel (Prolific and similar)</h3>' +
+        '<h3 style="margin:20px 0 8px">Online panel (Prolific, SONA, MTurk, CloudResearch)</h3>' +
         checkbox('data-path="enrollment.panel.enabled" data-bool="1"', en.panel && en.panel.enabled, 'Participants arrive from an online panel: the study link signs them in with the panel\'s participant ID') +
-        (en.panel && en.panel.enabled ? '<p class="muted">In Prolific, set the study URL to <code>' + esc(location.origin + '/lab/s/' + studyId) + '?PROLIFIC_PID={{%PROLIFIC_PID%}}&amp;STUDY_ID={{%STUDY_ID%}}&amp;SESSION_ID={{%SESSION_ID%}}</code> and choose "I\'ll use URL parameters". The ID is kept only in the payment list (Students tab, extra-credit list), never in research exports.</p>' +
-          '<div class="grid3">' + field('Link parameter with the participant ID', inp('enrollment.panel.param', en.panel.param, ' class="mono"')) + field('Completion link (shown on the last page)', inp('enrollment.panel.completionUrl', en.panel.completionUrl || '', ' placeholder="https://app.prolific.com/submissions/complete?cc=..."')) + '</div>' : '') +
+        (en.panel && en.panel.enabled ? panelEditor(en.panel) : '') +
+        quotaEditor(en) +
         (draft.consent.recording ? '<h3 style="margin:20px 0 8px">Voice recording</h3>' +
           checkbox('data-path="consent.recording.enabled" data-bool="1"', draft.consent.recording.enabled, 'Ask for separate consent to record participants\' voices (calls and spoken answers)') +
           (draft.consent.recording.enabled ? field('Recording consent checkbox label', area('consent.recording.label', draft.consent.recording.label || '', 2)) +
@@ -560,6 +651,43 @@
         field('Consent text (leave a blank line between paragraphs; email addresses become links)', '<textarea id="consenttext" rows="14">' + esc(draft.consent.paragraphs.join('\n\n')) + '</textarea>') +
         field('Agreement checkbox label', inp('consent.agreeLabel', draft.consent.agreeLabel)) +
         checkbox('data-path="consent.approved" data-bool="1"', draft.consent.approved, 'This is the IRB-approved consent text (removes the "draft" banner participants see)');
+    } else if (sub === 'order') {
+      var dz = draft.design || {}, blocks = me.study.type === 'multimodal';
+      h = '<h3 style="margin:0 0 8px">Latin square</h3>' +
+        checkbox('data-path="design.latinSquare" data-bool="1"', dz.latinSquare === true, 'Counterbalance the order of each session\'s ' + (blocks ? 'blocks' : 'items') + ' with a Latin square') +
+        '<p class="muted">Each participant gets one order from a balanced (Williams) Latin square: every ' + (blocks ? 'block' : 'item') + ' appears equally often in every position and right after every other one. With an odd number there are twice as many orders, which together are balanced. Orders are handed out so each is used about equally often within each condition. ' +
+        (blocks ? 'Items inside a block are still shown in order or shuffled as set on the Arms &amp; blocks tab.' : 'This replaces "shuffle the items".') + ' The trials CSV records each participant\'s order (<code>cb_row</code>, <code>cb_sequence</code>).</p>' +
+        (dz.sessions || []).map(function (sp, i) {
+          var units = blocks ? (sp.blocks || []).map(function (b, j) { return b.title || 'Block ' + (j + 1); }) : (sp.items || []);
+          if (units.length < 2) return '<p class="muted">Session ' + (i + 1) + ': only one ' + (blocks ? 'block' : 'item') + ', nothing to counterbalance.</p>';
+          var rows = williams(units.length);
+          return '<details class="vcard"' + (i === 0 ? ' open' : '') + '><summary>Session ' + (i + 1) + ': ' + rows.length + ' orders of ' + units.length + ' ' + (blocks ? 'blocks' : 'items') + '</summary><div class="table-wrap"><table><tr><th>Order</th><th>Shown as</th></tr>' +
+            rows.slice(0, 24).map(function (r, k) { return '<tr><td>' + (k + 1) + '</td><td class="wrap-cell">' + r.map(function (x) { return esc(units[x]); }).join(' → ') + '</td></tr>'; }).join('') + '</table></div></details>';
+        }).join('');
+    } else if (sub === 'environment') {
+      var ev = draft.environment || (draft.environment = { preload: false });
+      h = '<h3 style="margin:0 0 8px">Devices and browsers</h3>' +
+        checkbox('data-path="environment.desktopOnly" data-bool="1"', ev.desktopOnly, 'Computers only: phones and tablets are asked to come back on a laptop or desktop') +
+        checkbox('data-path="environment.speechBrowser" data-bool="1"', ev.speechBrowser, 'A browser that understands speech is needed (Chrome or Edge), for studies where participants talk') +
+        '<p class="muted">Participants who do not meet these see why and can come back with the right device; nothing is saved for them until they do. For panels, set the same requirement in the panel (for example Prolific\'s device filter) so fewer people arrive on the wrong device.</p>' +
+        '<h3 style="margin:20px 0 8px">Microphone and headphones</h3>' +
+        checkbox('data-path="environment.micCheck" data-bool="1"', ev.micCheck, 'Check the microphone before each session (a level meter; participants say a few words)') +
+        (ev.micCheck ? checkbox('data-path="environment.micRequired" data-bool="1"', ev.micRequired, 'Required: after two failed tries the study ends for that participant (screened out)') : '') +
+        checkbox('data-path="environment.headphoneCheck" data-bool="1"', ev.headphoneCheck, 'Headphone check in session 1 (Huggins pitch test, Milne et al. 2021: 6 short trials, passed at 5 correct)') +
+        (ev.headphoneCheck ? field('If the headphone check is not passed', sel('environment.headphoneFail', ev.headphoneFail || 'record', [['record', 'Record the score and continue'], ['screen', 'End the study for that participant (screened out)']])) : '') +
+        '<p class="muted">The results are saved once per session and are in the wide CSV (<code>s1_check_mic_ok</code>, <code>s1_check_headphone_correct</code>, and so on). The headphone test plays noise in both ears; one noise hides a faint tone that only headphones reveal, so it also catches people listening on speakers.</p>' +
+        checkbox('data-path="environment.timingCheck" data-bool="1"', ev.timingCheck, 'Measure each participant\'s display before each session (refresh rate, frame jitter, dropped frames, audio latency; about 2 seconds)') +
+        '<p class="muted">Stored with the session (<code>s1_check_timing_refresh_hz</code> and so on). For the lab\'s own machines, the <a href="/lab/timing/" target="_blank" rel="noopener">timing self-check page</a> also measures the speaker-to-microphone delay.</p>' +
+        '<h3 style="margin:20px 0 8px">Full screen</h3>' +
+        checkbox('data-path="environment.fullscreen" data-bool="1"', ev.fullscreen, 'Ask participants to switch to full screen before the first item') +
+        '<p class="muted">Browsers only allow full screen after a click, so participants see a button. Leaving full screen never stops the session: a bar offers the way back, and each trial records whether it was in full screen and every exit (<code>fullscreen</code>, <code>fullscreen_exits</code>, <code>fullscreen_exit_ms</code>).</p>' +
+        '<h3 style="margin:20px 0 8px">Language</h3>' +
+        field('Language of the study (screen readers, and the speech recognizer and voices of phone calls follow it)', sel('environment.language', ev.language || 'en-US', META.languages || [['en-US', 'English (US)']])) +
+        '<p class="muted">Write the study\'s text in that language yourself, on Screen text and the other tabs. The lab does not translate.</p>' +
+        '<h3 style="margin:20px 0 8px">Loading and timing</h3>' +
+        checkbox('data-path="environment.preload" data-bool="1"', ev.preload, 'Load every picture, sound, and video before the session starts') +
+        '<p class="muted">Participants see a progress bar while the files load, and the session starts only when all of them are ready, so no item waits on the network. If a file fails, they can try again (and, after a second failure, continue without it; the <code>preloaded</code> column then says 0). Use it whenever timing matters. Media you upload are always loaded in full; media on another website can only be warmed up, so upload timing-critical files.</p>' +
+        '<p class="muted">Every trial records when its screen first appeared (<code>onset_ms</code>, the first display frame after it was drawn) and the screen\'s frame interval (<code>frame_ms</code>; 16.67 ms is a 60 Hz display). Response times from onset are <code>rt_ms</code> minus <code>onset_delay_ms</code>.</p>';
     } else if (sub === 'text') {
       var group = null;
       h = '<p class="muted">Every piece of text participants see. Words in {braces} are filled in on screen (listed in each label). Leave a blank line between paragraphs.</p>';
@@ -582,9 +710,22 @@
     var r = plugin.applyEdit ? plugin.applyEdit(t, A) : undefined;
     if (r !== undefined) { setDirty(true); return r; }
     if (t.id === 'consenttext') draft.consent.paragraphs = t.value.split(/\n\s*\n/).map(function (x) { return x.trim(); }).filter(Boolean);
-    else if ((v = t.getAttribute('data-opts'))) setPath(v + '.options', t.value.split('\n').map(function (l) { return l.trim(); }).filter(Boolean).map(function (l) {
-      var m = l.split(/\s+\|\s+/); return m.length > 1 ? { value: m[0].trim(), label: m.slice(1).join(' | ').trim() } : { value: l, label: l };
+    else if ((v = t.getAttribute('data-opts'))) {
+      var was = {}; (getPath(v).options || []).forEach(function (o) { if (o.anchor) was[o.value] = true; });   // keep "stay at the end" on options that are still there
+      setPath(v + '.options', t.value.split('\n').map(function (l) { return l.trim(); }).filter(Boolean).map(function (l) {
+        var m = l.split(/\s+\|\s+/), o = m.length > 1 ? { value: m[0].trim(), label: m.slice(1).join(' | ').trim() } : { value: l, label: l };
+        if (was[o.value]) o.anchor = true;
+        return o;
+      }));
+    }
+    else if ((v = t.getAttribute('data-quota'))) {
+      var qt = draft.enrollment.quota || (draft.enrollment.quota = { total: null, perCondition: {} }), qv = t.value.trim() === '' ? null : Number(t.value);
+      if (v === 'total') qt.total = qv; else { qt.perCondition = qt.perCondition || {}; if (qv == null) delete qt.perCondition[v]; else qt.perCondition[v] = qv; }
+    }
+    else if ((v = t.getAttribute('data-rows'))) setPath(v + '.rows', t.value.split('\n').map(function (l) { return l.trim(); }).filter(Boolean).map(function (l, k) {
+      var m = l.split(/\s+\|\s+/); return m.length > 1 ? { id: m[0].trim(), text: m.slice(1).join(' | ').trim() } : { id: getPath(v).id + '_' + (k + 1), text: l };
     }));
+    else if ((v = t.getAttribute('data-anchor'))) { var an = v.split('|'), ao = getPath(an[0]).options[Number(an[1])]; if (t.checked) ao.anchor = true; else delete ao.anchor; }
     else if ((v = t.getAttribute('data-labels'))) setPath(v + '.labels', t.value.split('\n').map(function (x) { return x.trim(); }).filter(Boolean));
     else if (t.hasAttribute('data-domains')) draft.enrollment.domains = t.value.split(/[\s,;]+/).map(function (x) { return x.trim().toLowerCase().replace(/^@/, ''); }).filter(Boolean);
     else if ((v = t.getAttribute('data-dif'))) {   // display rule as JSON
@@ -603,11 +744,21 @@
     } else if ((v = t.getAttribute('data-path'))) {
       setPath(v, t.hasAttribute('data-bool') ? t.checked : t.hasAttribute('data-num') ? Number(t.value) : t.value);
       redraw = t.tagName === 'SELECT' || t.type === 'checkbox';
+      if (v === 'enrollment.panel.preset') {   // a preset fills in the link parameters and the redirect address
+        var pz = (META.presets || []).filter(function (x) { return x.id === t.value; })[0], pnl = draft.enrollment.panel;
+        if (pz) ['param', 'studyParam', 'sessionParam', 'redirectUrl'].forEach(function (k) { pnl[k] = pz[k]; });
+      }
+      if (/^enrollment\.panel\./.test(v) && t.tagName !== 'SELECT' && t.type !== 'checkbox') redraw = false;
       if (/\.type$/.test(v)) {
         var it = getPath(v.replace(/\.type$/, ''));
         if (it.type === 'info') it.required = false;
         if (it.type === 'scale' && !it.n) { it.n = 7; it.lo = it.lo || AGREE7[0]; it.hi = it.hi || AGREE7[6]; }
-        if ((it.type === 'choice' || it.type === 'select' || it.type === 'multi') && !(it.options && it.options.length)) it.options = [{ value: 'Option 1', label: 'Option 1' }, { value: 'Option 2', label: 'Option 2' }];
+        if ((it.type === 'choice' || it.type === 'select' || it.type === 'multi' || it.type === 'rank') && !(it.options && it.options.length)) it.options = [{ value: 'Option 1', label: 'Option 1' }, { value: 'Option 2', label: 'Option 2' }];
+        if (it.type === 'slider' && it.min == null) { it.min = 0; it.max = 100; it.step = 1; }
+        if (it.type === 'matrix') {
+          if (!(it.rows && it.rows.length)) it.rows = [{ id: it.id + '_1', text: 'Statement 1' }, { id: it.id + '_2', text: 'Statement 2' }];
+          if (!(it.options && it.options.length)) it.options = ['Strongly disagree', 'Disagree', 'Neither agree nor disagree', 'Agree', 'Strongly agree'].map(function (l, k) { return { value: String(k + 1), label: l }; });
+        }
       }
     } else return false;
     setDirty(true);
@@ -633,6 +784,8 @@
       var q = v.split('|'), list = getPath(q[0]), copy = clone(list[Number(q[1])]); copy.id = copy.id + '_copy'; list.splice(Number(q[1]) + 1, 0, copy);
     } else if ((v = t.getAttribute('data-move'))) {
       var m = v.split('|'), arr = getPath(m[0]), i = Number(m[1]), j = i + Number(m[2]), tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    } else if ((v = t.getAttribute('data-gencode'))) {
+      draft.enrollment.panel[v] = genCode();
     } else if ((v = t.getAttribute('data-resettext'))) {
       draft.text[v] = META.text.filter(function (f) { return f.key === v; })[0].def;
     } else if (!(plugin.click && plugin.click(t, A))) return;
@@ -681,7 +834,7 @@
     document.title = 'Lab console';
     root.innerHTML = '<div class="who"><div class="brandmark"><img src="/lab/assets/brand/logo-mark-128.png" alt="" width="48" height="48"><h1 style="margin:0" id="ctitle">CCAIR Lab: studies</h1></div><span id="whoami" class="muted"></span></div>' + SIGNIN + '<div id="app" hidden>' +
       '<p class="muted" id="cintro"></p>' +
-      '<div class="table-wrap"><table id="stbl"></table></div>' +
+      '<div class="table-wrap"><table id="stbl"></table></div><div id="clonebox"></div>' +
       '<div data-owner><div class="section start"><h2>Start a new study</h2><p class="muted">Pick a starting point. Each one is a complete, working study: you can preview it as a participant straight away, then change anything on its Study content tab.</p>' +
       '<div class="tpl-grid" id="tplgrid" role="list"></div>' +
       '<form id="newform" class="newform"><h3 id="newhead" tabindex="-1">Name your study</h3><div class="grid3">' +
@@ -694,6 +847,9 @@
       '<form id="impform"><div class="grid3"><label class="f">Name<input type="text" id="iname" placeholder="Attitudes survey"></label>' +
       '<label class="f">ID (in the link)<input type="text" id="iid" class="mono" placeholder="attitudes-survey"></label>' +
       '<label class="f">Survey file<input type="file" id="ifile" accept=".qsf,.lss,.csv,.xlsx,.txt"></label></div><div class="row"><button type="submit">Create study and open the import page</button></div></form><div id="impout" role="status"></div></div>' +
+      '<div class="section" data-owner><h2>Create a study from a design file</h2><p class="muted">A study design file (.json) holds a study\'s whole design and no data. Download one from a study\'s Study content tab, or get one from another lab or a paper\'s materials. The new study starts unlisted, with no participants.</p>' +
+      '<form id="dsgform"><div class="grid3"><label class="f">Name<input type="text" id="dname" placeholder="Leave empty to keep the file\'s name"></label><label class="f">Link name<input type="text" id="did" class="mono" placeholder="replication-1"></label>' +
+      '<label class="f">Design file<input type="file" id="dfile" accept=".json,application/json"></label></div><div class="row"><button type="submit">Create study from the file</button></div></form><div id="dsgout" role="status"></div></div>' +
       '<div class="section" id="researchers"><h2>Researchers</h2><p class="muted">Each researcher has their own account (email and password, with an optional authenticator app) and a role in each study: viewer, editor, manager, or owner. There is no email service here: an invitation is a link you copy or send from your own mail app. A link works once. Invitations last 7 days and password-reset links 24 hours. The owner key always works, whatever happens to accounts.</p>' +
       '<div class="table-wrap"><table id="rtbl"></table></div><div id="redit"></div>' +
       '<h3>Invite a researcher</h3><form id="invform"><div class="grid3"><label class="f">Name<input type="text" id="invname" autocomplete="off"></label><label class="f">Email<input type="text" id="invemail" autocomplete="off" inputmode="email"></label>' +
@@ -715,7 +871,7 @@
             '<td>' + (s.lastBackupAt ? esc(fmt(s.lastBackupAt)) : '<span class="muted">none yet</span>') + '</td><td>' + testText(s.lastSelfTest) + '</td>' +
             '<td id="sum-' + esc(s.id) + '">' + btn2('data-sum="' + esc(s.id) + '"', 'Load counts') + '</td>' +
             '<td class="links"><a href="' + esc(s.paths.admin) + '">Admin</a><a href="' + esc(s.paths.participant) + '" target="_blank" rel="noopener">Participant page</a></td>' +
-            (owner ? '<td>' + (s.listed && !s.archived ? 'yes' : 'no') + '</td><td>' + (s.builtIn ? '<span class="muted">set in code</span>' : btn2('data-list="' + esc(s.id) + '|' + (s.listed ? '0' : '1') + '"', s.listed ? 'Unlist' : 'List') + ' ' + btn2('data-arch="' + esc(s.id) + '|' + (s.archived ? '0' : '1') + '"', s.archived ? 'Restore' : 'Archive')) + '</td>' : '') + '</tr>';
+            (owner ? '<td>' + (s.listed && !s.archived ? 'yes' : 'no') + '</td><td>' + (s.builtIn ? '<span class="muted">set in code</span> ' : btn2('data-list="' + esc(s.id) + '|' + (s.listed ? '0' : '1') + '"', s.listed ? 'Unlist' : 'List') + ' ' + btn2('data-arch="' + esc(s.id) + '|' + (s.archived ? '0' : '1') + '"', s.archived ? 'Restore' : 'Archive') + ' ') + (s.archived ? '' : btn2('data-clone="' + esc(s.id) + '"', 'Clone')) + '</td>' : '') + '</tr>';
         }).join('') + (rows.length ? '' : '<tr><td colspan="9" class="muted">No studies yet. Ask the lab owner to give your account access to a study.</td></tr>');
       }).catch(function (e) { err(e.message); });
     }
@@ -819,7 +975,7 @@
             '<optgroup label="Blank study">' + TYPES.map(function (x) { return '<option value="type:' + esc(x.id) + '">Blank: ' + esc(x.label) + '</option>'; }).join('') + '</optgroup>';
           $('tplgrid').innerHTML = TPLS.map(function (x) {
             return '<button type="button" class="tpl-card" role="listitem" data-tpl="' + esc(x.id) + '"><span class="tpl-icon tpl-' + esc(x.icon) + '" aria-hidden="true"></span>' +
-              '<span class="tpl-name">' + esc(x.name) + '</span><span class="tpl-blurb">' + esc(x.blurb) + '</span><span class="tpl-meta">About ' + x.minutes + ' min · ' + (x.type === 'multimodal' ? 'media and voice' : 'text and surveys') + '</span></button>';
+              '<span class="tpl-name">' + esc(x.name) + '</span><span class="tpl-blurb">' + esc(x.blurb) + '</span><span class="tpl-meta">About ' + x.minutes + ' min · ' + (x.type === 'multimodal' ? 'media and voice' : x.type === 'reaction' ? 'reaction times' : 'text and surveys') + '</span></button>';
           }).join('');
           var d = function () {
             var v = $('ntpl').value, t = v.indexOf('tpl:') === 0 ? TPLS.filter(function (x) { return 'tpl:' + x.id === v; })[0] : null, y = !t ? TYPES.filter(function (x) { return 'type:' + x.id === v; })[0] : null;
@@ -860,6 +1016,33 @@
         $('nname').value = ''; $('nid').value = ''; $('ndesc').value = ''; idTouched = false; list();
       }).catch(function (e) { err(e.message); });
     });
+    // Clone: a new study with the same design (content, settings, media, completion codes) and no participants.
+    function cloneForm(id, at) {
+      var s = ROWS.filter(function (x) { return x.id === id; })[0] || { name: id }, box = $('clonebox');
+      box.innerHTML = '<form class="qcard" id="clf"><h3 id="clhead" tabindex="-1">Clone ' + esc(s.name) + '</h3><p class="muted">Copies the design (items, questions, conditions, settings, media, completion codes). Participants and answers are not copied.</p><div class="grid3">' +
+        '<label class="f">Name<input type="text" id="clname" value="' + esc(s.name + ' (copy)') + '"></label><label class="f">Link name<input type="text" id="clid" class="mono" value="' + esc(slug(s.id + '-copy')) + '"></label></div>' +
+        '<div class="row"><button type="submit">Create the copy</button><button type="button" class="secondary" id="clcancel">Cancel</button></div></form>';
+      $('clhead').focus();
+      $('clcancel').addEventListener('click', function () { box.innerHTML = ''; at.focus(); });
+      $('clf').addEventListener('submit', function (e) {
+        e.preventDefault(); err();
+        postJSON('clone', { from: id, name: $('clname').value.trim(), id: $('clid').value.trim() }).then(function (r) {
+          list(); box.innerHTML = '<div class="done-card"><h3 tabindex="-1" id="donehead">' + esc(r.study.name) + ' is ready</h3><p>A copy of ' + esc(s.name) + ' with no participants, unlisted. <a href="' + esc(r.study.paths.admin) + '">Open its admin page</a>.</p></div>'; $('donehead').focus();
+        }).catch(function (x) { err(x.message); });
+      });
+    }
+    $('dsgform').addEventListener('submit', function (e) {
+      e.preventDefault(); err(); $('dsgout').textContent = '';
+      var f = $('dfile').files[0], id = $('did').value.trim();
+      if (!id) return err('Enter a link name for the new study.');
+      readFile(f).then(function (file) {
+        var d; try { d = JSON.parse(file.data); } catch (x) { throw new Error('That file is not a study design file (it is not valid JSON).'); }
+        return postJSON('create', { design: d, id: id, name: $('dname').value.trim() || undefined });
+      }).then(function (r) {
+        $('dsgout').innerHTML = '<div class="done-card"><h3 tabindex="-1" id="dsghead">' + esc(r.study.name) + ' is ready</h3><p>Made from the design file' + (r.filesLeftOut ? ', but ' + r.filesLeftOut + ' media file(s) were not in it: upload them again on its Items tab' : '') + '.' + (r.newCodes && r.newCodes.length ? ' New completion codes were made (the file had none): enter them in your panel, from Study content, Sign-up &amp; consent.' : '') + ' <a href="' + esc(r.study.paths.admin) + '">Open its admin page</a>.</p></div>';
+        $('dsghead').focus(); $('did').value = ''; $('dname').value = ''; list();
+      }).catch(function (x) { err(x.message); });
+    });
     var impTouched = false;
     $('iname').addEventListener('input', function () { if (!impTouched) $('iid').value = slug($('iname').value); });
     $('iid').addEventListener('input', function () { impTouched = true; });
@@ -878,6 +1061,7 @@
     });
     $('stbl').addEventListener('click', function (e) {
       var sum = e.target.getAttribute && e.target.getAttribute('data-sum'); if (sum) return loadSum(sum);
+      var cl = e.target.getAttribute && e.target.getAttribute('data-clone'); if (cl) return cloneForm(cl, e.target);
       var v = e.target.getAttribute && (e.target.getAttribute('data-list') || e.target.getAttribute('data-arch')); if (!v) return;
       var p = v.split('|'), on = p[1] === '1', key = e.target.hasAttribute('data-list') ? 'listed' : 'archived';
       if (key === 'archived' && on && !confirm('Archive "' + p[0] + '"? Its participant page and admin page stop working, but no data is deleted. You can restore it here.')) return;

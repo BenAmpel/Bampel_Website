@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Timing self-check | CCAIR Behavioral Lab</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/lab/assets/brand/logo-mark-32.png">
+<link rel="apple-touch-icon" href="/lab/assets/brand/apple-touch-icon.png">
+<meta name="theme-color" content="#fbf6ef">
+<meta name="description" content="Measure this computer's display refresh, frame jitter, timer lag, audio latency, and speaker-to-microphone delay in the browser.">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/lab/assets/study.css">
+<link rel="stylesheet" href="/lab/engine/admin.css">
+<link rel="stylesheet" href="/lab/assets/pages.css">
+</head>
+<body>
+<header class="labbar"><div class="inner"><a class="brand" href="/lab/">CCAIR Behavioral Lab</a><nav aria-label="Lab pages"><a href="/lab/guide/">Researcher guide</a><a href="/lab/support/">Support</a><a href="/lab/signin/">Sign in</a></nav></div></header>
+<main class="wrap page">
+<div class="card">
+<h1>Timing self-check</h1>
+<p>Measures how this computer and browser present stimuli and play sound, the same way the lab's studies record it. Run it on every machine you test participants on, with the browser in front, other programs closed, and the laptop on power.</p>
+
+<h2>Display and timers</h2>
+<p>Counts 300 display frames: the refresh rate, how much frame intervals vary, frames the browser skipped, how late a zero-delay timer fires, and the audio output delay the browser reports. Takes about 5 seconds.</p>
+<div class="row"><button type="button" id="run">Measure the display</button></div>
+<p class="muted" id="runmsg" role="status"></p>
+<div class="table-wrap"><table id="out"></table></div>
+
+<h2>Speaker to microphone</h2>
+<p>Plays a short click and listens for it. Turn the volume up, use the computer's speakers (not headphones), and allow the microphone. The result is accurate to about 20 ms: it shows whether the sound path is fast, not its exact delay.</p>
+<div class="row"><button type="button" id="mic">Measure the sound delay</button></div>
+<p class="muted" id="micmsg" role="status"></p>
+
+<h2>Save the results</h2>
+<div class="row"><button type="button" class="secondary" id="save" disabled>Download results (JSON)</button></div>
+<p class="note">Nothing is sent from this page. The file includes the browser and screen size, so you can report the setup with your study.</p>
+
+<h2>What these numbers can and cannot show</h2>
+<p>A browser can only estimate its own timing. Studies run on the lab record, for every trial, when the item appeared (the first display frame after it was drawn) and the display's frame interval, and the study's codebook explains both. Reaction times measured this way are usually stable within a few milliseconds but carry a constant delay that depends on the hardware. For a methods paper, check the setup against a photodiode on the screen and a microphone at the speaker, as Bridges et al. (2020, PeerJ) and Anwyl-Irvine et al. (2021, Behavior Research Methods) did, and report both the browser's estimates and the hardware measurements.</p>
+</div>
+</main>
+<footer class="labfoot"><p>CCAIR Behavioral Lab, Georgia State University. <a href="/lab/">Back to the lab page</a>.</p></footer>
+<script src="/lab/engine/envcheck.js"></script>
+<script src="/lab/timing/timing.js"></script>
+</body>
+</html>
