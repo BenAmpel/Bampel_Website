@@ -62,7 +62,7 @@ function head({ title, desc, url, ogTitle }) {
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/png" sizes="64x64" href="/ccair/uploads/brand/logo-mark-64.png">
 <link rel="apple-touch-icon" href="/ccair/uploads/brand/apple-touch-icon.png">
-<link rel="stylesheet" href="/ccair/assets/pathways/pathways.css?v=${ASSET_V}-warm2">
+<link rel="stylesheet" href="/ccair/assets/pathways/pathways.css?v=${ASSET_V}-warm3">
 ${GA ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${GA}"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA}');</script>` : ''}`;
 }
@@ -86,7 +86,7 @@ function foot() {
   <span>Center for CyberAI Research (CCAIR) · Georgia State University · Reviewed ${esc(D.updated)}</span>
   <span><a href="/ccair/">CCAIR</a> · <a href="/ccair/pathways/">Pathway Finder</a> · <a href="/teaching/">Teaching</a></span>
 </div></footer>
-<script src="/ccair/assets/pathways/pathways.js?v=${ASSET_V}" defer></script>
+<script src="/ccair/assets/pathways/pathways.js?v=${ASSET_V}-anon1" defer></script>
 </body>
 </html>
 `;
@@ -115,7 +115,7 @@ function hub() {
     { q: 'Do I need to know how to code to work in cybersecurity?', a: 'No. Many roles, including GRC analyst, IT auditor, privacy analyst, security awareness and SOC analyst, need little or no programming. Coding matters most in application security, cloud security and AI security.' },
     { q: 'Which certification should I get first?', a: 'For most beginners, CompTIA Security+ or ISC2 Certified in Cybersecurity (CC) is a sensible first credential. The best choice depends on the role: each role guide lists starter and later certifications.' },
     { q: 'Is this quiz a test of my ability?', a: 'No. It is an interest guide, not an aptitude test. It compares what you say you would enjoy with what each job involves, based on the NIST NICE Workforce Framework. Use it to decide what to explore next.' },
-    { q: 'Do you store my answers?', a: 'No. Scoring happens in your browser and nothing you answer is saved or sent. If you copy a results link, your answers are packed into the link itself.' }
+    { q: 'Do you store my answers?', a: 'No. Scoring happens in your browser and nothing you answer is saved or sent. We only count, anonymously, how many people start and finish the quiz, with no answers or results attached. If you copy a results link, your answers are packed into the link itself.' }
   ];
   const roleList = D.roles.map((r, i) => ({ '@type': 'ListItem', position: i + 1, url: `${HUB}${r.slug}/`, name: `How to become ${an(r.name)}` }));
   const graph = {
@@ -138,7 +138,7 @@ ${ld(graph)}
 </head>
 <body>
 ${top('hub')}
-<main id="main">
+<main id="main" tabindex="-1">
   <section class="hero"><div class="wrap">
     <span class="eyebrow reveal"><span class="dot"></span>CCAIR Cyber Career Pathway Finder</span>
     <h1 class="reveal" data-split style="--d:.08s">Find where you <span class="grad">fit</span> in cybersecurity</h1>
@@ -221,8 +221,11 @@ function numbersHtml(r, cite) {
   const N = r.numbers;
   if (!N) return '';
   const row = (f) => `<div class="reveal"><dt>${esc(f.label)}</dt><dd>${f.value}${cite(f.refs)}${f.note ? `<small>${esc(f.note)}</small>` : ''}</dd></div>`;
+  // The BLS median already appears in the key facts at the top of the page; skip the identical "Median pay" stat here.
+  const pay = r.bls ? D.bls[r.bls] : null;
+  const stats = N.stats.filter((f) => !(pay && f.label === 'Median pay' && f.value === money(pay.median)));
   return `<section id="numbers"><h2 class="reveal">By the numbers</h2>
-    <dl class="numbers">${N.stats.map(row).join('')}</dl>
+    <dl class="numbers">${stats.map(row).join('')}</dl>
     ${N.where ? `<h3 class="reveal sub-h">Where the jobs are</h3><p class="body reveal">${N.where.text}${cite(N.where.refs)}</p>` : ''}
     ${N.who ? `<h3 class="reveal sub-h">Who hires</h3><ul class="list">${N.who.map((w) => `<li class="reveal">${w.text}${cite(w.refs)}</li>`).join('')}</ul>` : ''}
     ${N.caveat ? `<p class="reviewed reveal">${esc(N.caveat)}</p>` : ''}
@@ -260,12 +263,16 @@ function rolePage(r) {
     ]
   };
   const desc = `How to become ${an(short(r))}: what the work is like, the realistic first job, which certs to start with and free practice.`;
-  return `${head({ title: `How to Become ${an(short(r))}: First Job and Certs`, ogTitle: `How to become ${an(r.name)}`, url, desc })}
+  // The <title> names the role exactly as the H1 does; the ": First Job and Certs" tail is dropped when it would push
+  // the title past 70 characters (long names such as Network and Systems Security Administrator).
+  const titleBase = `How to Become ${an(r.name)}`;
+  const title = titleBase.length + 21 <= 70 ? `${titleBase}: First Job and Certs` : titleBase;
+  return `${head({ title, ogTitle: `How to become ${an(r.name)}`, url, desc })}
 ${ld(graph)}
 </head>
 <body>
 ${top('role')}
-<main id="main" class="guide"><div class="narrow">
+<main id="main" class="guide" tabindex="-1"><div class="narrow">
   <nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="/ccair/">CCAIR</a></li><li><a href="/ccair/pathways/">Pathway Finder</a></li><li aria-current="page">${esc(r.name)}</li></ol></nav>
   <div class="guide-hero">
     <span class="badge ${r.hiring} reveal">${HIRING[r.hiring]}</span>

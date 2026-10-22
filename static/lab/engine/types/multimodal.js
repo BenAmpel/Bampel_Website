@@ -100,13 +100,18 @@
   }
 
   // ---------- sound check (once per session, before the first item with sound) ----------
-  function soundCheck(ctx, ui, next) {
-    var plan = ctx.plan, stop = null;
-    ui.show('<h2>' + ui.Th('mic_title') + '</h2>' + ui.Tp('mic_body') +
-      '<div class="mm-check"><button type="button" class="secondary" id="mm-test">' + ui.Th('mic_test') + '</button>' +
+  // Runs as the engine's beforeTrial step, so it is not part of the item's time or traces. The parts the session's
+  // setup checks already covered are left out (info.heard: the headphone check passed; info.micHeard: the microphone
+  // check heard the participant): with both covered, or sound covered and no recording, there is no screen at all.
+  var MIC_ONLY_BODY = 'This study may record your spoken answers. If your browser asks to use your microphone, please allow it. The bar moves when we hear you.';
+  function soundCheck(info, ui, next) {
+    var plan = info.plan, stop = null, micOnly = !!info.heard;
+    ui.show('<h2>' + ui.Th('mic_title') + '</h2>' + (micOnly ? (ui.T('mic_only_body') ? ui.Tp('mic_only_body') : '<p>' + ui.esc(MIC_ONLY_BODY) + '</p>') : ui.Tp('mic_body')) +
+      '<div class="mm-check">' + (micOnly ? '' : '<button type="button" class="secondary" id="mm-test">' + ui.Th('mic_test') + '</button>') +
       (plan.recording ? '<div class="mm-meter" aria-hidden="true"><span id="mm-level"></span></div>' : '') + '</div><div id="mm-checkmsg" role="status"></div>' +
-      '<div class="actions"><button type="button" id="mm-ok">' + ui.Th('mic_ok') + '</button></div>');
-    document.getElementById('mm-test').addEventListener('click', function () { speak('This is a sound test. If you can hear this, your sound is working.', {}); });
+      '<div class="actions"><button type="button" id="mm-ok">' + ui.Th(micOnly ? 'continue_button' : 'mic_ok') + '</button></div>');
+    var test = document.getElementById('mm-test');
+    if (test) test.addEventListener('click', function () { speak('This is a sound test. If you can hear this, your sound is working.', {}); });
     if (plan.recording) {
       getMic().then(function (stream) {
         var msg = document.getElementById('mm-checkmsg');
@@ -316,7 +321,7 @@
         '<div class="captions" id="ph-captions" aria-live="polite" hidden></div>' +
         '<div class="phone-talk">' + (canSpeak ? '<button type="button" class="talk" id="ph-talk" disabled>' + ui.Th('call_talk') + '</button><p class="interim muted" id="ph-interim" aria-live="polite"></p>' : '') +
         '<form id="ph-typeform" class="typeform"><label for="ph-type">' + ui.Th('call_type_label') + '</label><div class="row"><input type="text" id="ph-type" autocomplete="off" disabled><button type="submit" class="secondary" id="ph-send" disabled>' + ui.Th('call_send') + '</button></div></form></div>' +
-        '<div class="phone-btns small"><label class="check"><input type="checkbox" id="ph-cc"> ' + ui.Th('call_captions') + '</label><button type="button" class="secondary" id="ph-hold">' + ui.Th('call_hold') + '</button>' +
+        '<div class="phone-btns small"><label class="check" for="ph-cc"><input type="checkbox" id="ph-cc"> ' + ui.Th('call_captions') + '</label><button type="button" class="secondary" id="ph-hold">' + ui.Th('call_hold') + '</button>' +
         '<button type="button" class="decline" id="ph-hang">' + ui.Th('call_hangup') + '</button></div>', 'live'));
       var clock = setInterval(function () { var s = document.getElementById('ph-status'); if (s && !st.ended && st.holdAt == null) s.textContent = fmtTime((now() - st.callT0 - st.holdMs) / 1000); }, 500);
       st.stopClock = function () { clearInterval(clock); };
@@ -432,10 +437,14 @@
   }
 
   var impl = {
+    beforeTrial: function (info, ui, go) {
+      var s = info.plan.session;
+      if (!needsSound(info.trial.item) || soundChecked[s]) return go();
+      if (info.heard && (!info.plan.recording || info.micHeard)) { soundChecked[s] = true; return go(); }
+      soundCheck(info, ui, go);
+    },
     runTrial: function (ctx, ui) {
-      var it = ctx.trial.item;
-      if (needsSound(it) && !soundChecked[ctx.plan.session]) return soundCheck(ctx, ui, function () { impl.runTrial(ctx, ui); });
-      if (it.kind === 'call') return runCall(ctx, ui);
+      if (ctx.trial.item.kind === 'call') return runCall(ctx, ui);
       renderItem(ctx, ui);
     }
   };

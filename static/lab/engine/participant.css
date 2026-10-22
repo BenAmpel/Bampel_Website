@@ -125,7 +125,15 @@ button.rec::before { content: ""; width: 10px; height: 10px; border-radius: 50%;
 .mt-opt[disabled] { opacity: .55; }
 .mt-area.live .mt-opt { opacity: 1; border-color: var(--accent); }
 .mt-area.live .mt-opt:hover { background: var(--accent-soft); }
-.mt-opt.chosen { background: var(--accent); color: var(--accent-text); border-color: var(--accent); opacity: 1 !important; }
+/* The answer given: filled with the accent (5:1 or more against the unchosen cards in both schemes, WCAG 1.4.11), a
+   ring in the text colour, and a check mark, so it does not rely on colour alone. It outranks the hover and disabled
+   styles (the answer is final, so every option is disabled once chosen). No animation, so reduced motion is unaffected. */
+.mt-area .mt-opt.chosen, .mt-area .mt-opt[aria-pressed="true"] { background: var(--accent); color: var(--accent-text); border: 2px solid var(--accent); box-shadow: 0 0 0 3px var(--card), 0 0 0 5px var(--text); opacity: 1 !important; font-weight: 700; }
+.mt-area .mt-opt.chosen::before { content: "\2713\00a0" / ""; }
+.mt-area.done .mt-opt:not(.chosen) { box-shadow: none; }
+@media (forced-colors: active) {
+  .mt-area .mt-opt.chosen { forced-color-adjust: none; background: Highlight; color: HighlightText; border: 3px solid CanvasText; box-shadow: none; }
+}
 .mt-start { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); min-width: 132px; }
 .mt-start:active:not([disabled]) { transform: translateX(-50%) scale(.97); }
 .mt-hint { position: absolute; left: 0; right: 0; bottom: 78px; text-align: center; margin: 0; }

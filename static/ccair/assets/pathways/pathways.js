@@ -1,7 +1,8 @@
 /* CCAIR Cyber Career Pathway Finder.
    Scroll reveals and role filters on every page; the quiz only on the hub (needs #pf-data).
    Nothing is stored or sent: answers live in memory and, if the student copies a link, in the URL hash
-   (never sent to the server). Analytics records only quiz_started, quiz_finished and the top role. */
+   (never sent to the server). Analytics records only anonymous quiz_started and quiz_finished counts, with no answers
+   or results attached. */
 (function () {
   'use strict';
   var doc = document.documentElement;
@@ -210,7 +211,7 @@
       '<h3 class="qtext" style="min-height:0" tabindex="-1">Tap how much each activity appeals to you. There are no wrong answers, and you don\'t need any cyber knowledge yet.</h3>' +
       '<p>You\'ll get your top 3 roles, why they fit, the realistic first job, which certifications to start with and free places to practise.</p>' +
       '<div class="hero-cta"><button class="btn btn-primary" id="pf-start">Start <span class="arrow" aria-hidden="true">&rarr;</span></button></div>' +
-      '<p class="privacy-note">Nothing you answer is saved or sent anywhere.</p>');
+      '<p class="privacy-note">Nothing you answer is saved or sent anywhere. We only count, anonymously, how many people start and finish.</p>');
     mount.appendChild(w);
     document.getElementById('pf-start').addEventListener('click', function () { show(0, 1); });
   }
@@ -301,7 +302,7 @@
 
   function finish() {
     var r = score();
-    track('quiz_finished', { top_role: r.order[0] });
+    track('quiz_finished');
     try { history.replaceState(null, '', '#r=' + encode()); } catch (e) {}
     if (reduce) return results(r, true);
     // A short "matching" moment: role names flick past while the scan line sweeps.
@@ -317,10 +318,13 @@
     var yes = [], maybe = [];
     A.forEach(function (it, i) { if (it.role === slug) { if (ansA[i] === 2) yes.push(it.text); else if (ansA[i] === 1) maybe.push(it.text); } });
     B.forEach(function (it, i) {
-      if (ansB[i] === 0 && it.pair.a[1] === slug) yes.push(it.pair.a[0]);
-      if (ansB[i] === 1 && it.pair.b[1] === slug) yes.push(it.pair.b[0]);
+      // pair.why holds a gerund phrase for each side ("building a company's security plan") so the reason reads
+      // "you would enjoy building ..."; fall back to the button label if a pair has none.
+      var why = it.pair.why || [];
+      if (ansB[i] === 0 && it.pair.a[1] === slug) yes.push(why[0] || it.pair.a[0]);
+      if (ansB[i] === 1 && it.pair.b[1] === slug) yes.push(why[1] || it.pair.b[0]);
     });
-    var list = yes.length ? yes : maybe;
+    var list = (yes.length ? yes : maybe).filter(function (t, i, all) { return all.indexOf(t) === i; });
     if (!list.length) return '<b>Why it fits:</b> your answers about background, work setting and pace pointed here more than to other roles.';
     return '<b>Why it fits:</b> you said ' + (yes.length ? 'you would enjoy' : 'you might enjoy') + '<ul>' + list.slice(0, 3).map(function (t) { return '<li>' + esc(t.charAt(0).toLowerCase() + t.slice(1)) + '</li>'; }).join('') + '</ul>';
   }

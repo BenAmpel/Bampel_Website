@@ -401,7 +401,9 @@ function CopyButton({ text, label }) {
   );
 }
 
-// Internal notes in data/materials.json ("To be added by Ben.", "Placeholder: ...", "Ben to confirm ...") stay off the public page.
+// Internal notes ("To be added by Ben.", "Placeholder: ...", "Ben to confirm ...") stay off the public page. Ben edits
+// data/ccair/materials-source.json; scripts/build-ccair.js already strips them when writing data/materials.json, so this
+// filter is the second guard.
 const isPlaceholderText = (t) => !t || /^\s*(to be added|placeholder)/i.test(t) || /ben to confirm/i.test(t);
 const isPublicMaterial = (m) => !m.placeholder && !isPlaceholderText(m.description);
 

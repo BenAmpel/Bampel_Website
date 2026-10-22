@@ -13,6 +13,7 @@ export default async () => {
   const studies = await listStudies(registry, { all: true });
   const budget = Math.max(2000, Math.floor(18000 / Math.max(1, studies.length)));
   for (const s of studies) {
+    if (s.deletingAt) continue;   // being deleted permanently (registry.mjs, deleteStudy): copying it again would undo that
     const r = await runBackup(blobsStore(getStore, s.storeName), blobsStore(getStore, s.backupName), { budgetMs: budget });
     console.log('lab-backup', s.id, JSON.stringify(r));
   }

@@ -114,3 +114,9 @@ extensions:
 security:
   # Allow frame for embedding speaker notes in slides
   allow_frame: true
+  # Permissions-Policy line of the generated _headers (the Wowchemy Netlify plugin; its default turns the microphone off).
+  # Set to the lab's policy (microphone, autoplay and full screen for this site only) so the generated line can never block
+  # the lab's voice answers and sound check. netlify.toml sets the stricter policy for every page outside the lab and
+  # explains how the two are combined; keep this value in step with its lab blocks.
+  permissions:
+    policy: 'accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(self), payment=(), usb=(), autoplay=(self), fullscreen=(self)'

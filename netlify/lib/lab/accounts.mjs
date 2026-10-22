@@ -302,6 +302,20 @@ export async function clearTotp(registry, id, who, now) {
   return { ok: true };
 }
 
+// A study was deleted: take its role off every account that had one (study-level only; nothing else in an account names a
+// study, and links are per account, not per study). Returns the emails changed, for the audit entry.
+export async function dropStudyRoles(registry, studyId) {
+  const changed = [];
+  for (const k of await registry.list('accounts/')) {
+    const a = await registry.get(k);
+    if (!a || !a.studyRoles || !Object.hasOwn(a.studyRoles, studyId)) continue;
+    const r = await update(registry, k, d => { if (d.studyRoles) delete d.studyRoles[studyId]; });
+    if (r.error) return r;
+    changed.push(a.email);
+  }
+  return { ok: true, changed };
+}
+
 export async function removeResearcher(registry, id, who, now) {
   const a = await getAccount(registry, id); if (!a) return { error: 'not_found', status: 404 };
   if (who.accountId === id) return { error: 'self', status: 400, hint: 'You cannot remove your own account.' };

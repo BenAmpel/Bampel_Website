@@ -16,12 +16,22 @@
       b.disabled = false; $('save').disabled = false;
     });
   });
+  // false when the site's own Permissions-Policy header turns the microphone off for this page (the browser then refuses
+  // without asking, and allowing it in the browser's settings does not help); null when the browser cannot tell.
+  function micAllowedBySite() {
+    var pp = document.permissionsPolicy || document.featurePolicy;
+    try { return pp && pp.allowsFeature ? pp.allowsFeature('microphone') : null; } catch (e) { return null; }
+  }
+  var SITE_BLOCKED = 'The website itself has turned the microphone off for this page (its Permissions-Policy setting), so the browser blocks it without asking. Changing the browser\'s settings will not help. Tell the lab (Support, at the top of the page) so the site setting can be fixed.';
   $('mic').addEventListener('click', function () {
-    var b = $('mic'); b.disabled = true; $('micmsg').textContent = 'Listening for the click.';
+    var b = $('mic');
+    if (micAllowedBySite() === false) { results.sound = { ok: false, error: 'site_policy' }; $('micmsg').textContent = SITE_BLOCKED; $('save').disabled = false; return; }
+    b.disabled = true; $('micmsg').textContent = 'Listening for the click.';
     L.micRoundTrip().then(function (r) {
       results.sound = r;
       $('micmsg').textContent = r.ok ? 'Speaker to microphone: ' + r.roundTripMs + ' ms (measured in blocks of ' + r.blockMs + ' ms).' :
-        r.error === 'denied' ? 'The microphone is blocked for this page. Allow it in the browser and try again.' : r.error === 'not_heard' ? 'The click was not heard. Turn the volume up, unplug headphones, and try again.' : 'This browser cannot record sound here.';
+        r.error === 'denied' ? (micAllowedBySite() === false ? SITE_BLOCKED : 'The microphone is blocked for this page. Allow it for this site in the browser (the camera or lock icon next to the address), reload, and try again. If the browser never asked, the website itself may be blocking it: tell the lab.') :
+        r.error === 'not_heard' ? 'The click was not heard. Turn the volume up, unplug headphones, and try again.' : 'This browser cannot record sound here.';
       b.disabled = false; $('save').disabled = false;
     });
   });

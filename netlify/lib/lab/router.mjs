@@ -14,7 +14,7 @@ import * as admin from './admin.mjs';
 import * as backup from './backup.mjs';
 import * as acc from './accounts.mjs';
 import { runSelfTest } from './selftest.mjs';
-import { getStudy, listStudies, createStudy, updateStudy, typeFor } from './registry.mjs';
+import { getStudy, listStudies, createStudy, updateStudy, deleteStudy, typeFor } from './registry.mjs';
 import { TYPES } from './types/index.mjs';
 import { importSurvey, ImportError } from './import/index.mjs';
 import { templateList } from './templates.mjs';
@@ -286,7 +286,7 @@ async function serveFile(store, name, req) {
 //   public:        studies (the listed studies), auth/* (sign in; open an invitation or reset link)
 //   any signed-in: me, mystudies, study-summary (a researcher session, or the owner key)
 //   researcher:    account/* (their own settings; a session only)
-//   owner:         types, studies (all), create, update, researchers/*, activity (owner key or a lab owner account)
+//   owner:         types, studies (all), create, clone, update, delete-study, researchers/*, activity (owner key or a lab owner account)
 async function labRoute(route, req, body, { registry, getStore, ownerKey, clock }) {
   const now = clock(), key = req.headers.get('x-admin-key'), bearer = acc.bearerOf(req);
   if (route === 'studies' && req.method === 'GET' && !key && !bearer) {
@@ -343,6 +343,8 @@ async function labRoute(route, req, body, { registry, getStore, ownerKey, clock 
       return reply(await cloneStudy(registry, st => blobsStore(getStore, st.storeName), { store: blobsStore(getStore, from.storeName), type: typeFor(from), study: from }, { id: body.id, name: body.name }, who, now));
     }
     case 'update': return needPost() || reply(await updateStudy(registry, String(body.id || ''), body));
+    case 'delete-study':   // an archived study, for good; the console repeats the call until done (registry.mjs, deleteStudy)
+      return needPost() || reply(await deleteStudy({ registry, registryBackup: blobsStore(getStore, 'lab-registry-backup'), getStoreFor: name => blobsStore(getStore, name) }, body.id, body.confirm, who, { now }));
     case 'researchers': return json(await acc.listResearchers(registry));
     case 'researchers/invite': return needPost() || reply(await acc.inviteResearcher(registry, body, who, await studyIds(), now));
     case 'researchers/update': return needPost() || reply(await acc.updateResearcher(registry, String(body.id || ''), body, who, await studyIds(), now));
@@ -404,7 +406,7 @@ async function studiesFor(registry, getStore, account) {
   return Promise.all(rows.map(async s => {
     const bk = await backup.backupStatus(blobsStore(getStore, s.backupName)), st = await blobsStore(getStore, s.storeName).get('meta/last-selftest');
     return { id: s.id, name: s.name, type: s.type, typeLabel: (TYPES[s.type] || {}).label || s.type, role: account && !account.labOwner ? account.studyRoles[s.id] : 'owner', paths: s.paths, listed: !!s.listed, archived: !!s.archived, builtIn: !!s.builtIn,
-      lastBackupAt: bk.lastCompleteAt || null, lastBackupTriedAt: bk.lastRunAt || null, lastSelfTest: st || null };
+      deleting: !!s.deletingAt, lastBackupAt: bk.lastCompleteAt || null, lastBackupTriedAt: bk.lastRunAt || null, lastSelfTest: st || null };
   }));
 }
 

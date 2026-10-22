@@ -11,9 +11,9 @@
 
   function signinView(msg, email, needCode, pw) {
     view('<h1>Researcher sign-in</h1><p>Sign in with the account the lab owner set up for you. Participants do not sign in here: they use the link for their study.</p>' +
-      '<form id="f" class="form-narrow" novalidate><label>Email<input type="email" id="email" autocomplete="username" spellcheck="false" value="' + esc(email || '') + '"></label>' +
-      '<label>Password<input type="password" id="pw" autocomplete="current-password" value="' + esc(pw || '') + '"></label>' +
-      (needCode ? '<label>Authenticator code or recovery code<input type="text" id="code" autocomplete="one-time-code" spellcheck="false" autocapitalize="off"></label>' : '') +
+      '<form id="f" class="form-narrow" novalidate><label for="email">Email<input type="email" id="email" autocomplete="username" spellcheck="false" value="' + esc(email || '') + '"></label>' +
+      '<label for="pw">Password<input type="password" id="pw" autocomplete="current-password" value="' + esc(pw || '') + '"></label>' +
+      (needCode ? '<label for="code">Authenticator code or recovery code<input type="text" id="code" autocomplete="one-time-code" spellcheck="false" autocapitalize="off"></label>' : '') +
       '<p class="error statusline" id="err" role="alert">' + esc(msg || '') + '</p><div class="row"><button type="submit" id="go">Sign in</button></div></form>' +
       '<p class="muted">No account yet? <a href="' + window.LabContact.access() + '">Request access</a> (opens your email app). <a href="' + window.LabContact.signin() + '">Trouble signing in?</a> See also the <a href="/lab/guide/">researcher guide</a>.</p>');
     var f = document.getElementById('f');
@@ -34,8 +34,8 @@
   function pwForm(info, token) {
     var invite = info.kind === 'invite';
     view('<h1>' + (invite ? 'Welcome to the lab' : 'Choose a new password') + '</h1><p>' + (invite ? 'You were invited as <strong>' + esc(info.email) + '</strong>. Set your name and a password.' : 'Setting a new password for <strong>' + esc(info.email) + '</strong>.') + '</p>' +
-      '<form id="f" class="form-narrow" novalidate>' + (invite ? '<label>Your name<input type="text" id="name" autocomplete="name" value="' + esc(info.name || '') + '"></label>' : '') +
-      '<label>Password (at least 12 characters)<input type="password" id="pw" autocomplete="new-password"></label><label>Type it again<input type="password" id="pw2" autocomplete="new-password"></label>' +
+      '<form id="f" class="form-narrow" novalidate>' + (invite ? '<label for="name">Your name<input type="text" id="name" autocomplete="name" value="' + esc(info.name || '') + '"></label>' : '') +
+      '<label for="pw">Password (at least 12 characters)<input type="password" id="pw" autocomplete="new-password"></label><label for="pw2">Type it again<input type="password" id="pw2" autocomplete="new-password"></label>' +
       '<p class="muted">Use a long phrase you do not use anywhere else. A password manager works well. Common passwords, and ones containing your name or email, are refused.</p>' +
       '<p class="error statusline" id="err" role="alert"></p><div class="row"><button type="submit" id="go">' + (invite ? 'Create my account' : 'Set password') + '</button></div></form>');
     document.getElementById(invite ? 'name' : 'pw').focus();
