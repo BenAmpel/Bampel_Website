@@ -52,6 +52,13 @@ export const ENGINE_TEXT = [
   ['End of session', 'finished_body', 'Last session: text', 'You have completed all sessions of the study. You can close this page.'],
   ['End of session', 'calendar_button', 'Add-to-calendar button', 'Add the next session to my calendar'],
   ['End of session', 'sign_out', 'Sign-out button', 'Sign out'],
+  ['Loading', 'preload_title', 'Loading media: title', 'Getting the study ready'],
+  ['Loading', 'preload_body', 'Loading media: text', 'Loading the pictures and sounds for this session, so everything plays without delay.'],
+  ['Loading', 'preload_progress', 'Loading media: progress ({i}, {n})', 'Loaded {i} of {n} files'],
+  ['Loading', 'preload_failed_title', 'Loading failed: title', 'Some files did not load'],
+  ['Loading', 'preload_failed_body', 'Loading failed: text ({n})', '{n} file(s) could not be loaded. Check your internet connection, then try again.'],
+  ['Loading', 'preload_retry', 'Loading failed: try again button', 'Try again'],
+  ['Loading', 'preload_continue', 'Loading failed: continue button', 'Continue anyway'],
   ['Online panel', 'handoff_code', 'Above the completion code', 'Your code for this study:'],
   ['Online panel', 'handoff_button', 'Link back to the panel ({panel})', 'Return to {panel}'],
   ['Online panel', 'stop_link', 'Link to stop taking part', 'I want to stop taking part'],
@@ -80,7 +87,9 @@ export function engineDefaults() {
       // Online panel sign-in (Prolific and similar): the participant ID comes from the study link; the completion link is shown at the end.
       // Completion codes and the redirect back to the panel: netlify/lib/lab/recruit.mjs.
       panel: { enabled: false, param: 'PROLIFIC_PID', completionUrl: '', label: 'panel', ...panelDefaults() } },
-    survey: { pre: [], post: [] }
+    survey: { pre: [], post: [] },
+    // How sessions run in the browser: preload fetches every media file before the first item (participant.js).
+    environment: { preload: false }
   };
 }
 
@@ -91,7 +100,7 @@ export function defaultContent(type) {
   return c;
 }
 
-const ENGINE_KEYS = ['minutesPerSession', 'consent', 'enrollment', 'survey', 'text', 'embedded'];
+const ENGINE_KEYS = ['minutesPerSession', 'consent', 'enrollment', 'survey', 'text', 'embedded', 'environment'];
 // Every part of a study's content that is saved (engine parts, then the type's own), as the design file keeps them.
 export const contentKeysFor = type => ENGINE_KEYS.concat(type.contentKeys);
 
@@ -115,6 +124,7 @@ export function normalize(c, type) {
   c.enrollment.panel = { ...d.enrollment.panel, ...(c.enrollment.panel || {}) };
   c.survey = { pre: c.survey?.pre || d.survey.pre, post: c.survey?.post || d.survey.post };
   c.embedded = Array.isArray(c.embedded) ? c.embedded : [];
+  c.environment = { ...d.environment, ...(c.environment && typeof c.environment === 'object' ? c.environment : {}) };
   c.text = { ...d.text, ...(c.text || {}) };
   for (const kind of ['pre', 'post']) for (const it of c.survey[kind]) if (!Array.isArray(it.sessions)) it.sessions = kind === 'pre' ? [1] : [];
   for (const k of type.contentKeys) if (c[k] === undefined) c[k] = structuredClone(d[k]);
@@ -140,6 +150,7 @@ export function publicContent(c, type, study) {
     panel: c.enrollment.panel && c.enrollment.panel.enabled ? { param: c.enrollment.panel.param, completionUrl: c.enrollment.panel.redirectUrl ? '' : c.enrollment.panel.completionUrl || '',
       studyParam: c.enrollment.panel.studyParam || '', sessionParam: c.enrollment.panel.sessionParam || '' } : null,
     embedded: (c.embedded || []).map(x => (x.source === 'url' ? { name: x.name, source: 'url', param: x.param || x.name } : { name: x.name, source: 'value', value: x.value })),
+    environment: c.environment,
     ...(type.publicContent ? type.publicContent(c) : {}) };
 }
 
@@ -300,6 +311,7 @@ export function validateContent(c, type) {
   if (type.validate) type.validate(c, typeErrors);
   const nS = typeErrors.length ? 99 : type.sessionCount(c);
   validateEmbedded(c.embedded, e);
+  if (c.environment != null && (typeof c.environment !== 'object' || typeof c.environment.preload !== 'boolean')) e.push('Choose whether media are loaded before the session starts.');
   const opts = { nSessions: nS, conditions: type.conditionsOf(c), rules: (type.surveyRules || []).map(r => r[0]), embedded: (Array.isArray(c.embedded) ? c.embedded : []).map(x => x && x.name) };
   validateQuestions(c.survey?.pre, 'Start-of-session question', e, opts);
   validateQuestions(c.survey?.post, 'End-of-session question', e, opts);

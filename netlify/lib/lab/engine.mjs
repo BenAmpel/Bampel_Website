@@ -284,6 +284,14 @@ export async function viewTrial(S, code, session, index, now = Date.now()) {
   return { ok: true };
 }
 
+// Browser timing for one trial (participant.js): onset on the performance.now() clock, onset after the screen was
+// built, the session's measured frame interval, and whether the session's media were preloaded.
+export function cleanTiming(t) {
+  if (!t || typeof t !== 'object') return null;
+  const n = (v, lo, hi) => (typeof v === 'number' && Number.isFinite(v) && v >= lo && v <= hi ? Math.round(v * 100) / 100 : null);
+  const out = { onsetMs: n(t.onsetMs, 0, 864e5 * 7), onsetDelayMs: n(t.onsetDelayMs, -1000, 600000), frameMs: n(t.frameMs, 1, 1000), preloaded: typeof t.preloaded === 'boolean' ? t.preloaded : null };
+  return Object.values(out).some(v => v != null) ? out : null;
+}
 const jsonSize = v => { try { return JSON.stringify(v).length; } catch { return Infinity; } };
 
 export async function saveTrial(S, code, session, index, data, now = Date.now()) {
@@ -301,6 +309,8 @@ export async function saveTrial(S, code, session, index, data, now = Date.now())
   // Hook: a study type that owns a trial's data (the economic game writes its round records on the server) takes over the save.
   if (kind === 'trial' && S.type.saveTrialHook) { const h = await S.type.saveTrialHook(S, p, plan, index, data, now); if (h) return h; }
   const clean = S.type.cleanTrialData(data, t, plan);
+  const timing = cleanTiming(data && data.timing);   // engine-level, for every type: stimulus onset and the display's frame interval
+  if (timing) clean.timing = timing;
   if (kind === 'trial') {
     const raw = Array.isArray(data?.rawEvents) ? data.rawEvents.slice(0, 20000) : [];
     // The type's record fields include a copy of the item and answer key as scored, so later content
@@ -449,6 +459,7 @@ export function trialRow(S, r, p) {
     session: r.session, trial_index: r.index,
     ...S.type.trialRow(r),
     trial_ms: d.traces?.durationMs ?? '', mouse_path_px: d.traces?.mousePathPx ?? '', idle_ms: d.traces?.idleMs ?? '', hidden_ms: d.traces?.hiddenMs ?? '',
+    onset_ms: d.timing?.onsetMs ?? '', onset_delay_ms: d.timing?.onsetDelayMs ?? '', frame_ms: d.timing?.frameMs ?? '', preloaded: d.timing?.preloaded == null ? '' : d.timing.preloaded ? 1 : 0,
     views: s.views?.[r.index] ?? '', viewport_w: d.viewport?.w ?? '', viewport_h: d.viewport?.h ?? '',
     received_at: r.receivedAt ? new Date(r.receivedAt).toISOString() : '',
     session_started_at: s.startedAt ? new Date(s.startedAt).toISOString() : '', session_completed_at: s.completedAt ? new Date(s.completedAt).toISOString() : '',

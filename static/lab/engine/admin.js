@@ -432,7 +432,7 @@
   var AGREE7 = ['Strongly disagree', 'Disagree', 'Somewhat disagree', 'Neither agree nor disagree', 'Somewhat agree', 'Agree', 'Strongly agree'];
   function setDirty(v) { dirty = v; $('dirty').innerHTML = v ? '<strong>Unsaved changes.</strong>' : 'No unsaved changes.'; $('save').disabled = !v; $('discard').disabled = !v; }
   window.addEventListener('beforeunload', function (e) { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
-  function subs() { return (plugin.subtabs || []).concat([['pre', 'Start-of-session survey'], ['post', 'End-of-session survey'], ['consent', 'Sign-up & consent'], ['text', 'Screen text']]); }
+  function subs() { return (plugin.subtabs || []).concat([['pre', 'Start-of-session survey'], ['post', 'End-of-session survey'], ['consent', 'Sign-up & consent'], ['environment', 'Devices & timing'], ['text', 'Screen text']]); }
   function loadContent(force) {
     if (draft && !force) return renderEditor();
     Promise.all([getJSON('content'), getJSON('content-history'), getJSON('participants')]).then(function (res) {
@@ -600,6 +600,12 @@
         field('Consent text (leave a blank line between paragraphs; email addresses become links)', '<textarea id="consenttext" rows="14">' + esc(draft.consent.paragraphs.join('\n\n')) + '</textarea>') +
         field('Agreement checkbox label', inp('consent.agreeLabel', draft.consent.agreeLabel)) +
         checkbox('data-path="consent.approved" data-bool="1"', draft.consent.approved, 'This is the IRB-approved consent text (removes the "draft" banner participants see)');
+    } else if (sub === 'environment') {
+      var ev = draft.environment || (draft.environment = { preload: false });
+      h = '<h3 style="margin:0 0 8px">Loading and timing</h3>' +
+        checkbox('data-path="environment.preload" data-bool="1"', ev.preload, 'Load every picture, sound, and video before the session starts') +
+        '<p class="muted">Participants see a progress bar while the files load, and the session starts only when all of them are ready, so no item waits on the network. If a file fails, they can try again (and, after a second failure, continue without it; the <code>preloaded</code> column then says 0). Use it whenever timing matters. Media you upload are always loaded in full; media on another website can only be warmed up, so upload timing-critical files.</p>' +
+        '<p class="muted">Every trial records when its screen first appeared (<code>onset_ms</code>, the first display frame after it was drawn) and the screen\'s frame interval (<code>frame_ms</code>; 16.67 ms is a 60 Hz display). Response times from onset are <code>rt_ms</code> minus <code>onset_delay_ms</code>.</p>';
     } else if (sub === 'text') {
       var group = null;
       h = '<p class="muted">Every piece of text participants see. Words in {braces} are filled in on screen (listed in each label). Leave a blank line between paragraphs.</p>';

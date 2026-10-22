@@ -462,8 +462,76 @@
       if (r.error) return showLogin(ERR[r.error] || ERR.server_error);
       S.plan = r;
       if (!S.lab && window.TraceLab) { S.lab = TraceLab.create({ study: studyId, version: '3.0.0', sink: { type: 'local' }, mouseSampleMs: 50 }); S.lab.start(); }
+      measureFrames();
+      if (env().preload) return preloadPlan(r, 0);
       next();
     });
+  }
+
+  // ---------- preloading and stimulus timing ----------
+  // With "preload" on, every media file in the session's plan is fetched before the first screen and the plan is
+  // pointed at in-memory copies (blob: addresses), so no stimulus waits on the network once the session starts.
+  // Files on other sites can only be warmed in the browser cache (images) unless that site allows it (CORS); the
+  // researcher guide says to upload timing-critical stimuli. Without "preload", nothing changes.
+  function env() { return S.content.environment || {}; }
+  var MEDIA_RE = /\.(mp3|m4a|wav|ogg|oga|webm|mp4|m4v|mov|png|jpe?g|gif|webp|avif|svg)(\?[^\s"']*)?$/i;
+  function mediaUrls(obj, out) {
+    out = out || [];
+    if (typeof obj === 'string') { if ((/^\/(?!\/)/.test(obj) || /^https:\/\//.test(obj)) && (MEDIA_RE.test(obj) || /^\/api\/lab\/[^/]+\/file\//.test(obj)) && out.indexOf(obj) < 0) out.push(obj); }
+    else if (obj && typeof obj === 'object') Object.keys(obj).forEach(function (k) { mediaUrls(obj[k], out); });
+    return out;
+  }
+  function swapUrls(obj, map) {
+    if (typeof obj === 'string') return Object.prototype.hasOwnProperty.call(map, obj) ? map[obj] : obj;
+    if (Array.isArray(obj)) return obj.map(function (x) { return swapUrls(x, map); });
+    if (obj && typeof obj === 'object') { var o = {}; Object.keys(obj).forEach(function (k) { o[k] = swapUrls(obj[k], map); }); return o; }
+    return obj;
+  }
+  function sameOrigin(u) { try { return new URL(u, location.href).origin === location.origin; } catch (e) { return false; } }
+  function preloadPlan(plan, tries, then) {
+    then = then || next;
+    var urls = mediaUrls(plan), done = 0, failed = [], map = {};
+    if (!urls.length) { S.preloaded = true; return then(); }
+    progress.textContent = '';
+    show('<h1>' + Th('preload_title') + '</h1>' + Tp('preload_body') + '<progress id="pl" max="' + urls.length + '" value="0" aria-describedby="plmsg"></progress><p class="muted" id="plmsg" aria-live="polite"></p>');
+    var bar = document.getElementById('pl'), msg = document.getElementById('plmsg');
+    function tick() { done++; bar.value = done; msg.textContent = T('preload_progress', { i: done, n: urls.length }); }
+    // Each file settles once: loaded, failed, or (after 30 seconds without an answer) failed.
+    function one(u) {
+      return new Promise(function (res) {
+        var settled = false, timer = setTimeout(function () { finish(false); }, 30000);
+        function finish(ok, blobUrl) { if (settled) return; settled = true; clearTimeout(timer); if (ok && blobUrl) map[u] = blobUrl; if (!ok) failed.push(u); tick(); res(); }
+        if (!sameOrigin(u) && /\.(png|jpe?g|gif|webp|avif|svg)(\?|$)/i.test(u)) {   // another site's image: warm the cache
+          var im = new Image(); im.onload = function () { finish(true); }; im.onerror = function () { finish(false); }; im.src = u; return;
+        }
+        fetch(u, { credentials: 'same-origin', mode: sameOrigin(u) ? 'same-origin' : 'cors' }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.blob(); })
+          .then(function (b) { finish(true, URL.createObjectURL(b)); }, function () { finish(false); });
+      });
+    }
+    var queue = urls.slice(), running = [];
+    function pump() { while (queue.length && running.length < 4) { var p = one(queue.shift()); running.push(p); p.then(function () { running.shift(); pump(); }); } }
+    var all = new Promise(function (res) { var timer = setInterval(function () { if (done >= urls.length) { clearInterval(timer); res(); } }, 50); });
+    pump();
+    return all.then(function () {
+      S.plan = swapUrls(plan, map);
+      if (!failed.length) { S.preloaded = true; return then(); }
+      show('<h1>' + Th('preload_failed_title') + '</h1>' + Tp('preload_failed_body', { n: failed.length }) +
+        '<div class="actions split">' + (tries >= 1 ? '<button class="secondary" id="anyway">' + Th('preload_continue') + '</button>' : '') + '<button id="retry">' + Th('preload_retry') + '</button></div>');
+      document.getElementById('retry').addEventListener('click', function () { preloadPlan(S.plan, tries + 1, then); });
+      var any = document.getElementById('anyway'); if (any) any.addEventListener('click', function () { S.preloaded = false; then(); });
+    });
+  }
+  // The display's frame interval: the median gap between 60 animation frames, measured once per session.
+  function measureFrames() {
+    if (S.frameMs != null || !window.requestAnimationFrame) return;
+    var last = null, gaps = [];
+    (function step(ts) {
+      if (last != null) gaps.push(ts - last);
+      last = ts;
+      if (gaps.length < 60) return requestAnimationFrame(step);
+      gaps.sort(function (a, b) { return a - b; });
+      S.frameMs = Math.round(gaps[30] * 100) / 100;
+    })(performance.now());
   }
   function next() {
     var p = S.plan;
@@ -489,15 +557,19 @@
     var doneCount = p.trials.filter(function (x) { return x.done; }).length;
     progress.textContent = isPractice ? T('progress_practice') : T('progress_trial', { session: p.session, i: doneCount + 1, n: p.total });
     if (!isPractice) api('view', { token: S.token, session: p.session, index: index });   // a reload re-shows it; the server counts views
-    var t0 = performance.now(), answerLog = [];
+    var t0 = performance.now(), answerLog = [], onset = null;
     if (S.lab) { S.lab.events.length = 0; S.lab.beginItem(isPractice ? 'practice' : 't' + index, stage); }
     var ctx = {
       trial: trial, index: index, isPractice: isPractice, plan: p, content: S.content,
       ms: function () { return Math.round(performance.now() - t0); },
+      // Stimulus onset: the first animation frame after the screen was drawn (performance.now() clock). A type that
+      // reveals its stimulus later (after a Start click, or when a clip starts) calls ctx.markOnset() at that moment.
+      markOnset: function () { if (window.requestAnimationFrame) requestAnimationFrame(function (ts) { onset = ts; }); },
       record: function (name, value) { answerLog.push({ atMs: ctx.ms(), name: name, value: value }); if (S.lab) S.lab.recordAnswer(name, value); },
       submit: function (fields, onError) {
         var feats = S.lab ? S.lab.endItem({}) : null, raw = S.lab ? S.lab.events.splice(0) : [];
-        var data = Object.assign({}, fields, { answerLog: answerLog, traces: feats ? feats.features : null, rawEvents: raw, viewport: { w: window.innerWidth, h: window.innerHeight } });
+        var data = Object.assign({}, fields, { answerLog: answerLog, traces: feats ? feats.features : null, rawEvents: raw, viewport: { w: window.innerWidth, h: window.innerHeight },
+          timing: { onsetMs: onset, onsetDelayMs: onset != null ? onset - t0 : null, frameMs: S.frameMs, preloaded: env().preload ? !!S.preloaded : null } });
         if (S.lab && !S.deviceSent[p.session] && !isPractice) { data.device = S.lab.device; S.deviceSent[p.session] = true; }
         api('trial', { token: S.token, session: p.session, index: index, data: data }).then(function (r) {
           if (r.error) { if (S.lab) S.lab.beginItem(isPractice ? 'practice' : 't' + index, stage); return onError && onError(ERR[r.error] || ERR.server_error); }
@@ -508,6 +580,7 @@
       }
     };
     S.type.runTrial(ctx, ui);
+    ctx.markOnset();
   }
   function showPracticeDone() {
     show('<h1>' + Th('practice_done_title') + '</h1>' + Tp('practice_done_body') + '<div class="actions"><button id="go">' + Th('practice_done_button') + '</button></div>');
@@ -572,7 +645,8 @@
     wire: wire, flag: flag, blank: blank, questionSet: questionSet, nextId: nextId, reduceMotion: reduceMotion, stage: stage,
     // Study types with their own server routes (for example the economic game's polling) call them with the sign-in token.
     call: function (route, body) { return api(route, Object.assign({ token: S.token }, body)); } };
-  window.LabEngine = { registerType: function (id, impl) { types[id] = impl; }, ui: ui };
+  window.LabEngine = { registerType: function (id, impl) { types[id] = impl; }, ui: ui,
+    internals: { S: S, mediaUrls: mediaUrls, swapUrls: swapUrls, preloadPlan: preloadPlan } };   // for tests (tests/lab/*.test.mjs)
 
   // ---------- boot ----------
   if (!studyId) { show('<h1>Study not found</h1><p>Check the link you were given.</p>'); return; }
