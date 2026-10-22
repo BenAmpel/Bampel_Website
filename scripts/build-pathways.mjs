@@ -37,8 +37,8 @@ const BY = Object.fromEntries(D.roles.map((r) => [r.slug, r]));
 const short = (r) => r.short || r.name;
 // 'an IT Auditor', 'an AI Security Specialist', 'a SOC Analyst'.
 const an = (name) => (/^[AEIOU]/.test(name) ? 'an ' : 'a ') + name;
-const reviewer = { '@type': 'Person', name: 'Benjamin M. Ampel', url: `${SITE}/`, jobTitle: 'Director, Center for CyberAI Research (CCAIR)' };
-const org = { '@type': 'ResearchOrganization', name: 'Center for CyberAI Research (CCAIR)', url: `${SITE}/ccair/` };
+const reviewer = { '@type': 'Person', '@id': `${SITE}/#person`, name: 'Benjamin M. Ampel', url: `${SITE}/`, jobTitle: 'Director, Center for CyberAI Research (CCAIR)' };
+const org = { '@type': 'ResearchOrganization', '@id': `${SITE}/ccair/#org`, name: 'Center for CyberAI Research (CCAIR)', url: `${SITE}/ccair/` };
 const ld = (obj) => `<script type="application/ld+json">${JSON.stringify(obj).replace(/</g, '\\u003c')}</script>`;
 
 function head({ title, desc, url, ogTitle }) {
@@ -62,7 +62,7 @@ function head({ title, desc, url, ogTitle }) {
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/png" sizes="64x64" href="/ccair/uploads/brand/logo-mark-64.png">
 <link rel="apple-touch-icon" href="/ccair/uploads/brand/apple-touch-icon.png">
-<link rel="stylesheet" href="/ccair/assets/pathways/pathways.css?v=${ASSET_V}-warm">
+<link rel="stylesheet" href="/ccair/assets/pathways/pathways.css?v=${ASSET_V}-warm2">
 ${GA ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${GA}"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA}');</script>` : ''}`;
 }
@@ -84,7 +84,7 @@ function top(current) {
 function foot() {
   return `<footer><div class="wrap">
   <span>Center for CyberAI Research (CCAIR) · Georgia State University · Reviewed ${esc(D.updated)}</span>
-  <span><a href="/ccair/">CCAIR</a> · <a href="/ccair/pathways/">Pathway Finder</a> · <a href="/teaching/">Teaching</a> · <a href="/privacy/">Privacy</a></span>
+  <span><a href="/ccair/">CCAIR</a> · <a href="/ccair/pathways/">Pathway Finder</a> · <a href="/teaching/">Teaching</a></span>
 </div></footer>
 <script src="/ccair/assets/pathways/pathways.js?v=${ASSET_V}" defer></script>
 </body>

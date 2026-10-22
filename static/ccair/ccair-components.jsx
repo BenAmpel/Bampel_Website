@@ -68,10 +68,19 @@ function CCAIRNav({ currentPage }) {
 
   useEffect(() => { setOpen(false); }, [currentPage]);
 
-  // While the sheet is open: Escape closes it, focus moves into it, and the page behind does not scroll.
+  // While the sheet is open: Escape closes it, Tab stays inside it (the toggle and the sheet's links),
+  // focus moves into it, and the page behind does not scroll.
   useEffect(() => {
     if (!open) return;
-    const onKey = (e) => { if (e.key === 'Escape') { setOpen(false); btnRef.current && btnRef.current.focus(); } };
+    const onKey = (e) => {
+      if (e.key === 'Escape') { setOpen(false); btnRef.current && btnRef.current.focus(); return; }
+      if (e.key !== 'Tab' || !sheetRef.current) return;
+      const items = [btnRef.current, ...sheetRef.current.querySelectorAll('a[href], button')].filter(Boolean);
+      const first = items[0], last = items[items.length - 1];
+      const inside = items.includes(document.activeElement);
+      if (e.shiftKey && (document.activeElement === first || !inside)) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && (document.activeElement === last || !inside)) { e.preventDefault(); first.focus(); }
+    };
     document.addEventListener('keydown', onKey);
     const first = sheetRef.current && sheetRef.current.querySelector('a');
     first && first.focus();
@@ -100,7 +109,7 @@ function CCAIRNav({ currentPage }) {
       </nav>
       {open && <div className="sheet-scrim" onClick={() => setOpen(false)} aria-hidden="true"></div>}
       {open && (
-        <div id="ccair-menu" className="sheet" ref={sheetRef}>
+        <div id="ccair-menu" className="sheet" ref={sheetRef} onClick={(e) => { if (e.target.closest('a')) setOpen(false); }}>
           <ul>
             <li><a href="#/" aria-current={currentPage === 'home' ? 'page' : undefined}>Home</a></li>
             {NAV_PAGES.map((p) => (
@@ -184,7 +193,6 @@ function PublicationItem({ title, authors, venue, year, type, doi, pdf }) {
   const award = / — (Best Paper Award)$/.exec(venue || '');
   const venueText = award ? venue.replace(award[0], '') : venue;
   const links = [
-    site.page && { label: 'Paper page', href: site.page, aria: `Paper page with abstract and citation for ${title}` },
     (pdf || site.pdf) && { label: 'PDF', href: pdf || site.pdf, aria: `PDF of ${title}` },
     site.code && { label: 'Code', href: site.code, aria: `Code for ${title}` },
     site.data && { label: 'Data', href: site.data, aria: `Data for ${title}` },
@@ -235,13 +243,13 @@ function SegmentedControl({ label, options, value, onChange }) {
   );
 }
 
-function FinderFeature({ headingLevel = 2 }) {
+function FinderFeature({ headingLevel = 2, titleId }) {
   const H = 'h' + headingLevel;
   return (
     <Reveal className="feature">
       <div>
         <div className="feature-meta"><span className="tag tag-workshop">Free</span><span className="tag">5 minutes</span><span className="tag">Nothing stored</span></div>
-        <H>Not sure where you fit in cybersecurity?</H>
+        <H id={titleId}>Not sure where you fit in cybersecurity?</H>
         <p>The Cyber Career Pathway Finder is a plain-language quiz built on the NIST NICE Workforce Framework. It ranks
           14 cybersecurity roles by your interests and shows the realistic first job, starter certifications, free practice
           and US pay for each.</p>

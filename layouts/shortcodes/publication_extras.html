@@ -38,7 +38,11 @@
 {{ with $page.Params.year }}{{ $year = printf "%v" . }}{{ end }}
 
 {{ $venue := $page.Params.publication | default $page.Params.publication_short | default $page.Params.venue | default "" }}
-{{ $venuePlain := $venue | plainify }}
+{{/* Front matter may carry markdown and status text ("In *Proceedings of X*", "*Journal (JMIS)*, Forthcoming"); same cleanup as academic_seo.html. */}}
+{{ $venuePlain := trim (replaceRE "^In\\s+" "" (replaceRE "\\*" "" (plainify $venue))) " " }}
+{{ $venuePlain = trim (replaceRE "(?i),?\\s*\\(?(forthcoming|in press|accepted)\\)?\\.?$" "" $venuePlain) " " }}
+{{/* Drop trailing volume/issue/pages (", 41:1, 236-265", ", 5:1, Article 7", ", 9(1)") so the venue is a bare name. */}}
+{{ $venuePlain = trim (replaceRE ",\\s*\\d.*$" "" $venuePlain) " " }}
 
 {{ $doi := "" }}
 {{ with $page.Params.doi }}
@@ -99,7 +103,7 @@
   {{ $firstAuthor := index $authors 0 }}
   {{ $nameParts := split $firstAuthor " " }}
   {{ if gt (len $nameParts) 0 }}
-    {{ $citationKey = lower (replaceRE "[^a-z]" "" (index $nameParts (sub (len $nameParts) 1))) }}
+    {{ $citationKey = replaceRE "[^a-z]" "" (lower (index $nameParts (sub (len $nameParts) 1))) }}
   {{ end }}
 {{ end }}
 {{ $titleKey := "" }}
@@ -222,9 +226,9 @@
           <pre><code>{{ $bibtex }}</code></pre>
         </details>
         <div class="pub-citation-actions">
-          <button class="pub-copy" type="button" data-copy-text="{{ $citationApa | urlquery }}" data-copy-label="APA">Copy APA</button>
-          <button class="pub-copy" type="button" data-copy-text="{{ $citationChicago | urlquery }}" data-copy-label="Chicago">Copy Chicago</button>
-          <button class="pub-copy" type="button" data-copy-text="{{ $bibtex | urlquery }}" data-copy-label="BibTeX">Copy BibTeX</button>
+          <button class="pub-copy" type="button" data-copy-text="{{ replace ($citationApa | urlquery) "+" "%20" }}" data-copy-label="APA">Copy APA</button>
+          <button class="pub-copy" type="button" data-copy-text="{{ replace ($citationChicago | urlquery) "+" "%20" }}" data-copy-label="Chicago">Copy Chicago</button>
+          <button class="pub-copy" type="button" data-copy-text="{{ replace ($bibtex | urlquery) "+" "%20" }}" data-copy-label="BibTeX">Copy BibTeX</button>
         </div>
       </div>
     </div>

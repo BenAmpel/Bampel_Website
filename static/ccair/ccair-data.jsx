@@ -13,27 +13,36 @@ const DATA_FILES = {
   materials: 'data/materials.json',
   paperPages: 'data/paper-pages.json',
 };
-// Generated at build time (scripts/build-ccair.js); the site still works if it is missing.
-const OPTIONAL_FILES = { paperPages: {} };
+// What a page gets when its file fails to load, so one failed fetch empties one section instead of the whole site.
+// paper-pages.json is generated at build time (scripts/build-ccair.js); the site still works if it is missing.
+const FALLBACKS = {
+  publications: [], people: { students: [], mentees: [], affiliates: [] }, resources: [],
+  funding: { grants: [], awarded: [], collaborations: [] }, courses: [], news: [], materials: [], paperPages: {},
+};
 
 function DataProvider({ children }) {
   const [state, setState] = useDataState({ data: null, loading: true, error: null });
 
   useDataEffect(() => {
     const entries = Object.entries(DATA_FILES);
-    Promise.all(entries.map(([key, url]) => fetch(url).then(r => {
+    Promise.allSettled(entries.map(([, url]) => fetch(url).then(r => {
       if (!r.ok) throw new Error(`Failed to load ${url}: ${r.status}`);
       return r.json();
-    }).catch(err => {
-      if (key in OPTIONAL_FILES) return OPTIONAL_FILES[key];
-      throw err;
     })))
       .then(results => {
         const data = {};
-        entries.forEach(([key], i) => { data[key] = results[i]; });
-        setState({ data, loading: false, error: null });
-      })
-      .catch(err => setState({ data: null, loading: false, error: err.message }));
+        const failed = [];
+        entries.forEach(([key], i) => {
+          const r = results[i];
+          if (r.status === 'fulfilled') { data[key] = r.value; return; }
+          failed.push(r.reason && r.reason.message ? r.reason.message : key);
+          data[key] = FALLBACKS[key];
+        });
+        if (failed.length) console.warn('CCAIR data:', failed.join('; '));
+        // Only show the error screen when nothing loaded at all.
+        if (failed.length === entries.length) setState({ data: null, loading: false, error: failed[0] });
+        else setState({ data, loading: false, error: null });
+      });
   }, []);
 
   if (state.loading) {

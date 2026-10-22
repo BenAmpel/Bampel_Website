@@ -20,7 +20,7 @@ class ErrorBoundary extends React.Component {
 
 const VALID_PAGES = ['home', 'research', 'publications', 'people', 'resources', 'materials', 'about', 'contact'];
 const TITLES = {
-  home: 'CCAIR — Center for CyberAI Research', research: 'Research — CCAIR', publications: 'Publications — CCAIR',
+  home: 'Center for CyberAI Research (CCAIR) — Georgia State University', research: 'Research — CCAIR', publications: 'Publications — CCAIR',
   people: 'People — CCAIR', resources: 'Resources — CCAIR', materials: 'Research materials — CCAIR',
   about: 'About — CCAIR', contact: 'Contact — CCAIR',
 };

@@ -12,9 +12,10 @@
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:image" content="{{ $card }}" />
 
-{{/* Person knowledge-graph identity: homepage and the author profile page. The @id is shared with the
-   CCAIR site's Organization JSON-LD (static/ccair/index.html), which names this person as its director. */}}
-{{ if or .IsHome (eq .RelPermalink "/authors/admin/") }}
+{{/* Person knowledge-graph identity: homepage only (author profile pages are not rendered and /authors/*
+   redirects to /). The @id is shared with the CCAIR site's Organization JSON-LD (static/ccair/index.html),
+   which names this person as its director. */}}
+{{ if .IsHome }}
 {{ $ld := dict
     "@context" "https://schema.org"
     "@type" "Person"

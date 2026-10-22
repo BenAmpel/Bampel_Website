@@ -23,11 +23,15 @@
   {{ $venuePlain := trim (replaceRE "^In\\s+" "" (replaceRE "\\*" "" (plainify $venue))) " " }}
   {{/* Scholar parses this as the journal/conference name: strip status suffixes. */}}
   {{ $venuePlain = trim (replaceRE "(?i),?\\s*\\(?(forthcoming|in press|accepted)\\)?\\.?$" "" $venuePlain) " " }}
+  {{/* ...and trailing volume/issue/pages (", 41:1, 236-265", ", 5:1, Article 7"). */}}
+  {{ $venuePlain = trim (replaceRE ",\\s*\\d.*$" "" $venuePlain) " " }}
   {{ $doi := "" }}{{ with $page.Params.doi }}{{ if ne . "" }}{{ $doi = . }}{{ end }}{{ end }}
   {{ $abstract := trim (replaceRE "\\s+" " " (plainify ($page.Params.abstract | default ""))) " " }}
 
+  {{/* citation_pdf_url only for real PDFs: many url_pdf values are publisher landing pages. Besides *.pdf,
+     accept known PDF endpoints (arXiv/ACM /pdf/, bepress viewcontent.cgi, NSF PAR servlets/purl). */}}
   {{ $pdf := "" }}
-  {{ with $page.Params.url_pdf }}{{ if ne . "" }}
+  {{ with $page.Params.url_pdf }}{{ if or (strings.HasSuffix (lower (replaceRE "[?#].*$" "" .)) ".pdf") (findRE "/pdf/|viewcontent\\.cgi|par\\.nsf\\.gov/servlets/purl/" .) }}
     {{ $pdf = cond (hasPrefix . "http") . (printf "%s%s" $page.Site.BaseURL (strings.TrimPrefix "/" .)) }}
   {{ end }}{{ end }}
 
@@ -61,7 +65,8 @@
       "mainEntityOfPage" $page.Permalink
   }}
   {{ with $abstract }}{{ $ld = merge $ld (dict "abstract" . "description" .) }}{{ end }}
-  {{ with $venuePlain }}{{ $ld = merge $ld (dict "isPartOf" (dict "@type" (cond $isJournal "Periodical" "PublicationEvent") "name" .)) }}{{ end }}
+  {{/* isPartOf ranges over CreativeWork: Periodical for journals, Book for proceedings volumes. */}}
+  {{ with $venuePlain }}{{ $ld = merge $ld (dict "isPartOf" (dict "@type" (cond $isJournal "Periodical" (cond (hasPrefix . "Proceedings") "Book" "CreativeWork")) "name" .)) }}{{ end }}
   {{ with $doi }}{{ $ld = merge $ld (dict "sameAs" $sameAs "identifier" (dict "@type" "PropertyValue" "propertyID" "doi" "value" .)) }}{{ end }}
   <script type="application/ld+json">{{ $ld | jsonify (dict "indent" "  ") | safeJS }}</script>
 {{ end }}

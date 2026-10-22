@@ -66,6 +66,7 @@ const JOIN_AREAS = [
 ];
 
 const byYearDesc = (a, b) => (b.year || 0) - (a.year || 0);
+const STAT_STYLE = { display: 'flex', flexDirection: 'column-reverse', justifyContent: 'flex-end' };
 
 function HomePage() {
   const { publications, people, news, courses } = useData();
@@ -85,10 +86,10 @@ function HomePage() {
             <a className="btn btn-secondary" href="/ccair/pathways/">Find your cyber career path</a>
           </div>
           <dl className="stats">
-            <div className="stat"><b>{publications.length}</b><span>Publications</span></div>
-            <div className="stat"><b>{phdCount}</b><span>Ph.D. students mentored</span></div>
-            <div className="stat"><b>2</b><span>Best paper awards</span></div>
-            <div className="stat"><b>{courses.length}</b><span>Courses taught</span></div>
+            {[[publications.length, 'Publications'], [phdCount, 'Ph.D. students mentored'], [2, 'Best paper awards'], [courses.length, 'Courses taught']].map(([n, label]) => (
+              // dt before dd for assistive tech; column-reverse keeps the number on top.
+              <div key={label} className="stat" style={STAT_STYLE}><dt><span>{label}</span></dt><dd><b>{n}</b></dd></div>
+            ))}
           </dl>
         </div>
       </section>
@@ -101,7 +102,7 @@ function HomePage() {
               <span className="card-num">{p.n}</span>
               <h3>{p.title}</h3>
               <p>{p.desc}</p>
-              <div className="chips" aria-label={`Systems built under ${p.title}`}>
+              <div className="chips" role="group" aria-label={`Systems built under ${p.title}`}>
                 {p.systems.map((s) => <a key={s.name} className="chip" href={s.href}>{s.name}</a>)}
               </div>
             </Reveal>
@@ -130,7 +131,7 @@ function HomePage() {
       </Section>
 
       <Section id="students" labelledBy="students-title">
-        <FinderFeature />
+        <FinderFeature titleId="students-title" />
       </Section>
 
       <Section id="explore" eyebrow="Get to know us" title="Find your way around">
@@ -268,11 +269,11 @@ function PeoplePage() {
       <PageHead eyebrow="People" title="The people behind CCAIR"
         lede="A small, collaborative group of faculty and Ph.D. researchers working across Georgia State and partner universities." />
 
-      <Section id="director" title="Director">
+      {d && <Section id="director" title="Director">
         <Reveal className="card director">
           <div className="avatar avatar-lg" aria-hidden="true">{initialsOf(d.name)}</div>
           <div>
-            <h2 style={{ fontSize: 'clamp(22px, 2.6vw, 28px)' }}>Dr. {d.name}</h2>
+            <h3 style={{ fontSize: 'clamp(22px, 2.6vw, 28px)', lineHeight: 1.2, letterSpacing: '-0.02em', marginBottom: 0 }}>Dr. {d.name}</h3>
             <p className="role">{d.title}, {d.dept}</p>
             <p>Ph.D. in Management Information Systems, University of Arizona (2024). The dissertation, “Securing Cyberspace:
               AI-Enabled Cyber-Adversary Defense,” won the ACM SIGMIS Doctoral Dissertation Award at ICIS 2024.</p>
@@ -284,7 +285,7 @@ function PeoplePage() {
             </div>
           </div>
         </Reveal>
-      </Section>
+      </Section>}
 
       <Section id="students" alt title="Graduate researchers" intro="Ph.D. students advised and mentored by CCAIR faculty at Georgia State and partner institutions.">
         <h3 className="group-label">Georgia State University</h3>
@@ -299,7 +300,7 @@ function PeoplePage() {
 
       <Section id="affiliates" title="Faculty affiliates" intro="Internal and external faculty contributing to shared CCAIR artifacts across research primitives.">
         <div className="grid grid-3">
-          {people.affiliates.map((a) => (
+          {(people.affiliates || []).map((a) => (
             <Reveal key={a.name}><PersonCard name={a.name} role={a.role} meta={a.dept} note={a.synergy} /></Reveal>
           ))}
         </div>
@@ -337,7 +338,7 @@ function ResourcesPage() {
         <Reveal className="feature">
           <div>
             <h2 id="materials-title">Research materials hub</h2>
-            <p>Released datasets, stimulus libraries, instruments and tools from CCAIR studies, each with a "how to cite" line and a DOI link.</p>
+            <p>Datasets, tools and other reusable materials from CCAIR studies, with a "how to cite" line and a DOI link where they exist.</p>
           </div>
           <div className="actions"><a className="btn btn-primary" href="#/materials">Browse materials <Arrow /></a></div>
         </Reveal>
@@ -384,44 +385,63 @@ const KIND_LABEL = { dataset: 'Dataset', stimuli: 'Stimulus library', instrument
 
 function CopyButton({ text, label }) {
   const [done, setDone] = usePageState(false);
+  const timer = React.useRef(null);
+  React.useEffect(() => () => clearTimeout(timer.current), []);
   if (!navigator.clipboard) return null;
-  const copy = () => navigator.clipboard.writeText(text).then(() => { setDone(true); setTimeout(() => setDone(false), 1800); });
-  return <button type="button" className="btn btn-secondary btn-sm" onClick={copy} aria-label={label}>{done ? 'Copied' : 'Copy citation'}</button>;
+  const copy = () => navigator.clipboard.writeText(text).then(() => {
+    setDone(true);
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => setDone(false), 1800);
+  });
+  return (
+    <>
+      <button type="button" className="btn btn-secondary btn-sm" onClick={copy} aria-label={done ? 'Citation copied' : label}>{done ? 'Copied' : 'Copy citation'}</button>
+      <span className="sr-only" role="status">{done ? 'Citation copied' : ''}</span>
+    </>
+  );
 }
 
+// Internal notes in data/materials.json ("To be added by Ben.", "Placeholder: ...", "Ben to confirm ...") stay off the public page.
+const isPlaceholderText = (t) => !t || /^\s*(to be added|placeholder)/i.test(t) || /ben to confirm/i.test(t);
+const isPublicMaterial = (m) => !m.placeholder && !isPlaceholderText(m.description);
+
 function MaterialsPage() {
-  const { materials = [] } = useData();
+  const { materials: all = [] } = useData();
+  const materials = all.filter(isPublicMaterial);
   const [kind, setKind] = usePageState('all');
   const shown = materials.filter((m) => kind === 'all' || m.kind === kind);
-  const options = MATERIAL_KINDS.map((k) => ({ ...k, label: `${k.label} ${k.value === 'all' ? materials.length : materials.filter((m) => m.kind === k.value).length}` }));
+  const countOf = (k) => (k === 'all' ? materials.length : materials.filter((m) => m.kind === k).length);
+  const options = MATERIAL_KINDS.filter((k) => k.value === 'all' || countOf(k.value) > 0).map((k) => ({ ...k, label: `${k.label} ${countOf(k.value)}` }));
 
   return (
     <div className="page">
       <PageHead eyebrow="Research materials" title="Data, stimuli, instruments and tools"
-        lede="Materials from CCAIR studies that other researchers and educators can reuse. Each entry says how to cite it and links to the version of record." />
-      <section className="section" aria-label="Materials list">
+        lede="Materials from CCAIR studies that other researchers and educators can reuse. Entries say how to cite them and link to the version of record where one exists." />
+      <section className="section" aria-labelledby="materials-list-title">
         <div className="wrap">
+          <h2 id="materials-list-title" className="sr-only">Materials list</h2>
           <div className="toolbar"><SegmentedControl label="Material type" options={options} value={kind} onChange={setKind} /></div>
           {shown.length === 0 && <p className="empty">Nothing of this type is listed yet.</p>}
           <div className="grid grid-2">
             {shown.map((m) => (
-              <Reveal key={m.title} className={'card material' + (m.placeholder ? ' is-placeholder' : '')}>
+              <Reveal key={m.title} className="card material">
                 <div className="material-meta">
                   <span className="tag">{KIND_LABEL[m.kind] || m.kind}</span>
                   <Status status={m.status} />
-                  {m.placeholder && <span className="tag tag-conference">Placeholder</span>}
                 </div>
                 <h3>{m.title}</h3>
                 <p>{m.description}</p>
-                <div className="material-cite">
-                  <span className="material-cite-label">How to cite</span>
-                  <p>{m.cite}{m.doi ? <> <a href={'https://doi.org/' + m.doi}>https://doi.org/{m.doi}</a></> : null}</p>
-                </div>
-                {(m.links.length > 0 || m.doi || !m.placeholder) && (
+                {!isPlaceholderText(m.cite) && (
+                  <div className="material-cite">
+                    <span className="material-cite-label">How to cite</span>
+                    <p>{m.cite}{m.doi ? <> <a href={'https://doi.org/' + m.doi}>https://doi.org/{m.doi}</a></> : null}</p>
+                  </div>
+                )}
+                {((m.links || []).length > 0 || m.doi || !isPlaceholderText(m.cite)) && (
                   <div className="material-actions">
                     {m.doi && <a className="btn btn-primary btn-sm" href={'https://doi.org/' + m.doi}>DOI</a>}
-                    {m.links.map((l) => <a key={l.href} className="btn btn-secondary btn-sm" href={l.href}>{l.label}</a>)}
-                    {!/to be added/i.test(m.cite) && <CopyButton text={m.cite + (m.doi ? ' https://doi.org/' + m.doi : '')} label={`Copy citation for ${m.title}`} />}
+                    {(m.links || []).map((l) => <a key={l.href} className="btn btn-secondary btn-sm" href={l.href}>{l.label}</a>)}
+                    {!isPlaceholderText(m.cite) && <CopyButton text={m.cite + (m.doi ? ' https://doi.org/' + m.doi : '')} label={`Copy citation for ${m.title}`} />}
                   </div>
                 )}
               </Reveal>

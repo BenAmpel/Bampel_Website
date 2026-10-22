@@ -4,7 +4,7 @@
 :root {
   color-scheme: light dark;
   --bg: #FBF6EF; --surface: #F6EDE2; --elevated: #FFFFFF;
-  --card: #FFFFFF; --card-solid: #FFFFFF;
+  --card: #FFFFFF; --card-solid: #FFFFFF; --ans-bg: #F6EDE2;
   --accent: #A94A26; --accent-rgb: 169, 74, 38; --accent-dim: rgba(180, 81, 43, 0.09); --accent-glow: rgba(180, 81, 43, 0.24);
   --accent2: #3B2A4A; --accent2-rgb: 59, 42, 74;
   --on-accent: #FFFFFF;
@@ -21,7 +21,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #1D171F; --surface: #2A2230; --elevated: #322938;
-    --card: #2A2230; --card-solid: #2A2230;
+    --card: #2A2230; --card-solid: #2A2230; --ans-bg: #322938;
     --accent: #F0936A; --accent-rgb: 240, 147, 106; --accent-dim: rgba(240, 147, 106, 0.14); --accent-glow: rgba(240, 147, 106, 0.28);
     --accent2: #E9D8F0; --accent2-rgb: 233, 216, 240;
     --on-accent: #2B1A12;
@@ -380,7 +380,7 @@ footer a { color: var(--text2); }
 .badge.emerging { color: var(--accent2); background: rgba(var(--accent2-rgb), 0.10); border-color: transparent; }
 .quiz { background: var(--card); border-color: var(--border-soft); box-shadow: 0 2px 4px rgba(29, 24, 16, 0.04), 0 24px 60px -30px rgba(29, 24, 16, 0.25); }
 .ring .track, .radar .grid { stroke: var(--faint-2); }
-.ans { background: var(--elevated); }
+.ans { background: var(--ans-bg); }
 .bars .b, .interlude-bar { background: var(--faint); }
 .match.first { background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.07), rgba(var(--accent2-rgb), 0.05)); }
 @media (prefers-reduced-transparency: reduce) { .top { background: var(--bg); -webkit-backdrop-filter: none; backdrop-filter: none; } }
