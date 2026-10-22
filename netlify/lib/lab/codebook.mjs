@@ -86,6 +86,14 @@ const TYPE_COLUMNS = {
     ['misleading_inspected', 'binary', 'A misleading panel was opened.', '0 = no; 1 = yes'], ['contradicts_ai_inspected', 'binary', 'A panel against the AI\'s verdict was opened.', '0 = no; 1 = yes'],
     ['contradicts_ai_inspected_after_ai', 'binary', 'Such a panel was on screen after the AI appeared.', '0 = no; 1 = yes'], ['influential_panels', 'list', 'What the participant said influenced them (| separated).']
   ],
+  reaction: [
+    ['paradigm', 'category', 'The task.', 'stroop; flanker'], ['practice', 'binary', 'A practice trial (exclude from analysis).', '0 = no; 1 = yes'],
+    ['target', 'category', 'The correct answer: the ink colour (Stroop) or the middle arrow\'s direction (flanker).', 'red; green; blue; yellow; left; right'],
+    ['distractor', 'category', 'What competed with it: the word (Stroop) or the outer arrows\' direction (flanker).'], ['congruent', 'binary', 'The distractor matched the target.', '0 = incongruent; 1 = congruent'],
+    ['response', 'category', 'The answer given (blank = no answer in time).'], ['response_key', 'text', 'The key pressed (blank for a tap).'], ['response_via', 'category', 'How the answer was given.', 'key; tap'],
+    ['correct', 'binary', 'The answer matched the target (blank = no answer in time).', '0 = no; 1 = yes'], ['rt_ms', 'ms', 'Response time from the stimulus\'s first display frame to the key press or tap (blank = no answer in time).'],
+    ['timed_out', 'binary', 'No answer within the response window.', '0 = no; 1 = yes']
+  ],
   game: [
     ['stage', 'category', 'Game stage.'], ['step', 'integer', 'Step within the round.'], ['acting', 'category', 'Role acting in this step.'], ['auto', 'binary', 'Decision made automatically (time-out or stored partner).', '0 = no; 1 = yes'],
     ['payoff', 'number', 'Payoff for the round.'], ['round', 'integer', 'Round number.'], ['group', 'integer', 'Group within the round.'], ['d_{decision}', 'number', 'This participant\'s value for each decision.'], ['o_{decision}', 'list', 'Other players\' values for each decision (| separated).']

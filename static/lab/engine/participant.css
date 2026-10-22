@@ -196,3 +196,14 @@ meter#micm { width: 100%; height: 24px; }
 /* Matrix (matrixHtml): each statement is its own fieldset with the shared answer options. */
 .matrix .mx-row { margin: 14px 0 0; padding: 0; border: 0; }
 .matrix .mx-row > legend { font-weight: 500; padding: 0; margin-bottom: 6px; }
+/* Reaction-time task (engine/types/reaction.js): a neutral panel, so ink colours look the same in light and dark mode. */
+.rt-stage { display: flex; align-items: center; justify-content: center; min-height: 220px; margin: 8px 0 16px; border-radius: var(--radius-sm); background: #f4f4f4; color: #1d1d1f; }
+.rt-fix { font-size: 48px; font-weight: 300; }
+.rt-word { font-size: 56px; font-weight: 800; letter-spacing: .04em; }
+.rt-arrows { font-size: 56px; letter-spacing: .1em; }
+.rt-fb { font-size: 24px; font-weight: 600; }
+.rt-keys { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.rt-keys .rt-key { min-height: 48px; min-width: 110px; }
+kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px solid var(--line-strong); border-radius: 6px; font: 600 .9em ui-monospace, SFMono-Regular, Menlo, monospace; text-align: center; }
+.rt-legend { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 14px; }
+.rt-swatch { display: inline-block; width: 14px; height: 14px; border-radius: 3px; margin: 0 6px -2px 4px; }

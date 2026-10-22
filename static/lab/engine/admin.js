@@ -975,7 +975,7 @@
             '<optgroup label="Blank study">' + TYPES.map(function (x) { return '<option value="type:' + esc(x.id) + '">Blank: ' + esc(x.label) + '</option>'; }).join('') + '</optgroup>';
           $('tplgrid').innerHTML = TPLS.map(function (x) {
             return '<button type="button" class="tpl-card" role="listitem" data-tpl="' + esc(x.id) + '"><span class="tpl-icon tpl-' + esc(x.icon) + '" aria-hidden="true"></span>' +
-              '<span class="tpl-name">' + esc(x.name) + '</span><span class="tpl-blurb">' + esc(x.blurb) + '</span><span class="tpl-meta">About ' + x.minutes + ' min · ' + (x.type === 'multimodal' ? 'media and voice' : 'text and surveys') + '</span></button>';
+              '<span class="tpl-name">' + esc(x.name) + '</span><span class="tpl-blurb">' + esc(x.blurb) + '</span><span class="tpl-meta">About ' + x.minutes + ' min · ' + (x.type === 'multimodal' ? 'media and voice' : x.type === 'reaction' ? 'reaction times' : 'text and surveys') + '</span></button>';
           }).join('');
           var d = function () {
             var v = $('ntpl').value, t = v.indexOf('tpl:') === 0 ? TPLS.filter(function (x) { return 'tpl:' + x.id === v; })[0] : null, y = !t ? TYPES.filter(function (x) { return 'type:' + x.id === v; })[0] : null;
