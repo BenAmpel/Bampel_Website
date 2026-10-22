@@ -695,6 +695,7 @@
           timing: { onsetMs: onset, onsetDelayMs: onset != null ? onset - t0 : null, frameMs: S.frameMs, preloaded: env().preload ? !!S.preloaded : null },
           fullscreen: env().fullscreen ? { atOnset: fsAtOnset, exitsMs: (S.fsExits || []).filter(function (x) { return x >= t0; }).map(function (x) { return x - t0; }) } : undefined });
         if (S.lab && !S.deviceSent[p.session] && !isPractice) { data.device = S.lab.device; S.deviceSent[p.session] = true; }
+        dqFlush(p.session);
         api('trial', { token: S.token, session: p.session, index: index, data: data }).then(function (r) {
           if (r.error) { if (S.lab) S.lab.beginItem(isPractice ? 'practice' : 't' + index, stage); return onError && onError(ERR[r.error] || ERR.server_error); }
           if (isPractice) { p.practiceDone = true; return showPracticeDone(); }
@@ -735,9 +736,10 @@
       var list = byPage[pages[idx]], mine = {};
       progress.textContent = T('start_title', { session: S.plan.session, total: S.content.sessions }) + (pages.length > 1 ? ' · ' + T('survey_page', { i: idx + 1, n: pages.length }) : '');
       show('<h1>' + esc(title) + '</h1>' + questionsHtml(list, { items: items, ed: ed, lookup: function (id) { return mine[id] !== undefined ? mine[id] : all[id]; } }) +
-        '<div id="surveymsg"></div><div class="actions"><button id="go">' + Th('continue_button') + '</button></div>');
+        honeypotHtml() + '<div id="surveymsg"></div><div class="actions"><button id="go">' + Th('continue_button') + '</button></div>');
       var go = document.getElementById('go'), qs = questionSet(stage, list, document.getElementById('surveymsg'), go, null, { answers: mine, prior: all, items: items, ed: ed });
       go.addEventListener('click', function () {
+        honeypotCheck();
         if (!qs.check()) return;
         Object.keys(qs.answers).forEach(function (k) { all[k] = qs.answers[k]; });
         idx++; skipHidden();
@@ -748,6 +750,7 @@
     showPage();
   }
   function submitSurvey(ans, kind, go) {
+    dqFlush(S.plan.session);
     api('survey', { token: S.token, session: S.plan.session, kind: kind, data: ans }).then(function (r) {
       if (r.error) { if (go) go.disabled = false; var m = document.getElementById('surveymsg'); if (m) m.innerHTML = errorBox(ERR[r.error] || ERR.server_error); return; }
       if (S.survey && S.survey.key) store(S.survey.key, null);
@@ -765,13 +768,46 @@
     var cal = document.getElementById('cal'); if (cal) cal.addEventListener('click', function () { calendar(st.nextSession, st.availableAt); });
   }
 
+  // ---------- data-quality signals (netlify/lib/lab/quality.mjs) ----------
+  // Watched for the whole session in this tab, sent as running totals when a page or item is submitted. Only counts
+  // and timing are kept, never the text typed or pasted.
+  var DQ = { honeypot: false, webdriver: !!(typeof navigator !== 'undefined' && navigator.webdriver), pastes: 0, pasteChars: 0, injectedChars: 0, keys: 0, fastKeys: 0 }, dqSent = '', lastKey = 0, keyBudget = 0;
+  function isTextBox(t) { return t && (t.tagName === 'TEXTAREA' || (t.tagName === 'INPUT' && /^(text|search|email|number|tel|url)?$/.test(t.type || ''))) && !t.classList.contains('hp-input'); }
+  if (document.addEventListener) {
+    document.addEventListener('keydown', function (e) {
+      if (!isTextBox(e.target) || e.key == null || (e.key.length !== 1 && e.key !== 'Backspace')) return;
+      var now = performance.now(); DQ.keys++; if (lastKey && now - lastKey < 30) DQ.fastKeys++; lastKey = now; keyBudget += 1;
+    }, true);
+    document.addEventListener('paste', function (e) {
+      if (!isTextBox(e.target)) return;
+      var t = ''; try { t = (e.clipboardData || window.clipboardData).getData('text') || ''; } catch (x) {}
+      DQ.pastes++; DQ.pasteChars += t.length; keyBudget += t.length;
+    }, true);
+    // Text that grows by more than the keys pressed and pasted since the last change was set by something else.
+    document.addEventListener('input', function (e) {
+      var t = e.target; if (!isTextBox(t)) return;
+      var len = String(t.value || '').length, was = t._dqLen || 0, grew = len - was;
+      t._dqLen = len;
+      if (grew > keyBudget + 1 && !/^(insertFromPaste|deleteContent)/.test(e.inputType || '')) DQ.injectedChars += grew - keyBudget;
+      keyBudget = 0;
+    }, true);
+  }
+  // A hidden text box people never see or reach; form-filling software finds it and types into it.
+  function honeypotHtml() { return '<div class="hp-field" aria-hidden="true"><label>Leave this box empty<input type="text" class="hp-input" name="hp_extra_info" tabindex="-1" autocomplete="off"></label></div>'; }
+  function honeypotCheck() { var h = stage.querySelector && stage.querySelector('.hp-input'); if (h && h.value) DQ.honeypot = true; }
+  function dqFlush(session) {
+    var s = JSON.stringify(DQ);
+    if (s === dqSent || !S.token || !session) return;
+    dqSent = s; post('dq', { token: S.token, session: session, data: DQ });   // best effort: no retry, never blocks the page
+  }
+
   // ---------- what study types get ----------
   var ui = { esc: esc, T: T, Th: Th, Tp: Tp, show: show, errorBox: errorBox, choiceGroup: choiceGroup, scaleGroup: scaleGroup, vas: vas, questionHtml: questionHtml, questionsHtml: questionsHtml, fillPipes: fillPipes,
     wire: wire, flag: flag, blank: blank, questionSet: questionSet, nextId: nextId, reduceMotion: reduceMotion, stage: stage,
     // Study types with their own server routes (for example the economic game's polling) call them with the sign-in token.
     call: function (route, body) { return api(route, Object.assign({ token: S.token }, body)); } };
   window.LabEngine = { registerType: function (id, impl) { types[id] = impl; }, ui: ui,
-    internals: { S: S, mediaUrls: mediaUrls, swapUrls: swapUrls, preloadPlan: preloadPlan, runChecks: runChecks } };   // for tests (tests/lab/*.test.mjs)
+    internals: { S: S, mediaUrls: mediaUrls, swapUrls: swapUrls, preloadPlan: preloadPlan, runChecks: runChecks, DQ: DQ, dqFlush: dqFlush, honeypotHtml: honeypotHtml } };   // for tests (tests/lab/*.test.mjs)
 
   // ---------- boot ----------
   if (!studyId) { show('<h1>Study not found</h1><p>Check the link you were given.</p>'); return; }

@@ -367,9 +367,25 @@
       var who = $('rpwho').value, label = $('rplabel').value;
       var sel = res[0].filter(function (p) { return (who === 'all' || !p.test) && (!label || p.label === label); });
       return rowsFor(sel.map(function (p) { return p.code; }), 'trials', function (f) { $('rpprog').textContent = 'Reading answers… ' + Math.round(f * 100) + '%'; })
-        .then(function (rows) { renderReport(sel, rows, res[1]); });
+        .then(function (rows) { renderReport(sel, rows, res[1]); return dqReport(sel); });
     }).catch(function (e) { err(e.message); }).then(function () { $('rprun').disabled = false; });
   });
+  // Data quality: how many participants raise each flag (netlify/lib/lab/quality.mjs), with the IDs to review.
+  var DQ_FLAGS = [['dq_honeypot', 'Filled in the hidden box (form-filling software)'], ['dq_webdriver', 'Browser controlled by automation software'], ['dq_paste_count', 'Pasted text into an open answer'],
+    ['dq_injected_chars', 'Text appeared without typing or pasting'], ['dq_fast_typing', 'Typed faster than people type'], ['dq_fast_completion', 'Finished a session in under a quarter of the expected time'],
+    ['dq_duplicate_panel', 'Opened the study more than once from the panel']];
+  function dqReport(sel) {
+    if (!sel.length) return;
+    return rowsFor(sel.map(function (p) { return p.code; }), 'wide').then(function (wide) {
+      var any = wide.filter(function (w) { return w.dq_flags > 0; });
+      var h = '<h3>Data quality</h3><p class="muted">Signals to review, not proof. Attention checks alone no longer catch AI agents that take surveys (Westwood 2025, <em>PNAS</em>), so the lab also records what software does and people rarely do. Column definitions are in this study\'s codebook; every flag is in the wide CSV.</p>' +
+        '<div class="table-wrap"><table><tr><th>Signal</th><th>Participants</th><th>Study IDs</th></tr>' + DQ_FLAGS.map(function (f) {
+          var hit = wide.filter(function (w) { return Number(w[f[0]]) > 0; });
+          return '<tr><td>' + esc(f[1]) + '</td><td>' + hit.length + '</td><td class="wrap-cell mono">' + hit.slice(0, 12).map(function (w) { return esc(w.code); }).join(' ') + (hit.length > 12 ? ' …' : '') + '</td></tr>';
+        }).join('') + '<tr><td><strong>Any flag</strong></td><td><strong>' + any.length + ' of ' + wide.length + '</strong></td><td></td></tr></table></div>';
+      $('rpout').insertAdjacentHTML('beforeend', h);
+    });
+  }
   var RA = { esc: esc, mean: mean, median: median, pct: function (a) { return a.length ? Math.round(mean(a) * 100) + '%' : '–'; }, num: function (v) { return v === '' || v == null || isNaN(Number(v)) ? null : Number(v); } };
   function renderReport(sel, rows, content) {
     $('rpprog').textContent = sel.length + ' participants, ' + rows.length + ' answered items.';

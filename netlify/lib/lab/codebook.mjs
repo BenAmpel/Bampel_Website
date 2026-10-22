@@ -7,6 +7,7 @@
 import { csvCell } from './engine.mjs';
 import { itemsFor } from './content.mjs';
 import { platformInfo } from './version.mjs';
+import { DQ_CODEBOOK } from './quality.mjs';
 
 const SHARED_ID = [
   ['code', 'id', 'Study ID: a keyed hash of the email or panel ID (P-...), or a pilot access code. Never the email or panel ID.'],
@@ -162,6 +163,7 @@ export function buildCodebook(S, c) {
     ['finished', 'binary', 'Finished every session.', '0 = no; 1 = yes'], ['screened_out', 'text', 'Why the study ended early for this participant (blank = not screened out).'],
     ['returned', 'binary', 'Chose "I want to stop taking part".', '0 = no; 1 = yes'], ['panel_study', 'text', 'The panel\'s study ID from the link (for example Prolific STUDY_ID).'],
     ['panel_sessions', 'integer', 'Different panel session IDs seen for this participant (more than 1 = opened the study more than once).'],
+    ...DQ_CODEBOOK,
     ['s{n}_check_{name}', 'as described', 'Setup checks before session n (Devices & timing): device_mobile (1 = phone or tablet), device_browser, device_speech (1 = speech recognition available), device_screen (width x height), device_problems (| separated: desktop, speech), mic_ok (1/0), mic_peak_db (loudest level heard, dBFS), mic_error, headphone_correct (of 6), headphone_pass (1 = 5 or more correct; Milne et al. 2021).'],
     ['s{n}_started_at', 'timestamp', 'Session n start (UTC).'], ['s{n}_completed_at', 'timestamp', 'Session n completion (UTC).'], ['s{n}_minutes', 'number', 'Session n length in minutes.'],
     ['ed_{name}', 'text', 'Embedded data (as in the surveys CSV), from the first survey that has it.'],

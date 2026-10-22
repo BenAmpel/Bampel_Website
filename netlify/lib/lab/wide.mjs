@@ -8,6 +8,7 @@
 // trial row are left out. Values are exactly those of the long CSVs, so the codebook's values apply.
 
 import { trialRow } from './engine.mjs';
+import { dqColumns } from './quality.mjs';
 
 export const WIDE_FIRST = ['code', 'condition', 'test', 'label', 'self_signup', 'consented', 'sessions_completed', 'total_sessions', 'finished', 'screened_out', 'returned', 'panel_study', 'panel_sessions'];
 const SKIP = new Set(['code', 'condition', 'test', 'label', 'self_signup', 'session', 'trial_index', 'item_id', 'item_title', 'item_kind', 'alert_id', 'content_version',
@@ -24,8 +25,9 @@ function checkColumns(n, d) {
   if (d.headphone) Object.assign(out, { [p + 'headphone_correct']: d.headphone.correct ?? '', [p + 'headphone_pass']: b(d.headphone.pass) });
   return out;
 }
-// records and participants as exportRecords returns them (one batch of participants).
-export function wideRows(S, { records, participants }) {
+// records and participants as exportRecords returns them (one batch of participants); c: the study content (for the
+// data-quality flags, which need the minutes per session).
+export function wideRows(S, { records, participants }, c = null) {
   const byCode = new Map();
   for (const p of participants) {
     const done = (p.completed || []).length;
@@ -38,7 +40,7 @@ export function wideRows(S, { records, participants }) {
       row[`s${n}_started_at`] = iso(s.startedAt); row[`s${n}_completed_at`] = iso(s.completedAt);
       row[`s${n}_minutes`] = s.startedAt && s.completedAt ? ((s.completedAt - s.startedAt) / 60000).toFixed(2) : '';
     }
-    byCode.set(p.code, { p, row });
+    byCode.set(p.code, { p, row, dq: [] });
   }
   const sorted = records.slice().sort((a, b) => (a.session - b.session) || String(a.key).localeCompare(String(b.key), 'en', { numeric: true }));
   for (const r of sorted) {
@@ -46,6 +48,7 @@ export function wideRows(S, { records, participants }) {
     if (!hit) continue;
     const row = hit.row, m = String(r.key).match(/\/survey-(pre|post)$/);
     if (/\/checks$/.test(r.key)) Object.assign(row, checkColumns(r.session, r.data || {}));   // setup checks (envcheck.mjs)
+    else if (/\/dq$/.test(r.key)) hit.dq.push(r.data || {});   // data-quality signals, summed below (quality.mjs)
     else if (m) {
       for (const [k, v] of Object.entries(r.embedded || {})) if (NAME.test(k) && !(`ed_${k}` in row)) row[`ed_${k}`] = v;
       for (const [k, v] of Object.entries(r.data || {})) if (NAME.test(k)) row[`s${r.session}_${m[1]}_${k}`] = Array.isArray(v) ? v.join('|') : v;
@@ -54,5 +57,6 @@ export function wideRows(S, { records, participants }) {
       for (const [k, v] of Object.entries(t)) if (!SKIP.has(k)) row[`s${r.session}_${item}_${k}`] = v;
     }
   }
+  for (const x of byCode.values()) Object.assign(x.row, dqColumns(x.dq, x.p, c));
   return [...byCode.values()].map(x => x.row).sort((a, b) => (a.label || a.code).localeCompare(b.label || b.code));
 }

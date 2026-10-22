@@ -23,6 +23,7 @@ import { exportDesign, importDesign, cloneStudy } from './studyfile.mjs';
 import { buildCodebook, codebookCsv, codebookMarkdown } from './codebook.mjs';
 import { wideRows, WIDE_FIRST } from './wide.mjs';
 import { saveChecks, LANGUAGES } from './envcheck.mjs';
+import { saveDq } from './quality.mjs';
 
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
 const csv = (text, name) => new Response(text, { headers: { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': `attachment; filename="${name}"`, 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
@@ -72,7 +73,7 @@ export async function handle(req, { getStore, env, now }) {
     const fm = route.match(/^file\/(f-[0-9a-f]{12}\.[a-z0-9]{2,4})$/);
     if (fm && (req.method === 'GET' || req.method === 'HEAD')) return await serveFile(S.store, fm[1], req);
     if (route === 'login') return reply(await E.login(S, body.email != null ? { email: body.email, confirm: body.confirm === true } : body.panelId != null ? { panelId: body.panelId, panelMeta: { study: body.panelStudy, session: body.panelSession } } : { code: body.code }));
-    if (['resume', 'consent', 'session', 'view', 'trial', 'survey', 'handoff', 'withdraw', 'checks'].includes(route)) {
+    if (['resume', 'consent', 'session', 'view', 'trial', 'survey', 'handoff', 'withdraw', 'checks', 'dq'].includes(route)) {
       const pid = await E.verifyToken(S, body.token);
       if (!pid) return json({ error: 'expired' }, 401);
       const idx = body.index === 'practice' ? 'practice' : Number(body.index);
@@ -88,6 +89,7 @@ export async function handle(req, { getStore, env, now }) {
         case 'view': return reply(await E.viewTrial(S, pid, Number(body.session), idx));
         case 'trial': return reply(await E.saveTrial(S, pid, Number(body.session), idx, body.data));
         case 'survey': return reply(await E.saveSurvey(S, pid, Number(body.session), body.kind, body.data));
+        case 'dq': return reply(await saveDq(S, E, pid, Number(body.session), body.data));   // data-quality signals (quality.mjs)
         case 'checks': return reply(await saveChecks(S, E, pid, Number(body.session), body.data, (await content.getContent(S.store, type)).environment));   // setup checks (envcheck.mjs)
         case 'withdraw': { const r = await recruit.markReturned(S, pid); if (r.error) return reply(r); }   // then the returned code, as for handoff
         // falls through
@@ -137,13 +139,13 @@ export async function handle(req, { getStore, env, now }) {
         case 'design.json': return json(await exportDesign(S));
         case 'codebook.csv': return csv(codebookCsv(buildCodebook(S, c)), `${study.id}_codebook_v${c.version || 0}.csv`);
         case 'codebook.md': return new Response(codebookMarkdown(buildCodebook(S, c), { study, type, version: c.version || 0 }), { headers: { 'content-type': 'text/markdown; charset=utf-8', 'content-disposition': `attachment; filename="${study.id}_codebook_v${c.version || 0}.md"`, 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
-        case 'export-wide.csv': return csv(E.toCsv(wideRows(S, await E.exportRecords(S)), WIDE_FIRST), `${study.id}_wide.csv`);
+        case 'export-wide.csv': return csv(E.toCsv(wideRows(S, await E.exportRecords(S), c), WIDE_FIRST), `${study.id}_wide.csv`);
         case 'export.csv': return csv(await E.exportCsv(S), `${study.id}_trials.csv`);
         case 'export-surveys.csv': return csv(await E.exportSurveyCsv(S), `${study.id}_surveys.csv`);
         case 'credit.csv': return csv(await E.exportCredit(S), `${study.id}_extra_credit.csv`);
         case 'rows': {
           const kind = url.searchParams.get('kind');
-          if (kind === 'wide') return json(wideRows(S, await E.exportRecords(S, codes.length ? codes : ['none'])));   // one row per participant
+          if (kind === 'wide') return json(wideRows(S, await E.exportRecords(S, codes.length ? codes : ['none']), c));   // one row per participant
           return json(await E.exportRows(S, kind === 'surveys' ? 'surveys' : 'trials', codes.length ? codes : ['none']));
         }
         case 'records': return json(await E.exportRecords(S, codes.length ? codes : ['none']));
