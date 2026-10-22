@@ -1,6 +1,6 @@
 // Study design files and Clone (netlify/lib/lab/studyfile.mjs): the design round-trips (export, import as a new
 // study, export again gives the same content), uploaded files travel and their addresses follow the new study,
-// completion codes are blanked in a download but kept by a clone, no participant data is ever in the file, and
+// completion codes are blanked in a download and replaced by fresh ones in a clone (the redirect address is kept), no participant data is ever in the file, and
 // bad files are refused before any study is created.
 import assert from 'node:assert/strict';
 import { handle } from '../../netlify/lib/lab/router.mjs';
@@ -59,7 +59,12 @@ assert.deepEqual((await call('/api/lab/copy-from-file/admin/participants', {})).
 const cl = await call('/api/lab/_lab/clone', { body: { from: 'orig-study', id: 'orig-clone', name: 'Clone' } });
 assert.equal(cl.status, 200, cl.text);
 const cc = (await call('/api/lab/orig-clone/admin/content', {})).json;
-assert.equal(cc.enrollment.panel.completionCode, 'SECRET22', 'a clone keeps the completion codes');
+assert(/^[A-Z0-9]{8}$/.test(cc.enrollment.panel.completionCode) && cc.enrollment.panel.completionCode !== 'SECRET22', 'a clone gets a new completion code');
+assert(/^[A-Z0-9]{8}$/.test(cc.enrollment.panel.returnCode) && cc.enrollment.panel.returnCode !== 'RET22222', 'and a new returned code');
+assert.equal(cc.enrollment.panel.screenOutCode, '', 'a code the original did not have stays empty');
+assert.deepEqual(cl.json.newCodes, ['completionCode', 'returnCode'], 'the result says which codes are new');
+assert.equal(cc.enrollment.panel.redirectUrl, 'https://app.prolific.com/submissions/complete?cc={code}', 'the redirect address is kept');
+assert.equal((await call('/api/lab/orig-study/admin/content', {})).json.enrollment.panel.completionCode, 'SECRET22', 'the original keeps its codes');
 assert.deepEqual((await call('/api/lab/orig-clone/admin/participants', {})).json, []);
 assert.equal((await call('/api/lab/_lab/clone', { body: { from: 'orig-study', id: 'orig-clone' } })).status, 409, 'the link name is taken');
 assert.equal((await call('/api/lab/_lab/clone', { body: { from: 'nope-study', id: 'x-clone' } })).status, 404);
@@ -80,4 +85,4 @@ assert(!studies.some(id => /^bad-/.test(id)), 'nothing was created for a bad fil
 const small = await SF.exportDesign({ store: { get: async () => null, list: async () => [] }, type: (await import('../../netlify/lib/lab/types/index.mjs')).TYPES.vignettes, study: { id: 'z', name: 'z', type: 'vignettes' } }).catch(e => e);
 assert(small.format === 'ccair-lab-study', 'a study with no saved content exports its defaults');
 assert.deepEqual(SF.fileRefs({ a: '/api/lab/s-one/file/f-0123456789ab.mp3', b: ['x /api/lab/s-one/file/f-0123456789ab.mp3', '/api/lab/s-one/file/f-aaaaaaaaaaaa.png'] }), ['f-0123456789ab.mp3', 'f-aaaaaaaaaaaa.png']);
-console.log('study design file: download, round trip with media, clone keeps codes, bad files refused');
+console.log('study design file: download, round trip with media, clone makes new codes, bad files refused');

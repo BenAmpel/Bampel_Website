@@ -7,7 +7,9 @@
 //
 // Uploaded files keep their random names; their addresses (/api/lab/<study>/file/<name>) are rewritten to the new
 // study on import. Completion codes are blanked in a downloaded file (it may be shared or deposited) and fresh ones
-// are made when it is imported, for the researcher to enter in their own panel; a clone keeps them.
+// are made when it is imported, for the researcher to enter in their own panel. A clone gets fresh codes too (the copy
+// is a separate study on the panel, and a shared code would let a participant of one claim credit in the other); the
+// redirect address and the other panel settings are copied.
 
 import { getMany } from './store.mjs';
 import { getContent, normalize, validateContent, saveContent, contentKeysFor } from './content.mjs';
@@ -82,8 +84,12 @@ export async function importDesign(registry, getStoreFor, design, target, who, n
   return { ok: true, study, version: saved.version, files: files.length, filesLeftOut: (design.filesLeftOut || []).length, newCodes };
 }
 
-// Clone: the whole design of one study (codes and every file kept) as a new study.
+// Clone: the whole design of one study (every file kept) as a new study, with a new code wherever the original has one.
+// newCodes in the result lists which codes were replaced, for the researcher to enter in the panel.
 export async function cloneStudy(registry, getStoreFor, S, target, who, now = Date.now()) {
   const d = await exportDesign(S, { redact: false, maxFileBytes: Infinity, now });
-  return importDesign(registry, getStoreFor, d, { name: target.name || `${S.study.name} (copy)`, id: target.id, description: S.study.description || '' }, who, now);
+  const pn = d.content.enrollment && d.content.enrollment.panel, newCodes = [];
+  if (pn) for (const k of CODE_KEYS) if (pn[k]) { let c; do c = newPanelCode(); while (c === pn[k]); pn[k] = c; newCodes.push(k); }
+  const r = await importDesign(registry, getStoreFor, d, { name: target.name || `${S.study.name} (copy)`, id: target.id, description: S.study.description || '' }, who, now);
+  return r.ok ? { ...r, newCodes } : r;
 }

@@ -867,11 +867,12 @@
         ROWS = rows;
         var owner = isOwner();
         $('stbl').innerHTML = '<tr><th>Study</th><th>Type</th><th>Your role</th><th>Last backup</th><th>Last self-test</th><th>Participants</th><th>Links</th>' + (owner ? '<th>On lab page</th><th></th>' : '') + '</tr>' + rows.map(function (s) {
-          return '<tr><td class="wrap-cell"><strong>' + esc(s.name) + '</strong> <span class="muted mono">' + esc(s.id) + '</span>' + (s.archived ? ' <span class="pill">archived</span>' : '') + (s.builtIn ? ' <span class="pill">built in</span>' : '') + '</td><td>' + esc(s.typeLabel) + '</td><td><span class="pill">' + esc(s.role) + '</span></td>' +
+          return '<tr><td class="wrap-cell"><strong>' + esc(s.name) + '</strong> <span class="muted mono">' + esc(s.id) + '</span>' + (s.archived ? ' <span class="pill">' + (s.deleting ? 'being deleted' : 'archived') + '</span>' : '') + (s.builtIn ? ' <span class="pill">built in</span>' : '') + '</td><td>' + esc(s.typeLabel) + '</td><td><span class="pill">' + esc(s.role) + '</span></td>' +
             '<td>' + (s.lastBackupAt ? esc(fmt(s.lastBackupAt)) : '<span class="muted">none yet</span>') + '</td><td>' + testText(s.lastSelfTest) + '</td>' +
             '<td id="sum-' + esc(s.id) + '">' + btn2('data-sum="' + esc(s.id) + '"', 'Load counts') + '</td>' +
             '<td class="links"><a href="' + esc(s.paths.admin) + '">Admin</a><a href="' + esc(s.paths.participant) + '" target="_blank" rel="noopener">Participant page</a></td>' +
-            (owner ? '<td>' + (s.listed && !s.archived ? 'yes' : 'no') + '</td><td>' + (s.builtIn ? '<span class="muted">set in code</span> ' : btn2('data-list="' + esc(s.id) + '|' + (s.listed ? '0' : '1') + '"', s.listed ? 'Unlist' : 'List') + ' ' + btn2('data-arch="' + esc(s.id) + '|' + (s.archived ? '0' : '1') + '"', s.archived ? 'Restore' : 'Archive') + ' ') + (s.archived ? '' : btn2('data-clone="' + esc(s.id) + '"', 'Clone')) + '</td>' : '') + '</tr>';
+            (owner ? '<td>' + (s.listed && !s.archived ? 'yes' : 'no') + '</td><td>' + (s.builtIn ? '<span class="muted">set in code</span> ' : btn2('data-list="' + esc(s.id) + '|' + (s.listed ? '0' : '1') + '"', s.listed ? 'Unlist' : 'List') + ' ' + (s.deleting ? '' : btn2('data-arch="' + esc(s.id) + '|' + (s.archived ? '0' : '1') + '"', s.archived ? 'Restore' : 'Archive') + ' ')) + (s.archived ? '' : btn2('data-clone="' + esc(s.id) + '"', 'Clone')) +
+              (s.archived && !s.builtIn ? ' <button type="button" class="danger secondary small" data-del="' + esc(s.id) + '">' + (s.deleting ? 'Finish deleting' : 'Delete permanently') + '</button>' : '') + '</td>' : '') + '</tr>';
         }).join('') + (rows.length ? '' : '<tr><td colspan="9" class="muted">No studies yet. Ask the lab owner to give your account access to a study.</td></tr>');
       }).catch(function (e) { err(e.message); });
     }
@@ -1016,10 +1017,10 @@
         $('nname').value = ''; $('nid').value = ''; $('ndesc').value = ''; idTouched = false; list();
       }).catch(function (e) { err(e.message); });
     });
-    // Clone: a new study with the same design (content, settings, media, completion codes) and no participants.
+    // Clone: a new study with the same design (content, settings, media) and no participants. Completion codes are new.
     function cloneForm(id, at) {
       var s = ROWS.filter(function (x) { return x.id === id; })[0] || { name: id }, box = $('clonebox');
-      box.innerHTML = '<form class="qcard" id="clf"><h3 id="clhead" tabindex="-1">Clone ' + esc(s.name) + '</h3><p class="muted">Copies the design (items, questions, conditions, settings, media, completion codes). Participants and answers are not copied.</p><div class="grid3">' +
+      box.innerHTML = '<form class="qcard" id="clf"><h3 id="clhead" tabindex="-1">Clone ' + esc(s.name) + '</h3><p class="muted">Copies the design (items, questions, conditions, settings, media). Participants and answers are not copied. The copy gets new completion codes, so the two studies never share a code: enter the new ones in your panel (Prolific, SONA, and so on) before you open the copy to participants. The panel redirect address is copied.</p><div class="grid3">' +
         '<label class="f">Name<input type="text" id="clname" value="' + esc(s.name + ' (copy)') + '"></label><label class="f">Link name<input type="text" id="clid" class="mono" value="' + esc(slug(s.id + '-copy')) + '"></label></div>' +
         '<div class="row"><button type="submit">Create the copy</button><button type="button" class="secondary" id="clcancel">Cancel</button></div></form>';
       $('clhead').focus();
@@ -1027,8 +1028,34 @@
       $('clf').addEventListener('submit', function (e) {
         e.preventDefault(); err();
         postJSON('clone', { from: id, name: $('clname').value.trim(), id: $('clid').value.trim() }).then(function (r) {
-          list(); box.innerHTML = '<div class="done-card"><h3 tabindex="-1" id="donehead">' + esc(r.study.name) + ' is ready</h3><p>A copy of ' + esc(s.name) + ' with no participants, unlisted. <a href="' + esc(r.study.paths.admin) + '">Open its admin page</a>.</p></div>'; $('donehead').focus();
+          list(); box.innerHTML = '<div class="done-card"><h3 tabindex="-1" id="donehead">' + esc(r.study.name) + ' is ready</h3><p>A copy of ' + esc(s.name) + ' with no participants, unlisted.' + (r.newCodes && r.newCodes.length ? ' It has new completion codes: enter them in your panel (they are on its Study content → Sign-up &amp; consent page).' : '') + ' <a href="' + esc(r.study.paths.admin) + '">Open its admin page</a>.</p></div>'; $('donehead').focus();
         }).catch(function (x) { err(x.message); });
+      });
+    }
+    // Delete permanently: archived, not built in, lab owners only. The owner types the study's link name to confirm. A large
+    // study is deleted over several calls; this repeats the call until the server says it is done.
+    function deleteForm(id, at) {
+      var s = ROWS.filter(function (x) { return x.id === id; })[0] || { name: id }, box = $('clonebox');
+      box.innerHTML = '<form class="qcard" id="delf"><h3 id="delhead" tabindex="-1">Delete ' + esc(s.name) + ' permanently</h3>' +
+        '<p><strong>This cannot be undone.</strong> Every participant, answer, recording, uploaded file, setting, and team key of this study is deleted, and so is its copy in the backup store. Researchers lose their access to it. The lab activity log keeps a note that it was deleted, and by whom.</p>' +
+        '<p>Download the complete backup first and keep it in GSU-approved storage, if your IRB protocol or data plan says to keep the data: click Restore, open the study\'s admin page, use "Download complete backup" in its Backups section, then archive it again.</p>' +
+        '<label class="f">To confirm, type the link name <span class="mono">' + esc(id) + '</span><input type="text" id="delconfirm" class="mono" autocomplete="off" spellcheck="false"></label>' +
+        '<div class="row"><button type="submit" class="danger">Delete permanently</button><button type="button" class="secondary" id="delcancel">Cancel</button></div><p class="muted" id="delprog" role="status"></p></form>';
+      $('delhead').focus();
+      $('delcancel').addEventListener('click', function () { box.innerHTML = ''; at.focus(); });
+      $('delf').addEventListener('submit', function (e) {
+        e.preventDefault(); err();
+        var typed = $('delconfirm').value.trim(), total = 0;
+        if (typed !== id) { err('Type the link name exactly (' + id + ') to confirm.'); $('delconfirm').focus(); return; }
+        var btns = box.querySelectorAll('button'); btns.forEach(function (b) { b.disabled = true; });
+        (function round() {
+          postJSON('delete-study', { id: id, confirm: typed }).then(function (r) {
+            total += r.deleted || 0;
+            if (!r.done) { $('delprog').textContent = 'Deleting… ' + total + ' records so far, about ' + r.remaining + ' left. Keep this page open.'; return round(); }
+            box.innerHTML = '<div class="done-card"><h3 tabindex="-1" id="donehead">' + esc(s.name) + ' was deleted</h3><p>' + total + ' records were deleted, with its backup copy.' + (r.accounts ? ' ' + r.accounts + ' researcher account(s) lost access to it.' : '') + '</p></div>';
+            $('donehead').focus(); list();
+          }).catch(function (x) { err(x.message + (total ? ' Part of the study was already deleted: click "Finish deleting" to complete it.' : '')); btns.forEach(function (b) { b.disabled = false; }); list(); });
+        })();
       });
     }
     $('dsgform').addEventListener('submit', function (e) {
@@ -1062,6 +1089,7 @@
     $('stbl').addEventListener('click', function (e) {
       var sum = e.target.getAttribute && e.target.getAttribute('data-sum'); if (sum) return loadSum(sum);
       var cl = e.target.getAttribute && e.target.getAttribute('data-clone'); if (cl) return cloneForm(cl, e.target);
+      var dl = e.target.getAttribute && e.target.getAttribute('data-del'); if (dl) return deleteForm(dl, e.target);
       var v = e.target.getAttribute && (e.target.getAttribute('data-list') || e.target.getAttribute('data-arch')); if (!v) return;
       var p = v.split('|'), on = p[1] === '1', key = e.target.hasAttribute('data-list') ? 'listed' : 'archived';
       if (key === 'archived' && on && !confirm('Archive "' + p[0] + '"? Its participant page and admin page stop working, but no data is deleted. You can restore it here.')) return;

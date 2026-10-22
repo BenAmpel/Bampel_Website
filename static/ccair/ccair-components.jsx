@@ -8,6 +8,7 @@ const NAV_PAGES = [
   { id: 'publications', label: 'Publications' },
   { id: 'people', label: 'People' },
   { id: 'resources', label: 'Resources' },
+  { id: 'materials', label: 'Materials' },
   { id: 'about', label: 'About' },
   { id: 'contact', label: 'Contact' },
 ];
@@ -187,13 +188,21 @@ function Authors({ text }) {
 // Must match normTitle in scripts/build-ccair.js, which writes data/paper-pages.json.
 const normTitle = (s) => String(s).replace(/\bML\b/g, 'Machine Learning').replace(/\bAI\b/g, 'Artificial Intelligence').toLowerCase().replace(/[^a-z0-9]/g, '');
 
+// A "PDF" link must open a PDF. Publisher landing pages (misq.umn.edu, tandfonline, dl.acm.org/doi/..., ieeexplore,
+// AIS eLibrary article pages, hdl.handle.net, arxiv.org/abs, workshop sites) are labelled "Paper" instead.
+const isPdfUrl = (u) => /\.pdf(?:$|[?#])/i.test(u) || /arxiv\.org\/pdf\//i.test(u) || /par\.nsf\.gov\/servlets\/purl\//i.test(u)
+  || /aisel\.aisnet\.org\/cgi\/viewcontent\.cgi/i.test(u) || /dl\.acm\.org\/doi\/pdf\//i.test(u);
+
 function PublicationItem({ title, authors, venue, year, type, doi, pdf }) {
   const { paperPages = {} } = useData();
   const site = paperPages[normTitle(title)] || {};
+  const fullText = pdf || site.pdf;
   const award = / — (Best Paper Award)$/.exec(venue || '');
   const venueText = award ? venue.replace(award[0], '') : venue;
   const links = [
-    (pdf || site.pdf) && { label: 'PDF', href: pdf || site.pdf, aria: `PDF of ${title}` },
+    fullText && (isPdfUrl(fullText)
+      ? { label: 'PDF', href: fullText, aria: `PDF of ${title}` }
+      : { label: 'Paper', href: fullText, aria: `Paper (publisher page) for ${title}` }),
     site.code && { label: 'Code', href: site.code, aria: `Code for ${title}` },
     site.data && { label: 'Data', href: site.data, aria: `Data for ${title}` },
     doi && { label: 'DOI', href: 'https://doi.org/' + doi, aria: `DOI for ${title}` },
@@ -287,7 +296,6 @@ function CCAIRFooter() {
           <div>
             <h2>Elsewhere</h2>
             <ul>
-              <li><a href="#/materials">Research materials</a></li>
               <li><a href="/ccair/pathways/">Cyber Career Finder</a></li>
               <li><a href="https://bampel.com/">bampel.com</a></li>
               <li><a href="https://bampel.com/publications/">Full publication list</a></li>

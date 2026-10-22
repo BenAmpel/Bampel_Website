@@ -4,7 +4,7 @@
 // defaults, normalization, validation, and survey "show when" rules. Saved edits are numbered versions.
 
 import { OPS, NO_VALUE_OPS } from './logic.mjs';
-import { panelDefaults, validatePanel } from './recruit.mjs';
+import { panelDefaults, validatePanel, PRESETS } from './recruit.mjs';
 import { validateOrder } from './order.mjs';
 import { quotaDefaults, validateQuota } from './quota.mjs';
 import { environmentDefaults, validateEnvironment } from './envcheck.mjs';
@@ -95,7 +95,10 @@ export const ENGINE_TEXT = [
   ['Online panel', 'stop_keep', 'Stop: keep going button', 'Keep going'],
   ['Online panel', 'stop_confirm', 'Stop: confirm button', 'Stop taking part'],
   ['Online panel', 'returned_title', 'After stopping: title', 'You have stopped taking part'],
-  ['Online panel', 'returned_body', 'After stopping: text', 'Thank you for your time. You can close this page.']
+  ['Online panel', 'returned_body', 'After stopping: text', 'Thank you for your time. You can close this page.'],
+  ['Online panel', 'start_body_panel', 'Before starting, panel participants ({minutes}, {panel})', 'This session takes about {minutes} minutes. Please complete it in one sitting, somewhere you will not be interrupted.\n\nIf you get disconnected, open the study link in {panel} again and you will pick up where you left off.'],
+  ['Online panel', 'finished_body_panel', 'Last session, panel with a return link ({panel})', 'You have completed all sessions of the study. Click the button below to return to {panel}, so your participation is recorded. If {panel} asks for a code, copy the one shown here.'],
+  ['Online panel', 'finished_body_panel_code', 'Last session, panel without a return link ({panel})', 'You have completed all sessions of the study. Copy the code below and enter it in {panel}, so your participation is recorded.']
 ].map(([group, key, label, def]) => ({ group, key, label, def }));
 
 export function textFieldsFor(type) {
@@ -178,7 +181,8 @@ export function publicContent(c, type, study) {
     text: c.text, sessions: type.sessionCount(c), signup: c.enrollment.open ? c.enrollment.domains : [],
     // Never the completion codes: the browser asks for its code (route "handoff") once the participant has one.
     panel: c.enrollment.panel && c.enrollment.panel.enabled ? { param: c.enrollment.panel.param, completionUrl: c.enrollment.panel.redirectUrl ? '' : c.enrollment.panel.completionUrl || '',
-      studyParam: c.enrollment.panel.studyParam || '', sessionParam: c.enrollment.panel.sessionParam || '' } : null,
+      studyParam: c.enrollment.panel.studyParam || '', sessionParam: c.enrollment.panel.sessionParam || '',
+      label: (PRESETS[c.enrollment.panel.preset] || {}).label || '' } : null,
     embedded: (c.embedded || []).map(x => (x.source === 'url' ? { name: x.name, source: 'url', param: x.param || x.name } : { name: x.name, source: 'value', value: x.value })),
     environment: c.environment,
     ...(type.publicContent ? type.publicContent(c) : {}) };

@@ -100,7 +100,12 @@ h1[tabindex="-1"]:focus { outline: none; }
 .sheet a.btn, .sheet a.btn:hover { color: var(--accent-ink); }
 @keyframes sheetIn { from { opacity: 0; transform: translateY(-8px) scale(0.98); } }
 @keyframes fade { from { opacity: 0; } }
-@media (max-width: 900px) {
+/* Seven page links plus the brand and the Career Finder button: tighten the link pills on narrower desktops so the
+   brand subtitle stays on one line, and switch to the menu sheet below 1000px, where the row no longer fits. */
+.brand { flex: none; }
+.brand small { white-space: nowrap; }
+@media (max-width: 1200px) { .nav-links a { padding: 7px 9px; font-size: 14px; } .nav-cta { margin-left: 2px; } }
+@media (max-width: 1000px) {
   .nav .nav-links, .nav .nav-cta { display: none; }
   .menu-btn { display: inline-flex; }
 }

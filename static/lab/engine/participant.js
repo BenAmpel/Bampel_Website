@@ -13,7 +13,7 @@
   var S = { token: null, plan: null, lab: null, content: null, type: null, deviceSent: {} };
   var types = {};
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var tokenKey = 'lab_token_' + studyId;
+  var tokenKey = 'lab_token_' + studyId, panelKey = 'lab_panel_' + studyId;
 
   // ---------- utilities ----------
   function store(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); if (v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch (e) { return null; } }
@@ -61,8 +61,15 @@
     busy: 'The server is busy. Please try again in a moment.',
     wrong_session: 'This session is no longer active. Reload the page to continue.'
   };
+  // Text for keys a study's saved text may not have yet (added after the study was made). Each is also an
+  // ENGINE_TEXT field in netlify/lib/lab/content.mjs, so researchers edit it like any other screen text.
+  var TEXT_DEFAULTS = {
+    start_body_panel: 'This session takes about {minutes} minutes. Please complete it in one sitting, somewhere you will not be interrupted.\n\nIf you get disconnected, open the study link in {panel} again and you will pick up where you left off.',
+    finished_body_panel: 'You have completed all sessions of the study. Click the button below to return to {panel}, so your participation is recorded. If {panel} asks for a code, copy the one shown here.',
+    finished_body_panel_code: 'You have completed all sessions of the study. Copy the code below and enter it in {panel}, so your participation is recorded.'
+  };
   function T(key, vars) {
-    var t = (S.content && S.content.text && S.content.text[key]) || '';
+    var t = (S.content && S.content.text && S.content.text[key]) || TEXT_DEFAULTS[key] || '';
     return t.replace(/\{(\w+)\}/g, function (m, k) { return vars && vars[k] != null ? vars[k] : k === 'minutes' ? S.content.minutesPerSession : m; });
   }
   function linkify(h) { return h.replace(/([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})/g, '<a href="mailto:$1">$1</a>'); }
@@ -105,10 +112,12 @@
   function tplAttr(s) { return String(s).indexOf('{{') < 0 ? '' : ' data-tpl="' + esc(s) + '"'; }
 
   // ---------- question components ----------
-  // Single choice as large tap targets in a fieldset (WCAG 1.3.1; Antoun et al. 2018).
+  // Single choice as large tap targets in a fieldset (WCAG 1.3.1; Antoun et al. 2018). Every input also gets an id and
+  // its label a matching for="", so the visible text is its accessible name in every browser and checker (WCAG 4.1.2).
   function choiceGroup(name, legend, opts, traceName) {
     return '<fieldset class="q-group" data-name="' + name + '"><legend class="q">' + legend + '</legend><div class="options">' + opts.map(function (o) {
-      return '<label class="option" data-trace="' + (traceName || name) + ':' + esc(o[0]) + '"><input type="radio" name="' + name + '" value="' + esc(o[0]) + '"><span>' + o[1] + '</span></label>';
+      var id = nextId('opt');
+      return '<label class="option" for="' + id + '" data-trace="' + (traceName || name) + ':' + esc(o[0]) + '"><input type="radio" name="' + name + '" value="' + esc(o[0]) + '" id="' + id + '"><span>' + o[1] + '</span></label>';
     }).join('') + '</div></fieldset>';
   }
   // Rating scale with every point labeled; one row on wide screens, stacked on phones (Krosnick &
@@ -117,8 +126,8 @@
     var labels = it.labels && it.labels.length === it.n ? it.labels : null, cells = '';
     var first = typeof it.start === 'number' && isFinite(it.start) ? Math.floor(it.start) : 1;   // numbers shown and stored: first .. first + n - 1
     for (var k = 1; k <= it.n; k++) {
-      var i = first + k - 1, lab = labels ? labels[k - 1] : k === 1 ? it.lo : k === it.n ? it.hi : '';
-      cells += '<label class="option scale-pt" data-trace="' + it.id + ':' + i + '"><input type="radio" name="' + it.id + '" value="' + i + '"><span class="pt-num">' + i + '</span>' + (lab ? '<span class="pt-lab">' + txt(lab) + '</span>' : '') + '</label>';
+      var i = first + k - 1, lab = labels ? labels[k - 1] : k === 1 ? it.lo : k === it.n ? it.hi : '', pid = nextId('opt');
+      cells += '<label class="option scale-pt" for="' + pid + '" data-trace="' + it.id + ':' + i + '"><input type="radio" name="' + it.id + '" value="' + i + '" id="' + pid + '"><span class="pt-num">' + i + '</span>' + (lab ? '<span class="pt-lab">' + txt(lab) + '</span>' : '') + '</label>';
     }
     return '<fieldset class="q-group" data-name="' + it.id + '"><legend class="q">' + txt(it.text) + '</legend><div class="likert' + (labels ? ' labeled' : '') + '" style="--n:' + it.n + '">' + cells + '</div></fieldset>';
   }
@@ -193,7 +202,8 @@
   function matrixHtml(it) {
     return '<fieldset class="q-group matrix" data-name="' + it.id + '"><legend class="q">' + txt(it.text) + '</legend>' + it.rows.map(function (r) {
       return '<fieldset class="q-group mx-row" data-name="' + esc(r.id) + '"><legend>' + txt(r.text) + '</legend><div class="likert labeled" style="--n:' + it.options.length + '">' + it.options.map(function (o) {
-        return '<label class="option scale-pt" data-trace="' + esc(r.id) + ':' + esc(o.value) + '"><input type="radio" name="' + esc(r.id) + '" value="' + esc(o.value) + '"><span class="pt-lab">' + txt(o.label) + '</span></label>';
+        var mid = nextId('opt');
+        return '<label class="option scale-pt" for="' + mid + '" data-trace="' + esc(r.id) + ':' + esc(o.value) + '"><input type="radio" name="' + esc(r.id) + '" value="' + esc(o.value) + '" id="' + mid + '"><span class="pt-lab">' + txt(o.label) + '</span></label>';
       }).join('') + '</div></fieldset>';
     }).join('') + '</fieldset>';
   }
@@ -207,7 +217,8 @@
     if (it.type === 'choice' || (it.type === 'select' && it.options.length <= 10)) return choiceGroup(it.id, txt(it.text), it.options.map(function (o) { return [o.value, txt(o.label)]; }));
     if (it.type === 'multi') {
       return '<fieldset class="q-group" data-name="' + it.id + '"><legend class="q">' + txt(it.text) + '</legend><div class="checks">' + it.options.map(function (o) {
-        return '<label class="option" data-trace="' + it.id + ':' + esc(o.value) + '"><input type="checkbox" name="' + it.id + '" value="' + esc(o.value) + '"><span>' + txt(o.label) + '</span></label>';
+        var cid = nextId('opt');
+        return '<label class="option" for="' + cid + '" data-trace="' + it.id + ':' + esc(o.value) + '"><input type="checkbox" name="' + it.id + '" value="' + esc(o.value) + '" id="' + cid + '"><span>' + txt(o.label) + '</span></label>';
       }).join('') + '</div></fieldset>';
     }
     if (it.type === 'number') {
@@ -374,7 +385,7 @@
       if (r.error === 'confirm_new') return showConfirm(r.email || creds.email);
       if (r.error && creds.panelId != null) return show('<h1>' + Th('login_title') + '</h1>' + errorBox('This study link is not complete. Please go back to the study page where you found it and open it again.'));
       if (r.error) return showLogin(loginError(r), creds.email != null ? 'email' : 'code', creds.email);
-      S.token = r.token; store(tokenKey, r.token);
+      S.token = r.token; store(tokenKey, r.token); store(panelKey, creds.panelId != null ? '1' : null);
       if (r.status && r.status.screenedOut) return showScreenedOut();   // for example, the study was already full
       if (!r.consented) return showConsent();
       showStatus(r.status);
@@ -396,9 +407,9 @@
     var c = S.content.consent, rec = c.recording && c.recording.enabled ? c.recording : null;
     show((c.approved ? '' : '<div class="banner" role="note">Draft consent text, pending IRB approval. Do not enroll participants with this version.</div>') +
       '<h1>' + Th('consent_title') + '</h1>' + c.paragraphs.map(function (x) { return '<p>' + para(x) + '</p>'; }).join('') +
-      '<label class="option agree"><input type="checkbox" id="agree"><span>' + esc(c.agreeLabel) + '</span></label>' +
+      '<label class="option agree" for="agree"><input type="checkbox" id="agree"><span>' + esc(c.agreeLabel) + '</span></label>' +
       // Studies that record voice ask separately, so saying no to recording still lets people take part (they type instead).
-      (rec ? '<label class="option agree"><input type="checkbox" id="agree-rec"><span>' + esc(rec.label) + (rec.required ? '' : ' <span class="muted">(optional: without it you type instead of speaking)</span>') + '</span></label>' : '') +
+      (rec ? '<label class="option agree" for="agree-rec"><input type="checkbox" id="agree-rec"><span>' + esc(rec.label) + (rec.required ? '' : ' <span class="muted">(optional: without it you type instead of speaking)</span>') + '</span></label>' : '') +
       '<div class="actions split"><button class="secondary" id="decline">I do not agree</button><button id="ok" disabled>Continue</button></div>');
     var agree = document.getElementById('agree'), ok = document.getElementById('ok'), agreeRec = document.getElementById('agree-rec');
     function ready() { ok.disabled = !agree.checked || !!(rec && rec.required && !agreeRec.checked); }
@@ -420,40 +431,55 @@
     for (var i = 1; i <= total; i++) dots += '<li class="' + (i <= done ? 'done' : i === current ? 'now' : '') + '"><span class="sr">Session ' + i + (i <= done ? ', complete' : i === current ? ', next' : '') + '</span></li>';
     return '<ol class="tracker" aria-label="Your progress">' + dots + '</ol>';
   }
+  // Arrived from an online panel's link (Prolific and similar) in this tab: they never typed an email or code, so
+  // "sign in again" and "Sign out" mean nothing to them; the panel's link is how they come back.
+  function viaPanel() { return !!(S.content && S.content.panel) && store(panelKey) === '1'; }
+  var PANEL_NAMES = { PROLIFIC_PID: 'Prolific', workerId: 'Amazon MTurk', participantId: 'CloudResearch Connect' };   // presets in netlify/lib/lab/recruit.mjs
+  function panelName() { var pn = S.content.panel || {}; return pn.label || PANEL_NAMES[pn.param] || 'the site where you found this study'; }
+  function signOutButton() { return viaPanel() ? '' : '<button class="secondary" id="out">' + Th('sign_out') + '</button>'; }
+  function wireSignOut() { var b = document.getElementById('out'); if (b) b.addEventListener('click', signOut); }
   function showStatus(st) {
     progress.textContent = '';
     if (st.screenedOut) return showScreenedOut();
     if (st.finished) return showFinished(st);
     var done = st.completed ? Tp('progress_done', { completed: st.completed, total: st.total }) : '';
-    var out = '<button class="secondary" id="out">' + Th('sign_out') + '</button>';
+    var out = signOutButton() || '<span></span>';
     if (!st.available) {
       show('<h1>' + Th('wait_title') + '</h1>' + tracker(st.completed, st.total, st.nextSession) + done + Tp('wait_body', { session: st.nextSession, date: fmtDate(st.availableAt) }) +
         '<div class="actions split">' + out + '<button class="secondary" id="cal">' + Th('calendar_button') + '</button></div>');
       document.getElementById('cal').addEventListener('click', function () { calendar(st.nextSession, st.availableAt); });
     } else {
-      show('<h1>' + Th('start_title', { session: st.nextSession, total: st.total }) + '</h1>' + tracker(st.completed, st.total, st.nextSession) + done + Tp('start_body') +
+      show('<h1>' + Th('start_title', { session: st.nextSession, total: st.total }) + '</h1>' + tracker(st.completed, st.total, st.nextSession) + done + (viaPanel() ? Tp('start_body_panel', { panel: panelName() }) : Tp('start_body')) +
         '<div class="actions split">' + out + '<button id="go">' + Th('start_button', { session: st.nextSession }) + '</button></div>');
       document.getElementById('go').addEventListener('click', function () { this.disabled = true; startSession(); });
     }
-    document.getElementById('out').addEventListener('click', signOut);
+    wireSignOut();
     if (S.content.panel) stopLink();
   }
+  // Panel participants are told to use the button back to the panel (above it, with the code kept on the page),
+  // not that they can close the page; the text follows what the panel needs once the hand-off arrives.
   function showFinished(st) {
     progress.textContent = '';
     if (st && st.returned) return showReturned();
-    show('<h1>' + Th('finished_title') + '</h1>' + (st && st.total ? tracker(st.total, st.total, 0) : '') + Tp('finished_body') + '<div id="handoff" aria-live="polite"></div>' +
-      '<div class="actions"><button class="secondary" id="out">' + Th('sign_out') + '</button></div>');
-    document.getElementById('out').addEventListener('click', signOut);
-    handoff();
+    var out = signOutButton(), panel = viaPanel();
+    show('<h1>' + Th('finished_title') + '</h1>' + (st && st.total ? tracker(st.total, st.total, 0) : '') +
+      '<div id="finbody">' + (panel ? Tp('finished_body_panel', { panel: panelName() }) : Tp('finished_body')) + '</div><div id="handoff" aria-live="polite"></div>' +
+      (out ? '<div class="actions">' + out + '</div>' : ''));
+    wireSignOut();
+    handoff(null, panel ? function (r) {
+      var body = document.getElementById('finbody'), name = r.panel || panelName();
+      if (body) body.innerHTML = r.url ? Tp('finished_body_panel', { panel: name }) : r.code ? Tp('finished_body_panel_code', { panel: name }) : Tp('finished_body');
+    } : null);
   }
   // ---------- hand-off to the recruitment panel ----------
   // The server sends the code for the outcome reached (completed, screened out, returned) only once it is reached,
   // with the address back to the panel (Prolific, SONA, ...). No automatic redirect: the participant reads the code
   // and follows the link when ready (no time limit, WCAG 2.2.1).
-  function handoff(got) {
+  function handoff(got, onReady) {
     var box = document.getElementById('handoff');
     if (!box || !S.token) return;
     (got ? Promise.resolve(got) : api('handoff', { token: S.token })).then(function (r) {
+      if (onReady && r && !r.error) onReady(r);
       if (!r || r.error || !r.outcome || (!r.code && !r.url)) return;
       var where = r.panel || 'the study site';
       box.innerHTML = (r.code ? '<p>' + Th('handoff_code') + '</p><p class="handoff-code"><code id="hcode">' + esc(r.code) + '</code> <button type="button" class="secondary small" id="hcopy">Copy code</button></p>' : '') +
@@ -490,7 +516,7 @@
     show('<h1>' + Th('returned_title') + '</h1>' + Tp('returned_body') + '<div id="handoff" aria-live="polite"></div>');
     handoff();
   }
-  function signOut() { store(tokenKey, null); S.token = null; showLogin(); }
+  function signOut() { store(tokenKey, null); store(panelKey, null); S.token = null; showLogin(); }
   // Add-to-calendar file for the next session (Dillman et al. 2014: lower the cost of coming back).
   function calendar(session, at) {
     var d = function (ms) { return new Date(ms).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, ''); };
@@ -542,7 +568,7 @@
     if (!any) return done();
     loadEnv(function (L) {
       if (!L) return done();   // the check script did not load: run the session (the trials still record full screen and device)
-      if ((S.checked && S.checked[n]) || (S.plan && S.plan.checksDone)) return fullscreenGate(L, done);
+      if ((S.checked && S.checked[n]) || (S.plan && S.plan.checksDone)) { if (!(S.soundChecks && S.soundChecks[n])) noteChecks(n, null); return fullscreenGate(L, done); }
       var dv = L.device(), problems = L.deviceProblems(e, dv), results = { device: Object.assign(dv, { problems: problems }) };
       if (problems.length) {   // no way forward on this device; nothing is saved, so the participant can come back on a computer
         show('<h1>' + Th('check_title') + '</h1>' + Tp(problems[0] === 'desktop' ? 'check_desktop' : 'check_speech'));
@@ -554,17 +580,27 @@
       if (e.headphoneCheck && n === 1) steps.push(function (go) { headphoneStep(L, results, go); });
       if (e.timingCheck) steps.push(function (go) {   // two seconds of measuring the display, nothing to do
         show('<h1>' + Th('check_title') + '</h1><p role="status">' + Th('timing_wait') + '</p>');
-        L.timingProbe(120).then(function (t) { results.timing = t; go(); });
+        L.timingProbe(120).then(function (t) { results.timing = t; if (S.frameMs == null && t && t.frameMsMedian >= 1) S.frameMs = t.frameMsMedian; go(); });
       });
       (function step(i) {
         if (i < steps.length) return steps[i](function () { step(i + 1); });
         api('checks', { token: S.token, session: n, data: results }).then(function (r) {
           if (r.screenedOut) return showScreenedOut();
-          S.checked = S.checked || {}; S.checked[n] = true;
+          S.checked = S.checked || {}; S.checked[n] = true; noteChecks(n, results);
           fullscreenGate(L, done);
         });
       })(0);
     });
+  }
+  // What this session's checks showed about sound, for a type's own sound check (multimodal skips the parts already
+  // done): heard = the headphone check passed (sound plays), mic = the microphone check heard the participant. After a
+  // reload the results are not in the page; a check that screens out on failure must have passed to get here.
+  function noteChecks(n, results) {
+    var e = env();
+    S.soundChecks = S.soundChecks || {};
+    S.soundChecks[n] = results
+      ? { heard: !!(results.headphone && results.headphone.pass), mic: !!(results.mic && results.mic.ok) }
+      : { heard: !!(e.headphoneCheck && n === 1 && e.headphoneFail === 'screen'), mic: !!(e.micCheck && e.micRequired) };
   }
   function micStep(L, results, tries, go) {
     show('<h1>' + Th('mic_check_title') + '</h1>' + Tp('mic_check_body') + '<label class="field" for="micm">Microphone level</label><meter id="micm" min="0" max="100" low="40" optimum="70" value="0"></meter>' +
@@ -668,7 +704,7 @@
     var urls = mediaUrls(plan), done = 0, failed = [], map = {};
     if (!urls.length) { S.preloaded = true; return then(); }
     progress.textContent = '';
-    show('<h1>' + Th('preload_title') + '</h1>' + Tp('preload_body') + '<progress id="pl" max="' + urls.length + '" value="0" aria-describedby="plmsg"></progress><p class="muted" id="plmsg" aria-live="polite"></p>');
+    show('<h1>' + Th('preload_title') + '</h1>' + Tp('preload_body') + '<progress id="pl" max="' + urls.length + '" value="0" aria-label="' + Th('preload_title') + '" aria-describedby="plmsg"></progress><p class="muted" id="plmsg" aria-live="polite"></p>');
     var bar = document.getElementById('pl'), msg = document.getElementById('plmsg');
     function tick() { done++; bar.value = done; msg.textContent = T('preload_progress', { i: done, n: urls.length }); }
     // Each file settles once: loaded, failed, or (after 30 seconds without an answer) failed.
@@ -696,17 +732,26 @@
       var any = document.getElementById('anyway'); if (any) any.addEventListener('click', function () { S.preloaded = false; then(); });
     });
   }
-  // The display's frame interval: the median gap between 60 animation frames, measured once per session.
+  // The display's frame interval: the median gap between 60 animation frames, measured once per session. It counts
+  // only frames drawn while the page is in front (a hidden tab draws none, and its first frame back is a long gap
+  // that is not a frame interval), and starts from the first frame rather than from performance.now(), which is
+  // on a different footing (a frame's timestamp is when the frame began, which can be before the code asking for
+  // it ran). With a coarse clock (some privacy settings round timestamps to 100 ms) the median can be 0; the mean
+  // gap is used then. The setup checks' display probe fills in if this has not finished when a trial is saved.
   function measureFrames() {
-    if (S.frameMs != null || !window.requestAnimationFrame) return;
+    if (S.frameMs != null || S.measuring || !window.requestAnimationFrame) return;
+    S.measuring = true;
     var last = null, gaps = [];
-    (function step(ts) {
-      if (last != null) gaps.push(ts - last);
-      last = ts;
+    function hidden() { return typeof document !== 'undefined' && document.visibilityState === 'hidden'; }
+    requestAnimationFrame(function step(ts) {
+      if (hidden()) last = null;
+      else { if (last != null && ts - last < 250) gaps.push(ts - last); last = ts; }
       if (gaps.length < 60) return requestAnimationFrame(step);
-      gaps.sort(function (a, b) { return a - b; });
-      S.frameMs = Math.round(gaps[30] * 100) / 100;
-    })(performance.now());
+      S.measuring = false;
+      var sorted = gaps.slice().sort(function (a, b) { return a - b; }), mid = sorted[30];
+      if (!(mid >= 1)) mid = gaps.reduce(function (a, b) { return a + b; }, 0) / gaps.length;
+      if (mid >= 1) S.frameMs = Math.round(mid * 100) / 100;
+    });
   }
   function next() {
     var p = S.plan;
@@ -726,20 +771,40 @@
   }
 
   // One item screen. The type renders it and calls ctx.submit(fields); the engine adds behavior traces,
-  // raw events, viewport, and device, saves it, and moves on.
+  // raw events, viewport, and device, saves it, and moves on. A type with a screen to show before an item (the
+  // multimodal type's sound check) supplies beforeTrial(info, ui, go): the item, its clock, and its traces start
+  // only when it calls go(), so that screen never counts as part of the item.
   function runTrial(trial, index) {
     var p = S.plan, isPractice = index === 'practice';
     var doneCount = p.trials.filter(function (x) { return x.done; }).length;
     progress.textContent = isPractice ? T('progress_practice') : T('progress_trial', { session: p.session, i: doneCount + 1, n: p.total });
+    if (S.type.beforeTrial) {
+      var checks = (S.soundChecks && S.soundChecks[p.session]) || {};
+      return S.type.beforeTrial({ trial: trial, index: index, isPractice: isPractice, plan: p, content: S.content, heard: !!checks.heard, micHeard: !!checks.mic }, ui, function () { startTrial(trial, index); });
+    }
+    startTrial(trial, index);
+  }
+  function startTrial(trial, index) {
+    var p = S.plan, isPractice = index === 'practice';
     if (!isPractice) api('view', { token: S.token, session: p.session, index: index });   // a reload re-shows it; the server counts views
     var t0 = performance.now(), answerLog = [], onset = null, fsAtOnset = null;
     if (S.lab) { S.lab.events.length = 0; S.lab.beginItem(isPractice ? 'practice' : 't' + index, stage); }
     var ctx = {
       trial: trial, index: index, isPractice: isPractice, plan: p, content: S.content,
       ms: function () { return Math.round(performance.now() - t0); },
-      // Stimulus onset: the first animation frame after the screen was drawn (performance.now() clock). A type that
-      // reveals its stimulus later (after a Start click, or when a clip starts) calls ctx.markOnset() at that moment.
-      markOnset: function () { if (window.requestAnimationFrame) requestAnimationFrame(function (ts) { onset = ts; fsAtOnset = !!(document.fullscreenElement || document.webkitFullscreenElement); }); },
+      // Stimulus onset: the first animation frame that begins after the screen was drawn (performance.now() clock). A
+      // type that reveals its stimulus later (after a Start click, or when a clip starts) calls ctx.markOnset() then.
+      // A frame's timestamp is when that frame began, which can be a few ms before the code that asked for it ran
+      // (the browser was still busy when the frame started); such a frame is skipped for the next one, so the onset
+      // never comes before the screen was drawn and onset_delay_ms is never negative.
+      markOnset: function () {
+        if (!window.requestAnimationFrame) return;
+        var asked = performance.now();
+        requestAnimationFrame(function frame(ts) {
+          if (ts < asked) return requestAnimationFrame(frame);
+          onset = ts; fsAtOnset = !!(document.fullscreenElement || document.webkitFullscreenElement);
+        });
+      },
       record: function (name, value) { answerLog.push({ atMs: ctx.ms(), name: name, value: value }); if (S.lab) S.lab.recordAnswer(name, value); },
       submit: function (fields, onError) {
         var feats = S.lab ? S.lab.endItem({}) : null, raw = S.lab ? S.lab.events.splice(0) : [];
@@ -815,8 +880,8 @@
     if (st && st.screenedOut) return showScreenedOut();
     if (st && st.finished) return showFinished(st);
     show('<h1>' + Th('done_title') + '</h1>' + (st ? tracker(st.completed, st.total, 0) : '') + Tp('done_body') + (st && st.availableAt ? Tp('done_next', { date: fmtDate(st.availableAt) }) : '') +
-      '<div class="actions split"><button class="secondary" id="out">' + Th('sign_out') + '</button>' + (st && st.availableAt ? '<button class="secondary" id="cal">' + Th('calendar_button') + '</button>' : '') + '</div>');
-    document.getElementById('out').addEventListener('click', signOut);
+      '<div class="actions split">' + (signOutButton() || '<span></span>') + (st && st.availableAt ? '<button class="secondary" id="cal">' + Th('calendar_button') + '</button>' : '') + '</div>');
+    wireSignOut();
     var cal = document.getElementById('cal'); if (cal) cal.addEventListener('click', function () { calendar(st.nextSession, st.availableAt); });
   }
 
@@ -859,13 +924,14 @@
     // Study types with their own server routes (for example the economic game's polling) call them with the sign-in token.
     call: function (route, body) { return api(route, Object.assign({ token: S.token }, body)); } };
   window.LabEngine = { registerType: function (id, impl) { types[id] = impl; }, ui: ui,
-    internals: { S: S, mediaUrls: mediaUrls, swapUrls: swapUrls, preloadPlan: preloadPlan, runChecks: runChecks, DQ: DQ, dqFlush: dqFlush, honeypotHtml: honeypotHtml } };   // for tests (tests/lab/*.test.mjs)
+    internals: { S: S, mediaUrls: mediaUrls, swapUrls: swapUrls, preloadPlan: preloadPlan, runChecks: runChecks, DQ: DQ, dqFlush: dqFlush, honeypotHtml: honeypotHtml,
+      showLogin: showLogin, showConsent: showConsent, showStatus: showStatus, showFinished: showFinished, headphoneStep: headphoneStep, micStep: micStep, runTrial: runTrial, measureFrames: measureFrames } };   // for tests (tests/lab/*.test.mjs)
 
   // ---------- boot ----------
   if (!studyId) { show('<h1>Study not found</h1><p>Check the link you were given.</p>'); return; }
   fetch(API + 'content', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (c) {
     S.content = c;
-    document.title = c.text.login_title || c.name || 'Research study';
+    document.title = (c.text.login_title || c.name || 'Research study') + ' | CCAIR Behavioral Lab';   // the same pattern as the lab's other pages
     // The study's language: screen readers and the speech recognizer and voices of call items follow it.
     var lang = (c.environment && c.environment.language) || 'en-US';
     document.documentElement.setAttribute('lang', lang); document.documentElement.setAttribute('data-speech-lang', lang);
@@ -881,7 +947,7 @@
         // code is then removed from the address bar so it is not bookmarked or shared by accident.
         if (qs && qs.get('preview') === '1') previewRibbon();
         // A code in the link always wins over a sign-in kept in this tab (a researcher previewing twice gets the new participant).
-        if (linkCode) { store(tokenKey, null); S.token = null; try { history.replaceState(null, '', location.pathname + (qs.get('preview') === '1' ? '?preview=1' : '')); } catch (e) {} return signIn({ code: linkCode }); }
+        if (linkCode) { store(tokenKey, null); store(panelKey, null); S.token = null; try { history.replaceState(null, '', location.pathname + (qs.get('preview') === '1' ? '?preview=1' : '')); } catch (e) {} return signIn({ code: linkCode }); }
         // Online panel (for example Prolific): the participant ID in the link signs them in, so there is no form to fill.
         // Signing in again with the same ID returns the same participant, so the link is always used.
         if (panelId) {

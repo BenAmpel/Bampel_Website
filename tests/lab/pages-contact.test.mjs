@@ -90,7 +90,7 @@ console.log('contact links: encoding, templates, participant link without email,
   try {
     await new Promise((res, rej) => { const t = setTimeout(() => rej(new Error('dev server did not start')), 8000); child.stdout.on('data', d => { if (String(d).includes('Lab dev server')) { clearTimeout(t); res(); } }); child.on('exit', c => rej(new Error('dev server exited ' + c))); });
     const get = async p => { const r = await fetch(`http://localhost:${port}${p}`); return { status: r.status, text: await r.text() }; };
-    const expect = { '/lab/': 'For researchers', '/lab/signin/': 'Researcher sign-in', '/lab/account/': 'Account settings', '/lab/guide/': 'Researcher guide', '/lab/support/': 'Support', '/lab/admin/': 'Lab admin', '/lab/s/phish-pilot': 'Research study', '/lab/studies/verification/': 'Research study' };
+    const expect = { '/lab/': 'For researchers', '/lab/signin/': 'Researcher sign-in', '/lab/account/': 'Account settings', '/lab/guide/': 'Researcher guide', '/lab/support/': 'Support', '/lab/admin/': 'Lab admin', '/lab/s/phish-pilot': 'Research study', '/lab/studies/verification/': 'Security alert study | CCAIR Behavioral Lab' };
     for (const [p, text] of Object.entries(expect)) { const r = await get(p); assert.equal(r.status, 200, p); assert(r.text.includes(text), `${p} contains "${text}"`); }
     for (const p of ['/lab/engine/auth.js', '/lab/engine/signin.js', '/lab/engine/account.js', '/lab/assets/contact.js', '/lab/assets/pages.css', '/lab/CODEBOOK.md', '/lab/templates/survey-template.csv']) assert.equal((await get(p)).status, 200, p);
     // the researcher flow end to end against the dev server: owner key -> invitation -> account -> My studies

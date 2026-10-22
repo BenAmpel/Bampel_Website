@@ -50,7 +50,7 @@ cur.enrollment.panel = { ...cur.enrollment.panel, enabled: true, preset: 'prolif
 const r = await call(A + 'content-save', { key: OWNER, body: { content: cur, baseVersion: cur.version } });
 assert.equal(r.status, 200, r.text);
 const pub = await call(P + 'content');
-assert.deepEqual(pub.json.panel, { param: 'PROLIFIC_PID', completionUrl: '', studyParam: 'STUDY_ID', sessionParam: 'SESSION_ID' });
+assert.deepEqual(pub.json.panel, { param: 'PROLIFIC_PID', completionUrl: '', studyParam: 'STUDY_ID', sessionParam: 'SESSION_ID', label: 'Prolific' });
 assert(!/DONE2345|OUT23456|RET23456/.test(pub.text), 'no code is in the public content');
 const bad = structuredClone(cur); bad.enrollment.panel.redirectUrl = 'https://x.test/?a={who}';
 assert.equal((await call(A + 'content-save', { key: OWNER, body: { content: bad, baseVersion: r.json.version } })).status, 400, 'a bad redirect is refused on save');
