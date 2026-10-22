@@ -155,7 +155,9 @@ export const VISHING_STUDY2 = {
       item('practice-intro', 'A practice call', 'text', { body: 'Next, a coworker will call you. This is practice and is not scored. Answer, then speak your reply out loud: tap Tap to talk, speak, and tap it again. Hang up when you are done.' }),
       ...PRACTICE_ITEMS,
       item('clips-intro-1', 'Recorded calls', 'text', { minSeconds: 10,
-        body: 'You will hear 12 short recorded calls to the Northwind front desk. For each one, click Start: the call plays and two answers appear, Legitimate and Suspicious.\n\nChoose an answer while the call plays. You can change it until the call ends. Press the space bar the moment you have made up your mind. Then say how sure you are.' }),
+        // Exact, true base rate for every arm before the first block (decided 2026-10-22): it fixes the prior, so arm
+        // differences must run through cue weighting or verification policy. Each set of 12 has 6 attacks (clips.mjs).
+        body: 'You will hear 12 short recorded calls to the Northwind front desk. In each set of 12 calls in this study, 6 are attempts to get information or money from Northwind, and 6 are legitimate.\n\nFor each one, click Start: the call plays and two answers appear, Legitimate and Suspicious.\n\nChoose an answer while the call plays. You can change it until the call ends. Press the space bar the moment you have made up your mind. Then say how sure you are.' }),
       ...TRAINING_ITEMS,
       item('knowledge-check', 'A few questions about the briefing', 'text', { ask: [...TRAINING_QUESTIONS.filter(x => x.id.startsWith('kc_')).map(x => x.id), 'prev_bridge', 'cred_useful', 'cred_trust', 'cred_apply', 'intent_inbound'],
         body: 'Please answer from what the briefing said.' }),
