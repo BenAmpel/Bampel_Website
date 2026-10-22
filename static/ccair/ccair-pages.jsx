@@ -1,18 +1,18 @@
 /* CCAIR Pages — all page content */
-const { useState: usePageState } = React;
+const { useState: usePageState, useMemo: usePageMemo } = React;
 
 const RESEARCH_PORTFOLIO = [
-  { tier: 'Core', risk: 'Established program', color: '#22c55e', areas: [
+  { tier: 'Core', risk: 'Established program', color: 'var(--green)', areas: [
     { name: 'Proactive Cyber Threat Intelligence', desc: 'Mining pre-attack signals from hacker forums, paste sites, and adversarial ecosystems' },
     { name: 'Dark Web Analytics', desc: 'Longitudinal analysis of underground communities, jargon evolution, and knowledge diffusion' },
     { name: 'Human–AI Collaboration', desc: 'How analysts and AI systems co-produce actionable intelligence in security workflows' },
   ]},
-  { tier: 'Strategic', risk: 'Active development', color: '#3b82f6', areas: [
+  { tier: 'Strategic', risk: 'Active development', color: 'var(--accent)', areas: [
     { name: 'Agentic Defense Systems', desc: 'Autonomous AI agents that detect, adapt to, and mitigate adversarial behavior in real time' },
     { name: 'LLM Security & Robustness', desc: 'Adversarial attacks, jailbreaking, alignment evaluation, and defense for large language models' },
     { name: 'Multimodal Threat Modeling', desc: 'Integrating text, code, audio, and infrastructure signals for cross-modal threat inference' },
   ]},
-  { tier: 'Exploratory', risk: 'Early-stage exploration', color: '#a78bfa', areas: [
+  { tier: 'Exploratory', risk: 'Early-stage exploration', color: 'var(--warm)', areas: [
     { name: 'Attacker–AI Co-evolution', desc: 'Modeling how adversaries adapt when defenders deploy AI-enabled countermeasures' },
     { name: 'Emergent Misuse of Autonomous Systems', desc: 'Anticipating novel attack surfaces created by widespread AI agent deployment' },
   ]},
@@ -31,302 +31,290 @@ const PIPELINE = [
   { level: "Doctoral", description: "PhD students lead CCAIR research with dissertations contributing durable center artifacts.", programs: ["Dissertation Research", "Center Publications", "Conference Leadership"] },
 ];
 
-function HomePage({ onNavigate, tweaks }) {
+// The three research pillars, each with the published systems that put it into practice.
+const PILLARS = [
+  { n: '01', title: 'Adversarial Signal Emergence', desc: 'How malicious intent, capabilities, and tactics emerge across heterogeneous data sources prior to exploitation.',
+    points: ['How attacker knowledge diffuses over time', 'Slang and jargon evolution to evade detection', 'Experimental exploits maturing into operational tools', 'Cross-modal signal integration for intent inference'],
+    systems: [
+      { name: 'TRACE', href: 'https://bampel.com/conference_publication/vendor-conditioned-contrastive-learning-for-predicting-organizational-/' },
+      { name: 'PHI-NEXT', href: 'https://bampel.com/journal_publication/phi-hacker-jmis/' },
+      { name: 'HackerSignal', href: 'https://bampel.com/conference_publication/hackersignal-a-large-scale-multi-source-dataset-linking-hacker-communi/' },
+    ] },
+  { n: '02', title: 'Ambiguity-Aware Intelligence', desc: 'AI systems that operate under adversarial uncertainty — reasoning about ambiguity, deception, and partial information.',
+    points: ['Robust ML under adversarial label noise', 'Adversarially resilient architectures', 'Agentic systems with adaptive decision-making', 'Treating uncertainty as a first-class design constraint'],
+    systems: [
+      { name: 'Adaptive Phishing GAN', href: 'https://bampel.com/conference_publication/adaptive-phishing-gan-cars-2026/' },
+      { name: 'Four-Signal Fusion', href: 'https://bampel.com/conference_publication/four-signal-phishing-cars-2026/' },
+      { name: 'AVA', href: 'https://bampel.com/conference_publication/vuln-variant-cars-2026/' },
+    ] },
+  { n: '03', title: 'Human–AI Collaboration', desc: 'How humans and AI jointly interpret, validate, and act on adversarial signals in realistic security workflows.',
+    points: ['Joint interpretation of adversarial signals', 'Trust calibration between analysts and AI', 'Workflow integration for CTI production', 'Organizational context in security decisions'],
+    systems: [
+      { name: 'AI-Assisted Training', href: 'https://bampel.com/conference_publication/performance-transfer-cars-2026/' },
+      { name: 'Prosody Training', href: 'https://bampel.com/conference_publication/prosody-vishing-icis-2026/' },
+      { name: 'HackerVote', href: 'https://bampel.com/journal_publication/hacker-communities-isf/' },
+    ] },
+];
+
+const JOIN_AREAS = [
+  { area: 'LLM Security & Robustness', desc: 'Adversarial attacks, jailbreaking, alignment for security applications' },
+  { area: 'Cyber Threat Intelligence', desc: 'Automated collection and analysis of threat data from dark web and hacker communities' },
+  { area: 'Phishing & Social Engineering', desc: 'AI-driven detection and generation analysis of phishing campaigns' },
+  { area: 'Proactive Threat Hunting', desc: 'Predictive models and early-warning systems for emerging cyber threats' },
+  { area: 'Human–AI Collaboration', desc: 'Designing AI tools that augment analyst decision-making in SOC environments' },
+  { area: 'Generative AI for Security', desc: 'Leveraging LLMs for vulnerability analysis, code auditing, and threat modeling' },
+];
+
+const byYearDesc = (a, b) => (b.year || 0) - (a.year || 0);
+const STAT_STYLE = { display: 'flex', flexDirection: 'column-reverse', justifyContent: 'flex-end' };
+
+function HomePage() {
   const { publications, people, news, courses } = useData();
+  const phdCount = (people.students || []).length + (people.mentees || []).length;
+  const recent = publications.filter((p) => p.type === 'journal').slice().sort(byYearDesc).slice(0, 3);
 
   return (
-    <div>
-      <div className={tweaks.showGrid ? 'grid-bg' : ''} style={{
-        position: 'relative', minHeight: tweaks.heroStyle === 'full' ? '92vh' : '50vh',
-        display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
-        textAlign: 'center', padding: '100px clamp(20px,5vw,80px) 60px', overflow: 'hidden',
-      }}>
-        <div data-parallax="0.18" style={{ position: 'absolute', top: '15%', left: '20%', width: 400, height: 400, borderRadius: '50%', background: `radial-gradient(circle, rgba(var(--accent-rgb),0.08), transparent 70%)`, animation: 'float1 22s ease-in-out infinite', pointerEvents: 'none' }}></div>
-        <div data-parallax="-0.12" style={{ position: 'absolute', bottom: '10%', right: '15%', width: 350, height: 350, borderRadius: '50%', background: `radial-gradient(circle, rgba(var(--accent2-rgb),0.06), transparent 70%)`, animation: 'float2 18s ease-in-out infinite', pointerEvents: 'none' }}></div>
-
-        <NetworkCanvas scheme={tweaks.colorScheme} />
-
-        <div className="ccair-hero is-in" style={{ position: 'relative', zIndex: 1, maxWidth: 860 }}>
-          <img className="ccair-hero-logo" src="uploads/ccair-logo.png" alt="CCAIR" style={{ height: tweaks.heroStyle === 'full' ? 100 : 64, marginBottom: 24, filter: 'drop-shadow(0 0 30px rgba(var(--accent-rgb),0.2))' }} />
-          <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.8rem)', marginBottom: 16, lineHeight: 1.1 }}>
-            <SplitWords text="Center for" /> <span style={{ color: 'var(--accent)' }}><SplitWords text="CyberAI" start={2} /></span> <SplitWords text="Research" start={3} />
-          </h1>
-          <p className="ccair-hero-rise" style={{ '--d': '0.45s', color: 'var(--text-secondary)', fontSize: 'clamp(15px, 2vw, 18px)', maxWidth: 600, margin: '0 auto 36px', lineHeight: 1.7 }}>
-            Advancing the theory and practice of proactive cyber threat intelligence under adversarial uncertainty.
-          </p>
-          <div className="ccair-hero-rise" style={{ '--d': '0.6s', display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <CButton primary onClick={() => onNavigate('research')}>Explore Research →</CButton>
-            <CButton onClick={() => onNavigate('people')}>Join CCAIR</CButton>
-            <CButton href="/ccair/pathways/">Find your cyber career path</CButton>
+    <div className="page">
+      <section className="hero" aria-labelledby="hero-title">
+        <div className="wrap">
+          <img className="hero-logo" src="uploads/brand/logo-mark-512.png" alt="CCAIR logo: a shield around a speech bubble with sound waves and a cursor" width="120" height="120" />
+          <h1 id="hero-title">Center for <em>CyberAI</em> Research</h1>
+          <p className="lede">We study how intelligent systems can spot malicious behavior before it turns into an attack,
+            and we help people and organizations act on what those systems find.</p>
+          <div className="hero-cta">
+            <a className="btn btn-primary" href="#/research">Explore our research <Arrow /></a>
+            <a className="btn btn-secondary" href="/ccair/pathways/">Find your cyber career path</a>
           </div>
+          <dl className="stats">
+            {[[publications.length, 'Publications'], [phdCount, 'Ph.D. students mentored'], [2, 'Best paper awards'], [courses.length, 'Courses taught']].map(([n, label]) => (
+              // dt before dd for assistive tech; column-reverse keeps the number on top.
+              <div key={label} className="stat" style={STAT_STYLE}><dt><span>{label}</span></dt><dd><b>{n}</b></dd></div>
+            ))}
+          </dl>
         </div>
+      </section>
 
-        {tweaks.heroStyle === 'full' && (
-          <div style={{ position: 'relative', zIndex: 1, marginTop: 60, display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 'clamp(24px,5vw,60px)', maxWidth: '100%', animation: 'fadeInUp 1s ease 0.8s both' }}>
-            <StatCard value={publications.length} label="Publications" />
-            <StatCard value={(people.students || []).length + (people.mentees || []).length} label="Ph.D. Students Mentored" />
-            <StatCard value={2} label="Best Paper Awards" />
-            <StatCard value={courses.length} label="Courses Taught" />
-          </div>
-        )}
-      </div>
-
-      <PageSection title="Research Thesis" accent="// mission" subtitle="CCAIR investigates how intelligent systems can anticipate, interpret, and adapt to malicious behavior before exploitation — shifting the focus from reactive defense to proactive intelligence.">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20 }}>
-          {[
-            { n: '01', title: 'Adversarial Signal Emergence', desc: 'How malicious intent, capabilities, and tactics emerge across heterogeneous data sources prior to exploitation.', systems: [
-              { name: 'TRACE', href: 'https://bampel.com/conference_publication/vendor-conditioned-contrastive-learning-for-predicting-organizational-/' },
-              { name: 'PHI-NEXT', href: 'https://bampel.com/journal_publication/phi-hacker-jmis/' },
-              { name: 'HackerSignal', href: 'https://bampel.com/conference_publication/hackersignal-a-large-scale-multi-source-dataset-linking-hacker-communi/' },
-            ] },
-            { n: '02', title: 'Ambiguity-Aware Intelligence', desc: 'AI systems that operate under adversarial uncertainty — reasoning about ambiguity, deception, and partial information.', systems: [
-              { name: 'Adaptive Phishing GAN', href: 'https://bampel.com/conference_publication/adaptive-phishing-gan-cars-2026/' },
-              { name: 'Four-Signal Fusion', href: 'https://bampel.com/conference_publication/four-signal-phishing-cars-2026/' },
-              { name: 'AVA', href: 'https://bampel.com/conference_publication/vuln-variant-cars-2026/' },
-            ] },
-            { n: '03', title: 'Human–AI Collaboration', desc: 'How humans and AI jointly interpret, validate, and act on adversarial signals in realistic security workflows.', systems: [
-              { name: 'AI-Assisted Training', href: 'https://bampel.com/conference_publication/performance-transfer-cars-2026/' },
-              { name: 'Prosody Training', href: 'https://bampel.com/conference_publication/prosody-vishing-icis-2026/' },
-              { name: 'HackerVote', href: 'https://bampel.com/journal_publication/hacker-communities-isf/' },
-            ] },
-          ].map((p, i) => (
-            <GlassCard key={i} glow>
-              <div className="mono" style={{ color: 'var(--accent)', fontSize: 13, fontWeight: 700, marginBottom: 10, opacity: 0.6 }}>{p.n}</div>
-              <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 8 }}>{p.title}</div>
-              <div style={{ color: 'var(--text-secondary)', fontSize: 13.5, lineHeight: 1.65 }}>{p.desc}</div>
-              {p.systems && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 12 }}>
-                  {p.systems.map((s) => (
-                    <a key={s.name} href={s.href} className="mono" style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.5, padding: '3px 10px', borderRadius: 999, color: 'var(--accent)', border: '1px solid rgba(var(--accent-rgb),0.35)', background: 'rgba(var(--accent-rgb),0.06)', textDecoration: 'none' }}>{s.name}</a>
-                  ))}
-                </div>
-              )}
-            </GlassCard>
-          ))}
-        </div>
-        <div style={{ marginTop: 28, textAlign: 'center' }}>
-          <CButton onClick={() => onNavigate('research')}>Explore all research →</CButton>
-        </div>
-      </PageSection>
-
-      <PageSection title="Latest" accent="// updates">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
-          {news.map((n, i) => (
-            <GlassCard key={i} style={{ padding: 20 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                <span className="mono" style={{ fontSize: 11, color: 'var(--text-muted)' }}>{n.date}</span>
-                <Badge small>{n.tag}</Badge>
+      <Section id="pillars" eyebrow="What we study" title="Three questions guide our work"
+        intro="CCAIR shifts security from reacting to attacks toward anticipating them. Each project maps to one of these research pillars.">
+        <div className="grid grid-3">
+          {PILLARS.map((p) => (
+            <Reveal key={p.n} className="card">
+              <span className="card-num">{p.n}</span>
+              <h3>{p.title}</h3>
+              <p>{p.desc}</p>
+              <div className="chips" role="group" aria-label={`Systems built under ${p.title}`}>
+                {p.systems.map((s) => <a key={s.name} className="chip" href={s.href}>{s.name}</a>)}
               </div>
-              <div style={{ fontWeight: 600, fontSize: 14 }}>{n.title}</div>
-            </GlassCard>
+            </Reveal>
           ))}
         </div>
-      </PageSection>
+        <div className="section-foot"><a className="btn btn-plain" href="#/research">How the research agenda fits together <Arrow /></a></div>
+      </Section>
 
-      <PageSection>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
-          {[
-            { label: 'People', desc: 'Meet the team', page: 'people' },
-            { label: 'Resources', desc: 'Datasets, tools & benchmarks', page: 'resources' },
-            { label: 'About', desc: 'Education, funding & governance', page: 'about' },
-          ].map(l => (
-            <GlassCard key={l.page} onClick={() => onNavigate(l.page)} style={{ cursor: 'pointer', textAlign: 'center', padding: 32 }}>
-              <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 4, color: 'var(--accent)' }}>{l.label}</div>
-              <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>{l.desc}</div>
-            </GlassCard>
+      <Section id="recent" alt eyebrow="Recent work" title="Selected journal articles">
+        <Reveal as="ul" className="pub-list card" style={{ paddingBlock: 4 }}>
+          {recent.map((p) => <PublicationItem key={p.title} {...p} />)}
+        </Reveal>
+        <div className="section-foot"><a className="btn btn-secondary" href="#/publications">All {publications.length} publications <Arrow /></a></div>
+      </Section>
+
+      <Section id="news" eyebrow="News" title="What's new at the center">
+        <Reveal as="ul" className="news">
+          {news.map((n) => (
+            <li key={n.date + n.title}>
+              <time>{n.date}</time>
+              <span className="title">{n.title}</span>
+              <span className="tag">{n.tag}</span>
+            </li>
           ))}
+        </Reveal>
+      </Section>
+
+      <Section id="students" labelledBy="students-title">
+        <FinderFeature titleId="students-title" />
+      </Section>
+
+      <Section id="explore" eyebrow="Get to know us" title="Find your way around">
+        <div className="grid grid-3">
+          <LinkCard href="#/people" title="People" more="Meet the team"><p>The director, graduate researchers, and faculty affiliates behind the center.</p></LinkCard>
+          <LinkCard href="#/resources" title="Resources" more="See resources"><p>Datasets, benchmarks, tools, and free career guides for students.</p></LinkCard>
+          <LinkCard href="#/contact" title="Work with us" more="Get in touch"><p>Prospective students, collaborators, and partners: here is how to reach us.</p></LinkCard>
         </div>
-      </PageSection>
+      </Section>
     </div>
   );
 }
 
 function ResearchPage() {
   const { publications } = useData();
-  const [filter, setFilter] = usePageState('All');
-  const types = ['All', 'journal', 'conference', 'workshop'];
-  const filtered = filter === 'All' ? publications : publications.filter(p => p.type === filter);
-
   return (
-    <div style={{ paddingTop: 64 }}>
-      <h1 className="sr-only">Research — CCAIR</h1>
-      <PageSection title="Research Primitives" accent="// core agenda" subtitle="All center activities, proposals, and artifacts map to at least one of these foundational primitives.">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
-          {[
-            { n: 'P1', title: 'Adversarial Signal Emergence', points: ['How attacker knowledge diffuses over time', 'Slang and jargon evolution to evade detection', 'Experimental exploits maturing into operational tools', 'Cross-modal signal integration for intent inference'] },
-            { n: 'P2', title: 'Ambiguity-Aware Intelligence Models', points: ['Robust ML under adversarial label noise', 'Adversarially resilient architectures', 'Agentic systems with adaptive decision-making', 'Treating uncertainty as a first-class design constraint'] },
-            { n: 'P3', title: 'Human–AI Collaboration (HAIC)', points: ['Joint interpretation of adversarial signals', 'Trust calibration between analysts and AI', 'Workflow integration for CTI production', 'Organizational context in security decisions'] },
-          ].map((p, i) => (
-            <GlassCard key={i} glow>
-              <div className="mono" style={{ color: 'var(--accent)', fontSize: 12, fontWeight: 700, marginBottom: 12, letterSpacing: 1 }}>{p.n}</div>
-              <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 14 }}>{p.title}</div>
-              <ul style={{ listStyle: 'none', padding: 0 }}>
-                {p.points.map((pt, j) => (
-                  <li key={j} style={{ color: 'var(--text-secondary)', fontSize: 13, lineHeight: 1.6, padding: '4px 0', paddingLeft: 16, position: 'relative' }}>
-                    <span style={{ position: 'absolute', left: 0, color: 'var(--accent)', opacity: 0.5 }}>▸</span>
-                    {pt}
-                  </li>
-                ))}
-              </ul>
-            </GlassCard>
+    <div className="page">
+      <PageHead eyebrow="Research" title="Anticipating attacks, not just reacting to them"
+        lede="CCAIR investigates how intelligent systems can anticipate, interpret, and adapt to malicious behavior before exploitation. All center activities, proposals, and artifacts map to at least one of three research primitives." />
+
+      <Section id="primitives" title="Research primitives" intro="The foundational questions every project contributes to.">
+        <div className="grid grid-3">
+          {PILLARS.map((p, i) => (
+            <Reveal key={p.n} className="card">
+              <span className="card-num">P{i + 1}</span>
+              <h3>{p.title}</h3>
+              <p>{p.desc}</p>
+              <ul className="list-check">{p.points.map((pt) => <li key={pt}>{pt}</li>)}</ul>
+            </Reveal>
           ))}
         </div>
-      </PageSection>
+      </Section>
 
-      <PageSection title="Research Portfolio" accent="// strategic positions" subtitle="CCAIR organizes research investments into three tiers based on risk and expected coherence with the center thesis.">
-        <div style={{ display: 'grid', gap: 20 }}>
+      <Section id="portfolio" alt title="Research portfolio" intro="CCAIR organizes research investments into three tiers based on risk and expected coherence with the center thesis.">
+        <div className="grid">
           {RESEARCH_PORTFOLIO.map((tier) => (
-            <GlassCard key={tier.tier} style={{ borderLeft: `3px solid ${tier.color}` }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-                <div className="mono" style={{ fontWeight: 700, fontSize: 14, color: tier.color }}>{tier.tier}</div>
-                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{tier.risk}</span>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12 }}>
+            <Reveal key={tier.tier} className="card tier" style={{ '--tier': tier.color }}>
+              <div className="tier-head"><h3>{tier.tier}</h3><span>{tier.risk}</span></div>
+              <div className="tier-items">
                 {tier.areas.map((a) => (
-                  <div key={a.name} style={{ padding: '12px 14px', borderRadius: 8, background: `${tier.color}08`, border: `1px solid ${tier.color}18` }}>
-                    <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 4 }}>{a.name}</div>
-                    <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>{a.desc}</div>
-                  </div>
+                  <div key={a.name} className="tier-item"><b>{a.name}</b><span>{a.desc}</span></div>
                 ))}
               </div>
-            </GlassCard>
+            </Reveal>
           ))}
         </div>
-      </PageSection>
+      </Section>
 
-      <PageSection title="Theoretical Constructs" accent="// foundations" subtitle="Provisional constructs designed to be empirically observable, computationally operationalizable, and stable enough to accumulate evidence across projects.">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
+      <Section id="constructs" title="Theoretical constructs" intro="Provisional constructs designed to be empirically observable, computationally operationalizable, and stable enough to accumulate evidence across projects.">
+        <div className="grid grid-3">
           {CONSTRUCTS.map((c) => (
-            <GlassCard key={c.name} style={{ padding: 22 }}>
-              <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 8, color: 'var(--accent)' }}>{c.name}</div>
-              <div style={{ color: 'var(--text-secondary)', fontSize: 13, lineHeight: 1.7 }}>{c.desc}</div>
-            </GlassCard>
+            <Reveal key={c.name} className="card"><h3>{c.name}</h3><p>{c.desc}</p></Reveal>
           ))}
         </div>
-      </PageSection>
+      </Section>
 
-      <PageSection title="Center Outputs" accent="// artifacts" subtitle="Persistent, reusable artifacts that outlive individual grants.">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
+      <Section id="outputs" title="Center outputs" intro="Persistent, reusable artifacts that outlive individual grants.">
+        <div className="grid grid-4">
           {[
             { title: 'Adversarial Intelligence Corpora', desc: 'Longitudinal datasets capturing threat signals from adversarial ecosystems' },
             { title: 'CyberAI Evaluation Benchmarks', desc: 'Task-specific benchmarks for detection, robustness, and agentic defense' },
             { title: 'Proactive CTI Systems', desc: 'Data pipelines, models, and simulation environments for security workflows' },
             { title: 'Human-Centered Frameworks', desc: 'Theory-grounded frameworks for human–AI co-production of cyber defense' },
-          ].map((o, i) => (
-            <GlassCard key={i} style={{ padding: 22 }}>
-              <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 6, color: 'var(--accent)' }}>{o.title}</div>
-              <div style={{ color: 'var(--text-secondary)', fontSize: 13, lineHeight: 1.6 }}>{o.desc}</div>
-            </GlassCard>
+          ].map((o) => (
+            <Reveal key={o.title} className="card"><h3>{o.title}</h3><p>{o.desc}</p></Reveal>
           ))}
         </div>
-      </PageSection>
+        <div className="section-foot"><a className="btn btn-secondary" href="#/publications">Read the {publications.length} publications <Arrow /></a></div>
+      </Section>
+    </div>
+  );
+}
 
-      <PageSection title="Publications" accent="// selected works">
-        <FilterBar filters={types} active={filter} onFilter={setFilter} label="Filter:" />
-        <div style={{ display: 'grid', gap: 12 }}>
-          {filtered.length === 0 && (
-            <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-secondary)', fontSize: 14 }}>
-              No publications match this filter.
+function PublicationsPage() {
+  const { publications } = useData();
+  const [type, setType] = usePageState('all');
+  const [query, setQuery] = usePageState('');
+
+  const counts = usePageMemo(() => publications.reduce((acc, p) => { acc[p.type] = (acc[p.type] || 0) + 1; return acc; }, {}), [publications]);
+  const filtered = usePageMemo(() => {
+    const q = query.trim().toLowerCase();
+    return publications.filter((p) => (type === 'all' || p.type === type) &&
+      (!q || [p.title, p.authors, p.venue, String(p.year)].join(' ').toLowerCase().includes(q)));
+  }, [publications, type, query]);
+  const years = usePageMemo(() => {
+    const groups = new Map();
+    filtered.slice().sort(byYearDesc).forEach((p) => {
+      if (!groups.has(p.year)) groups.set(p.year, []);
+      groups.get(p.year).push(p);
+    });
+    return [...groups.entries()];
+  }, [filtered]);
+
+  const options = [
+    { value: 'all', label: `All ${publications.length}` },
+    { value: 'journal', label: `Journals ${counts.journal || 0}` },
+    { value: 'conference', label: `Conferences ${counts.conference || 0}` },
+    { value: 'workshop', label: `Workshops ${counts.workshop || 0}` },
+  ];
+
+  return (
+    <div className="page">
+      <PageHead eyebrow="Publications" title="Center publications"
+        lede="Peer-reviewed cybersecurity research from CCAIR faculty, students, and collaborators. The complete list, including work outside security, is on bampel.com." />
+      <section className="section" aria-label="Publication list">
+        <div className="wrap">
+          <div className="toolbar">
+            <label className="search">
+              <span className="sr-only">Search publications</span>
+              <Icon name="search" />
+              <input type="search" placeholder="Search titles, authors, venues" value={query} onChange={(e) => setQuery(e.target.value)} />
+            </label>
+            <SegmentedControl label="Publication type" options={options} value={type} onChange={setType} />
+          </div>
+          <p className="sr-only" aria-live="polite">{filtered.length} publications shown</p>
+          {years.length === 0 && <p className="empty">No publications match that search. Try a different word or type.</p>}
+          {years.map(([year, items]) => (
+            <div key={year}>
+              <h2 className="pub-year">{year}</h2>
+              <ul className="pub-list">{items.map((p) => <PublicationItem key={p.title} {...p} />)}</ul>
             </div>
-          )}
-          {filtered.map((p) => <PublicationCard key={p.title} {...p} />)}
+          ))}
+          <p className="pub-count">Showing {filtered.length} of {publications.length}. <a href="https://bampel.com/publications/">Full list on bampel.com</a></p>
         </div>
-        <div className="mono" style={{ color: 'var(--text-muted)', fontSize: 12, marginTop: 20, textAlign: 'center' }}>
-          Showing {filtered.length} of {publications.length} publications
-        </div>
-      </PageSection>
+      </section>
     </div>
   );
 }
 
 function PeoplePage() {
   const { people } = useData();
-
+  const d = people.director;
   return (
-    <div style={{ paddingTop: 64 }}>
-      <h1 className="sr-only">People — CCAIR</h1>
-      <PageSection title="Director" accent="// leadership">
-        <PersonCard name={people.director.name} role={people.director.title} dept={people.director.dept} areas={people.director.areas} isDirector />
-      </PageSection>
+    <div className="page">
+      <PageHead eyebrow="People" title="The people behind CCAIR"
+        lede="A small, collaborative group of faculty and Ph.D. researchers working across Georgia State and partner universities." />
 
-      <PageSection title="Graduate Researchers" accent="// students" subtitle="Ph.D. students advised and mentored by CCAIR faculty at Georgia State and partner institutions.">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12 }}>
-          {[...(people.students || []), ...(people.mentees || [])].map((s) => (
-            <GlassCard key={s.name} style={{ padding: 18 }}>
-              <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 2 }}>{s.name}</div>
-              <div style={{ color: 'var(--accent2)', fontSize: 12, fontWeight: 600, marginBottom: 4 }}>{s.role}</div>
-              <div style={{ color: 'var(--text-muted)', fontSize: 12 }}>{s.org}{s.years ? ` · ${s.years}` : ''}</div>
-            </GlassCard>
-          ))}
-        </div>
-      </PageSection>
-
-      <PageSection title="Faculty Affiliates" accent="// collaborators" subtitle="Internal and external faculty contributing to shared CCAIR artifacts across research primitives.">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 }}>
-          {people.affiliates.map((a) => (
-            <GlassCard key={a.name} style={{ padding: 22 }}>
-              <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
-                <div style={{
-                  width: 48, height: 48, borderRadius: 10, flexShrink: 0,
-                  background: 'linear-gradient(135deg, rgba(var(--accent2-rgb),0.2), rgba(var(--accent-rgb),0.1))',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 16, fontWeight: 700, color: 'var(--accent2)',
-                  border: '1px solid rgba(var(--accent2-rgb),0.15)',
-                }}>{a.initials}</div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 2 }}>{a.name}</div>
-                  <div style={{ color: 'var(--accent2)', fontSize: 12.5, fontWeight: 600, marginBottom: 2 }}>{a.role}</div>
-                  <div style={{ color: 'var(--text-muted)', fontSize: 12, marginBottom: 8 }}>{a.dept}</div>
-                  <div style={{ color: 'var(--text-secondary)', fontSize: 12, lineHeight: 1.5, fontStyle: 'italic' }}>{a.synergy}</div>
-                </div>
-              </div>
-            </GlassCard>
-          ))}
-        </div>
-      </PageSection>
-
-      <PageSection title="Join CCAIR" accent="// open positions">
-        <GlassCard style={{ padding: 36, background: 'linear-gradient(135deg, rgba(var(--accent-rgb),0.05), rgba(var(--accent2-rgb),0.03))' }}>
-          <p style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.8, marginBottom: 24 }}>
-            CCAIR is recruiting motivated <strong style={{ color: 'var(--accent)' }}>PhD students</strong> and <strong style={{ color: 'var(--accent)' }}>MS students</strong> to join our research group at Georgia State University. We value curiosity, persistence, and a willingness to work at the intersection of AI and cybersecurity.
-          </p>
-
-          <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--accent2)', marginBottom: 12, fontFamily: "'Fira Code', monospace", letterSpacing: 1 }}>RESEARCH AREAS</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12, marginBottom: 28 }}>
-            {[
-              { area: 'LLM Security & Robustness', desc: 'Adversarial attacks, jailbreaking, alignment for security applications' },
-              { area: 'Cyber Threat Intelligence', desc: 'Automated collection and analysis of threat data from dark web and hacker communities' },
-              { area: 'Phishing & Social Engineering', desc: 'AI-driven detection and generation analysis of phishing campaigns' },
-              { area: 'Proactive Threat Hunting', desc: 'Predictive models and early-warning systems for emerging cyber threats' },
-              { area: 'Human–AI Collaboration', desc: 'Designing AI tools that augment analyst decision-making in SOC environments' },
-              { area: 'Generative AI for Security', desc: 'Leveraging LLMs for vulnerability analysis, code auditing, and threat modeling' },
-            ].map(({ area, desc }) => (
-              <div key={area} style={{ padding: '14px 16px', borderRadius: 8, border: '1px solid rgba(var(--accent-rgb),0.12)', background: 'rgba(var(--accent-rgb),0.03)' }}>
-                <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--accent)', marginBottom: 4, fontFamily: "'Fira Code', monospace" }}>{area}</div>
-                <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>{desc}</div>
-              </div>
-            ))}
-          </div>
-
-          <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--accent2)', marginBottom: 12, fontFamily: "'Fira Code', monospace", letterSpacing: 1 }}>IDEAL CANDIDATES</div>
-          <ul style={{ color: 'var(--text-secondary)', fontSize: 13, lineHeight: 2, paddingLeft: 20, marginBottom: 28 }}>
-            <li>Background in computer science, information systems, cybersecurity, or a related field</li>
-            <li>Interest in applied machine learning / NLP for security problems</li>
-            <li>Programming experience in Python; familiarity with PyTorch or HuggingFace a plus</li>
-            <li>Strong writing skills and interest in publishing at top venues</li>
-          </ul>
-
-          <div style={{ textAlign: 'center', borderTop: '1px solid rgba(var(--accent-rgb),0.1)', paddingTop: 24 }}>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 12 }}>
-              Interested? Reach out with your CV and a brief description of your research interests.
-            </p>
-            <CButton primary href="mailto:bampel@gsu.edu">Contact Dr. Ampel →</CButton>
-            <div style={{ marginTop: 12, fontSize: 13, color: 'var(--text-secondary)', fontFamily: "'Fira Code', monospace" }}>
-              bampel@gsu.edu
+      {d && <Section id="director" title="Director">
+        <Reveal className="card director">
+          <div className="avatar avatar-lg" aria-hidden="true">{initialsOf(d.name)}</div>
+          <div>
+            <h3 style={{ fontSize: 'clamp(22px, 2.6vw, 28px)', lineHeight: 1.2, letterSpacing: '-0.02em', marginBottom: 0 }}>Dr. {d.name}</h3>
+            <p className="role">{d.title}, {d.dept}</p>
+            <p>Ph.D. in Management Information Systems, University of Arizona (2024). The dissertation, “Securing Cyberspace:
+              AI-Enabled Cyber-Adversary Defense,” won the ACM SIGMIS Doctoral Dissertation Award at ICIS 2024.</p>
+            <div className="chips">{(d.areas || []).map((a) => <span key={a} className="chip">{a}</span>)}</div>
+            <div className="actions">
+              <a className="btn btn-primary btn-sm" href={'mailto:' + d.email}>Email</a>
+              <a className="btn btn-secondary btn-sm" href="https://bampel.com/">bampel.com</a>
+              <a className="btn btn-secondary btn-sm" href="https://robinson.gsu.edu/profile/benjamin-ampel/">GSU profile</a>
             </div>
           </div>
-        </GlassCard>
-      </PageSection>
+        </Reveal>
+      </Section>}
+
+      <Section id="students" alt title="Graduate researchers" intro="Ph.D. students advised and mentored by CCAIR faculty at Georgia State and partner institutions.">
+        <h3 className="group-label">Georgia State University</h3>
+        <div className="grid grid-3">
+          {(people.students || []).map((s) => <Reveal key={s.name}><PersonCard name={s.name} role={s.role} meta={[s.org, s.years].filter(Boolean).join(' · ')} /></Reveal>)}
+        </div>
+        <h3 className="group-label">Mentees at partner universities</h3>
+        <div className="grid grid-3">
+          {(people.mentees || []).map((s) => <Reveal key={s.name}><PersonCard name={s.name} role={s.role} meta={[s.org, s.years].filter(Boolean).join(' · ')} warm /></Reveal>)}
+        </div>
+      </Section>
+
+      <Section id="affiliates" title="Faculty affiliates" intro="Internal and external faculty contributing to shared CCAIR artifacts across research primitives.">
+        <div className="grid grid-3">
+          {(people.affiliates || []).map((a) => (
+            <Reveal key={a.name}><PersonCard name={a.name} role={a.role} meta={a.dept} note={a.synergy} /></Reveal>
+          ))}
+        </div>
+      </Section>
+
+      <Section id="join" labelledBy="join-title">
+        <Reveal className="feature">
+          <div>
+            <h2 id="join-title">Want to do research with us?</h2>
+            <p>CCAIR is recruiting motivated Ph.D. and M.S. students who are curious about the intersection of AI and cybersecurity.</p>
+          </div>
+          <div className="actions"><a className="btn btn-primary" href="#/contact">How to join <Arrow /></a></div>
+        </Reveal>
+      </Section>
     </div>
   );
 }
@@ -334,209 +322,285 @@ function PeoplePage() {
 function ResourcesPage() {
   const { resources } = useData();
   const [tab, setTab] = usePageState('datasets');
-  const byCategory = (cat) => resources.filter(r => r.category === cat.slice(0, -1));
+  const byCategory = (cat) => resources.filter((r) => r.category === cat.slice(0, -1));
+  const tabs = ['datasets', 'benchmarks', 'tools'].map((t) => ({ value: t, label: t[0].toUpperCase() + t.slice(1) + ' ' + byCategory(t).length }));
 
   return (
-    <div style={{ paddingTop: 64 }}>
-      <h1 className="sr-only">Resources — CCAIR</h1>
-      <PageSection title="For Students" accent="// careers" subtitle="Free guides for students deciding where they fit in cybersecurity.">
-        <GlassCard style={{ padding: 28, display: 'flex', flexWrap: 'wrap', gap: 24, alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ flex: '1 1 380px' }}>
-            <div className="mono" style={{ fontSize: 11, letterSpacing: 1.5, color: 'var(--accent)', marginBottom: 8 }}>RELEASED · FREE · NOTHING STORED</div>
-            <div style={{ fontWeight: 700, fontSize: 20, marginBottom: 8 }}>Cyber Career Pathway Finder</div>
-            <div style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.7 }}>
-              A 5-minute, jargon-free quiz that ranks 14 cybersecurity roles by your interests, with the realistic first job,
-              starter certifications, free practice and US pay for each. Every role also has its own guide.
+    <div className="page">
+      <PageHead eyebrow="Resources" title="Shared tools for students and researchers"
+        lede="Free career guidance for students, and research assets designed to outlive individual grants and serve the CyberAI community." />
+
+      <Section id="students" title="For students" intro="Free guides for students deciding where they fit in cybersecurity.">
+        <FinderFeature headingLevel={3} />
+      </Section>
+
+      <Section id="materials" labelledBy="materials-title">
+        <Reveal className="feature">
+          <div>
+            <h2 id="materials-title">Research materials hub</h2>
+            <p>Datasets, tools and other reusable materials from CCAIR studies, with a "how to cite" line and a DOI link where they exist.</p>
+          </div>
+          <div className="actions"><a className="btn btn-primary" href="#/materials">Browse materials <Arrow /></a></div>
+        </Reveal>
+      </Section>
+
+      <Section id="assets" alt title="Research assets" intro="Persistent artifacts designed as shared infrastructure for the CyberAI community. Each shows its current status.">
+        <div className="toolbar"><SegmentedControl label="Asset type" options={tabs} value={tab} onChange={setTab} /></div>
+        <div className="grid grid-3">
+          {byCategory(tab).map((r) => (
+            <div key={r.title} className="card">
+              <div style={{ marginBottom: 12 }}><Status status={r.status} /></div>
+              <h3>{r.title}</h3>
+              <p>{r.description}</p>
+              <div className="chips">{(r.tags || []).map((t) => <span key={t} className="chip">{t}</span>)}</div>
             </div>
-          </div>
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-            <CButton primary href="/ccair/pathways/">Take the finder →</CButton>
-            <CButton href="/ccair/pathways/#roles">Browse the 14 role guides</CButton>
-          </div>
-        </GlassCard>
-      </PageSection>
-
-      <PageSection title="Research Assets" accent="// resources" subtitle="Persistent artifacts designed to outlive individual grants and serve as shared infrastructure for the CyberAI community.">
-        <FilterBar filters={['datasets', 'benchmarks', 'tools']} active={tab} onFilter={setTab} label="View:" />
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
-          {byCategory(tab).map((r) => <ResourceCard key={r.title} {...r} />)}
+          ))}
         </div>
-      </PageSection>
+      </Section>
 
-      <PageSection title="Data Governance" accent="// ethics" subtitle="CCAIR adopts a conservative governance posture for all data activities.">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
+      <Section id="governance" title="Data governance" intro="CCAIR adopts a conservative governance posture for all data activities.">
+        <div className="grid grid-4">
           {[
             { title: 'Ethical Oversight', desc: 'All collection reviewed under IRB consultation. Clear separation between observational research and any facilitating activity.' },
             { title: 'Data Lifecycle', desc: 'Full provenance tracking from acquisition through publication and archiving, aligned with NIST AI Risk Management.' },
             { title: 'Controlled Access', desc: 'Sensitive corpora restricted to trained personnel with audit logging. Derived datasets preferentially shared to balance openness.' },
             { title: 'Community Sharing', desc: 'Curated subsets, benchmarks, and task formulations released under appropriate usage agreements.' },
-          ].map((g, i) => (
-            <GlassCard key={i} style={{ padding: 22 }}>
-              <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 6 }}>{g.title}</div>
-              <div style={{ color: 'var(--text-secondary)', fontSize: 13, lineHeight: 1.65 }}>{g.desc}</div>
-            </GlassCard>
+          ].map((g) => (
+            <Reveal key={g.title} className="card"><h3>{g.title}</h3><p>{g.desc}</p></Reveal>
           ))}
         </div>
-      </PageSection>
+      </Section>
     </div>
   );
 }
 
-function AboutPage({ onNavigate }) {
-  const { funding, courses } = useData();
+const MATERIAL_KINDS = [
+  { value: 'all', label: 'All' },
+  { value: 'dataset', label: 'Datasets' },
+  { value: 'stimuli', label: 'Stimulus libraries' },
+  { value: 'instrument', label: 'Instruments' },
+  { value: 'tool', label: 'Tools' },
+];
+const KIND_LABEL = { dataset: 'Dataset', stimuli: 'Stimulus library', instrument: 'Instrument', tool: 'Tool' };
+
+function CopyButton({ text, label }) {
+  const [done, setDone] = usePageState(false);
+  const timer = React.useRef(null);
+  React.useEffect(() => () => clearTimeout(timer.current), []);
+  if (!navigator.clipboard) return null;
+  const copy = () => navigator.clipboard.writeText(text).then(() => {
+    setDone(true);
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => setDone(false), 1800);
+  });
+  return (
+    <>
+      <button type="button" className="btn btn-secondary btn-sm" onClick={copy} aria-label={done ? 'Citation copied' : label}>{done ? 'Copied' : 'Copy citation'}</button>
+      <span className="sr-only" role="status">{done ? 'Citation copied' : ''}</span>
+    </>
+  );
+}
+
+// Internal notes in data/materials.json ("To be added by Ben.", "Placeholder: ...", "Ben to confirm ...") stay off the public page.
+const isPlaceholderText = (t) => !t || /^\s*(to be added|placeholder)/i.test(t) || /ben to confirm/i.test(t);
+const isPublicMaterial = (m) => !m.placeholder && !isPlaceholderText(m.description);
+
+function MaterialsPage() {
+  const { materials: all = [] } = useData();
+  const materials = all.filter(isPublicMaterial);
+  const [kind, setKind] = usePageState('all');
+  const shown = materials.filter((m) => kind === 'all' || m.kind === kind);
+  const countOf = (k) => (k === 'all' ? materials.length : materials.filter((m) => m.kind === k).length);
+  const options = MATERIAL_KINDS.filter((k) => k.value === 'all' || countOf(k.value) > 0).map((k) => ({ ...k, label: `${k.label} ${countOf(k.value)}` }));
 
   return (
-    <div style={{ paddingTop: 64 }}>
-      <h1 className="sr-only">About — CCAIR</h1>
-      <PageSection title="Talent Pipeline" accent="// education" subtitle="A multi-stage pipeline spanning K–12 through doctoral research, building technically sophisticated and theoretically grounded CyberAI professionals.">
-        <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
-          {PIPELINE.map((p, i) => <PipelineStep key={i} {...p} index={i} total={PIPELINE.length} />)}
+    <div className="page">
+      <PageHead eyebrow="Research materials" title="Data, stimuli, instruments and tools"
+        lede="Materials from CCAIR studies that other researchers and educators can reuse. Entries say how to cite them and link to the version of record where one exists." />
+      <section className="section" aria-labelledby="materials-list-title">
+        <div className="wrap">
+          <h2 id="materials-list-title" className="sr-only">Materials list</h2>
+          <div className="toolbar"><SegmentedControl label="Material type" options={options} value={kind} onChange={setKind} /></div>
+          {shown.length === 0 && <p className="empty">Nothing of this type is listed yet.</p>}
+          <div className="grid grid-2">
+            {shown.map((m) => (
+              <Reveal key={m.title} className="card material">
+                <div className="material-meta">
+                  <span className="tag">{KIND_LABEL[m.kind] || m.kind}</span>
+                  <Status status={m.status} />
+                </div>
+                <h3>{m.title}</h3>
+                <p>{m.description}</p>
+                {!isPlaceholderText(m.cite) && (
+                  <div className="material-cite">
+                    <span className="material-cite-label">How to cite</span>
+                    <p>{m.cite}{m.doi ? <> <a href={'https://doi.org/' + m.doi}>https://doi.org/{m.doi}</a></> : null}</p>
+                  </div>
+                )}
+                {((m.links || []).length > 0 || m.doi || !isPlaceholderText(m.cite)) && (
+                  <div className="material-actions">
+                    {m.doi && <a className="btn btn-primary btn-sm" href={'https://doi.org/' + m.doi}>DOI</a>}
+                    {(m.links || []).map((l) => <a key={l.href} className="btn btn-secondary btn-sm" href={l.href}>{l.label}</a>)}
+                    {!isPlaceholderText(m.cite) && <CopyButton text={m.cite + (m.doi ? ' https://doi.org/' + m.doi : '')} label={`Copy citation for ${m.title}`} />}
+                  </div>
+                )}
+              </Reveal>
+            ))}
+          </div>
+          <p className="pub-count">Using CCAIR materials in your work? We'd like to hear about it: <a href="mailto:bampel@gsu.edu">bampel@gsu.edu</a>.</p>
         </div>
-      </PageSection>
+      </section>
+    </div>
+  );
+}
 
-      <PageSection title="Career Guidance" accent="// pathways" subtitle="Helping students who are new to the field find the cybersecurity role that fits them.">
-        <GlassCard style={{ padding: 28, display: 'flex', flexWrap: 'wrap', gap: 24, alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ flex: '1 1 380px' }}>
-            <div className="mono" style={{ fontSize: 11, letterSpacing: 1.5, color: 'var(--accent)', marginBottom: 8 }}>FREE · 5 MINUTES · NOTHING STORED</div>
-            <div style={{ fontWeight: 700, fontSize: 20, marginBottom: 8 }}>Cyber Career Pathway Finder</div>
-            <div style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.7 }}>
-              A plain-language quiz built on the NIST NICE Workforce Framework. It ranks 14 cybersecurity roles by a
-              student's interests and gives the realistic first job, starter certifications, free practice and US pay for
-              each. It complements CIS 3620 Career Pathways.
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-            <CButton primary href="/ccair/pathways/">Take the finder →</CButton>
-            <CButton href="/ccair/pathways/#roles">Browse the 14 role guides</CButton>
-          </div>
-        </GlassCard>
-      </PageSection>
+function AboutPage() {
+  const { funding, courses } = useData();
+  return (
+    <div className="page">
+      <PageHead eyebrow="About" title="A home for AI-enabled cybersecurity at Georgia State"
+        lede="CCAIR advances AI-enabled cybersecurity through three research pillars: detecting social engineering at machine speed (phishing, vishing, and deepfake fraud), understanding hacker communities and the vulnerability lifecycle through large-scale analytics, and building trustworthy AI systems for security operations." />
 
-      <PageSection title="Courses" accent="// curriculum">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
-          {courses.map((c, i) => (
-            <GlassCard key={i} style={{ padding: 18 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <span className="mono" style={{ color: 'var(--accent)', fontSize: 12, fontWeight: 700 }}>{c.code}</span>
-                  <div style={{ fontWeight: 600, fontSize: 14, marginTop: 2 }}>{c.title}</div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <Badge small>{c.level}</Badge>
-                  <div className="mono" style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{c.rating}</div>
-                </div>
-              </div>
-            </GlassCard>
+      <Section id="pipeline" title="Talent pipeline" intro="A multi-stage pipeline spanning K–12 through doctoral research, building technically sophisticated and theoretically grounded CyberAI professionals.">
+        <ol className="steps">
+          {PIPELINE.map((p) => (
+            <li key={p.level}>
+              <Reveal className="card" style={{ height: '100%' }}>
+                <h3>{p.level}</h3>
+                <p>{p.description}</p>
+                <div className="chips">{p.programs.map((x) => <span key={x} className="chip">{x}</span>)}</div>
+              </Reveal>
+            </li>
+          ))}
+        </ol>
+      </Section>
+
+      <Section id="courses" alt title="Courses" intro="Security and AI courses taught by the center director at Georgia State, with student evaluation scores.">
+        <Reveal as="ul" className="rows">
+          {courses.map((c) => (
+            <li key={c.code}>
+              <span><span className="code">{c.code}</span><span className="t">{c.title}</span></span>
+              <span className="r">{c.level} · {c.rating}</span>
+            </li>
+          ))}
+        </Reveal>
+      </Section>
+
+      <Section id="support" title="Research support" intro="Grants led by center faculty, plus the federal and defense sponsors acknowledged across CCAIR publications.">
+        {(funding.grants || []).length > 0 && <>
+          <h3 className="group-label">Grants led by center faculty</h3>
+          <div className="grid grid-2" style={{ marginBottom: 8 }}>
+            {funding.grants.map((g) => (
+              <Reveal key={g.name} className="card">
+                <h3>{g.name}</h3>
+                <p>{g.sponsor}{g.id ? ` (${g.id})` : ''}</p>
+                <div className="chips"><span className="chip">{g.role}</span><span className="chip">{g.years}</span></div>
+              </Reveal>
+            ))}
+          </div>
+        </>}
+        <h3 className="group-label">Sponsors acknowledged in center publications</h3>
+        <div className="grid grid-3">
+          {(funding.awarded || []).map((p) => (
+            <Reveal key={p.id} className="card"><h3>{p.name}</h3><p>{p.role}</p><div className="chips"><span className="chip">{p.id}</span></div></Reveal>
           ))}
         </div>
-      </PageSection>
-
-      <PageSection title="Research Support" accent="// support" subtitle="CCAIR research has been supported by federal and defense sponsors, acknowledged across the center's publications.">
-        <div style={{ marginBottom: 24 }}>
-          <div className="mono" style={{ color: 'var(--accent)', fontSize: 12, fontWeight: 700, letterSpacing: 1, marginBottom: 14 }}>SPONSORED SUPPORT</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 10 }}>
-            {(funding.awarded || []).map((p) => (
-              <div key={p.id} style={{ padding: '12px 16px', borderRadius: 8, border: '1px solid rgba(var(--accent-rgb),0.10)', background: 'rgba(var(--accent-rgb),0.03)' }}>
-                <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 2 }}>{p.name}</div>
-                <div className="mono" style={{ fontSize: 11, color: 'var(--accent)', marginBottom: 4 }}>{p.id}</div>
-                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{p.role}</div>
-              </div>
-            ))}
-          </div>
+        <h3 className="group-label">Collaborating institutions</h3>
+        <div className="grid grid-3">
+          {(funding.collaborations || []).map((p) => (
+            <Reveal key={p.name} className="card"><h3>{p.name}</h3><p>{p.focus}</p></Reveal>
+          ))}
         </div>
-        <div>
-          <div className="mono" style={{ color: 'var(--accent2)', fontSize: 12, fontWeight: 700, letterSpacing: 1, marginBottom: 14 }}>COLLABORATING INSTITUTIONS</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 10 }}>
-            {(funding.collaborations || []).map((p) => (
-              <div key={p.name} style={{ padding: '12px 16px', borderRadius: 8, border: '1px solid rgba(var(--accent2-rgb),0.10)', background: 'rgba(var(--accent2-rgb),0.03)' }}>
-                <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 2 }}>{p.name}</div>
-                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{p.focus}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </PageSection>
+      </Section>
 
-      <PageSection title="Governance" accent="// structure">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+      <Section id="governance" alt title="Governance">
+        <div className="grid grid-4">
           {[
             { role: 'Center Director', desc: 'Sets research direction, primary liaison to funding agencies and university leadership.' },
             { role: 'Faculty Affiliates', desc: 'Contribute to shared center artifacts (data, benchmarks, systems) on specific projects.' },
             { role: 'External Advisory Council', desc: 'Annual review of research direction, relevance, and translational opportunities.' },
             { role: 'Graduate Researchers', desc: 'PhD and MS students driving research under faculty supervision.' },
-          ].map((g, i) => (
-            <GlassCard key={i} style={{ padding: 22 }}>
-              <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 6, color: 'var(--accent)' }}>{g.role}</div>
-              <div style={{ color: 'var(--text-secondary)', fontSize: 13, lineHeight: 1.6 }}>{g.desc}</div>
-            </GlassCard>
+          ].map((g) => (
+            <Reveal key={g.role} className="card"><h3>{g.role}</h3><p>{g.desc}</p></Reveal>
           ))}
         </div>
-      </PageSection>
+      </Section>
 
-      <PageSection title="Contact" accent="// connect">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
-          <GlassCard style={{ padding: 22 }}>
-            <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 8, color: 'var(--accent)' }}>Director</div>
-            <div style={{ fontSize: 13.5, color: 'var(--text-secondary)', lineHeight: 1.8 }}>
-              Dr. Benjamin M. Ampel<br />
-              <a href="mailto:bampel@gsu.edu" style={{ color: 'var(--accent2)' }}>bampel@gsu.edu</a><br />
-              Department of Computer Information Systems<br />
-              J. Mack Robinson College of Business<br />
-              55 Park Place NW, Atlanta, GA 30303
-            </div>
-          </GlassCard>
-          <GlassCard style={{ padding: 22 }}>
-            <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 8, color: 'var(--accent)' }}>Robinson Cyber Ecosystem</div>
-            <div style={{ fontSize: 13.5, color: 'var(--text-secondary)', lineHeight: 1.8 }}>
-              <a href="https://robinson.gsu.edu/research-centers/crisp/" target="_blank" rel="noopener" style={{ color: 'var(--accent2)' }}>CRISP — Center for Research in Information Security &amp; Privacy</a><br />
-              NSF CyberCorps® Scholarship for Service participant<br />
-              NSA/DHS CAE Cyber Defense designated program
-            </div>
-          </GlassCard>
-        </div>
-      </PageSection>
-
-      <PageSection title="Strategic Environment" accent="// GSU ecosystem" subtitle="CCAIR operates within Georgia State University's interdisciplinary R1 environment.">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+      <Section id="environment" title="Strategic environment" intro="CCAIR operates within Georgia State University's interdisciplinary R1 environment.">
+        <div className="grid grid-4">
           {[
             { name: 'CHAI Center', desc: 'Collaborative Human-AI center with GSU and Duke University leadership.' },
             { name: 'TReNDS Center', desc: 'Large-scale data analytics and translational neuroscience research.' },
             { name: 'Center for Digital Innovation', desc: 'Theory-driven research on digital transformation and innovation.' },
             { name: 'CIS Department', desc: 'Recognized for leadership in digital innovation and security research.' },
-          ].map((p, i) => (
-            <GlassCard key={i} style={{ padding: 22 }}>
-              <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>{p.name}</div>
-              <div style={{ color: 'var(--text-secondary)', fontSize: 13, lineHeight: 1.6 }}>{p.desc}</div>
-            </GlassCard>
+          ].map((p) => (
+            <Reveal key={p.name} className="card"><h3>{p.name}</h3><p>{p.desc}</p></Reveal>
           ))}
         </div>
-      </PageSection>
+      </Section>
+    </div>
+  );
+}
 
-      <PageSection>
-        <GlassCard style={{ textAlign: 'center', padding: 'clamp(36px, 5vw, 60px)', background: 'linear-gradient(135deg, rgba(var(--accent-rgb),0.04), rgba(var(--accent2-rgb),0.02))' }}>
-          <div className="mono" style={{ color: 'var(--accent)', fontSize: 12, fontWeight: 700, letterSpacing: 2, marginBottom: 12 }}>// CONTACT</div>
-          <h2 style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)', marginBottom: 12 }}>Get in Touch</h2>
-          <p style={{ color: 'var(--text-secondary)', fontSize: 15, maxWidth: 500, margin: '0 auto 8px', lineHeight: 1.7 }}>
-            Interested in collaboration, joining the lab, or learning more about CCAIR?
-          </p>
-          <div style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 24 }}>
-            J. Mack Robinson School of Business · 55 Park Place NW · Atlanta, GA 30303
-          </div>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <CButton primary href="mailto:bampel@gsu.edu">Email Dr. Ampel</CButton>
-            <CButton href="https://robinson.gsu.edu/profile/benjamin-ampel/">GSU Profile</CButton>
-          </div>
-        </GlassCard>
-      </PageSection>
+function ContactPage() {
+  return (
+    <div className="page">
+      <PageHead eyebrow="Contact" title="We'd love to hear from you"
+        lede="Interested in collaboration, joining the lab, or learning more about CCAIR? Email is the best way to reach us." >
+        <div className="hero-cta" style={{ justifyContent: 'flex-start' }}>
+          <a className="btn btn-primary" href="mailto:bampel@gsu.edu">Email Dr. Ampel <Arrow /></a>
+          <a className="btn btn-secondary" href="https://robinson.gsu.edu/profile/benjamin-ampel/">GSU profile</a>
+        </div>
+      </PageHead>
+
+      <Section id="details" title="Where to find us">
+        <div className="grid grid-2">
+          <Reveal className="card">
+            <h3>Director</h3>
+            <address className="contact-lines">
+              Dr. Benjamin M. Ampel<br />
+              <a href="mailto:bampel@gsu.edu">bampel@gsu.edu</a><br />
+              Department of Computer Information Systems<br />
+              J. Mack Robinson College of Business<br />
+              55 Park Place NW, Atlanta, GA 30303
+            </address>
+          </Reveal>
+          <Reveal className="card">
+            <h3>Robinson cyber ecosystem</h3>
+            <ul className="list-check">
+              <li><a href="https://robinson.gsu.edu/research-centers/crisp/">CRISP — Center for Research in Information Security &amp; Privacy</a></li>
+              <li>NSF CyberCorps® Scholarship for Service participant</li>
+              <li>NSA/DHS CAE Cyber Defense designated program</li>
+            </ul>
+          </Reveal>
+        </div>
+      </Section>
+
+      <Section id="join" alt eyebrow="Open positions" title="Join CCAIR"
+        intro="CCAIR is recruiting motivated Ph.D. and M.S. students to join our research group at Georgia State University. We value curiosity, persistence, and a willingness to work at the intersection of AI and cybersecurity.">
+        <h3 className="group-label">Research areas</h3>
+        <div className="grid grid-3">
+          {JOIN_AREAS.map(({ area, desc }) => (
+            <Reveal key={area} className="card"><h3>{area}</h3><p>{desc}</p></Reveal>
+          ))}
+        </div>
+        <h3 className="group-label">Ideal candidates</h3>
+        <Reveal className="card">
+          <ul className="list-check">
+            <li>Background in computer science, information systems, cybersecurity, or a related field</li>
+            <li>Interest in applied machine learning / NLP for security problems</li>
+            <li>Programming experience in Python; familiarity with PyTorch or HuggingFace a plus</li>
+            <li>Strong writing skills and interest in publishing at top venues</li>
+          </ul>
+          <p style={{ marginTop: 16 }}>Interested? Reach out with your CV and a brief description of your research interests.</p>
+          <div className="section-foot" style={{ marginTop: 16 }}><a className="btn btn-primary" href="mailto:bampel@gsu.edu">Contact Dr. Ampel <Arrow /></a></div>
+        </Reveal>
+      </Section>
     </div>
   );
 }
 
 window.CCAIR = window.CCAIR || {};
-Object.assign(window.CCAIR, {
-  HomePage, ResearchPage, PeoplePage, ResourcesPage, AboutPage,
-});
-Object.assign(window, {
-  HomePage, ResearchPage, PeoplePage, ResourcesPage, AboutPage,
-});
+const CCAIR_PAGES = { HomePage, ResearchPage, PublicationsPage, PeoplePage, ResourcesPage, MaterialsPage, AboutPage, ContactPage };
+Object.assign(window.CCAIR, CCAIR_PAGES);
+Object.assign(window, CCAIR_PAGES);

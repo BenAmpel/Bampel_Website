@@ -28,6 +28,7 @@ url_dataset: ''
 url_project: ''
 url_slides: ''
 url_video: ''
+plain_summary: "Large language models (LLMs, e.g., the AI systems behind chatbots) can become unreliable at classifying cyber threats as attacker behavior and data shift after deployment. We developed Adapt-ICL, which lets a frozen LLM adapt at answer time by keeping an evolving memory of past examples and retrieving the most useful ones (no retraining required). On the EMBER2024 malware benchmark, Adapt-ICL outperformed existing in-context learning methods (i.e., learning from examples placed in the prompt) on accuracy across all six LLMs we tested and held steady over successive time periods."
 
 url: "/workshop_publication/cyber-threat-classification-under-non-stationary-environments-an-adapt/"
 ---

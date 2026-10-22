@@ -37,8 +37,8 @@ const BY = Object.fromEntries(D.roles.map((r) => [r.slug, r]));
 const short = (r) => r.short || r.name;
 // 'an IT Auditor', 'an AI Security Specialist', 'a SOC Analyst'.
 const an = (name) => (/^[AEIOU]/.test(name) ? 'an ' : 'a ') + name;
-const reviewer = { '@type': 'Person', name: 'Benjamin M. Ampel', url: `${SITE}/`, jobTitle: 'Director, Center for CyberAI Research (CCAIR)' };
-const org = { '@type': 'ResearchOrganization', name: 'Center for CyberAI Research (CCAIR)', url: `${SITE}/ccair/` };
+const reviewer = { '@type': 'Person', '@id': `${SITE}/#person`, name: 'Benjamin M. Ampel', url: `${SITE}/`, jobTitle: 'Director, Center for CyberAI Research (CCAIR)' };
+const org = { '@type': 'ResearchOrganization', '@id': `${SITE}/ccair/#org`, name: 'Center for CyberAI Research (CCAIR)', url: `${SITE}/ccair/` };
 const ld = (obj) => `<script type="application/ld+json">${JSON.stringify(obj).replace(/</g, '\\u003c')}</script>`;
 
 function head({ title, desc, url, ogTitle }) {
@@ -51,7 +51,8 @@ function head({ title, desc, url, ogTitle }) {
 <meta name="description" content="${esc(desc)}">
 <link rel="canonical" href="${url}">
 <meta name="robots" content="index, follow, max-image-preview:large">
-<meta name="theme-color" content="#050a15">
+<meta name="theme-color" content="#FBF6EF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1D171F" media="(prefers-color-scheme: dark)">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="CCAIR, Center for CyberAI Research">
 <meta property="og:title" content="${esc(ogTitle || title)}">
@@ -59,11 +60,9 @@ function head({ title, desc, url, ogTitle }) {
 <meta property="og:url" content="${url}">
 <meta property="og:image" content="${SITE}/media/sharing-card.png">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/ccair/uploads/ccair-logo.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/ccair/assets/pathways/pathways.css?v=${ASSET_V}">
+<link rel="icon" type="image/png" sizes="64x64" href="/ccair/uploads/brand/logo-mark-64.png">
+<link rel="apple-touch-icon" href="/ccair/uploads/brand/apple-touch-icon.png">
+<link rel="stylesheet" href="/ccair/assets/pathways/pathways.css?v=${ASSET_V}-warm2">
 ${GA ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${GA}"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA}');</script>` : ''}`;
 }
@@ -72,7 +71,7 @@ function top(current) {
   return `<a class="skip" href="#main">Skip to content</a>
 <div class="backdrop" aria-hidden="true"><div class="glow g1"></div><div class="glow g2"></div></div>
 <header class="top"><div class="wrap">
-  <a class="brand" href="/ccair/"><img src="/ccair/uploads/ccair-logo.png" alt="" width="30" height="30">CCAIR</a>
+  <a class="brand" href="/ccair/"><img src="/ccair/uploads/brand/logo-mark-64.png" alt="" width="30" height="30">CCAIR</a>
   <nav aria-label="Main">
     <a href="/ccair/" class="hide-sm">Center home</a>
     <a href="/ccair/pathways/"${current === 'hub' ? ' aria-current="page"' : ''}>Pathway Finder</a>
@@ -85,7 +84,7 @@ function top(current) {
 function foot() {
   return `<footer><div class="wrap">
   <span>Center for CyberAI Research (CCAIR) · Georgia State University · Reviewed ${esc(D.updated)}</span>
-  <span><a href="/ccair/">CCAIR</a> · <a href="/ccair/pathways/">Pathway Finder</a> · <a href="/teaching/">Teaching</a> · <a href="/privacy/">Privacy</a></span>
+  <span><a href="/ccair/">CCAIR</a> · <a href="/ccair/pathways/">Pathway Finder</a> · <a href="/teaching/">Teaching</a></span>
 </div></footer>
 <script src="/ccair/assets/pathways/pathways.js?v=${ASSET_V}" defer></script>
 </body>
