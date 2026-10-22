@@ -92,6 +92,8 @@ export function defaultContent(type) {
 }
 
 const ENGINE_KEYS = ['minutesPerSession', 'consent', 'enrollment', 'survey', 'text', 'embedded'];
+// Every part of a study's content that is saved (engine parts, then the type's own), as the design file keeps them.
+export const contentKeysFor = type => ENGINE_KEYS.concat(type.contentKeys);
 
 // Survey "show when" rules: always, by condition (it.conditions), plus the type's own rules.
 export function itemsFor(items, kind, ctx, type) {

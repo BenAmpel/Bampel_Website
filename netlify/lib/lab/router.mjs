@@ -19,6 +19,7 @@ import { TYPES } from './types/index.mjs';
 import { importSurvey, ImportError } from './import/index.mjs';
 import { templateList } from './templates.mjs';
 import * as recruit from './recruit.mjs';
+import { exportDesign, importDesign, cloneStudy } from './studyfile.mjs';
 
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
 const csv = (text, name) => new Response(text, { headers: { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': `attachment; filename="${name}"`, 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
@@ -27,7 +28,7 @@ const MAX_BODY = 4_000_000;
 const MAX_IMPORT_BODY = 8_000_000;   // a survey file as JSON text (an .xlsx is base64); Netlify itself caps a request near 6 MB
 
 const NEED = {
-  me: 'viewer', participants: 'viewer', 'export.csv': 'viewer', 'export-surveys.csv': 'viewer', 'export.json': 'viewer', rows: 'viewer', records: 'viewer', raw: 'viewer',
+  me: 'viewer', participants: 'viewer', 'design.json': 'viewer', 'export.csv': 'viewer', 'export-surveys.csv': 'viewer', 'export.json': 'viewer', rows: 'viewer', records: 'viewer', raw: 'viewer',
   content: 'viewer', 'content-history': 'viewer',
   'content-save': 'editor', 'content-restore': 'editor', import: 'editor', preview: 'editor',
   roster: 'manager', lookup: 'manager', 'credit.csv': 'manager', create: 'manager', 'set-test': 'manager',
@@ -124,6 +125,7 @@ export async function handle(req, { getStore, env, now }) {
         case 'me': return json({ name: who.name, role: who.role, roles: admin.ROLE_INFO, study: { id: study.id, name: study.name, type: type.id, typeLabel: type.label, paths: study.paths }, conditions: type.conditionsOf(c) });
         case 'participants': return json(await E.listParticipants(S));
         case 'export.json': return json(await E.exportRecords(S));
+        case 'design.json': return json(await exportDesign(S));
         case 'export.csv': return csv(await E.exportCsv(S), `${study.id}_trials.csv`);
         case 'export-surveys.csv': return csv(await E.exportSurveyCsv(S), `${study.id}_surveys.csv`);
         case 'credit.csv': return csv(await E.exportCredit(S), `${study.id}_extra_credit.csv`);
@@ -305,7 +307,17 @@ async function labRoute(route, req, body, { registry, getStore, ownerKey, clock 
     case 'studies': return json(await listStudies(registry, { all: true }));
     case 'types': return json(Object.values(TYPES).map(t => ({ id: t.id, label: t.label, description: t.description })));
     case 'templates': return json(templateList());
-    case 'create': return needPost() || reply(await createStudy(registry, body, who));
+    case 'create': {   // from a template or a type, or (body.design) from a study design file
+      if (!post) return needPost();
+      if (body.design) return reply(await importDesign(registry, st => blobsStore(getStore, st.storeName), body.design, { id: body.id, name: body.name, description: body.description }, who, now));
+      return reply(await createStudy(registry, body, who));
+    }
+    case 'clone': {   // a new study with the same design (content, settings, files); no participants or data
+      if (!post) return needPost();
+      const from = await getStudy(registry, String(body.from || ''));
+      if (!from) return json({ error: 'no_study', hint: 'That study no longer exists.' }, 404);
+      return reply(await cloneStudy(registry, st => blobsStore(getStore, st.storeName), { store: blobsStore(getStore, from.storeName), type: typeFor(from), study: from }, { id: body.id, name: body.name }, who, now));
+    }
     case 'update': return needPost() || reply(await updateStudy(registry, String(body.id || ''), body));
     case 'researchers': return json(await acc.listResearchers(registry));
     case 'researchers/invite': return needPost() || reply(await acc.inviteResearcher(registry, body, who, await studyIds(), now));

@@ -114,7 +114,9 @@
     '<section data-tab="content" hidden><p class="muted" id="contentinfo"></p><div id="contentwarn"></div><p class="ok" id="say" role="status"></p><nav class="tabs sub" id="subtabs"></nav><fieldset id="editor" style="border:0;padding:0;margin:0;min-width:0"></fieldset>' +
       '<div class="savebar" id="savebar" data-role="editor"><span id="dirty" class="muted">No unsaved changes.</span><input type="text" id="note" class="grow" placeholder="What changed? (optional, shown in the activity log)">' +
       '<button type="button" class="secondary" id="discard" disabled>Discard changes</button><button type="button" id="save" disabled>Save changes</button></div>' +
-      '<div class="section"><h2>Versions</h2><p class="muted">Every save makes a new version. Restoring an old version saves it again as the newest version, so nothing is lost. Each answer records the version it was collected under.</p><div class="table-wrap"><table id="vtbl"></table></div></div></section>' +
+      '<div class="section"><h2>Versions</h2><p class="muted">Every save makes a new version. Restoring an old version saves it again as the newest version, so nothing is lost. Each answer records the version it was collected under.</p><div class="table-wrap"><table id="vtbl"></table></div></div>' +
+      '<div class="section"><h2>Study design file</h2><p class="muted">One file with this study\'s whole design: items, questions, conditions, screen text, consent, and settings, with uploaded media up to about 3 MB. It has no participants and no answers. Use it to share the study with another lab, to deposit it with a paper, or to start a new study from it on the lab console (owners). Completion codes are left blank in the file.</p>' +
+      '<div class="row"><button type="button" class="secondary" id="designdl">Download study design (JSON)</button></div><p class="muted" id="designmsg" role="status"></p></div></section>' +
     '<section data-tab="team" hidden><h2>Add a team member</h2><p class="muted">Each person gets their own key for this study. Share it privately. Removing a person disables their key immediately.</p>' +
       '<form class="row" id="teamform"><label>Name <input type="text" id="tname" style="width:200px"></label><label>Access <select id="trole"></select></label><button type="submit">Create key</button></form>' +
       '<p class="muted" id="roledesc"></p><div id="newkey" hidden></div><div class="table-wrap"><table id="teamtbl"></table></div></section>' +
@@ -447,6 +449,12 @@
     if (!confirm((dirty ? 'Your unsaved changes will be discarded. ' : '') + 'Restore version ' + v + '? It will be saved as a new version.')) return;
     postJSON('content-restore', { version: Number(v) }).then(function () { loadContent(true); }).catch(function (e) { err(e.message); });
   });
+  $('designdl').addEventListener('click', function () {
+    err(); getJSON('design.json').then(function (d) {
+      saveFile(JSON.stringify(d, null, 2), studyId + '_design_v' + d.contentVersion + '_' + day() + '.json', 'application/json');
+      $('designmsg').textContent = 'Saved version ' + d.contentVersion + (d.filesLeftOut.length ? '. ' + d.filesLeftOut.length + ' media file(s) were too large to include; copy them separately.' : '.');
+    }).catch(function (e) { err(e.message); });
+  });
   $('discard').addEventListener('click', function () { if (confirm('Discard all unsaved changes?')) { err(); loadContent(true); } });
   $('save').addEventListener('click', function () {
     err(); $('save').disabled = true;
@@ -711,7 +719,7 @@
     document.title = 'Lab console';
     root.innerHTML = '<div class="who"><div class="brandmark"><img src="/lab/assets/brand/logo-mark-128.png" alt="" width="48" height="48"><h1 style="margin:0" id="ctitle">CCAIR Lab: studies</h1></div><span id="whoami" class="muted"></span></div>' + SIGNIN + '<div id="app" hidden>' +
       '<p class="muted" id="cintro"></p>' +
-      '<div class="table-wrap"><table id="stbl"></table></div>' +
+      '<div class="table-wrap"><table id="stbl"></table></div><div id="clonebox"></div>' +
       '<div data-owner><div class="section start"><h2>Start a new study</h2><p class="muted">Pick a starting point. Each one is a complete, working study: you can preview it as a participant straight away, then change anything on its Study content tab.</p>' +
       '<div class="tpl-grid" id="tplgrid" role="list"></div>' +
       '<form id="newform" class="newform"><h3 id="newhead" tabindex="-1">Name your study</h3><div class="grid3">' +
@@ -724,6 +732,9 @@
       '<form id="impform"><div class="grid3"><label class="f">Name<input type="text" id="iname" placeholder="Attitudes survey"></label>' +
       '<label class="f">ID (in the link)<input type="text" id="iid" class="mono" placeholder="attitudes-survey"></label>' +
       '<label class="f">Survey file<input type="file" id="ifile" accept=".qsf,.lss,.csv,.xlsx,.txt"></label></div><div class="row"><button type="submit">Create study and open the import page</button></div></form><div id="impout" role="status"></div></div>' +
+      '<div class="section" data-owner><h2>Create a study from a design file</h2><p class="muted">A study design file (.json) holds a study\'s whole design and no data. Download one from a study\'s Study content tab, or get one from another lab or a paper\'s materials. The new study starts unlisted, with no participants.</p>' +
+      '<form id="dsgform"><div class="grid3"><label class="f">Name<input type="text" id="dname" placeholder="Leave empty to keep the file\'s name"></label><label class="f">Link name<input type="text" id="did" class="mono" placeholder="replication-1"></label>' +
+      '<label class="f">Design file<input type="file" id="dfile" accept=".json,application/json"></label></div><div class="row"><button type="submit">Create study from the file</button></div></form><div id="dsgout" role="status"></div></div>' +
       '<div class="section" id="researchers"><h2>Researchers</h2><p class="muted">Each researcher has their own account (email and password, with an optional authenticator app) and a role in each study: viewer, editor, manager, or owner. There is no email service here: an invitation is a link you copy or send from your own mail app. A link works once. Invitations last 7 days and password-reset links 24 hours. The owner key always works, whatever happens to accounts.</p>' +
       '<div class="table-wrap"><table id="rtbl"></table></div><div id="redit"></div>' +
       '<h3>Invite a researcher</h3><form id="invform"><div class="grid3"><label class="f">Name<input type="text" id="invname" autocomplete="off"></label><label class="f">Email<input type="text" id="invemail" autocomplete="off" inputmode="email"></label>' +
@@ -745,7 +756,7 @@
             '<td>' + (s.lastBackupAt ? esc(fmt(s.lastBackupAt)) : '<span class="muted">none yet</span>') + '</td><td>' + testText(s.lastSelfTest) + '</td>' +
             '<td id="sum-' + esc(s.id) + '">' + btn2('data-sum="' + esc(s.id) + '"', 'Load counts') + '</td>' +
             '<td class="links"><a href="' + esc(s.paths.admin) + '">Admin</a><a href="' + esc(s.paths.participant) + '" target="_blank" rel="noopener">Participant page</a></td>' +
-            (owner ? '<td>' + (s.listed && !s.archived ? 'yes' : 'no') + '</td><td>' + (s.builtIn ? '<span class="muted">set in code</span>' : btn2('data-list="' + esc(s.id) + '|' + (s.listed ? '0' : '1') + '"', s.listed ? 'Unlist' : 'List') + ' ' + btn2('data-arch="' + esc(s.id) + '|' + (s.archived ? '0' : '1') + '"', s.archived ? 'Restore' : 'Archive')) + '</td>' : '') + '</tr>';
+            (owner ? '<td>' + (s.listed && !s.archived ? 'yes' : 'no') + '</td><td>' + (s.builtIn ? '<span class="muted">set in code</span> ' : btn2('data-list="' + esc(s.id) + '|' + (s.listed ? '0' : '1') + '"', s.listed ? 'Unlist' : 'List') + ' ' + btn2('data-arch="' + esc(s.id) + '|' + (s.archived ? '0' : '1') + '"', s.archived ? 'Restore' : 'Archive') + ' ') + (s.archived ? '' : btn2('data-clone="' + esc(s.id) + '"', 'Clone')) + '</td>' : '') + '</tr>';
         }).join('') + (rows.length ? '' : '<tr><td colspan="9" class="muted">No studies yet. Ask the lab owner to give your account access to a study.</td></tr>');
       }).catch(function (e) { err(e.message); });
     }
@@ -890,6 +901,33 @@
         $('nname').value = ''; $('nid').value = ''; $('ndesc').value = ''; idTouched = false; list();
       }).catch(function (e) { err(e.message); });
     });
+    // Clone: a new study with the same design (content, settings, media, completion codes) and no participants.
+    function cloneForm(id, at) {
+      var s = ROWS.filter(function (x) { return x.id === id; })[0] || { name: id }, box = $('clonebox');
+      box.innerHTML = '<form class="qcard" id="clf"><h3 id="clhead" tabindex="-1">Clone ' + esc(s.name) + '</h3><p class="muted">Copies the design (items, questions, conditions, settings, media, completion codes). Participants and answers are not copied.</p><div class="grid3">' +
+        '<label class="f">Name<input type="text" id="clname" value="' + esc(s.name + ' (copy)') + '"></label><label class="f">Link name<input type="text" id="clid" class="mono" value="' + esc(slug(s.id + '-copy')) + '"></label></div>' +
+        '<div class="row"><button type="submit">Create the copy</button><button type="button" class="secondary" id="clcancel">Cancel</button></div></form>';
+      $('clhead').focus();
+      $('clcancel').addEventListener('click', function () { box.innerHTML = ''; at.focus(); });
+      $('clf').addEventListener('submit', function (e) {
+        e.preventDefault(); err();
+        postJSON('clone', { from: id, name: $('clname').value.trim(), id: $('clid').value.trim() }).then(function (r) {
+          list(); box.innerHTML = '<div class="done-card"><h3 tabindex="-1" id="donehead">' + esc(r.study.name) + ' is ready</h3><p>A copy of ' + esc(s.name) + ' with no participants, unlisted. <a href="' + esc(r.study.paths.admin) + '">Open its admin page</a>.</p></div>'; $('donehead').focus();
+        }).catch(function (x) { err(x.message); });
+      });
+    }
+    $('dsgform').addEventListener('submit', function (e) {
+      e.preventDefault(); err(); $('dsgout').textContent = '';
+      var f = $('dfile').files[0], id = $('did').value.trim();
+      if (!id) return err('Enter a link name for the new study.');
+      readFile(f).then(function (file) {
+        var d; try { d = JSON.parse(file.data); } catch (x) { throw new Error('That file is not a study design file (it is not valid JSON).'); }
+        return postJSON('create', { design: d, id: id, name: $('dname').value.trim() || undefined });
+      }).then(function (r) {
+        $('dsgout').innerHTML = '<div class="done-card"><h3 tabindex="-1" id="dsghead">' + esc(r.study.name) + ' is ready</h3><p>Made from the design file' + (r.filesLeftOut ? ', but ' + r.filesLeftOut + ' media file(s) were not in it: upload them again on its Items tab' : '') + '.' + (r.newCodes && r.newCodes.length ? ' New completion codes were made (the file had none): enter them in your panel, from Study content, Sign-up &amp; consent.' : '') + ' <a href="' + esc(r.study.paths.admin) + '">Open its admin page</a>.</p></div>';
+        $('dsghead').focus(); $('did').value = ''; $('dname').value = ''; list();
+      }).catch(function (x) { err(x.message); });
+    });
     var impTouched = false;
     $('iname').addEventListener('input', function () { if (!impTouched) $('iid').value = slug($('iname').value); });
     $('iid').addEventListener('input', function () { impTouched = true; });
@@ -908,6 +946,7 @@
     });
     $('stbl').addEventListener('click', function (e) {
       var sum = e.target.getAttribute && e.target.getAttribute('data-sum'); if (sum) return loadSum(sum);
+      var cl = e.target.getAttribute && e.target.getAttribute('data-clone'); if (cl) return cloneForm(cl, e.target);
       var v = e.target.getAttribute && (e.target.getAttribute('data-list') || e.target.getAttribute('data-arch')); if (!v) return;
       var p = v.split('|'), on = p[1] === '1', key = e.target.hasAttribute('data-list') ? 'listed' : 'archived';
       if (key === 'archived' && on && !confirm('Archive "' + p[0] + '"? Its participant page and admin page stop working, but no data is deleted. You can restore it here.')) return;
