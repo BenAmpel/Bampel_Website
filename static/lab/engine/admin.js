@@ -448,7 +448,14 @@
   var AGREE7 = ['Strongly disagree', 'Disagree', 'Somewhat disagree', 'Neither agree nor disagree', 'Somewhat agree', 'Agree', 'Strongly agree'];
   function setDirty(v) { dirty = v; $('dirty').innerHTML = v ? '<strong>Unsaved changes.</strong>' : 'No unsaved changes.'; $('save').disabled = !v; $('discard').disabled = !v; }
   window.addEventListener('beforeunload', function (e) { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
-  function subs() { return (plugin.subtabs || []).concat([['pre', 'Start-of-session survey'], ['post', 'End-of-session survey'], ['consent', 'Sign-up & consent'], ['environment', 'Devices & timing'], ['text', 'Screen text']]); }
+  function subs() { return (plugin.subtabs || []).concat([['pre', 'Start-of-session survey'], ['post', 'End-of-session survey'], ['consent', 'Sign-up & consent'], ['environment', 'Devices & timing']].concat(me && /^(multimodal|vignettes)$/.test(me.study.type) ? [['order', 'Block order']] : []).concat([['text', 'Screen text']])); }
+  // The rows of a Williams design (as netlify/lib/lab/latin.mjs builds them), for the preview on the Block order tab.
+  function williams(n) {
+    var first = [0], k, rows = [], r;
+    for (k = 1; first.length < n; k++) { first.push(k); if (first.length < n) first.push(n - k); }
+    for (r = 0; r < n; r++) rows.push(first.map(function (x) { return (x + r) % n; }));
+    return n % 2 ? rows.concat(rows.map(function (x) { return x.slice().reverse(); })) : rows;
+  }
   function loadContent(force) {
     if (draft && !force) return renderEditor();
     Promise.all([getJSON('content'), getJSON('content-history'), getJSON('participants')]).then(function (res) {
@@ -634,6 +641,19 @@
         field('Consent text (leave a blank line between paragraphs; email addresses become links)', '<textarea id="consenttext" rows="14">' + esc(draft.consent.paragraphs.join('\n\n')) + '</textarea>') +
         field('Agreement checkbox label', inp('consent.agreeLabel', draft.consent.agreeLabel)) +
         checkbox('data-path="consent.approved" data-bool="1"', draft.consent.approved, 'This is the IRB-approved consent text (removes the "draft" banner participants see)');
+    } else if (sub === 'order') {
+      var dz = draft.design || {}, blocks = me.study.type === 'multimodal';
+      h = '<h3 style="margin:0 0 8px">Latin square</h3>' +
+        checkbox('data-path="design.latinSquare" data-bool="1"', dz.latinSquare === true, 'Counterbalance the order of each session\'s ' + (blocks ? 'blocks' : 'items') + ' with a Latin square') +
+        '<p class="muted">Each participant gets one order from a balanced (Williams) Latin square: every ' + (blocks ? 'block' : 'item') + ' appears equally often in every position and right after every other one. With an odd number there are twice as many orders, which together are balanced. Orders are handed out so each is used about equally often within each condition. ' +
+        (blocks ? 'Items inside a block are still shown in order or shuffled as set on the Arms &amp; blocks tab.' : 'This replaces "shuffle the items".') + ' The trials CSV records each participant\'s order (<code>cb_row</code>, <code>cb_sequence</code>).</p>' +
+        (dz.sessions || []).map(function (sp, i) {
+          var units = blocks ? (sp.blocks || []).map(function (b, j) { return b.title || 'Block ' + (j + 1); }) : (sp.items || []);
+          if (units.length < 2) return '<p class="muted">Session ' + (i + 1) + ': only one ' + (blocks ? 'block' : 'item') + ', nothing to counterbalance.</p>';
+          var rows = williams(units.length);
+          return '<details class="vcard"' + (i === 0 ? ' open' : '') + '><summary>Session ' + (i + 1) + ': ' + rows.length + ' orders of ' + units.length + ' ' + (blocks ? 'blocks' : 'items') + '</summary><div class="table-wrap"><table><tr><th>Order</th><th>Shown as</th></tr>' +
+            rows.slice(0, 24).map(function (r, k) { return '<tr><td>' + (k + 1) + '</td><td class="wrap-cell">' + r.map(function (x) { return esc(units[x]); }).join(' → ') + '</td></tr>'; }).join('') + '</table></div></details>';
+        }).join('');
     } else if (sub === 'environment') {
       var ev = draft.environment || (draft.environment = { preload: false });
       h = '<h3 style="margin:0 0 8px">Devices and browsers</h3>' +

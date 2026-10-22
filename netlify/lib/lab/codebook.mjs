@@ -138,6 +138,11 @@ export function buildCodebook(S, c) {
   for (const q of c.questions || []) if (q.type !== 'info') out.push(questionEntry('trials', `a_${q.id}`, q, typeId === 'multimodal' ? 'items that ask it' : 'every item', 'item question'));
   add('trials', SHARED_TRIAL_TAIL, 'engine');
   orderEntries('trials', c.questions || [], v => v, out);
+  if (c.design && c.design.latinSquare === true) {
+    const units = Array.isArray((c.design.sessions || [])[0]?.blocks) ? 'blocks' : 'items';
+    add('trials', [['cb_row', 'integer', `Latin-square row (sequence) this participant got for the session (Williams design, balanced within condition).`],
+      ['cb_sequence', 'list', `The session's ${units} in the order shown, as their positions in the design (> separated; 2>1>3 = the second ${units.slice(0, -1)} first).`]], 'engine');
+  }
 
   // ----- surveys CSV -----
   add('surveys', SHARED_ID.map(r => (r[0] === 'condition' ? [r[0], r[1], r[2], condValues] : r)), 'engine');
@@ -165,6 +170,7 @@ export function buildCodebook(S, c) {
     ['panel_sessions', 'integer', 'Different panel session IDs seen for this participant (more than 1 = opened the study more than once).'],
     ...DQ_CODEBOOK,
     ['s{n}_check_{name}', 'as described', 'Setup checks before session n (Devices & timing): device_mobile (1 = phone or tablet), device_browser, device_speech (1 = speech recognition available), device_screen (width x height), device_problems (| separated: desktop, speech), mic_ok (1/0), mic_peak_db (loudest level heard, dBFS), mic_error, headphone_correct (of 6), headphone_pass (1 = 5 or more correct; Milne et al. 2021).'],
+    ['s{n}_cb_row', 'integer', 'Latin-square row for session n (counterbalanced studies).'], ['s{n}_cb_sequence', 'list', 'Order of session n\'s blocks or items (> separated design positions).'],
     ['s{n}_started_at', 'timestamp', 'Session n start (UTC).'], ['s{n}_completed_at', 'timestamp', 'Session n completion (UTC).'], ['s{n}_minutes', 'number', 'Session n length in minutes.'],
     ['ed_{name}', 'text', 'Embedded data (as in the surveys CSV), from the first survey that has it.'],
     ['s{n}_pre_{question}', 'as in the surveys CSV', 'Answer to a start-of-session question in session n (values as for that question in the surveys CSV).'],

@@ -8,6 +8,7 @@ import { panelDefaults, validatePanel } from './recruit.mjs';
 import { validateOrder } from './order.mjs';
 import { quotaDefaults, validateQuota } from './quota.mjs';
 import { environmentDefaults, validateEnvironment } from './envcheck.mjs';
+import { validateLatin } from './latin.mjs';
 
 // Screen text used by the shared participant app (types add or override fields).
 export const ENGINE_TEXT = [
@@ -341,6 +342,7 @@ export function validateContent(c, type) {
   const nS = typeErrors.length ? 99 : type.sessionCount(c);
   validateEmbedded(c.embedded, e);
   validateEnvironment(c.environment, e);
+  validateLatin(c, e);
   const opts = { nSessions: nS, conditions: type.conditionsOf(c), rules: (type.surveyRules || []).map(r => r[0]), embedded: (Array.isArray(c.embedded) ? c.embedded : []).map(x => x && x.name) };
   validateQuestions(c.survey?.pre, 'Start-of-session question', e, opts);
   validateQuestions(c.survey?.post, 'End-of-session question', e, opts);

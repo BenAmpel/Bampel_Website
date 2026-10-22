@@ -12,7 +12,7 @@ import { dqColumns } from './quality.mjs';
 
 export const WIDE_FIRST = ['code', 'condition', 'test', 'label', 'self_signup', 'consented', 'sessions_completed', 'total_sessions', 'finished', 'screened_out', 'returned', 'panel_study', 'panel_sessions'];
 const SKIP = new Set(['code', 'condition', 'test', 'label', 'self_signup', 'session', 'trial_index', 'item_id', 'item_title', 'item_kind', 'alert_id', 'content_version',
-  'received_at', 'session_started_at', 'session_completed_at', 'days_since_prev_session']);
+  'received_at', 'session_started_at', 'session_completed_at', 'days_since_prev_session', 'cb_row', 'cb_sequence']);
 const NAME = /^[a-z][a-z0-9_]{0,40}$/;
 export const slug = s => String(s ?? '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40) || 'x';
 const iso = ms => (ms ? new Date(ms).toISOString() : '');
@@ -54,6 +54,7 @@ export function wideRows(S, { records, participants }, c = null) {
       for (const [k, v] of Object.entries(r.data || {})) if (NAME.test(k)) row[`s${r.session}_${m[1]}_${k}`] = Array.isArray(v) ? v.join('|') : v;
     } else if (/\/t\d+$/.test(r.key) && !S.type.exportTrials) {   // the economic game's rounds stay in its own long export
       const t = trialRow(S, r, hit.p), item = slug(t.item_id || t.alert_id || `t${r.index}`);
+      if (t.cb_row) { row[`s${r.session}_cb_row`] = t.cb_row; row[`s${r.session}_cb_sequence`] = t.cb_sequence; }   // once per session
       for (const [k, v] of Object.entries(t)) if (!SKIP.has(k)) row[`s${r.session}_${item}_${k}`] = v;
     }
   }

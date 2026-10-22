@@ -22,6 +22,7 @@ import { recordPanelMeta } from './recruit.mjs';
 import { randomizeQuestions, orderColumns } from './order.mjs';
 import { quotaState } from './quota.mjs';
 import { cleanFullscreen } from './envcheck.mjs';
+import { chooseRow, applyRow, markerKey, latinColumns } from './latin.mjs';
 
 export const TOKEN_HOURS = 12;
 const DEFAULT_GAP = 6;
@@ -243,7 +244,9 @@ export async function consent(S, code, agree, now = Date.now(), opts = {}) {
 export function buildPlan(S, p, n, c, extra = {}) {
   const seedId = S.study.seedId || S.study.id;
   const rand = seeded(`${p.code}|${seedId}|s${n}`);
-  const plan = S.type.buildPlan(p, n, c, rand, { seeded, shuffle, studyId: seedId });
+  const lsq = extra.latinRow != null ? applyRow(c, n, extra.latinRow) : null;   // Latin-square block order (latin.mjs)
+  const plan = S.type.buildPlan(p, n, lsq ? lsq.content : c, rand, { seeded, shuffle, studyId: seedId });
+  if (lsq) plan.latin = lsq.latin;
   const ctx = { session: n, condition: p.condition, ...(plan.surveyCtx || {}) };
   // Question and option order (order.mjs), from its own seed so the type's draws above are unchanged.
   const orand = seeded(`${p.code}|${seedId}|s${n}|order`), order = {};
@@ -278,7 +281,11 @@ export async function startSession(S, code, now = Date.now(), extra = {}) {
   const n = st.nextSession;
   let plan = await getPlan(S, p, n);
   if (!plan) {   // written once: whoever writes first wins and everyone reads that copy
-    if (await setNew(S.store, planKey(p.code, n), buildPlan(S, p, n, c, extra))) await S.store.set(`started/${p.code}/s${n}-${now}`, { at: now });
+    const latinRow = await chooseRow(S, p, n, c);
+    if (await setNew(S.store, planKey(p.code, n), buildPlan(S, p, n, c, { ...extra, latinRow }))) {
+      await S.store.set(`started/${p.code}/s${n}-${now}`, { at: now });
+      if (latinRow != null) await S.store.set(markerKey(p, n, latinRow), { at: now });
+    }
     plan = await S.store.get(planKey(p.code, n));
     if (n === 1 && p.totalSessions == null) await update(S.store, pKey(p.code), d => { if (d.totalSessions == null) d.totalSessions = S.type.sessionCount(c); });
   }
@@ -327,7 +334,7 @@ export async function saveTrial(S, code, session, index, data, now = Date.now())
     // The type's record fields include a copy of the item and answer key as scored, so later content
     // edits never change this record.
     const rec = { code: p.code, condition: p.condition, session, index, ...S.type.recordFields(t, plan), contentVersion: plan.contentVersion, receivedAt: now, data: clean,
-      ...(plan.order?.questions ? { shown: plan.order.questions } : {}) };
+      ...(plan.order?.questions ? { shown: plan.order.questions } : {}), ...(plan.latin ? { latin: plan.latin } : {}) };
     if (!(await setNew(store, key, rec))) return { ok: true, repeat: true };
     if (raw.length && jsonSize(raw) <= 3e6) await store.set(`raw/${p.code}/s${session}/t${index}`, { code: p.code, session, index, events: raw });
   } else if (!(await setNew(store, key, { code: p.code, session, contentVersion: plan.contentVersion, receivedAt: now, data: clean }))) return { ok: true, repeat: true };
@@ -482,7 +489,8 @@ export function trialRow(S, r, p) {
     session_started_at: s.startedAt ? new Date(s.startedAt).toISOString() : '', session_completed_at: s.completedAt ? new Date(s.completedAt).toISOString() : '',
     days_since_prev_session: prev && s.startedAt ? ((s.startedAt - prev.completedAt) / 864e5).toFixed(2) : '',
     content_version: r.contentVersion ?? 0,
-    ...orderColumns(r.shown)   // the order the item's questions and options were shown in, when shuffled
+    ...orderColumns(r.shown),   // the order the item's questions and options were shown in, when shuffled
+    ...latinColumns(r.latin)   // the Latin-square row and block order of this session
   };
 }
 
@@ -524,6 +532,7 @@ export async function deleteParticipant(S, id) {
   const keys = (await Promise.all(['data', 'raw', 'plans', 'started', 'done', 'views'].map(k => store.list(`${k}/${p.code}/`)))).flat();
   // Hook: a study type may hold more keys for this participant (the economic game: matching, moves, payments).
   const extra = S.type.purgeParticipant ? await S.type.purgeParticipant(S, p) : [];
+  for (const [, pl] of await getMany(store, keys.filter(k => k.startsWith('plans/')))) if (pl && pl.latin) extra.push(markerKey(p, pl.session, pl.latin.row));   // frees the Latin-square row
   await deleteKeys(store, keys.concat(extra, [`consent/${p.code}`, `cond/${p.condition}/${p.code}`, `cond-test/${p.condition}/${p.code}`, contactKey(p.code)]));
   await store.delete(pKey(p.code));
   return { ok: true, code: p.code, condition: p.condition, test: !!p.test, extraKeys: extra, records: keys.filter(k => k.startsWith('data/')).length };
