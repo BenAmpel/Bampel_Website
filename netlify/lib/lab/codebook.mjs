@@ -88,6 +88,11 @@ const TYPE_COLUMNS = {
   ]
 };
 
+// Columns that record a shuffled order (order.mjs): order_questions, and order_{question} for shuffled options.
+function orderEntries(file, qs, _, out) {
+  if (qs.some(q => q.shuffle)) out.push({ file, column: 'order_questions', kind: 'list', values: 'question variable names, | separated', label: 'The order the shuffled questions were shown in (all questions of the list, in display order).', applies_to: 'lists with shuffled questions', source: 'engine' });
+  for (const q of qs) if (q.shuffleOptions) out.push({ file, column: `order_${q.id}`, kind: 'list', values: 'option values, | separated', label: `The order the options of "${q.id}" were shown in${q.options.some(o => o.anchor) ? ' (options set to stay last are always at the end)' : ''}.`, applies_to: `whoever saw ${q.id}`, source: 'engine' });
+}
 const plainRule = r => (r ? JSON.stringify(r).replace(/[{}"]/g, '').replace(/,/g, ', ') : '');
 
 // Allowed values for one question, as "value = label" pairs (or a range).
@@ -128,6 +133,7 @@ export function buildCodebook(S, c) {
   if (typeId === 'multimodal' && c.decision && Array.isArray(c.decision.options)) { const d = out.find(x => x.column === 'decision' && x.file === 'trials'); if (d) { d.values = c.decision.options.map(o => `${o.value} = ${o.label}`).join('; '); d.label = c.decision.prompt || d.label; } }
   for (const q of c.questions || []) if (q.type !== 'info') out.push(questionEntry('trials', `a_${q.id}`, q, typeId === 'multimodal' ? 'items that ask it' : 'every item', 'item question'));
   add('trials', SHARED_TRIAL_TAIL, 'engine');
+  orderEntries('trials', c.questions || [], v => v, out);
 
   // ----- surveys CSV -----
   add('surveys', SHARED_ID.map(r => (r[0] === 'condition' ? [r[0], r[1], r[2], condValues] : r)), 'engine');
@@ -144,6 +150,7 @@ export function buildCodebook(S, c) {
       out.push(questionEntry('surveys', col, q, `${kind === 'pre' ? 'start' : 'end'} of session ${sessions.join(', ')}${q.page ? `; page ${q.page}` : ''}`, `${kind}-session survey`));
     }
   }
+  orderEntries('surveys', (c.survey.pre || []).concat(c.survey.post || []), v => v, out);
 
   // ----- wide CSV (one row per participant; column patterns, see wide.mjs) -----
   add('wide', [

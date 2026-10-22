@@ -509,7 +509,8 @@
   }
   // Display rule, layout, and source note: the parts an imported survey fills in. Closed unless the question uses them.
   function advanced(list, it, b, opts) {
-    var used = !!(it.displayIf || it.group || it.long != null || it.min != null || it.max != null || it.source);
+    var used = !!(it.displayIf || it.group || it.long != null || it.min != null || it.max != null || it.source || it.shuffle || it.shuffleOptions);
+    var hasOpts = it.type === 'choice' || it.type === 'select' || it.type === 'multi';
     var shown = it.displayIf && window.LabLogic ? '<p class="muted">Shown when ' + esc(window.LabLogic.describe(it.displayIf, getPath(list))) + '.</p>' : '';
     return '<details class="vcard"' + (used ? ' open' : '') + '><summary>Display logic and layout' + (it.displayIf ? ' · shown conditionally' : '') + '</summary>' + shown +
       field('Show this question only when (display rule; leave empty to always show). Written as JSON: {"all": [{"q": "variable", "op": "eq", "value": "x"}]}. Rules can use answers to earlier questions ("q"), embedded data ("ed"), or the condition ("condition"). See the README.',
@@ -519,6 +520,12 @@
       (it.type === 'text' ? '<label class="f check"><input type="checkbox" data-path="' + b + '.long" data-bool="1"' + (it.long ? ' checked' : '') + '> Multi-line answer box</label>' : '') + '</div>' +
       (it.type === 'number' ? '<div class="grid3">' + field('Smallest expected number (a hint; answers are kept as typed)', '<input type="text" data-optnum="' + b + '.min" value="' + esc(it.min != null ? it.min : '') + '">') +
         field('Largest expected number (a hint)', '<input type="text" data-optnum="' + b + '.max" value="' + esc(it.max != null ? it.max : '') + '">') + '</div>' : '') +
+      '<h4 style="margin:12px 0 4px">Order</h4>' +
+      checkbox('data-path="' + b + '.shuffle" data-bool="1"', it.shuffle, 'Shuffle: this question trades places at random with the other ticked questions on its page') +
+      (hasOpts ? checkbox('data-path="' + b + '.shuffleOptions" data-bool="1"', it.shuffleOptions, 'Show the options in a random order') : '') +
+      (hasOpts && it.shuffleOptions ? '<div class="f"><span>Options that always stay at the end (for example "Other" or "None of the above")</span><div class="row">' + (it.options || []).map(function (o, k) {
+        return '<label class="check"><input type="checkbox" data-anchor="' + b + '|' + k + '"' + (o.anchor ? ' checked' : '') + '> ' + esc(o.label) + '</label>'; }).join('') + '</div></div>' : '') +
+      '<p class="muted">Each participant keeps the same order for the whole session. The order shown is saved with the answers (<code>order_questions</code>, <code>order_' + esc(it.id) + '</code>).</p>' +
       (it.source ? '<p class="muted">Imported from: ' + esc(it.source) + '</p>' : '') + '</details>';
   }
   function qlist(list, opts) {
@@ -628,9 +635,15 @@
     var r = plugin.applyEdit ? plugin.applyEdit(t, A) : undefined;
     if (r !== undefined) { setDirty(true); return r; }
     if (t.id === 'consenttext') draft.consent.paragraphs = t.value.split(/\n\s*\n/).map(function (x) { return x.trim(); }).filter(Boolean);
-    else if ((v = t.getAttribute('data-opts'))) setPath(v + '.options', t.value.split('\n').map(function (l) { return l.trim(); }).filter(Boolean).map(function (l) {
-      var m = l.split(/\s+\|\s+/); return m.length > 1 ? { value: m[0].trim(), label: m.slice(1).join(' | ').trim() } : { value: l, label: l };
-    }));
+    else if ((v = t.getAttribute('data-opts'))) {
+      var was = {}; (getPath(v).options || []).forEach(function (o) { if (o.anchor) was[o.value] = true; });   // keep "stay at the end" on options that are still there
+      setPath(v + '.options', t.value.split('\n').map(function (l) { return l.trim(); }).filter(Boolean).map(function (l) {
+        var m = l.split(/\s+\|\s+/), o = m.length > 1 ? { value: m[0].trim(), label: m.slice(1).join(' | ').trim() } : { value: l, label: l };
+        if (was[o.value]) o.anchor = true;
+        return o;
+      }));
+    }
+    else if ((v = t.getAttribute('data-anchor'))) { var an = v.split('|'), ao = getPath(an[0]).options[Number(an[1])]; if (t.checked) ao.anchor = true; else delete ao.anchor; }
     else if ((v = t.getAttribute('data-labels'))) setPath(v + '.labels', t.value.split('\n').map(function (x) { return x.trim(); }).filter(Boolean));
     else if (t.hasAttribute('data-domains')) draft.enrollment.domains = t.value.split(/[\s,;]+/).map(function (x) { return x.trim().toLowerCase().replace(/^@/, ''); }).filter(Boolean);
     else if ((v = t.getAttribute('data-dif'))) {   // display rule as JSON

@@ -19,6 +19,7 @@ import { setNew, update, getMany, inBatches, deleteKeys } from './store.mjs';
 import { getContent, itemsFor, domainAllowed } from './content.mjs';
 import { resolve as resolveLogic, publicQuestions } from './logic.mjs';
 import { recordPanelMeta } from './recruit.mjs';
+import { randomizeQuestions, orderColumns } from './order.mjs';
 
 export const TOKEN_HOURS = 12;
 const DEFAULT_GAP = 6;
@@ -241,8 +242,13 @@ export function buildPlan(S, p, n, c, extra = {}) {
   const rand = seeded(`${p.code}|${seedId}|s${n}`);
   const plan = S.type.buildPlan(p, n, c, rand, { seeded, shuffle, studyId: seedId });
   const ctx = { session: n, condition: p.condition, ...(plan.surveyCtx || {}) };
+  // Question and option order (order.mjs), from its own seed so the type's draws above are unchanged.
+  const orand = seeded(`${p.code}|${seedId}|s${n}|order`), order = {};
+  const ordered = (list, k) => { const r = randomizeQuestions(list, orand); if (r.shown) order[k] = r.shown; return r.items; };
+  const preItems = ordered(itemsFor(c.survey.pre, 'pre', ctx, S.type), 'pre'), postItems = ordered(itemsFor(c.survey.post, 'post', ctx, S.type), 'post');
+  if (Array.isArray(plan.questions)) plan.questions = ordered(plan.questions, 'questions');
   return { ...plan, session: n, contentVersion: c.version || 0, createdAt: Date.now(), condition: p.condition, embedded: resolveEmbedded(c.embedded, extra.embedded),
-    preItems: itemsFor(c.survey.pre, 'pre', ctx, S.type), postItems: itemsFor(c.survey.post, 'post', ctx, S.type) };
+    preItems, postItems, ...(Object.keys(order).length ? { order } : {}) };
 }
 
 // What the browser receives for a plan; the type decides what each trial exposes (never answer keys).
@@ -315,7 +321,8 @@ export async function saveTrial(S, code, session, index, data, now = Date.now())
     const raw = Array.isArray(data?.rawEvents) ? data.rawEvents.slice(0, 20000) : [];
     // The type's record fields include a copy of the item and answer key as scored, so later content
     // edits never change this record.
-    const rec = { code: p.code, condition: p.condition, session, index, ...S.type.recordFields(t, plan), contentVersion: plan.contentVersion, receivedAt: now, data: clean };
+    const rec = { code: p.code, condition: p.condition, session, index, ...S.type.recordFields(t, plan), contentVersion: plan.contentVersion, receivedAt: now, data: clean,
+      ...(plan.order?.questions ? { shown: plan.order.questions } : {}) };
     if (!(await setNew(store, key, rec))) return { ok: true, repeat: true };
     if (raw.length && jsonSize(raw) <= 3e6) await store.set(`raw/${p.code}/s${session}/t${index}`, { code: p.code, session, index, events: raw });
   } else if (!(await setNew(store, key, { code: p.code, session, contentVersion: plan.contentVersion, receivedAt: now, data: clean }))) return { ok: true, repeat: true };
@@ -333,7 +340,7 @@ export async function saveSurvey(S, code, session, kind, data, now = Date.now())
   if (st.finished || session !== st.nextSession || !plan) return { error: 'wrong_session', status: 409 };
   if (kind === 'post' && (prog.sessions[session]?.trialsDone.length || 0) < plan.trials.length) return { error: 'trials_incomplete', status: 409 };
   const items = (kind === 'pre' ? plan.preItems : plan.postItems) || [];
-  const created = await setNew(store, key, { code: p.code, condition: p.condition, session, kind, contentVersion: plan.contentVersion, receivedAt: now,
+  const created = await setNew(store, key, { code: p.code, condition: p.condition, session, kind, contentVersion: plan.contentVersion, receivedAt: now, ...(plan.order?.[kind] ? { shown: plan.order[kind] } : {}),
     ...(plan.embedded && Object.keys(plan.embedded).length ? { embedded: plan.embedded } : {}), data: cleanAnswers(data, items, { condition: p.condition, embedded: plan.embedded }) });
   if (created && kind === 'post') await store.set(`done/${p.code}/s${session}-${now}`, { at: now });
   const after = await progressOf(S, p);
@@ -464,7 +471,8 @@ export function trialRow(S, r, p) {
     received_at: r.receivedAt ? new Date(r.receivedAt).toISOString() : '',
     session_started_at: s.startedAt ? new Date(s.startedAt).toISOString() : '', session_completed_at: s.completedAt ? new Date(s.completedAt).toISOString() : '',
     days_since_prev_session: prev && s.startedAt ? ((s.startedAt - prev.completedAt) / 864e5).toFixed(2) : '',
-    content_version: r.contentVersion ?? 0
+    content_version: r.contentVersion ?? 0,
+    ...orderColumns(r.shown)   // the order the item's questions and options were shown in, when shuffled
   };
 }
 
@@ -473,7 +481,7 @@ export function surveyRow(r, p) {
     session: r.session, survey: r.kind, content_version: r.contentVersion ?? 0, received_at: r.receivedAt ? new Date(r.receivedAt).toISOString() : '' };
   for (const [k, v] of Object.entries(r.embedded || {})) if (/^[a-z][a-z0-9_]{0,40}$/.test(k)) row[`ed_${k}`] = v;   // embedded data (URL parameters, constants)
   for (const [k, v] of Object.entries(r.data || {})) if (/^[a-z][a-z0-9_]{0,40}$/.test(k)) row[k in row ? `q_${k}` : k] = v;
-  return row;
+  return Object.assign(row, orderColumns(r.shown, row));
 }
 
 export async function exportRows(S, kind, codes) {

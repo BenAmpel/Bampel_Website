@@ -5,6 +5,7 @@
 
 import { OPS, NO_VALUE_OPS } from './logic.mjs';
 import { panelDefaults, validatePanel } from './recruit.mjs';
+import { validateOrder } from './order.mjs';
 
 // Screen text used by the shared participant app (types add or override fields).
 export const ENGINE_TEXT = [
@@ -263,6 +264,7 @@ export function validateQuestions(items, where, e, { nSessions, conditions, rule
       }
     }
   });
+  validateOrder(allowSessions ? items : items.map(q => ({ ...q, page: 1 })), where, e);   // shuffled questions and options (order.mjs)
 }
 
 // Embedded data: values captured when a session starts (URL parameters such as PROLIFIC_PID, or constants).
