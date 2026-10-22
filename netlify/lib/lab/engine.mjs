@@ -370,7 +370,8 @@ export async function enroll(S, ids, opts, now, rand) {
 // that session, so people screened out in earlier sessions never hold an arm or count toward one.
 const assignAt = (S, c) => (S.type.assignAtSession ? S.type.assignAtSession(c) : 1);
 async function assignNow(S, p, now, rand = Math.random) {
-  const condition = await pickCondition(S, !!p.test, rand);
+  // A type can allocate from its own list (for example permuted blocks fixed in advance); otherwise minimization.
+  const condition = (S.type.allocate && await S.type.allocate(S, p, await getContent(S.store, S.type))) || await pickCondition(S, !!p.test, rand);
   const u = await update(S.store, pKey(p.code), d => { if (!d.condition) d.condition = condition; });
   const rec = u.value || p;
   if (rec.condition === condition) await setNew(S.store, `${p.test ? 'cond-test' : 'cond'}/${condition}/${p.code}`, { at: now });

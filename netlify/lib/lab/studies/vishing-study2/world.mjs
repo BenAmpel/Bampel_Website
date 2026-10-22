@@ -52,6 +52,5 @@ export const DIRECTORY = [
 ];
 export const number = name => (DIRECTORY.find(d => d.name === name) || {}).number;
 
-// Caller voices (Kokoro). V1-V4 follow the training-module drafts; the final four are Ben's pick from the voice
-// lineup (TO DO: confirm; these are the highest-rated American Kokoro voices).
+// Caller voices (Kokoro), two female and two male, counterbalanced across call types. Confirmed by Ben 2026-10-22.
 export const VOICES = { V1: 'af_heart', V2: 'am_michael', V3: 'af_bella', V4: 'am_fenrir' };

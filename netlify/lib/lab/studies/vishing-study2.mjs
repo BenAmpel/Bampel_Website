@@ -105,7 +105,11 @@ export const VISHING_STUDY2 = {
         { id: 'a3', label: 'A3: Legitimate template' }, { id: 'a4', label: 'A4: Structural rule plus verification' }
       ],
       assignAtSession: 2, continuous: true, practice: false, noSoundCheck: true,
-      // Exploratory real-time suspicion slider: half of each arm, in the first set of recorded calls (Ben: open item 5).
+      // Permuted blocks of 10 (each arm twice per block), fixed in advance by the seed (decided 2026-10-22). The list is
+      // exported for the preregistration from the console: admin/allocation.csv. Do not change the seed after launch.
+      randomization: { method: 'blocks', blockSize: 10, seed: 'vishing-study2-v1' },
+      // Exploratory real-time suspicion slider: half of each arm, in the first (pre-training) set of recorded calls, so the
+      // post-training clips that carry H1 and H2 are never rated while listening (decided 2026-10-22).
       sliderBlock: 'clips:pre',
       sessions: [
         { blocks: [

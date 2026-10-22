@@ -139,6 +139,9 @@ let passer = null;
   const m = await markers(); assert.equal(m.length, 1, 'exactly one arm marker: the participant who passed');
   const me = (await call(P + 'admin/participants', { key: OWNER })).json.find(x => x.completedSessions === 1);
   assert(['a0', 'a1', 'a2', 'a3', 'a4'].includes(me.condition) && m[0] === `cond/${me.condition}/${me.code}`, JSON.stringify(me));
+  const alloc = parseCsv((await call(P + 'admin/allocation.csv', { key: OWNER })).text);
+  assert.equal(alloc[1][alloc[0].indexOf('arm')], me.condition, 'the first participant past screening gets the first slot of the pre-set list');
+  assert.equal(alloc.slice(1).filter(x => x[alloc[0].indexOf('used')] === '1').length, 1, 'one slot used');
   passer = { tok, s2, me };
 }
 // ---------- session 2: counterbalancing, passive trials, training, the scored shift ----------
@@ -258,6 +261,16 @@ console.log('preview participants keep the arm the researcher chose');
   }
   assert(Object.keys(seen).length === 72 && Object.values(seen).every(s => s.pre === 3 && s.post === 3), 'every clip: 3 lists pre, 3 post');
   const X = await import('../../netlify/lib/lab/types/multimodal-study.mjs');
+  // permuted blocks: every block of 10 has each arm twice; 50 people assigned at once take 50 distinct slots
+  const { VISHING_STUDY2 } = await import('../../netlify/lib/lab/studies/vishing-study2.mjs');
+  const { blobsStore } = await import('../../netlify/lib/lab/store.mjs');
+  const c2 = VISHING_STUDY2.content(), list = X.allocationList(c2);
+  for (let b = 0; b < list.length / 10; b++) for (const a of ['a0', 'a1', 'a2', 'a3', 'a4']) assert.equal(list.slice(b * 10, b * 10 + 10).filter(x => x === a).length, 2);
+  assert.deepEqual(X.allocationList(c2), list, 'the list is fixed by the seed');
+  const S2 = { store: blobsStore(memBlobs(), 'alloc-test') };
+  const got = await Promise.all(Array.from({ length: 50 }, (_, i) => X.allocate(S2, { code: 'P' + i }, c2)));
+  assert.deepEqual(got, list.slice(0, 50), 'concurrent assignments fill the list in order, each slot once');
+  for (const a of ['a0', 'a1', 'a2', 'a3', 'a4']) assert.equal(got.filter(x => x === a).length, 10, 'after 5 blocks, 10 per arm');
   const persona = { rows: [{ label: 'pw', value: 'maple-harbor-47', secret: 'password' }, { label: 'acct', value: '4815162342', secret: 'account' }] };
   assert.deepEqual(X.disclosures('it is four one five two seven three', { code: '415273', persona }), ['code']);
   assert.deepEqual(X.disclosures('sure, 415 273', { code: '415273', persona }), ['code']);

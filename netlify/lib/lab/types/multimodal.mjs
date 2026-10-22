@@ -523,6 +523,14 @@ const adminRoutes = {
     await audit('bonus.export', `${lines.length} bonus lines`);
     return { csv: lines.join('\n') + (lines.length ? '\n' : ''), filename: `${S.study.id}_prolific_bonus.csv` };
   } },
+  // The permuted-block allocation list fixed by the seed (for the preregistration), with the slots already used.
+  'allocation.csv': { need: 'viewer', handler: async S => {
+    const c = await getContent(S.store, S.type), list = X.allocationList(c);
+    if (!list) return { error: 'no_block_randomization', status: 400 };
+    const used = new Set((await S.store.list('alloc-arm/')).map(k => Number(k.slice(10))));
+    const size = c.design.randomization.blockSize, rows = list.map((arm, k) => ({ slot: k + 1, block: Math.floor(k / size) + 1, arm, used: used.has(k) ? 1 : 0 }));
+    return { csv: toCsv(rows, ['slot', 'block', 'arm', 'used']), filename: `${S.study.id}_allocation.csv` };
+  } },
   files: { need: 'viewer', handler: async S => {
     const keys = await S.store.list('files/');
     return (await getMany(S.store, keys)).filter(([, v]) => v).map(([k, v]) => ({ name: k.slice(6), url: `/api/lab/${S.study.id}/file/${k.slice(6)}`, filename: v.filename, mime: v.mime, bytes: v.bytes, at: v.at }));
@@ -540,6 +548,7 @@ export default {
   sessionCount: c => c.design.sessions.length,
   assignAtSession: c => c.design?.assignAtSession || 1,
   assignFlags: X.assignFlags,
+  allocate: X.allocate,
   publicContent: c => ({ continuous: !!c.design?.continuous, noSoundCheck: !!c.design?.noSoundCheck, debrief: c.debrief && c.debrief.body ? { title: c.debrief.title || 'About this study', body: c.debrief.body } : null }),
   // Engine hooks: eligibility answers (start-of-session survey) and failed equipment checks end the study.
   screenSurvey(c, kind, session, answers) {
@@ -628,6 +637,9 @@ export default {
     if ((c.items || []).some(it => it.recordVoice) && !(rec && rec.enabled)) e.push('An item records a spoken answer, so turn on recording consent (Sign-up & consent tab).');
     const nS = d && Array.isArray(d.sessions) ? d.sessions.length : 1;
     if (d && d.assignAtSession != null && !int(d.assignAtSession, 1, nS)) e.push(`Assign the arm at a session from 1 to ${nS}.`);
+    const rz = d && d.randomization;
+    if (rz && (rz.method !== 'blocks' || !int(rz.blockSize, d.conditions.length, 100) || rz.blockSize % d.conditions.length || !str(String(rz.seed || ''), 80)))
+      e.push(`Permuted blocks need a block size that is a multiple of the ${d.conditions.length} arms, and a seed.`);
     if (d && d.assignAtSession > 1) {
       const early = d.sessions.slice(0, d.assignAtSession - 1).flatMap(s => s.blocks.flatMap(b => b.items));
       const armed = (c.items || []).filter(it => early.includes(it.id) && Object.keys(it.variants || {}).length).map(it => it.id);

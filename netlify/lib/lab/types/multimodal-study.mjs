@@ -12,6 +12,30 @@
 //   pilot         { scriptedShare } share of participants whose AI callers use only the scripted lines.
 //   design.sliderBlock  "clips:pre" or "clips:post": half of each arm rates suspicion continuously in that block.
 import { digitsIn } from '../voicebot.mjs';
+import { setNew } from '../store.mjs';
+import { seeded, shuffle } from '../engine.mjs';
+
+// ---------- arm assignment by permuted blocks ----------
+// design.randomization = { method: 'blocks', blockSize, seed }: the allocation list is fixed in advance by the seed
+// (each block holds every arm blockSize / arms times, in shuffled order), so it can be filed with the preregistration.
+// Participants claim slots in order with write-once keys, so two people assigned at the same moment can never take
+// the same slot. Test participants use their own list.
+export function allocationList(c, nBlocks = 200) {
+  const r = c.design && c.design.randomization, arms = (c.design.conditions || []).map(x => x.id);
+  if (!r || r.method !== 'blocks' || !arms.length) return null;
+  const per = Math.max(1, Math.round((r.blockSize || arms.length) / arms.length)), out = [];
+  for (let b = 0; b < nBlocks; b++) out.push(...shuffle(arms.flatMap(a => Array(per).fill(a)), seeded(`${r.seed || 'blocks'}|${b}`)));
+  return out;
+}
+export async function allocate(S, p, c) {
+  const list = allocationList(c);
+  if (!list) return null;
+  const prefix = p.test ? 'alloc-arm-test/' : 'alloc-arm/';
+  for (let k = (await S.store.list(prefix)).length; k < list.length; k++) {
+    if (await setNew(S.store, `${prefix}${String(k).padStart(6, '0')}`, { code: p.code, arm: list[k], at: Date.now() })) return list[k];
+  }
+  return null;   // the list is used up: fall back to the platform's own assignment
+}
 
 const WORDS = ['maple', 'harbor', 'cedar', 'river', 'copper', 'meadow', 'falcon', 'summit', 'willow', 'granite', 'orchid', 'lantern', 'pepper', 'canyon', 'violet', 'thunder'];
 
