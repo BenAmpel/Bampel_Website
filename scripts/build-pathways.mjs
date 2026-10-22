@@ -51,8 +51,8 @@ function head({ title, desc, url, ogTitle }) {
 <meta name="description" content="${esc(desc)}">
 <link rel="canonical" href="${url}">
 <meta name="robots" content="index, follow, max-image-preview:large">
-<meta name="theme-color" content="#FAF8F5" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#151311" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#FBF6EF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1D171F" media="(prefers-color-scheme: dark)">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="CCAIR, Center for CyberAI Research">
 <meta property="og:title" content="${esc(ogTitle || title)}">
@@ -60,7 +60,8 @@ function head({ title, desc, url, ogTitle }) {
 <meta property="og:url" content="${url}">
 <meta property="og:image" content="${SITE}/media/sharing-card.png">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/ccair/uploads/ccair-mark.png">
+<link rel="icon" type="image/png" sizes="64x64" href="/ccair/uploads/brand/logo-mark-64.png">
+<link rel="apple-touch-icon" href="/ccair/uploads/brand/apple-touch-icon.png">
 <link rel="stylesheet" href="/ccair/assets/pathways/pathways.css?v=${ASSET_V}-warm">
 ${GA ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${GA}"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA}');</script>` : ''}`;
@@ -70,7 +71,7 @@ function top(current) {
   return `<a class="skip" href="#main">Skip to content</a>
 <div class="backdrop" aria-hidden="true"><div class="glow g1"></div><div class="glow g2"></div></div>
 <header class="top"><div class="wrap">
-  <a class="brand" href="/ccair/"><img src="/ccair/uploads/ccair-mark.png" alt="" width="30" height="30">CCAIR</a>
+  <a class="brand" href="/ccair/"><img src="/ccair/uploads/brand/logo-mark-64.png" alt="" width="30" height="30">CCAIR</a>
   <nav aria-label="Main">
     <a href="/ccair/" class="hide-sm">Center home</a>
     <a href="/ccair/pathways/"${current === 'hub' ? ' aria-current="page"' : ''}>Pathway Finder</a>

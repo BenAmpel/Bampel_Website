@@ -40,7 +40,7 @@ function DataProvider({ children }) {
     return (
       <div className="state" role="status">
         <div>
-          <img src="uploads/ccair-mark.png" alt="" />
+          <img src="uploads/brand/logo-mark-128.png" alt="" />
           <p>Loading the center…</p>
         </div>
       </div>

@@ -76,7 +76,7 @@ function HomePage() {
     <div className="page">
       <section className="hero" aria-labelledby="hero-title">
         <div className="wrap">
-          <img className="hero-logo" src="uploads/ccair-logo-card.png" alt="CCAIR logo" width="128" height="138" />
+          <img className="hero-logo" src="uploads/brand/logo-mark-512.png" alt="CCAIR logo: a shield around a speech bubble with sound waves and a cursor" width="120" height="120" />
           <h1 id="hero-title">Center for <em>CyberAI</em> Research</h1>
           <p className="lede">We study how intelligent systems can spot malicious behavior before it turns into an attack,
             and we help people and organizations act on what those systems find.</p>

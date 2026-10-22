@@ -84,7 +84,7 @@ function CCAIRNav({ currentPage }) {
     <header className={'nav' + (scrolled ? ' is-scrolled' : '')}>
       <nav className="wrap nav-inner" aria-label="Main">
         <a className="brand" href="#/" aria-label="CCAIR home">
-          <img src="uploads/ccair-mark.png" alt="" width="32" height="32" />
+          <img src="uploads/brand/logo-mark-64.png" alt="" width="32" height="32" />
           <span>CCAIR<small>Center for CyberAI Research</small></span>
         </a>
         <ul className="nav-links">
@@ -261,7 +261,7 @@ function CCAIRFooter() {
         <div className="footer-inner">
           <div>
             <a className="brand" href="#/" aria-label="CCAIR home">
-              <img src="uploads/ccair-mark.png" alt="" width="32" height="32" />
+              <img src="uploads/brand/logo-mark-64.png" alt="" width="32" height="32" />
               <span>CCAIR<small>Center for CyberAI Research</small></span>
             </a>
             <address className="contact-lines">
