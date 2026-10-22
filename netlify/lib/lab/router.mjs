@@ -24,6 +24,7 @@ import { buildCodebook, codebookCsv, codebookMarkdown } from './codebook.mjs';
 import { wideRows, WIDE_FIRST } from './wide.mjs';
 import { saveChecks, LANGUAGES } from './envcheck.mjs';
 import { saveDq } from './quality.mjs';
+import { buildBundle } from './bundle.mjs';
 
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
 const csv = (text, name) => new Response(text, { headers: { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': `attachment; filename="${name}"`, 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
@@ -32,7 +33,7 @@ const MAX_BODY = 4_000_000;
 const MAX_IMPORT_BODY = 8_000_000;   // a survey file as JSON text (an .xlsx is base64); Netlify itself caps a request near 6 MB
 
 const NEED = {
-  me: 'viewer', participants: 'viewer', 'design.json': 'viewer', 'codebook.csv': 'viewer', 'codebook.md': 'viewer', 'export-wide.csv': 'viewer', 'export.csv': 'viewer', 'export-surveys.csv': 'viewer', 'export.json': 'viewer', rows: 'viewer', records: 'viewer', raw: 'viewer',
+  me: 'viewer', participants: 'viewer', 'design.json': 'viewer', 'codebook.csv': 'viewer', 'codebook.md': 'viewer', 'export-wide.csv': 'viewer', 'bundle.zip': 'viewer', 'export.csv': 'viewer', 'export-surveys.csv': 'viewer', 'export.json': 'viewer', rows: 'viewer', records: 'viewer', raw: 'viewer',
   content: 'viewer', 'content-history': 'viewer',
   'content-save': 'editor', 'content-restore': 'editor', import: 'editor', preview: 'editor',
   roster: 'manager', lookup: 'manager', 'credit.csv': 'manager', create: 'manager', 'set-test': 'manager',
@@ -139,6 +140,11 @@ export async function handle(req, { getStore, env, now }) {
         case 'design.json': return json(await exportDesign(S));
         case 'codebook.csv': return csv(codebookCsv(buildCodebook(S, c)), `${study.id}_codebook_v${c.version || 0}.csv`);
         case 'codebook.md': return new Response(codebookMarkdown(buildCodebook(S, c), { study, type, version: c.version || 0 }), { headers: { 'content-type': 'text/markdown; charset=utf-8', 'content-disposition': `attachment; filename="${study.id}_codebook_v${c.version || 0}.md"`, 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
+        case 'bundle.zip': {   // reproducibility bundle (bundle.mjs): design, codebook, platform version; no participant data
+          const b = await buildBundle(S);
+          await admin.audit(S.store, who, 'bundle.download', `${b.name} (${b.files.length} files)`);
+          return new Response(b.bytes, { headers: { 'content-type': 'application/zip', 'content-disposition': `attachment; filename="${b.name}"`, 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
+        }
         case 'export-wide.csv': return csv(E.toCsv(wideRows(S, await E.exportRecords(S), c), WIDE_FIRST), `${study.id}_wide.csv`);
         case 'export.csv': return csv(await E.exportCsv(S), `${study.id}_trials.csv`);
         case 'export-surveys.csv': return csv(await E.exportSurveyCsv(S), `${study.id}_surveys.csv`);

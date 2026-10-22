@@ -118,7 +118,9 @@
       '<button type="button" class="secondary" id="discard" disabled>Discard changes</button><button type="button" id="save" disabled>Save changes</button></div>' +
       '<div class="section"><h2>Versions</h2><p class="muted">Every save makes a new version. Restoring an old version saves it again as the newest version, so nothing is lost. Each answer records the version it was collected under.</p><div class="table-wrap"><table id="vtbl"></table></div></div>' +
       '<div class="section"><h2>Study design file</h2><p class="muted">One file with this study\'s whole design: items, questions, conditions, screen text, consent, and settings, with uploaded media up to about 3 MB. It has no participants and no answers. Use it to share the study with another lab, to deposit it with a paper, or to start a new study from it on the lab console (owners). Completion codes are left blank in the file.</p>' +
-      '<div class="row"><button type="button" class="secondary" id="designdl">Download study design (JSON)</button></div><p class="muted" id="designmsg" role="status"></p></div></section>' +
+      '<div class="row"><button type="button" class="secondary" id="designdl">Download study design (JSON)</button></div><p class="muted" id="designmsg" role="status"></p>' +
+      '<h3>Reproducibility bundle</h3><p class="muted">One .zip to deposit with a paper: the design file, this study\'s codebook (CSV and Markdown), the platform version and code commit, the list of content versions, how to cite, and the fields for a Zenodo upload (which gives it a DOI). It holds no participant data. Make it from the content version you ran.</p>' +
+      '<div class="row"><button type="button" class="secondary" id="bundledl">Download reproducibility bundle (.zip)</button></div></div></section>' +
     '<section data-tab="team" hidden><h2>Add a team member</h2><p class="muted">Each person gets their own key for this study. Share it privately. Removing a person disables their key immediately.</p>' +
       '<form class="row" id="teamform"><label>Name <input type="text" id="tname" style="width:200px"></label><label>Access <select id="trole"></select></label><button type="submit">Create key</button></form>' +
       '<p class="muted" id="roledesc"></p><div id="newkey" hidden></div><div class="table-wrap"><table id="teamtbl"></table></div></section>' +
@@ -481,6 +483,9 @@
     var v = e.target.getAttribute && e.target.getAttribute('data-restore'); if (v == null) return;
     if (!confirm((dirty ? 'Your unsaved changes will be discarded. ' : '') + 'Restore version ' + v + '? It will be saved as a new version.')) return;
     postJSON('content-restore', { version: Number(v) }).then(function () { loadContent(true); }).catch(function (e) { err(e.message); });
+  });
+  $('bundledl').addEventListener('click', function () {
+    err(); call('bundle.zip').then(function (r) { return r.blob(); }).then(function (blob) { saveFile(blob, studyId + '_materials_v' + (saved ? saved.version || 0 : 0) + '.zip'); }).catch(function (e) { err(e.message); });
   });
   $('designdl').addEventListener('click', function () {
     err(); getJSON('design.json').then(function (d) {
