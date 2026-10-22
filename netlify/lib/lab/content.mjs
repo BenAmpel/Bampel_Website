@@ -82,6 +82,7 @@ export const ENGINE_TEXT = [
   ['Setup checks', 'hp_play', 'Headphones: play button', 'Play the three noises'],
   ['Setup checks', 'hp_question', 'Headphones: question', 'Which noise had the faint tone?'],
   ['Setup checks', 'hp_fail', 'Headphones: did not pass', 'It seems you are not wearing headphones, or the tone was hard to hear.'],
+  ['Setup checks', 'timing_wait', 'Display timing: text', 'Measuring your screen. This takes a few seconds; please keep this page in front.'],
   ['Setup checks', 'fs_title', 'Full screen: title', 'This study uses the full screen'],
   ['Setup checks', 'fs_body', 'Full screen: text', 'Click the button to switch to full screen. Please stay in full screen until the end of the session.'],
   ['Setup checks', 'fs_button', 'Full screen: button', 'Switch to full screen'],

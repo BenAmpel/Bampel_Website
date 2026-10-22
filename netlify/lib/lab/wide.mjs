@@ -23,6 +23,7 @@ function checkColumns(n, d) {
     [p + 'device_screen']: dv.screenW ? `${dv.screenW}x${dv.screenH}` : '', [p + 'device_problems']: (dv.problems || []).join('|') };
   if (d.mic) Object.assign(out, { [p + 'mic_ok']: b(d.mic.ok), [p + 'mic_peak_db']: d.mic.peakDb ?? '', [p + 'mic_error']: d.mic.error || '' });
   if (d.headphone) Object.assign(out, { [p + 'headphone_correct']: d.headphone.correct ?? '', [p + 'headphone_pass']: b(d.headphone.pass) });
+  if (d.timing) for (const [k, v] of [['refresh_hz', 'refreshHz'], ['frame_ms', 'frameMsMedian'], ['frame_sd_ms', 'frameMsSd'], ['jitter_p95_ms', 'jitterP95Ms'], ['dropped_frames', 'droppedFrames'], ['timer_lag_ms', 'timerLagMs'], ['audio_output_latency_ms', 'audioOutputLatencyMs']]) out[p + 'timing_' + k] = d.timing[v] ?? '';
   return out;
 }
 // records and participants as exportRecords returns them (one batch of participants); c: the study content (for the

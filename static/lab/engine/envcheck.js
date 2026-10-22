@@ -118,7 +118,68 @@
     }
   };
 
-  root.LabEnv = { device: device, deviceProblems: deviceProblems, micLevel: micLevel, noisePair: noisePair, trialBuffer: trialBuffer, fft: fft, score: score, fullscreen: fs, AudioContext: Ctx,
+  // ---------- timing self-check ----------
+  // The display: n animation-frame intervals (median, mean, SD, 95th percentile of the deviation from the median, and
+  // frames that took longer than 1.5 intervals, which are dropped frames); timer lag (setTimeout(0) after 10 tries); and
+  // the audio output latency the browser reports. Browser estimates only: a photodiode or a microphone at the speaker
+  // is still the reference (Bridges et al. 2020; Anwyl-Irvine et al. 2021).
+  function stats(xs) {
+    var s = xs.slice().sort(function (a, b) { return a - b; }), n = s.length, mean = s.reduce(function (a, b) { return a + b; }, 0) / n;
+    var sd = Math.sqrt(s.reduce(function (a, b) { return a + (b - mean) * (b - mean); }, 0) / Math.max(1, n - 1)), q = function (p) { return s[Math.min(n - 1, Math.floor(p * n))]; };
+    return { n: n, median: q(0.5), mean: mean, sd: sd, p95: q(0.95), min: s[0], max: s[n - 1] };
+  }
+  var r2 = function (x) { return x == null || !isFinite(x) ? null : Math.round(x * 100) / 100; };
+  function timingProbe(frames) {
+    frames = frames || 120;
+    return new Promise(function (res) {
+      var gaps = [], last = null;
+      (function step(ts) {
+        if (last != null) gaps.push(ts - last);
+        last = ts;
+        if (gaps.length < frames) return requestAnimationFrame(step);
+        var st = stats(gaps), dev = stats(gaps.map(function (g) { return Math.abs(g - st.median); }));
+        var lags = [], k = 0;
+        (function tick() {
+          var t = performance.now();
+          setTimeout(function () { lags.push(performance.now() - t); if (++k < 10) tick(); else finish(); }, 0);
+        })();
+        function finish() {
+          var a = { base: null, output: null, rate: null };
+          try { var ac = new Ctx(); a = { base: ac.baseLatency != null ? ac.baseLatency * 1000 : null, output: ac.outputLatency != null ? ac.outputLatency * 1000 : null, rate: ac.sampleRate }; ac.close(); } catch (e) {}
+          res({ frames: st.n, refreshHz: r2(1000 / st.median), frameMsMedian: r2(st.median), frameMsMean: r2(st.mean), frameMsSd: r2(st.sd), jitterP95Ms: r2(dev.p95),
+            droppedFrames: gaps.filter(function (g) { return g > st.median * 1.5; }).length, timerLagMs: r2(stats(lags).median),
+            audioBaseLatencyMs: r2(a.base), audioOutputLatencyMs: r2(a.output), audioSampleRate: a.rate, at: new Date().toISOString() });
+        }
+      })(performance.now());
+    });
+  }
+  // Speaker to microphone round trip: a 20 ms 1 kHz click is scheduled on the audio clock while the microphone listens;
+  // the first loud input block after it gives the delay. Needs speakers (not headphones) near the microphone; accurate to
+  // about one processing block (about 20 ms), so it says whether the audio path is fast, not its exact latency.
+  function micRoundTrip() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !Ctx) return Promise.resolve({ ok: false, error: 'unsupported' });
+    return navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } }).then(function (stream) {
+      var ac = new Ctx(), src = ac.createMediaStreamSource(stream), sp = ac.createScriptProcessor(1024, 1, 1), sink = ac.createGain();
+      sink.gain.value = 0; src.connect(sp); sp.connect(sink); sink.connect(ac.destination);
+      return new Promise(function (res) {
+        var t0 = ac.currentTime + 0.6, found = null, noise = 0, blocks = 0;
+        var osc = ac.createOscillator(), g = ac.createGain(); osc.frequency.value = 1000; g.gain.value = 0.8; osc.connect(g); g.connect(ac.destination);
+        osc.start(t0); osc.stop(t0 + 0.02);
+        sp.onaudioprocess = function (e) {
+          var d = e.inputBuffer.getChannelData(0), peak = 0, at = e.playbackTime - e.inputBuffer.duration;   // when this block was heard
+          for (var i = 0; i < d.length; i++) peak = Math.max(peak, Math.abs(d[i]));
+          if (at < t0 - 0.05) { noise = Math.max(noise, peak); blocks++; return; }
+          if (found == null && at >= t0 - 0.03 && peak > Math.max(0.05, noise * 4)) found = at;
+        };
+        setTimeout(function () {
+          stream.getTracks().forEach(function (t) { t.stop(); }); try { ac.close(); } catch (e) {}
+          res(found == null ? { ok: false, error: 'not_heard', noise: r2(noise) } : { ok: true, roundTripMs: r2((found - t0) * 1000), blockMs: r2(1024 / ac.sampleRate * 1000) });
+        }, 1800);
+      });
+    }, function (e) { return { ok: false, error: e && e.name === 'NotAllowedError' ? 'denied' : 'no_mic' }; });
+  }
+
+  root.LabEnv = { timingProbe: timingProbe, micRoundTrip: micRoundTrip, stats: stats, device: device, deviceProblems: deviceProblems, micLevel: micLevel, noisePair: noisePair, trialBuffer: trialBuffer, fft: fft, score: score, fullscreen: fs, AudioContext: Ctx,
     HEADPHONE_TRIALS: 6, HEADPHONE_PASS: 5 };
   if (typeof module !== 'undefined') module.exports = root.LabEnv;
 })();

@@ -538,7 +538,7 @@
     document.head.appendChild(s);
   }
   function runChecks(n, done) {
-    var e = env(), any = e.desktopOnly || e.speechBrowser || e.micCheck || (e.headphoneCheck && n === 1) || e.fullscreen;
+    var e = env(), any = e.desktopOnly || e.speechBrowser || e.micCheck || (e.headphoneCheck && n === 1) || e.timingCheck || e.fullscreen;
     if (!any) return done();
     loadEnv(function (L) {
       if (!L) return done();   // the check script did not load: run the session (the trials still record full screen and device)
@@ -552,6 +552,10 @@
       var steps = [];
       if (e.micCheck) steps.push(function (go) { micStep(L, results, 0, go); });
       if (e.headphoneCheck && n === 1) steps.push(function (go) { headphoneStep(L, results, go); });
+      if (e.timingCheck) steps.push(function (go) {   // two seconds of measuring the display, nothing to do
+        show('<h1>' + Th('check_title') + '</h1><p role="status">' + Th('timing_wait') + '</p>');
+        L.timingProbe(120).then(function (t) { results.timing = t; go(); });
+      });
       (function step(i) {
         if (i < steps.length) return steps[i](function () { step(i + 1); });
         api('checks', { token: S.token, session: n, data: results }).then(function (r) {

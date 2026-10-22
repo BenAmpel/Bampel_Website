@@ -10,9 +10,9 @@ import { setNew, update } from './store.mjs';
 export const LANGUAGES = [['en-US', 'English (US)'], ['en-GB', 'English (UK)'], ['es-ES', 'Spanish (Spain)'], ['es-MX', 'Spanish (Mexico)'], ['fr-FR', 'French'], ['de-DE', 'German'],
   ['it-IT', 'Italian'], ['pt-BR', 'Portuguese (Brazil)'], ['nl-NL', 'Dutch'], ['zh-CN', 'Chinese (Mandarin)'], ['ja-JP', 'Japanese'], ['ko-KR', 'Korean'], ['hi-IN', 'Hindi'], ['ar-SA', 'Arabic']];
 export function environmentDefaults() {
-  return { preload: false, fullscreen: false, desktopOnly: false, speechBrowser: false, micCheck: false, micRequired: false, headphoneCheck: false, headphoneFail: 'record', language: 'en-US' };
+  return { preload: false, fullscreen: false, desktopOnly: false, speechBrowser: false, micCheck: false, micRequired: false, headphoneCheck: false, headphoneFail: 'record', timingCheck: false, language: 'en-US' };
 }
-const BOOLS = ['preload', 'fullscreen', 'desktopOnly', 'speechBrowser', 'micCheck', 'micRequired', 'headphoneCheck'];
+const BOOLS = ['preload', 'fullscreen', 'desktopOnly', 'speechBrowser', 'micCheck', 'micRequired', 'headphoneCheck', 'timingCheck'];
 export function validateEnvironment(env, e) {
   if (env == null) return;
   if (typeof env !== 'object') { e.push('Devices & timing settings are not valid.'); return; }
@@ -26,10 +26,12 @@ const num = (v, lo, hi) => (typeof v === 'number' && Number.isFinite(v) && v >= 
 const word = v => (typeof v === 'string' && /^[a-z_]{1,20}$/.test(v) ? v : null);
 export function cleanChecks(d) {
   d = d && typeof d === 'object' ? d : {};
-  const dv = d.device || {}, mic = d.mic, hp = d.headphone;
+  const dv = d.device || {}, mic = d.mic, hp = d.headphone, tm = d.timing;
   return {
     device: { mobile: bool(dv.mobile), browser: word(dv.browser), speech: bool(dv.speech), screenW: num(dv.screenW, 0, 20000), screenH: num(dv.screenH, 0, 20000), dpr: num(dv.dpr, 0, 10), problems: Array.isArray(dv.problems) ? dv.problems.map(word).filter(Boolean).slice(0, 5) : [] },
     ...(mic ? { mic: { ok: bool(mic.ok), peakDb: num(mic.peakDb, -200, 10), error: word(mic.error), tries: num(mic.tries, 0, 20) } } : {}),
+    ...(tm ? { timing: { refreshHz: num(tm.refreshHz, 0, 1000), frameMsMedian: num(tm.frameMsMedian, 0, 1000), frameMsSd: num(tm.frameMsSd, 0, 1000), jitterP95Ms: num(tm.jitterP95Ms, 0, 1000),
+      droppedFrames: num(tm.droppedFrames, 0, 10000), timerLagMs: num(tm.timerLagMs, 0, 10000), audioBaseLatencyMs: num(tm.audioBaseLatencyMs, 0, 10000), audioOutputLatencyMs: num(tm.audioOutputLatencyMs, 0, 10000) } } : {}),
     ...(hp ? { headphone: { correct: num(hp.correct, 0, 6), of: num(hp.of, 0, 6), pass: bool(hp.pass), answers: Array.isArray(hp.answers) ? hp.answers.slice(0, 6).map(x => num(x, 0, 2)) : [], targets: Array.isArray(hp.targets) ? hp.targets.slice(0, 6).map(x => num(x, 0, 2)) : [] } } : {})
   };
 }
