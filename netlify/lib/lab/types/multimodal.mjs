@@ -373,6 +373,12 @@ async function checkWord(S, pid, body, now) {
   const ctx = await checkContext(S, pid, body, 'word');
   if (ctx.error) return ctx;
   if (ctx.repeat) return { pass: ctx.repeat.pass, attemptsLeft: ctx.plan.attempts - ctx.attempt };
+  // Researchers previewing (test participants only) may type the word instead of saying it.
+  if (ctx.p.test && typeof body.typed === 'string') {
+    const target = ctx.plan.words[ctx.attempt - 1].word, pass = saidWord(body.typed, target);
+    await setNew(S.store, checkKey(ctx.tag, 'word', ctx.attempt), { at: now, word: target, heard: body.typed.slice(0, 60), pass, typed: true });
+    return { pass, heard: body.typed.slice(0, 60), attemptsLeft: pass ? 0 : ctx.plan.attempts - ctx.attempt };
+  }
   const data = typeof body.data === 'string' ? body.data : '';
   if (!data || !/^[A-Za-z0-9+/=]+$/.test(data) || data.length > 1_000_000) return { error: 'bad_data', status: 400 };
   const buf = Buffer.from(data, 'base64');

@@ -398,6 +398,7 @@
     progress.textContent = '';
     var back = S.content.panel && S.content.panel.completionUrl && /^https:\/\//.test(S.content.panel.completionUrl) ? S.content.panel.completionUrl : '';
     var db = S.content.debrief;   // a study's debrief text, and (for types that have one) the participant's own record
+    var mi = document.getElementById('mm-myinfo'); if (mi) mi.remove();
     show('<h1>' + Th('finished_title') + '</h1>' + (st && st.total && !S.content.continuous ? tracker(st.total, st.total, 0) : '') + Tp('finished_body') +
       (back ? '<div class="actions"><a class="btn" href="' + esc(back) + '" rel="noopener">Return to Prolific to record your completion</a></div>' : '') +
       (db ? '<section class="debrief"><h2>' + esc(db.title) + '</h2>' + String(db.body).split(/\n\s*\n/).map(function (x) { return '<p>' + linkify(esc(x.trim())) + '</p>'; }).join('') + '</section><div id="debrief-own"></div>' : '') +

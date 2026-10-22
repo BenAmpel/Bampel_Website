@@ -57,7 +57,7 @@ function attack({ org, dept, ask, askKind, urgent, spoof, n, voice }) {
 function benign({ org, dept, ask, urgent, n, voice, routeOwn }) {
   const cb = number(dept);
   return {
-    caller: org, number: cb, callbackNumber: cb, intent: 'benign', voice,
+    caller: org.replace(/^the /, ''), number: cb, callbackNumber: cb, intent: 'benign', voice,
     persona: `A real employee of ${org}. ${urgent ? 'Urgent but polite.' : 'Calm and routine.'}`,
     script: {
       opener: urgent ? `Hello, this is Morgan from ${org}. I am calling about something time-sensitive for Northwind Supply.` : `Hi, this is Casey from ${org}. Is this the Northwind front desk?`,

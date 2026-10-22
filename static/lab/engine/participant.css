@@ -190,6 +190,12 @@ button.rec::before { content: ""; width: 10px; height: 10px; border-radius: 50%;
 .mm-auth li { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
 .mm-auth strong { font-size: 1.35rem; letter-spacing: .06em; font-variant-numeric: tabular-nums; }
 .mm-auth p { margin: 0; }
+.phone .muted, .phone .mm-auth .muted { color: #e8d6c8; opacity: .9; }
+.phone input[type="search"], .phone input[type="text"], .phone input[inputmode="tel"] { background: rgba(255, 247, 239, .1); color: #fff7ef; border: 1px solid rgba(255, 247, 239, .35); border-radius: 10px; padding: 6px 10px; }
+.phone input::placeholder { color: #d8c4b6; }
+.phone .directory li { background: rgba(255, 247, 239, .07); border-radius: 12px; padding: 8px 10px; margin: 6px 0; display: flex; justify-content: space-between; align-items: center; gap: 8px; list-style: none; }
+.phone .directory { padding: 0; }
+.phone #mm-dstate { color: #fff7ef; }
 #ph-dirbox-live, #ph-dirbox { text-align: left; margin-top: 14px; }
 input[type="search"]#mm-dsearch { width: 100%; margin: 6px 0 8px; }
 .mm-dialpad { gap: 8px; align-items: center; margin: 10px 0 4px; flex-wrap: wrap; }

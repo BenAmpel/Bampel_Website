@@ -391,7 +391,7 @@
       var left = [];
       if (!timeOk) left.push('a little more time on this screen');
       if (screen.clipsEnded < nClips) left.push('every example played to the end (' + screen.clipsEnded + ' of ' + nClips + ')');
-      if (it.practiceDial && !screen.reachedTarget) left.push('the practice call');
+      if (it.practiceDial && !screen.reachedTarget) left.push('you call the number this screen asks for');
       var g = document.getElementById('mm-sgate'); if (g) g.textContent = left.length ? 'Continue opens after ' + left.join(', ') + '.' : '';
       if (!left.length && !gate) submit.disabled = false;
     }
@@ -754,6 +754,17 @@
           result(res, word);
         });
       };
+      // Preview only (the server accepts this from test participants alone): type the word instead of saying it.
+      if (/[?&]preview=1/.test(location.search)) {
+        msg.insertAdjacentHTML('beforebegin', '<form class="row" id="mm-wtyped"><label for="mm-wt">Preview only: type the word</label><input id="mm-wt" autocomplete="off"><button type="submit" class="secondary small">Send</button></form>');
+        document.getElementById('mm-wtyped').addEventListener('submit', function (e) {
+          e.preventDefault();
+          ui.call('check/word', { session: ctx.plan.session, index: ctx.index, attempt: attempt, typed: document.getElementById('mm-wt').value }).then(function (res) {
+            if (res && res.error) { msg.innerHTML = ui.errorBox(res.error); return; }
+            result(res, word);
+          });
+        });
+      }
       recBtn.addEventListener('click', function () {
         if (rec) return stopRec();
         getMic().then(function (s) {
