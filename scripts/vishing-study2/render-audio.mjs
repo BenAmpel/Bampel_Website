@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 // Renders Study 2's recorded audio with the lab's Kokoro voice service and puts it on the telephone band:
-// the training examples (studies/vishing-study2/training.mjs) and the passive clip library (clips.mjs).
+// the training examples (studies/vishing-study2/training.mjs), the passive clip library (clips.mjs), and the check
+// words, practice-directory lines and directory greetings (vishing-study2.mjs AUDIO_JOBS). All in the one study voice.
 //
-//   LAB_TTS_URL=http://100.85.210.3:8179/tts node scripts/vishing-study2/render-audio.mjs [--force] [training|clips]
+//   LAB_TTS_URL=http://100.85.210.3:8179/tts node scripts/vishing-study2/render-audio.mjs [--force] [training|clips|extra]
 //
 // Phone band, as in the build spec: 300-3,400 Hz, 8 kHz, light line noise; saved as MP3 (served at 8 kHz) under
 // static/lab/media/vishing-study2/. Existing files are kept unless --force. Needs ffmpeg.
@@ -13,12 +14,13 @@ import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 import { CLIP_JOBS as TRAINING } from '../../netlify/lib/lab/studies/vishing-study2/training.mjs';
 import { CLIP_JOBS as CLIPS } from '../../netlify/lib/lab/studies/vishing-study2/clips.mjs';
+import { AUDIO_JOBS as EXTRA } from '../../netlify/lib/lab/studies/vishing-study2.mjs';
 
 const OUT = join(dirname(fileURLToPath(import.meta.url)), '../../static/lab/media/vishing-study2');
 const URL_ = process.env.LAB_TTS_URL;
 if (!URL_) { console.error('Set LAB_TTS_URL to the voice service, for example http://100.85.210.3:8179/tts'); process.exit(1); }
 const args = process.argv.slice(2), force = args.includes('--force'), only = args.find(a => !a.startsWith('--'));
-const jobs = (only === 'training' ? TRAINING : only === 'clips' ? CLIPS : TRAINING.concat(CLIPS));
+const jobs = only === 'training' ? TRAINING : only === 'clips' ? CLIPS : only === 'extra' ? EXTRA : TRAINING.concat(CLIPS, EXTRA);
 
 let made = 0, kept = 0;
 for (const j of jobs) {

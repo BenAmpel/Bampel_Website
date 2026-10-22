@@ -301,7 +301,7 @@ async function callBack(S, pid, body, now) {
   else say = entry.greeting || `Thank you for calling ${entry.name}. How can I help you today?`;
   await S.store.set(`callbacks/${ctx.tag}/${now}-${randomBytes(2).toString('hex')}`, { at: now, number: dialed, listed: !!entry, name: entry ? entry.name : null, resolves, callerSupplied, source,
     duringCall: body.duringCall === true });
-  const voice = resolves || !entry ? 'af_sarah' : callerSupplied ? call.voice : 'af_sarah';
+  const voice = callerSupplied ? call.voice : (entry && entry.voice) || 'af_sarah';
   const v = entry || callerSupplied ? await voiceFor(S, say, voice, now) : {};
   return { say, name: callerSupplied ? call.caller : entry ? entry.name : null, audio: v.audio || null };
 }
@@ -623,6 +623,7 @@ export default {
     else c.directory.forEach((x, i) => {
       if (!str(x.name, 120) || !/\d{3}/.test(String(x.number || ''))) e.push(`Directory entry ${i + 1}: needs a name and a phone number.`);
       if (!opt(x.greeting, 1000)) e.push(`Directory entry ${i + 1}: the greeting is too long.`);
+      if (x.voice != null && !str(x.voice, 40)) e.push(`Directory entry ${i + 1}: the voice must be a voice name.`);
     });
     if (!d || !Array.isArray(d.sessions) || d.sessions.length < 1 || d.sessions.length > 12) e.push('The study needs 1 to 12 sessions.');
     else d.sessions.forEach((s, i) => {
@@ -682,7 +683,7 @@ export default {
         ...(item.kind === 'call' && item.call && item.call.code ? { callCode: X.codeFor(rand) } : {}) };
     };
     return {
-      questions, directory: (c.directory || []).map(x => ({ name: x.name, number: x.number, greeting: x.greeting || '', dept: x.dept || '' })),
+      questions, directory: (c.directory || []).map(x => ({ name: x.name, number: x.number, greeting: x.greeting || '', dept: x.dept || '', ...(x.voice ? { voice: x.voice } : {}) })),
       recording: !!(c.consent && c.consent.recording && c.consent.recording.enabled && p.recordingConsent),
       trials: order.map(({ it, block, meta, blockTitle }, i) => make(it, i, block, meta, blockTitle)),
       practice: session === 1 && c.design.practice && c.practice ? make(c.practice, 'practice', 0) : null,

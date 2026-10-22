@@ -423,7 +423,7 @@
           var d = (pd.directory || []).filter(function (x) { return x.number.replace(/\D/g, '').slice(-7) === number.replace(/\D/g, '').slice(-7); })[0];
           var hit = d && pd.target && d.number.replace(/\D/g, '').slice(-7) === pd.target.replace(/\D/g, '').slice(-7);
           if (hit) { screen.reachedTarget = true; setTimeout(screenReady, 0); }
-          return Promise.resolve(d ? { name: d.name, say: hit ? pd.say : (d.greeting || 'Thank you for calling ' + d.name + '.'), audio: hit ? pd.media : null } : { say: 'The number you have dialed is not in service.' });
+          return Promise.resolve(d ? { name: d.name, say: hit ? pd.say : (d.greeting || 'Thank you for calling ' + d.name + '.'), audio: (hit ? pd.media : d.media) || null } : { say: 'The number you have dialed is not in service.', audio: pd.missMedia || null });
         } });
       }
       screenReady();

@@ -23,7 +23,7 @@ const call = async (path, { body, key } = {}) => {
 };
 
 // A stand-in for the lab's whisper-server: it "hears" every check word, or nothing.
-let heard = 'harbor garden pencil window rocket blanket candle ladder turtle button';
+let heard = 'harbor garden pencil window pillow blanket candle ladder turtle button';
 const fake = createServer((req, res) => { req.resume(); req.on('end', () => { res.setHeader('content-type', 'application/json'); res.end(JSON.stringify({ text: heard })); }); });
 await new Promise(r => fake.listen(0, '127.0.0.1', r));
 const ASR_URL = `http://127.0.0.1:${fake.address().port}/inference`;
@@ -109,7 +109,7 @@ console.log('eligibility: IL, TX, WA, outside the U.S., under 18 and no equipmen
   const { tok, plan } = await start('PIDSKIPWORD1');
   assert.equal((await hp(tok, 1, picks(plan, 1, 'quiet'))).json.pass, true);
   assert((await save(tok, 0)).json.ok);
-  assert.equal(plan.trials[1].item.check.media.length, 2); assert(!/harbor|garden|pencil|window|rocket|blanket|candle|ladder|turtle|button/.test(JSON.stringify(plan.trials[1])), 'the word list stays on the server');
+  assert.equal(plan.trials[1].item.check.media.length, 2); assert(!/harbor|garden|pencil|window|pillow|blanket|candle|ladder|turtle|button/.test(JSON.stringify(plan.trials[1])), 'the word list stays on the server');
   r = await save(tok, 1); assert.equal(r.json.screenedOut, true, 'leaving the check without trying fails it');
 }
 assert.deepEqual(await markers(), [], 'failed checks never hold an arm');
@@ -127,7 +127,7 @@ let passer = null;
   process.env.LAB_ASR_URL = ASR_URL;
   heard = 'umm';
   r = await word(tok, 1); assert.equal(r.json.pass, false); assert.equal(r.json.attemptsLeft, 1, 'a wrong word uses an attempt; the outage did not');
-  heard = 'harbor garden pencil window rocket blanket candle ladder turtle button';
+  heard = 'harbor garden pencil window pillow blanket candle ladder turtle button';
   r = await word(tok, 2); assert.equal(r.json.pass, true, r.text);
   r = await save(tok, 1); assert(r.json.ok && !r.json.screenedOut, r.text);
   await onboard(tok, plan);

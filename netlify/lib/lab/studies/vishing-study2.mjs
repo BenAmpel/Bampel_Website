@@ -14,7 +14,7 @@
 // Exported as a lab template ("vishing-study2"), so a study made from it starts from this content.
 // Parts: vishing-study2/world.mjs (persona, directory, voices), training.mjs (A0-A4), clips.mjs (passive library and
 // lists), calls.mjs (practice call and shift). Audio: scripts/vishing-study2/render-audio.mjs.
-import { PERSONA, DIRECTORY, number } from './vishing-study2/world.mjs';
+import { PERSONA, DIRECTORY, DIRECTORY_JOBS, VOICE, number } from './vishing-study2/world.mjs';
 import { TRAINING_ITEMS, TRAINING_QUESTIONS } from './vishing-study2/training.mjs';
 import { CLIP_LIBRARY, PLACEHOLDER_CLIPS } from './vishing-study2/clips.mjs';
 import { PRACTICE_ITEMS, SHIFT_ITEMS, SHIFT_FORMS, PLACEHOLDER_CALLS } from './vishing-study2/calls.mjs';
@@ -34,9 +34,19 @@ const slug = s => s.toLowerCase().replace(/[^a-z]+/g, '_');
 export const EXCLUDED_STATES = ['illinois', 'texas', 'washington'];
 const STATE_OPTIONS = STATES.map(s => ({ value: slug(s), label: s })).concat([{ value: 'outside_us', label: 'I do not live in the U.S.' }]);
 
-// Spoken with Kokoro af_heart; Whisper large-v3-turbo on the lab Mac mini transcribed all ten correctly (2026-10-22).
-const WORDS = ['harbor', 'garden', 'pencil', 'window', 'rocket', 'blanket', 'candle', 'ladder', 'turtle', 'button']
+// Spoken in the study voice (world.mjs VOICE); Whisper large-v3-turbo on the lab Mac mini must transcribe all ten.
+const WORDS = ['harbor', 'garden', 'pencil', 'window', 'pillow', 'blanket', 'candle', 'ladder', 'turtle', 'button']
   .map((word, i) => ({ word, media: `/lab/media/vishing-study2/check/w${String(i + 1).padStart(2, '0')}.mp3` }));
+
+const PRACTICE_SAY = 'Receiving, this is Sam. Just testing the line? Sounds good. Bye now.';
+const NOT_IN_SERVICE = 'The number you have dialed is not in service.';
+// Everything this file plays that is not a training example or a passive clip, rendered in the study voice.
+export const AUDIO_JOBS = [
+  ...WORDS.map(w => ({ file: w.media.replace('/lab/media/vishing-study2/', ''), text: w.word, voice: VOICE, phone: false })),
+  { file: 'directory/practice-receiving.mp3', text: PRACTICE_SAY, voice: VOICE, phone: true },
+  { file: 'directory/not-in-service.mp3', text: NOT_IN_SERVICE, voice: VOICE, phone: true },
+  ...DIRECTORY_JOBS
+];
 
 const AGREE7 = ['Strongly disagree', 'Disagree', 'Somewhat disagree', 'Neither agree nor disagree', 'Somewhat agree', 'Agree', 'Strongly agree'];
 const opts = list => list.map(([value, label]) => ({ value, label }));
@@ -151,7 +161,8 @@ export const VISHING_STUDY2 = {
         body: 'Read your card carefully. You can open it again at any time with the My info button at the bottom right of the screen.' }),
       item('tour', 'Your phone and directory', 'text', { minSeconds: 20, ask: ['tour_codes', 'tour_lookup', 'tour_report'],
         body: 'During your shift, calls ring on a phone like this one. For each call you can:\n\n· Answer or decline it, and see the caller ID.\n· Talk: tap the big button, say your reply out loud, then tap it again. You can also type.\n· Put the caller on hold, or hang up at any time.\n· See one-time codes when a service sends one: they appear in the Authenticator on the phone.\n· Look a number up in the company directory, or dial a number, and call it.\n· After each call, say how you would describe it (legitimate, suspicious, or report to security) and how sure you are.\n\nTry the directory now: search for "receiving" and call Warehouse Receiving.',
-        practiceDial: { directory: DIRECTORY, target: number('Warehouse Receiving, Northwind'), say: 'Receiving, this is Sam. Just testing the line? Sounds good. Bye now.' } }),
+        practiceDial: { directory: DIRECTORY, target: number('Warehouse Receiving, Northwind'), say: PRACTICE_SAY, media: '/lab/media/vishing-study2/directory/practice-receiving.mp3',
+          missMedia: '/lab/media/vishing-study2/directory/not-in-service.mp3' } }),
       item('practice-intro', 'A practice call', 'text', { body: 'Next, a coworker will call you. This is practice and is not scored. Answer, then speak your reply out loud: tap Tap to talk, speak, and tap it again. Hang up when you are done.' }),
       ...PRACTICE_ITEMS,
       item('clips-intro-1', 'Recorded calls', 'text', { minSeconds: 10,

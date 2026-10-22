@@ -26,7 +26,13 @@ export const PERSONA = {
   ]
 };
 
-const e = (name, dept, number, greeting = '') => ({ name, dept, number: `(404) ${number}`, greeting });
+// One voice for every recorded and live line in the study (decision 2026-10-22): one American male Kokoro voice, so
+// voice cannot predict truth, valence or arm. Directory lines use it too; `media` is the pre-rendered greeting the
+// tour's practice directory plays (scripts/vishing-study2/render-audio.mjs).
+export const VOICE = 'am_michael';
+const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const e = (name, dept, number, greeting = '') => ({ name, dept, number: `(404) ${number}`, greeting, voice: VOICE,
+  media: `/lab/media/vishing-study2/directory/${slug(name)}.mp3` });
 export const DIRECTORY = [
   e('Northwind Security Desk', 'Internal · report suspicious calls', '555-0101', 'Northwind Security Desk. Thanks for letting us know; we have logged it.'),
   e('Northwind IT Help Desk', 'Internal', '555-0102'),
@@ -52,5 +58,10 @@ export const DIRECTORY = [
 ];
 export const number = name => (DIRECTORY.find(d => d.name === name) || {}).number;
 
-// Caller voices (Kokoro), two female and two male, counterbalanced across call types. Confirmed by Ben 2026-10-22.
-export const VOICES = { V1: 'af_heart', V2: 'am_michael', V3: 'af_bella', V4: 'am_fenrir' };
+// Voice slots. All four are the one study voice (decision 2026-10-22, replacing two female and two male voices); the
+// slots stay so call, clip and training specs keep their structure.
+export const VOICES = { V1: VOICE, V2: VOICE, V3: VOICE, V4: VOICE };
+
+// Directory greetings, pre-rendered for the practice directory (the live shift synthesizes the same voice per call).
+export const DIRECTORY_JOBS = DIRECTORY.map(d => ({ file: d.media.replace('/lab/media/vishing-study2/', ''),
+  text: d.greeting || `Thank you for calling ${d.name}.`, voice: VOICE, phone: true }));
