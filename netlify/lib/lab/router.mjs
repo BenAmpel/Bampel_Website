@@ -17,6 +17,7 @@ import { runSelfTest } from './selftest.mjs';
 import { getStudy, listStudies, createStudy, updateStudy, typeFor } from './registry.mjs';
 import { TYPES } from './types/index.mjs';
 import { importSurvey, ImportError } from './import/index.mjs';
+import { templateList } from './templates.mjs';
 
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
 const csv = (text, name) => new Response(text, { headers: { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': `attachment; filename="${name}"`, 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
@@ -27,7 +28,7 @@ const MAX_IMPORT_BODY = 8_000_000;   // a survey file as JSON text (an .xlsx is 
 const NEED = {
   me: 'viewer', participants: 'viewer', 'export.csv': 'viewer', 'export-surveys.csv': 'viewer', 'export.json': 'viewer', rows: 'viewer', records: 'viewer', raw: 'viewer',
   content: 'viewer', 'content-history': 'viewer',
-  'content-save': 'editor', 'content-restore': 'editor', import: 'editor',
+  'content-save': 'editor', 'content-restore': 'editor', import: 'editor', preview: 'editor',
   roster: 'manager', lookup: 'manager', 'credit.csv': 'manager', create: 'manager', 'set-test': 'manager',
   delete: 'owner', 'delete-test': 'owner', 'self-test': 'owner', 'backup-status': 'owner', 'backup-run': 'owner', 'backup-part': 'owner',
   team: 'owner', 'team-add': 'owner', 'team-remove': 'owner', activity: 'owner'
@@ -61,14 +62,18 @@ export async function handle(req, { getStore, env, now }) {
     const backupStore = () => blobsStore(getStore, study.backupName);
 
     if (route === 'content') return json(content.publicContent(await content.getContent(S.store, type), type, study));
-    if (route === 'login') return reply(await E.login(S, body.email != null ? { email: body.email, confirm: body.confirm === true } : { code: body.code }));
+    // Stimulus files a researcher uploaded (audio, video, images), public like any page asset. Random names, so
+    // a file name never hints at a condition or an answer. Range requests let browsers seek (Safari needs them).
+    const fm = route.match(/^file\/(f-[0-9a-f]{12}\.[a-z0-9]{2,4})$/);
+    if (fm && (req.method === 'GET' || req.method === 'HEAD')) return await serveFile(S.store, fm[1], req);
+    if (route === 'login') return reply(await E.login(S, body.email != null ? { email: body.email, confirm: body.confirm === true } : body.panelId != null ? { panelId: body.panelId } : { code: body.code }));
     if (['resume', 'consent', 'session', 'view', 'trial', 'survey'].includes(route)) {
       const pid = await E.verifyToken(S, body.token);
       if (!pid) return json({ error: 'expired' }, 401);
       const idx = body.index === 'practice' ? 'practice' : Number(body.index);
       switch (route) {
         case 'resume': return reply(await E.resume(S, pid));
-        case 'consent': return reply(await E.consent(S, pid, body.agree === true));
+        case 'consent': return reply(await E.consent(S, pid, body.agree === true, Date.now(), { recording: typeof body.recording === 'boolean' ? body.recording : undefined }));
         case 'session': return reply(await E.startSession(S, pid, Date.now(), { embedded: body.embedded }));
         case 'view': return reply(await E.viewTrial(S, pid, Number(body.session), idx));
         case 'trial': return reply(await E.saveTrial(S, pid, Number(body.session), idx, body.data));
@@ -183,6 +188,14 @@ export async function handle(req, { getStore, env, now }) {
           await admin.audit(S.store, who, 'codes.create', `${n} pilot codes${body.test ? ', test' : ''}`);
           return json(r);
         }
+        case 'preview': {   // one throwaway test participant, in the arm chosen, with no wait between sessions
+          const conds = type.conditionsOf(c), cond = String(body.condition || '');
+          if (cond && !conds.includes(cond)) return json({ error: 'bad_condition', hint: 'That condition no longer exists. Reload the page.' }, 400);
+          const r = await E.createParticipants(S, 1, { label: 'preview', gapDays: 0, test: true, condition: cond || undefined });
+          const made = r.created[0];
+          await admin.audit(S.store, who, 'preview', `${made.code} (${made.condition})`);
+          return json({ code: made.code, condition: made.condition, url: `${study.paths.participant}?code=${encodeURIComponent(made.code)}&preview=1` });
+        }
         case 'self-test': {
           const r = await runSelfTest(S, { condition: String(body.condition || ''), code: body.code ? String(body.code) : undefined, keep: body.keep === true });
           if (r.done) {
@@ -217,6 +230,22 @@ export async function handle(req, { getStore, env, now }) {
     console.error('lab-api error', studyId, route, err);
     return json({ error: 'server_error' }, 500);
   }
+}
+
+const FILE_TYPES = { mp3: 'audio/mpeg', m4a: 'audio/mp4', wav: 'audio/wav', ogg: 'audio/ogg', webm: 'video/webm', mp4: 'video/mp4', mov: 'video/quicktime', png: 'image/png', jpg: 'image/jpeg', gif: 'image/gif', webp: 'image/webp' };
+async function serveFile(store, name, req) {
+  const f = await store.get(`files/${name}`);
+  if (!f || typeof f.data !== 'string') return new Response('not found', { status: 404 });
+  const bytes = Buffer.from(f.data, 'base64'), size = bytes.length;
+  const head = { 'content-type': f.mime || FILE_TYPES[name.split('.').pop()] || 'application/octet-stream', 'accept-ranges': 'bytes', 'cache-control': 'public, max-age=3600', 'x-robots-tag': 'noindex', 'x-content-type-options': 'nosniff' };
+  const m = (req.headers.get('range') || '').match(/^bytes=(\d*)-(\d*)$/);
+  if (m && (m[1] || m[2])) {
+    let start = m[1] ? Number(m[1]) : size - Number(m[2]), end = m[1] && m[2] ? Number(m[2]) : size - 1;
+    start = Math.max(0, start); end = Math.min(size - 1, end);
+    if (start > end) return new Response(null, { status: 416, headers: { 'content-range': `bytes */${size}` } });
+    return new Response(req.method === 'HEAD' ? null : bytes.subarray(start, end + 1), { status: 206, headers: { ...head, 'content-range': `bytes ${start}-${end}/${size}`, 'content-length': String(end - start + 1) } });
+  }
+  return new Response(req.method === 'HEAD' ? null : bytes, { status: 200, headers: { ...head, 'content-length': String(size) } });
 }
 
 // Lab-level routes.
@@ -267,6 +296,7 @@ async function labRoute(route, req, body, { registry, getStore, ownerKey, clock 
   switch (route) {
     case 'studies': return json(await listStudies(registry, { all: true }));
     case 'types': return json(Object.values(TYPES).map(t => ({ id: t.id, label: t.label, description: t.description })));
+    case 'templates': return json(templateList());
     case 'create': return needPost() || reply(await createStudy(registry, body, who));
     case 'update': return needPost() || reply(await updateStudy(registry, String(body.id || ''), body));
     case 'researchers': return json(await acc.listResearchers(registry));

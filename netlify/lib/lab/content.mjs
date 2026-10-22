@@ -66,7 +66,9 @@ export function engineDefaults() {
     embedded: [],
     minutesPerSession: 15,
     consent: { approved: false, paragraphs: ['[Paste the IRB-approved consent text here. Leave a blank line between paragraphs.]'], agreeLabel: 'I am 18 or older and I agree to participate.' },
-    enrollment: { open: true, domains: ['gsu.edu', 'student.gsu.edu'], gapDays: 0, label: 'self-signup' },
+    enrollment: { open: true, domains: ['gsu.edu', 'student.gsu.edu'], gapDays: 0, label: 'self-signup',
+      // Online panel sign-in (Prolific and similar): the participant ID comes from the study link; the completion link is shown at the end.
+      panel: { enabled: false, param: 'PROLIFIC_PID', completionUrl: '', label: 'panel' } },
     survey: { pre: [], post: [] }
   };
 }
@@ -97,6 +99,7 @@ export function normalize(c, type) {
   c.minutesPerSession = c.minutesPerSession ?? d.minutesPerSession;
   c.consent = { ...d.consent, ...(c.consent || {}) };
   c.enrollment = { ...d.enrollment, ...(c.enrollment || {}) };
+  c.enrollment.panel = { ...d.enrollment.panel, ...(c.enrollment.panel || {}) };
   c.survey = { pre: c.survey?.pre || d.survey.pre, post: c.survey?.post || d.survey.post };
   c.embedded = Array.isArray(c.embedded) ? c.embedded : [];
   c.text = { ...d.text, ...(c.text || {}) };
@@ -120,6 +123,7 @@ export function clearContentCache(store) { if (store) caches.delete(store.name);
 export function publicContent(c, type, study) {
   return { study: study.id, type: type.id, name: study.name, version: c.version, minutesPerSession: c.minutesPerSession, consent: c.consent,
     text: c.text, sessions: type.sessionCount(c), signup: c.enrollment.open ? c.enrollment.domains : [],
+    panel: c.enrollment.panel && c.enrollment.panel.enabled ? { param: c.enrollment.panel.param, completionUrl: c.enrollment.panel.completionUrl || '' } : null,
     embedded: (c.embedded || []).map(x => (x.source === 'url' ? { name: x.name, source: 'url', param: x.param || x.name } : { name: x.name, source: 'value', value: x.value })),
     ...(type.publicContent ? type.publicContent(c) : {}) };
 }
@@ -258,6 +262,11 @@ export function validateContent(c, type) {
   if (!intIn(c.minutesPerSession, 1, 180)) e.push('Minutes per session must be a whole number from 1 to 180.');
   if (!c.consent || !Array.isArray(c.consent.paragraphs) || !c.consent.paragraphs.length || !c.consent.paragraphs.every(p => str(p))) e.push('Consent needs at least one paragraph.');
   if (c.consent && !str(c.consent.agreeLabel, 300)) e.push('Consent needs an agreement checkbox label.');
+  const rec = c.consent && c.consent.recording;
+  if (rec != null) {
+    if (typeof rec !== 'object' || typeof rec.enabled !== 'boolean') e.push('Recording consent: choose whether participants are asked to be recorded.');
+    else if (rec.enabled && !str(rec.label, 400)) e.push('Recording consent needs a checkbox label (what participants agree to).');
+  }
   const en = c.enrollment;
   if (!en || typeof en.open !== 'boolean') e.push('Choose whether students can sign up themselves.');
   else {
@@ -265,6 +274,11 @@ export function validateContent(c, type) {
     else if (en.open && !en.domains.length) e.push('Add at least one email domain, or turn off self sign-up.');
     if (!intIn(en.gapDays, 0, 60)) e.push('Gap days for self sign-ups must be a whole number from 0 to 60.');
     if (en.label != null && typeof en.label === 'string' && en.label.length > 40) e.push('The self sign-up label must be 40 characters or fewer.');
+    const pn = en.panel;
+    if (pn && pn.enabled) {
+      if (!/^[A-Za-z][A-Za-z0-9_]{0,39}$/.test(pn.param || '')) e.push('Online panel: the link parameter must be a name like PROLIFIC_PID (letters, numbers, underscores).');
+      if (pn.completionUrl && !/^https:\/\/[^\s"'<>]+$/.test(pn.completionUrl)) e.push('Online panel: the completion link must start with https:// (copy it from Prolific).');
+    }
   }
   const typeErrors = [];
   if (type.validate) type.validate(c, typeErrors);

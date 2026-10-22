@@ -63,6 +63,14 @@
   var median = function (a) { if (!a.length) return null; var b = a.slice().sort(function (x, y) { return x - y; }), m = Math.floor(b.length / 2); return b.length % 2 ? b[m] : (b[m - 1] + b[m]) / 2; };
   var mean = function (a) { return a.length ? a.reduce(function (x, y) { return x + y; }, 0) / a.length : null; };
   window.LabAdmin = { registerType: function (id, impl) { types[id] = impl; } };
+  // `npm run lab` opens /lab/admin/#key=... so the researcher is signed in on their own computer. The key is kept
+  // for this tab only and removed from the address bar at once. Only honored on this computer (localhost).
+  (function () {
+    var m = location.hash.match(/^#key=([^&]+)$/);
+    if (!m || !/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) return;
+    try { sessionStorage.setItem('lab_admin_key', decodeURIComponent(m[1])); sessionStorage.removeItem('lab_session'); } catch (e) {}
+    try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+  })();
 
   var SIGNIN = '<div id="signinbox"><p style="margin-top:12px"><a class="btn" href="' + esc(signInLink()) + '">Sign in with your researcher account</a></p>' +
     '<form class="row" id="keyform" style="margin-top:12px"><label>Or use an admin key <input type="password" id="key" autocomplete="off" size="36"></label><button type="submit" class="secondary">Use key</button></form></div>' +
@@ -71,8 +79,11 @@
   if (!studyId) return labConsole();
 
   // ======================= study admin =======================
-  root.innerHTML = '<div class="who"><h1 style="margin:0" id="title">Study admin</h1><span id="whoami" class="muted"></span></div>' + SIGNIN + '<div id="app" hidden>' +
-    '<p class="muted links" id="links"></p><nav class="tabs" id="tabs"></nav>' +
+  root.innerHTML = '<div class="who"><div class="brandmark"><img src="/lab/assets/brand/logo-mark-128.png" alt="" width="48" height="48"><h1 style="margin:0" id="title">Study admin</h1></div><span id="whoami" class="muted"></span></div>' + SIGNIN + '<div id="app" hidden>' +
+    '<p class="muted links" id="links"></p>' +
+    '<div class="preview-bar" id="previewbar" hidden><div><strong>See it as a participant</strong><span class="muted">Opens the study in a new tab as a test participant (left out of real counts), with no wait between sessions.</span></div>' +
+      '<div class="row"><label id="pvcondwrap">Arm <select id="pvcond"></select></label><button type="button" class="primary" id="preview">Preview as a participant</button></div><p class="muted" id="pvout" role="status"></p></div>' +
+    '<nav class="tabs" id="tabs"></nav>' +
     '<section data-tab="participants"><div class="row">' +
       '<button type="button" class="secondary" id="refresh">Refresh</button>' +
       '<button type="button" class="secondary" data-export="trials">Download trials CSV</button><button type="button" class="secondary" data-export="surveys">Download surveys CSV</button>' +
@@ -161,6 +172,11 @@
         $('tabs').querySelectorAll('button').forEach(function (b) { b.addEventListener('click', function () { showTab(b.getAttribute('data-tab')); }); });
         $('trole').innerHTML = ['viewer', 'editor', 'manager'].map(function (r) { return '<option value="' + r + '">' + r[0].toUpperCase() + r.slice(1) + '</option>'; }).join('');
         var desc = function () { $('roledesc').textContent = m.roles[$('trole').value]; }; $('trole').addEventListener('change', desc); desc();
+        if (can('editor')) {
+          $('previewbar').hidden = false;
+          $('pvcond').innerHTML = '<option value="">Any (balanced, as for real participants)</option>' + m.conditions.map(function (c) { return '<option value="' + esc(c) + '">' + esc(c) + '</option>'; }).join('');
+          $('pvcondwrap').hidden = m.conditions.length < 2;
+        }
         $('selftest').textContent = 'Run self-test (' + (m.conditions.length === 1 ? 'one group' : 'all ' + m.conditions.length + ' groups') + ')';
         $('rpintro').innerHTML = plugin.reportIntro || 'How the items and sessions are performing, for tuning the study after a pilot.';
         var last = null; try { last = sessionStorage.getItem(tabKey); } catch (e) {}
@@ -176,6 +192,16 @@
     return fetch('/api/lab/_lab/account/signout', { method: 'POST', headers: { authorization: 'Bearer ' + ses.token, 'content-type': 'application/json' }, body: '{}' }).catch(function () {});
   }
   $('keyform').addEventListener('submit', function (e) { e.preventDefault(); setSession(null); setKey($('key').value.trim()); start(); });
+  // The window opens first (inside the click, so pop-up blockers allow it) and is pointed at the link once it exists.
+  $('preview').addEventListener('click', function () {
+    err(); var w = window.open('about:blank', '_blank'), b = $('preview');
+    if (dirty) $('pvout').textContent = 'Note: the preview uses the saved version. Save your changes first to see them.';
+    b.disabled = true;
+    postJSON('preview', { condition: $('pvcond').value }).then(function (r) {
+      $('pvout').textContent = (dirty ? 'The preview uses the saved version, not your unsaved changes. ' : '') + 'Opened a preview as ' + r.code + ' (arm ' + r.condition + ').';
+      if (w) w.location = r.url; else location.href = r.url;
+    }).catch(function (e) { if (w) w.close(); err(e.message); }).then(function () { b.disabled = false; });
+  });
 
   // ---------- participants and exports ----------
   // Exports are assembled here from small batches of participants, so no single server request has to
@@ -521,6 +547,15 @@
         '<p class="muted">Participants type their email each session; the first time, they confirm it. There is no verification email, so the study relies on people entering their own address. Emails added on the Students tab can always sign in, even with sign-up off.</p>' +
         '<div class="grid3">' + field('Email domains (one per line, no @)', '<textarea data-domains="1" rows="3" class="mono">' + esc(en.domains.join('\n')) + '</textarea>') +
         field('Gap days between sessions (self sign-ups)', num('enrollment.gapDays', en.gapDays, 0, 60)) + field('Label for self sign-ups', inp('enrollment.label', en.label || '')) + '</div>' +
+        '<h3 style="margin:20px 0 8px">Online panel (Prolific and similar)</h3>' +
+        checkbox('data-path="enrollment.panel.enabled" data-bool="1"', en.panel && en.panel.enabled, 'Participants arrive from an online panel: the study link signs them in with the panel\'s participant ID') +
+        (en.panel && en.panel.enabled ? '<p class="muted">In Prolific, set the study URL to <code>' + esc(location.origin + '/lab/s/' + studyId) + '?PROLIFIC_PID={{%PROLIFIC_PID%}}&amp;STUDY_ID={{%STUDY_ID%}}&amp;SESSION_ID={{%SESSION_ID%}}</code> and choose "I\'ll use URL parameters". The ID is kept only in the payment list (Students tab, extra-credit list), never in research exports.</p>' +
+          '<div class="grid3">' + field('Link parameter with the participant ID', inp('enrollment.panel.param', en.panel.param, ' class="mono"')) + field('Completion link (shown on the last page)', inp('enrollment.panel.completionUrl', en.panel.completionUrl || '', ' placeholder="https://app.prolific.com/submissions/complete?cc=..."')) + '</div>' : '') +
+        (draft.consent.recording ? '<h3 style="margin:20px 0 8px">Voice recording</h3>' +
+          checkbox('data-path="consent.recording.enabled" data-bool="1"', draft.consent.recording.enabled, 'Ask for separate consent to record participants\' voices (calls and spoken answers)') +
+          (draft.consent.recording.enabled ? field('Recording consent checkbox label', area('consent.recording.label', draft.consent.recording.label || '', 2)) +
+            checkbox('data-path="consent.recording.required" data-bool="1"', draft.consent.recording.required, 'Required to take part (if unticked, people who decline type instead of speaking)') +
+            '<p class="muted">Recordings stay on the lab server, are listed under Recordings &amp; calls (managers and owners), and are never copied to the hourly backup. Delete them on the schedule your IRB approved.</p>' : '') : '') +
         '<h3 style="margin:20px 0 8px">Consent</h3>' + field('Minutes per session (write {minutes} in any text to insert it)', num('minutesPerSession', draft.minutesPerSession, 1, 180)) +
         field('Consent text (leave a blank line between paragraphs; email addresses become links)', '<textarea id="consenttext" rows="14">' + esc(draft.consent.paragraphs.join('\n\n')) + '</textarea>') +
         field('Agreement checkbox label', inp('consent.agreeLabel', draft.consent.agreeLabel)) +
@@ -579,11 +614,11 @@
     return redraw;
   }
   // Typing updates the draft without redrawing; checkboxes, dropdowns, and leaving a field can redraw.
-  $('editor').addEventListener('input', function (e) { var t = e.target; if (t.tagName !== 'SELECT' && t.type !== 'checkbox') applyEdit(t); });
+  $('editor').addEventListener('input', function (e) { var t = e.target; if (t.tagName !== 'SELECT' && t.type !== 'checkbox' && t.type !== 'radio' && t.type !== 'file') applyEdit(t); });
   $('editor').addEventListener('change', function (e) {
     var t = e.target;
     if (plugin.select && plugin.select(t, A)) return renderEditor();   // navigation inside a type tab (not an edit)
-    if ((t.tagName === 'SELECT' || t.type === 'checkbox') && applyEdit(t) === true) renderEditor();
+    if ((t.tagName === 'SELECT' || t.type === 'checkbox' || t.type === 'radio') && applyEdit(t) === true) renderEditor();
   });
   $('editor').addEventListener('click', function (e) {
     var t = e.target.closest ? e.target.closest('button') : null; if (!t || t.disabled) return;
@@ -644,15 +679,17 @@
   // Any other signed-in researcher: "My studies", the studies their account can open.
   function labConsole() {
     document.title = 'Lab console';
-    root.innerHTML = '<div class="who"><h1 style="margin:0" id="ctitle">CCAIR Lab: studies</h1><span id="whoami" class="muted"></span></div>' + SIGNIN + '<div id="app" hidden>' +
+    root.innerHTML = '<div class="who"><div class="brandmark"><img src="/lab/assets/brand/logo-mark-128.png" alt="" width="48" height="48"><h1 style="margin:0" id="ctitle">CCAIR Lab: studies</h1></div><span id="whoami" class="muted"></span></div>' + SIGNIN + '<div id="app" hidden>' +
       '<p class="muted" id="cintro"></p>' +
       '<div class="table-wrap"><table id="stbl"></table></div>' +
-      '<div data-owner><div class="section"><h2>New study</h2><form id="newform"><div class="grid3">' +
-      '<label class="f">Name<input type="text" id="nname" placeholder="Phishing email judgments"></label>' +
-      '<label class="f">ID (in the link; lowercase letters, numbers, dashes)<input type="text" id="nid" class="mono" placeholder="phishing-judgments"></label>' +
-      '<label class="f">Study type<select id="ntype"></select></label></div><p class="muted" id="ntypedesc"></p>' +
-      '<label class="f">Description (shown on the lab page when listed)<textarea id="ndesc" rows="2"></textarea></label>' +
-      '<div class="row"><button type="submit">Create study</button></div></form><div id="newout"></div></div>' +
+      '<div data-owner><div class="section start"><h2>Start a new study</h2><p class="muted">Pick a starting point. Each one is a complete, working study: you can preview it as a participant straight away, then change anything on its Study content tab.</p>' +
+      '<div class="tpl-grid" id="tplgrid" role="list"></div>' +
+      '<form id="newform" class="newform"><h3 id="newhead" tabindex="-1">Name your study</h3><div class="grid3">' +
+      '<label class="f">Starting point<select id="ntpl"></select></label>' +
+      '<label class="f">Name (participants see it)<input type="text" id="nname" placeholder="Phone call study, pilot 1"></label>' +
+      '<label class="f">Link name (lowercase letters, numbers, dashes)<input type="text" id="nid" class="mono" placeholder="phone-calls-pilot"></label></div><p class="muted" id="ntypedesc"></p>' +
+      '<label class="f">Description (shown on the lab page once you list the study)<textarea id="ndesc" rows="2"></textarea></label>' +
+      '<div class="row"><button type="submit" class="primary">Create study</button></div></form><div id="newout" role="status"></div></div>' +
       '<div class="section"><h2 id="impheading">Create a study from a survey file</h2><p class="muted">Start from a survey you already have: a Qualtrics export (.qsf), a LimeSurvey structure (.lss), a REDCap data dictionary (.csv), or the lab\'s spreadsheet template (.csv or .xlsx; <a href="/lab/templates/survey-template.csv" download>download the template</a>). This creates a survey study (type "Vignettes and surveys") and opens its Study content, Import a survey page with your file already read and previewed. Nothing is saved to the study until you load the preview into the editor and click Save.</p>' +
       '<form id="impform"><div class="grid3"><label class="f">Name<input type="text" id="iname" placeholder="Attitudes survey"></label>' +
       '<label class="f">ID (in the link)<input type="text" id="iid" class="mono" placeholder="attitudes-survey"></label>' +
@@ -664,7 +701,7 @@
       '<fieldset class="roles"><legend>Access to studies</legend><div id="invroles" class="rolegrid"></div></fieldset><div class="row" style="margin-top:8px"><button type="submit">Create invitation link</button></div></form><div id="invout" role="status"></div></div>' +
       '<div class="section" id="labactivity"><h2>Account activity</h2><p class="muted">Sign-ins, sign-outs, invitations, password and authenticator changes, role changes. Passwords are never logged.</p><div class="row"><button type="button" class="secondary" id="actload">Show recent activity</button></div><div class="table-wrap"><table id="acttbl2"></table></div></div></div></div>';
     $('keyhelp').innerHTML = 'Sign in with your researcher account, or use the lab owner key (the <code>LAB_ADMIN_KEY</code> or <code>VC_ADMIN_KEY</code> Netlify variable). Keys and sign-ins are kept in this tab only. New here? Read the <a href="/lab/guide/">researcher guide</a>.';
-    var TYPES = [], idTouched = false, ME = null, ROWS = [], PEOPLE = [];
+    var TYPES = [], TPLS = [], idTouched = false, ME = null, ROWS = [], PEOPLE = [];
     function slug(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').replace(/^[^a-z]+/, '').slice(0, 31); }
     var isOwner = function () { return ME && ME.role === 'owner'; };
     function btn2(attr, label) { return '<button type="button" class="secondary small" ' + attr + '>' + label + '</button>'; }
@@ -775,11 +812,27 @@
           ? 'Every study runs on the same engine: sign-in, consent, sessions, surveys, behavior traces, exports, backups, team access, and the live self-test. A new study gets its own data store, admin page, and participant link. Studies start unlisted; list one on <a href="/lab/">the lab page</a> once its consent text is IRB-approved and it is ready to recruit. New to the lab? Send researchers to the <a href="/lab/guide/">researcher guide</a>.'
           : 'The studies your account can open, with your role in each. Open a study\'s admin page to see participants, edit content, and download data (what you can do depends on your role). Backup and self-test times come from the study itself; click "Load counts" to count participants. New to the lab? Read the <a href="/lab/guide/">researcher guide</a>.';
         if (!isOwner()) { list(); return; }
-        return getJSON('types').then(function (t) {
-          TYPES = t;
-          $('ntype').innerHTML = TYPES.map(function (x) { return '<option value="' + esc(x.id) + '"' + (x.id === 'vignettes' ? ' selected' : '') + '>' + esc(x.label) + '</option>'; }).join('');
-          var d = function () { var y = TYPES.filter(function (x) { return x.id === $('ntype').value; })[0]; $('ntypedesc').textContent = y ? y.description : ''; };
-          $('ntype').addEventListener('change', d); d();
+        return Promise.all([getJSON('types'), getJSON('templates').catch(function () { return []; })]).then(function (res) {
+          TYPES = res[0]; TPLS = res[1];
+          // Templates first; a blank study of each type after them, for researchers who want to start from nothing.
+          $('ntpl').innerHTML = '<optgroup label="Templates">' + TPLS.map(function (x) { return '<option value="tpl:' + esc(x.id) + '">' + esc(x.name) + '</option>'; }).join('') + '</optgroup>' +
+            '<optgroup label="Blank study">' + TYPES.map(function (x) { return '<option value="type:' + esc(x.id) + '">Blank: ' + esc(x.label) + '</option>'; }).join('') + '</optgroup>';
+          $('tplgrid').innerHTML = TPLS.map(function (x) {
+            return '<button type="button" class="tpl-card" role="listitem" data-tpl="' + esc(x.id) + '"><span class="tpl-icon tpl-' + esc(x.icon) + '" aria-hidden="true"></span>' +
+              '<span class="tpl-name">' + esc(x.name) + '</span><span class="tpl-blurb">' + esc(x.blurb) + '</span><span class="tpl-meta">About ' + x.minutes + ' min · ' + (x.type === 'multimodal' ? 'media and voice' : 'text and surveys') + '</span></button>';
+          }).join('');
+          var d = function () {
+            var v = $('ntpl').value, t = v.indexOf('tpl:') === 0 ? TPLS.filter(function (x) { return 'tpl:' + x.id === v; })[0] : null, y = !t ? TYPES.filter(function (x) { return 'type:' + x.id === v; })[0] : null;
+            $('ntypedesc').textContent = t ? t.blurb : y ? y.description : '';
+            document.querySelectorAll('.tpl-card').forEach(function (c) { c.setAttribute('aria-pressed', t && c.getAttribute('data-tpl') === t.id ? 'true' : 'false'); });
+          };
+          $('ntpl').addEventListener('change', d); d();
+          $('tplgrid').addEventListener('click', function (e) {
+            var c = e.target.closest && e.target.closest('.tpl-card'); if (!c) return;
+            $('ntpl').value = 'tpl:' + c.getAttribute('data-tpl'); d();
+            $('newform').scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+            $('nname').focus({ preventScroll: true });
+          });
           return getJSON('mystudies');
         }).then(function (rows) { ROWS = rows; $('invroles').innerHTML = roleSelects('inv-'); wireResearchers(); list(); people(); });
       }).catch(function (e) { setKey(''); if (e.code === 'session_expired') setSession(null); $('signinbox').hidden = false; $('app').hidden = true; err(e.message); });
@@ -789,9 +842,21 @@
     $('nid').addEventListener('input', function () { idTouched = true; });
     $('newform').addEventListener('submit', function (e) {
       e.preventDefault(); err();
-      postJSON('create', { name: $('nname').value.trim(), id: $('nid').value.trim(), type: $('ntype').value, description: $('ndesc').value.trim() }).then(function (r) {
+      var pick = $('ntpl').value, body = { name: $('nname').value.trim(), id: $('nid').value.trim(), description: $('ndesc').value.trim() };
+      if (!body.name) { err('Give the study a name.'); return $('nname').focus(); }
+      if (pick.indexOf('tpl:') === 0) body.template = pick.slice(4); else body.type = pick.slice(5);
+      postJSON('create', body).then(function (r) {
         var s = r.study;
-        $('newout').innerHTML = '<div class="warn"><strong>' + esc(s.name) + '</strong> is ready, unlisted. Next: open its <a href="' + esc(s.paths.admin) + '">admin page</a>, edit the study content (consent, items, questions), and run the self-test. Participants sign in at <code>' + esc(location.origin + s.paths.participant) + '</code>.</div>';
+        $('newout').innerHTML = '<div class="done-card"><h3 tabindex="-1" id="donehead">' + esc(s.name) + ' is ready</h3><p>It is not listed on the lab page yet, so only people with the link can reach it. Try it as a participant first, then change the consent text, items, and questions on its admin page.</p>' +
+          '<div class="row"><button type="button" class="primary" id="newpreview" data-study="' + esc(s.id) + '">Preview as a participant</button><a class="btn secondary" href="' + esc(s.paths.admin) + '">Open its admin page</a></div>' +
+          '<p class="muted">Participant link: <code>' + esc(location.origin + s.paths.participant) + '</code></p></div>';
+        $('donehead').focus();
+        $('newpreview').addEventListener('click', function () {
+          var w = window.open('about:blank', '_blank'), ses = getSession();
+          fetch('/api/lab/' + s.id + '/admin/preview', { method: 'POST', headers: Object.assign(ses ? { authorization: 'Bearer ' + ses.token } : { 'x-admin-key': getKey() }, { 'content-type': 'application/json' }), body: '{}' })
+            .then(function (x) { return x.json(); }).then(function (p) { if (p.url) { if (w) w.location = p.url; else location.href = p.url; } else { if (w) w.close(); err(p.hint || 'The preview could not start.'); } })
+            .catch(function () { if (w) w.close(); err('The preview could not start. Check that the lab is still running.'); });
+        });
         $('nname').value = ''; $('nid').value = ''; $('ndesc').value = ''; idTouched = false; list();
       }).catch(function (e) { err(e.message); });
     });

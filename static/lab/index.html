@@ -4,73 +4,61 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CCAIR Behavioral Lab</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/lab/assets/brand/logo-mark-32.png">
+<link rel="apple-touch-icon" href="/lab/assets/brand/apple-touch-icon.png">
+<meta name="theme-color" content="#fbf6ef">
 <meta name="description" content="Browser-based studies of how people judge cyber threats, from the Center for CyberAI Research (CCAIR) at Georgia State University.">
 <link rel="canonical" href="https://bampel.com/lab/">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/lab/assets/study.css">
 <style>
-  :root {
-    --bg: #050a15; --surface: #0a1628; --card: #0f1f3a; --accent: #00ddb3; --accent-dim: rgba(0,221,179,0.10);
-    --accent2: #2d8cf0; --text: #e8edf5; --text2: #8b9ab8; --muted: #7288ab;
-    --border: rgba(0,221,179,0.14); --border-subtle: rgba(255,255,255,0.06);
-  }
-  @media (prefers-color-scheme: light) {
-    :root:not([data-theme="dark"]) {
-      --bg: #f5f8fb; --surface: #ffffff; --card: #ffffff; --accent: #007a63; --accent-dim: rgba(0,122,99,0.08);
-      --accent2: #1f6feb; --text: #0f1b2d; --text2: #3c4a60; --muted: #5a6880;
-      --border: rgba(0,122,99,0.18); --border-subtle: rgba(15,27,45,0.08);
-    }
-  }
-  :root[data-theme="light"] {
-    --bg: #f5f8fb; --surface: #ffffff; --card: #ffffff; --accent: #007a63; --accent-dim: rgba(0,122,99,0.08);
-    --accent2: #1f6feb; --text: #0f1b2d; --text2: #3c4a60; --muted: #5a6880;
-    --border: rgba(0,122,99,0.18); --border-subtle: rgba(15,27,45,0.08);
-  }
-  *, *::before, *::after { box-sizing: border-box; }
-  html, body { margin: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'Manrope', sans-serif; line-height: 1.6; }
-  a { color: var(--accent); }
-  .mono { font-family: 'Space Mono', monospace; }
-  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
-  header { border-bottom: 1px solid var(--border-subtle); }
-  header .wrap { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 14px; padding-bottom: 14px; flex-wrap: wrap; }
-  .brand { font-weight: 800; color: var(--text); text-decoration: none; letter-spacing: .2px; }
+  /* Lab home: the shared tokens from study.css, laid out as a page. System fonts only, so no visitor data goes to a font service. */
+  body { padding: 0; }
+  .mono { font-family: var(--mono); }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+  header { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 78%, transparent); -webkit-backdrop-filter: blur(18px) saturate(170%); backdrop-filter: blur(18px) saturate(170%); border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent); }
+  header .wrap { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 12px; padding-bottom: 12px; flex-wrap: wrap; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; color: var(--text); text-decoration: none; letter-spacing: -.01em; }
+  .brand img { width: 34px; height: 34px; border-radius: 10px; }
   .brand span { color: var(--accent); }
-  nav a { color: var(--text2); text-decoration: none; margin-left: 18px; font-size: 14px; }
+  nav a { color: var(--muted); text-decoration: none; margin-left: 18px; font-size: .9375rem; font-weight: 600; }
   nav a:first-child { margin-left: 0; }
   nav a:hover { color: var(--accent); }
-  .hero { padding: 64px 0 40px; }
-  .eyebrow { color: var(--accent); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; }
-  h1 { font-size: clamp(30px, 5vw, 48px); line-height: 1.1; margin: 12px 0 16px; }
-  .lede { color: var(--text2); font-size: 18px; max-width: 720px; }
-  section { padding: 32px 0; }
-  h2 { font-size: 24px; margin: 0 0 16px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
-  .card h3 { margin: 0 0 6px; font-size: 16px; }
-  .card p { margin: 0; color: var(--text2); font-size: 14px; }
-  .tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; background: var(--accent-dim); color: var(--accent); margin-bottom: 8px; }
+  .hero { display: grid; grid-template-columns: 1.05fr 1fr; gap: clamp(20px, 4vw, 48px); align-items: center; padding: clamp(36px, 7vw, 80px) 0 40px; }
+  .hero img { width: 100%; height: auto; border-radius: 28px; box-shadow: var(--shadow-lift); }
+  .eyebrow { color: var(--accent); font-size: .75rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+  .hero h1 { font-size: clamp(2.1rem, 1.4rem + 3vw, 3.4rem); line-height: 1.04; letter-spacing: -.03em; margin: 12px 0 18px; }
+  .lede { color: var(--muted); font-size: 1.125rem; line-height: 1.6; max-width: 600px; }
+  section { padding: 36px 0; }
+  section h2 { font-size: 1.75rem; letter-spacing: -.02em; margin: 0 0 18px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+  .card { border-radius: 22px; padding: 22px; }
+  .card h3 { margin: 0 0 6px; font-size: 1.0625rem; }
+  .card p { margin: 0; color: var(--muted); font-size: .9375rem; }
+  .tag { display: inline-block; font-size: .75rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); margin-bottom: 10px; }
   .study { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
-  .btn { display: inline-block; padding: 10px 16px; border-radius: 8px; background: var(--accent); color: var(--bg); font-weight: 700; text-decoration: none; }
-  ul.plain { padding-left: 18px; color: var(--text2); margin: 0; }
+  .btn { display: inline-flex; }
+  ul.plain { padding-left: 18px; color: var(--muted); margin: 0; }
   ul.plain li { margin: 6px 0; }
-  footer { border-top: 1px solid var(--border-subtle); padding: 24px 0 40px; color: var(--muted); font-size: 13px; }
+  footer { border-top: 1px solid var(--line); padding: 24px 0 40px; color: var(--muted); font-size: .8125rem; }
+  @media (max-width: 760px) { .hero { grid-template-columns: 1fr; } .hero img { order: -1; } nav a { margin-left: 12px; } }
 </style>
 </head>
 <body>
 <header>
   <div class="wrap">
-    <a class="brand" href="/lab/">CCAIR <span>Behavioral Lab</span></a>
+    <a class="brand" href="/lab/"><img src="/lab/assets/brand/logo-mark-64.png" alt="" width="34" height="34">CCAIR <span>Behavioral Lab</span></a>
     <nav><a href="/ccair/">CCAIR</a><a href="#studies">Studies</a><a href="#data">Data &amp; privacy</a><a href="#researchers">For researchers</a><a href="/">bampel.com</a></nav>
   </div>
 </header>
 
 <main class="wrap">
   <div class="hero">
-    <div class="eyebrow mono">Center for CyberAI Research · Georgia State University</div>
+    <div>
+    <div class="eyebrow">Center for CyberAI Research · Georgia State University</div>
     <h1>How people judge cyber threats, measured as they decide.</h1>
     <p class="lede">The CCAIR Behavioral Lab runs browser-based studies of security decisions such as spotting phishing, judging links, and responding to suspicious calls. Each study records the answer and how the person arrived at it (timing, hesitation, where attention went), so we can study the decision process rather than only its outcome.</p>
+    </div>
+    <img src="/lab/assets/brand/hero.webp" alt="" width="768" height="512">
   </div>
 
   <section id="studies">

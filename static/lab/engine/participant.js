@@ -311,6 +311,12 @@
     document.getElementById('no').addEventListener('click', function () { showLogin(null, 'email', email); });
     document.getElementById('yes').addEventListener('click', function () { this.disabled = true; signIn({ email: email, confirm: true }); });
   }
+  function previewRibbon() {
+    if (document.getElementById('preview-ribbon')) return;
+    var b = document.createElement('div'); b.id = 'preview-ribbon'; b.className = 'preview-ribbon'; b.setAttribute('role', 'note');
+    b.innerHTML = '<strong>Preview</strong> · You are seeing the study as a participant would. This test participant is marked as test and is left out of real counts.';
+    document.body.insertBefore(b, document.body.firstChild);
+  }
   function loginError(r) {
     if (r.error === 'not_enrolled' && r.domains && r.domains.length) return 'That email can\'t be used for this study. Use an email address ending in @' + r.domains.join(' or @') + '.';
     return ERR[r.error] || ERR.server_error;
@@ -318,6 +324,7 @@
   function signIn(creds) {
     api('login', creds).then(function (r) {
       if (r.error === 'confirm_new') return showConfirm(r.email || creds.email);
+      if (r.error && creds.panelId != null) return show('<h1>' + Th('login_title') + '</h1>' + errorBox('This study link is not complete. Please go back to the study page where you found it and open it again.'));
       if (r.error) return showLogin(loginError(r), creds.email != null ? 'email' : 'code', creds.email);
       S.token = r.token; store(tokenKey, r.token);
       if (!r.consented) return showConsent();
@@ -336,14 +343,20 @@
   function para(text) { return linkify(esc(String(text).replace(/\{minutes\}/g, S.content.minutesPerSession))); }
   function showConsent() {
     progress.textContent = '';
-    var c = S.content.consent;
+    var c = S.content.consent, rec = c.recording && c.recording.enabled ? c.recording : null;
     show((c.approved ? '' : '<div class="banner" role="note">Draft consent text, pending IRB approval. Do not enroll participants with this version.</div>') +
       '<h1>' + Th('consent_title') + '</h1>' + c.paragraphs.map(function (x) { return '<p>' + para(x) + '</p>'; }).join('') +
       '<label class="option agree"><input type="checkbox" id="agree"><span>' + esc(c.agreeLabel) + '</span></label>' +
+      // Studies that record voice ask separately, so saying no to recording still lets people take part (they type instead).
+      (rec ? '<label class="option agree"><input type="checkbox" id="agree-rec"><span>' + esc(rec.label) + (rec.required ? '' : ' <span class="muted">(optional: without it you type instead of speaking)</span>') + '</span></label>' : '') +
       '<div class="actions split"><button class="secondary" id="decline">I do not agree</button><button id="ok" disabled>Continue</button></div>');
-    var agree = document.getElementById('agree'), ok = document.getElementById('ok');
-    agree.addEventListener('change', function () { ok.disabled = !agree.checked; });
-    ok.addEventListener('click', function () { ok.disabled = true; api('consent', { token: S.token, agree: true }).then(function (r) { if (r.error) return showLogin(ERR[r.error] || ERR.server_error); refresh(); }); });
+    var agree = document.getElementById('agree'), ok = document.getElementById('ok'), agreeRec = document.getElementById('agree-rec');
+    function ready() { ok.disabled = !agree.checked || !!(rec && rec.required && !agreeRec.checked); }
+    agree.addEventListener('change', ready); if (agreeRec) agreeRec.addEventListener('change', ready);
+    ok.addEventListener('click', function () {
+      ok.disabled = true;
+      api('consent', { token: S.token, agree: true, recording: rec ? agreeRec.checked : undefined }).then(function (r) { if (r.error) return showLogin(ERR[r.error] || ERR.server_error); refresh(); });
+    });
     document.getElementById('decline').addEventListener('click', function () {
       api('consent', { token: S.token, agree: false }).then(function () { store(tokenKey, null); show('<h1>' + Th('finished_title') + '</h1>' + Tp('decline_body')); });
     });
@@ -375,7 +388,10 @@
   }
   function showFinished(st) {
     progress.textContent = '';
-    show('<h1>' + Th('finished_title') + '</h1>' + (st && st.total ? tracker(st.total, st.total, 0) : '') + Tp('finished_body') + '<div class="actions"><button class="secondary" id="out">' + Th('sign_out') + '</button></div>');
+    var back = S.content.panel && S.content.panel.completionUrl && /^https:\/\//.test(S.content.panel.completionUrl) ? S.content.panel.completionUrl : '';
+    show('<h1>' + Th('finished_title') + '</h1>' + (st && st.total ? tracker(st.total, st.total, 0) : '') + Tp('finished_body') +
+      (back ? '<div class="actions"><a class="btn" href="' + esc(back) + '" rel="noopener">Return to Prolific to record your completion</a></div>' : '') +
+      '<div class="actions"><button class="secondary" id="out">' + Th('sign_out') + '</button></div>');
     document.getElementById('out').addEventListener('click', signOut);
   }
   function signOut() { store(tokenKey, null); S.token = null; showLogin(); }
@@ -534,6 +550,20 @@
         S.type = types[c.type];
         if (!S.type) return show('<h1>' + esc(c.name) + '</h1>' + errorBox(ERR.server_error));
         S.token = store(tokenKey);
+        var qs = null; try { qs = new URLSearchParams(location.search); } catch (e) {}
+        var linkCode = qs && qs.get('code'), panel = S.content.panel, panelId = panel && qs ? qs.get(panel.param) : null;
+        // A researcher's "Preview as a participant" link (?code=XX-XXXX-XXXX&preview=1): sign in with that code. The
+        // code is then removed from the address bar so it is not bookmarked or shared by accident.
+        if (qs && qs.get('preview') === '1') previewRibbon();
+        // A code in the link always wins over a sign-in kept in this tab (a researcher previewing twice gets the new participant).
+        if (linkCode) { store(tokenKey, null); S.token = null; try { history.replaceState(null, '', location.pathname + (qs.get('preview') === '1' ? '?preview=1' : '')); } catch (e) {} return signIn({ code: linkCode }); }
+        // Online panel (for example Prolific): the participant ID in the link signs them in, so there is no form to fill.
+        // Signing in again with the same ID returns the same participant, so the link is always used.
+        if (panelId) {
+          embeddedFromUrl();   // keep the link's embedded data (for example STUDY_ID) for this tab, then take the ID out of the address bar
+          try { history.replaceState(null, '', location.pathname); } catch (e) {}
+          return signIn({ panelId: panelId });
+        }
         if (S.token) refresh(); else showLogin();
       };
       s.onerror = function () { show('<h1>' + esc(c.name) + '</h1>' + errorBox(ERR.network)); };

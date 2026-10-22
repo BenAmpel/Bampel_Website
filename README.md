@@ -1,3 +1,21 @@
+# bampel.com and the CCAIR Behavioral Lab
+
+## Run the CCAIR Behavioral Lab on your computer
+
+```
+npm run lab
+```
+
+That is the whole setup (Node.js 20 or newer; nothing to install). It starts the lab, keeps its studies and data in `.lab-data/`, and opens the researcher console in your browser, already signed in. On a Mac you can instead double-click `scripts/Start CCAIR Lab.command`. From the console, pick a template (survey, multi-arm experiment, audio clips, AI voice-caller conversations, image and video ratings, mouse tracking, or the five-arm vishing study), create it, and click **Preview as a participant**.
+
+- Researcher guide (plain language): `static/lab/guide/index.html`, also at `/lab/guide/` while the lab runs
+- Technical reference: [`static/lab/README.md`](static/lab/README.md); export columns: [`static/lab/CODEBOOK.md`](static/lab/CODEBOOK.md)
+- Tests: `npm run test:lab`
+
+The rest of this file is the original Hugo theme README for the website.
+
+---
+
 # [Hugo Academic Theme](https://github.com/wowchemy/starter-hugo-academic)
 
 [![Screenshot](./preview.png)](https://wowchemy.com/hugo-themes/)

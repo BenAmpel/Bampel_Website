@@ -97,6 +97,36 @@ Trials CSV columns after `trial_index` (the generic identifier, behavior, and co
 
 Per-link detail (`link:<url>` targets) is in the full JSON export under `records[].data.traces.hovers` and `clickTargets`.
 
+## Multimodal studies (media, voice, and conversations)
+
+Trials CSV columns after `trial_index` (the generic identifier, behavior, and context columns above also apply). Blank means "does not apply to this item".
+
+| Column | Meaning |
+|---|---|
+| `item_id`, `item_title`, `item_kind` | Item as defined on the admin page; kind is `text`, `image`, `audio`, `video`, or `call` |
+| `item_variant` | Arm whose version of the item was shown; blank = the base version |
+| `block` | Block number within the session (blocks run in order; items may be shuffled within a block) |
+| `call_intent` | For calls: `attack` or `benign` (set by the researcher; never shown to participants) |
+| `rt_ms`, `first_answer_ms`, `answer_changes` | Time on the item; time to the first answer; number of answer changes |
+| `decision`, `decision_ms` | The decision (option value) and the time from the item appearing to the decision |
+| `decision_changes` | Times the decision was changed (plain layout only; with mouse tracking the first answer is final) |
+| `mt_mad`, `mt_auc` | Mouse tracking: maximum deviation from the straight start-to-answer line, and the area between the path and that line, both scaled by the line's length (positive = pulled toward the other answers) |
+| `mt_xflips`, `mt_init_ms`, `mt_move_ms` | Horizontal direction changes; time from Start to the first movement; time from that movement to the answer |
+| `media_plays`, `media_heard_pct`, `media_first_play_ms`, `media_transcript` | Clip plays, furthest point heard (%), time to the first play, and whether the transcript was opened (1/0) |
+| `call_answered`, `call_outcome`, `call_final_state` | Whether the call was answered; how it ended (`disclosed` digits to an attacker, `complied`, `completed` a legitimate request, `verified` by insisting on calling back, `refused`, `resisted`, `not_completed`, `declined`, `missed`, `hung_up`, `max_turns`); the caller's last step |
+| `call_turns`, `call_digits_disclosed`, `call_verifies`, `call_refusals` | Participant turns; the longest run of digits said; requests to verify or call back; refusals |
+| `call_callbacks`, `call_callback_resolved` | Calls made from the directory after the call; whether one reached the organization's real number (1/0) |
+| `call_duration_ms`, `call_hold_ms`, `call_median_latency_ms` | Call length, time on hold, and the median time from the participant's turn to the caller starting to speak |
+| `call_llm_turns`, `call_typed_turns`, `call_interruptions`, `call_captions`, `call_directory_opened` | Caller lines rephrased by the AI; participant turns typed rather than spoken; times the participant talked over the caller; captions turned on (1/0); directory opened (1/0) |
+| `voice_recorded`, `voice_ms`, `voice_typed` | Spoken answer recorded (1/0), its length, or the typed answer when not recorded |
+| `a_{question}` | Answer to each item question asked about this item |
+
+The full mouse path (`[x, y, ms]` points) is in the full JSON export under `records[].data.trajectory`.
+
+**Call transcripts CSV** (Recordings & calls tab): one row per turn: `code`, `session`, `trial_index`, `turn`, `event` (`answer`, `say`, `hold`, `resume`, `hangup`, `decline`, `timeout`), `participant_said` (numbers, emails, and street addresses replaced before saving), `participant_intent` (`comply`, `verify`, `refuse`, `question`, `hold`, `other`, `silence`), `digits_said`, `caller_state`, `caller_said`, `caller_source` (`script`, `llm`, or `recorded`), `llm_error`, `server_ms`, `latency_ms`, `asr` (1 = spoken, 0 = typed), `call_done`, `call_outcome`, `at`.
+
+**Recordings** (managers and owners): one audio file per call or spoken answer, named `<code>_s<session>_<item>_<call|voice>`. Recorded only with the participant's recording consent; never copied to the backup store.
+
 ## Question types and survey pages (all studies)
 
 | Type | Participant sees | Saved in the CSV cell |

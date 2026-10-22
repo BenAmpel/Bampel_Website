@@ -191,6 +191,17 @@ export async function login(S, creds = {}, now = Date.now()) {
       [p] = await enroll(S, [pid], { gapDays: en.gapDays, label: en.label || null, selfSignup: true }, now, Math.random);
     }
     await setNew(store, contactKey(p.code), { email, firstSeenAt: now });
+  } else if (creds.panelId != null) {
+    // Online panels (Prolific, MTurk, CloudResearch): the panel's participant ID arrives in the study link
+    // (?PROLIFIC_PID=...). The study ID is a keyed hash of it, like an email, so the same person always gets the
+    // same record and the panel ID itself is kept only under contact/{id} (for paying bonuses).
+    const en = (await getContent(store, S.type)).enrollment, panel = en.panel || {};
+    const id = String(creds.panelId || '').trim();
+    if (!panel.enabled || !/^[A-Za-z0-9_-]{4,64}$/.test(id)) return { error: 'not_enrolled', status: 401, domains: [] };
+    const pepper = await getPepper(store, true), pid = 'P-' + hmac(pepper, 'panel|' + id).toString('hex').slice(0, 16);
+    p = await store.get(pKey(pid));
+    if (!p) [p] = await enroll(S, [pid], { gapDays: en.gapDays, label: panel.label || 'panel', selfSignup: true }, now, Math.random);
+    await setNew(store, contactKey(p.code), { panelId: id, firstSeenAt: now });
   } else {
     p = await loadParticipant(S, creds.code);
     if (!p || PID_RE.test(p.code)) return { error: 'invalid_code', status: 401 };
@@ -206,9 +217,17 @@ export async function resume(S, pid, now = Date.now()) {
   return { consented: !!p.consentedAt, status: await statusOf(S, p, now) };
 }
 
-export async function consent(S, code, agree, now = Date.now()) {
-  if (agree) await setNew(S.store, `consent/${code}`, { at: now });
-  const u = await update(S.store, pKey(code), d => { if (agree) d.consentedAt = d.consentedAt || now; else d.declinedAt = now; });
+// opts.recording: the separate consent to have the voice recorded (studies that turn it on). Kept on the
+// participant record, so it holds for later sessions; a participant who said no types instead of speaking.
+export async function consent(S, code, agree, now = Date.now(), opts = {}) {
+  const rec = (await getContent(S.store, S.type)).consent.recording;   // only asked (and kept) when the study records
+  const recording = typeof opts.recording === 'boolean' && rec && rec.enabled ? opts.recording : undefined;
+  if (agree && rec && rec.enabled && rec.required && recording !== true) return { error: 'recording_required', status: 400 };
+  if (agree) await setNew(S.store, `consent/${code}`, { at: now, ...(recording !== undefined ? { recording } : {}) });
+  const u = await update(S.store, pKey(code), d => {
+    if (agree) { d.consentedAt = d.consentedAt || now; if (recording !== undefined && d.recordingConsent === undefined) d.recordingConsent = recording; }
+    else d.declinedAt = now;
+  });
   if (u.error) return u.error === 'not_found' ? { error: 'invalid_code', status: 401 } : u;
   return agree ? { ok: true } : { ok: true, declined: true };
 }
@@ -320,8 +339,10 @@ async function pickCondition(S, test, rand) {
 
 export async function enroll(S, ids, opts, now, rand) {
   const made = [];
+  const conds = opts.condition ? S.type.conditionsOf(await getContent(S.store, S.type)) : [];
   for (const id of ids) {
-    const condition = await pickCondition(S, !!opts.test, rand);
+    // A fixed condition is only for test participants (previewing one arm); real ones are always balanced.
+    const condition = opts.test && conds.includes(opts.condition) ? opts.condition : await pickCondition(S, !!opts.test, rand);
     const p = { code: id, condition, createdAt: now, gapDays: opts.gapDays ?? DEFAULT_GAP, label: opts.label || null, test: !!opts.test, selfSignup: !!opts.selfSignup };
     if (await setNew(S.store, pKey(id), p)) { await S.store.set(`${p.test ? 'cond-test' : 'cond'}/${condition}/${id}`, { at: now }); made.push(p); }
     else made.push(await S.store.get(pKey(id)));
@@ -502,8 +523,8 @@ export async function exportCredit(S, now = Date.now()) {
   const progs = await inBatches(pairs, 20, ([k]) => progressOf(S, people[k.slice(8)]));
   const rows = pairs.map(([k, ct], j) => {
     const p = people[k.slice(8)], prog = progs[j], total = totalFor(S, p, c, prog), st = status(p, now, total, prog.completed), last = prog.completed.slice(-1)[0];
-    return { email: ct.email, sessions_completed: st.completed, total_sessions: total, finished: st.finished ? 1 : 0,
+    return { email: ct.email || '', ...(ct.panelId ? { panel_id: ct.panelId } : {}), sessions_completed: st.completed, total_sessions: total, finished: st.finished ? 1 : 0,
       last_session_completed: last ? new Date(last.completedAt).toISOString() : '', first_seen: new Date(ct.firstSeenAt || ct.addedAt || p.createdAt).toISOString(), label: p.label || '', test: p.test ? 1 : 0 };
   });
-  return toCsv(rows.sort((a, b) => a.email.localeCompare(b.email)), ['email']);
+  return toCsv(rows.sort((a, b) => (a.email || a.panel_id || '').localeCompare(b.email || b.panel_id || '')), ['email', 'panel_id']);   // panel_id only when someone came from a panel
 }

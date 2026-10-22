@@ -1,33 +1,9 @@
-// Local lab server: the static lab pages plus the lab API on in-memory stores (nothing is saved).
-// Mirrors the netlify.toml rewrites for /lab/s/<study> and /lab/admin/<study>.
+// Local lab server on in-memory stores (nothing is saved), for tests and quick checks. For day-to-day use,
+// `npm run lab` runs the same server with data kept on disk (scripts/lab.mjs).
 //   npm run lab:dev            then open http://localhost:8899/lab/admin/ (owner key: local-owner-key-0123456789)
-import { createServer } from 'node:http';
-import { readFile, stat } from 'node:fs/promises';
-import { join, extname, normalize } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { handle } from '../../netlify/lib/lab/router.mjs';
+import { labServer, listen } from '../../scripts/lab/server.mjs';
 import { memBlobs } from './memstore.mjs';
 
-const ROOT = fileURLToPath(new URL('../../static', import.meta.url));
-const PORT = Number(process.env.PORT || 8899);
 const env = { LAB_ADMIN_KEY: process.env.LAB_ADMIN_KEY || 'local-owner-key-0123456789' };
-const getStore = memBlobs();
-const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.md': 'text/markdown; charset=utf-8', '.png': 'image/png', '.svg': 'image/svg+xml', '.jpg': 'image/jpeg' };
-
-createServer(async (req, res) => {
-  const url = new URL(req.url, `http://localhost:${PORT}`);
-  if (url.pathname.startsWith('/api/lab/') || url.pathname.startsWith('/api/vc/')) {
-    const body = ['GET', 'HEAD'].includes(req.method) ? undefined : await new Promise(r => { const c = []; req.on('data', d => c.push(d)); req.on('end', () => r(Buffer.concat(c))); });
-    const out = await handle(new Request(url, { method: req.method, headers: req.headers, body }), { getStore, env });
-    res.writeHead(out.status, Object.fromEntries(out.headers)); return res.end(Buffer.from(await out.arrayBuffer()));
-  }
-  let p = url.pathname;
-  if (/^\/lab\/s\/[^/]+\/?$/.test(p)) p = '/lab/s/index.html';
-  if (/^\/lab\/admin\/[^/]+\/?$/.test(p)) p = '/lab/admin/index.html';
-  let file = normalize(join(ROOT, p));
-  if (!file.startsWith(ROOT)) { res.writeHead(403); return res.end(); }
-  let data;
-  try { if ((await stat(file)).isDirectory()) file = join(file, 'index.html'); data = await readFile(file); }   // read first: headers go out only once the file exists
-  catch { res.writeHead(404); return res.end('not found'); }
-  res.writeHead(200, { 'content-type': TYPES[extname(file)] || 'application/octet-stream', 'cache-control': 'no-store' }); res.end(data);
-}).listen(PORT, () => console.log(`Lab dev server: http://localhost:${PORT}/lab/  (admin key: ${env.LAB_ADMIN_KEY})`));
+const port = await listen(labServer({ getStore: memBlobs(), env }), Number(process.env.PORT || 8899), undefined, 0);
+console.log(`Lab dev server: http://localhost:${port}/lab/  (admin key: ${env.LAB_ADMIN_KEY})`);

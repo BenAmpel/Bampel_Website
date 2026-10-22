@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Researcher guide | CCAIR Behavioral Lab</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/lab/assets/brand/logo-mark-32.png">
+<link rel="apple-touch-icon" href="/lab/assets/brand/apple-touch-icon.png">
+<meta name="theme-color" content="#fbf6ef">
 <meta name="description" content="How to get access to the CCAIR Behavioral Lab, build a study, import a survey, run live and asynchronous games, pilot, and export data.">
 <link rel="canonical" href="https://bampel.com/lab/guide/">
 <link rel="stylesheet" href="/lab/assets/study.css">
@@ -20,13 +23,22 @@
 <p class="muted">Both email links open your own email app with a prepared message. Messages go to the lab director's university inbox (bampel@gsu.edu). Nothing is sent from this page, and the lab does not store what you write.</p>
 
 <nav class="toc" aria-label="On this page"><strong>On this page</strong><ol>
-<li><a href="#what">What the lab is</a></li><li><a href="#access">Getting access</a></li><li><a href="#create">Creating a study</a></li><li><a href="#types">Study types</a></li>
+<li><a href="#what">What the lab is</a></li><li><a href="#local">Run it on your computer</a></li><li><a href="#access">Getting access</a></li><li><a href="#create">Creating a study</a></li><li><a href="#types">Study types</a></li><li><a href="#media">Audio, video, and phone calls</a></li>
 <li><a href="#import">Importing a survey</a></li><li><a href="#games">Running economic games</a></li><li><a href="#pilot">Piloting</a></li><li><a href="#export">Exports and codebooks</a></li>
 <li><a href="#irb">IRB and data checklist</a></li><li><a href="#faq">Questions</a></li></ol></nav>
 
 <h2 id="what">What the lab is</h2>
 <p>The CCAIR Behavioral Lab runs browser-based studies for the Center for CyberAI Research at Georgia State University. Participants open a link, give consent, and complete one or more sessions in their browser. The lab records their answers and, for most study types, how they arrived at them: timing, hesitation, answer changes, and where the pointer went.</p>
 <p>One engine runs every study. It handles sign-in, consent, sessions spread over several weeks, balanced assignment to conditions, surveys before and after each session, storage, hourly backups, exports, and a live self-test. A study is content that you edit on its admin page, plus a study type that decides what the item screen looks like. You do not write code to run a study of an existing type.</p>
+
+<h2 id="local">Run the lab on your own computer</h2>
+<p>You can build and try a study on your laptop before anything goes online. You need <a href="https://nodejs.org">Node.js</a> (version 20 or newer, the "LTS" download) and a copy of the lab's folder.</p>
+<ol>
+<li>On a Mac, double-click <strong>Start CCAIR Lab.command</strong> in the <code>scripts</code> folder. On any computer you can instead open a terminal in the lab's folder and type <code>npm run lab</code>.</li>
+<li>Your browser opens the lab console, already signed in. Keep the small terminal window open while you work; close it (or press Ctrl+C) to stop the lab.</li>
+<li>Everything you create is saved in the <code>.lab-data</code> folder, so it is still there next time. An example five-arm study is waiting for you to explore.</li>
+</ol>
+<p class="note">Nothing needs installing beyond Node.js. To let the AI caller rephrase its lines naturally, create a file named <code>.env.lab</code> in the lab's folder containing one line, <code>ANTHROPIC_API_KEY=</code> followed by the lab's key. Without it the caller speaks your script word for word, which is also the right setting for a fully controlled study.</p>
 
 <h2 id="access">Getting access</h2>
 <ol>
@@ -48,7 +60,8 @@
 
 <h2 id="create">Creating a study</h2>
 <ol>
-<li>Tell the lab owner the study's name, its type (below), and who needs which role. The owner creates it in the lab console. Studies start unlisted, so nobody finds them by accident.</li>
+<li>In the lab console, under <strong>Start a new study</strong>, pick a template: a survey, an A/B or multi-arm experiment, audio clip judgments, a conversation with an AI voice caller, image and video ratings, a mouse-tracking task, or the five-arm vishing training study. Give it a name and click Create. (On the lab's website, the owner creates studies and gives you a role.) Studies start unlisted, so nobody finds them by accident.</li>
+<li>Click <strong>Preview as a participant</strong> right away: the study opens in a new tab exactly as a participant sees it, as a test participant that is kept out of the real counts. Pick an arm to see that arm's version.</li>
 <li>Open the study from <strong>My studies</strong>. On its admin page, <strong>Study content</strong> holds everything participants see: consent text, sign-up rules, sessions, items and questions, surveys, and the wording of every screen. Every save makes a numbered version, and an old version can be restored.</li>
 <li>Write the consent text and tick "IRB-approved" only when it is. Until then participants see a banner that says the consent is a draft.</li>
 <li>Run the live self-test (owner), then pilot (below).</li>
@@ -63,6 +76,21 @@
 <p>Scenarios shown as plain text or emails, each followed by questions you choose: rating scales, multiple choice, dropdowns, text, a confidence line, numbers, and select-all. Conditions are defined in the content, and each item can have different wording per condition, so a manipulation needs no code. A study with no scenarios is a survey, including a longitudinal one. Questions can be shown or hidden depending on earlier answers, the participant's condition, or embedded data such as a Prolific ID read from the link.</p>
 <h3>Economic games</h3>
 <p>Prisoner's dilemma, public goods, trust, ultimatum, dictator, or a game you define with payoff formulas. Games can be played live (participants are matched in real time) or asynchronously (each participant decides alone and is matched with stored decisions). See <a href="#games">Running economic games</a>.</p>
+
+<h3>Media, voice, and conversations</h3>
+<p>Items of five kinds, mixed freely: text (for example training material), an image, an audio clip, a video clip, or a <strong>phone call</strong> from an AI voice caller. After each item you can ask for a decision (for example accept, verify, or refuse) with mouse tracking, any of your questions, and a spoken answer. Items are grouped into blocks that run in order, each shown in a fixed or shuffled order. See <a href="#media">Audio, video, and phone calls</a>.</p>
+
+<h2 id="media">Audio, video, and phone calls</h2>
+<ol>
+<li><strong>Add your clips.</strong> On Study content, Items, choose the kind of item, then <em>Upload a file</em> (up to about 2.5 MB) or paste an https:// address for larger video. Uploaded files get a random name, so the address never gives away the condition. Tick <em>Must be played to the end</em> to lock the answers until the clip has been heard, and set a limit on plays if you want one. Add a transcript for participants who need it; whether they open it is recorded.</li>
+<li><strong>Arms.</strong> On <em>Arms &amp; blocks</em>, add up to 12 arms. Each item can show each arm its own text or clip (<em>Different per arm</em> on the Items tab), which is how training arms are built. Blocks run in order; tick <em>Shuffle this block</em> to randomize within it.</li>
+<li><strong>The decision.</strong> On <em>Decision &amp; directory</em>, write the question and two to four answers. With mouse tracking on, participants click Start at the bottom and move to an answer at the top; the export has the path measures (MAD, AUC, direction changes) and timing for every decision.</li>
+<li><strong>Phone calls.</strong> A call item rings with the caller ID you set. Write what the caller says at each step: the opening, the reason for the call, the request, two follow-ups if the participant hesitates, the answer to "can I call you back?", and the goodbyes. Mark the caller as an attacker or a legitimate caller (participants never see this). Participants talk (Chrome and Edge understand speech) or type, and can hang up at any time. After the call they can look up a number in the phone directory and call it: the organization's real number tells them the truth.</li>
+<li><strong>Recording.</strong> On <em>Sign-up &amp; consent</em>, turn on <em>Voice recording</em> to ask for separate consent to record. People who decline still take part and type instead. Recordings are listed on the <em>Recordings &amp; calls</em> tab (managers and owners), never copied to backups, and can be deleted in one step when your IRB says so.</li>
+<li><strong>Prolific.</strong> On <em>Sign-up &amp; consent</em>, turn on <em>Online panel</em>, copy the study address shown into Prolific, and paste Prolific's completion link. Participants arrive signed in, and the last page sends them back to Prolific. Their Prolific ID is kept only in the payment list.</li>
+<li><strong>Before launch,</strong> preview every arm, run the self-test, and pilot with a few lab members on the computers and browsers your participants will use.</li>
+</ol>
+<p>What gets saved for each call: every turn of the conversation (what the participant said, with numbers, emails, and street addresses removed before saving; what the caller said; the step the caller was on; response times), how the call ended (for example <em>disclosed</em>, <em>verified</em>, <em>refused</em>, <em>declined</em>), callbacks to the directory, and the recording when the participant agreed to one. The codebook lists every column.</p>
 
 <h2 id="import">Importing a survey</h2>
 <p>A study of the type "Vignettes and surveys" can start from a survey you already have. On the study's admin page, open <strong>Study content</strong>, then <strong>Import a survey</strong>, choose the file, and click Preview. The lab console (owners) can also create a new study straight from a file. Nothing is saved by the preview. You read the report, load the result into the editor as an unsaved draft, and click Save like any other edit.</p>
@@ -118,6 +146,8 @@
 <li><strong>Access to the Netlify site is access to identifiable data.</strong> A participant's study ID is derived from their email with a secret key kept in the same store, and the extra-credit list holds the emails. Anyone with Netlify access can therefore re-identify participants. List who has Netlify access in your data management plan.</li>
 <li>Backups: the lab copies each study to a backup store every hour. For a copy outside Netlify, the study owner downloads the complete backup and saves it to GSU-approved storage on a schedule. It contains emails, so treat it as identifiable.</li>
 <li>Withdrawals: the owner can delete a participant, which removes answers, traces, plans, and email, and removes them from the backup store. Copies you downloaded earlier are not changed, so record withdrawals so you can remove those people from saved files.</li>
+<li>Studies that record voices: the consent describes recording, the IRB has approved a deletion schedule for audio, and someone owns deleting it on time (Recordings &amp; calls tab). Voice is biometric data in some states (for example Illinois, Texas, and Washington); on Prolific, exclude those states or get counsel's sign-off first.</li>
+<li>Studies with simulated scam calls: the consent says calls "may attempt to obtain information" without saying which, all caller details are fictional, and the debrief explains the deception.</li>
 <li>Run the self-test, pilot, and delete the test participants.</li>
 <li>Decide before data collection how you will handle participants who are not paid or credited because a group stalled.</li>
 </ul>

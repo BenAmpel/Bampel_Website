@@ -4,6 +4,7 @@
 // its backup mirror, so studies never share participants or data.
 import { TYPES } from './types/index.mjs';
 import { seed as dataQualitySeed } from './studies/data-quality.mjs';
+import { TEMPLATES } from './templates.mjs';
 
 export const BUILT_IN = {
   verification: {
@@ -23,10 +24,12 @@ export const BUILT_IN = {
   }
 };
 
-// The study type for a study: the registered type, with the study's own starting content when it has one.
+// The study type for a study: the registered type, with the study's own starting content when it has one
+// (a built-in study's seed, or the template it was created from).
 export function typeFor(study) {
-  const t = TYPES[study.type];
-  return t && study.seed ? { ...t, defaultContent: study.seed } : t;
+  const t = TYPES[study.type], tpl = study.template && TEMPLATES[study.template];
+  const seed = study.seed || (tpl && tpl.type === study.type ? tpl.content : null);
+  return t && seed ? { ...t, defaultContent: seed } : t;
 }
 
 const ID_RE = /^[a-z][a-z0-9-]{2,30}$/;
@@ -46,14 +49,18 @@ export async function listStudies(registry, { all = false } = {}) {
   return [...Object.values(BUILT_IN), ...stored].filter(s => all || (s.listed && !s.archived));
 }
 
-export async function createStudy(registry, { id, name, type, description }, who, now = Date.now()) {
+export async function createStudy(registry, { id, name, type, description, template }, who, now = Date.now()) {
   id = String(id || '').trim().toLowerCase();
-  if (!ID_RE.test(id) || RESERVED.includes(id) || BUILT_IN[id]) return { error: 'bad_id', status: 400, hint: 'Use 3–31 lowercase letters, numbers, and dashes, starting with a letter.' };
-  if (!TYPES[type]) return { error: 'bad_type', status: 400 };
-  if (!String(name || '').trim()) return { error: 'name_required', status: 400 };
+  if (!ID_RE.test(id) || RESERVED.includes(id) || BUILT_IN[id]) return { error: 'bad_id', status: 400, hint: 'The link name needs 3 to 31 lowercase letters, numbers, and dashes, starting with a letter (for example "phone-calls-pilot").' };
+  if (template != null && template !== '') {
+    if (!Object.hasOwn(TEMPLATES, template)) return { error: 'bad_template', status: 400, hint: 'That template no longer exists. Reload the page.' };
+    type = TEMPLATES[template].type;
+  } else template = null;
+  if (!TYPES[type]) return { error: 'bad_type', status: 400, hint: 'Choose a study type.' };
+  if (!String(name || '').trim()) return { error: 'name_required', status: 400, hint: 'Give the study a name.' };
   const prefix = (id.replace(/[^a-z]/g, '') + 'xx').slice(0, 2).toUpperCase();
   const s = { id, name: String(name).trim().slice(0, 120), type, description: String(description || '').slice(0, 500),
-    storeName: `lab-${id}`, backupName: `lab-${id}-backup`, codePrefix: prefix, listed: false, createdAt: now, createdBy: who.name };
+    storeName: `lab-${id}`, backupName: `lab-${id}-backup`, codePrefix: prefix, listed: false, createdAt: now, createdBy: who.name, ...(template ? { template } : {}) };
   if (registry.setIf) { if (!(await registry.setIf(`studies/${id}`, s, { onlyIfNew: true }))) return { error: 'exists', status: 409 }; }
   else { if (await registry.get(`studies/${id}`)) return { error: 'exists', status: 409 }; await registry.set(`studies/${id}`, s); }
   return { ok: true, study: withPaths(s) };
