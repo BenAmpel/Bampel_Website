@@ -20,6 +20,7 @@ import { getContent, itemsFor, domainAllowed } from './content.mjs';
 import { resolve as resolveLogic, publicQuestions } from './logic.mjs';
 import { recordPanelMeta } from './recruit.mjs';
 import { randomizeQuestions, orderColumns } from './order.mjs';
+import { quotaState } from './quota.mjs';
 
 export const TOKEN_HOURS = 12;
 const DEFAULT_GAP = 6;
@@ -128,6 +129,7 @@ export function totalFor(S, p, c, prog) {
   return total;
 }
 export function status(p, now, total, completed) {
+  if (p.screenedOut) return { finished: true, screenedOut: true, completed: completed.length, total };
   if (p.returnedAt) return { finished: true, returned: true, completed: completed.length, total };   // chose to stop (recruit.mjs)
   const next = completed.length + 1;
   if (next > total) return { finished: true, completed: completed.length, total };
@@ -350,8 +352,11 @@ export async function saveSurvey(S, code, session, kind, data, now = Date.now())
 // ---------- enrollment ----------
 // Conditions are assigned by minimization: the condition with the fewest participants so far (ties at
 // random), counted from write-once marker keys. Test participants are counted separately.
-async function pickCondition(S, test, rand) {
-  const conds = S.type.conditionsOf(await getContent(S.store, S.type)), pre = test ? 'cond-test' : 'cond';
+// capped (self sign-ups): conditions at their quota are skipped, and null means the study is full (quota.mjs).
+async function pickCondition(S, test, rand, capped = false) {
+  const c = await getContent(S.store, S.type);
+  let conds = S.type.conditionsOf(c), pre = test ? 'cond-test' : 'cond';
+  if (capped && !test) { conds = (await quotaState(S, c, conds)).open; if (!conds.length) return null; }
   const counts = await Promise.all(conds.map(cn => S.store.list(`${pre}/${cn}/`).then(k => k.length)));
   const min = Math.min(...counts), opts = conds.filter((cn, i) => counts[i] === min);
   return opts[Math.floor(rand() * opts.length)];
@@ -362,9 +367,10 @@ export async function enroll(S, ids, opts, now, rand) {
   const conds = opts.condition ? S.type.conditionsOf(await getContent(S.store, S.type)) : [];
   for (const id of ids) {
     // A fixed condition is only for test participants (previewing one arm); real ones are always balanced.
-    const condition = opts.test && conds.includes(opts.condition) ? opts.condition : await pickCondition(S, !!opts.test, rand);
-    const p = { code: id, condition, createdAt: now, gapDays: opts.gapDays ?? DEFAULT_GAP, label: opts.label || null, test: !!opts.test, selfSignup: !!opts.selfSignup };
-    if (await setNew(S.store, pKey(id), p)) { await S.store.set(`${p.test ? 'cond-test' : 'cond'}/${condition}/${id}`, { at: now }); made.push(p); }
+    const condition = opts.test && conds.includes(opts.condition) ? opts.condition : await pickCondition(S, !!opts.test, rand, !!opts.selfSignup);
+    const p = { code: id, condition, createdAt: now, gapDays: opts.gapDays ?? DEFAULT_GAP, label: opts.label || null, test: !!opts.test, selfSignup: !!opts.selfSignup,
+      ...(condition == null ? { screenedOut: { at: now, reason: 'quota_full' } } : {}) };   // the study (or every open condition) is full
+    if (await setNew(S.store, pKey(id), p)) { if (condition != null) await S.store.set(`${p.test ? 'cond-test' : 'cond'}/${condition}/${id}`, { at: now }); made.push(p); }
     else made.push(await S.store.get(pKey(id)));
   }
   return made;

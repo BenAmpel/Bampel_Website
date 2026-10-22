@@ -92,7 +92,8 @@ export async function handoff(S, p, st, pn) {
   const code = (pn && pn[CODE_FIELD[outcome]]) || '';
   const contact = pn && pn.enabled ? await S.store.get(`contact/${p.code}`) : null;
   const url = pn && pn.enabled ? redirectFor(pn, outcome, code, contact && contact.panelId) : '';
-  return { outcome, code, url, panel: pn && pn.enabled ? (PRESETS[pn.preset] || {}).label || 'the study site' : null };
+  return { outcome, code, url, panel: pn && pn.enabled ? (PRESETS[pn.preset] || {}).label || 'the study site' : null,
+    ...(outcome === 'screened_out' && p.screenedOut && p.screenedOut.reason ? { reason: p.screenedOut.reason } : {}) };
 }
 
 // The participant chose to stop: kept on the record (write-once), so the "returned" code is shown from then on.

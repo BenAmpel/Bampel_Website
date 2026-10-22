@@ -443,6 +443,7 @@
       if (!sub || !subs().some(function (s) { return s[0] === sub; })) sub = subs()[0][0];
       if (plugin.onLoad) plugin.onLoad(A);
       var started = res[2].filter(function (p) { return !p.test && (p.consented || p.completedSessions); }).length;
+      A.counts = {}; res[2].forEach(function (p) { if (!p.test && p.condition) A.counts[p.condition] = (A.counts[p.condition] || 0) + 1; });   // for the quota boxes
       A.started = started;
       $('contentinfo').textContent = 'Current version: ' + (saved.version || 0) + (saved.version ? ', saved ' + fmt(saved.savedAt) + ' by ' + saved.savedBy : ' (the built-in defaults)') + '.' + (can('editor') ? '' : ' You can view the content but not change it.');
       $('contentwarn').innerHTML = started ? '<div class="warn">' + started + ' real participant' + (started === 1 ? ' has' : 's have') + ' already started. Changes apply from each participant\'s next session (a session in progress keeps the plan it started with). Answers record the version they were collected under, and each answer keeps a copy of the item as shown. Changing the design mid-study makes sessions hard to compare, so check with the team first.</div>' : '';
@@ -579,6 +580,15 @@
         code('returnCode', 'Returned code', 'Shown when the participant chooses "I want to stop taking part".') + '</div>' +
       '<p class="muted">Codes stay on the server until a participant reaches that point, so they cannot be read from the page.</p>';
   }
+  // Quotas: caps on how many people who sign themselves up are let in, for the study and for each condition.
+  function quotaEditor(en) {
+    var q = en.quota || (en.quota = { total: null, perCondition: {} }), conds = conditionsNow(), counts = A.counts || {}, total = 0;
+    Object.keys(counts).forEach(function (k) { total += counts[k]; });
+    function capInput(attr, v, label) { return '<input type="number" min="0" ' + attr + ' value="' + (v == null ? '' : esc(v)) + '" style="max-width:140px" aria-label="' + esc(label) + '">'; }
+    return '<h3 style="margin:20px 0 8px">Quotas</h3><p class="muted">The most people who can sign themselves up (by email or from an online panel), counted as real participants assigned to a condition. Leave a box empty for no cap. Someone who arrives when the study, or every condition with room, is full sees "This study is full" and gets the screened-out code. People you add on the Students tab, and test participants, are never capped. When many people arrive in the same second, a cap can be passed by one or two.</p>' +
+      '<div class="grid3">' + field('Whole study (now ' + total + ')', capInput('data-quota="total"', q.total, 'Cap for the whole study')) +
+      conds.map(function (cn) { return field(esc(cn) + ' (now ' + (counts[cn] || 0) + ')', capInput('data-quota="' + esc(cn) + '"', (q.perCondition || {})[cn], 'Cap for ' + cn)); }).join('') + '</div>';
+  }
   function genCode() { var a = '23456789ABCDEFGHJKMNPQRSTVWXYZ', s = '', r = new Uint32Array(8); (window.crypto || {}).getRandomValues ? crypto.getRandomValues(r) : r.forEach(function (x, i) { r[i] = Math.random() * 4294967296; }); for (var i = 0; i < 8; i++) s += a[r[i] % a.length]; return s; }
   function renderEditor() {
     $('subtabs').innerHTML = subs().map(function (s) { return '<button type="button" data-sub="' + s[0] + '" aria-selected="' + (s[0] === sub) + '">' + s[1] + '</button>'; }).join('');
@@ -598,6 +608,7 @@
         '<h3 style="margin:20px 0 8px">Online panel (Prolific, SONA, MTurk, CloudResearch)</h3>' +
         checkbox('data-path="enrollment.panel.enabled" data-bool="1"', en.panel && en.panel.enabled, 'Participants arrive from an online panel: the study link signs them in with the panel\'s participant ID') +
         (en.panel && en.panel.enabled ? panelEditor(en.panel) : '') +
+        quotaEditor(en) +
         (draft.consent.recording ? '<h3 style="margin:20px 0 8px">Voice recording</h3>' +
           checkbox('data-path="consent.recording.enabled" data-bool="1"', draft.consent.recording.enabled, 'Ask for separate consent to record participants\' voices (calls and spoken answers)') +
           (draft.consent.recording.enabled ? field('Recording consent checkbox label', area('consent.recording.label', draft.consent.recording.label || '', 2)) +
@@ -642,6 +653,10 @@
         if (was[o.value]) o.anchor = true;
         return o;
       }));
+    }
+    else if ((v = t.getAttribute('data-quota'))) {
+      var qt = draft.enrollment.quota || (draft.enrollment.quota = { total: null, perCondition: {} }), qv = t.value.trim() === '' ? null : Number(t.value);
+      if (v === 'total') qt.total = qv; else { qt.perCondition = qt.perCondition || {}; if (qv == null) delete qt.perCondition[v]; else qt.perCondition[v] = qv; }
     }
     else if ((v = t.getAttribute('data-anchor'))) { var an = v.split('|'), ao = getPath(an[0]).options[Number(an[1])]; if (t.checked) ao.anchor = true; else delete ao.anchor; }
     else if ((v = t.getAttribute('data-labels'))) setPath(v + '.labels', t.value.split('\n').map(function (x) { return x.trim(); }).filter(Boolean));

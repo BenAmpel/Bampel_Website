@@ -327,6 +327,7 @@
       if (r.error && creds.panelId != null) return show('<h1>' + Th('login_title') + '</h1>' + errorBox('This study link is not complete. Please go back to the study page where you found it and open it again.'));
       if (r.error) return showLogin(loginError(r), creds.email != null ? 'email' : 'code', creds.email);
       S.token = r.token; store(tokenKey, r.token);
+      if (r.status && r.status.screenedOut) return showScreenedOut();   // for example, the study was already full
       if (!r.consented) return showConsent();
       showStatus(r.status);
     });
@@ -334,6 +335,7 @@
   function refresh() {
     api('resume', { token: S.token }).then(function (r) {
       if (r.error) return showLogin(ERR[r.error] || ERR.server_error);
+      if (r.status && r.status.screenedOut) return showScreenedOut();
       if (!r.consented) return showConsent();
       showStatus(r.status);
     });
@@ -372,6 +374,7 @@
   }
   function showStatus(st) {
     progress.textContent = '';
+    if (st.screenedOut) return showScreenedOut();
     if (st.finished) return showFinished(st);
     var done = st.completed ? Tp('progress_done', { completed: st.completed, total: st.total }) : '';
     var out = '<button class="secondary" id="out">' + Th('sign_out') + '</button>';
@@ -399,10 +402,10 @@
   // The server sends the code for the outcome reached (completed, screened out, returned) only once it is reached,
   // with the address back to the panel (Prolific, SONA, ...). No automatic redirect: the participant reads the code
   // and follows the link when ready (no time limit, WCAG 2.2.1).
-  function handoff() {
+  function handoff(got) {
     var box = document.getElementById('handoff');
     if (!box || !S.token) return;
-    api('handoff', { token: S.token }).then(function (r) {
+    (got ? Promise.resolve(got) : api('handoff', { token: S.token })).then(function (r) {
       if (!r || r.error || !r.outcome || (!r.code && !r.url)) return;
       var where = r.panel || 'the study site';
       box.innerHTML = (r.code ? '<p>' + Th('handoff_code') + '</p><p class="handoff-code"><code id="hcode">' + esc(r.code) + '</code> <button type="button" class="secondary small" id="hcopy">Copy code</button></p>' : '') +
@@ -422,6 +425,16 @@
       show('<h1>' + Th('stop_title') + '</h1>' + Tp('stop_body') + '<div class="actions split"><button class="secondary" id="keep">' + Th('stop_keep') + '</button><button id="yes">' + Th('stop_confirm') + '</button></div>');
       document.getElementById('keep').addEventListener('click', refresh);
       document.getElementById('yes').addEventListener('click', function () { this.disabled = true; api('withdraw', { token: S.token }).then(function () { showReturned(); }); });
+    });
+  }
+  // Screened out (a screening rule or failed check, or the study was full when they arrived): no further sessions,
+  // and the panel's screened-out code. The page says "study full" when that is the reason.
+  function showScreenedOut() {
+    progress.textContent = ''; S.lab = null;
+    api('handoff', { token: S.token }).then(function (r) {
+      var full = r && r.reason === 'quota_full';
+      show('<h1>' + Th(full ? 'full_title' : 'screenout_title') + '</h1>' + Tp(full ? 'full_body' : 'screenout_body') + '<div id="handoff" aria-live="polite"></div>');
+      handoff(r);
     });
   }
   function showReturned() {
@@ -633,6 +646,7 @@
   }
   function showDone(st) {
     progress.textContent = ''; S.lab = null;
+    if (st && st.screenedOut) return showScreenedOut();
     if (st && st.finished) return showFinished(st);
     show('<h1>' + Th('done_title') + '</h1>' + (st ? tracker(st.completed, st.total, 0) : '') + Tp('done_body') + (st && st.availableAt ? Tp('done_next', { date: fmtDate(st.availableAt) }) : '') +
       '<div class="actions split"><button class="secondary" id="out">' + Th('sign_out') + '</button>' + (st && st.availableAt ? '<button class="secondary" id="cal">' + Th('calendar_button') + '</button>' : '') + '</div>');

@@ -6,6 +6,7 @@
 import { OPS, NO_VALUE_OPS } from './logic.mjs';
 import { panelDefaults, validatePanel } from './recruit.mjs';
 import { validateOrder } from './order.mjs';
+import { quotaDefaults, validateQuota } from './quota.mjs';
 
 // Screen text used by the shared participant app (types add or override fields).
 export const ENGINE_TEXT = [
@@ -60,6 +61,10 @@ export const ENGINE_TEXT = [
   ['Loading', 'preload_failed_body', 'Loading failed: text ({n})', '{n} file(s) could not be loaded. Check your internet connection, then try again.'],
   ['Loading', 'preload_retry', 'Loading failed: try again button', 'Try again'],
   ['Loading', 'preload_continue', 'Loading failed: continue button', 'Continue anyway'],
+  ['Screened out', 'screenout_title', 'Not eligible or a check failed: title', 'Thank you for your interest'],
+  ['Screened out', 'screenout_body', 'Not eligible or a check failed: text', 'Unfortunately you are not able to continue with this study. Thank you for your time.'],
+  ['Screened out', 'full_title', 'Study full: title', 'This study is full'],
+  ['Screened out', 'full_body', 'Study full: text', 'Thank you for your interest. Enough people have already taken part, so the study is closed to new participants.'],
   ['Online panel', 'handoff_code', 'Above the completion code', 'Your code for this study:'],
   ['Online panel', 'handoff_button', 'Link back to the panel ({panel})', 'Return to {panel}'],
   ['Online panel', 'stop_link', 'Link to stop taking part', 'I want to stop taking part'],
@@ -87,7 +92,8 @@ export function engineDefaults() {
     enrollment: { open: true, domains: ['gsu.edu', 'student.gsu.edu'], gapDays: 0, label: 'self-signup',
       // Online panel sign-in (Prolific and similar): the participant ID comes from the study link; the completion link is shown at the end.
       // Completion codes and the redirect back to the panel: netlify/lib/lab/recruit.mjs.
-      panel: { enabled: false, param: 'PROLIFIC_PID', completionUrl: '', label: 'panel', ...panelDefaults() } },
+      panel: { enabled: false, param: 'PROLIFIC_PID', completionUrl: '', label: 'panel', ...panelDefaults() },
+      quota: quotaDefaults() },   // N caps for self sign-ups: quota.mjs
     survey: { pre: [], post: [] },
     // How sessions run in the browser: preload fetches every media file before the first item (participant.js).
     environment: { preload: false }
@@ -123,6 +129,7 @@ export function normalize(c, type) {
   c.consent = { ...d.consent, ...(c.consent || {}) };
   c.enrollment = { ...d.enrollment, ...(c.enrollment || {}) };
   c.enrollment.panel = { ...d.enrollment.panel, ...(c.enrollment.panel || {}) };
+  c.enrollment.quota = { ...d.enrollment.quota, ...(c.enrollment.quota && typeof c.enrollment.quota === 'object' ? c.enrollment.quota : {}) };
   c.survey = { pre: c.survey?.pre || d.survey.pre, post: c.survey?.post || d.survey.post };
   c.embedded = Array.isArray(c.embedded) ? c.embedded : [];
   c.environment = { ...d.environment, ...(c.environment && typeof c.environment === 'object' ? c.environment : {}) };
@@ -308,6 +315,7 @@ export function validateContent(c, type) {
       if (pn.completionUrl && !/^https:\/\/[^\s"'<>]+$/.test(pn.completionUrl)) e.push('Online panel: the completion link must start with https:// (copy it from Prolific).');
     }
     validatePanel(pn, e);
+    validateQuota(en.quota, (() => { try { return type.conditionsOf(c); } catch { return []; } })(), e);
   }
   const typeErrors = [];
   if (type.validate) type.validate(c, typeErrors);
