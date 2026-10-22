@@ -372,9 +372,17 @@
   }
   function showStatus(st) {
     progress.textContent = '';
+    if (st.screenedOut) return showScreenedOut();
     if (st.finished) return showFinished(st);
     var done = st.completed ? Tp('progress_done', { completed: st.completed, total: st.total }) : '';
     var out = '<button class="secondary" id="out">' + Th('sign_out') + '</button>';
+    // One sitting split into sessions: no session numbers or tracker; a returning participant resumes at once.
+    if (S.content.continuous && st.available) {
+      if (st.completed) return startSession();
+      show('<h1>' + Th('continuous_title') + '</h1>' + Tp('start_body') + '<div class="actions split">' + out + '<button id="go">' + Th('continuous_button') + '</button></div>');
+      document.getElementById('go').addEventListener('click', function () { this.disabled = true; startSession(); });
+      return document.getElementById('out').addEventListener('click', signOut);
+    }
     if (!st.available) {
       show('<h1>' + Th('wait_title') + '</h1>' + tracker(st.completed, st.total, st.nextSession) + done + Tp('wait_body', { session: st.nextSession, date: fmtDate(st.availableAt) }) +
         '<div class="actions split">' + out + '<button class="secondary" id="cal">' + Th('calendar_button') + '</button></div>');
@@ -393,6 +401,15 @@
       (back ? '<div class="actions"><a class="btn" href="' + esc(back) + '" rel="noopener">Return to Prolific to record your completion</a></div>' : '') +
       '<div class="actions"><button class="secondary" id="out">' + Th('sign_out') + '</button></div>');
     document.getElementById('out').addEventListener('click', signOut);
+  }
+  // Screened out (not eligible, or a required check failed): no further sessions; panel participants get the
+  // screen-out link (for example Prolific's screen-out code) instead of the completion link.
+  function showScreenedOut() {
+    progress.textContent = ''; S.lab = null;
+    var back = S.content.panel && /^https:\/\//.test(S.content.panel.screenOutUrl || '') ? S.content.panel.screenOutUrl : '';
+    show('<h1>' + (Th('screenout_title') || 'Thank you for your interest') + '</h1>' +
+      (T('screenout_body') ? Tp('screenout_body') : '<p>Unfortunately you are not able to continue with this study. Thank you for your time.</p>') +
+      (back ? '<div class="actions"><a class="btn" href="' + esc(back) + '" rel="noopener">Return to Prolific</a></div>' : ''));
   }
   function signOut() { store(tokenKey, null); S.token = null; showLogin(); }
   // Add-to-calendar file for the next session (Dillman et al. 2014: lower the cost of coming back).
@@ -441,7 +458,7 @@
   }
   function showInstructions() {
     var p = S.plan, extra = S.type.instructions ? S.type.instructions(p, ui) : '';
-    progress.textContent = T('start_title', { session: p.session, total: S.content.sessions });
+    progress.textContent = S.content.continuous ? '' : T('start_title', { session: p.session, total: S.content.sessions });
     show('<h1>' + Th('instr_title') + '</h1>' + Tp('instr_intro', p.game && p.game.roundsTextAll ? { n: p.total, rounds_text: p.game.roundsTextAll } : { n: p.total }) + extra + (p.practice && !p.practiceDone ? Tp('instr_practice') : '') +
       '<div class="actions"><button id="go">' + Th('begin_button') + '</button></div>');
     document.getElementById('go').addEventListener('click', function () { p._instructed = true; next(); });
@@ -466,6 +483,7 @@
         if (S.lab && !S.deviceSent[p.session] && !isPractice) { data.device = S.lab.device; S.deviceSent[p.session] = true; }
         api('trial', { token: S.token, session: p.session, index: index, data: data }).then(function (r) {
           if (r.error) { if (S.lab) S.lab.beginItem(isPractice ? 'practice' : 't' + index, stage); return onError && onError(ERR[r.error] || ERR.server_error); }
+          if (r.screenedOut) return showScreenedOut();
           if (isPractice) { p.practiceDone = true; return showPracticeDone(); }
           p.trials.forEach(function (x) { if (x.index === index) x.done = true; });
           next();
@@ -501,7 +519,7 @@
       skipHidden();
       if (idx >= pages.length) return submitSurvey(all, kind, null);
       var list = byPage[pages[idx]], mine = {};
-      progress.textContent = T('start_title', { session: S.plan.session, total: S.content.sessions }) + (pages.length > 1 ? ' · ' + T('survey_page', { i: idx + 1, n: pages.length }) : '');
+      progress.textContent = (S.content.continuous ? '' : T('start_title', { session: S.plan.session, total: S.content.sessions })) + (pages.length > 1 ? (S.content.continuous ? '' : ' · ') + T('survey_page', { i: idx + 1, n: pages.length }) : '');
       show('<h1>' + esc(title) + '</h1>' + questionsHtml(list, { items: items, ed: ed, lookup: function (id) { return mine[id] !== undefined ? mine[id] : all[id]; } }) +
         '<div id="surveymsg"></div><div class="actions"><button id="go">' + Th('continue_button') + '</button></div>');
       var go = document.getElementById('go'), qs = questionSet(stage, list, document.getElementById('surveymsg'), go, null, { answers: mine, prior: all, items: items, ed: ed });
@@ -519,13 +537,17 @@
     api('survey', { token: S.token, session: S.plan.session, kind: kind, data: ans }).then(function (r) {
       if (r.error) { if (go) go.disabled = false; var m = document.getElementById('surveymsg'); if (m) m.innerHTML = errorBox(ERR[r.error] || ERR.server_error); return; }
       if (S.survey && S.survey.key) store(S.survey.key, null);
+      if (r.screenedOut) return showScreenedOut();
       if (kind === 'pre') { S.plan.preSurveyDone = true; return next(); }
       showDone(r.status);
     });
   }
   function showDone(st) {
     progress.textContent = ''; S.lab = null;
+    if (st && st.screenedOut) return showScreenedOut();
     if (st && st.finished) return showFinished(st);
+    // One sitting split into sessions (for example screening, then the study): go straight on to the next one.
+    if (S.content.continuous && st && st.available) return startSession();
     show('<h1>' + Th('done_title') + '</h1>' + (st ? tracker(st.completed, st.total, 0) : '') + Tp('done_body') + (st && st.availableAt ? Tp('done_next', { date: fmtDate(st.availableAt) }) : '') +
       '<div class="actions split"><button class="secondary" id="out">' + Th('sign_out') + '</button>' + (st && st.availableAt ? '<button class="secondary" id="cal">' + Th('calendar_button') + '</button>' : '') + '</div>');
     document.getElementById('out').addEventListener('click', signOut);

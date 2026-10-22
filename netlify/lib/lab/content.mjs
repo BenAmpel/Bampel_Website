@@ -68,7 +68,8 @@ export function engineDefaults() {
     consent: { approved: false, paragraphs: ['[Paste the IRB-approved consent text here. Leave a blank line between paragraphs.]'], agreeLabel: 'I am 18 or older and I agree to participate.' },
     enrollment: { open: true, domains: ['gsu.edu', 'student.gsu.edu'], gapDays: 0, label: 'self-signup',
       // Online panel sign-in (Prolific and similar): the participant ID comes from the study link; the completion link is shown at the end.
-      panel: { enabled: false, param: 'PROLIFIC_PID', completionUrl: '', label: 'panel' } },
+      // screenOutUrl: where a participant screened out (ineligible, failed a check) is sent, e.g. Prolific's screen-out code link.
+      panel: { enabled: false, param: 'PROLIFIC_PID', completionUrl: '', screenOutUrl: '', label: 'panel' } },
     survey: { pre: [], post: [] }
   };
 }
@@ -123,7 +124,7 @@ export function clearContentCache(store) { if (store) caches.delete(store.name);
 export function publicContent(c, type, study) {
   return { study: study.id, type: type.id, name: study.name, version: c.version, minutesPerSession: c.minutesPerSession, consent: c.consent,
     text: c.text, sessions: type.sessionCount(c), signup: c.enrollment.open ? c.enrollment.domains : [],
-    panel: c.enrollment.panel && c.enrollment.panel.enabled ? { param: c.enrollment.panel.param, completionUrl: c.enrollment.panel.completionUrl || '' } : null,
+    panel: c.enrollment.panel && c.enrollment.panel.enabled ? { param: c.enrollment.panel.param, completionUrl: c.enrollment.panel.completionUrl || '', screenOutUrl: c.enrollment.panel.screenOutUrl || '' } : null,
     embedded: (c.embedded || []).map(x => (x.source === 'url' ? { name: x.name, source: 'url', param: x.param || x.name } : { name: x.name, source: 'value', value: x.value })),
     ...(type.publicContent ? type.publicContent(c) : {}) };
 }
@@ -278,6 +279,7 @@ export function validateContent(c, type) {
     if (pn && pn.enabled) {
       if (!/^[A-Za-z][A-Za-z0-9_]{0,39}$/.test(pn.param || '')) e.push('Online panel: the link parameter must be a name like PROLIFIC_PID (letters, numbers, underscores).');
       if (pn.completionUrl && !/^https:\/\/[^\s"'<>]+$/.test(pn.completionUrl)) e.push('Online panel: the completion link must start with https:// (copy it from Prolific).');
+      if (pn.screenOutUrl && !/^https:\/\/[^\s"'<>]+$/.test(pn.screenOutUrl)) e.push('Online panel: the screen-out link must start with https:// (copy it from Prolific).');
     }
   }
   const typeErrors = [];

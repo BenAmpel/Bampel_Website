@@ -430,9 +430,141 @@
     }
   }
 
+  // ---------- equipment checks (scored on the server; failing every attempt ends the study) ----------
+  // Headphones (Woods et al. 2017): three 200 Hz tones per round, one 6 dB quieter, one in antiphase (left and right
+  // inverted, which partly cancels over loudspeakers but not over headphones). The quieter tone is the answer.
+  function playTones(order, onDone) {
+    var Ctx = window.AudioContext || window.webkitAudioContext, ac;
+    try { ac = new Ctx(); } catch (e) { return onDone(); }
+    var t = ac.currentTime + 0.15, dur = 1.0, gap = 0.5, base = 0.18;
+    order.forEach(function (kind) {
+      var osc = ac.createOscillator(), env = ac.createGain(), inv = ac.createGain(), merge = ac.createChannelMerger(2), level = kind === 'quiet' ? base / 2 : base;
+      osc.frequency.value = 200; osc.connect(env);
+      env.gain.setValueAtTime(0, t); env.gain.linearRampToValueAtTime(level, t + 0.1);
+      env.gain.setValueAtTime(level, t + dur - 0.1); env.gain.linearRampToValueAtTime(0, t + dur);
+      env.connect(merge, 0, 0);
+      inv.gain.value = kind === 'anti' ? -1 : 1; env.connect(inv); inv.connect(merge, 0, 1);
+      merge.connect(ac.destination);
+      osc.start(t); osc.stop(t + dur);
+      t += dur + gap;
+    });
+    setTimeout(function () { try { ac.close(); } catch (e) {} onDone(); }, (t - ac.currentTime) * 1000 + 100);
+  }
+
+  // Word check: records 16 kHz mono WAV in the browser, so the lab's Whisper server needs no converter.
+  function wavRecorder(stream) {
+    var Ctx = window.AudioContext || window.webkitAudioContext, ac = new Ctx(), src = ac.createMediaStreamSource(stream);
+    var proc = ac.createScriptProcessor(4096, 1, 1), bufs = [], t0 = now();
+    proc.onaudioprocess = function (e) { bufs.push(new Float32Array(e.inputBuffer.getChannelData(0))); };
+    src.connect(proc); proc.connect(ac.destination);
+    return {
+      stop: function () {
+        try { proc.disconnect(); src.disconnect(); } catch (e) {}
+        var rate = ac.sampleRate, n = bufs.reduce(function (s, b) { return s + b.length; }, 0), all = new Float32Array(n), o = 0;
+        bufs.forEach(function (b) { all.set(b, o); o += b.length; });
+        try { ac.close(); } catch (e) {}
+        var ratio = rate / 16000, m = Math.floor(n / ratio), pcm = new DataView(new ArrayBuffer(44 + m * 2));
+        function str(off, s) { for (var i = 0; i < s.length; i++) pcm.setUint8(off + i, s.charCodeAt(i)); }
+        str(0, 'RIFF'); pcm.setUint32(4, 36 + m * 2, true); str(8, 'WAVE'); str(12, 'fmt '); pcm.setUint32(16, 16, true); pcm.setUint16(20, 1, true); pcm.setUint16(22, 1, true);
+        pcm.setUint32(24, 16000, true); pcm.setUint32(28, 32000, true); pcm.setUint16(32, 2, true); pcm.setUint16(34, 16, true); str(36, 'data'); pcm.setUint32(40, m * 2, true);
+        for (var i = 0; i < m; i++) {   // average the samples that fall in each 16 kHz step
+          var a = Math.floor(i * ratio), z = Math.min(n, Math.floor((i + 1) * ratio)), s = 0;
+          for (var j = a; j < z; j++) s += all[j];
+          var v = Math.max(-1, Math.min(1, z > a ? s / (z - a) : 0));
+          pcm.setInt16(44 + i * 2, v < 0 ? v * 0x8000 : v * 0x7fff, true);
+        }
+        return { blob: new Blob([pcm.buffer], { type: 'audio/wav' }), durationMs: Math.round(now() - t0) };
+      }
+    };
+  }
+
+  function runCheck(ctx, ui) {
+    var it = ctx.trial.item, k = it.check || {}, esc = ui.esc, attempt = 1, t0 = now(), outages = 0;
+    var finish = function () { ctx.submit({ answers: {}, rtMs: Math.round(now() - t0) }, function (err) { var m = document.getElementById('mm-ckmsg'); if (m) m.innerHTML = ui.errorBox(err); }); };
+    var passed = function () {
+      ui.show('<h2>' + esc(it.title) + '</h2><p role="status">' + ui.Th('check_passed') + '</p><div class="actions"><button type="button" id="mm-ckgo">' + ui.Th('submit_button') + '</button></div><div id="mm-ckmsg"></div>');
+      document.getElementById('mm-ckgo').addEventListener('click', function () { this.disabled = true; finish(); });
+    };
+    var result = function (r, again) {
+      if (r && r.pass) return passed();
+      if (r && r.attemptsLeft > 0) { attempt++; return again(ui.Tp('check_retry')); }
+      finish();   // every attempt failed: the server screens the participant out when the item is saved
+    };
+
+    // A reload resumes the check where it stood (passed, or the next unused attempt).
+    var begin = function (fn) {
+      ui.call('check/status', { session: ctx.plan.session, index: ctx.index }).then(function (s) {
+        if (s && s.passed) return passed();
+        if (s && s.nextAttempt > s.attempts) return finish();
+        if (s && s.nextAttempt > 1) { attempt = s.nextAttempt; return fn(ui.Tp('check_retry')); }
+        fn('');
+      });
+    };
+
+    if (k.test === 'headphones') {
+      var round = function (note) {
+        var picks = [], r = 0, rounds = k.rounds[attempt - 1];
+        var one = function () {
+          ui.show('<h2>' + esc(it.title) + '</h2>' + (note || '') + ui.Tp('hp_body', { n: rounds.length }) +
+            '<p class="muted">' + (r + 1) + ' / ' + rounds.length + '</p><div class="actions"><button type="button" class="secondary" id="mm-hpplay">' + ui.Th('hp_play') + '</button></div>' +
+            '<fieldset class="mm-hp" disabled id="mm-hpset"><legend>' + ui.Th('hp_choose') + '</legend>' +
+            [1, 2, 3].map(function (n) { return '<button type="button" class="secondary" data-n="' + n + '">' + n + '</button>'; }).join(' ') + '</fieldset><div id="mm-ckmsg"></div>');
+          note = '';
+          var play = document.getElementById('mm-hpplay'), set = document.getElementById('mm-hpset');
+          play.addEventListener('click', function () { play.disabled = true; playTones(rounds[r], function () { set.disabled = false; }); });
+          set.addEventListener('click', function (e) {
+            var n = e.target && e.target.getAttribute('data-n'); if (!n || set.disabled) return;
+            set.disabled = true; picks.push(+n); ctx.record('hp_' + attempt + '_' + (r + 1), +n); r++;
+            if (r < rounds.length) return one();
+            ui.call('check/headphones', { session: ctx.plan.session, index: ctx.index, attempt: attempt, choices: picks }).then(function (res) {
+              if (res && res.error) { var m = document.getElementById('mm-ckmsg'); if (m) m.innerHTML = ui.errorBox(res.error); return; }
+              result(res, round);
+            });
+          });
+        };
+        one();
+      };
+      return begin(round);
+    }
+
+    // word
+    var word = function (note) {
+      ui.show('<h2>' + esc(it.title) + '</h2>' + (note || '') + ui.Tp('word_body') +
+        '<div class="actions split"><button type="button" class="secondary" id="mm-wplay">' + ui.Th('word_play') + '</button><button type="button" id="mm-wrec" disabled>' + ui.Th('word_record') + '</button></div><div id="mm-ckmsg" role="status"></div>');
+      var play = document.getElementById('mm-wplay'), recBtn = document.getElementById('mm-wrec'), msg = document.getElementById('mm-ckmsg'), rec = null, stream = null, auto = null;
+      play.addEventListener('click', function () {
+        play.disabled = true;
+        var a = new Audio(k.media[attempt - 1]); a.onended = a.onerror = function () { recBtn.disabled = false; }; a.play().catch(function () { recBtn.disabled = false; });
+      });
+      var stopRec = function () {
+        clearTimeout(auto); recBtn.disabled = true;
+        var out = rec.stop(); stream.getTracks().forEach(function (t) { t.stop(); });
+        blobToBase64(out.blob).then(function (b64) { return ui.call('check/word', { session: ctx.plan.session, index: ctx.index, attempt: attempt, data: b64, durationMs: out.durationMs }); }).then(function (res) {
+          if (res && res.error === 'asr_unavailable') {
+            outages++;
+            if (outages >= 2) { msg.innerHTML = '<p>' + ui.Th('check_server_down') + '</p><div class="actions"><button type="button" id="mm-ckgo">' + ui.Th('submit_button') + '</button></div>'; document.getElementById('mm-ckgo').addEventListener('click', finish); return; }
+            return word('');
+          }
+          if (res && res.error) { msg.innerHTML = ui.errorBox(res.error); return; }
+          ctx.record('word_' + attempt, res.pass ? 'pass' : 'fail');
+          result(res, word);
+        });
+      };
+      recBtn.addEventListener('click', function () {
+        if (rec) return stopRec();
+        getMic().then(function (s) {
+          if (!s) { micBlocked = false; msg.innerHTML = '<p>' + ui.Th('check_mic_needed') + '</p>'; return; }
+          stream = s; rec = wavRecorder(s); recBtn.textContent = ui.T('word_stop'); auto = setTimeout(stopRec, 5000);
+        });
+      });
+    };
+    begin(word);
+  }
+
   var impl = {
     runTrial: function (ctx, ui) {
       var it = ctx.trial.item;
+      if (it.kind === 'check') return runCheck(ctx, ui);
       if (needsSound(it) && !soundChecked[ctx.plan.session]) return soundCheck(ctx, ui, function () { impl.runTrial(ctx, ui); });
       if (it.kind === 'call') return runCall(ctx, ui);
       renderItem(ctx, ui);

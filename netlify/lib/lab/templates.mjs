@@ -6,6 +6,8 @@
 //
 // The sample clips and images live in static/lab/media/samples/ (made with scripts/lab-samples.sh).
 
+import { VISHING_STUDY2 } from './studies/vishing-study2.mjs';
+
 const S = '/lab/media/samples/';
 const AGREE7 = ['Strongly disagree', 'Disagree', 'Somewhat disagree', 'Neither agree nor disagree', 'Somewhat agree', 'Agree', 'Strongly agree'];
 const SUSP7 = ['Not at all suspicious', 'Slightly suspicious', 'Somewhat suspicious', 'Moderately suspicious', 'Quite suspicious', 'Very suspicious', 'Extremely suspicious'];
@@ -221,7 +223,9 @@ export const TEMPLATES = {
       enrollment: { open: false, domains: [], gapDays: 0, label: 'self-signup', panel: { enabled: true, param: 'PROLIFIC_PID', completionUrl: '', label: 'prolific' } },
       embedded: [{ name: 'prolific_pid', source: 'url', param: 'PROLIFIC_PID' }, { name: 'study_id', source: 'url', param: 'STUDY_ID' }, { name: 'session_id', source: 'url', param: 'SESSION_ID' }]
     })
-  }
+  },
+
+  'vishing-study2': VISHING_STUDY2
 };
 
 export const templateList = () => Object.entries(TEMPLATES).map(([id, t]) => ({ id, name: t.name, icon: t.icon, type: t.type, minutes: t.minutes, blurb: t.blurb }));

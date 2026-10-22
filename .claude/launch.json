@@ -6,6 +6,12 @@
       "runtimeExecutable": "hugo",
       "runtimeArgs": ["server", "--disableFastRender"],
       "port": 1313
+    },
+    {
+      "name": "CCAIR Lab",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["scripts/lab.mjs", "--no-open"],
+      "port": 8911
     }
   ]
 }

@@ -7,6 +7,13 @@
 //   call   a phone call from an AI voice caller (netlify/lib/lab/voicebot.mjs): the participant answers or
 //          declines, talks (speech recognition, or typing as a fallback), can hold, hang up, and look up a
 //          number in the directory and call it back
+//   check  an equipment check scored on the server: "headphones" (Woods et al. 2017 antiphase test: which of three
+//          tones is quietest) or "word" (hear a word, say it back; the lab's own Whisper server must hear it).
+//          Failing every attempt screens the participant out (a hard gate); a speech-server outage does not.
+// Screening: content.screening.rules [{ question, pass: [values] }] check start-of-session answers (for example
+// eligibility); an answer outside `pass` screens the participant out. design.assignAtSession (> 1) defers the arm
+// assignment to that session, so screened-out people never hold an arm; design.continuous runs the sessions as one
+// sitting.
 // After the stimulus an item can ask for a decision (for example accept / verify / refuse) laid out for mouse
 // tracking (start button at the bottom, options in the top corners), any of the study's questions, and a spoken
 // answer recorded from the microphone. Conditions are defined in the content and each item can have different
@@ -20,8 +27,10 @@ import { publicQuestions, evalDisplay, orderItems } from '../logic.mjs';
 import { getMany, setNew, deleteKeys } from '../store.mjs';
 import { trajectoryMetrics, cleanPoints } from '../trajectory.mjs';
 import * as bot from '../voicebot.mjs';
+import { transcribe, saidWord } from '../asr.mjs';
 
-const KINDS = ['text', 'image', 'audio', 'video', 'call'];
+const KINDS = ['text', 'image', 'audio', 'video', 'call', 'check'];
+const CHECKS = ['headphones', 'word'];
 const F = (group, key, label, def) => ({ group, key, label, def });
 const textFields = [
   F('Instructions', 'instr_intro', 'Instructions ({n} = items this session)', 'You will go through {n} short items: some to read, some to listen to or watch, and possibly a phone call. Take each one as it comes and answer the questions after it.'),
@@ -61,7 +70,22 @@ const textFields = [
   F('Device check', 'mic_body', 'Microphone check text', 'This study plays audio and may ask you to speak. Turn your volume up, then click Test sound. If you agreed to be recorded, your browser will ask to use your microphone: please allow it.'),
   F('Device check', 'mic_test', 'Test sound button', 'Test sound'),
   F('Device check', 'mic_ok', 'Continue button', 'Sound works, continue'),
-  F('Device check', 'mic_denied', 'Microphone blocked', 'Your microphone is blocked, so you will type instead of speaking. That is fine.')
+  F('Device check', 'mic_denied', 'Microphone blocked', 'Your microphone is blocked, so you will type instead of speaking. That is fine.'),
+  F('Equipment check', 'hp_body', 'Headphone check text', 'Put on your headphones. You will hear three tones. Choose the one that is quietest. There are {n} rounds.'),
+  F('Equipment check', 'hp_play', 'Play tones button', 'Play the tones'),
+  F('Equipment check', 'hp_choose', 'Question', 'Which tone was the quietest?'),
+  F('Equipment check', 'word_body', 'Word check text', 'You will hear one word. After it plays, click Record, say the word out loud, then click Stop.'),
+  F('Equipment check', 'word_play', 'Play word button', 'Play the word'),
+  F('Equipment check', 'word_record', 'Record button', 'Record'),
+  F('Equipment check', 'word_stop', 'Stop button', 'Stop'),
+  F('Equipment check', 'check_retry', 'One more try', 'That did not work. Please check your headphones and microphone and try once more.'),
+  F('Equipment check', 'check_passed', 'Passed', 'Thanks, that worked.'),
+  F('Equipment check', 'check_mic_needed', 'Microphone needed', 'This study needs your microphone. Please allow it in your browser and try again.'),
+  F('Equipment check', 'check_server_down', 'Speech server unavailable', 'Our speech system is not responding right now. You can continue.'),
+  F('One sitting', 'continuous_title', 'Start screen title (sessions run as one sitting)', 'Before you begin'),
+  F('One sitting', 'continuous_button', 'Start button', 'Begin'),
+  F('Screened out', 'screenout_title', 'Title', 'Thank you for your interest'),
+  F('Screened out', 'screenout_body', 'Text', 'Unfortunately you are not able to take part in this study. Please return to Prolific using the button below. Thank you for your time.')
 ];
 
 const str = (v, max = 4000) => typeof v === 'string' && v.trim().length > 0 && v.length <= max;
@@ -83,9 +107,25 @@ function resolve(item, condition) {
     if (v.caller) out.call.caller = v.caller;
     if (v.number) out.call.number = v.number;
   }
+  if (item.kind === 'check' && item.check) out.check = item.check;
   out.variant = Object.keys(v).length ? condition : '';
   return out;
 }
+
+// Equipment checks: what the server decides when the session starts (the order of tones, the words to say).
+// Woods et al. (2017): each round plays a standard tone, the same tone in antiphase (quiet over loudspeakers,
+// not over headphones), and a tone 6 dB quieter; the quieter one is the answer.
+function checkPlan(check, rand) {
+  const attempts = check.attempts || 2;
+  if (check.test === 'headphones') {
+    const order = () => { const a = ['std', 'anti', 'quiet']; for (let i = 2; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+    return { test: 'headphones', attempts, pass: check.pass || 2, rounds: Array.from({ length: attempts }, () => Array.from({ length: check.trials || 3 }, order)) };
+  }
+  const pool = (check.words || []).slice(), picks = [];
+  for (let i = 0; i < attempts && pool.length; i++) picks.push(pool.splice(Math.floor(rand() * pool.length), 1)[0]);
+  return { test: 'word', attempts: picks.length, words: picks };
+}
+const checkKey = (tag, test, attempt) => `checks/${tag}/${test}-${attempt}`;
 const questionsFor = (plan, t) => {
   const all = plan.questions || [], ask = t.item.ask;
   if (ask === 'none') return [];
@@ -105,7 +145,8 @@ function validateOptions(list, e, where) {
 }
 function validateItem(it, e, conds, qids, where) {
   if (!str(it.title, 200)) e.push(`${where}: a title is required.`);
-  if (!KINDS.includes(it.kind)) { e.push(`${where}: choose what kind of item it is (text, image, audio, video, or call).`); return; }
+  if (!KINDS.includes(it.kind)) { e.push(`${where}: choose what kind of item it is (text, image, audio, video, call, or check).`); return; }
+  if (it.kind === 'check' && it.decide) e.push(`${where}: an equipment check cannot ask for a decision.`);
   if (it.kind === 'text' && !str(it.body, 20000)) e.push(`${where}: the text is empty.`);
   if (['image', 'audio', 'video'].includes(it.kind)) {
     if (!str(it.media, 2000)) e.push(`${where}: add the ${it.kind} file (upload it, or paste an https:// address).`);
@@ -117,6 +158,16 @@ function validateItem(it, e, conds, qids, where) {
   if (it.decisionOptions && it.decisionOptions.length) validateOptions(it.decisionOptions, e, `${where}, decision`);
   if (Array.isArray(it.ask)) { const bad = it.ask.filter(q => !qids.includes(q)); if (bad.length) e.push(`${where}: asks questions that do not exist (${bad.join(', ')}).`); }
   else if (it.ask != null && !['all', 'none'].includes(it.ask)) e.push(`${where}: choose which questions to ask.`);
+  if (it.kind === 'check') {
+    const k = it.check;
+    if (!k || !CHECKS.includes(k.test)) e.push(`${where}: choose which check this is (headphones or word).`);
+    else if (k.attempts != null && !int(k.attempts, 1, 3)) e.push(`${where}: allow 1 to 3 attempts.`);
+    else if (k.test === 'headphones' && ((k.trials != null && !int(k.trials, 1, 6)) || (k.pass != null && !int(k.pass, 1, k.trials || 3)))) e.push(`${where}: use 1 to 6 rounds, and a pass mark no higher than the rounds.`);
+    else if (k.test === 'word') {
+      if (!Array.isArray(k.words) || k.words.length < (k.attempts || 2)) e.push(`${where}: give at least one word per attempt.`);
+      else k.words.forEach((w, i) => { if (!w || !/^[a-z]{3,20}$/.test(w.word || '') || !MEDIA_RE.test(w.media || '')) e.push(`${where}: word ${i + 1} needs a lowercase word and its audio file.`); });
+    }
+  }
   if (it.kind === 'call') {
     const c = it.call;
     if (!c || typeof c !== 'object') { e.push(`${where}: the call settings are missing.`); return; }
@@ -215,6 +266,69 @@ async function callBack(S, pid, body, now) {
   else say = entry.greeting || `Thank you for calling ${entry.name}. How can I help you today?`;
   await S.store.set(`callbacks/${ctx.tag}/${now}-${randomBytes(2).toString('hex')}`, { at: now, number: dialed, listed: !!entry, name: entry ? entry.name : null, resolves });
   return { say, name: entry ? entry.name : null };
+}
+
+// Equipment checks. Attempts run in order and each is written once; attempt n+1 is allowed only after n failed.
+async function checkContext(S, pid, body, test) {
+  const ctx = await trialContext(S, pid, body);
+  if (ctx.error) return ctx;
+  const plan = ctx.trial.checkPlan;
+  if (ctx.trial.item.kind !== 'check' || !plan || plan.test !== test) return { error: 'not_a_check', status: 400 };
+  const attempt = Number(body.attempt);
+  if (!int(attempt, 1, plan.attempts)) return { error: 'bad_attempt', status: 400 };
+  const prior = (await getMany(S.store, Array.from({ length: plan.attempts }, (_, i) => checkKey(ctx.tag, test, i + 1)))).map(([, v]) => v);
+  if (prior.some(v => v && v.pass)) return { error: 'already_passed', status: 409 };
+  if (prior[attempt - 1]) return { ...ctx, plan, attempt, repeat: prior[attempt - 1] };
+  if (attempt > 1 && !prior[attempt - 2]) return { error: 'out_of_order', status: 409 };
+  return { ...ctx, plan, attempt };
+}
+// Where a check stands, so a reload resumes it: { passed, nextAttempt } (nextAttempt > attempts: all used).
+async function checkStatus(S, pid, body) {
+  const ctx = await trialContext(S, pid, body);
+  if (ctx.error) return ctx;
+  const plan = ctx.trial.checkPlan;
+  if (!plan) return { error: 'not_a_check', status: 400 };
+  const got = (await getMany(S.store, Array.from({ length: plan.attempts }, (_, i) => checkKey(ctx.tag, plan.test, i + 1)))).map(([, v]) => v);
+  const used = got.findIndex(v => !v);
+  return { passed: got.some(v => v && v.pass), nextAttempt: used < 0 ? plan.attempts + 1 : used + 1, attempts: plan.attempts };
+}
+async function checkHeadphones(S, pid, body, now) {
+  const ctx = await checkContext(S, pid, body, 'headphones');
+  if (ctx.error) return ctx;
+  if (ctx.repeat) return { pass: ctx.repeat.pass, attemptsLeft: ctx.plan.attempts - ctx.attempt };
+  const rounds = ctx.plan.rounds[ctx.attempt - 1], picks = Array.isArray(body.choices) ? body.choices.slice(0, rounds.length).map(Number) : [];
+  if (picks.length !== rounds.length || !picks.every(x => int(x, 1, 3))) return { error: 'bad_choices', status: 400 };
+  const correct = picks.filter((x, i) => rounds[i][x - 1] === 'quiet').length, pass = correct >= ctx.plan.pass;
+  await setNew(S.store, checkKey(ctx.tag, 'headphones', ctx.attempt), { at: now, picks, correct, pass, chose: picks.map((x, i) => rounds[i][x - 1]) });
+  return { pass, attemptsLeft: pass ? 0 : ctx.plan.attempts - ctx.attempt };
+}
+async function checkWord(S, pid, body, now) {
+  const ctx = await checkContext(S, pid, body, 'word');
+  if (ctx.error) return ctx;
+  if (ctx.repeat) return { pass: ctx.repeat.pass, attemptsLeft: ctx.plan.attempts - ctx.attempt };
+  const data = typeof body.data === 'string' ? body.data : '';
+  if (!data || !/^[A-Za-z0-9+/=]+$/.test(data) || data.length > 1_000_000) return { error: 'bad_data', status: 400 };
+  const buf = Buffer.from(data, 'base64');
+  if (!buf.subarray(0, 4).toString('latin1').startsWith('RIFF')) return { error: 'bad_data', status: 400 };
+  const target = ctx.plan.words[ctx.attempt - 1].word, r = await transcribe(buf);
+  // An outage is the lab's problem, not the participant's: it is logged and never counts as a failed attempt.
+  if (r.error) {
+    await S.store.set(`${checkKey(ctx.tag, 'word', ctx.attempt)}-down-${now}${randomBytes(2).toString('hex')}`, { at: now, error: r.error, ms: r.ms ?? null });
+    return { error: 'asr_unavailable', status: 503 };
+  }
+  const pass = saidWord(r.text, target);
+  await setNew(S.store, checkKey(ctx.tag, 'word', ctx.attempt), { at: now, word: target, heard: bot.redact(r.text).slice(0, 200), pass, asrMs: r.ms, durationMs: num(body.durationMs, 0, 6e4) });
+  return { pass, heard: r.text.slice(0, 200), attemptsLeft: pass ? 0 : ctx.plan.attempts - ctx.attempt };
+}
+// The server's record of a check, attached to the item's answer when it is saved. passed: true (an attempt passed),
+// null (no pass, but the speech server was down at least once: the participant continues and is flagged), or false
+// (anything else, including leaving the check without trying: the participant is screened out).
+async function checkSummary(S, tag, plan) {
+  const keys = Array.from({ length: plan.attempts }, (_, i) => checkKey(tag, plan.test, i + 1));
+  const got = (await getMany(S.store, keys)).map(([, v]) => v).filter(Boolean);
+  const outages = (await S.store.list(`checks/${tag}/${plan.test}-`)).filter(k => /-down-\d+[0-9a-f]{4}$/.test(k)).length;
+  const passed = got.some(v => v.pass) ? true : outages > 0 ? null : false;
+  return { test: plan.test, attempts: got.length, passed, outages, ...(plan.test === 'headphones' ? { correct: got.map(v => v.correct) } : { heard: got.map(v => v.heard) }) };
 }
 
 // Participant audio (a call, or a spoken answer): only with recording consent; one file per item and kind, write-once.
@@ -318,13 +432,22 @@ export default {
   id: 'multimodal',
   label: 'Media, voice, and conversations (multimodal)',
   description: 'Text, images, audio and video clips, and phone calls with an AI voice caller, in blocks shown in order or shuffled, with per-condition wording and media. Each item can ask for a mouse-tracked decision, any questions, and a spoken answer. Records play behavior, decision paths, answer changes, call transcripts, and (with consent) participant audio.',
-  contentKeys: ['design', 'items', 'practice', 'questions', 'decision', 'directory'],
+  contentKeys: ['design', 'items', 'practice', 'questions', 'decision', 'directory', 'screening'],
   textFields,
   surveyRules: [],
   conditionsOf: c => (c.design?.conditions || []).map(x => x.id),
   sessionCount: c => c.design.sessions.length,
+  assignAtSession: c => c.design?.assignAtSession || 1,
+  publicContent: c => ({ continuous: !!c.design?.continuous }),
+  // Engine hooks: eligibility answers (start-of-session survey) and failed equipment checks end the study.
+  screenSurvey(c, kind, session, answers) {
+    if (kind !== 'pre') return null;
+    const bad = (c.screening?.rules || []).find(r => (r.session || 1) === session && !(r.pass || []).includes(answers[r.question]));
+    return bad ? `ineligible:${bad.question}` : null;
+  },
+  screenOutReason: rec => rec.item?.kind === 'check' && rec.data?.checkServer?.passed === false ? `check_failed:${rec.data.checkServer.test}` : null,
   editorMeta: () => ({ llm: bot.llmConfigured(), scripts: { attack: bot.defaultScript('attack'), benign: bot.defaultScript('benign') }, maxUploadMb: Math.floor(MAX_AUDIO_B64 * 0.75 / 1e5) / 10 }),
-  routes: { 'call/turn': callTurn, 'call/callback': callBack, 'media/upload': mediaUpload },
+  routes: { 'call/turn': callTurn, 'call/callback': callBack, 'media/upload': mediaUpload, 'check/headphones': checkHeadphones, 'check/word': checkWord, 'check/status': checkStatus },
   adminRoutes,
 
   defaultContent() {
@@ -340,6 +463,7 @@ export default {
       ],
       practice: { id: 'practice', title: 'Practice', kind: 'text', body: 'A coworker asks to borrow your stapler for a meeting.', media: '', mediaAlt: '', transcript: '', decide: true, ask: 'none', variants: {} },
       questions: [{ id: 'confidence', text: 'How confident are you in that choice?', type: 'confidence', required: true, showIf: 'always', conditions: [] }],
+      screening: { rules: [] },
       survey: { pre: [], post: [] }
     };
   },
@@ -352,9 +476,10 @@ export default {
     for (const it of (c.items || []).concat(c.practice ? [c.practice] : [])) {
       it.variants = it.variants || {}; it.kind = it.kind || 'text';
       if (it.ask == null) it.ask = 'all';
-      if (it.decide == null) it.decide = it.kind !== 'text';
+      if (it.decide == null) it.decide = it.kind !== 'text' && it.kind !== 'check';
     }
     for (const q of c.questions || []) { if (!Array.isArray(q.conditions)) q.conditions = []; if (!q.showIf) q.showIf = 'always'; }
+    c.screening = { rules: Array.isArray(c.screening?.rules) ? c.screening.rules : [] };
   },
 
   validate(c, e) {
@@ -392,6 +517,18 @@ export default {
     });
     const rec = c.consent && c.consent.recording;
     if ((c.items || []).some(it => it.recordVoice) && !(rec && rec.enabled)) e.push('An item records a spoken answer, so turn on recording consent (Sign-up & consent tab).');
+    const nS = d && Array.isArray(d.sessions) ? d.sessions.length : 1;
+    if (d && d.assignAtSession != null && !int(d.assignAtSession, 1, nS)) e.push(`Assign the arm at a session from 1 to ${nS}.`);
+    if (d && d.assignAtSession > 1) {
+      const early = d.sessions.slice(0, d.assignAtSession - 1).flatMap(s => s.blocks.flatMap(b => b.items));
+      const armed = (c.items || []).filter(it => early.includes(it.id) && Object.keys(it.variants || {}).length).map(it => it.id);
+      if (armed.length) e.push(`Items before the arm is assigned cannot vary by arm (${armed.join(', ')}).`);
+    }
+    const preIds = (c.survey?.pre || []).map(q => q.id);
+    (c.screening?.rules || []).forEach((r, i) => {
+      if (!r || !preIds.includes(r.question)) e.push(`Screening rule ${i + 1}: choose a start-of-session question.`);
+      else if (!Array.isArray(r.pass) || !r.pass.length) e.push(`Screening rule ${i + 1}: list the answers that may continue.`);
+    });
     validateQuestions(c.questions || [], 'Item question', e, { nSessions: 99, conditions: conds, rules: [], allowSessions: false, embedded: (c.embedded || []).map(x => x && x.name) });
   },
 
@@ -399,7 +536,7 @@ export default {
     const spec = c.design.sessions[session - 1], byId = new Map((c.items || []).map(x => [x.id, x]));
     const order = spec.blocks.flatMap((b, bi) => { const its = b.items.map(id => byId.get(id)).filter(Boolean).map(it => ({ it, block: bi + 1 })); return b.randomize ? shuffle(its, rand) : its; });
     const questions = (c.questions || []).filter(q => !q.conditions.length || q.conditions.includes(p.condition));
-    const make = (it, i, block) => { const item = resolve(it, p.condition); return { index: i, itemId: it.id, block, item, decision: decisionOf(c, item) }; };
+    const make = (it, i, block) => { const item = resolve(it, p.condition); return { index: i, itemId: it.id, block, item, decision: decisionOf(c, item), ...(item.kind === 'check' && item.check ? { checkPlan: checkPlan(item.check, rand) } : {}) }; };
     return {
       questions, directory: (c.directory || []).map(x => ({ name: x.name, number: x.number, greeting: x.greeting || '' })),
       recording: !!(c.consent && c.consent.recording && c.consent.recording.enabled && p.recordingConsent),
@@ -411,8 +548,11 @@ export default {
   // What the browser gets: never the item ID, the condition's variant name, or a call's script and intent
   // (the caller's lines arrive one at a time from call/turn).
   publicTrial(t, plan) {
-    const { id, variant, call, ...item } = t.item;
+    const { id, variant, call, check, ...item } = t.item;
     if (call) item.call = { caller: call.caller, number: call.number || '', ringSeconds: call.ringSeconds || 30, voice: call.voice || null };
+    // A check gets what the browser must play (tone orders, word audio), never the words themselves.
+    const k = t.checkPlan;
+    if (k) item.check = k.test === 'headphones' ? { test: k.test, attempts: k.attempts, rounds: k.rounds } : { test: k.test, attempts: k.attempts, media: k.words.map(w => w.media) };
     item.ask = questionsFor(plan, t).map(q => q.id);
     return { item, block: t.block, decision: t.decision };
   },
@@ -422,10 +562,14 @@ export default {
   // sent under that name is replaced. Returns nothing, so the engine saves as usual.
   saveTrialHook: async (S, p, plan, index, data) => {
     const t = plan.trials[index];
-    if (data && typeof data === 'object') data.callServer = t && t.item.kind === 'call' ? await callSummary(S, `${p.code}/s${plan.session}/t${index}`) : null;
+    const tag = `${p.code}/s${plan.session}/t${index}`;
+    if (data && typeof data === 'object') {
+      data.callServer = t && t.item.kind === 'call' ? await callSummary(S, tag) : null;
+      data.checkServer = t && t.checkPlan ? await checkSummary(S, tag, t.checkPlan) : null;
+    }
     return null;
   },
-  purgeParticipant: async (S, p) => (await Promise.all([`calls/${p.code}/`, `callbacks/${p.code}/`, `audio/${p.code}/`].map(k => S.store.list(k)))).flat(),
+  purgeParticipant: async (S, p) => (await Promise.all([`calls/${p.code}/`, `callbacks/${p.code}/`, `audio/${p.code}/`, `checks/${p.code}/`].map(k => S.store.list(k)))).flat(),
 
   cleanTrialData(d, t, plan) {
     d = d && typeof d === 'object' ? d : {};
@@ -445,7 +589,7 @@ export default {
     return {
       answers: cleanAnswers(d.answers, questionsFor(plan, t), { condition: plan.condition, embedded: plan.embedded }),
       decision, decisionMs: decision ? num(d.decisionMs, 0, 864e5) : null, trajectory: points.length ? points : null, mt: points.length ? trajectoryMetrics(points) : null,
-      rtMs: num(d.rtMs, 0, 864e5), answerLog, traces: small(d.traces, 50000), media, call, callServer: small(d.callServer, 4000),
+      rtMs: num(d.rtMs, 0, 864e5), answerLog, traces: small(d.traces, 50000), media, call, callServer: small(d.callServer, 4000), checkServer: small(d.checkServer, 2000),
       voice: v ? { recorded: v.recorded === true && !!plan.recording, durationMs: num(v.durationMs, 0, 36e5), typed: typeof v.typed === 'string' ? v.typed.slice(0, 4000) : '' } : null,
       viewport: d.viewport ? { w: num(d.viewport.w, 0, 20000), h: num(d.viewport.h, 0, 20000) } : null, device: small(d.device, 4000), selfTest: d.selfTest === true || undefined
     };
@@ -465,7 +609,8 @@ export default {
       call_answered: d.callServer ? (cs.answered ? 1 : 0) : '', call_outcome: cs.outcome || '', call_final_state: cs.finalState || '', call_turns: cs.participantTurns ?? '',
       call_digits_disclosed: cs.digitsDisclosed ?? '', call_verifies: cs.verifies ?? '', call_refusals: cs.refusals ?? '', call_callbacks: cs.callbacks ?? '', call_callback_resolved: d.callServer ? (cs.callbackResolved ? 1 : 0) : '',
       call_duration_ms: c.durationMs ?? '', call_hold_ms: c.holdMs ?? '', call_median_latency_ms: cs.medianLatencyMs ?? '', call_llm_turns: cs.llmTurns ?? '', call_typed_turns: c.typedTurns ?? '', call_interruptions: c.interruptions ?? '', call_captions: d.call ? (c.captions ? 1 : 0) : '', call_directory_opened: d.call ? (c.directoryOpened ? 1 : 0) : '',
-      voice_recorded: d.voice ? (d.voice.recorded ? 1 : 0) : '', voice_ms: d.voice?.durationMs ?? '', voice_typed: d.voice?.typed || '' };
+      voice_recorded: d.voice ? (d.voice.recorded ? 1 : 0) : '', voice_ms: d.voice?.durationMs ?? '', voice_typed: d.voice?.typed || '',
+      check_test: d.checkServer?.test || '', check_passed: d.checkServer ? (d.checkServer.passed == null ? '' : d.checkServer.passed ? 1 : 0) : '', check_attempts: d.checkServer?.attempts ?? '', check_outages: d.checkServer?.outages ?? '' };
     for (const q of r.questions || Object.keys(d.answers || {})) row[`a_${q}`] = (d.answers || {})[q] ?? '';
     return row;
   },

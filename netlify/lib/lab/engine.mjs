@@ -13,6 +13,7 @@
 //   data/{id}/s{n}/practice | survey-pre | survey-post
 //   contact/{id}                 the email (extra credit only; never in research exports)
 //   cond/{condition}/{id}, cond-test/{condition}/{id}   assignment counts (minimization)
+//   screenout/{id}               write-once: the participant was screened out (reason, time)
 //   meta/pepper, content/*, admins/*, audit/*, selftest/*
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { setNew, update, getMany, inBatches, deleteKeys } from './store.mjs';
@@ -126,6 +127,7 @@ export function totalFor(S, p, c, prog) {
   return total;
 }
 export function status(p, now, total, completed) {
+  if (p.screenedOut) return { finished: true, screenedOut: true, completed: completed.length, total };
   const next = completed.length + 1;
   if (next > total) return { finished: true, completed: completed.length, total };
   const last = completed[completed.length - 1];
@@ -256,7 +258,7 @@ export function publicPlan(S, plan, state) {
 }
 
 export async function startSession(S, code, now = Date.now(), extra = {}) {
-  const p = await loadParticipant(S, code);
+  let p = await loadParticipant(S, code);
   if (!p) return { error: 'invalid_code', status: 401 };
   if (!p.consentedAt && !(await S.store.get(`consent/${p.code}`))) return { error: 'no_consent', status: 403 };
   const c = await getContent(S.store, S.type), prog = await progressOf(S, p);
@@ -264,6 +266,7 @@ export async function startSession(S, code, now = Date.now(), extra = {}) {
   if (st.finished) return { error: 'finished', status: 409 };
   if (!st.available) return { error: 'not_yet', status: 409, availableAt: st.availableAt };
   const n = st.nextSession;
+  if (!p.condition && n >= assignAt(S, c)) p = await assignNow(S, p, now);
   let plan = await getPlan(S, p, n);
   if (!plan) {   // written once: whoever writes first wins and everyone reads that copy
     if (await setNew(S.store, planKey(p.code, n), buildPlan(S, p, n, c, extra))) await S.store.set(`started/${p.code}/s${n}-${now}`, { at: now });
@@ -305,6 +308,9 @@ export async function saveTrial(S, code, session, index, data, now = Date.now())
     const rec = { code: p.code, condition: p.condition, session, index, ...S.type.recordFields(t, plan), contentVersion: plan.contentVersion, receivedAt: now, data: clean };
     if (!(await setNew(store, key, rec))) return { ok: true, repeat: true };
     if (raw.length && jsonSize(raw) <= 3e6) await store.set(`raw/${p.code}/s${session}/t${index}`, { code: p.code, session, index, events: raw });
+    // A gate item (for example an equipment check) can end the study for this participant.
+    const why = S.type.screenOutReason ? S.type.screenOutReason(rec, t) : null;
+    if (why) { await screenOut(S, p.code, why, now); return { ok: true, screenedOut: true }; }
   } else if (!(await setNew(store, key, { code: p.code, session, contentVersion: plan.contentVersion, receivedAt: now, data: clean }))) return { ok: true, repeat: true };
   return { ok: true };
 }
@@ -323,8 +329,11 @@ export async function saveSurvey(S, code, session, kind, data, now = Date.now())
   const created = await setNew(store, key, { code: p.code, condition: p.condition, session, kind, contentVersion: plan.contentVersion, receivedAt: now,
     ...(plan.embedded && Object.keys(plan.embedded).length ? { embedded: plan.embedded } : {}), data: cleanAnswers(data, items, { condition: p.condition, embedded: plan.embedded }) });
   if (created && kind === 'post') await store.set(`done/${p.code}/s${session}-${now}`, { at: now });
+  // Screening questions (for example eligibility): the type's rules decide whether these answers end the study.
+  const why = created && S.type.screenSurvey ? S.type.screenSurvey(c, kind, session, (await store.get(key))?.data || {}) : null;
+  const pNow = why ? await screenOut(S, p.code, why, now) : p;
   const after = await progressOf(S, p);
-  return { ok: true, repeat: !created || undefined, status: status(p, now, totalFor(S, p, c, after), after.completed) };
+  return { ok: true, repeat: !created || undefined, ...(why ? { screenedOut: true } : {}), status: status(pNow || p, now, totalFor(S, p, c, after), after.completed) };
 }
 
 // ---------- enrollment ----------
@@ -339,15 +348,34 @@ async function pickCondition(S, test, rand) {
 
 export async function enroll(S, ids, opts, now, rand) {
   const made = [];
-  const conds = opts.condition ? S.type.conditionsOf(await getContent(S.store, S.type)) : [];
+  const c = await getContent(S.store, S.type), conds = S.type.conditionsOf(c), defer = assignAt(S, c) > 1;
   for (const id of ids) {
     // A fixed condition is only for test participants (previewing one arm); real ones are always balanced.
-    const condition = opts.test && conds.includes(opts.condition) ? opts.condition : await pickCondition(S, !!opts.test, rand);
+    const fixed = opts.test && conds.includes(opts.condition) ? opts.condition : null;
+    const condition = fixed || (defer ? null : await pickCondition(S, !!opts.test, rand));
     const p = { code: id, condition, createdAt: now, gapDays: opts.gapDays ?? DEFAULT_GAP, label: opts.label || null, test: !!opts.test, selfSignup: !!opts.selfSignup };
-    if (await setNew(S.store, pKey(id), p)) { await S.store.set(`${p.test ? 'cond-test' : 'cond'}/${condition}/${id}`, { at: now }); made.push(p); }
+    if (await setNew(S.store, pKey(id), p)) { if (condition) await S.store.set(`${p.test ? 'cond-test' : 'cond'}/${condition}/${id}`, { at: now }); made.push(p); }
     else made.push(await S.store.get(pKey(id)));
   }
   return made;
+}
+
+// Deferred assignment: a study whose type says so (assignAtSession > 1) picks the arm when the participant starts
+// that session, so people screened out in earlier sessions never hold an arm or count toward one.
+const assignAt = (S, c) => (S.type.assignAtSession ? S.type.assignAtSession(c) : 1);
+async function assignNow(S, p, now, rand = Math.random) {
+  const condition = await pickCondition(S, !!p.test, rand);
+  const u = await update(S.store, pKey(p.code), d => { if (!d.condition) d.condition = condition; });
+  const rec = u.value || p;
+  if (rec.condition === condition) await setNew(S.store, `${p.test ? 'cond-test' : 'cond'}/${condition}/${p.code}`, { at: now });
+  return rec;
+}
+
+// Screening out: the participant ends here (status reports finished and screenedOut); the reason is kept.
+export async function screenOut(S, code, reason, now = Date.now()) {
+  await setNew(S.store, `screenout/${code}`, { at: now, reason: String(reason).slice(0, 80) });
+  const u = await update(S.store, pKey(code), d => { if (!d.screenedOut) d.screenedOut = { at: now, reason: String(reason).slice(0, 80) }; });
+  return u.value;
 }
 
 export async function createParticipants(S, count, opts = {}, now = Date.now(), rand = Math.random) {
@@ -407,6 +435,7 @@ export async function listParticipants(S, now = Date.now()) {
     const cur = st.nextSession && prog.sessions[st.nextSession];
     const plan = cur && cur.startedAt ? await getPlan(S, p, st.nextSession) : null;
     return { code: p.code, type: PID_RE.test(p.code) ? (p.selfSignup ? 'email (self)' : 'email') : 'code', condition: p.condition, label: p.label, test: !!p.test, gapDays: p.gapDays, consented: !!p.consentedAt, declined: !!p.declinedAt,
+      screenedOut: p.screenedOut ? p.screenedOut.reason : null,
       completedSessions: st.completed, nextSession: st.nextSession || null, availableAt: st.availableAt || null, lastSeenAt: p.lastSeenAt || null,
       totalSessions: total, inProgress: cur ? cur.trialsDone.length : 0, inProgressOf: plan ? plan.trials.length : 0 };
   });
