@@ -385,14 +385,49 @@
       document.getElementById('go').addEventListener('click', function () { this.disabled = true; startSession(); });
     }
     document.getElementById('out').addEventListener('click', signOut);
+    if (S.content.panel) stopLink();
   }
   function showFinished(st) {
     progress.textContent = '';
-    var back = S.content.panel && S.content.panel.completionUrl && /^https:\/\//.test(S.content.panel.completionUrl) ? S.content.panel.completionUrl : '';
-    show('<h1>' + Th('finished_title') + '</h1>' + (st && st.total ? tracker(st.total, st.total, 0) : '') + Tp('finished_body') +
-      (back ? '<div class="actions"><a class="btn" href="' + esc(back) + '" rel="noopener">Return to Prolific to record your completion</a></div>' : '') +
+    if (st && st.returned) return showReturned();
+    show('<h1>' + Th('finished_title') + '</h1>' + (st && st.total ? tracker(st.total, st.total, 0) : '') + Tp('finished_body') + '<div id="handoff" aria-live="polite"></div>' +
       '<div class="actions"><button class="secondary" id="out">' + Th('sign_out') + '</button></div>');
     document.getElementById('out').addEventListener('click', signOut);
+    handoff();
+  }
+  // ---------- hand-off to the recruitment panel ----------
+  // The server sends the code for the outcome reached (completed, screened out, returned) only once it is reached,
+  // with the address back to the panel (Prolific, SONA, ...). No automatic redirect: the participant reads the code
+  // and follows the link when ready (no time limit, WCAG 2.2.1).
+  function handoff() {
+    var box = document.getElementById('handoff');
+    if (!box || !S.token) return;
+    api('handoff', { token: S.token }).then(function (r) {
+      if (!r || r.error || !r.outcome || (!r.code && !r.url)) return;
+      var where = r.panel || 'the study site';
+      box.innerHTML = (r.code ? '<p>' + Th('handoff_code') + '</p><p class="handoff-code"><code id="hcode">' + esc(r.code) + '</code> <button type="button" class="secondary small" id="hcopy">Copy code</button></p>' : '') +
+        (r.url ? '<div class="actions"><a class="btn" href="' + esc(r.url) + '" rel="noopener">' + esc(T('handoff_button').replace('{panel}', where)) + '</a></div>' : '');
+      var cp = document.getElementById('hcopy');
+      if (cp) cp.addEventListener('click', function () {
+        (navigator.clipboard ? navigator.clipboard.writeText(r.code) : Promise.reject()).then(function () { cp.textContent = 'Copied'; }, function () { cp.textContent = 'Select the code and copy it'; });
+      });
+    });
+  }
+  // "Stop taking part": panel participants can leave at any time and get the panel's "returned" code.
+  function stopLink() {
+    var a = document.createElement('p'); a.className = 'muted stop-note';
+    a.innerHTML = '<button type="button" class="linklike" id="stop">' + Th('stop_link') + '</button>';
+    stage.appendChild(a);
+    document.getElementById('stop').addEventListener('click', function () {
+      show('<h1>' + Th('stop_title') + '</h1>' + Tp('stop_body') + '<div class="actions split"><button class="secondary" id="keep">' + Th('stop_keep') + '</button><button id="yes">' + Th('stop_confirm') + '</button></div>');
+      document.getElementById('keep').addEventListener('click', refresh);
+      document.getElementById('yes').addEventListener('click', function () { this.disabled = true; api('withdraw', { token: S.token }).then(function () { showReturned(); }); });
+    });
+  }
+  function showReturned() {
+    progress.textContent = ''; S.lab = null;
+    show('<h1>' + Th('returned_title') + '</h1>' + Tp('returned_body') + '<div id="handoff" aria-live="polite"></div>');
+    handoff();
   }
   function signOut() { store(tokenKey, null); S.token = null; showLogin(); }
   // Add-to-calendar file for the next session (Dillman et al. 2014: lower the cost of coming back).
@@ -562,7 +597,7 @@
         if (panelId) {
           embeddedFromUrl();   // keep the link's embedded data (for example STUDY_ID) for this tab, then take the ID out of the address bar
           try { history.replaceState(null, '', location.pathname); } catch (e) {}
-          return signIn({ panelId: panelId });
+          return signIn({ panelId: panelId, panelStudy: panel.studyParam ? qs.get(panel.studyParam) || undefined : undefined, panelSession: panel.sessionParam ? qs.get(panel.sessionParam) || undefined : undefined });
         }
         if (S.token) refresh(); else showLogin();
       };

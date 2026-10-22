@@ -426,7 +426,7 @@
     if (draft && !force) return renderEditor();
     Promise.all([getJSON('content'), getJSON('content-history'), getJSON('participants')]).then(function (res) {
       var c = res[0];
-      META = { text: c._textFields, type: c._meta || {}, conditions: c._conditions || [], rules: c._surveyRules || [], qtypes: c._questionTypes || Object.keys(QTYPE_LABEL) };
+      META = { text: c._textFields, type: c._meta || {}, conditions: c._conditions || [], rules: c._surveyRules || [], qtypes: c._questionTypes || Object.keys(QTYPE_LABEL), presets: c._panelPresets || [] };
       Object.keys(c).forEach(function (k) { if (k[0] === '_') delete c[k]; });
       saved = c; draft = clone(saved); A.draft = draft; setDirty(false);
       if (!sub || !subs().some(function (s) { return s[0] === sub; })) sub = subs()[0][0];
@@ -532,6 +532,30 @@
     markDirty: function () { setDirty(true); }, rerender: function () { renderEditor(); }, goto: function (s) { sub = s; renderEditor(); }, readFile: readFile, fmt: fmt,
     api: { getJSON: getJSON, postJSON: postJSON } };
 
+  // Online panel: a preset fills the link parameters and the redirect address; three codes (completed, screened out,
+  // returned) are shown to participants only once they reach that outcome (netlify/lib/lab/recruit.mjs).
+  function panelEditor(pn) {
+    var pre = (META.presets || []).filter(function (x) { return x.id === pn.preset; })[0];
+    var link = location.origin + '/lab/s/' + studyId + (pre ? pre.link : '?' + pn.param + '=...');
+    var sample = (pn.redirectUrl || '').replace(/\{code\}/g, pn.completionCode || '(code)').replace(/\{pid\}/g, '(participant ID)');
+    function code(k, label, help) {
+      return '<div class="f"><span>' + label + '</span><div class="row">' + inp('enrollment.panel.' + k, pn[k] || '', ' class="mono" style="flex:1" aria-label="' + esc(label) + '"') + btn('data-gencode="' + k + '"', 'Generate') + '</div><span class="muted">' + help + '</span></div>';
+    }
+    return '<div class="grid3">' + field('Panel', sel('enrollment.panel.preset', pn.preset || 'custom', [['custom', 'Other (set everything below)']].concat((META.presets || []).map(function (x) { return [x.id, x.label]; })))) + '</div>' +
+      (pre ? '<p class="muted">' + esc(pre.help) + '</p>' : '') +
+      '<p class="muted">Study link to give the panel: <code>' + esc(link) + '</code></p>' +
+      '<div class="grid3">' + field('Link parameter with the participant ID', inp('enrollment.panel.param', pn.param, ' class="mono"')) +
+        field('Link parameter with the panel\'s study ID (optional)', inp('enrollment.panel.studyParam', pn.studyParam || '', ' class="mono" placeholder="STUDY_ID"')) +
+        field('Link parameter with the panel\'s session ID (optional)', inp('enrollment.panel.sessionParam', pn.sessionParam || '', ' class="mono" placeholder="SESSION_ID"')) + '</div>' +
+      '<p class="muted">The participant ID is kept only in the payment list (Students tab, extra-credit list), never in research exports. The study and session IDs are not identifying; they go in the exports and show when one person opened the study more than once.</p>' +
+      field('Address that takes participants back to the panel. Write {code} for the code and {pid} for their panel ID. Leave empty to show the code only.', inp('enrollment.panel.redirectUrl', pn.redirectUrl || '', ' class="mono" placeholder="https://app.prolific.com/submissions/complete?cc={code}"')) +
+      (pn.redirectUrl ? '<p class="muted">A participant who finishes goes to: <code>' + esc(sample) + '</code></p>' : '') +
+      '<div class="grid3">' + code('completionCode', 'Completion code', 'Shown when every session is done.') +
+        code('screenOutCode', 'Screened-out code', 'Shown when a screening question, a failed check, or a full quota ends the study.') +
+        code('returnCode', 'Returned code', 'Shown when the participant chooses "I want to stop taking part".') + '</div>' +
+      '<p class="muted">Codes stay on the server until a participant reaches that point, so they cannot be read from the page.</p>';
+  }
+  function genCode() { var a = '23456789ABCDEFGHJKMNPQRSTVWXYZ', s = '', r = new Uint32Array(8); (window.crypto || {}).getRandomValues ? crypto.getRandomValues(r) : r.forEach(function (x, i) { r[i] = Math.random() * 4294967296; }); for (var i = 0; i < 8; i++) s += a[r[i] % a.length]; return s; }
   function renderEditor() {
     $('subtabs').innerHTML = subs().map(function (s) { return '<button type="button" data-sub="' + s[0] + '" aria-selected="' + (s[0] === sub) + '">' + s[1] + '</button>'; }).join('');
     var h = '';
@@ -547,10 +571,9 @@
         '<p class="muted">Participants type their email each session; the first time, they confirm it. There is no verification email, so the study relies on people entering their own address. Emails added on the Students tab can always sign in, even with sign-up off.</p>' +
         '<div class="grid3">' + field('Email domains (one per line, no @)', '<textarea data-domains="1" rows="3" class="mono">' + esc(en.domains.join('\n')) + '</textarea>') +
         field('Gap days between sessions (self sign-ups)', num('enrollment.gapDays', en.gapDays, 0, 60)) + field('Label for self sign-ups', inp('enrollment.label', en.label || '')) + '</div>' +
-        '<h3 style="margin:20px 0 8px">Online panel (Prolific and similar)</h3>' +
+        '<h3 style="margin:20px 0 8px">Online panel (Prolific, SONA, MTurk, CloudResearch)</h3>' +
         checkbox('data-path="enrollment.panel.enabled" data-bool="1"', en.panel && en.panel.enabled, 'Participants arrive from an online panel: the study link signs them in with the panel\'s participant ID') +
-        (en.panel && en.panel.enabled ? '<p class="muted">In Prolific, set the study URL to <code>' + esc(location.origin + '/lab/s/' + studyId) + '?PROLIFIC_PID={{%PROLIFIC_PID%}}&amp;STUDY_ID={{%STUDY_ID%}}&amp;SESSION_ID={{%SESSION_ID%}}</code> and choose "I\'ll use URL parameters". The ID is kept only in the payment list (Students tab, extra-credit list), never in research exports.</p>' +
-          '<div class="grid3">' + field('Link parameter with the participant ID', inp('enrollment.panel.param', en.panel.param, ' class="mono"')) + field('Completion link (shown on the last page)', inp('enrollment.panel.completionUrl', en.panel.completionUrl || '', ' placeholder="https://app.prolific.com/submissions/complete?cc=..."')) + '</div>' : '') +
+        (en.panel && en.panel.enabled ? panelEditor(en.panel) : '') +
         (draft.consent.recording ? '<h3 style="margin:20px 0 8px">Voice recording</h3>' +
           checkbox('data-path="consent.recording.enabled" data-bool="1"', draft.consent.recording.enabled, 'Ask for separate consent to record participants\' voices (calls and spoken answers)') +
           (draft.consent.recording.enabled ? field('Recording consent checkbox label', area('consent.recording.label', draft.consent.recording.label || '', 2)) +
@@ -603,6 +626,11 @@
     } else if ((v = t.getAttribute('data-path'))) {
       setPath(v, t.hasAttribute('data-bool') ? t.checked : t.hasAttribute('data-num') ? Number(t.value) : t.value);
       redraw = t.tagName === 'SELECT' || t.type === 'checkbox';
+      if (v === 'enrollment.panel.preset') {   // a preset fills in the link parameters and the redirect address
+        var pz = (META.presets || []).filter(function (x) { return x.id === t.value; })[0], pnl = draft.enrollment.panel;
+        if (pz) ['param', 'studyParam', 'sessionParam', 'redirectUrl'].forEach(function (k) { pnl[k] = pz[k]; });
+      }
+      if (/^enrollment\.panel\./.test(v) && t.tagName !== 'SELECT' && t.type !== 'checkbox') redraw = false;
       if (/\.type$/.test(v)) {
         var it = getPath(v.replace(/\.type$/, ''));
         if (it.type === 'info') it.required = false;
@@ -633,6 +661,8 @@
       var q = v.split('|'), list = getPath(q[0]), copy = clone(list[Number(q[1])]); copy.id = copy.id + '_copy'; list.splice(Number(q[1]) + 1, 0, copy);
     } else if ((v = t.getAttribute('data-move'))) {
       var m = v.split('|'), arr = getPath(m[0]), i = Number(m[1]), j = i + Number(m[2]), tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    } else if ((v = t.getAttribute('data-gencode'))) {
+      draft.enrollment.panel[v] = genCode();
     } else if ((v = t.getAttribute('data-resettext'))) {
       draft.text[v] = META.text.filter(function (f) { return f.key === v; })[0].def;
     } else if (!(plugin.click && plugin.click(t, A))) return;

@@ -173,3 +173,11 @@ button.rec::before { content: ""; width: 10px; height: 10px; border-radius: 50%;
 .phone #ph-dialstate { color: #f3e3d6; margin-top: 10px; }
 @media (max-width: 480px) { .mt-opt { width: 44%; } .mt-area[data-n="3"] .mt-opt, .mt-area[data-n="4"] .mt-opt { position: static; transform: none !important; width: 100%; margin: 8px 0 0; } .mt-area[data-n="3"], .mt-area[data-n="4"] { height: auto; padding: 8px 14px 80px; } }
 @media (prefers-reduced-motion: reduce) { .phone.ringing .avatar { animation: none; box-shadow: 0 0 0 6px rgba(246, 201, 168, .4); } }
+
+/* Hand-off to a recruitment panel: the code to copy and the link back (engine/participant.js handoff()). */
+.handoff-code { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.handoff-code code { font-size: 1.4em; letter-spacing: 2px; padding: 8px 14px; border: 1px solid var(--line-strong); border-radius: 10px; user-select: all; }
+button.small { min-height: 48px; padding: 8px 16px; font-size: .95em; }
+button.linklike { background: none; border: 0; color: var(--link, var(--text)); text-decoration: underline; min-height: 48px; padding: 0 4px; font: inherit; }
+button.linklike:hover:not([disabled]) { background: none; color: var(--text); }
+.stop-note { margin-top: 24px; }

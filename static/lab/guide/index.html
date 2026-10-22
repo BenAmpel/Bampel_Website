@@ -24,7 +24,7 @@
 
 <nav class="toc" aria-label="On this page"><strong>On this page</strong><ol>
 <li><a href="#what">What the lab is</a></li><li><a href="#local">Run it on your computer</a></li><li><a href="#access">Getting access</a></li><li><a href="#create">Creating a study</a></li><li><a href="#types">Study types</a></li><li><a href="#media">Audio, video, and phone calls</a></li>
-<li><a href="#import">Importing a survey</a></li><li><a href="#games">Running economic games</a></li><li><a href="#pilot">Piloting</a></li><li><a href="#export">Exports and codebooks</a></li>
+<li><a href="#panels">Recruiting from Prolific, SONA, MTurk, or CloudResearch</a></li><li><a href="#import">Importing a survey</a></li><li><a href="#games">Running economic games</a></li><li><a href="#pilot">Piloting</a></li><li><a href="#export">Exports and codebooks</a></li>
 <li><a href="#irb">IRB and data checklist</a></li><li><a href="#faq">Questions</a></li></ol></nav>
 
 <h2 id="what">What the lab is</h2>
@@ -87,10 +87,19 @@
 <li><strong>The decision.</strong> On <em>Decision &amp; directory</em>, write the question and two to four answers. With mouse tracking on, participants click Start at the bottom and move to an answer at the top; the export has the path measures (MAD, AUC, direction changes) and timing for every decision.</li>
 <li><strong>Phone calls.</strong> A call item rings with the caller ID you set. Write what the caller says at each step: the opening, the reason for the call, the request, two follow-ups if the participant hesitates, the answer to "can I call you back?", and the goodbyes. Mark the caller as an attacker or a legitimate caller (participants never see this). Participants talk (Chrome and Edge understand speech) or type, and can hang up at any time. After the call they can look up a number in the phone directory and call it: the organization's real number tells them the truth.</li>
 <li><strong>Recording.</strong> On <em>Sign-up &amp; consent</em>, turn on <em>Voice recording</em> to ask for separate consent to record. People who decline still take part and type instead. Recordings are listed on the <em>Recordings &amp; calls</em> tab (managers and owners), never copied to backups, and can be deleted in one step when your IRB says so.</li>
-<li><strong>Prolific.</strong> On <em>Sign-up &amp; consent</em>, turn on <em>Online panel</em>, copy the study address shown into Prolific, and paste Prolific's completion link. Participants arrive signed in, and the last page sends them back to Prolific. Their Prolific ID is kept only in the payment list.</li>
+<li><strong>Prolific and other panels.</strong> See <a href="#panels">Recruiting from Prolific, SONA, MTurk, or CloudResearch</a>.</li>
 <li><strong>Before launch,</strong> preview every arm, run the self-test, and pilot with a few lab members on the computers and browsers your participants will use.</li>
 </ol>
 <p>What gets saved for each call: every turn of the conversation (what the participant said, with numbers, emails, and street addresses removed before saving; what the caller said; the step the caller was on; response times), how the call ended (for example <em>disclosed</em>, <em>verified</em>, <em>refused</em>, <em>declined</em>), callbacks to the directory, and the recording when the participant agreed to one. The codebook lists every column.</p>
+
+<h2 id="panels">Recruiting from Prolific, SONA, MTurk, or CloudResearch</h2>
+<p>On <strong>Study content</strong>, <strong>Sign-up &amp; consent</strong>, turn on <em>Online panel</em> and pick your panel. The lab fills in the settings that panel needs and shows the study link to paste into it. Participants arrive already signed in: their panel ID links their sessions, and is kept only in the payment list, never in the research data.</p>
+<ol>
+<li><strong>Codes.</strong> There are three: the <em>completion code</em> (every session done), the <em>screened-out code</em> (a screening question, a failed check, or a full quota ended the study), and the <em>returned code</em> (the participant clicked "I want to stop taking part"). Copy them from your panel, or click <em>Generate</em> and enter the same codes in the panel. Participants see a code only when they reach that point, so nobody can read it from the page.</li>
+<li><strong>The address back.</strong> Write <code>{code}</code> where the code goes and <code>{pid}</code> where the participant's panel ID goes. Prolific: the preset fills in Prolific's completion address, ending in <code>?cc={code}</code>. SONA: paste the "client-side completion URL" from SONA's study page and put <code>{pid}</code> where SONA shows XXXX; SONA then grants credit by itself. MTurk needs no address: workers paste the code into the HIT. The last page shows the code with a Copy button and a button back to the panel. It never sends people away on a timer.</li>
+<li><strong>Study and session IDs.</strong> Prolific's STUDY_ID and SESSION_ID (or MTurk's hitId and assignmentId) are saved with the participant and appear in the exports. They are not identifying. Two session IDs for one participant means the same person opened the study twice.</li>
+<li><strong>Test it.</strong> Open the study link yourself with a made-up ID (for example <code>?PROLIFIC_PID=test123&amp;STUDY_ID=s&amp;SESSION_ID=x</code>), finish the study, and check that the button takes you to the panel's page with the right code. Delete that test participant afterwards.</li>
+</ol>
 
 <h2 id="import">Importing a survey</h2>
 <p>A study of the type "Vignettes and surveys" can start from a survey you already have. On the study's admin page, open <strong>Study content</strong>, then <strong>Import a survey</strong>, choose the file, and click Preview. The lab console (owners) can also create a new study straight from a file. Nothing is saved by the preview. You read the report, load the result into the editor as an unsaved draft, and click Save like any other edit.</p>

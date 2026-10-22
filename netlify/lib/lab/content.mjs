@@ -4,6 +4,7 @@
 // defaults, normalization, validation, and survey "show when" rules. Saved edits are numbered versions.
 
 import { OPS, NO_VALUE_OPS } from './logic.mjs';
+import { panelDefaults, validatePanel } from './recruit.mjs';
 
 // Screen text used by the shared participant app (types add or override fields).
 export const ENGINE_TEXT = [
@@ -50,7 +51,16 @@ export const ENGINE_TEXT = [
   ['End of session', 'finished_title', 'Last session: title', 'Thank you'],
   ['End of session', 'finished_body', 'Last session: text', 'You have completed all sessions of the study. You can close this page.'],
   ['End of session', 'calendar_button', 'Add-to-calendar button', 'Add the next session to my calendar'],
-  ['End of session', 'sign_out', 'Sign-out button', 'Sign out']
+  ['End of session', 'sign_out', 'Sign-out button', 'Sign out'],
+  ['Online panel', 'handoff_code', 'Above the completion code', 'Your code for this study:'],
+  ['Online panel', 'handoff_button', 'Link back to the panel ({panel})', 'Return to {panel}'],
+  ['Online panel', 'stop_link', 'Link to stop taking part', 'I want to stop taking part'],
+  ['Online panel', 'stop_title', 'Stop: title', 'Stop taking part?'],
+  ['Online panel', 'stop_body', 'Stop: text', 'You can stop at any time without giving a reason. Answers you have already given are kept unless you ask the research team to delete them.'],
+  ['Online panel', 'stop_keep', 'Stop: keep going button', 'Keep going'],
+  ['Online panel', 'stop_confirm', 'Stop: confirm button', 'Stop taking part'],
+  ['Online panel', 'returned_title', 'After stopping: title', 'You have stopped taking part'],
+  ['Online panel', 'returned_body', 'After stopping: text', 'Thank you for your time. You can close this page.']
 ].map(([group, key, label, def]) => ({ group, key, label, def }));
 
 export function textFieldsFor(type) {
@@ -68,7 +78,8 @@ export function engineDefaults() {
     consent: { approved: false, paragraphs: ['[Paste the IRB-approved consent text here. Leave a blank line between paragraphs.]'], agreeLabel: 'I am 18 or older and I agree to participate.' },
     enrollment: { open: true, domains: ['gsu.edu', 'student.gsu.edu'], gapDays: 0, label: 'self-signup',
       // Online panel sign-in (Prolific and similar): the participant ID comes from the study link; the completion link is shown at the end.
-      panel: { enabled: false, param: 'PROLIFIC_PID', completionUrl: '', label: 'panel' } },
+      // Completion codes and the redirect back to the panel: netlify/lib/lab/recruit.mjs.
+      panel: { enabled: false, param: 'PROLIFIC_PID', completionUrl: '', label: 'panel', ...panelDefaults() } },
     survey: { pre: [], post: [] }
   };
 }
@@ -123,7 +134,9 @@ export function clearContentCache(store) { if (store) caches.delete(store.name);
 export function publicContent(c, type, study) {
   return { study: study.id, type: type.id, name: study.name, version: c.version, minutesPerSession: c.minutesPerSession, consent: c.consent,
     text: c.text, sessions: type.sessionCount(c), signup: c.enrollment.open ? c.enrollment.domains : [],
-    panel: c.enrollment.panel && c.enrollment.panel.enabled ? { param: c.enrollment.panel.param, completionUrl: c.enrollment.panel.completionUrl || '' } : null,
+    // Never the completion codes: the browser asks for its code (route "handoff") once the participant has one.
+    panel: c.enrollment.panel && c.enrollment.panel.enabled ? { param: c.enrollment.panel.param, completionUrl: c.enrollment.panel.redirectUrl ? '' : c.enrollment.panel.completionUrl || '',
+      studyParam: c.enrollment.panel.studyParam || '', sessionParam: c.enrollment.panel.sessionParam || '' } : null,
     embedded: (c.embedded || []).map(x => (x.source === 'url' ? { name: x.name, source: 'url', param: x.param || x.name } : { name: x.name, source: 'value', value: x.value })),
     ...(type.publicContent ? type.publicContent(c) : {}) };
 }
@@ -279,6 +292,7 @@ export function validateContent(c, type) {
       if (!/^[A-Za-z][A-Za-z0-9_]{0,39}$/.test(pn.param || '')) e.push('Online panel: the link parameter must be a name like PROLIFIC_PID (letters, numbers, underscores).');
       if (pn.completionUrl && !/^https:\/\/[^\s"'<>]+$/.test(pn.completionUrl)) e.push('Online panel: the completion link must start with https:// (copy it from Prolific).');
     }
+    validatePanel(pn, e);
   }
   const typeErrors = [];
   if (type.validate) type.validate(c, typeErrors);

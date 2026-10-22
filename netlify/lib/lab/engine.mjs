@@ -18,6 +18,7 @@ import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { setNew, update, getMany, inBatches, deleteKeys } from './store.mjs';
 import { getContent, itemsFor, domainAllowed } from './content.mjs';
 import { resolve as resolveLogic, publicQuestions } from './logic.mjs';
+import { recordPanelMeta } from './recruit.mjs';
 
 export const TOKEN_HOURS = 12;
 const DEFAULT_GAP = 6;
@@ -126,6 +127,7 @@ export function totalFor(S, p, c, prog) {
   return total;
 }
 export function status(p, now, total, completed) {
+  if (p.returnedAt) return { finished: true, returned: true, completed: completed.length, total };   // chose to stop (recruit.mjs)
   const next = completed.length + 1;
   if (next > total) return { finished: true, completed: completed.length, total };
   const last = completed[completed.length - 1];
@@ -202,6 +204,7 @@ export async function login(S, creds = {}, now = Date.now()) {
     p = await store.get(pKey(pid));
     if (!p) [p] = await enroll(S, [pid], { gapDays: en.gapDays, label: panel.label || 'panel', selfSignup: true }, now, Math.random);
     await setNew(store, contactKey(p.code), { panelId: id, firstSeenAt: now });
+    await recordPanelMeta(S, p.code, creds.panelMeta, now);   // the panel's study and session IDs (not identifying)
   } else {
     p = await loadParticipant(S, creds.code);
     if (!p || PID_RE.test(p.code)) return { error: 'invalid_code', status: 401 };
