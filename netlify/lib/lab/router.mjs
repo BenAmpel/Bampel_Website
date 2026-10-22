@@ -20,6 +20,8 @@ import { importSurvey, ImportError } from './import/index.mjs';
 import { templateList } from './templates.mjs';
 import * as recruit from './recruit.mjs';
 import { exportDesign, importDesign, cloneStudy } from './studyfile.mjs';
+import { buildCodebook, codebookCsv, codebookMarkdown } from './codebook.mjs';
+import { wideRows, WIDE_FIRST } from './wide.mjs';
 
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
 const csv = (text, name) => new Response(text, { headers: { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': `attachment; filename="${name}"`, 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
@@ -28,7 +30,7 @@ const MAX_BODY = 4_000_000;
 const MAX_IMPORT_BODY = 8_000_000;   // a survey file as JSON text (an .xlsx is base64); Netlify itself caps a request near 6 MB
 
 const NEED = {
-  me: 'viewer', participants: 'viewer', 'design.json': 'viewer', 'export.csv': 'viewer', 'export-surveys.csv': 'viewer', 'export.json': 'viewer', rows: 'viewer', records: 'viewer', raw: 'viewer',
+  me: 'viewer', participants: 'viewer', 'design.json': 'viewer', 'codebook.csv': 'viewer', 'codebook.md': 'viewer', 'export-wide.csv': 'viewer', 'export.csv': 'viewer', 'export-surveys.csv': 'viewer', 'export.json': 'viewer', rows: 'viewer', records: 'viewer', raw: 'viewer',
   content: 'viewer', 'content-history': 'viewer',
   'content-save': 'editor', 'content-restore': 'editor', import: 'editor', preview: 'editor',
   roster: 'manager', lookup: 'manager', 'credit.csv': 'manager', create: 'manager', 'set-test': 'manager',
@@ -126,10 +128,17 @@ export async function handle(req, { getStore, env, now }) {
         case 'participants': return json(await E.listParticipants(S));
         case 'export.json': return json(await E.exportRecords(S));
         case 'design.json': return json(await exportDesign(S));
+        case 'codebook.csv': return csv(codebookCsv(buildCodebook(S, c)), `${study.id}_codebook_v${c.version || 0}.csv`);
+        case 'codebook.md': return new Response(codebookMarkdown(buildCodebook(S, c), { study, type, version: c.version || 0 }), { headers: { 'content-type': 'text/markdown; charset=utf-8', 'content-disposition': `attachment; filename="${study.id}_codebook_v${c.version || 0}.md"`, 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
+        case 'export-wide.csv': return csv(E.toCsv(wideRows(S, await E.exportRecords(S)), WIDE_FIRST), `${study.id}_wide.csv`);
         case 'export.csv': return csv(await E.exportCsv(S), `${study.id}_trials.csv`);
         case 'export-surveys.csv': return csv(await E.exportSurveyCsv(S), `${study.id}_surveys.csv`);
         case 'credit.csv': return csv(await E.exportCredit(S), `${study.id}_extra_credit.csv`);
-        case 'rows': return json(await E.exportRows(S, url.searchParams.get('kind') === 'surveys' ? 'surveys' : 'trials', codes.length ? codes : ['none']));
+        case 'rows': {
+          const kind = url.searchParams.get('kind');
+          if (kind === 'wide') return json(wideRows(S, await E.exportRecords(S, codes.length ? codes : ['none'])));   // one row per participant
+          return json(await E.exportRows(S, kind === 'surveys' ? 'surveys' : 'trials', codes.length ? codes : ['none']));
+        }
         case 'records': return json(await E.exportRecords(S, codes.length ? codes : ['none']));
         case 'raw': return json(codes.length === 1 ? await E.exportRaw(S, codes[0]) : { error: 'one_code' });
         case 'content': return json({ ...c, _textFields: content.textFieldsFor(type), _meta: type.editorMeta ? type.editorMeta() : {}, _type: type.id,

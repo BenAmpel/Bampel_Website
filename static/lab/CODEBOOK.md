@@ -1,5 +1,9 @@
 # Lab export codebook
 
+**Each study also has its own generated codebook** (Participants tab: *Download this study's codebook*, as CSV or Markdown; routes `admin/codebook.csv` and `admin/codebook.md`). It lists every column of that study's trials and surveys CSVs with its kind, allowed values and labels, question text, and the conditions, sessions, and display rules it applies to, plus the column patterns of the wide CSV. This file gives the general definitions.
+
+**Wide CSV** (one row per participant; `admin/export-wide.csv`, or *Download wide CSV* on the Participants tab, built in batches): `code`, `condition`, `test`, `label`, `self_signup`, `consented`, `sessions_completed`, `total_sessions`, `finished`, `screened_out` (reason), `returned` (chose to stop), `panel_study`, `panel_sessions` (distinct panel session IDs; more than 1 = opened the study more than once), `s{n}_started_at`, `s{n}_completed_at`, `s{n}_minutes`, `ed_{name}`, `s{n}_{pre|post}_{question}`, and `s{n}_{item}_{measure}` for every trial measure below, named by the item ID (`t{index}` without one). Identifiers and timestamps that repeat on every trial row are left out. Economic games keep their rounds in their own long export.
+
 Economic games (study type `game`) have their own export columns in [CODEBOOK-GAMES.md](CODEBOOK-GAMES.md). Applies to every study on the lab engine. "Identifiers and design" (first rows), "Behavior and context", and "Surveys CSV" are the same for every study; the alert sections are specific to `alert-triage` studies (the verification study), and "Vignettes studies" lists the columns of `vignettes` studies.
 
 Trials CSV: one row per item (alert, scenario) answered. Surveys CSV: one row per survey submitted. Times are ISO 8601 UTC; durations are milliseconds. Empty cells mean "not applicable" (for example, AI columns in sessions without the AI).

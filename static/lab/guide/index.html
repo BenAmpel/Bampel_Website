@@ -141,6 +141,8 @@
 <h2 id="export">Exports and codebooks</h2>
 <ul>
 <li><strong>Trials CSV</strong>: one row per participant and item (or per round and stage in a game). <strong>Surveys CSV</strong>: one row per participant and survey. <strong>Full JSON</strong> for archiving. <strong>Raw behavior traces</strong> (JSONL) only if you need event-level data.</li>
+<li><strong>Wide CSV</strong>: one row per participant, ready for SPSS, Stata, or a regression. Survey answers are named <code>s1_pre_age</code> (session, survey, question) and item measures <code>s1_vm_bank_decision</code> (session, item, measure). Items are named by their ID, not by the order shown, because that order is shuffled for each participant. It also says who finished, who was screened out or stopped, and the panel's study and session IDs.</li>
+<li><strong>This study's codebook</strong> (CSV or Markdown, Participants tab): every column of the downloads, with its kind, allowed values and their labels, the exact question text, and the conditions, sessions, and display rules it applies to. It is generated from the study content, so download it again whenever you change a question, and keep the copy that matches the version you ran. It is ready to put next to the data in a repository.</li>
 <li>Games add a groups CSV and the payments files.</li>
 <li>A "real participants only" box leaves out test data. The <code>test</code> column marks it otherwise.</li>
 <li>Column definitions: <a href="/lab/CODEBOOK.md">the codebook</a> and <a href="/lab/CODEBOOK-GAMES.md">the games codebook</a>.</li>

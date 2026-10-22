@@ -87,10 +87,12 @@
     '<section data-tab="participants"><div class="row">' +
       '<button type="button" class="secondary" id="refresh">Refresh</button>' +
       '<button type="button" class="secondary" data-export="trials">Download trials CSV</button><button type="button" class="secondary" data-export="surveys">Download surveys CSV</button>' +
+      '<button type="button" class="secondary" data-export="wide">Download wide CSV (one row per participant)</button>' +
       '<button type="button" class="secondary" data-export="json">Download full JSON</button><button type="button" class="secondary" data-export="raw">Download raw behavior traces (JSONL)</button>' +
       '<label class="check" style="font-size:13px"><input type="checkbox" id="exreal"> Real participants only</label>' +
       '<button type="button" class="danger secondary" data-role="owner" id="deltest">Delete all test participants</button></div>' +
-      '<p class="muted" id="exprog"></p><p class="muted">Column definitions: <a href="/lab/CODEBOOK.md" target="_blank" rel="noopener">codebook</a>. Test participants are included and marked in the <code>test</code> column unless "Real participants only" is ticked.</p>' +
+      '<p class="muted" id="exprog"></p><div class="row"><button type="button" class="secondary" data-codebook="csv">Download this study\'s codebook (CSV)</button><button type="button" class="secondary" data-codebook="md">Codebook as a document (Markdown)</button></div>' +
+      '<p class="muted">The study\'s codebook lists every column of the downloads: its name, kind, allowed values and their labels, the question text, and the conditions and sessions it applies to. It is made from the current study content, so download it again after you change the questions. General definitions: <a href="/lab/CODEBOOK.md" target="_blank" rel="noopener">lab codebook</a>. Test participants are included and marked in the <code>test</code> column unless "Real participants only" is ticked.</p>' +
       '<p class="muted" id="summary"></p><div class="table-wrap"><table id="tbl"></table></div>' +
       '<div class="section" data-role="owner"><h2>Backups</h2><p class="muted">Every hour the study data is copied to a separate backup store on Netlify (answers once, changing records every time). That protects against mistakes and bugs. For a copy outside Netlify, download a complete backup (every record, raw traces, emails, study content, team, and activity log) and save it to GSU-approved storage, for example weekly. It contains emails, so treat it as identifiable data. Deleting a participant also removes them from the backup store.</p>' +
         '<p id="bkstatus" class="muted"></p><div class="row"><button type="button" class="secondary" id="bkrun">Run backup now</button><button type="button" class="secondary" id="bkdl">Download complete backup (.json.gz)</button></div><p id="bkprog" class="muted"></p></div>' +
@@ -209,6 +211,7 @@
   // Exports are assembled here from small batches of participants, so no single server request has to
   // read the whole study (Netlify functions have a time and response-size limit).
   var FIRST = ['code', 'condition', 'test', 'label', 'self_signup', 'session', 'trial_index'];
+  var WIDE_FIRST = ['code', 'condition', 'test', 'label', 'self_signup', 'consented', 'sessions_completed', 'total_sessions', 'finished', 'screened_out', 'returned', 'panel_study', 'panel_sessions'];   // netlify/lib/lab/wide.mjs
   function batched(codes, size, fetchOne, onProgress) {
     var batches = [], out = [];
     for (var i = 0; i < codes.length; i += size) batches.push(codes.slice(i, i + size));
@@ -235,9 +238,15 @@
             saveFile(JSON.stringify({ study: studyId, type: me.study.type, exportedAt: new Date().toISOString(), participants: [].concat.apply([], parts.map(function (r) { return r.participants; })),
               records: [].concat.apply([], parts.map(function (r) { return r.records; })) }), studyId + '_all_' + day() + '.json', 'application/json');
           })
-          : rowsFor(codes, kind, prog).then(function (rows) { saveFile(toCsv(rows, kind === 'trials' ? FIRST : FIRST.slice(0, 6)), studyId + '_' + kind + '_' + day() + '.csv', 'text/csv'); });
+          : rowsFor(codes, kind, prog).then(function (rows) { saveFile(toCsv(rows, kind === 'trials' ? FIRST : kind === 'wide' ? WIDE_FIRST : FIRST.slice(0, 6)), studyId + '_' + kind + '_' + day() + '.csv', 'text/csv'); });
         return work.then(function () { $('exprog').textContent = 'Exported ' + codes.length + ' participants.'; });
       }).catch(function (e) { err(e.message); }).then(function () { buttons.forEach(function (x) { x.disabled = false; }); });
+    });
+  });
+  document.querySelectorAll('[data-codebook]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var ext = b.getAttribute('data-codebook'); err();
+      call('codebook.' + ext).then(function (r) { return r.blob(); }).then(function (blob) { saveFile(blob, studyId + '_codebook_' + day() + '.' + ext); }).catch(function (e) { err(e.message); });
     });
   });
   $('credit').addEventListener('click', function () {
