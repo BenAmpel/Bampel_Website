@@ -31,22 +31,25 @@ function DataProvider({ children }) {
 
   if (state.loading) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: 24 }}>
-        <img src="uploads/ccair-logo.png" alt="CCAIR" style={{ height: 64, opacity: 0.6, animation: 'pulse 2s ease-in-out infinite' }} />
-        <div className="mono" style={{ color: 'var(--text-muted)', fontSize: 13 }}>Loading data...</div>
+      <div className="state" role="status">
+        <div>
+          <img src="uploads/ccair-mark.png" alt="" />
+          <p>Loading the center…</p>
+        </div>
       </div>
     );
   }
 
   if (state.error) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: 16, padding: 40 }}>
-        <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>Failed to load data</div>
-        <div style={{ color: 'var(--text-secondary)', fontSize: 14, maxWidth: 400, textAlign: 'center' }}>{state.error}</div>
-        <button onClick={() => { setState({ data: null, loading: true, error: null }); window.location.reload(); }}
-          style={{ marginTop: 8, padding: '8px 20px', background: 'var(--accent)', border: 'none', borderRadius: 8, color: 'var(--bg-base)', fontWeight: 600, cursor: 'pointer', fontSize: 14 }}>
-          Retry
-        </button>
+      <div className="state" role="alert">
+        <div>
+          <h2 style={{ marginBottom: 8 }}>We couldn't load this page</h2>
+          <p style={{ marginBottom: 16 }}>{state.error}</p>
+          <button type="button" className="btn btn-primary" onClick={() => { setState({ data: null, loading: true, error: null }); window.location.reload(); }}>
+            Try again
+          </button>
+        </div>
       </div>
     );
   }

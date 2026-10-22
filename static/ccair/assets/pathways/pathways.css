@@ -1,15 +1,36 @@
-/* CCAIR Cyber Career Pathway Finder. Matches the CCAIR app: dark navy, teal accent, Manrope + Space Mono. */
+/* CCAIR Cyber Career Pathway Finder. Matches the CCAIR center site (assets/ccair.css): warm light-first palette with
+   a warm-dark mode, navy accent from the logo, amber secondary, system fonts. Overrides for the old dark-only
+   colours are at the end of this file. */
 :root {
-  --bg: #050a15; --surface: #0a1628; --elevated: #0f1f3a;
-  --card: rgba(15, 31, 58, 0.62); --card-solid: #0f1f3a;
-  --accent: #00ddb3; --accent-rgb: 0, 221, 179; --accent-dim: rgba(0, 221, 179, 0.10); --accent-glow: rgba(0, 221, 179, 0.28);
-  --accent2: #2d8cf0; --accent2-rgb: 45, 140, 240;
-  --text: #e8edf5; --text2: #a3b1cc; --muted: #8597b8;
-  --border: rgba(0, 221, 179, 0.14); --border-soft: rgba(255, 255, 255, 0.07);
-  --radius: 18px; --radius-sm: 12px;
+  color-scheme: light dark;
+  --bg: #FAF8F5; --surface: #F3EFE9; --elevated: #FFFFFF;
+  --card: #FFFFFF; --card-solid: #FFFFFF;
+  --accent: #1F4E8C; --accent-rgb: 31, 78, 140; --accent-dim: rgba(31, 78, 140, 0.08); --accent-glow: rgba(31, 78, 140, 0.22);
+  --accent2: #B45309; --accent2-rgb: 180, 83, 9;
+  --on-accent: #FFFFFF;
+  --text: #1D1D1F; --text2: #4A4741; --muted: #6B675F;
+  --border: rgba(31, 78, 140, 0.20); --border-soft: rgba(29, 29, 31, 0.10);
+  --faint: rgba(29, 29, 31, 0.06); --faint-2: rgba(29, 29, 31, 0.10);
+  --nav-bg: rgba(250, 248, 245, 0.72);
+  --shadow: 0 1px 2px rgba(29, 24, 16, 0.04), 0 8px 24px rgba(29, 24, 16, 0.06);
+  --radius: 20px; --radius-sm: 14px;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --mono: 'Space Mono', ui-monospace, monospace;
-  --sans: 'Manrope', system-ui, -apple-system, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, Roboto, "Helvetica Neue", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #151311; --surface: #1E1B18; --elevated: #2A2622;
+    --card: #1E1B18; --card-solid: #1E1B18;
+    --accent: #8DB6F2; --accent-rgb: 141, 182, 242; --accent-dim: rgba(141, 182, 242, 0.12); --accent-glow: rgba(141, 182, 242, 0.25);
+    --accent2: #F0A35E; --accent2-rgb: 240, 163, 94;
+    --on-accent: #0E1B2E;
+    --text: #F5F2ED; --text2: #CFC8BE; --muted: #A59E94;
+    --border: rgba(141, 182, 242, 0.28); --border-soft: rgba(255, 255, 255, 0.09);
+    --faint: rgba(255, 255, 255, 0.06); --faint-2: rgba(255, 255, 255, 0.10);
+    --nav-bg: rgba(21, 19, 17, 0.72);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
+  }
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
@@ -333,3 +354,34 @@ footer a { color: var(--text2); }
   .match .go::after { content: ' (' attr(href) ')'; font-weight: 400; font-size: 9pt; }
   .badge { border: 1px solid #999 !important; color: #111 !important; background: none !important; }
 }
+
+/* ---------- Warm restyle: overrides for colours that were written for the old dark-only theme ---------- */
+.backdrop::before { display: none; }
+.glow { animation: none; opacity: 0.6; filter: blur(110px); }
+.glow.g1 { background: rgba(244, 196, 140, 0.35); }
+.glow.g2 { background: rgba(141, 182, 242, 0.28); }
+@media (prefers-color-scheme: dark) { .glow.g1 { background: rgba(240, 163, 94, 0.10); } .glow.g2 { background: rgba(141, 182, 242, 0.08); } }
+.top { background: var(--nav-bg); -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%); }
+.brand img { border-radius: 50%; background: #fff; box-shadow: 0 0 0 1px var(--border-soft); }
+.top nav a:hover, .top nav a[aria-current] { background: var(--faint); }
+.skip, .btn-primary, .chip[aria-pressed="true"], .toast { color: var(--on-accent); }
+.btn-primary { box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08); }
+.btn-primary:hover { transform: none; box-shadow: 0 4px 14px -6px var(--accent-glow); }
+.btn:active { transform: scale(0.97); }
+.btn-ghost { background: var(--elevated); border-color: var(--faint-2); }
+.eyebrow { font-family: var(--sans); letter-spacing: 0.04em; font-weight: 600; color: var(--accent2); background: rgba(var(--accent2-rgb), 0.08); border-color: transparent; }
+.eyebrow .dot { background: var(--accent2); box-shadow: none; animation: none; }
+.kicker { font-family: var(--sans); letter-spacing: 0.04em; font-weight: 600; color: var(--accent2); }
+.stat b { font-family: var(--sans); font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
+.stat span { letter-spacing: 0.02em; text-transform: none; }
+.card, .role-card, .faq details, .match { box-shadow: var(--shadow); }
+.role-card:hover { transform: translateY(-2px); box-shadow: 0 2px 4px rgba(29, 24, 16, 0.04), 0 18px 40px -18px rgba(var(--accent-rgb), 0.35); }
+.badge.step { color: var(--accent); background: var(--accent-dim); border-color: transparent; }
+.badge.emerging { color: var(--accent2); background: rgba(var(--accent2-rgb), 0.10); border-color: transparent; }
+.quiz { background: var(--card); border-color: var(--border-soft); box-shadow: 0 2px 4px rgba(29, 24, 16, 0.04), 0 24px 60px -30px rgba(29, 24, 16, 0.25); }
+.ring .track, .radar .grid { stroke: var(--faint-2); }
+.ans { background: var(--elevated); }
+.bars .b, .interlude-bar { background: var(--faint); }
+.match.first { background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.07), rgba(var(--accent2-rgb), 0.05)); }
+@media (prefers-reduced-transparency: reduce) { .top { background: var(--bg); -webkit-backdrop-filter: none; backdrop-filter: none; } }
+@media (prefers-reduced-motion: reduce) { .btn:active { transform: none; } .role-card:hover { transform: none; } }
