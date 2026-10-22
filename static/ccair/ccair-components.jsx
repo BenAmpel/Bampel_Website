@@ -175,20 +175,31 @@ function Authors({ text }) {
   return <p className="authors">{parts.map((p, i) => (i % 2 ? <strong key={i}>{p}</strong> : p))}</p>;
 }
 
+// Must match normTitle in scripts/build-ccair.js, which writes data/paper-pages.json.
+const normTitle = (s) => String(s).replace(/\bML\b/g, 'Machine Learning').replace(/\bAI\b/g, 'Artificial Intelligence').toLowerCase().replace(/[^a-z0-9]/g, '');
+
 function PublicationItem({ title, authors, venue, year, type, doi, pdf }) {
+  const { paperPages = {} } = useData();
+  const site = paperPages[normTitle(title)] || {};
   const award = / — (Best Paper Award)$/.exec(venue || '');
   const venueText = award ? venue.replace(award[0], '') : venue;
+  const links = [
+    site.page && { label: 'Paper page', href: site.page, aria: `Paper page with abstract and citation for ${title}` },
+    (pdf || site.pdf) && { label: 'PDF', href: pdf || site.pdf, aria: `PDF of ${title}` },
+    site.code && { label: 'Code', href: site.code, aria: `Code for ${title}` },
+    site.data && { label: 'Data', href: site.data, aria: `Data for ${title}` },
+    doi && { label: 'DOI', href: 'https://doi.org/' + doi, aria: `DOI for ${title}` },
+  ].filter(Boolean);
   return (
     <li className="pub">
-      <h3>{title}</h3>
+      <h3>{site.page ? <a className="pub-title-link" href={site.page}>{title}</a> : title}</h3>
       <Authors text={authors} />
       <p className="venue">{venueText}{year ? `, ${year}` : ''}{award && <> · <span className="award">{award[1]}</span></>}</p>
       <div className="side">
         <Tag type={type} />
-        {(doi || pdf) && (
+        {links.length > 0 && (
           <span className="links">
-            {doi && <a href={'https://doi.org/' + doi} aria-label={`DOI for ${title}`}>DOI</a>}
-            {pdf && <a href={pdf} aria-label={`PDF of ${title}`}>PDF</a>}
+            {links.map((l) => <a key={l.label} href={l.href} aria-label={l.aria}>{l.label}</a>)}
           </span>
         )}
       </div>
@@ -268,6 +279,7 @@ function CCAIRFooter() {
           <div>
             <h2>Elsewhere</h2>
             <ul>
+              <li><a href="#/materials">Research materials</a></li>
               <li><a href="/ccair/pathways/">Cyber Career Finder</a></li>
               <li><a href="https://bampel.com/">bampel.com</a></li>
               <li><a href="https://bampel.com/publications/">Full publication list</a></li>

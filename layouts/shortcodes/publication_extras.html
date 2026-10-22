@@ -180,6 +180,8 @@
       {{ with $page.Params.url_project }}{{ if ne . "" }}{{ $artifacts = $artifacts | append (dict "label" "Project" "url" .) }}{{ end }}{{ end }}
       {{ with $page.Params.url_slides }}{{ if ne . "" }}{{ $artifacts = $artifacts | append (dict "label" "Slides" "url" .) }}{{ end }}{{ end }}
       {{ with $page.Params.url_video }}{{ if ne . "" }}{{ $artifacts = $artifacts | append (dict "label" "Video" "url" .) }}{{ end }}{{ end }}
+      {{/* Always offer the version of record; it is the only full-text link when no preprint PDF is listed. */}}
+      {{ with $doi }}{{ $artifacts = $artifacts | append (dict "label" "DOI" "url" (printf "https://doi.org/%s" .)) }}{{ end }}
 
       {{ if gt (len $artifacts) 0 }}
         <div class="pub-artifacts">
@@ -212,9 +214,13 @@
     </div>
 
     <div class="pub-extras-card">
-      <h3>Citation</h3>
+      <h3>Cite this</h3>
       <div class="pub-citation">
-        <div class="pub-citation-text">{{ $citationApa }}</div>
+        <div class="pub-citation-text"><span class="pub-cite-label">APA</span> {{ $citationApa }}</div>
+        <details class="pub-bibtex">
+          <summary>BibTeX</summary>
+          <pre><code>{{ $bibtex }}</code></pre>
+        </details>
         <div class="pub-citation-actions">
           <button class="pub-copy" type="button" data-copy-text="{{ $citationApa | urlquery }}" data-copy-label="APA">Copy APA</button>
           <button class="pub-copy" type="button" data-copy-text="{{ $citationChicago | urlquery }}" data-copy-label="Chicago">Copy Chicago</button>
@@ -248,6 +254,10 @@ body:not(.dark) .pub-plain p { color:#1a2a33; }
 .pub-citation { display:flex; flex-direction:column; gap:10px; }
 .pub-citation-text { font-size:0.8rem; line-height:1.4; background:rgba(0,0,0,0.35); border-radius:10px; padding:10px; border:1px solid rgba(0,255,65,0.2); }
 .pub-citation-actions { display:flex; flex-wrap:wrap; gap:8px; }
+.pub-cite-label { font-weight:700; font-size:0.66rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--clr-green); margin-right:4px; }
+.pub-bibtex summary { cursor:pointer; font-size:0.72rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--clr-green); }
+.pub-bibtex pre { margin:8px 0 0; max-width:100%; overflow-x:auto; white-space:pre; font-size:0.72rem; line-height:1.45; background:rgba(0,0,0,0.35); border:1px solid rgba(0,255,65,0.2); border-radius:10px; padding:10px; }
+body:not(.dark) .pub-bibtex pre { background:rgba(255,255,255,0.9); }
 .pub-copy { align-self:flex-start; border-radius:999px; border:1px solid rgba(0,255,65,0.4); color:var(--clr-green); background:rgba(0,255,65,0.12); padding:6px 12px; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; cursor:pointer; }
 .pub-copy.copied { color:#111; background:var(--clr-green); }
 

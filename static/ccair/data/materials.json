@@ -1,0 +1,71 @@
+[
+  {
+    "title": "HackerSignal",
+    "kind": "dataset",
+    "description": "A benchmark of 7.45 million deduplicated documents from 64 public forum and source identifiers over a 36-year window (1990–2026). Shared CVE identifiers link hacker community discourse to exploit databases, vulnerability advisories and software fix commits.",
+    "cite": "Ampel, B. M., & Samtani, S. (2026). HackerSignal: A large-scale multi-source dataset linking hacker community discourse to the CVE vulnerability lifecycle. Conference on Neural Information Processing Systems (NeurIPS 2026), Evaluations & Datasets Track.",
+    "doi": "10.48550/arXiv.2605.03158",
+    "links": [
+      { "label": "Code and data release", "href": "https://github.com/BenAmpel/hackersignal" },
+      { "label": "Paper page", "href": "https://bampel.com/conference_publication/hackersignal-a-large-scale-multi-source-dataset-linking-hacker-communi/" }
+    ],
+    "status": "Released",
+    "placeholder": false
+  },
+  {
+    "title": "Cyber Career Pathway Finder",
+    "kind": "tool",
+    "description": "A free, plain-language quiz built on the NIST NICE Workforce Framework. It ranks 14 entry-level cybersecurity roles by a student's interests and gives the realistic first job, starter certifications, free practice and US pay for each. Nothing a student answers is stored.",
+    "cite": "Center for CyberAI Research. (2026). Cyber Career Pathway Finder [Web tool]. Georgia State University. https://bampel.com/ccair/pathways/",
+    "doi": null,
+    "links": [
+      { "label": "Open the finder", "href": "/ccair/pathways/" },
+      { "label": "Browse the 14 role guides", "href": "/ccair/pathways/#roles" }
+    ],
+    "status": "Released",
+    "placeholder": false
+  },
+  {
+    "title": "CCAIR Behavioral Lab",
+    "kind": "tool",
+    "description": "Browser-based studies of how people judge cyber threats. Researchers edit study content on an admin page, and the platform handles consent, condition assignment, surveys, behavior traces and data exports.",
+    "cite": "To be added by Ben.",
+    "doi": null,
+    "links": [
+      { "label": "Visit the lab", "href": "/lab/" },
+      { "label": "Researcher guide", "href": "/lab/guide/" }
+    ],
+    "status": "Active",
+    "placeholder": false
+  },
+  {
+    "title": "Social engineering stimulus library",
+    "kind": "stimuli",
+    "description": "Placeholder: a curated set of study stimuli (for example phishing emails, vishing audio or deepfake clips) with metadata for reuse. Ben to confirm what will be released.",
+    "cite": "To be added by Ben.",
+    "doi": null,
+    "links": [],
+    "status": "Planning",
+    "placeholder": true
+  },
+  {
+    "title": "Validated survey instruments",
+    "kind": "instrument",
+    "description": "Placeholder: measurement scales and questionnaires used in CCAIR behavioral studies, with item wording, scoring and source citations. Ben to confirm which instruments to list.",
+    "cite": "To be added by Ben.",
+    "doi": null,
+    "links": [],
+    "status": "Planning",
+    "placeholder": true
+  },
+  {
+    "title": "Additional dataset",
+    "kind": "dataset",
+    "description": "Placeholder for the next released center dataset. The in-development corpora on the Resources page move here once they have a public release and a DOI.",
+    "cite": "To be added by Ben.",
+    "doi": null,
+    "links": [],
+    "status": "Planning",
+    "placeholder": true
+  }
+]

@@ -18,10 +18,11 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-const VALID_PAGES = ['home', 'research', 'publications', 'people', 'resources', 'about', 'contact'];
+const VALID_PAGES = ['home', 'research', 'publications', 'people', 'resources', 'materials', 'about', 'contact'];
 const TITLES = {
   home: 'CCAIR — Center for CyberAI Research', research: 'Research — CCAIR', publications: 'Publications — CCAIR',
-  people: 'People — CCAIR', resources: 'Resources — CCAIR', about: 'About — CCAIR', contact: 'Contact — CCAIR',
+  people: 'People — CCAIR', resources: 'Resources — CCAIR', materials: 'Research materials — CCAIR',
+  about: 'About — CCAIR', contact: 'Contact — CCAIR',
 };
 
 function pageFromHash() {
@@ -50,7 +51,7 @@ function CCAIRApp() {
     if (h1) { h1.setAttribute('tabindex', '-1'); h1.focus({ preventScroll: true }); }
   }, [page]);
 
-  const pages = { home: HomePage, research: ResearchPage, publications: PublicationsPage, people: PeoplePage, resources: ResourcesPage, about: AboutPage, contact: ContactPage };
+  const pages = { home: HomePage, research: ResearchPage, publications: PublicationsPage, people: PeoplePage, resources: ResourcesPage, materials: MaterialsPage, about: AboutPage, contact: ContactPage };
   const Page = pages[page] || HomePage;
 
   return (

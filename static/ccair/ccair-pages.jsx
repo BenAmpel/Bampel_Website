@@ -333,6 +333,16 @@ function ResourcesPage() {
         <FinderFeature headingLevel={3} />
       </Section>
 
+      <Section id="materials" labelledBy="materials-title">
+        <Reveal className="feature">
+          <div>
+            <h2 id="materials-title">Research materials hub</h2>
+            <p>Released datasets, stimulus libraries, instruments and tools from CCAIR studies, each with a "how to cite" line and a DOI link.</p>
+          </div>
+          <div className="actions"><a className="btn btn-primary" href="#/materials">Browse materials <Arrow /></a></div>
+        </Reveal>
+      </Section>
+
       <Section id="assets" alt title="Research assets" intro="Persistent artifacts designed as shared infrastructure for the CyberAI community. Each shows its current status.">
         <div className="toolbar"><SegmentedControl label="Asset type" options={tabs} value={tab} onChange={setTab} /></div>
         <div className="grid grid-3">
@@ -359,6 +369,67 @@ function ResourcesPage() {
           ))}
         </div>
       </Section>
+    </div>
+  );
+}
+
+const MATERIAL_KINDS = [
+  { value: 'all', label: 'All' },
+  { value: 'dataset', label: 'Datasets' },
+  { value: 'stimuli', label: 'Stimulus libraries' },
+  { value: 'instrument', label: 'Instruments' },
+  { value: 'tool', label: 'Tools' },
+];
+const KIND_LABEL = { dataset: 'Dataset', stimuli: 'Stimulus library', instrument: 'Instrument', tool: 'Tool' };
+
+function CopyButton({ text, label }) {
+  const [done, setDone] = usePageState(false);
+  if (!navigator.clipboard) return null;
+  const copy = () => navigator.clipboard.writeText(text).then(() => { setDone(true); setTimeout(() => setDone(false), 1800); });
+  return <button type="button" className="btn btn-secondary btn-sm" onClick={copy} aria-label={label}>{done ? 'Copied' : 'Copy citation'}</button>;
+}
+
+function MaterialsPage() {
+  const { materials = [] } = useData();
+  const [kind, setKind] = usePageState('all');
+  const shown = materials.filter((m) => kind === 'all' || m.kind === kind);
+  const options = MATERIAL_KINDS.map((k) => ({ ...k, label: `${k.label} ${k.value === 'all' ? materials.length : materials.filter((m) => m.kind === k.value).length}` }));
+
+  return (
+    <div className="page">
+      <PageHead eyebrow="Research materials" title="Data, stimuli, instruments and tools"
+        lede="Materials from CCAIR studies that other researchers and educators can reuse. Each entry says how to cite it and links to the version of record." />
+      <section className="section" aria-label="Materials list">
+        <div className="wrap">
+          <div className="toolbar"><SegmentedControl label="Material type" options={options} value={kind} onChange={setKind} /></div>
+          {shown.length === 0 && <p className="empty">Nothing of this type is listed yet.</p>}
+          <div className="grid grid-2">
+            {shown.map((m) => (
+              <Reveal key={m.title} className={'card material' + (m.placeholder ? ' is-placeholder' : '')}>
+                <div className="material-meta">
+                  <span className="tag">{KIND_LABEL[m.kind] || m.kind}</span>
+                  <Status status={m.status} />
+                  {m.placeholder && <span className="tag tag-conference">Placeholder</span>}
+                </div>
+                <h3>{m.title}</h3>
+                <p>{m.description}</p>
+                <div className="material-cite">
+                  <span className="material-cite-label">How to cite</span>
+                  <p>{m.cite}{m.doi ? <> <a href={'https://doi.org/' + m.doi}>https://doi.org/{m.doi}</a></> : null}</p>
+                </div>
+                {(m.links.length > 0 || m.doi || !m.placeholder) && (
+                  <div className="material-actions">
+                    {m.doi && <a className="btn btn-primary btn-sm" href={'https://doi.org/' + m.doi}>DOI</a>}
+                    {m.links.map((l) => <a key={l.href} className="btn btn-secondary btn-sm" href={l.href}>{l.label}</a>)}
+                    {!/to be added/i.test(m.cite) && <CopyButton text={m.cite + (m.doi ? ' https://doi.org/' + m.doi : '')} label={`Copy citation for ${m.title}`} />}
+                  </div>
+                )}
+              </Reveal>
+            ))}
+          </div>
+          <p className="pub-count">Using CCAIR materials in your work? We'd like to hear about it: <a href="mailto:bampel@gsu.edu">bampel@gsu.edu</a>.</p>
+        </div>
+      </section>
     </div>
   );
 }
@@ -510,6 +581,6 @@ function ContactPage() {
 }
 
 window.CCAIR = window.CCAIR || {};
-const CCAIR_PAGES = { HomePage, ResearchPage, PublicationsPage, PeoplePage, ResourcesPage, AboutPage, ContactPage };
+const CCAIR_PAGES = { HomePage, ResearchPage, PublicationsPage, PeoplePage, ResourcesPage, MaterialsPage, AboutPage, ContactPage };
 Object.assign(window.CCAIR, CCAIR_PAGES);
 Object.assign(window, CCAIR_PAGES);

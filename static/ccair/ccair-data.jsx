@@ -10,16 +10,23 @@ const DATA_FILES = {
   funding: 'data/funding.json',
   courses: 'data/courses.json',
   news: 'data/news.json',
+  materials: 'data/materials.json',
+  paperPages: 'data/paper-pages.json',
 };
+// Generated at build time (scripts/build-ccair.js); the site still works if it is missing.
+const OPTIONAL_FILES = { paperPages: {} };
 
 function DataProvider({ children }) {
   const [state, setState] = useDataState({ data: null, loading: true, error: null });
 
   useDataEffect(() => {
     const entries = Object.entries(DATA_FILES);
-    Promise.all(entries.map(([, url]) => fetch(url).then(r => {
+    Promise.all(entries.map(([key, url]) => fetch(url).then(r => {
       if (!r.ok) throw new Error(`Failed to load ${url}: ${r.status}`);
       return r.json();
+    }).catch(err => {
+      if (key in OPTIONAL_FILES) return OPTIONAL_FILES[key];
+      throw err;
     })))
       .then(results => {
         const data = {};
