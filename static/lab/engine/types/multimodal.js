@@ -270,11 +270,13 @@
   // opts: { entries, onDial(number, source) -> Promise<{ say, audio }>, voice }
   function directoryWidget(box, ui, opts) {
     var esc = ui.esc;
-    box.innerHTML = '<h3 tabindex="-1">' + ui.Th('directory_title') + '</h3><label class="sr" for="mm-dsearch">Search</label><input type="search" id="mm-dsearch" placeholder="Search the directory" autocomplete="off">' +
-      '<ul class="directory" id="mm-dlist"></ul><form class="row mm-dialpad" id="mm-dpad"><label for="mm-dnum">Dial a number</label><input id="mm-dnum" inputmode="tel" autocomplete="off" placeholder="555-0100"><button type="submit" class="secondary small">Call</button></form>' +
+    box.innerHTML = '<h3 tabindex="-1">' + ui.Th('directory_title') + '</h3>' + (opts.down ? '<p class="mm-down" role="status">The company directory is down right now. The dial pad still works.</p>' :
+      '<label class="sr" for="mm-dsearch">Search</label><input type="search" id="mm-dsearch" placeholder="Search the directory" autocomplete="off">') +
+      '<ul class="directory" id="mm-dlist"' + (opts.down ? ' hidden' : '') + '></ul><form class="row mm-dialpad" id="mm-dpad"><label for="mm-dnum">Dial a number</label><input id="mm-dnum" inputmode="tel" autocomplete="off" placeholder="555-0100"><button type="submit" class="secondary small">Call</button></form>' +
       '<p class="muted" id="mm-dstate" aria-live="polite"></p>';
     var list = box.querySelector('#mm-dlist'), q = box.querySelector('#mm-dsearch'), ds = box.querySelector('#mm-dstate'), busy = false;
     function render() {
+      if (!q) return;
       var term = q.value.trim().toLowerCase();
       list.innerHTML = opts.entries.filter(function (d) { return !term || (d.name + ' ' + (d.dept || '')).toLowerCase().indexOf(term) >= 0; }).map(function (d) {
         return '<li><span><strong>' + esc(d.name) + '</strong>' + (d.dept ? ' <span class="muted">' + esc(d.dept) + '</span>' : '') + '<br><span class="muted">' + esc(d.number) + '</span></span><button type="button" class="secondary small" data-num="' + esc(d.number) + '">' + ui.Th('directory_call') + '</button></li>';
@@ -288,7 +290,7 @@
         speak(line, { voice: opts.voice, audio: r && r.audio }, null, function () { busy = false; ds.textContent += ' (call ended)'; });
       }, function () { busy = false; ds.textContent = 'The call did not go through.'; });
     }
-    q.addEventListener('input', function () { render(); if (q.value.trim()) logUi('directory_search:' + q.value.trim().toLowerCase().slice(0, 30)); });
+    if (q) q.addEventListener('input', function () { render(); if (q.value.trim()) logUi('directory_search:' + q.value.trim().toLowerCase().slice(0, 30)); });
     list.addEventListener('click', function (e) { var n = e.target.getAttribute && e.target.getAttribute('data-num'); if (n) dial(n, 'directory'); });
     box.querySelector('#mm-dpad').addEventListener('submit', function (e) { e.preventDefault(); dial(box.querySelector('#mm-dnum').value.trim(), 'dialpad'); });
     render();
@@ -523,7 +525,7 @@
         st.directoryOpened = true; logUi('directory_open_live');
         if (st.holdAt == null) document.getElementById('ph-hold').click();   // looking a number up puts the caller on hold
         var b = document.getElementById('ph-dirbox-live'); b.hidden = false; dl.hidden = true;
-        directoryWidget(b, ui, { entries: plan.directory, voice: call.voice, onDial: function (n, src) { st.callbacks = (st.callbacks || 0) + 1; return dialOut(n, src); } });
+        directoryWidget(b, ui, { entries: plan.directory, down: !!it.directoryDown, voice: call.voice, onDial: function (n, src) { st.callbacks = (st.callbacks || 0) + 1; return dialOut(n, src); } });
       });
       var clock = setInterval(function () { var s = document.getElementById('ph-status'); if (s && !st.ended && st.holdAt == null) s.textContent = fmtTime((now() - st.callT0 - st.holdMs) / 1000); }, 500);
       st.stopClock = function () { clearInterval(clock); };
@@ -630,7 +632,7 @@
       if (dirBtn) dirBtn.addEventListener('click', function () {
         st.directoryOpened = true; logUi('directory_open_after');
         var b = document.getElementById('ph-dirbox'); b.hidden = false; dirBtn.hidden = true;
-        directoryWidget(b, ui, { entries: dir, voice: call.voice, onDial: dialOut });
+        directoryWidget(b, ui, { entries: dir, down: !!it.directoryDown, voice: call.voice, onDial: dialOut });
       });
       wireDecision(root, dec, state, ctx);
       var set = ui.questionSet(box, qs, msg, submit, function (n, v) { ctx.record(n, v); });

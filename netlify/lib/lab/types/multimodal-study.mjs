@@ -135,7 +135,17 @@ export function poolItems(block, c, p, byId) {
   }
   if (block.pool === 'shift') {
     const ids = (c.shift && c.shift.forms[f.shiftForm || Object.keys(c.shift.forms)[0]]) || [];
-    return ids.map(id => byId.get(id)).filter(Boolean).map(it => ({ it, meta: { ...(it.meta || {}), shiftForm: f.shiftForm || '' } }));
+    const items = ids.map(id => byId.get(id)).filter(Boolean);
+    // Directory outage (shift.outage): within each structure x surface stratum, the given number of calls, chosen per
+    // participant, ring while the company directory is down (the dial pad still works). This manipulates the
+    // verification channel within subject, so arm x channel is estimated within person.
+    const down = new Set();
+    for (const [stratum, k] of Object.entries((c.shift && c.shift.outage) || {})) {
+      const [structure, surface] = stratum.split('|');
+      const pool = items.filter(it => (it.meta || {}).structure === structure && (it.meta || {}).surface === surface).map(it => it.id);
+      shuffle(pool, seeded(`${p.code}|outage|${stratum}`)).slice(0, Number(k) || 0).forEach(id => down.add(id));
+    }
+    return items.map(it => ({ it, meta: { ...(it.meta || {}), shiftForm: f.shiftForm || '', directoryDown: down.has(it.id) } }));
   }
   return [];
 }

@@ -1,8 +1,8 @@
-// Study 2 phone calls: the practice call (session 1, a hard gate with one retry) and the 8-call softphone shift.
+// Study 2 phone calls: the practice call (session 1, a hard gate with one retry) and the 10-call softphone shift.
 //
-// Shift mix (build spec): 4 attacks (2 calm, 1 of them with caller ID spoofed to a directory number; 2 urgent) and
-// 4 benign (2 urgent but legitimate, 2 calm requests), every benign caller also asking for something with no value
-// transfer. Topics (financial / community) are counterbalanced: form A and form B swap the topic of every slot, and
+// Shift mix: 5 attacks (3 calm, 1 of them with caller ID spoofed to a directory number; 2 urgent) and 5 benign
+// (2 urgent but legitimate, 3 calm requests), every benign caller also asking for something with no value transfer.
+// The directory is down on 4 calls per participant (decision 2026-10-22; multimodal-study.mjs poolItems). Topics (financial / community) are counterbalanced: form A and form B swap the topic of every slot, and
 // each participant gets one form (balanced within arm). Order is shuffled per participant.
 //
 // PLACEHOLDERS: the shift calls are written by the outside script writer (writer independence). These placeholder
@@ -34,8 +34,8 @@ export const PRACTICE_ITEMS = [
 ];
 
 // ---------- the shift (placeholders) ----------
-const ATTACKER_NUMBERS = ['(404) 555-0186', '(404) 555-0188', '(404) 555-0191', '(404) 555-0193'];
-const UNKNOWN_IDS = ['(470) 555-0179', '(678) 555-0177', '(762) 555-0176', '(470) 555-0175'];
+const ATTACKER_NUMBERS = ['(404) 555-0186', '(404) 555-0188', '(404) 555-0191', '(404) 555-0193', '(404) 555-0195'];
+const UNKNOWN_IDS = ['(470) 555-0179', '(678) 555-0177', '(762) 555-0176', '(470) 555-0175', '(678) 555-0174'];
 function attack({ org, dept, ask, askKind, urgent, spoof, n, voice }) {
   const cb = number(dept);
   return {
@@ -80,6 +80,8 @@ const SLOTS = {
     { topic: 'financial', org: 'PayLark Payroll', dept: 'PayLark Payroll', askKind: 'password', urgent: true, ask: 'To stop the payroll run, I need the Northwind portal password right now.' }],
   'atk-urgent-2': [{ topic: 'financial', org: 'Meridian Ridge Credit Union', dept: 'Meridian Ridge Credit Union', askKind: 'account', urgent: true, ask: 'I need Northwind\'s full company account number to freeze the transfer. What is it?' },
     { topic: 'community', org: 'Brightway Parcel', dept: 'Brightway Parcel, Riverton Depot', askKind: 'account', urgent: true, ask: 'Your shipment is being returned unless the duty is paid now. What is the company account number for the charge?' }],
+  'atk-calm-2': [{ topic: 'financial', org: 'PayLark Payroll', dept: 'PayLark Payroll', askKind: 'account', ask: 'We are moving Northwind to our new funding system. To match your file, could you read me the company account number that payroll is drawn from?' },
+    { topic: 'community', org: 'the Harlan County Tax Office', dept: 'Harlan County Tax Office', askKind: 'account', ask: 'Northwind has a small property tax refund. To deposit it, I just need the company account number. Do you have it handy?' }],
   'ben-urgent-1': [{ topic: 'financial', org: 'Tallgrass Bank', dept: 'Tallgrass Bank, Fraud Prevention', urgent: true, routeOwn: true, ask: 'Please hang up and call Tallgrass Fraud Prevention at the number in your company directory, so you know it is really us.' },
     { topic: 'community', org: 'Riverton Water and Power', dept: 'Riverton Water & Power, Business Accounts', urgent: true, routeOwn: true, ask: 'Please call Business Accounts back at the number in your directory today so we can restore the autopay.' }],
   'ben-urgent-2': [{ topic: 'community', org: 'the Riverton Fire Marshal\'s Office', dept: 'Riverton Fire Marshal\'s Office', urgent: true, ask: 'An inspector is on the way this afternoon. Can you confirm someone will be at the front desk until five?' },
@@ -87,14 +89,16 @@ const SLOTS = {
   'ben-calm-1': [{ topic: 'community', org: 'Brightway Parcel', dept: 'Brightway Parcel, Riverton Depot', ask: 'We have a delivery for 2200 Calder Way tomorrow morning. Can you confirm the front desk opens at eight?' },
     { topic: 'financial', org: 'Tallgrass Bank', dept: 'Tallgrass Bank, Business Services', ask: 'Your new deposit slips are ready. Would you like them mailed to the office, or picked up at the branch?' }],
   'ben-calm-2': [{ topic: 'financial', org: 'Ashby Mutual Insurance', dept: 'Ashby Mutual Insurance, Commercial', ask: 'We mailed the renewal packet last week. Could you confirm it arrived? Nothing else is needed.' },
-    { topic: 'community', org: 'the Riverton Business Association', dept: 'Riverton Business Association', ask: 'We are confirming attendance for Thursday\'s breakfast. Is Northwind still planning to send someone?' }]
+    { topic: 'community', org: 'the Riverton Business Association', dept: 'Riverton Business Association', ask: 'We are confirming attendance for Thursday\'s breakfast. Is Northwind still planning to send someone?' }],
+  'ben-calm-3': [{ topic: 'community', org: 'Calder Properties', dept: 'Calder Properties, Building Management', ask: 'The elevator inspection is Thursday morning. Can you confirm someone at the front desk can let the inspector in at nine?' },
+    { topic: 'financial', org: 'Ashby Mutual Insurance', dept: 'Ashby Mutual Insurance, Commercial', ask: 'We updated Northwind\'s certificate of insurance. Could you confirm the office address on it is still 2200 Calder Way?' }]
 };
-const VOICE_BY_SLOT = { 'atk-calm-1': VOICES.V2, 'atk-calm-spoof': VOICES.V1, 'atk-urgent-1': VOICES.V4, 'atk-urgent-2': VOICES.V3, 'ben-urgent-1': VOICES.V3, 'ben-urgent-2': VOICES.V4, 'ben-calm-1': VOICES.V1, 'ben-calm-2': VOICES.V2 };
+const VOICE_BY_SLOT = { 'atk-calm-2': VOICES.V1, 'ben-calm-3': VOICES.V3, 'atk-calm-1': VOICES.V2, 'atk-calm-spoof': VOICES.V1, 'atk-urgent-1': VOICES.V4, 'atk-urgent-2': VOICES.V3, 'ben-urgent-1': VOICES.V3, 'ben-urgent-2': VOICES.V4, 'ben-calm-1': VOICES.V1, 'ben-calm-2': VOICES.V2 };
 
 export const SHIFT_ITEMS = [], SHIFT_FORMS = { A: [], B: [] };
 Object.entries(SLOTS).forEach(([slot, forms], n) => forms.forEach((s, f) => {
   const id = `call-${slot}-${'ab'[f]}`, isAttack = slot.startsWith('atk'), urgent = !!s.urgent;
-  const spec = isAttack ? attack({ ...s, urgent, n: n % 4, voice: VOICE_BY_SLOT[slot] }) : benign({ ...s, urgent, n, voice: VOICE_BY_SLOT[slot] });
+  const spec = isAttack ? attack({ ...s, urgent, n: n % 5, voice: VOICE_BY_SLOT[slot] }) : benign({ ...s, urgent, n, voice: VOICE_BY_SLOT[slot] });
   SHIFT_ITEMS.push(callItem(id, { ...spec, placeholder: true }, { meta: { slot, structure: isAttack ? 'attack' : 'benign', surface: urgent ? 'urgent' : 'calm', topic: s.topic,
     callerId: isAttack ? (s.spoof ? 'spoofed' : 'unknown') : 'matches', askKind: s.askKind || 'none', placeholder: true } }));
   SHIFT_FORMS['AB'[f]].push(id);

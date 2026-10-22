@@ -150,8 +150,8 @@ let passer = null;
   assert(Number.isInteger(me.flags.clipList) && me.flags.clipList >= 0 && me.flags.clipList < 18, 'a clip list');
   assert(['A', 'B'].includes(me.flags.shiftForm) && typeof me.flags.slider === 'boolean' && typeof me.flags.scripted === 'boolean', JSON.stringify(me.flags));
   const kinds = s2.trials.map(t => t.item.kind);
-  assert.equal(s2.trials.length, 1 + 12 + 8 + 1 + 1 + 12 + 1 + 8, 'intro, 12 clips, 8 briefing screens, check, intro, 12 clips, shift intro, 8 calls');
-  assert.equal(kinds.filter(k => k === 'audio').length, 24); assert.equal(kinds.filter(k => k === 'call').length, 8);
+  assert.equal(s2.trials.length, 1 + 12 + 8 + 1 + 1 + 12 + 1 + 10, 'intro, 12 clips, 8 briefing screens, check, intro, 12 clips, shift intro, 10 calls');
+  assert.equal(kinds.filter(k => k === 'audio').length, 24); assert.equal(kinds.filter(k => k === 'call').length, 10);
   assert.deepEqual(s2.preItems.filter(x => x.type !== 'info').map(x => x.id).slice(0, 3), ['age', 'gender', 'education'], 'the baseline survey opens session 2');
   const clips = s2.trials.filter(t => t.item.kind === 'audio');
   assert(clips.every(t => t.item.live && t.decision && t.decision.options.length === 2 && t.decision.mouseTracking), 'binary, mouse-tracked, answered while playing');
@@ -200,7 +200,7 @@ let passer = null;
   const rows = parseCsv((await call(P + 'admin/export.csv', { key: OWNER })).text);
   const head = rows[0], col = n => head.indexOf(n);
   for (const c of ['clip_id', 'phase', 'structure', 'surface', 'topic', 'clip_list', 'live_first', 'live_changes', 'live_final', 'live_decided_clip_ms', 'slider_flag', 'call_slot', 'caller_id',
-    'shift_form', 'call_disclosure', 'call_disclosed', 'call_code_sent', 'call_points', 'call_callbacks_lookedup', 'call_callbacks_caller_number', 'call_pressure_turns', 'pilot_scripted', 'a_confidence6'])
+    'shift_form', 'call_directory_down', 'call_disclosure', 'call_disclosed', 'call_code_sent', 'call_points', 'call_callbacks_lookedup', 'call_callbacks_caller_number', 'call_pressure_turns', 'pilot_scripted', 'a_confidence6'])
     assert(col(c) >= 0, `export has ${c}`);
   const mine = rows.slice(1).filter(x => x[col('code')] === me.code && x[col('session')] === '2');
   const pre = mine.filter(x => x[col('phase')] === 'pre'), post = mine.filter(x => x[col('phase')] === 'post');
@@ -211,9 +211,14 @@ let passer = null;
   assert.equal(clips.filter(t => t.item.locked).length, 12, 'the browser knows which trials are locked');
   assert(pre.every(x => x[col('live_changes')] === '1' && x[col('live_final')] === 'legitimate' && x[col('live_decided_clip_ms')] === '6700'), 'the live decision is exported');
   const shift = mine.filter(x => x[col('call_slot')]);
-  assert.equal(shift.length, 8);
+  assert.equal(shift.length, 10);
   const attacks = shift.filter(x => x[col('call_intent')] === 'attack'), benign = shift.filter(x => x[col('call_intent')] === 'benign');
-  assert.equal(attacks.length, 4); assert.equal(benign.length, 4);
+  assert.equal(attacks.length, 5); assert.equal(benign.length, 5);
+  const down = shift.filter(x => x[col('call_directory_down')] === '1');
+  assert.equal(down.length, 4, 'the directory is down on 4 of the 10 calls');
+  for (const s of ['attack', 'benign']) for (const u of ['calm', 'urgent'])
+    assert.equal(down.filter(x => x[col('structure')] === s && x[col('surface')] === u).length, 1, `one outage call in the ${s}/${u} stratum`);
+  assert.equal(calls.filter(t => t.item.directoryDown).length, 4, 'the browser knows which calls have the directory down');
   const codeCalls = attacks.filter(x => x[col('call_code_sent')] === '1');
   assert.equal(codeCalls.length, 2, 'two attacks send a code');
   assert(codeCalls.every(x => x[col('call_disclosed')] === 'code' && x[col('call_points')] === '-42'), 'reading the code back is a disclosure: -40, and the callback costs 2');
@@ -222,7 +227,7 @@ let passer = null;
   r = await call(P + 'survey', { body: { token: tok, session: 2, kind: 'post', data: { prev_post: '30', verify_cost: '3', tlx_mental: '40', demand_probe: 'spot scams', bot_suspect: 'some', attn_check: 'sometimes' } } });
   assert(r.json.ok && r.json.status.finished, r.text);
   const db = (await call(P + 'debrief', { body: { token: tok } })).json;
-  assert.equal(db.calls.length, 8); assert.equal(db.points, 2 * -42 + 4 * 10, 'the debrief totals the shift');
+  assert.equal(db.calls.length, 10); assert.equal(db.points, 2 * -42 + 5 * 10, 'the debrief totals the shift');
   assert(db.calls.every(c => c.transcript.length > 0) && !JSON.stringify(db).match(/\b\d{6}\b/), 'own transcript, with the code redacted');
   const bonus = await call(P + 'admin/bonus.csv', { key: OWNER });
   assert.equal(bonus.status, 200, bonus.text);
