@@ -108,10 +108,13 @@ export function valuesOf(q) {
   if (q.type === 'choice' || q.type === 'select') return (q.options || []).map(o => (o.value === o.label ? o.value : `${o.value} = ${o.label}`)).join('; ');
   if (q.type === 'multi') return 'any of (| separated): ' + (q.options || []).map(o => (o.value === o.label ? o.value : `${o.value} = ${o.label}`)).join('; ');
   if (q.type === 'confidence') return '0 to 100';
+  if (q.type === 'slider') return `${q.min} to ${q.max} in steps of ${q.step}; blank = not touched (no handle until the participant moves it)`;
+  if (q.type === 'rank') return 'every option in rank order, first = ranked highest (| separated): ' + (q.options || []).map(o => (o.value === o.label ? o.value : `${o.value} = ${o.label}`)).join('; ');
+  if (q.type === 'matrix') return (q.options || []).map(o => (o.value === o.label ? o.value : `${o.value} = ${o.label}`)).join('; ');
   if (q.type === 'number') return Number.isFinite(q.min) || Number.isFinite(q.max) ? `number as typed (expected ${q.min ?? ''} to ${q.max ?? ''}; not enforced)` : 'number as typed';
   return 'free text';
 }
-const KIND = { scale: 'integer', choice: 'category', select: 'category', multi: 'list', confidence: 'integer', number: 'number', text: 'text' };
+const KIND = { scale: 'integer', choice: 'category', select: 'category', multi: 'list', confidence: 'integer', number: 'number', text: 'text', slider: 'number', rank: 'list', matrix: 'category' };
 
 function questionEntry(file, column, q, appliesExtra, source) {
   const parts = [];
@@ -155,8 +158,10 @@ export function buildCodebook(S, c) {
       const sessions = [];
       for (let n = 1; n <= nS; n++) if (conds.some(cd => itemsFor([q], kind, { session: n, condition: cd }, S.type).length)) sessions.push(n);
       if (!sessions.length) continue;
+      const where = `${kind === 'pre' ? 'start' : 'end'} of session ${sessions.join(', ')}${q.page ? `; page ${q.page}` : ''}`;
+      if (q.type === 'matrix') { for (const r of q.rows || []) out.push({ ...questionEntry('surveys', taken.has(r.id) ? `q_${r.id}` : r.id, q, where, `${kind}-session survey (matrix ${q.id})`), label: `${String(q.text).trim()} ${r.text}`.replace(/\s+/g, ' ') }); continue; }
       const col = taken.has(q.id) ? `q_${q.id}` : q.id;
-      out.push(questionEntry('surveys', col, q, `${kind === 'pre' ? 'start' : 'end'} of session ${sessions.join(', ')}${q.page ? `; page ${q.page}` : ''}`, `${kind}-session survey`));
+      out.push(questionEntry('surveys', col, q, where, `${kind}-session survey`));
     }
   }
   orderEntries('surveys', (c.survey.pre || []).concat(c.survey.post || []), v => v, out);

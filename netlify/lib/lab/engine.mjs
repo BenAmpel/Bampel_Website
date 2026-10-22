@@ -23,6 +23,7 @@ import { randomizeQuestions, orderColumns } from './order.mjs';
 import { quotaState } from './quota.mjs';
 import { cleanFullscreen } from './envcheck.mjs';
 import { chooseRow, applyRow, markerKey, latinColumns } from './latin.mjs';
+import { EXTRA_TYPES, cleanExtra } from './questiontypes.mjs';
 
 export const TOKEN_HOURS = 12;
 const DEFAULT_GAP = 6;
@@ -155,6 +156,7 @@ export function cleanAnswers(d, items, ctx = {}) {
   for (const it of items) {
     if (it.type === 'info') continue;
     const v = Object.hasOwn(d, it.id) ? d[it.id] : undefined;   // own properties only (never "constructor" or "__proto__")
+    if (EXTRA_TYPES.includes(it.type)) { for (const [k, x] of cleanExtra(it, v, d)) out[k] = x; continue; }   // slider, rank, matrix (rows are their own variables)
     if (v == null || v === '') continue;
     if (it.type === 'scale') { const n = Number(v), lo = Number.isInteger(it.start) ? it.start : 1; if (Number.isInteger(n) && n >= lo && n <= lo + it.n - 1) out[it.id] = String(n); }
     else if (it.type === 'confidence') { const n = Number(v); if (Number.isFinite(n) && n >= 0 && n <= 100) out[it.id] = String(Math.round(n)); }

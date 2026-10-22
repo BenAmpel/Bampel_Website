@@ -131,17 +131,20 @@
       '<div class="vas-ends"><span>' + Th('conf_low') + '</span><output class="vas-val" aria-hidden="true">–</output><span>' + Th('conf_high') + '</span></div></div>' +
       '<p class="muted help">' + Th('conf_help') + '</p></fieldset>';
   }
+  // Also the slider question type: data-min, data-max, and data-step (default 0, 100, 1) set its range.
   function wireVas(el, onAnswer) {
     var track = el.querySelector('.vas-track'), thumb = el.querySelector('.vas-thumb'), fill = el.querySelector('.vas-fill'), out = el.querySelector('.vas-val');
+    var lo = Number(el.getAttribute('data-min') || 0), hi = Number(el.getAttribute('data-max') || 100), st = Number(el.getAttribute('data-step') || 1);
     var val = null, dragging = false;
+    function snap(v) { return +(lo + Math.round((Math.max(lo, Math.min(hi, v)) - lo) / st) * st).toFixed(6); }
     function set(v, commit) {
-      v = Math.max(0, Math.min(100, Math.round(v)));
-      var changed = v !== val; val = v;
-      thumb.hidden = false; thumb.style.left = v + '%'; fill.style.width = v + '%'; out.textContent = v;
+      v = snap(v);
+      var changed = v !== val, pct = (v - lo) / (hi - lo) * 100; val = v;
+      thumb.hidden = false; thumb.style.left = pct + '%'; fill.style.width = pct + '%'; out.textContent = v;
       el.setAttribute('aria-valuenow', v); el.setAttribute('aria-valuetext', String(v)); el.classList.add('set');
       if (commit && changed) onAnswer(el.getAttribute('data-name'), v);
     }
-    function fromEvent(e) { var r = track.getBoundingClientRect(); return (e.clientX - r.left) / r.width * 100; }
+    function fromEvent(e) { var r = track.getBoundingClientRect(); return lo + (e.clientX - r.left) / r.width * (hi - lo); }
     el.addEventListener('pointerdown', function (e) {
       if (el.getAttribute('aria-disabled') === 'true' || (e.button && e.button !== 0)) return;
       dragging = true; try { el.setPointerCapture(e.pointerId); } catch (x) {} set(fromEvent(e), false); el.focus({ preventScroll: true }); e.preventDefault();
@@ -158,8 +161,8 @@
       var step = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1, PageUp: 10, PageDown: -10 }[e.key];
       if (step == null && e.key !== 'Home' && e.key !== 'End') return;
       e.preventDefault();
-      var base = val == null ? 50 : val;   // keyboard users start from the middle
-      set(e.key === 'Home' ? 0 : e.key === 'End' ? 100 : base + (val == null ? 0 : step), true);
+      var base = val == null ? (lo + hi) / 2 : val;   // keyboard users start from the middle
+      set(e.key === 'Home' ? lo : e.key === 'End' ? hi : base + (val == null ? 0 : step * st), true);
     });
   }
   // Any question from a study's content (surveys, or a type's per-item questions). Radio buttons, not
@@ -169,8 +172,36 @@
       return '<p>' + para.split('\n').map(txt).join('<br>') + '</p>';
     }).join('') + '</div>';
   }
+  // Slider: the confidence line's no-handle design over any range (Liu & Conrad 2019: no default to anchor on).
+  function sliderHtml(it) {
+    var lo = it.min, hi = it.max;
+    return '<fieldset class="q-group" data-name="' + it.id + '"><legend class="q">' + txt(it.text) + '</legend>' +
+      '<div class="vas" data-name="' + it.id + '" data-trace="' + it.id + '" data-min="' + lo + '" data-max="' + hi + '" data-step="' + it.step + '" role="slider" tabindex="0"' + tplAttr(it.text).replace('data-tpl', 'data-aria-tpl') + ' aria-label="' + esc(fillPipes(it.text)) + '" aria-valuemin="' + lo + '" aria-valuemax="' + hi + '" aria-valuetext="Not set">' +
+      '<div class="vas-track"><div class="vas-fill"></div><div class="vas-thumb" hidden></div></div>' +
+      '<div class="vas-ends"><span>' + esc(it.lo ? lo + ' ' + it.lo : lo) + '</span><output class="vas-val" aria-hidden="true">–</output><span>' + esc(it.hi ? hi + ' ' + it.hi : hi) + '</span></div></div>' +
+      '<p class="muted help">' + Th('conf_help') + '</p></fieldset>';
+  }
+  // Ranking: Move up / Move down buttons (keyboard and screen readers; no dragging needed, WCAG 2.5.7). The order shown
+  // first is not an answer: the participant moves an option or confirms the order.
+  function rankHtml(it) {
+    return '<fieldset class="q-group rank" data-name="' + it.id + '"><legend class="q">' + txt(it.text) + '</legend><ol class="rank-list">' + it.options.map(function (o, i) {
+      return '<li data-value="' + esc(o.value) + '"><span class="rank-label">' + txt(o.label) + '</span><span class="rank-btns"><button type="button" class="secondary small" data-rank="-1" aria-label="Move ' + esc(fillPipes(o.label)) + ' up">Up</button>' +
+        '<button type="button" class="secondary small" data-rank="1" aria-label="Move ' + esc(fillPipes(o.label)) + ' down">Down</button></span></li>';
+    }).join('') + '</ol><div class="row"><button type="button" class="secondary small" data-rankok="1">This order is right</button></div><p class="sr" aria-live="polite" data-rankmsg="1"></p></fieldset>';
+  }
+  // Matrix: one statement per row, each its own variable, answered with the same options (stacked on phones).
+  function matrixHtml(it) {
+    return '<fieldset class="q-group matrix" data-name="' + it.id + '"><legend class="q">' + txt(it.text) + '</legend>' + it.rows.map(function (r) {
+      return '<fieldset class="q-group mx-row" data-name="' + esc(r.id) + '"><legend>' + txt(r.text) + '</legend><div class="likert labeled" style="--n:' + it.options.length + '">' + it.options.map(function (o) {
+        return '<label class="option scale-pt" data-trace="' + esc(r.id) + ':' + esc(o.value) + '"><input type="radio" name="' + esc(r.id) + '" value="' + esc(o.value) + '"><span class="pt-lab">' + txt(o.label) + '</span></label>';
+      }).join('') + '</div></fieldset>';
+    }).join('') + '</fieldset>';
+  }
   function questionHtml(it) {
     if (it.type === 'info') return infoHtml(it);
+    if (it.type === 'slider') return sliderHtml(it);
+    if (it.type === 'rank') return rankHtml(it);
+    if (it.type === 'matrix') return matrixHtml(it);
     if (it.type === 'scale') return scaleGroup(it);
     if (it.type === 'confidence') return vas(it.id, txt(it.text), esc(fillPipes(it.text)), tplAttr(it.text) ? it.text : null);
     if (it.type === 'choice' || (it.type === 'select' && it.options.length <= 10)) return choiceGroup(it.id, txt(it.text), it.options.map(function (o) { return [o.value, txt(o.label)]; }));
@@ -220,6 +251,20 @@
       });
     });
     root.querySelectorAll('.vas').forEach(function (v) { wireVas(v, onAnswer); });
+    root.querySelectorAll('.rank').forEach(function (g) {
+      var name = g.getAttribute('data-name'), list = g.querySelector('.rank-list'), msg = g.querySelector('[data-rankmsg]');
+      function order() { return Array.prototype.map.call(list.children, function (li) { return li.getAttribute('data-value'); }); }
+      g.addEventListener('click', function (e) {
+        var b = e.target.closest ? e.target.closest('button') : null; if (!b) return;
+        if (b.hasAttribute('data-rankok')) { g.classList.add('set'); onAnswer(name, order()); msg.textContent = 'Order saved.'; return; }
+        var li = b.closest('li'), d = Number(b.getAttribute('data-rank')), sib = d < 0 ? li.previousElementSibling : li.nextElementSibling;
+        if (!sib) return;
+        if (d < 0) list.insertBefore(li, sib); else list.insertBefore(sib, li);
+        b.focus();   // focus stays on the button that was pressed, which moved with its option
+        msg.textContent = li.querySelector('.rank-label').textContent + ' is now ' + (Array.prototype.indexOf.call(list.children, li) + 1) + ' of ' + list.children.length + '.';
+        g.classList.add('set'); onAnswer(name, order());
+      });
+    });
     root.querySelectorAll('select').forEach(function (s) { s.addEventListener('change', function () { onAnswer(s.name, s.value); }); });
     root.querySelectorAll('textarea').forEach(function (t) { t.addEventListener('input', function () { onAnswer(t.name, t.value); }); });
     root.querySelectorAll('input.num, input.line').forEach(function (t) { t.addEventListener('input', function () { onAnswer(t.name, t.value); }); });
@@ -245,7 +290,7 @@
     ctx = ctx || {};
     var answers = ctx.answers || {}, prior = ctx.prior || {}, ed = ctx.ed || (S.plan && S.plan.embedded) || {}, prompted = false, hidden = {};
     function active() { return items.filter(function (i) { return i.type !== 'info' && !hidden[i.id]; }); }
-    function ids(list) { return list.map(function (i) { return i.id; }); }
+    function ids(list) { return [].concat.apply([], list.map(function (i) { return i.type === 'matrix' ? (i.rows || []).map(function (r) { return r.id; }) : [i.id]; })); }   // a matrix row is its own variable
     setPipeEnv(ctx.items || items, function (id) { return answers[id] !== undefined ? answers[id] : prior[id]; }, ed);
     function applyLogic() {
       hidden = lib() ? lib().resolve(items, answers, { ed: ed }, prior).hidden : {};
@@ -254,7 +299,10 @@
         if (!el) return;
         var h = !!hidden[it.id];
         el.hidden = h;
-        if (h) { el.classList.remove('missing'); if (answers[it.id] !== undefined) { delete answers[it.id]; clearInputs(el); } }
+        if (h) {
+          el.classList.remove('missing'); if (answers[it.id] !== undefined) { delete answers[it.id]; clearInputs(el); }
+          if (it.type === 'matrix') (it.rows || []).forEach(function (r) { if (answers[r.id] !== undefined) { delete answers[r.id]; clearInputs(el); } });
+        }
       });
       root.querySelectorAll('.q-groupwrap').forEach(function (w) { w.hidden = !w.querySelector('.q-group:not([hidden])'); });
       root.querySelectorAll('[data-tpl]').forEach(function (n) { n.textContent = fillPipes(n.getAttribute('data-tpl')); });

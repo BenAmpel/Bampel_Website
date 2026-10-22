@@ -66,6 +66,7 @@ export function resolve(items, answers, env = {}, seed = {}) {
   for (const it of orderItems(items)) {
     if (!evalDisplay(it.displayIf, { answers: kept, ed: env.ed, condition: env.condition })) { hidden[it.id] = true; continue; }
     if (it.type !== 'info' && answers && Object.hasOwn(answers, it.id) && answers[it.id] !== undefined) kept[it.id] = answers[it.id];
+    if (it.type === 'matrix' && answers) for (const r of it.rows || []) if (Object.hasOwn(answers, r.id) && answers[r.id] !== undefined) kept[r.id] = answers[r.id];   // each row is a variable
   }
   return { hidden, answers: kept };
 }

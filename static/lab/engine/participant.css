@@ -186,3 +186,13 @@ button.linklike:hover:not([disabled]) { background: none; color: var(--text); }
 meter#micm { width: 100%; height: 24px; }
 /* The data-quality honeypot (engine/participant.js honeypotHtml): off screen, hidden from screen readers, out of the tab order. */
 .hp-field { position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+/* Ranking (engine/participant.js rankHtml): one row per option with Up and Down buttons. */
+.rank-list { list-style: none; padding: 0; margin: 8px 0; counter-reset: rank; }
+.rank-list li::before { counter-increment: rank; content: counter(rank) "."; font-weight: 600; min-width: 1.6em; }
+.rank-label { flex: 1; }
+.rank-list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 10px; margin: 6px 0; border: 1.5px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--card); }
+.rank-btns { display: flex; gap: 8px; flex-shrink: 0; }
+.rank.set .rank-list li { border-color: var(--accent); }
+/* Matrix (matrixHtml): each statement is its own fieldset with the shared answer options. */
+.matrix .mx-row { margin: 14px 0 0; padding: 0; border: 0; }
+.matrix .mx-row > legend { font-weight: 500; padding: 0; margin-bottom: 6px; }

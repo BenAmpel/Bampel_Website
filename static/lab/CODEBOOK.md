@@ -141,6 +141,9 @@ The full mouse path (`[x, y, ms]` points) is in the full JSON export under `reco
 | `number` | A box for a typed number | The number exactly as entered (commas removed), with no range check, so an impossible age is still recorded |
 | `confidence` | A 0 to 100 line | 0 to 100 |
 | `text` | A text box | The text |
+| `slider` | A line over any range with no starting handle | The number chosen (on the step grid); empty if never touched |
+| `rank` | Options put in order with Up and Down buttons | Every option's saved value in rank order, joined with `\|` (first = ranked highest); empty if never ordered or confirmed |
+| `matrix` | Several statements with the same answer options | One column per statement (its own variable name): the option's saved value |
 
 A survey question can have a `page` number: questions with the same number appear together, pages in ascending order (blank = page 1). Answers are saved when the last page is finished; reloading the tab keeps earlier pages' answers on that device.
 

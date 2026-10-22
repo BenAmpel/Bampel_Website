@@ -9,6 +9,7 @@ import { validateOrder } from './order.mjs';
 import { quotaDefaults, validateQuota } from './quota.mjs';
 import { environmentDefaults, validateEnvironment } from './envcheck.mjs';
 import { validateLatin } from './latin.mjs';
+import { EXTRA_TYPES, validateExtra } from './questiontypes.mjs';
 
 // Screen text used by the shared participant app (types add or override fields).
 export const ENGINE_TEXT = [
@@ -182,7 +183,7 @@ export function publicContent(c, type, study) {
     ...(type.publicContent ? type.publicContent(c) : {}) };
 }
 
-export const QUESTION_TYPES = ['scale', 'choice', 'select', 'text', 'confidence', 'number', 'multi', 'info'];
+export const QUESTION_TYPES = ['scale', 'choice', 'select', 'text', 'confidence', 'number', 'multi', 'info', ...EXTRA_TYPES];
 const str = (v, max = 4000) => typeof v === 'string' && v.trim().length > 0 && v.length <= max;
 const intIn = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi;
 const RESERVED = ['constructor', 'prototype', '__proto__', 'hasownproperty', 'tostring', 'valueof', 'code', 'condition', 'test', 'label', 'self_signup', 'session', 'survey', 'content_version', 'received_at', 'trial_index', 'item_id'];
@@ -259,7 +260,8 @@ export function validateQuestions(items, where, e, { nSessions, conditions, rule
     }
     if (it.page != null && !allowSessions) e.push(`${w}: questions asked after an item are all on one screen, so they cannot have a page number.`);
     else if (it.page != null && !intIn(it.page, 1, 99)) e.push(`${w}: the page must be a whole number from 1 to 99.`);
-    if (it.type === 'choice' || it.type === 'select' || it.type === 'multi') {
+    validateExtra(it, w, e, { ids, reserved: RESERVED, allowMatrix: allowSessions });   // slider, rank, matrix (questiontypes.mjs)
+    if (it.type === 'choice' || it.type === 'select' || it.type === 'multi' || it.type === 'rank' || it.type === 'matrix') {
       if (!Array.isArray(it.options) || it.options.length < 2) e.push(`${w}: add at least two options.`);
       else if (!it.options.every(o => str(o.value, 200) && str(o.label, 300))) e.push(`${w}: every option needs text.`);
       else if (new Set(it.options.map(o => o.value)).size !== it.options.length) e.push(`${w}: two options have the same value.`);

@@ -444,7 +444,7 @@
   // ---------- study content editor ----------
   // Engine parts (surveys, consent, screen text) are edited here; each study type adds its own tabs.
   var saved = null, draft = null, dirty = false, sub = null, META = {};
-  var QTYPE_LABEL = { scale: 'Rating scale', choice: 'Multiple choice', select: 'Dropdown', text: 'Text answer', confidence: 'Confidence line (0–100)', number: 'Number (typed in)', multi: 'Select all that apply', info: 'Descriptive text (no answer)' };
+  var QTYPE_LABEL = { scale: 'Rating scale', choice: 'Multiple choice', select: 'Dropdown', text: 'Text answer', confidence: 'Confidence line (0–100)', number: 'Number (typed in)', multi: 'Select all that apply', info: 'Descriptive text (no answer)', slider: 'Slider (no starting point)', rank: 'Ranking (put in order)', matrix: 'Matrix (several statements, same answers)' };
   var AGREE7 = ['Strongly disagree', 'Disagree', 'Somewhat disagree', 'Neither agree nor disagree', 'Somewhat agree', 'Agree', 'Strongly agree'];
   function setDirty(v) { dirty = v; $('dirty').innerHTML = v ? '<strong>Unsaved changes.</strong>' : 'No unsaved changes.'; $('save').disabled = !v; $('discard').disabled = !v; }
   window.addEventListener('beforeunload', function (e) { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
@@ -524,7 +524,12 @@
       (conds.length > 1 ? '<div class="f"><span>Conditions (none ticked = everyone)</span><div class="row">' + conds.map(function (c) { return '<label class="check"><input type="checkbox" data-qcond="' + b + '|' + esc(c) + '"' + ((it.conditions || []).indexOf(c) >= 0 ? ' checked' : '') + '> ' + esc(c) + '</label>'; }).join('') + '</div></div>' : '') +
       (it.type === 'scale' ? '<div class="grid3">' + field('Points', num(b + '.n', it.n || 7, 2, 11)) + field('First number (blank = 1; use 0 for a 0-based scale)', '<input type="text" data-optnum="' + b + '.start" value="' + esc(it.start != null ? it.start : '') + '">') + field('Label for the first point', inp(b + '.lo', it.lo || '')) + field('Label for the top point', inp(b + '.hi', it.hi || '')) + '</div>' +
         field('Label every point (recommended): one line per point, from 1 to ' + (it.n || 7) + '. Leave empty to label only the ends.', '<textarea data-labels="' + b + '" rows="' + Math.min(11, it.n || 7) + '" class="mono">' + esc((it.labels || []).join('\n')) + '</textarea>') : '') +
-      (it.type === 'choice' || it.type === 'select' || it.type === 'multi' ? field('Options, one per line (optionally "saved value | text shown")', '<textarea data-opts="' + b + '" rows="4" class="mono">' + esc(optText) + '</textarea>') : '') +
+      (it.type === 'slider' ? '<div class="grid3">' + field('Smallest value', '<input type="text" data-optnum="' + b + '.min" value="' + esc(it.min != null ? it.min : '') + '">') + field('Largest value', '<input type="text" data-optnum="' + b + '.max" value="' + esc(it.max != null ? it.max : '') + '">') +
+        field('Step (1 = whole numbers)', '<input type="text" data-optnum="' + b + '.step" value="' + esc(it.step != null ? it.step : '') + '">') + field('Label at the low end', inp(b + '.lo', it.lo || '')) + field('Label at the high end', inp(b + '.hi', it.hi || '')) + '</div>' +
+        '<p class="muted">No handle is shown until the participant clicks or uses the arrow keys, so there is no default answer. Untouched sliders have an empty cell in the CSV.</p>' : '') +
+      (it.type === 'rank' ? '<p class="muted">Participants put the options in order with Up and Down buttons (no dragging), or confirm the order shown with "This order is right". The CSV cell lists the saved values in rank order, joined with |. Tick "Show the options in a random order" (Display logic and layout) to vary the starting order.</p>' : '') +
+      (it.type === 'matrix' ? field('Statements, one per line: "variable name | statement" (each statement is its own column in the CSV)', '<textarea data-rows="' + b + '" rows="4" class="mono">' + esc((it.rows || []).map(function (r) { return r.id + ' | ' + r.text; }).join('\n')) + '</textarea>') : '') +
+      (it.type === 'choice' || it.type === 'select' || it.type === 'multi' || it.type === 'rank' || it.type === 'matrix' ? field(it.type === 'matrix' ? 'Answer columns, one per line (optionally "saved value | text shown")' : 'Options, one per line (optionally "saved value | text shown")', '<textarea data-opts="' + b + '" rows="4" class="mono">' + esc(optText) + '</textarea>') : '') +
       (it.type === 'number' ? '<p class="muted">A box for a typed number, kept exactly as entered (no range check, so an impossible answer is still recorded). Non-numbers are not accepted.</p>' : '') +
       (it.type === 'multi' ? '<p class="muted">Checkboxes. The CSV cell lists the ticked options\' saved values joined with |.</p>' : '') +
       (it.type === 'confidence' ? '<p class="muted">A 0–100 line with no starting point. Its end labels and help text are on the Screen text tab.</p>' : '') +
@@ -710,6 +715,9 @@
       var qt = draft.enrollment.quota || (draft.enrollment.quota = { total: null, perCondition: {} }), qv = t.value.trim() === '' ? null : Number(t.value);
       if (v === 'total') qt.total = qv; else { qt.perCondition = qt.perCondition || {}; if (qv == null) delete qt.perCondition[v]; else qt.perCondition[v] = qv; }
     }
+    else if ((v = t.getAttribute('data-rows'))) setPath(v + '.rows', t.value.split('\n').map(function (l) { return l.trim(); }).filter(Boolean).map(function (l, k) {
+      var m = l.split(/\s+\|\s+/); return m.length > 1 ? { id: m[0].trim(), text: m.slice(1).join(' | ').trim() } : { id: getPath(v).id + '_' + (k + 1), text: l };
+    }));
     else if ((v = t.getAttribute('data-anchor'))) { var an = v.split('|'), ao = getPath(an[0]).options[Number(an[1])]; if (t.checked) ao.anchor = true; else delete ao.anchor; }
     else if ((v = t.getAttribute('data-labels'))) setPath(v + '.labels', t.value.split('\n').map(function (x) { return x.trim(); }).filter(Boolean));
     else if (t.hasAttribute('data-domains')) draft.enrollment.domains = t.value.split(/[\s,;]+/).map(function (x) { return x.trim().toLowerCase().replace(/^@/, ''); }).filter(Boolean);
@@ -738,7 +746,12 @@
         var it = getPath(v.replace(/\.type$/, ''));
         if (it.type === 'info') it.required = false;
         if (it.type === 'scale' && !it.n) { it.n = 7; it.lo = it.lo || AGREE7[0]; it.hi = it.hi || AGREE7[6]; }
-        if ((it.type === 'choice' || it.type === 'select' || it.type === 'multi') && !(it.options && it.options.length)) it.options = [{ value: 'Option 1', label: 'Option 1' }, { value: 'Option 2', label: 'Option 2' }];
+        if ((it.type === 'choice' || it.type === 'select' || it.type === 'multi' || it.type === 'rank') && !(it.options && it.options.length)) it.options = [{ value: 'Option 1', label: 'Option 1' }, { value: 'Option 2', label: 'Option 2' }];
+        if (it.type === 'slider' && it.min == null) { it.min = 0; it.max = 100; it.step = 1; }
+        if (it.type === 'matrix') {
+          if (!(it.rows && it.rows.length)) it.rows = [{ id: it.id + '_1', text: 'Statement 1' }, { id: it.id + '_2', text: 'Statement 2' }];
+          if (!(it.options && it.options.length)) it.options = ['Strongly disagree', 'Disagree', 'Neither agree nor disagree', 'Agree', 'Strongly agree'].map(function (l, k) { return { value: String(k + 1), label: l }; });
+        }
       }
     } else return false;
     setDirty(true);
