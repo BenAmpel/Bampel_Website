@@ -148,7 +148,7 @@ ${top('hub')}
     <h2 class="reveal">Common questions from students</h2>
     ${faqHtml(faq)}
     <div class="note reveal"><b>How this was built.</b> Roles follow the <a href="${D.sources.nice}" rel="noopener">NIST NICE Workforce Framework</a>; first-job routes draw on <a href="${D.sources.cyberseek}" rel="noopener">CyberSeek</a>; pay figures are US Bureau of Labor Statistics medians (${esc(D.sources.blsDate)}). Reviewed ${esc(D.updated)} by Dr. Benjamin M. Ampel, Director of CCAIR, who teaches CIS 3620 Career Pathways at Georgia State University. It is an interest guide, not a test of ability.</div>
-    <div class="cta-band reveal"><div><h3>Picked a role? Plan the rest of your degree.</h3><p>The CCAIR Student Guide covers skills, certifications, federal hiring, security clearances, research and scholarships, year by year.</p></div>
+    <div class="cta-band reveal"><div><h3>Picked a role? Plan the rest of your degree.</h3><p>The CCAIR Student Guide covers skills, a portfolio, certifications, getting hired, research and scholarships, year by year, with a separate track for government and defense work.</p></div>
       <a class="btn btn-ghost" href="/ccair/students/">Read the student guide <span class="arrow" aria-hidden="true">&rarr;</span></a></div>
   </div></section>
 </main>
