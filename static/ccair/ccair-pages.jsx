@@ -516,7 +516,7 @@ function AboutPage() {
         </ul>
       </Section>
 
-      <Section id="support" title="Research support" intro="Grants led by center faculty, plus the federal and defense sponsors acknowledged across CCAIR publications.">
+      <Section id="support" title="Research support" intro="Grants led by center faculty at Georgia State, plus earlier support for Dr. Ampel's research.">
         {(funding.grants || []).length > 0 && <>
           <h3 className="group-label">Grants led by center faculty</h3>
           <div className="grid grid-2" style={{ marginBottom: 8 }}>
@@ -529,7 +529,7 @@ function AboutPage() {
             ))}
           </div>
         </>}
-        <h3 className="group-label">Sponsors acknowledged in center publications</h3>
+        <h3 className="group-label">Earlier support for Dr. Ampel's research</h3>
         <div className="grid grid-3">
           {(funding.awarded || []).map((p) => (
             <Reveal key={p.id} className="card"><h3>{p.name}</h3><p>{p.role}</p><div className="chips"><span className="chip">{p.id}</span></div></Reveal>
