@@ -4,35 +4,39 @@
 //   1 post, or the reverse) x 3 rotations of which clips in a cell go pre or post.
 // Every phase has 12 clips at 6/6 on all three factors, and every clip is heard pre in 3 lists and post in 3.
 //
-// PLACEHOLDERS: the real clips are written by the outside script writer, who has not seen the training (writer
-// independence). These short placeholder clips only make the study run end to end; each is marked placeholder: true,
-// and the launch checklist (PLACEHOLDER_COUNT) must be 0 before data collection.
-import { VOICES } from './world.mjs';
+// The clips are the writer's matched pairs (stimuli-data.mjs): each attack clip has a legitimate twin with the same
+// surface and topic whose words are identical except the request. A participant must never hear both members of a
+// pair, so the legitimate twins are rotated by one set: twin k of a pair whose attack is in set s sits in set s + 1
+// (mod 3). The lists then hold no pair (tests/lab/vishing-study2.test.mjs checks this).
+import { VOICE } from './world.mjs';
+import { STIMULI } from './stimuli-data.mjs';
 
 const AUDIO = '/lab/media/vishing-study2/clips/';
-const ORGS = { financial: ['Tallgrass Bank', 'Keystone Card Services', 'Meridian Ridge Credit Union', 'PayLark Payroll', 'Ashby Mutual Insurance'],
-  community: ['Riverton Water and Power', 'the Harlan County Tax Office', 'Brightway Parcel', 'Calder Properties', 'the Riverton Fire Marshal\'s Office'] };
-// Placeholder wording by cell: an attack asks for a value transfer through the caller's channel; a benign call asks for
-// nothing of value or routes the action through the participant's own channel. High surface = urgency and threat.
-const LINES = {
-  'attack-high': o => `This is ${o}, and this is urgent. Your account will be locked in the next ten minutes. Read me the six digit code we just sent you, right now, so I can stop it.`,
-  'attack-low': o => `Hi, this is ${o}. No rush at all. We are just updating your file, so could you read me the six digit code we just texted you when you have a second?`,
-  'benign-high': o => `This is ${o} with an urgent notice. We have stopped a payment that looked unusual. Please call us back today at the number on your statement so we can sort it out.`,
-  'benign-low': o => `Hi, this is ${o}, just a quick courtesy call. Your statement for this month is ready in your online account. There is nothing you need to do.`
-};
-const VOICE_ROTA = [VOICES.V1, VOICES.V2, VOICES.V3, VOICES.V4];
-
 const CELLS = [];
 for (const structure of [1, -1]) for (const surface of [1, -1]) for (const topic of [1, -1]) CELLS.push({ structure, surface, topic });
-const label = c => ({ structure: c.structure > 0 ? 'attack' : 'benign', surface: c.surface > 0 ? 'high' : 'low', topic: c.topic > 0 ? 'financial' : 'community' });
 const code = c => (c.structure > 0 ? 'A' : 'B') + (c.surface > 0 ? 'H' : 'L') + (c.topic > 0 ? 'F' : 'C');
 
-export const CLIPS = CELLS.flatMap((c, ci) => Array.from({ length: 9 }, (_, i) => {
-  const l = label(c), org = ORGS[l.topic][i % 5], id = `${code(c)}${i + 1}`;
-  return { id, media: `${AUDIO}${id.toLowerCase()}.mp3`, transcript: '', placeholder: true,
-    meta: { structure: l.structure, surface: l.surface, topic: l.topic, cell: code(c), placeholder: true },
-    text: LINES[`${l.structure}-${l.surface}`](org), voice: VOICE_ROTA[(ci + i) % 4] };
-}));
+// The spoken words (tags removed), and where the request starts and ends, in words.
+const plain = t => t.replace(/\[\/?(ASK|RES)\]/g, ' ').replace(/\s+/g, ' ').trim();
+const nWords = t => (plain(t).match(/\S+/g) || []).length;
+function spans(t) {
+  const a = t.indexOf('[ASK]'), b = t.indexOf('[/ASK]');
+  return { askStartWord: nWords(t.slice(0, a)), askEndWord: nWords(t.slice(0, b)), words: nWords(t) };
+}
+
+const ROTATE = 3;   // one set (three positions) for the legitimate twins
+export const CLIPS = CELLS.flatMap(c => {
+  const cell = code(c), mine = STIMULI.filter(x => x.set === 'passive' && x.cell === cell).sort((x, y) => x.id.localeCompare(y.id));
+  if (mine.length !== 9) throw new Error(`clips.mjs: cell ${cell} has ${mine.length} clips, not 9`);
+  const slots = new Array(9);
+  mine.forEach((x, k) => { slots[c.structure > 0 ? k : (k + ROTATE) % 9] = x; });
+  return slots.map((x, i) => {
+    const id = `${cell}${i + 1}`;
+    return { id, media: `${AUDIO}${id.toLowerCase()}.mp3`, transcript: '', text: plain(x.text), voice: VOICE,
+      meta: { structure: c.structure > 0 ? 'attack' : 'benign', surface: x.surface, topic: x.topic, cell, stimulusId: x.id, pair: x.id.slice(3),
+        organization: x.organization, requestKind: x.requestKind, requestPosition: x.requestPosition, ...spans(x.text) } };
+  });
+});
 
 // The 18 lists (verified by tests/lab/vishing-study2.test.mjs: 12 per phase, 6/6 on every factor, 3 pre + 3 post each).
 export const LISTS = [];
@@ -55,4 +59,4 @@ export const CLIP_LIBRARY = {
   template: { title: 'Recorded call', body: 'Listen to this call to the Northwind front desk. Decide whether it is legitimate or suspicious.', live: true, mustFinish: true, maxPlays: 1, decide: true, ask: ['confidence6'] }
 };
 export const CLIP_JOBS = CLIPS.map(c => ({ file: `clips/${c.id.toLowerCase()}.mp3`, text: c.text, voice: c.voice, phone: true }));
-export const PLACEHOLDER_CLIPS = CLIPS.filter(c => c.placeholder).length;
+export const PLACEHOLDER_CLIPS = 0;

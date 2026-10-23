@@ -10,7 +10,8 @@
 //
 // PLACEHOLDERS: the shift calls are written by the outside script writer (writer independence). These placeholder
 // call specs only make the shift run end to end; each is marked placeholder: true and counted in PLACEHOLDER_CALLS.
-import { DIRECTORY, VOICES, number } from './world.mjs';
+import { DIRECTORY, VOICES, VOICE, number } from './world.mjs';
+import { STIMULI } from './stimuli-data.mjs';
 
 const DISPOSITION = [{ value: 'legitimate', label: 'Legitimate' }, { value: 'suspicious', label: 'Suspicious' }, { value: 'report', label: 'Report to security' }];
 const callItem = (id, call, extra = {}) => ({ id, title: 'Incoming call', kind: 'call', body: '', media: '', mediaAlt: '', transcript: '', decide: true,
@@ -36,78 +37,45 @@ export const PRACTICE_ITEMS = [
   callItem('practice-call-retry', { ...PRACTICE, gate: { retryOf: 'practice-call', final: true } }, { title: 'Practice call (second try)', body: 'Let us try the practice call once more. Speak your reply out loud.', decide: false, ask: 'none' })
 ];
 
-// ---------- the shift (placeholders) ----------
-const ATTACKER_NUMBERS = ['(404) 555-0186', '(404) 555-0188', '(404) 555-0191', '(404) 555-0193', '(404) 555-0195'];
-function attack({ org, dept, ask, askKind, urgent, n, voice }) {
-  const cb = number(dept);
-  return {
-    caller: 'Incoming call', number: '', debriefName: org.replace(/^the /, ''), callbackNumber: cb, deflectNumber: ATTACKER_NUMBERS[n], intent: 'attack', voice,
-    ...(askKind === 'code' ? { code: { service: org, at: 'ask' } } : {}),
-    persona: `A caller claiming to be from ${org}. ${urgent ? 'Urgent and insistent.' : 'Calm, polite and patient.'}`,
-    script: {
-      opener: urgent ? `This is ${org}, and I need a moment of your time right away. Am I speaking with Alex at Northwind Supply?` : `Hi, this is Jordan with ${org}. Is this Alex at Northwind Supply? No rush, I just have a quick question.`,
-      pretext: urgent ? `We have flagged unusual activity on Northwind's account, and it needs to be stopped in the next few minutes.` : `We are updating Northwind's file, and I need to verify a detail before I can close it out.`,
-      ask, pressure1: urgent ? 'I understand, but this has to happen now, or the account will be locked.' : 'Totally understand. It only takes a second, and then you are all set.',
-      pressure2: urgent ? 'If we cannot finish this on this call, Northwind will be responsible for the loss.' : 'I just need that one detail, and I will not need to call again.',
-      deflect: `You can reach me directly at ${ATTACKER_NUMBERS[n].replace(/[()]/g, '').replace(/-/g, ' ')}, but it is much faster to finish this now.`,
-      deflectLine: `${org}, this is Jordan. Thanks for calling back. Go ahead and read me that detail now.`,
-      goAhead: urgent ? 'Good. Go ahead, I am ready for it now.' : 'Great, thank you. Go ahead whenever you are ready.',
-      closeComply: 'Thank you, that is all I needed. You are all set.', closeRefuse: 'All right. Have a good day.', close: 'I have to let you go now. Goodbye.',
-      callback: `Thank you for calling ${org}. I do not see any call from us to Northwind today, and we never ask for codes or passwords by phone. Please do not share anything with that caller.`
-    }
-  };
-}
-function benign({ org, dept, ask, urgent, n, voice, routeOwn, complete }) {
-  const cb = number(dept);
-  return {
-    caller: 'Incoming call', number: '', debriefName: org.replace(/^the /, ''), callbackNumber: cb, intent: 'benign', voice,
-    // Completion: a request to call back is completed only by reaching the real number; any other request by the
-    // truthful answer on the call (`complete`, when that answer is not a plain yes).
-    ...(routeOwn ? { completeViaCallback: true } : {}), ...(complete ? { completeRe: complete } : {}),
-    persona: `A real employee of ${org}. ${urgent ? 'Urgent but polite.' : 'Calm and routine.'}`,
-    script: {
-      opener: urgent ? `Hello, this is Morgan from ${org}. I am calling about something time-sensitive for Northwind Supply.` : `Hi, this is Casey from ${org}. Is this the Northwind front desk?`,
-      pretext: urgent ? 'We stopped a transaction this morning that did not match Northwind\'s usual activity.' : 'I am just confirming a routine detail on our end.',
-      ask, pressure1: routeOwn ? 'Again, please use the number in your directory, not one from me.' : 'No problem if you are not sure. It is just a quick confirmation.',
-      pressure2: 'Thanks for your time either way.',
-      deflect: `Of course. Please call ${org} at the number in your company directory and they can confirm this.`,
-      closeComply: 'Perfect, thank you. That is all we needed.', closeRefuse: 'That is completely fine. Have a good day.', close: 'Thanks, goodbye.',
-      callback: `Thank you for calling ${org}. Yes, we did call Northwind today about that, and everything is in order. Thanks for checking.`
-    }
-  };
-}
-// slot -> [form A spec, form B spec]; topics swap between forms.
-const SLOTS = {
-  'atk-calm-1': [{ topic: 'financial', org: 'Keystone Card Services', dept: 'Keystone Card Services, Corporate Cards', askKind: 'code', ask: 'I just texted a six-digit code to the company phone. Could you read it back to me so I can verify the account?' },
-    { topic: 'community', org: 'Calder Properties', dept: 'Calder Properties, Building Management', askKind: 'code', ask: 'Our system just sent a six-digit access code to your phone. Could you read it back so I can update the badge list?' }],
-  'atk-calm-3': [{ topic: 'financial', org: 'Tallgrass Bank', dept: 'Tallgrass Bank, Fraud Prevention', askKind: 'code', ask: 'I just sent a six-digit code to the company phone to confirm I am speaking with the right person. Could you read it to me?' },
-    { topic: 'community', org: 'Riverton Water and Power', dept: 'Riverton Water & Power, Business Accounts', askKind: 'code', ask: 'I just sent a six-digit code for the account change. Could you read it to me?' }],
-  'atk-urgent-1': [{ topic: 'community', org: 'the Harlan County Tax Office', dept: 'Harlan County Tax Office', askKind: 'password', urgent: true, ask: 'To stop the penalty, I need to log in to Northwind\'s business portal with you. What is the portal password?' },
-    { topic: 'financial', org: 'PayLark Payroll', dept: 'PayLark Payroll', askKind: 'password', urgent: true, ask: 'To stop the payroll run, I need the Northwind portal password right now.' }],
-  'atk-urgent-2': [{ topic: 'financial', org: 'Meridian Ridge Credit Union', dept: 'Meridian Ridge Credit Union', askKind: 'account', urgent: true, ask: 'I need Northwind\'s full company account number to freeze the transfer. What is it?' },
-    { topic: 'community', org: 'Brightway Parcel', dept: 'Brightway Parcel, Riverton Depot', askKind: 'account', urgent: true, ask: 'Your shipment is being returned unless the duty is paid now. What is the company account number for the charge?' }],
-  'atk-calm-2': [{ topic: 'financial', org: 'PayLark Payroll', dept: 'PayLark Payroll', askKind: 'account', ask: 'We are moving Northwind to our new funding system. To match your file, could you read me the company account number that payroll is drawn from?' },
-    { topic: 'community', org: 'the Harlan County Tax Office', dept: 'Harlan County Tax Office', askKind: 'account', ask: 'Northwind has a small property tax refund. To deposit it, I just need the company account number. Do you have it handy?' }],
-  'ben-urgent-1': [{ topic: 'financial', org: 'Tallgrass Bank', dept: 'Tallgrass Bank, Fraud Prevention', urgent: true, routeOwn: true, ask: 'Please hang up and call Tallgrass Fraud Prevention at the number in your company directory, so you know it is really us.' },
-    { topic: 'community', org: 'Riverton Water and Power', dept: 'Riverton Water & Power, Business Accounts', urgent: true, routeOwn: true, ask: 'Please call Business Accounts back at the number in your directory today so we can restore the autopay.' }],
-  'ben-urgent-2': [{ topic: 'community', org: 'the Riverton Fire Marshal\'s Office', dept: 'Riverton Fire Marshal\'s Office', urgent: true, ask: 'An inspector is on the way this afternoon. Can you confirm someone will be at the front desk until five?' },
-    { topic: 'financial', org: 'Keystone Card Services', dept: 'Keystone Card Services, Corporate Cards', urgent: true, ask: 'We blocked a charge on the card ending in the four digits on file. Can you confirm whether anyone at Northwind made a purchase at Orchard Office Furniture today? Just yes or no.', complete: "\\b(yes|yeah|no|nope|nobody|no one|not that i know|i don'?t think so)\\b" }],
-  'ben-calm-1': [{ topic: 'community', org: 'Brightway Parcel', dept: 'Brightway Parcel, Riverton Depot', ask: 'We have a delivery for 2200 Calder Way tomorrow morning. Can you confirm the front desk opens at eight?' },
-    { topic: 'financial', org: 'Tallgrass Bank', dept: 'Tallgrass Bank, Business Services', ask: 'Your new deposit slips are ready. Would you like them mailed to the office, or picked up at the branch?', complete: '\\b(mail|mailed|post|pick (them )?up|picked up|pickup|branch)\\b' }],
-  'ben-calm-2': [{ topic: 'financial', org: 'Ashby Mutual Insurance', dept: 'Ashby Mutual Insurance, Commercial', ask: 'We mailed the renewal packet last week. Could you confirm it arrived? Nothing else is needed.' },
-    { topic: 'community', org: 'the Riverton Business Association', dept: 'Riverton Business Association', ask: 'We are confirming attendance for Thursday\'s breakfast. Is Northwind still planning to send someone?' }],
-  'ben-calm-3': [{ topic: 'community', org: 'Calder Properties', dept: 'Calder Properties, Building Management', ask: 'The elevator inspection is Thursday morning. Can you confirm someone at the front desk can let the inspector in at nine?' },
-    { topic: 'financial', org: 'Ashby Mutual Insurance', dept: 'Ashby Mutual Insurance, Commercial', ask: 'We updated Northwind\'s certificate of insurance. Could you confirm the office address on it is still 2200 Calder Way?' }]
+// ---------- the shift (the writer's calls, stimuli-data.mjs) ----------
+// Scoring patterns, by the writer's stimulus id. completeRe (legitimate calls) starts from the writer's completes list;
+// a choice call also takes the options its ask offers. lossRe (bank-change, payment and link-approval attacks) adds the
+// short ways a person agrees to that action; a bare "okay" or "sure" never matches.
+const BANK_CHANGE = "\\b(?:change the bank details|i saved the new bank information|go ahead and update the account|the new account is now on file|i(?:'?ll| will| can) (?:update|change|enter|save) (?:it|that|them|the (?:bank|account))|i(?:'?ve| have) (?:updated|changed|saved) (?:it|that|them)|it'?s (?:updated|saved))\\b";
+const PAYMENT = "\\b(?:i sent the payment|go ahead and pay it|the payment is submitted|i paid the invoice to that account|(?:i'?ll|i will|i can) (?:send|submit|pay|make) (?:it|that|the payment)|i(?:'?ve| have| just) (?:sent|submitted|paid) (?:it|that|the payment)|it'?s (?:sent|submitted|paid)|sending it now)\\b";
+const LINK = "\\b(?:yes, approve it|i approved the request|the review is approved|go ahead and approve it|(?:i'?ll|i will|i can) (?:approve|click) (?:it|that|the link|the request|access)|i(?:'?ve| have| just) (?:approved|clicked) (?:it|that|the link|the request)|(?:it'?s|that'?s) approved)\\b";
+const HELD = '\\b(?:yes|yeah|that is correct|that matches|no, it has changed|the date is correct|the last four are correct)\\b';
+const YES_NO = '\\b(?:yes|yeah|no|no, we will not|yes, we expect it|we do not expect it)\\b';
+const choice = offered => `\\b(?:email|the account portal|tuesday morning|wednesday afternoon|thursday morning|friday afternoon|front entrance|warehouse door|receiving|afternoon pickup|${offered})\\b`;
+const PATTERNS = {
+  'S-atk-calm-2-A': BANK_CHANGE, 'S-atk-calm-2-B': BANK_CHANGE, 'R-atk-5': BANK_CHANGE,
+  'S-atk-urgent-2-A': PAYMENT, 'S-atk-urgent-2-B': PAYMENT, 'R-atk-4': PAYMENT, 'R-atk-8': PAYMENT,
+  'R-atk-6': LINK,
+  'S-ben-calm-1-A': HELD, 'S-ben-calm-1-B': HELD, 'R-ben-1': HELD,
+  'S-ben-calm-2-A': YES_NO, 'S-ben-calm-2-B': YES_NO, 'S-ben-urgent-2-A': YES_NO, 'S-ben-urgent-2-B': YES_NO, 'R-ben-3': YES_NO, 'R-ben-6': YES_NO, 'R-ben-7': YES_NO,
+  'S-ben-calm-3-A': choice('this afternoon|tomorrow morning'), 'S-ben-calm-3-B': choice('portal'), 'R-ben-2': choice('thursday|friday'), 'R-ben-8': choice('this afternoon|tomorrow morning')
 };
-const VOICE_BY_SLOT = { 'atk-calm-2': VOICES.V1, 'ben-calm-3': VOICES.V3, 'atk-calm-1': VOICES.V2, 'atk-calm-3': VOICES.V1, 'atk-urgent-1': VOICES.V4, 'atk-urgent-2': VOICES.V3, 'ben-urgent-1': VOICES.V3, 'ben-urgent-2': VOICES.V4, 'ben-calm-1': VOICES.V1, 'ben-calm-2': VOICES.V2 };
+
+function toCall(s) {
+  const debriefName = s.organization.split(',')[0], attack = s.structure === 'attack', k = s.requestKind;
+  const call = { caller: 'Incoming call', number: '', debriefName, callbackNumber: number(s.organization), intent: attack ? 'attack' : 'benign', voice: VOICE, persona: s.persona, script: s.lines };
+  if (k === 'code') call.code = { service: debriefName, at: 'ask' };
+  if (attack) call.deflectNumber = s.attackerNumber;   // every attack's deflect line gives this number; dialing it is a caller-supplied callback
+  if (k === 'caller-callback') call.lossOnCallerCallback = true;
+  if (['bank-change', 'payment', 'link-approval'].includes(k)) call.lossRe = PATTERNS[s.id];
+  if (k === 'route-own') call.completeViaCallback = true;
+  if (['yes-no', 'confirm-held', 'choice'].includes(k)) call.completeRe = PATTERNS[s.id];
+  return call;
+}
+const meta = s => ({ slot: s.slot, structure: s.structure === 'attack' ? 'attack' : 'benign', surface: s.surface === 'high' ? 'urgent' : 'calm', topic: s.topic, askKind: s.requestKind, stimulusId: s.id, form: s.form });
 
 export const SHIFT_ITEMS = [], SHIFT_FORMS = { A: [], B: [] };
-Object.entries(SLOTS).forEach(([slot, forms], n) => forms.forEach((s, f) => {
-  const id = `call-${slot}-${'ab'[f]}`, isAttack = slot.startsWith('atk'), urgent = !!s.urgent;
-  const spec = isAttack ? attack({ ...s, urgent, n: n % 5, voice: VOICE_BY_SLOT[slot] }) : benign({ ...s, urgent, n, voice: VOICE_BY_SLOT[slot] });
-  SHIFT_ITEMS.push(callItem(id, { ...spec, placeholder: true }, { meta: { slot, structure: isAttack ? 'attack' : 'benign', surface: urgent ? 'urgent' : 'calm', topic: s.topic,
-    askKind: s.askKind || 'none', placeholder: true } }));
-  SHIFT_FORMS['AB'[f]].push(id);
-}));
-export const PLACEHOLDER_CALLS = SHIFT_ITEMS.length;
+for (const s of STIMULI.filter(s => s.set === 'shift')) {
+  const id = `call-${s.slot}-${s.form.toLowerCase()}`;
+  SHIFT_ITEMS.push(callItem(id, toCall(s), { meta: meta(s) }));
+  SHIFT_FORMS[s.form].push(id);
+}
+// Reserve calls: written and scored like the shift, not used in the study yet.
+export const RESERVE_ITEMS = STIMULI.filter(s => s.set === 'reserve').map(s => callItem(`reserve-${s.id}`, toCall(s), { meta: meta(s) }));
+export const PLACEHOLDER_CALLS = 0;
 export const DIRECTORY_NUMBERS = DIRECTORY.map(d => d.number);

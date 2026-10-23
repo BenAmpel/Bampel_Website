@@ -254,7 +254,10 @@ let passer = null;
     assert.equal(down.filter(x => x[col('structure')] === s && x[col('surface')] === u).length, 1, `one outage call in the ${s}/${u} stratum`);
   assert.equal(calls.filter(t => t.item.directoryDown).length, 4, 'the browser knows which calls have the directory down');
   const codeCalls = attacks.filter(x => x[col('call_code_sent')] === '1');
-  assert.equal(codeCalls.length, 2, 'two attacks send a code');
+  // How many of this form's attacks send a code comes from the shipped calls, not a fixed number.
+  const { SHIFT_ITEMS } = await import('../../netlify/lib/lab/studies/vishing-study2/calls.mjs');
+  const codeSlots = SHIFT_ITEMS.filter(it => it.call.code && it.call.intent === 'attack' && it.id.endsWith('-' + me.flags.shiftForm.toLowerCase())).length;
+  assert(codeSlots >= 1 && codeCalls.length === codeSlots, `each attack that sends a code sends it (${codeCalls.length} of ${codeSlots})`);
   assert(codeCalls.every(x => x[col('call_disclosed')] === 'code' && x[col('call_points')] === '-42'), 'reading the code back is a disclosure: -40, and the callback costs 2');
   const routeOwn = benign.filter(x => x[col('call_slot')] === 'ben-urgent-1'), onCall = benign.filter(x => x[col('call_slot')] !== 'ben-urgent-1');
   assert(onCall.every(x => x[col('call_points')] === '10' && x[col('call_benign_completed_on_call')] === '1'), 'a legitimate request completed on the call earns 10');
@@ -267,7 +270,7 @@ let passer = null;
   r = await call(P + 'survey', { body: { token: tok, session: 2, kind: 'post', data: { prev_post: '30', verify_cost: '3', tlx_mental: '40', demand_probe: 'spot scams', bot_suspect: 'some', attn_check: 'sometimes' } } });
   assert(r.json.ok && r.json.status.finished, r.text);
   const db = (await call(P + 'debrief', { body: { token: tok } })).json;
-  assert.equal(db.calls.length, 10); assert.equal(db.points, 2 * -42 + 4 * 10, 'the debrief totals the shift');
+  assert.equal(db.calls.length, 10); assert.equal(db.points, codeCalls.length * -42 + 4 * 10, 'the debrief totals the shift');
   assert(db.calls.every(c => c.transcript.length > 0) && !JSON.stringify(db).match(/\b\d{6}\b/), 'own transcript, with the code redacted');
   const bonus = await call(P + 'admin/bonus.csv', { key: OWNER });
   assert.equal(bonus.status, 200, bonus.text);
@@ -308,6 +311,11 @@ console.log('preview participants keep the arm the researcher chose');
     for (const id of l[ph]) (seen[id] = seen[id] || { pre: 0, post: 0 })[ph]++;
   }
   assert(Object.keys(seen).length === 72 && Object.values(seen).every(s => s.pre === 3 && s.post === 3), 'every clip: 3 lists pre, 3 post');
+  // Matched pairs (an attack and its legitimate twin, identical but for the request): never both in one list.
+  for (const l of LISTS) {
+    const pairs = [...l.pre, ...l.post].map(id => meta.get(id).pair).filter(Boolean);
+    assert.equal(new Set(pairs).size, pairs.length, 'no list holds both members of a matched pair');
+  }
   const X = await import('../../netlify/lib/lab/types/multimodal-study.mjs');
   // An attack whose ask is not a secret: its own loss phrases count as giving it ('action'); agreeing alone does not.
   const lossRe = "\\b(go ahead and (change|update) (it|them)|i'?ll (call|ring) you (at|on) that number)\\b";
