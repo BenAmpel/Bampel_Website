@@ -5,6 +5,7 @@
 // each call works for about budgetMs and saves progress under selftest/{code}, returning
 // { done: false } until finished, so no call hits the function time limit. Nothing here signs in
 // through the website.
+import { EXTRA_TYPES, simulateExtra } from './questiontypes.mjs';
 import * as E from './engine.mjs';
 import { getContent } from './content.mjs';
 import { evalDisplay, orderItems } from './logic.mjs';
@@ -35,6 +36,7 @@ function surveyAnswers(items, plan, r) {
   const answers = {};
   for (const it of orderItems(items)) {
     if (it.type === 'info' || !evalDisplay(it.displayIf, { answers, ed: plan.embedded })) continue;
+    if (EXTRA_TYPES.includes(it.type)) { Object.assign(answers, simulateExtra(it, r)); continue; }
     answers[it.id] = answerFor(it, r);
   }
   return answers;

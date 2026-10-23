@@ -31,4 +31,5 @@ See `.impeccable.md` for the full design specification. Summary:
 - Shortcodes: self-contained HTML + `<style>` + `<script>` in `/layouts/shortcodes/`
 - Dark mode: `body.dark` selector; light: `body:not(.dark)`
 - Data: static JSON in `/static/data/` fetched client-side
+- CCAIR data: `static/ccair/data/*.json`, except research materials: edit `data/ccair/materials-source.json` (unpublished; may hold placeholders and notes). `npm run build:ccair` writes the cleaned, gitignored `static/ccair/data/materials.json`
 - Charts: ECharts; Maps: Leaflet

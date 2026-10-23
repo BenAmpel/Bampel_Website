@@ -12,15 +12,23 @@
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:image" content="{{ $card }}" />
 
-{{/* Person knowledge-graph identity, homepage only. */}}
+{{/* Person knowledge-graph identity: homepage only (author profile pages are not rendered and /authors/*
+   redirects to /). The @id is shared with the CCAIR site's Organization JSON-LD (static/ccair/index.html),
+   which names this person as its director. */}}
 {{ if .IsHome }}
 {{ $ld := dict
     "@context" "https://schema.org"
     "@type" "Person"
+    "@id" (printf "%s#person" site.BaseURL)
     "name" "Benjamin M. Ampel"
+    "givenName" "Benjamin"
+    "familyName" "Ampel"
     "alternateName" (slice "Ben Ampel" "Benjamin Ampel")
-    "jobTitle" "Assistant Professor of Computer Information Systems"
+    "jobTitle" (slice "Assistant Professor of Computer Information Systems" "Director, Center for CyberAI Research (CCAIR)")
     "worksFor" (dict "@type" "CollegeOrUniversity" "name" "Georgia State University" "sameAs" "https://www.gsu.edu/")
+    "memberOf" (dict "@type" "ResearchOrganization" "@id" (printf "%sccair/#org" site.BaseURL) "name" "Center for CyberAI Research (CCAIR)" "url" (printf "%sccair/" site.BaseURL))
+    "alumniOf" (dict "@type" "CollegeOrUniversity" "name" "University of Arizona" "sameAs" "https://www.arizona.edu/")
+    "award" (slice "ACM SIGMIS Doctoral Dissertation Award (2024)" "IEEE ISI Best Paper Award (2023)" "IEEE ISI Best Paper Award (2020)")
     "url" site.BaseURL
     "image" (printf "%smedia/sharing-card.png" site.BaseURL)
     "email" "bampel@gsu.edu"

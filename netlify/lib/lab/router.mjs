@@ -14,10 +14,17 @@ import * as admin from './admin.mjs';
 import * as backup from './backup.mjs';
 import * as acc from './accounts.mjs';
 import { runSelfTest } from './selftest.mjs';
-import { getStudy, listStudies, createStudy, updateStudy, typeFor } from './registry.mjs';
+import { getStudy, listStudies, createStudy, updateStudy, deleteStudy, typeFor } from './registry.mjs';
 import { TYPES } from './types/index.mjs';
 import { importSurvey, ImportError } from './import/index.mjs';
 import { templateList } from './templates.mjs';
+import * as recruit from './recruit.mjs';
+import { exportDesign, importDesign, cloneStudy } from './studyfile.mjs';
+import { buildCodebook, codebookCsv, codebookMarkdown } from './codebook.mjs';
+import { wideRows, WIDE_FIRST } from './wide.mjs';
+import { saveChecks, LANGUAGES } from './envcheck.mjs';
+import { saveDq } from './quality.mjs';
+import { buildBundle } from './bundle.mjs';
 
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
 const csv = (text, name) => new Response(text, { headers: { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': `attachment; filename="${name}"`, 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
@@ -26,7 +33,7 @@ const MAX_BODY = 4_000_000;
 const MAX_IMPORT_BODY = 8_000_000;   // a survey file as JSON text (an .xlsx is base64); Netlify itself caps a request near 6 MB
 
 const NEED = {
-  me: 'viewer', participants: 'viewer', 'export.csv': 'viewer', 'export-surveys.csv': 'viewer', 'export.json': 'viewer', rows: 'viewer', records: 'viewer', raw: 'viewer',
+  me: 'viewer', participants: 'viewer', 'design.json': 'viewer', 'codebook.csv': 'viewer', 'codebook.md': 'viewer', 'export-wide.csv': 'viewer', 'bundle.zip': 'viewer', 'export.csv': 'viewer', 'export-surveys.csv': 'viewer', 'export.json': 'viewer', rows: 'viewer', records: 'viewer', raw: 'viewer',
   content: 'viewer', 'content-history': 'viewer',
   'content-save': 'editor', 'content-restore': 'editor', import: 'editor', preview: 'editor',
   roster: 'manager', lookup: 'manager', 'credit.csv': 'manager', create: 'manager', 'set-test': 'manager',
@@ -66,18 +73,32 @@ export async function handle(req, { getStore, env, now }) {
     // a file name never hints at a condition or an answer. Range requests let browsers seek (Safari needs them).
     const fm = route.match(/^file\/(f-[0-9a-f]{12}\.[a-z0-9]{2,4})$/);
     if (fm && (req.method === 'GET' || req.method === 'HEAD')) return await serveFile(S.store, fm[1], req);
-    if (route === 'login') return reply(await E.login(S, body.email != null ? { email: body.email, confirm: body.confirm === true } : body.panelId != null ? { panelId: body.panelId } : { code: body.code }));
-    if (['resume', 'consent', 'session', 'view', 'trial', 'survey'].includes(route)) {
+    if (route === 'login') return reply(await E.login(S, body.email != null ? { email: body.email, confirm: body.confirm === true } : body.panelId != null ? { panelId: body.panelId, panelMeta: { study: body.panelStudy, session: body.panelSession } } : { code: body.code }));
+    if (['resume', 'consent', 'session', 'view', 'trial', 'survey', 'handoff', 'withdraw', 'checks', 'dq'].includes(route)) {
       const pid = await E.verifyToken(S, body.token);
       if (!pid) return json({ error: 'expired' }, 401);
       const idx = body.index === 'practice' ? 'practice' : Number(body.index);
       switch (route) {
         case 'resume': return reply(await E.resume(S, pid));
         case 'consent': return reply(await E.consent(S, pid, body.agree === true, Date.now(), { recording: typeof body.recording === 'boolean' ? body.recording : undefined }));
-        case 'session': return reply(await E.startSession(S, pid, Date.now(), { embedded: body.embedded }));
+        case 'session': {
+          const r = await E.startSession(S, pid, Date.now(), { embedded: body.embedded });
+          // setup checks already saved for this session (a reload goes straight on)
+          if (!r.error && await S.store.get(`data/${pid}/s${r.session}/checks`)) r.checksDone = true;
+          return reply(r);
+        }
         case 'view': return reply(await E.viewTrial(S, pid, Number(body.session), idx));
         case 'trial': return reply(await E.saveTrial(S, pid, Number(body.session), idx, body.data));
         case 'survey': return reply(await E.saveSurvey(S, pid, Number(body.session), body.kind, body.data));
+        case 'dq': return reply(await saveDq(S, E, pid, Number(body.session), body.data));   // data-quality signals (quality.mjs)
+        case 'checks': return reply(await saveChecks(S, E, pid, Number(body.session), body.data, (await content.getContent(S.store, type)).environment));   // setup checks (envcheck.mjs)
+        case 'withdraw': { const r = await recruit.markReturned(S, pid); if (r.error) return reply(r); }   // then the returned code, as for handoff
+        // falls through
+        case 'handoff': {   // the code and redirect for the outcome this participant has reached (none while the study goes on)
+          const p = await E.loadParticipant(S, pid), c = await content.getContent(S.store, type);
+          if (!p) return json({ error: 'expired' }, 401);
+          return json(await recruit.handoff(S, p, (await E.resume(S, pid)).status || {}, c.enrollment.panel));
+        }
       }
     }
 
@@ -116,14 +137,27 @@ export async function handle(req, { getStore, env, now }) {
         case 'me': return json({ name: who.name, role: who.role, roles: admin.ROLE_INFO, study: { id: study.id, name: study.name, type: type.id, typeLabel: type.label, paths: study.paths }, conditions: type.conditionsOf(c) });
         case 'participants': return json(await E.listParticipants(S));
         case 'export.json': return json(await E.exportRecords(S));
+        case 'design.json': return json(await exportDesign(S));
+        case 'codebook.csv': return csv(codebookCsv(buildCodebook(S, c)), `${study.id}_codebook_v${c.version || 0}.csv`);
+        case 'codebook.md': return new Response(codebookMarkdown(buildCodebook(S, c), { study, type, version: c.version || 0 }), { headers: { 'content-type': 'text/markdown; charset=utf-8', 'content-disposition': `attachment; filename="${study.id}_codebook_v${c.version || 0}.md"`, 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
+        case 'bundle.zip': {   // reproducibility bundle (bundle.mjs): design, codebook, platform version; no participant data
+          const b = await buildBundle(S);
+          await admin.audit(S.store, who, 'bundle.download', `${b.name} (${b.files.length} files)`);
+          return new Response(b.bytes, { headers: { 'content-type': 'application/zip', 'content-disposition': `attachment; filename="${b.name}"`, 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
+        }
+        case 'export-wide.csv': return csv(E.toCsv(wideRows(S, await E.exportRecords(S), c), WIDE_FIRST), `${study.id}_wide.csv`);
         case 'export.csv': return csv(await E.exportCsv(S), `${study.id}_trials.csv`);
         case 'export-surveys.csv': return csv(await E.exportSurveyCsv(S), `${study.id}_surveys.csv`);
         case 'credit.csv': return csv(await E.exportCredit(S), `${study.id}_extra_credit.csv`);
-        case 'rows': return json(await E.exportRows(S, url.searchParams.get('kind') === 'surveys' ? 'surveys' : 'trials', codes.length ? codes : ['none']));
+        case 'rows': {
+          const kind = url.searchParams.get('kind');
+          if (kind === 'wide') return json(wideRows(S, await E.exportRecords(S, codes.length ? codes : ['none']), c));   // one row per participant
+          return json(await E.exportRows(S, kind === 'surveys' ? 'surveys' : 'trials', codes.length ? codes : ['none']));
+        }
         case 'records': return json(await E.exportRecords(S, codes.length ? codes : ['none']));
         case 'raw': return json(codes.length === 1 ? await E.exportRaw(S, codes[0]) : { error: 'one_code' });
         case 'content': return json({ ...c, _textFields: content.textFieldsFor(type), _meta: type.editorMeta ? type.editorMeta() : {}, _type: type.id,
-          _conditions: type.conditionsOf(c), _surveyRules: type.surveyRules || [], _questionTypes: content.QUESTION_TYPES });
+          _conditions: type.conditionsOf(c), _surveyRules: type.surveyRules || [], _questionTypes: content.QUESTION_TYPES, _panelPresets: recruit.presetList(), _languages: LANGUAGES });
         case 'content-history': return json(await content.contentHistory(S.store));
         case 'team': return json(await admin.listMembers(S.store));
         case 'activity': return json(await admin.auditLog(S.store));
@@ -252,7 +286,7 @@ async function serveFile(store, name, req) {
 //   public:        studies (the listed studies), auth/* (sign in; open an invitation or reset link)
 //   any signed-in: me, mystudies, study-summary (a researcher session, or the owner key)
 //   researcher:    account/* (their own settings; a session only)
-//   owner:         types, studies (all), create, update, researchers/*, activity (owner key or a lab owner account)
+//   owner:         types, studies (all), create, clone, update, delete-study, researchers/*, activity (owner key or a lab owner account)
 async function labRoute(route, req, body, { registry, getStore, ownerKey, clock }) {
   const now = clock(), key = req.headers.get('x-admin-key'), bearer = acc.bearerOf(req);
   if (route === 'studies' && req.method === 'GET' && !key && !bearer) {
@@ -297,8 +331,20 @@ async function labRoute(route, req, body, { registry, getStore, ownerKey, clock 
     case 'studies': return json(await listStudies(registry, { all: true }));
     case 'types': return json(Object.values(TYPES).map(t => ({ id: t.id, label: t.label, description: t.description })));
     case 'templates': return json(templateList());
-    case 'create': return needPost() || reply(await createStudy(registry, body, who));
+    case 'create': {   // from a template or a type, or (body.design) from a study design file
+      if (!post) return needPost();
+      if (body.design) return reply(await importDesign(registry, st => blobsStore(getStore, st.storeName), body.design, { id: body.id, name: body.name, description: body.description }, who, now));
+      return reply(await createStudy(registry, body, who));
+    }
+    case 'clone': {   // a new study with the same design (content, settings, files); no participants or data
+      if (!post) return needPost();
+      const from = await getStudy(registry, String(body.from || ''));
+      if (!from) return json({ error: 'no_study', hint: 'That study no longer exists.' }, 404);
+      return reply(await cloneStudy(registry, st => blobsStore(getStore, st.storeName), { store: blobsStore(getStore, from.storeName), type: typeFor(from), study: from }, { id: body.id, name: body.name }, who, now));
+    }
     case 'update': return needPost() || reply(await updateStudy(registry, String(body.id || ''), body));
+    case 'delete-study':   // an archived study, for good; the console repeats the call until done (registry.mjs, deleteStudy)
+      return needPost() || reply(await deleteStudy({ registry, registryBackup: blobsStore(getStore, 'lab-registry-backup'), getStoreFor: name => blobsStore(getStore, name) }, body.id, body.confirm, who, { now }));
     case 'researchers': return json(await acc.listResearchers(registry));
     case 'researchers/invite': return needPost() || reply(await acc.inviteResearcher(registry, body, who, await studyIds(), now));
     case 'researchers/update': return needPost() || reply(await acc.updateResearcher(registry, String(body.id || ''), body, who, await studyIds(), now));
@@ -360,7 +406,7 @@ async function studiesFor(registry, getStore, account) {
   return Promise.all(rows.map(async s => {
     const bk = await backup.backupStatus(blobsStore(getStore, s.backupName)), st = await blobsStore(getStore, s.storeName).get('meta/last-selftest');
     return { id: s.id, name: s.name, type: s.type, typeLabel: (TYPES[s.type] || {}).label || s.type, role: account && !account.labOwner ? account.studyRoles[s.id] : 'owner', paths: s.paths, listed: !!s.listed, archived: !!s.archived, builtIn: !!s.builtIn,
-      lastBackupAt: bk.lastCompleteAt || null, lastBackupTriedAt: bk.lastRunAt || null, lastSelfTest: st || null };
+      deleting: !!s.deletingAt, lastBackupAt: bk.lastCompleteAt || null, lastBackupTriedAt: bk.lastRunAt || null, lastSelfTest: st || null };
   }));
 }
 

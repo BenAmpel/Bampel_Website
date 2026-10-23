@@ -233,6 +233,9 @@ let passer = null;
   for (const c of ['clip_id', 'phase', 'structure', 'surface', 'topic', 'clip_list', 'live_first', 'live_changes', 'live_final', 'live_decided_clip_ms', 'slider_flag', 'call_slot', 'caller_id',
     'shift_form', 'call_directory_down', 'call_disclosure', 'call_disclosed', 'call_code_sent', 'call_points', 'call_callbacks_lookedup', 'call_callbacks_caller_number', 'call_pressure_turns', 'pilot_scripted', 'a_confidence6'])
     assert(col(c) >= 0, `export has ${c}`);
+  const cb = parseCsv((await call(P + 'admin/codebook.csv', { key: OWNER })).text), cbHead = cb[0];
+  const documented = new Set(cb.slice(1).filter(r => r[cbHead.indexOf('file')] === 'trials').map(r => r[cbHead.indexOf('column')]));
+  for (const c of head) assert(documented.has(c), `Study 2 export column ${c} is in the codebook`);
   const mine = rows.slice(1).filter(x => x[col('code')] === me.code && x[col('session')] === '2');
   const pre = mine.filter(x => x[col('phase')] === 'pre'), post = mine.filter(x => x[col('phase')] === 'post');
   assert.equal(pre.length, 12); assert.equal(post.length, 12);

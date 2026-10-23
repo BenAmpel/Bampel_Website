@@ -10,6 +10,14 @@ const DATA_FILES = {
   funding: 'data/funding.json',
   courses: 'data/courses.json',
   news: 'data/news.json',
+  materials: 'data/materials.json',
+  paperPages: 'data/paper-pages.json',
+};
+// What a page gets when its file fails to load, so one failed fetch empties one section instead of the whole site.
+// paper-pages.json is generated at build time (scripts/build-ccair.js); the site still works if it is missing.
+const FALLBACKS = {
+  publications: [], people: { students: [], mentees: [], affiliates: [] }, resources: [],
+  funding: { grants: [], awarded: [], collaborations: [] }, courses: [], news: [], materials: [], paperPages: {},
 };
 
 function DataProvider({ children }) {
@@ -17,36 +25,47 @@ function DataProvider({ children }) {
 
   useDataEffect(() => {
     const entries = Object.entries(DATA_FILES);
-    Promise.all(entries.map(([, url]) => fetch(url).then(r => {
+    Promise.allSettled(entries.map(([, url]) => fetch(url).then(r => {
       if (!r.ok) throw new Error(`Failed to load ${url}: ${r.status}`);
       return r.json();
     })))
       .then(results => {
         const data = {};
-        entries.forEach(([key], i) => { data[key] = results[i]; });
-        setState({ data, loading: false, error: null });
-      })
-      .catch(err => setState({ data: null, loading: false, error: err.message }));
+        const failed = [];
+        entries.forEach(([key], i) => {
+          const r = results[i];
+          if (r.status === 'fulfilled') { data[key] = r.value; return; }
+          failed.push(r.reason && r.reason.message ? r.reason.message : key);
+          data[key] = FALLBACKS[key];
+        });
+        if (failed.length) console.warn('CCAIR data:', failed.join('; '));
+        // Only show the error screen when nothing loaded at all.
+        if (failed.length === entries.length) setState({ data: null, loading: false, error: failed[0] });
+        else setState({ data, loading: false, error: null });
+      });
   }, []);
 
   if (state.loading) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: 24 }}>
-        <img src="uploads/ccair-logo.png" alt="CCAIR" style={{ height: 64, opacity: 0.6, animation: 'pulse 2s ease-in-out infinite' }} />
-        <div className="mono" style={{ color: 'var(--text-muted)', fontSize: 13 }}>Loading data...</div>
+      <div className="state" role="status">
+        <div>
+          <img src="uploads/brand/logo-mark-128.png" alt="" />
+          <p>Loading the center…</p>
+        </div>
       </div>
     );
   }
 
   if (state.error) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: 16, padding: 40 }}>
-        <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>Failed to load data</div>
-        <div style={{ color: 'var(--text-secondary)', fontSize: 14, maxWidth: 400, textAlign: 'center' }}>{state.error}</div>
-        <button onClick={() => { setState({ data: null, loading: true, error: null }); window.location.reload(); }}
-          style={{ marginTop: 8, padding: '8px 20px', background: 'var(--accent)', border: 'none', borderRadius: 8, color: 'var(--bg-base)', fontWeight: 600, cursor: 'pointer', fontSize: 14 }}>
-          Retry
-        </button>
+      <div className="state" role="alert">
+        <div>
+          <h2 style={{ marginBottom: 8 }}>We couldn't load this page</h2>
+          <p style={{ marginBottom: 16 }}>{state.error}</p>
+          <button type="button" className="btn btn-primary" onClick={() => { setState({ data: null, loading: true, error: null }); window.location.reload(); }}>
+            Try again
+          </button>
+        </div>
       </div>
     );
   }

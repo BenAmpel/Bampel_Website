@@ -67,7 +67,7 @@
         var opts = alert.panels.map(function (x) { return [x.key, esc(x.label)]; }).concat([['summary', Th('infl_summary')]]).concat(ai ? [['ai', Th('infl_ai')]] : []);
         return ui.choiceGroup('final_judgment', Th(twoStep ? 'q_final_two' : 'q_final'), answerOpts, 'final') + ui.vas('final_confidence', Th('q_conf')) +
           '<fieldset class="q-group" data-name="influential"><legend class="q">' + Th('q_influence') + '</legend><div class="checks">' +
-          opts.map(function (o) { return '<label class="option" data-trace="infl:' + esc(o[0]) + '"><input type="checkbox" name="influential" value="' + esc(o[0]) + '"><span>' + o[1] + '</span></label>'; }).join('') + '</div></fieldset>' +
+          opts.map(function (o) { var id = ui.nextId('infl'); return '<label class="option" for="' + id + '" data-trace="infl:' + esc(o[0]) + '"><input type="checkbox" name="influential" value="' + esc(o[0]) + '" id="' + id + '"><span>' + o[1] + '</span></label>'; }).join('') + '</div></fieldset>' +
           '<div id="trialmsg"></div><div class="actions"><button id="submit">' + Th(ctx.isPractice ? 'practice_submit' : 'submit_button') + '</button></div>';
       }
       if (aiAtTop) aiShownAtMs = 0;

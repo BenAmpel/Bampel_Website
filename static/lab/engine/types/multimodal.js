@@ -34,7 +34,8 @@
   function loadVoices() { try { voices = window.speechSynthesis ? speechSynthesis.getVoices() : []; } catch (e) { voices = []; } }
   if (window.speechSynthesis) { loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
   function pickVoice(pref) {
-    var en = voices.filter(function (v) { return /^en(-|_)/i.test(v.lang); });
+    var lg = (document.documentElement.getAttribute('data-speech-lang') || 'en-US').split('-')[0];   // the study's language (Devices & timing)
+    var en = voices.filter(function (v) { return new RegExp('^' + lg + '(-|_)', 'i').test(v.lang); });
     if (pref && pref.name) { var m = voices.filter(function (v) { return v.name === pref.name; })[0]; if (m) return m; }
     return en.filter(function (v) { return /Samantha|Google US English|Jenny|Aria|Natural/i.test(v.name); })[0] || en[0] || null;
   }
@@ -113,13 +114,18 @@
   }
 
   // ---------- sound check (once per session, before the first item with sound) ----------
-  function soundCheck(ctx, ui, next) {
-    var plan = ctx.plan, stop = null;
-    ui.show('<h2>' + ui.Th('mic_title') + '</h2>' + ui.Tp('mic_body') +
-      '<div class="mm-check"><button type="button" class="secondary" id="mm-test">' + ui.Th('mic_test') + '</button>' +
+  // Runs as the engine's beforeTrial step, so it is not part of the item's time or traces. The parts the session's
+  // setup checks already covered are left out (info.heard: the headphone check passed; info.micHeard: the microphone
+  // check heard the participant): with both covered, or sound covered and no recording, there is no screen at all.
+  var MIC_ONLY_BODY = 'This study may record your spoken answers. If your browser asks to use your microphone, please allow it. The bar moves when we hear you.';
+  function soundCheck(info, ui, next) {
+    var plan = info.plan, stop = null, micOnly = !!info.heard;
+    ui.show('<h2>' + ui.Th('mic_title') + '</h2>' + (micOnly ? (ui.T('mic_only_body') ? ui.Tp('mic_only_body') : '<p>' + ui.esc(MIC_ONLY_BODY) + '</p>') : ui.Tp('mic_body')) +
+      '<div class="mm-check">' + (micOnly ? '' : '<button type="button" class="secondary" id="mm-test">' + ui.Th('mic_test') + '</button>') +
       (plan.recording ? '<div class="mm-meter" aria-hidden="true"><span id="mm-level"></span></div>' : '') + '</div><div id="mm-checkmsg" role="status"></div>' +
-      '<div class="actions"><button type="button" id="mm-ok">' + ui.Th('mic_ok') + '</button></div>');
-    document.getElementById('mm-test').addEventListener('click', function () { speak('This is a sound test. If you can hear this, your sound is working.', {}); });
+      '<div class="actions"><button type="button" id="mm-ok">' + ui.Th(micOnly ? 'continue_button' : 'mic_ok') + '</button></div>');
+    var test = document.getElementById('mm-test');
+    if (test) test.addEventListener('click', function () { speak('This is a sound test. If you can hear this, your sound is working.', {}); });
     if (plan.recording) {
       getMic().then(function (stream) {
         var msg = document.getElementById('mm-checkmsg');
@@ -539,7 +545,7 @@
         '<div class="captions" id="ph-captions" aria-live="polite" hidden></div>' +
         '<div class="phone-talk">' + (canSpeak ? '<button type="button" class="talk" id="ph-talk" disabled>' + ui.Th('call_talk') + '</button><p class="interim muted" id="ph-interim" aria-live="polite"></p>' : '') +
         '<form id="ph-typeform" class="typeform"' + (call.scored && canSpeak ? ' hidden' : '') + '><label for="ph-type">' + ui.Th('call_type_label') + '</label><div class="row"><input type="text" id="ph-type" autocomplete="off" disabled><button type="submit" class="secondary" id="ph-send" disabled>' + ui.Th('call_send') + '</button></div></form></div>' +
-        '<div class="phone-btns small"><label class="check"><input type="checkbox" id="ph-cc"> ' + ui.Th('call_captions') + '</label><button type="button" class="secondary" id="ph-hold">' + ui.Th('call_hold') + '</button>' +
+        '<div class="phone-btns small"><label class="check" for="ph-cc"><input type="checkbox" id="ph-cc"> ' + ui.Th('call_captions') + '</label><button type="button" class="secondary" id="ph-hold">' + ui.Th('call_hold') + '</button>' +
         ((plan.directory || []).length ? '<button type="button" class="secondary" id="ph-dirlive">' + ui.Th('directory_open') + '</button>' : '') +
         '<button type="button" class="decline" id="ph-hang">' + ui.Th('call_hangup') + '</button></div><div id="ph-dirbox-live" hidden></div>', 'live'));
       if (agentOn) document.getElementById('ph-captions').hidden = false;   // the caller's words, for an agent that cannot listen
@@ -626,7 +632,7 @@
       var talk = document.getElementById('ph-talk'), interim = document.getElementById('ph-interim'), heard = '';
       try { recog = new SR(); } catch (e) { recog = null; }
       if (!recog) return;
-      recog.lang = 'en-US'; recog.interimResults = true; recog.continuous = true; recog.maxAlternatives = 1;
+      recog.lang = document.documentElement.getAttribute('data-speech-lang') || 'en-US'; recog.interimResults = true; recog.continuous = true; recog.maxAlternatives = 1;
       recog.onresult = function (e) { var t = ''; for (var i = 0; i < e.results.length; i++) t += e.results[i][0].transcript; heard = t; if (interim) interim.textContent = t; };
       recog.onerror = function (e) { if (e.error === 'not-allowed' || e.error === 'service-not-allowed') { micBlocked = true; talk.hidden = true; } };
       recog.onend = function () {
@@ -846,13 +852,20 @@
         }).join('');
       });
     },
+    // The sound check before the first audio item of a session: skipped for agents (they read the words) and for
+    // studies that run their own equipment checks (content.noSoundCheck).
+    beforeTrial: function (info, ui, go) {
+      var s = info.plan.session;
+      if (!needsSound(info.trial.item) || soundChecked[s] || agentMode(info.plan) || (info.content && info.content.noSoundCheck)) return go();
+      if (info.heard && (!info.plan.recording || info.micHeard)) { soundChecked[s] = true; return go(); }
+      soundCheck(info, ui, go);
+    },
     runTrial: function (ctx, ui) {
       var it = ctx.trial.item;
       agentOn = agentMode(ctx.plan);
       if (agentOn) micBlocked = true;   // replies are typed
       if (it.kind !== 'check') myInfo(ctx.plan, ui);
       if (it.kind === 'check') return runCheck(ctx, ui);
-      if (needsSound(it) && !agentOn && !soundChecked[ctx.plan.session] && !(ctx.content && ctx.content.noSoundCheck)) return soundCheck(ctx, ui, function () { impl.runTrial(ctx, ui); });
       if (it.kind === 'call') return runCall(ctx, ui);
       renderItem(ctx, ui);
     }

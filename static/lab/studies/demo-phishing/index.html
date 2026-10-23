@@ -4,14 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Email Judgment Demo</title>
+<title>Email judgment demo | CCAIR Behavioral Lab</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/lab/assets/brand/logo-mark-32.png">
+<link rel="apple-touch-icon" href="/lab/assets/brand/apple-touch-icon.png">
+<meta name="theme-color" content="#fbf6ef">
 <link rel="stylesheet" href="../../assets/study.css">
 </head>
 <body>
-<div class="wrap">
+<main class="wrap">
   <p class="progress" id="progress"></p>
   <div class="card" id="stage"></div>
-</div>
+</main>
 <div class="statusbar" id="statusbar"></div>
 
 <script src="../../tracelab/tracelab.js"></script>
@@ -57,7 +60,8 @@
 
   function choiceBlock(name, label, options) {
     return '<p class="q">' + label + '</p><div class="options">' + options.map(function (o) {
-      return '<label class="option" data-trace="opt:' + o[0] + '"><input type="radio" name="' + name + '" value="' + o[0] + '"> ' + o[1] + '</label>';
+      var id = name + '-' + o[0];
+      return '<label class="option" for="' + id + '" data-trace="opt:' + o[0] + '"><input type="radio" name="' + name + '" value="' + o[0] + '" id="' + id + '"> ' + o[1] + '</label>';
     }).join('') + '</div>';
   }
 
@@ -88,7 +92,7 @@
     { id: 'habit', render: function () {
       var labels = ['Strongly disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly agree'];
       return '<h2>One last question</h2><p class="q">"I usually check where a link goes before I click it."</p><div class="likert">' +
-        labels.map(function (l, i) { return '<label class="option" data-trace="likert:' + (i + 1) + '"><input type="radio" name="likert" value="' + (i + 1) + '"> ' + l + '</label>'; }).join('') + '</div>';
+        labels.map(function (l, i) { return '<label class="option" for="likert-' + (i + 1) + '" data-trace="likert:' + (i + 1) + '"><input type="radio" name="likert" value="' + (i + 1) + '" id="likert-' + (i + 1) + '"> ' + l + '</label>'; }).join('') + '</div>';
     }, required: ['likert'] }
   ];
 
@@ -104,7 +108,7 @@
       '<p>This short demonstration shows how the CCAIR Behavioral Lab records behavior while you answer questions. It has five short items and takes about three minutes.</p>' +
       '<p>Once you agree below, the page records how you answer: timing, mouse movement, hovers, clicks, scrolling, and typing rhythm. It never records the keys you press, and it does not use your camera or microphone.</p>' +
       '<p><strong>This is a demo. Nothing is sent anywhere.</strong> Your data stays in this browser tab, and you can view or download it at the end.</p>' +
-      '<label class="option" style="margin-top:16px"><input type="checkbox" id="consent"> I understand and want to try the demo.</label>' +
+      '<label class="option" for="consent" style="margin-top:16px"><input type="checkbox" id="consent"> I understand and want to try the demo.</label>' +
       '<div class="actions"><button id="begin" disabled>Begin</button></div>';
     var c = document.getElementById('consent'), b = document.getElementById('begin');
     c.addEventListener('change', function () { b.disabled = !c.checked; });

@@ -32,35 +32,21 @@
   {{ end }}
   {{ $authors = $authors | append $name }}
 {{ end }}
-{{ $authorsStr := delimit $authors ", " }}
 
 {{ $year := $page.Date.Format "2006" }}
 {{ with $page.Params.year }}{{ $year = printf "%v" . }}{{ end }}
 
 {{ $venue := $page.Params.publication | default $page.Params.publication_short | default $page.Params.venue | default "" }}
-{{ $venuePlain := $venue | plainify }}
+{{/* Front matter may carry markdown and status text ("In *Proceedings of X*", "*Journal (JMIS)*, Forthcoming"); same cleanup as academic_seo.html. */}}
+{{ $venuePlain := trim (replaceRE "^In\\s+" "" (replaceRE "\\*" "" (plainify $venue))) " " }}
+{{ $venuePlain = trim (replaceRE "(?i),?\\s*\\(?(forthcoming|in press|accepted)\\)?\\.?$" "" $venuePlain) " " }}
+{{/* Drop trailing volume/issue/pages (", 41:1, 236-265", ", 5:1, Article 7", ", 9(1)") so the venue is a bare name. */}}
+{{ $venuePlain = trim (replaceRE ",\\s*\\d.*$" "" $venuePlain) " " }}
 
 {{ $doi := "" }}
 {{ with $page.Params.doi }}
   {{ if ne . "" }}{{ $doi = . }}{{ end }}
 {{ end }}
-
-{{ $authorCount := len $authors }}
-{{ $authorsApa := $authorsStr }}
-{{ $authorsChicago := $authorsStr }}
-{{ if eq $authorCount 1 }}
-  {{ $authorsApa = index $authors 0 }}
-  {{ $authorsChicago = index $authors 0 }}
-{{ else if eq $authorCount 2 }}
-  {{ $authorsApa = printf "%s & %s" (index $authors 0) (index $authors 1) }}
-  {{ $authorsChicago = printf "%s and %s" (index $authors 0) (index $authors 1) }}
-{{ else if gt $authorCount 2 }}
-  {{ $firsts := first (sub $authorCount 1) $authors }}
-  {{ $last := index $authors (sub $authorCount 1) }}
-  {{ $authorsApa = printf "%s, & %s" (delimit $firsts ", ") $last }}
-  {{ $authorsChicago = printf "%s, and %s" (delimit $firsts ", ") $last }}
-{{ end }}
-
 
 {{ $pubData := .Site.Data.publications }}
 {{ if isSet $pubData 0 }}
@@ -79,13 +65,6 @@
 {{ $currentVenue := $current.venue | default $venuePlain }}
 {{ $currentType := $current.type | default "" }}
 
-{{ $citationApa := printf "%s (%s). %s.%s" $authorsApa $year $page.Title (cond (ne $currentVenue "") (printf " %s" $currentVenue) "") }}
-{{ $citationChicago := printf "%s. %s. \"%s.\"%s" $authorsChicago $year $page.Title (cond (ne $currentVenue "") (printf " %s" $currentVenue) "") }}
-{{ if $doi }}
-  {{ $citationApa = printf "%s https://doi.org/%s" $citationApa $doi }}
-  {{ $citationChicago = printf "%s https://doi.org/%s" $citationChicago $doi }}
-{{ end }}
-
 {{ $bibEntryType := "misc" }}
 {{ if or (eq $currentType "journal") (eq $page.Section "journal_publication") }}
   {{ $bibEntryType = "article" }}
@@ -94,12 +73,133 @@
 {{ end }}
 {{ $bibVenueField := cond (eq $bibEntryType "article") "journal" "booktitle" }}
 
+{{/* ---------- Cite box: APA 7 and Chicago author-date ----------
+  Names: "Benjamin M. Ampel" -> APA "Ampel, B. M.", Chicago (first author) "Ampel, Benjamin M.". Suffixes (Jr., Sr., II-IV)
+  move after the initials: "Jay F. Nunamaker Jr." -> "Nunamaker, J. F., Jr.". Hyphenated given names keep the hyphen
+  ("Chi-Heng Yang" -> "Yang, C.-H."). APA lists up to 20 authors (then the first 19, ". . .", and the last); Chicago lists
+  up to 10 (then the first 7 and "et al.").
+  Volume, issue and pages come from volume/issue/pages front matter or the end of the publication string
+  ("*MIS Quarterly*, 48:1, 137-166", "*Journal*, 37:2", "*Journal*, 5:1, Article 7", "*Journal, 9*(1)"); when neither has
+  them they are left out, never guessed. */}}
+{{ $sfxRE := `(?i),?\s+(jr|sr|ii|iii|iv)\.?$` }}
+{{ $apaNames := slice }}
+{{ $chiNames := slice }}
+{{ range $i, $full := $authors }}
+  {{ $n := trim (replaceRE `\s+` " " $full) " " }}
+  {{ $suffix := "" }}
+  {{ with findRESubmatch $sfxRE $n 1 }}
+    {{ $s := lower (index (index . 0) 1) }}
+    {{ $suffix = upper $s }}
+    {{ if eq $s "jr" }}{{ $suffix = "Jr." }}{{ else if eq $s "sr" }}{{ $suffix = "Sr." }}{{ end }}
+    {{ $n = trim (replaceRE $sfxRE "" $n) " " }}
+  {{ end }}
+  {{ $parts := split $n " " }}
+  {{ $last := index $parts (sub (len $parts) 1) }}
+  {{ $givens := first (sub (len $parts) 1) $parts }}
+  {{ $initials := slice }}
+  {{ range $givens }}
+    {{ $pieces := slice }}
+    {{ range split . "-" }}{{ if ne . "" }}{{ $pieces = $pieces | append (printf "%s." (substr . 0 1)) }}{{ end }}{{ end }}
+    {{ $initials = $initials | append (delimit $pieces "-") }}
+  {{ end }}
+  {{ $apa := $last }}
+  {{ if $initials }}{{ $apa = printf "%s, %s" $last (delimit $initials " ") }}{{ end }}
+  {{ if $suffix }}{{ $apa = printf "%s, %s" $apa $suffix }}{{ end }}
+  {{ $apaNames = $apaNames | append $apa }}
+  {{ $chi := $n }}
+  {{ if eq $i 0 }}
+    {{ $chi = $last }}
+    {{ if $givens }}{{ $chi = printf "%s, %s" $last (delimit $givens " ") }}{{ end }}
+    {{ if $suffix }}{{ $chi = printf "%s, %s" $chi $suffix }}{{ end }}
+  {{ else if $suffix }}
+    {{ $chi = printf "%s %s" $n $suffix }}
+  {{ end }}
+  {{ $chiNames = $chiNames | append $chi }}
+{{ end }}
+
+{{ $nA := len $apaNames }}
+{{ $authorsApa := "" }}
+{{ if eq $nA 1 }}
+  {{ $authorsApa = index $apaNames 0 }}
+{{ else if and (ge $nA 2) (le $nA 20) }}
+  {{ $authorsApa = printf "%s, & %s" (delimit (first (sub $nA 1) $apaNames) ", ") (index $apaNames (sub $nA 1)) }}
+{{ else if gt $nA 20 }}
+  {{ $authorsApa = printf "%s, . . . %s" (delimit (first 19 $apaNames) ", ") (index $apaNames (sub $nA 1)) }}
+{{ end }}
+{{ $authorsChicago := "" }}
+{{ if eq $nA 1 }}
+  {{ $authorsChicago = index $chiNames 0 }}
+{{ else if and (ge $nA 2) (le $nA 10) }}
+  {{ $authorsChicago = printf "%s, and %s" (delimit (first (sub $nA 1) $chiNames) ", ") (index $chiNames (sub $nA 1)) }}
+{{ else if gt $nA 10 }}
+  {{ $authorsChicago = printf "%s, et al." (delimit (first 7 $chiNames) ", ") }}
+{{ end }}
+
+{{ $volume := "" }}
+{{ $issue := "" }}
+{{ $pages := "" }}
+{{ $pubRaw := trim (replaceRE `\*` "" (plainify ($page.Params.publication | default ""))) " " }}
+{{ with findRESubmatch `,\s*(\d+)\s*(?::\s*(\d+)|\((\d+)\))?\s*(?:,\s*((?:[Aa]rticle\s+)?\d+(?:\s*[-–]\s*\d+)?))?\s*$` $pubRaw 1 }}
+  {{ $m := index . 0 }}
+  {{ $volume = index $m 1 }}
+  {{ $issue = or (index $m 2) (index $m 3) }}
+  {{ $pages = index $m 4 }}
+{{ end }}
+{{ with $page.Params.volume }}{{ $volume = printf "%v" . }}{{ end }}
+{{ with $page.Params.issue }}{{ $issue = printf "%v" . }}{{ end }}
+{{ with $page.Params.pages }}{{ $pages = printf "%v" . }}{{ end }}
+{{ $pages = replaceRE `\s*[-–]\s*` "–" $pages }}
+{{ $isJournal := eq $bibEntryType "article" }}
+{{ $isPreprint := findRE `(?i)^arxiv` $currentVenue }}
+
+{{ $apaSource := "" }}
+{{ $chiSource := "" }}
+{{ if ne $currentVenue "" }}
+  {{ if $isJournal }}
+    {{ $apaSource = $currentVenue }}
+    {{ $chiSource = $currentVenue }}
+    {{ if $volume }}
+      {{ $apaSource = printf "%s, %s" $apaSource $volume }}
+      {{ $chiSource = printf "%s %s" $chiSource $volume }}
+      {{ if $issue }}
+        {{ $apaSource = printf "%s(%s)" $apaSource $issue }}
+        {{ $chiSource = printf "%s (%s)" $chiSource $issue }}
+      {{ end }}
+    {{ end }}
+    {{ if $pages }}
+      {{ $apaSource = printf "%s, %s" $apaSource $pages }}
+      {{ $chiSource = printf "%s: %s" $chiSource (replaceRE `^Article` "article" $pages) }}
+    {{ end }}
+  {{ else }}
+    {{ $apaSource = cond (gt (len $isPreprint) 0) $currentVenue (printf "In %s" $currentVenue) }}
+    {{ $chiSource = $apaSource }}
+    {{ if $pages }}
+      {{ $apaSource = printf "%s (pp. %s)" $apaSource $pages }}
+      {{ $chiSource = printf "%s, %s" $chiSource $pages }}
+    {{ end }}
+  {{ end }}
+  {{ if not (strings.HasSuffix $apaSource ".") }}{{ $apaSource = printf "%s." $apaSource }}{{ end }}
+  {{ if not (strings.HasSuffix $chiSource ".") }}{{ $chiSource = printf "%s." $chiSource }}{{ end }}
+{{ end }}
+
+{{/* Collapse stray whitespace in the title ("Hackers:  An", "Approach ") so the citation reads "Approach." */}}
+{{ $citeTitle := trim (replaceRE `\s+` " " $page.Title) " " }}
+{{ $titleEnd := "." }}
+{{ if findRE `[.?!]$` $citeTitle }}{{ $titleEnd = "" }}{{ end }}
+{{ $citationApa := printf "%s (%s). %s%s" $authorsApa $year $citeTitle $titleEnd }}
+{{ if $apaSource }}{{ $citationApa = printf "%s %s" $citationApa $apaSource }}{{ end }}
+{{ if $doi }}{{ $citationApa = printf "%s https://doi.org/%s" $citationApa $doi }}{{ end }}
+{{ $chiAuthorsEnd := cond (strings.HasSuffix $authorsChicago ".") "" "." }}
+{{ $citationChicago := printf "%s%s %s. \"%s%s\"" $authorsChicago $chiAuthorsEnd $year $citeTitle $titleEnd }}
+{{ if $chiSource }}{{ $citationChicago = printf "%s %s" $citationChicago $chiSource }}{{ end }}
+{{ if $doi }}{{ $citationChicago = printf "%s https://doi.org/%s." $citationChicago $doi }}{{ end }}
+
 {{ $citationKey := "ampel" }}
 {{ if gt (len $authors) 0 }}
   {{ $firstAuthor := index $authors 0 }}
   {{ $nameParts := split $firstAuthor " " }}
   {{ if gt (len $nameParts) 0 }}
-    {{ $citationKey = lower (replaceRE "[^a-z]" "" (index $nameParts (sub (len $nameParts) 1))) }}
+    {{ $citationKey = replaceRE "[^a-z]" "" (lower (index $nameParts (sub (len $nameParts) 1))) }}
   {{ end }}
 {{ end }}
 {{ $titleKey := "" }}
@@ -180,6 +280,8 @@
       {{ with $page.Params.url_project }}{{ if ne . "" }}{{ $artifacts = $artifacts | append (dict "label" "Project" "url" .) }}{{ end }}{{ end }}
       {{ with $page.Params.url_slides }}{{ if ne . "" }}{{ $artifacts = $artifacts | append (dict "label" "Slides" "url" .) }}{{ end }}{{ end }}
       {{ with $page.Params.url_video }}{{ if ne . "" }}{{ $artifacts = $artifacts | append (dict "label" "Video" "url" .) }}{{ end }}{{ end }}
+      {{/* Always offer the version of record; it is the only full-text link when no preprint PDF is listed. */}}
+      {{ with $doi }}{{ $artifacts = $artifacts | append (dict "label" "DOI" "url" (printf "https://doi.org/%s" .)) }}{{ end }}
 
       {{ if gt (len $artifacts) 0 }}
         <div class="pub-artifacts">
@@ -212,13 +314,17 @@
     </div>
 
     <div class="pub-extras-card">
-      <h3>Citation</h3>
+      <h3>Cite this</h3>
       <div class="pub-citation">
-        <div class="pub-citation-text">{{ $citationApa }}</div>
+        <div class="pub-citation-text"><span class="pub-cite-label">APA</span> {{ $citationApa }}</div>
+        <details class="pub-bibtex">
+          <summary>BibTeX</summary>
+          <pre><code>{{ $bibtex }}</code></pre>
+        </details>
         <div class="pub-citation-actions">
-          <button class="pub-copy" type="button" data-copy-text="{{ $citationApa | urlquery }}" data-copy-label="APA">Copy APA</button>
-          <button class="pub-copy" type="button" data-copy-text="{{ $citationChicago | urlquery }}" data-copy-label="Chicago">Copy Chicago</button>
-          <button class="pub-copy" type="button" data-copy-text="{{ $bibtex | urlquery }}" data-copy-label="BibTeX">Copy BibTeX</button>
+          <button class="pub-copy" type="button" data-copy-text="{{ replace ($citationApa | urlquery) "+" "%20" }}" data-copy-label="APA">Copy APA</button>
+          <button class="pub-copy" type="button" data-copy-text="{{ replace ($citationChicago | urlquery) "+" "%20" }}" data-copy-label="Chicago">Copy Chicago</button>
+          <button class="pub-copy" type="button" data-copy-text="{{ replace ($bibtex | urlquery) "+" "%20" }}" data-copy-label="BibTeX">Copy BibTeX</button>
         </div>
       </div>
     </div>
@@ -248,6 +354,10 @@ body:not(.dark) .pub-plain p { color:#1a2a33; }
 .pub-citation { display:flex; flex-direction:column; gap:10px; }
 .pub-citation-text { font-size:0.8rem; line-height:1.4; background:rgba(0,0,0,0.35); border-radius:10px; padding:10px; border:1px solid rgba(0,255,65,0.2); }
 .pub-citation-actions { display:flex; flex-wrap:wrap; gap:8px; }
+.pub-cite-label { font-weight:700; font-size:0.66rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--clr-green); margin-right:4px; }
+.pub-bibtex summary { cursor:pointer; font-size:0.72rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--clr-green); }
+.pub-bibtex pre { margin:8px 0 0; max-width:100%; overflow-x:auto; white-space:pre; font-size:0.72rem; line-height:1.45; background:rgba(0,0,0,0.35); border:1px solid rgba(0,255,65,0.2); border-radius:10px; padding:10px; }
+body:not(.dark) .pub-bibtex pre { background:rgba(255,255,255,0.9); }
 .pub-copy { align-self:flex-start; border-radius:999px; border:1px solid rgba(0,255,65,0.4); color:var(--clr-green); background:rgba(0,255,65,0.12); padding:6px 12px; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; cursor:pointer; }
 .pub-copy.copied { color:#111; background:var(--clr-green); }
 

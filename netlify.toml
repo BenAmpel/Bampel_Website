@@ -3,12 +3,24 @@
   # contains [deploy now]. Ben's Mac publishes waiting changes at 06:00 and 17:00 US Eastern through the
   # "scheduled" build hook (~/.purplelink/bin/netlify-batch-build.sh); hook builds are never skipped by this line.
   ignore = "git log -1 --format=%B | grep -qF '[deploy now]' && exit 1 || exit 0"
-  command = "npm install && npm run build:ccair && hugo --gc --minify"
+  # scripts/lab/build-info.mjs writes the commit being built (COMMIT_REF) into the lab functions, which cannot read it at run time.
+  command = "npm install && node scripts/lab/build-info.mjs && npm run build:ccair && hugo --gc --minify"
   publish = "public"
 
-# Site-wide security headers (added 2026-10-16). HSTS, nosniff, Referrer-Policy and Permissions-Policy come from the
-# _headers file that the Wowchemy Netlify plugin generates at build time; this block adds the Content-Security-Policy and
-# X-Frame-Options it does not set. The /lab/ blocks below are more specific and stay as they are.
+# Site-wide security headers (added 2026-10-16). HSTS, nosniff and Referrer-Policy come from the _headers file that the
+# Wowchemy Netlify plugin generates at build time (its template: modules/wowchemy-plugin-netlify/src/layouts/index.headers,
+# one "/*" rule); this block adds the Content-Security-Policy and X-Frame-Options it does not set, and the Permissions-Policy.
+#
+# How Netlify combines these (checked on bampel.com, 2026-10-22; the Netlify docs do not say): every rule that matches a path
+# applies, and for the same header name the later, more specific rule replaces the value instead of adding a second header.
+# The plugin's "/*" rule comes first. Evidence: /lab/s/* answers with one Referrer-Policy, "same-origin" from the block below,
+# not the plugin's strict-origin-when-cross-origin; /lab/studies/*/admin.html gets Cache-Control from its own block and the
+# CSP from /lab/studies/*. So the lab blocks' Permissions-Policy replaces the plugin's. In case that ever changes, the plugin's
+# own value is set in config/_default/params.yaml (security.permissions.policy) to the lab's policy, so its _headers line
+# never blocks the microphone on lab pages either way; the "/*" block here keeps the stricter policy for the rest of the site.
+#
+# The dev server (scripts/lab/server.mjs, npm run lab) reads these [[headers]] blocks and sends the same headers for the
+# pages it serves; tests/lab/headers.test.mjs checks the lab blocks. Keep each value on one line, in double quotes.
 #
 # Why each source is listed (inventory taken by loading every page in the sitemap plus /care/ and /lab/ in headless Chrome):
 #   script-src  'unsafe-inline': the theme hooks (layouts/partials/hooks), the shortcodes and the JSON-LD blocks use inline <script>.
@@ -29,19 +41,42 @@
   [headers.values]
     X-Frame-Options = "DENY"
     Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://cdn.jsdelivr.net https://d1bxh8uas1mnw7.cloudfront.net https://embed.altmetric.com https://api.altmetric.com https://badge.dimensions.ai https://cdnjs.buymeacoffee.com https://identity.netlify.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://badge.dimensions.ai https://embed.altmetric.com; font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://badges.altmetric.com https://cdn.altmetric.com https://cdn.buymeacoffee.com https://server.arcgisonline.com https://www.googletagmanager.com https://www.google-analytics.com; connect-src 'self' https://api.ipify.org https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://api.altmetric.com https://metrics-api.dimensions.ai https://badge.dimensions.ai; frame-src https://www.buymeacoffee.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'"
+    Permissions-Policy = "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
 
-# Lab study pages: never framed by other sites, not indexed; admin pages also send no referrer.
+# Lab pages (2026-10-22). Each lab block sets a whole Content-Security-Policy: a block's value replaces the site-wide one
+# above, so a policy of only "frame-ancestors 'none'" would leave these pages with no script or object limits.
+# Inventory (every page under static/lab and the scripts it loads, checked in headless Chrome with zero "Refused to" errors):
+#   script-src  'self' only: every lab page loads its scripts from /lab/ (participant.js adds the study type's script and
+#               logic.js, also from /lab/). No inline <script>, no inline event handlers, no eval. The one exception is the
+#               TraceLab demo (/lab/studies/demo-phishing/), which has an inline script and its own block below.
+#   style-src   'unsafe-inline': the pages build their HTML with style="" attributes. Stylesheets are all under /lab/.
+#   img-src, media-src  https: because a study's images, audio and video may be any https:// address (the content checks in
+#               netlify/lib/lab/types allow that); blob: for media preloaded before a session and for voice recordings played
+#               back; data: for small inline images.
+#   connect-src 'self' for the lab API (/api/lab/, /api/vc/); participant pages add https: because preloading fetches a
+#               study's media files from wherever they are hosted. Admin, sign-in and account pages connect to /api/ only.
+#   No fonts from other sites, no frames, no workers, no plugins; never framed; <base> and form posts stay on this site.
+# Permissions-Policy: the plugin's default turns the microphone off everywhere, which made voice answers, the AI caller and
+# the timing check's sound test fail. Lab study, admin and timing pages allow the microphone, autoplay and full screen for
+# this site only (not for anything embedded); everything else stays off. Sign-in and account pages keep the site default.
 [[headers]]
   for = "/lab/studies/*"
   [headers.values]
     X-Frame-Options = "DENY"
-    Content-Security-Policy = "frame-ancestors 'none'"
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; connect-src 'self' https:; font-src 'self'; frame-src 'none'; worker-src 'none'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'"
+    Permissions-Policy = "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(self), payment=(), usb=(), autoplay=(self), fullscreen=(self)"
     X-Robots-Tag = "noindex"
     Referrer-Policy = "same-origin"
 
 [[headers]]
+  for = "/lab/studies/demo-phishing/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; connect-src 'self' https:; font-src 'self'; frame-src 'none'; worker-src 'none'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'"
+
+[[headers]]
   for = "/lab/studies/*/admin.html"
   [headers.values]
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; connect-src 'self'; font-src 'self'; frame-src 'none'; worker-src 'none'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'"
     Referrer-Policy = "no-referrer"
     Cache-Control = "no-store"
 
@@ -49,7 +84,8 @@
   for = "/lab/s/*"
   [headers.values]
     X-Frame-Options = "DENY"
-    Content-Security-Policy = "frame-ancestors 'none'"
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; connect-src 'self' https:; font-src 'self'; frame-src 'none'; worker-src 'none'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'"
+    Permissions-Policy = "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(self), payment=(), usb=(), autoplay=(self), fullscreen=(self)"
     X-Robots-Tag = "noindex"
     Referrer-Policy = "same-origin"
 
@@ -57,10 +93,21 @@
   for = "/lab/admin/*"
   [headers.values]
     X-Frame-Options = "DENY"
-    Content-Security-Policy = "frame-ancestors 'none'"
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; connect-src 'self'; font-src 'self'; frame-src 'none'; worker-src 'none'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'"
+    Permissions-Policy = "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(self), payment=(), usb=(), autoplay=(self), fullscreen=(self)"
     X-Robots-Tag = "noindex"
     Referrer-Policy = "no-referrer"
     Cache-Control = "no-store"
+
+# The timing self-check measures the speaker-to-microphone delay, so it needs the microphone too. Nothing is sent from it.
+[[headers]]
+  for = "/lab/timing/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; connect-src 'self'; font-src 'self'; frame-src 'none'; worker-src 'none'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'"
+    Permissions-Policy = "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(self), payment=(), usb=(), autoplay=(self), fullscreen=(self)"
+    X-Robots-Tag = "noindex"
+    Referrer-Policy = "same-origin"
 
 # Researcher sign-in and account pages: never framed, not indexed, no referrer, not cached. (The invitation token is in the
 # address fragment, which browsers never send to a server or in a referrer; the page also removes it from the address bar.)
@@ -68,7 +115,7 @@
   for = "/lab/signin/*"
   [headers.values]
     X-Frame-Options = "DENY"
-    Content-Security-Policy = "frame-ancestors 'none'"
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; frame-src 'none'; worker-src 'none'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'"
     X-Robots-Tag = "noindex"
     Referrer-Policy = "no-referrer"
     Cache-Control = "no-store"
@@ -77,7 +124,7 @@
   for = "/lab/account/*"
   [headers.values]
     X-Frame-Options = "DENY"
-    Content-Security-Policy = "frame-ancestors 'none'"
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; frame-src 'none'; worker-src 'none'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'"
     X-Robots-Tag = "noindex"
     Referrer-Policy = "no-referrer"
     Cache-Control = "no-store"

@@ -5,6 +5,9 @@
 import { TYPES } from './types/index.mjs';
 import { seed as dataQualitySeed } from './studies/data-quality.mjs';
 import { TEMPLATES } from './templates.mjs';
+import { update, deleteKeys } from './store.mjs';
+import { audit } from './admin.mjs';
+import { dropStudyRoles } from './accounts.mjs';
 
 export const BUILT_IN = {
   verification: {
@@ -70,8 +73,50 @@ export async function updateStudy(registry, id, changes) {
   if (BUILT_IN[id]) return { error: 'built_in', status: 400, hint: 'Built-in studies are configured in code (netlify/lib/lab/registry.mjs).' };
   const s = await registry.get(`studies/${id}`);
   if (!s) return { error: 'not_found', status: 404 };
+  if (s.deletingAt) return { error: 'deleting', status: 409, hint: 'This study is being deleted permanently. Click "Delete permanently" again to finish.' };
   for (const k of ['name', 'description']) if (typeof changes[k] === 'string') s[k] = changes[k].slice(0, k === 'name' ? 120 : 500);
   for (const k of ['listed', 'archived']) if (typeof changes[k] === 'boolean') s[k] = changes[k];
   await registry.set(`studies/${id}`, s);
   return { ok: true, study: withPaths(s) };
+}
+
+// Deletes an archived study for good (lab owner only): every record in its store, its backup copy, its entry in the studies
+// list and in the registry's backup, and its role on every researcher account. Built-in studies cannot be deleted.
+// confirm must be the study's ID, typed by the owner.
+//
+// A large study can take longer than one function call, so this works in rounds: the first call marks the study
+// (deletingAt; it cannot be restored from then on, and the hourly backup skips it) and writes "study.delete_started" to the
+// lab activity log; each call deletes for up to budgetMs and answers { done: false, remaining } until nothing is left. The
+// studies-list entry goes last, so a study that is half deleted stays on the console, marked, until a later call finishes
+// it ("study.delete" in the activity log). Deleting is idempotent, so two calls at once only repeat each other's work.
+// ctx: { registry, registryBackup, getStoreFor(name) }.
+export async function deleteStudy(ctx, id, confirm, who, { now = Date.now(), budgetMs = 6000 } = {}) {   // budget: well inside a function's 10-second limit
+  const { registry, registryBackup, getStoreFor } = ctx, t0 = Date.now();
+  id = String(id || '');
+  if (!who || who.role !== 'owner') return { error: 'forbidden', status: 403, hint: 'Only a lab owner can delete a study.' };
+  if (BUILT_IN[id]) return { error: 'built_in', status: 400, hint: 'Built-in studies cannot be deleted.' };
+  const s = ID_RE.test(id) ? await registry.get(`studies/${id}`) : null;
+  if (!s) return { error: 'not_found', status: 404, hint: 'That study no longer exists.' };
+  if (!s.archived) return { error: 'not_archived', status: 409, hint: 'Archive the study first. Only an archived study can be deleted.' };
+  if (String(confirm == null ? '' : confirm).trim() !== id) return { error: 'confirm', status: 400, hint: `To confirm, type the study's link name exactly: ${id}` };
+  if (!s.deletingAt) {
+    const u = await update(registry, `studies/${id}`, d => { if (!d.deletingAt) { d.deletingAt = now; d.deletingBy = who.name; } });
+    if (u.error) return u;
+    await audit(registry, who, 'study.delete_started', `${id} (${s.name})`, now);
+  }
+  let deleted = 0;
+  for (const name of [s.storeName, s.backupName]) {   // the study's store first, so the hourly backup has nothing left to copy back
+    const store = getStoreFor(name);
+    for (let keys = await store.list(''); keys.length; keys = await store.list('')) {
+      if (Date.now() - t0 > budgetMs) return { ok: true, done: false, deleted, remaining: keys.length };
+      const batch = keys.slice(0, 400);
+      await deleteKeys(store, batch); deleted += batch.length;
+    }
+  }
+  const roles = await dropStudyRoles(registry, id);
+  if (roles.error) return roles;
+  if (registryBackup) await registryBackup.delete(`m/studies/${id}`);
+  await registry.delete(`studies/${id}`);
+  await audit(registry, who, 'study.delete', `${id} (${s.name}): every record and its backup copy deleted${roles.changed.length ? `; access removed from ${roles.changed.join(', ')}` : ''}`, now);
+  return { ok: true, done: true, deleted, accounts: roles.changed.length };
 }

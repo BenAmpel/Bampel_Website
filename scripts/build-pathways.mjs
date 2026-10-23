@@ -4,19 +4,13 @@
 // Run by `npm run build:ccair` (netlify.toml build command), before Hugo copies static/ into public/.
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { CCAIR as ccair, SITE, esc, ld, person as reviewer, org, head as baseHead, top as baseTop, foot as baseFoot, writeSitemap, readJson } from './ccair-static.mjs';
 
-const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
-const ccair = path.join(root, 'static', 'ccair');
 const out = path.join(ccair, 'pathways');
-const D = JSON.parse(fs.readFileSync(path.join(ccair, 'data', 'pathways.json'), 'utf8'));
-const SITE = 'https://bampel.com';
+const D = readJson('pathways.json');
 const HUB = `${SITE}/ccair/pathways/`;
-const params = fs.readFileSync(path.join(root, 'config', '_default', 'params.yaml'), 'utf8');
-const GA = (params.match(/google_analytics:\s*'([^']+)'/) || [])[1] || '';
 const ASSET_V = D.updated.replace(/-/g, '');
 
-const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const money = (n) => '$' + n.toLocaleString('en-US');
 const HIRING = { entry: 'Entry-level', step: 'Usually a second job', emerging: 'Emerging field' };
 const CODE = {
@@ -37,61 +31,20 @@ const BY = Object.fromEntries(D.roles.map((r) => [r.slug, r]));
 const short = (r) => r.short || r.name;
 // 'an IT Auditor', 'an AI Security Specialist', 'a SOC Analyst'.
 const an = (name) => (/^[AEIOU]/.test(name) ? 'an ' : 'a ') + name;
-const reviewer = { '@type': 'Person', name: 'Benjamin M. Ampel', url: `${SITE}/`, jobTitle: 'Director, Center for CyberAI Research (CCAIR)' };
-const org = { '@type': 'ResearchOrganization', name: 'Center for CyberAI Research (CCAIR)', url: `${SITE}/ccair/` };
-const ld = (obj) => `<script type="application/ld+json">${JSON.stringify(obj).replace(/</g, '\\u003c')}</script>`;
 
-function head({ title, desc, url, ogTitle }) {
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${esc(title)}</title>
-<meta name="description" content="${esc(desc)}">
-<link rel="canonical" href="${url}">
-<meta name="robots" content="index, follow, max-image-preview:large">
-<meta name="theme-color" content="#050a15">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="CCAIR, Center for CyberAI Research">
-<meta property="og:title" content="${esc(ogTitle || title)}">
-<meta property="og:description" content="${esc(desc)}">
-<meta property="og:url" content="${url}">
-<meta property="og:image" content="${SITE}/media/sharing-card.png">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/ccair/uploads/ccair-logo.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/ccair/assets/pathways/pathways.css?v=${ASSET_V}">
-${GA ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${GA}"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA}');</script>` : ''}`;
-}
+const head = (o) => baseHead({ ...o, css: [`/ccair/assets/pathways/pathways.css?v=${ASSET_V}-warm3`] });
 
 function top(current) {
-  return `<a class="skip" href="#main">Skip to content</a>
-<div class="backdrop" aria-hidden="true"><div class="glow g1"></div><div class="glow g2"></div></div>
-<header class="top"><div class="wrap">
-  <a class="brand" href="/ccair/"><img src="/ccair/uploads/ccair-logo.png" alt="" width="30" height="30">CCAIR</a>
-  <nav aria-label="Main">
-    <a href="/ccair/" class="hide-sm">Center home</a>
-    <a href="/ccair/pathways/"${current === 'hub' ? ' aria-current="page"' : ''}>Pathway Finder</a>
-    <a href="/ccair/pathways/#roles" class="hide-sm">All roles</a>
-    <a href="/">bampel.com</a>
-  </nav>
-</div></header>`;
+  return baseTop([
+    { href: '/ccair/', label: 'Center home', hideSm: true },
+    { href: '/ccair/pathways/', label: 'Pathway Finder', current: current === 'hub' },
+    { href: '/ccair/pathways/#roles', label: 'All roles', hideSm: true },
+    { href: '/ccair/students/', label: 'Student guide', hideSm: true },
+    { href: '/', label: 'bampel.com' }
+  ]);
 }
 
-function foot() {
-  return `<footer><div class="wrap">
-  <span>Center for CyberAI Research (CCAIR) · Georgia State University · Reviewed ${esc(D.updated)}</span>
-  <span><a href="/ccair/">CCAIR</a> · <a href="/ccair/pathways/">Pathway Finder</a> · <a href="/teaching/">Teaching</a> · <a href="/privacy/">Privacy</a></span>
-</div></footer>
-<script src="/ccair/assets/pathways/pathways.js?v=${ASSET_V}" defer></script>
-</body>
-</html>
-`;
-}
+const foot = () => baseFoot({ note: `Reviewed ${D.updated}`, scripts: [`/ccair/assets/pathways/pathways.js?v=${ASSET_V}-anon1`] });
 
 function faqHtml(faq) {
   return `<div class="faq">${faq.map((f, i) => `<details class="reveal" style="--d:${(i * 0.05).toFixed(2)}s"><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join('')}</div>`;
@@ -116,7 +69,7 @@ function hub() {
     { q: 'Do I need to know how to code to work in cybersecurity?', a: 'No. Many roles, including GRC analyst, IT auditor, privacy analyst, security awareness and SOC analyst, need little or no programming. Coding matters most in application security, cloud security and AI security.' },
     { q: 'Which certification should I get first?', a: 'For most beginners, CompTIA Security+ or ISC2 Certified in Cybersecurity (CC) is a sensible first credential. The best choice depends on the role: each role guide lists starter and later certifications.' },
     { q: 'Is this quiz a test of my ability?', a: 'No. It is an interest guide, not an aptitude test. It compares what you say you would enjoy with what each job involves, based on the NIST NICE Workforce Framework. Use it to decide what to explore next.' },
-    { q: 'Do you store my answers?', a: 'No. Scoring happens in your browser and nothing you answer is saved or sent. If you copy a results link, your answers are packed into the link itself.' }
+    { q: 'Do you store my answers?', a: 'No. Scoring happens in your browser and nothing you answer is saved or sent. We only count, anonymously, how many people start and finish the quiz, with no answers or results attached. If you copy a results link, your answers are packed into the link itself.' }
   ];
   const roleList = D.roles.map((r, i) => ({ '@type': 'ListItem', position: i + 1, url: `${HUB}${r.slug}/`, name: `How to become ${an(r.name)}` }));
   const graph = {
@@ -139,7 +92,7 @@ ${ld(graph)}
 </head>
 <body>
 ${top('hub')}
-<main id="main">
+<main id="main" tabindex="-1">
   <section class="hero"><div class="wrap">
     <span class="eyebrow reveal"><span class="dot"></span>CCAIR Cyber Career Pathway Finder</span>
     <h1 class="reveal" data-split style="--d:.08s">Find where you <span class="grad">fit</span> in cybersecurity</h1>
@@ -195,6 +148,8 @@ ${top('hub')}
     <h2 class="reveal">Common questions from students</h2>
     ${faqHtml(faq)}
     <div class="note reveal"><b>How this was built.</b> Roles follow the <a href="${D.sources.nice}" rel="noopener">NIST NICE Workforce Framework</a>; first-job routes draw on <a href="${D.sources.cyberseek}" rel="noopener">CyberSeek</a>; pay figures are US Bureau of Labor Statistics medians (${esc(D.sources.blsDate)}). Reviewed ${esc(D.updated)} by Dr. Benjamin M. Ampel, Director of CCAIR, who teaches CIS 3620 Career Pathways at Georgia State University. It is an interest guide, not a test of ability.</div>
+    <div class="cta-band reveal"><div><h3>Picked a role? Plan the rest of your degree.</h3><p>The CCAIR Student Guide covers skills, a portfolio, certifications, getting hired, research and scholarships, year by year, with a separate track for government and defense work.</p></div>
+      <a class="btn btn-ghost" href="/ccair/students/">Read the student guide <span class="arrow" aria-hidden="true">&rarr;</span></a></div>
   </div></section>
 </main>
 <script type="application/json" id="pf-data">${JSON.stringify(quizData).replace(/</g, '\\u003c')}</script>
@@ -222,8 +177,11 @@ function numbersHtml(r, cite) {
   const N = r.numbers;
   if (!N) return '';
   const row = (f) => `<div class="reveal"><dt>${esc(f.label)}</dt><dd>${f.value}${cite(f.refs)}${f.note ? `<small>${esc(f.note)}</small>` : ''}</dd></div>`;
+  // The BLS median already appears in the key facts at the top of the page; skip the identical "Median pay" stat here.
+  const pay = r.bls ? D.bls[r.bls] : null;
+  const stats = N.stats.filter((f) => !(pay && f.label === 'Median pay' && f.value === money(pay.median)));
   return `<section id="numbers"><h2 class="reveal">By the numbers</h2>
-    <dl class="numbers">${N.stats.map(row).join('')}</dl>
+    <dl class="numbers">${stats.map(row).join('')}</dl>
     ${N.where ? `<h3 class="reveal sub-h">Where the jobs are</h3><p class="body reveal">${N.where.text}${cite(N.where.refs)}</p>` : ''}
     ${N.who ? `<h3 class="reveal sub-h">Who hires</h3><ul class="list">${N.who.map((w) => `<li class="reveal">${w.text}${cite(w.refs)}</li>`).join('')}</ul>` : ''}
     ${N.caveat ? `<p class="reviewed reveal">${esc(N.caveat)}</p>` : ''}
@@ -261,12 +219,16 @@ function rolePage(r) {
     ]
   };
   const desc = `How to become ${an(short(r))}: what the work is like, the realistic first job, which certs to start with and free practice.`;
-  return `${head({ title: `How to Become ${an(short(r))}: First Job and Certs`, ogTitle: `How to become ${an(r.name)}`, url, desc })}
+  // The <title> names the role exactly as the H1 does; the ": First Job and Certs" tail is dropped when it would push
+  // the title past 70 characters (long names such as Network and Systems Security Administrator).
+  const titleBase = `How to Become ${an(r.name)}`;
+  const title = titleBase.length + 21 <= 70 ? `${titleBase}: First Job and Certs` : titleBase;
+  return `${head({ title, ogTitle: `How to become ${an(r.name)}`, url, desc })}
 ${ld(graph)}
 </head>
 <body>
 ${top('role')}
-<main id="main" class="guide"><div class="narrow">
+<main id="main" class="guide" tabindex="-1"><div class="narrow">
   <nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="/ccair/">CCAIR</a></li><li><a href="/ccair/pathways/">Pathway Finder</a></li><li aria-current="page">${esc(r.name)}</li></ol></nav>
   <div class="guide-hero">
     <span class="badge ${r.hiring} reveal">${HIRING[r.hiring]}</span>
@@ -329,7 +291,5 @@ for (const r of D.roles) {
   fs.mkdirSync(path.join(out, r.slug), { recursive: true });
   fs.writeFileSync(path.join(out, r.slug, 'index.html'), rolePage(r));
 }
-const urls = [`${SITE}/ccair/`, HUB, ...D.roles.map((r) => `${HUB}${r.slug}/`)];
-fs.writeFileSync(path.join(ccair, 'sitemap.xml'),
-  `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u) => `  <url><loc>${u}</loc><lastmod>${D.updated}</lastmod></url>`).join('\n')}\n</urlset>\n`);
-console.log('Pathways build complete: hub + %d role pages, sitemap with %d URLs', D.roles.length, urls.length);
+const n = writeSitemap();
+console.log('Pathways build complete: hub + %d role pages, sitemap with %d URLs', D.roles.length, n);

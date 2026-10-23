@@ -1,0 +1,595 @@
+{
+  "updated": "2026-10-22",
+  "verified": "October 2026",
+  "markup": "Text fields use a small markup that scripts/build-students.mjs renders: [text](url) for links, **text** for bold lead-ins, {{refId}} for a numbered citation to refs.refId, [[role:slug]] for a link to a Pathway Finder role guide. Blocks: p, ul, ol, note, warn, h3, table {caption, head, rows}, cards (the guide's own page list).",
+  "pages": [
+    {
+      "slug": "",
+      "nav": "Start here",
+      "title": "Plan your cybersecurity career, year by year",
+      "metaTitle": "CCAIR Student Guide: A Year-by-Year Plan for a Cybersecurity Career",
+      "desc": "A free, sourced plan for cybersecurity students aiming at industry jobs: target roles, a portfolio, student clubs and local chapters, internship recruiting timelines and the final-year job search, from the Center for CyberAI Research.",
+      "summary": "A year-by-year plan: target roles, a portfolio, communities and internship timing.",
+      "lede": "This guide turns the advice we give Center for CyberAI Research (CCAIR) students into a plan for a security career in industry. That covers security teams at companies, managed security and detection providers, consulting and audit firms, product security teams, cloud providers and startups. Government work is one track among these, with its own page at the end. Dates, prices and rules change often, so every one of them links to the public source we checked.",
+      "roles": ["soc-analyst", "cloud-security-engineer", "application-security-engineer", "grc-analyst"],
+      "sections": [
+        { "h": "Your first month", "blocks": [
+          { "ol": [
+            "**Pick two or three target roles.** The [Pathway Finder](/ccair/pathways/) ranks 14 roles by your interests in about five minutes. Each role guide names a realistic first job, such as a security operations center (SOC) analyst at a company or at a managed detection and response (MDR) provider. The Finder uses the NICE Workforce Framework (a common vocabulary for cybersecurity work, maintained by the National Institute of Standards and Technology) as its reference{{niccs-nice}}.",
+            "**Start a portfolio.** Create a GitHub account and one public repository for lab notes and write-ups. GitHub Pages can host a personal site straight from a repository{{gh-pages}}. See [Build skills](/ccair/students/skills/).",
+            "**Join a student club.** Ask your department which security clubs and competition teams meet on campus. Women in CyberSecurity (WiCyS) supports student chapters, though new chapter applications are paused until spring 2027{{wicys-chapters}}.",
+            "**Find a faculty mentor.** Agree on a meeting schedule at the first meeting, and keep it.",
+            "**Start a one-page resume.** Update it every term. See [Get hired](/ccair/students/get-hired/).",
+            "**Learn research ethics basics.** Complete your campus research ethics training before you work with data about people{{ohrp}}."
+          ] }
+        ] },
+        { "h": "Join the local security community", "blocks": [
+          { "p": "Local chapters put you in a room with working practitioners, and some of them hire interns and new graduates. Go to one meeting a month, and talk to two people at each." },
+          { "ul": [
+            "**OWASP chapters.** The Open Worldwide Application Security Project (OWASP) runs local chapters with free meetings, talks and training open to members and non-members{{owasp-chapters}}.",
+            "**ISSA chapters.** The Information Systems Security Association (ISSA) offers student membership at US$30 a year plus local chapter dues, for full-time students not yet working full-time in cybersecurity{{issa-student}}.",
+            "**ISACA chapters.** ISACA (a professional association for IT audit, risk and governance) has more than 200 local chapters{{isaca-chapters}}. Student membership is US$25 a year plus chapter dues{{isaca}}. It fits [[role:grc-analyst]] and [[role:it-auditor]] targets.",
+            "**BSides.** BSides events are local security conferences run by and for the security community{{bsides}}. Each event sets its own ticket price, so check its page."
+          ] }
+        ] },
+        { "h": "Every semester", "blocks": [
+          { "ul": [
+            "**Take one skill step.** Finish a lab, a competition, a write-up or a certification step each term. See [Build skills](/ccair/students/skills/) and [Certifications](/ccair/students/certifications/).",
+            "**Add one item to your portfolio.** A write-up, a lab diagram or a small tool you wrote all count.",
+            "**Keep your grades up.** Many scholarships set a minimum grade point average (GPA), such as 2.5 for ISC2's academic scholarships{{cfcse}}.",
+            "**Meet your mentor on schedule.** Bring a short written update and one specific question."
+          ] }
+        ] },
+        { "h": "Every year", "blocks": [
+          { "ul": [
+            "**Late summer and fall: apply for next summer's internships.** Many large employers in technology, finance and consulting start recruiting in late summer or early fall for roles that begin the following year{{cornell-timeline}}{{uw-internships}}. Other employers post later, so check each posting's closing date.",
+            "**Use every channel.** Go to campus career fairs, and check your career center's job board. Handshake, for example, partners with more than 1,500 schools and colleges{{handshake}}. Ask the people you meet at chapter meetings for referrals.",
+            "**Summer: work in a security role.** An internship, a research assistantship or a campus IT security job gives you experience to describe on a resume. Internships also lead to jobs: in a 2026 National Association of Colleges and Employers (NACE) survey, employers converted 63.1% of their 2024-25 interns into full-time hires{{nace-conversion}}.",
+            "**Spring: update your plan.** Compare your resume and portfolio with two real job postings for your target role, and close one gap before fall."
+          ] }
+        ] },
+        { "h": "Your final year", "blocks": [
+          { "ul": [
+            "**Apply early.** The same fall timeline applies to many full-time programs for new graduates at large employers{{cornell-timeline}}.",
+            "**Ask for referrals.** Former internship managers, club alumni and chapter contacts can refer you. Send each one the posting and your resume.",
+            "**Compare offers before you accept.** See [Get hired](/ccair/students/get-hired/#offers) for how to compare pay and ask for time."
+          ] },
+          { "p": "Having a plan matters less than following it. The pages below cover each step in detail." }
+        ] },
+        { "h": "If you are considering government or defense work", "blocks": [
+          { "p": "Many government and defense contractor jobs require a security clearance. If that track interests you, start a records file now. The clearance questionnaire asks for 10 years of addresses, employers and schools, and 7 years of foreign travel and close foreign contacts{{sf86}}. [Working in government or defense](/ccair/students/security-clearance/) covers the process, and [Get hired](/ccair/students/get-hired/#federal-jobs) covers federal applications." }
+        ] },
+        { "h": "The rest of this guide", "blocks": [ { "cards": true } ] }
+      ]
+    },
+    {
+      "slug": "skills",
+      "nav": "Build skills",
+      "title": "Build skills and a portfolio employers can check",
+      "metaTitle": "Hands-On Cybersecurity Skills and a Portfolio: A Student Guide",
+      "desc": "How cybersecurity students build hands-on skills and a portfolio employers can check: home labs, capture-the-flag challenges, write-ups, open source, legal bug bounty work, free training, competitions and local conferences.",
+      "summary": "Home labs, CTFs, write-ups, open source, legal bug bounties, free training and conferences.",
+      "lede": "Employers hire for evidence that you can do the work. A portfolio of labs, write-ups and contributions is that evidence. Free training gives you the concepts, and practice gives you the hands-on time.",
+      "roles": ["soc-analyst", "penetration-tester", "threat-intelligence-analyst", "application-security-engineer", "ai-security-specialist"],
+      "sections": [
+        { "h": "Build a portfolio", "blocks": [
+          { "ul": [
+            "**A home lab.** Run a few virtual machines on your own computer: an attacker machine, a target and a logging server. Write down what you built, what broke and how you fixed it.",
+            "**Capture-the-flag (CTF) challenges.** CTFs are puzzles in which you exploit or analyze a system to find a hidden string (the flag). CTFtime keeps a public calendar and archive of events, with past write-ups{{ctftime}}.",
+            "**Write-ups.** Write one short write-up a month. Explain a solved challenge in plain language (after the competition ends, never during it).",
+            "**Open-source contributions.** Many projects label beginner tasks \"good first issue,\" and GitHub counts documentation and other non-code help as contributions{{gh-contribute}}. OWASP projects are built and maintained by volunteers{{owasp-about}}.",
+            "**A simple site.** Host your write-ups on GitHub Pages and link the site from your resume{{gh-pages}}."
+          ] },
+          { "p": "A hiring manager can read one page of your work in two minutes. Three clear write-ups do more for you than thirty screenshots." }
+        ] },
+        { "h": "Practice legally", "blocks": [
+          { "p": "Test only systems you own or have written permission to test. Federal law makes unauthorized access to computers a crime{{usc-1030}}. Curiosity is not a defense." },
+          { "ul": [
+            "**Intentionally vulnerable targets.** OWASP Juice Shop is an insecure web application built for security training{{juice-shop}}. Run your own copy, and attack it as hard as you like.",
+            "**Bug bounty programs.** Companies invite outside researchers to find and report vulnerabilities, and some pay rewards. Each program publishes a policy that sets its scope (the systems you may test) and its rules{{h1-disclosure}}.",
+            "**Safe harbor.** A safe harbor statement is the program's promise that good-faith research within its policy counts as authorized, and that it will not take legal action against you for that research{{h1-safe-harbor}}. disclose.io publishes open safe harbor policy templates and a directory of disclosure programs{{disclose-io}}. Safe harbor terms differ by program, so read each one.",
+            "**Stay in scope.** HackerOne requires you to review a program's policy before you test{{h1-coc}}. Bugcrowd tells researchers never to test out-of-scope targets and warns that doing so can end in a ban{{bugcrowd-briefs}}.",
+            "**Check age and payment rules.** HackerOne requires a parent or guardian to accept its terms for users under 18{{h1-terms}}. Bugcrowd pays rewards only to researchers who are at least 18 or have reached the age of majority{{bugcrowd-sdt}}."
+          ] },
+          { "p": "Start with practice targets and programs that accept reports without rewards. A clear report is a portfolio item once the program allows you to disclose it." }
+        ] },
+        { "h": "Free training", "blocks": [
+          { "ul": [
+            "**CISA Learning.** The Cybersecurity and Infrastructure Security Agency (CISA) replaced its old FedVTE platform with CISA Learning. It offers about 850 hours of no-cost training mapped to the NICE Framework, and U.S. residents sign in with Login.gov{{cisa-learning}}.",
+            "**NICCS Education and Training Catalog.** A searchable list of thousands of in-person and online cybersecurity courses from many providers{{niccs-catalog}}. Check the price on each listing.",
+            "**MITRE ATT&CK training.** MITRE publishes courses on ATT&CK (a public knowledge base of attacker tactics and techniques), including ATT&CK Fundamentals and a Cyber Threat Intelligence course{{attack-training}}.",
+            "**Microsoft Learn AI security fundamentals.** A beginner learning path of three modules: AI security, AI security controls and an introduction to AI security testing{{ms-ai-sec}}."
+          ] }
+        ] },
+        { "h": "Practice platforms", "blocks": [
+          { "ul": [
+            "**OverTheWire.** Start with Bandit, which teaches Unix and Linux basics through short levels{{otw}}.",
+            "**CyLab Security Academy.** Carnegie Mellon's free practice platform, formerly picoCTF. Older picoCTF logins still work{{cylab}}.",
+            "**TryHackMe.** Guided exercises that run in your browser. Students get 20% off an annual Premium subscription{{thm}}.",
+            "**Hack The Box Academy.** A discounted student subscription is available once you verify an academic email address{{htb}}.",
+            "**After graduation: SANS Cyber Academy.** Free, intensive training for career changers. Full-time students are not eligible, and it requires U.S. citizenship or permanent residence{{sans}}."
+          ] }
+        ] },
+        { "h": "Competitions help, but are optional", "blocks": [
+          { "ul": [
+            "**National Cyber League (NCL).** Individual and team games run each fall and spring. High school and college students in the United States and Canada can play{{ncl}}{{ncl-spring}}.",
+            "**Collegiate Cyber Defense Competition (CCDC).** College teams run and defend a business network against a live attacking team, through regional rounds to a national final{{ccdc}}. Ask your department whether it fields a team."
+          ] },
+          { "p": "Competitions give you a rank, a date and a team to describe in an interview. They are useful, not required. A portfolio of labs and write-ups shows the same skills." }
+        ] },
+        { "h": "Go to conferences and meetups", "blocks": [
+          { "ul": [
+            "**BSides.** Local security conferences run by and for the community{{bsides}}. Each event sets its own price.",
+            "**OWASP chapter meetings.** Free and open to non-members{{owasp-chapters}}.",
+            "**DEF CON.** DEF CON does not offer student discounts. Its FAQ lists other ways to attend free, such as working on a contest, event or village{{defcon-faq}}.",
+            "**WiCyS conference scholarships.** These cover registration and shared lodging. See [Scholarships](/ccair/students/scholarships/)."
+          ] },
+          { "p": "Bring a one-sentence introduction, and ask people what their team works on. See [Start here](/ccair/students/) for local chapters." }
+        ] }
+      ]
+    },
+    {
+      "slug": "certifications",
+      "nav": "Certifications",
+      "title": "Certifications: what employers ask for, and when",
+      "metaTitle": "Cybersecurity Certifications for Students: What Employers Ask For",
+      "desc": "Which cybersecurity certifications employers ask for at entry level and in cloud, security operations and offensive security roles, with current exam versions, prices, student discounts and when to wait.",
+      "summary": "Entry, cloud, SOC and offensive certifications, prices, discounts and when to wait.",
+      "lede": "Read five job postings for your target role before you buy anything. Most students need one entry certification before their first job. Leave advanced ones until you have the experience they assume, or until an employer pays for them.",
+      "roles": ["soc-analyst", "penetration-tester", "cloud-security-engineer", "ai-security-specialist", "grc-analyst"],
+      "sections": [
+        { "h": "Start with the job posting", "blocks": [
+          { "p": "Pick your target role first. Each [Pathway Finder role guide](/ccair/pathways/#roles) lists its starter and later certifications. Then read five current postings for that role, and note which certifications they require and which they only prefer." },
+          { "p": "Experience counts as much as certificates at entry level. In a 2025 ISC2 survey of 929 hiring managers in six countries, 90% would consider entry- and junior-level candidates whose only background was IT work experience. 89% would consider candidates with only entry-level certifications{{isc2-hiring}}. Build your portfolio alongside your first exam." }
+        ] },
+        { "h": "Entry certifications", "blocks": [
+          { "table": { "caption": "Entry certifications, current exams and key dates (checked October 2026)", "head": ["Certification", "Exam", "Date or price to know"], "rows": [
+            ["CompTIA Security+ (V7)", "SY0-701", "English retires June 11, 2027{{secplus-v7}}"],
+            ["CompTIA Security+ (V8)", "SY0-801", "Expected around November 17, 2026{{secplus-v8}}"],
+            ["ISC2 Certified in Cybersecurity (CC)", "CC", "US$199 exam fee{{isc2-pricing}}"]
+          ] } },
+          { "p": "Pick one Security+ version and study only for it. SY0-701 stays available in English until June 11, 2027, and SY0-801 adds objectives on risks in AI systems, models, prompts and data exposure{{secplus-v8}}." },
+          { "p": "ISC2 ended its free One Million Certified in Cybersecurity program on May 20, 2026. If you hold an unexpired free code, you must take the exam by December 31, 2026{{isc2-1mcc}}." }
+        ] },
+        { "h": "Cloud certifications", "blocks": [
+          { "table": { "caption": "Cloud certifications and what to know (checked October 2026)", "head": ["Certification", "Level", "Price or date to know"], "rows": [
+            ["AWS Certified Cloud Practitioner", "Foundational", "US$100{{aws-ccp}}"],
+            ["Microsoft Azure Fundamentals", "AZ-900", "Price set by country{{ms-az900}}"],
+            ["Microsoft Security, Compliance, and Identity Fundamentals", "SC-900", "Price set by country{{ms-sc900}}"],
+            ["AWS Certified Security - Specialty", "SCS-C03", "US$300{{aws-scs-doc}}{{aws-scs}}"],
+            ["Microsoft Cloud and AI Security Engineer Associate", "SC-500", "AZ-500 retired August 31, 2026{{ms-az500}}"],
+            ["Google Cloud Professional Cloud Security Engineer", "Professional", "US$200 plus tax{{gcp-pcse}}"]
+          ] } },
+          { "p": "Start with a fundamentals exam for the cloud your target employers name in their postings. Microsoft offers academic pricing once you verify your student status in your Microsoft Learn profile, before you pay{{ms-student}}." },
+          { "p": "Save the specialty and professional exams until you have built and secured real workloads. Microsoft's SC-500 exam leads to the Cloud and AI Security Engineer Associate credential{{ms-sc500}}. AWS has used exam SCS-C03 since December 2, 2025{{aws-scs-doc}}." }
+        ] },
+        { "h": "Security operations certifications", "blocks": [
+          { "table": { "caption": "Security operations center (SOC) and analyst certifications (checked October 2026)", "head": ["Certification", "Exam", "Date or price to know"], "rows": [
+            ["CompTIA CySA+ (V4)", "CS0-004", "Launched June 23, 2026{{cysa-v4}}"],
+            ["CompTIA CySA+ (V3)", "CS0-003", "English retires December 22, 2026{{cysa}}"],
+            ["Splunk Core Certified User", "Splunk", "US$130 per attempt{{splunk-user}}"],
+            ["Splunk Certified Cybersecurity Defense Analyst", "Splunk", "US$130 per attempt{{splunk-cda}}"]
+          ] } },
+          { "p": "CySA+ suits security operations center (SOC) and vulnerability analyst roles, and CompTIA recommends about four years of experience in them{{cysa-v4}}. Treat it as a second certification." },
+          { "p": "Splunk (now part of Cisco) is a log search and security information and event management (SIEM) platform{{splunk-cda}}. If postings for your target role name Splunk, its certifications show that you can search and investigate in it." }
+        ] },
+        { "h": "Offensive security certifications", "blocks": [
+          { "table": { "caption": "Penetration testing certifications (checked October 2026)", "head": ["Certification", "Course or exam", "Date or price to know"], "rows": [
+            ["CompTIA PenTest+", "PT0-003", "Launched December 17, 2024{{pentest}}"],
+            ["OffSec OSCP+", "PEN-200", "US$1,749 course and one exam attempt{{offsec-pricing}}"]
+          ] } },
+          { "p": "PEN-200 (Penetration Testing with Kali Linux) leads to the OSCP+ certification, which expires after three years. Passing also earns the OSCP, which does not expire{{offsec-pen200}}. OffSec's Learn One subscription costs US$2,749 a year, and full-time college students can get up to 10% off it{{offsec-pricing}}." },
+          { "p": "That is a lot of money for a hard exam. Build your skills on free platforms first, and buy the course when the free material feels easy." }
+        ] },
+        { "h": "Later, with experience", "blocks": [
+          { "table": { "caption": "Advanced certifications and what they need", "head": ["Certification", "What it needs"], "rows": [
+            ["CompTIA SecAI+ (CY0-001)", "3 to 4 years in IT, 2+ in security, recommended{{secai}}"],
+            ["ISC2 CISSP", "5 years of full-time security experience{{cissp-exp}}"],
+            ["GIAC (for example GSEC, GCIH)", "US$999 per attempt for most{{giac-pricing}}"]
+          ] } },
+          { "p": "You can pass the Certified Information Systems Security Professional (CISSP) exam before you have the experience and become an Associate of ISC2. You then have six years to earn the five years of experience. A degree in computer science, IT or a related field can count for one year, and paid or unpaid internships count as experience{{cissp-exp}}." },
+          { "p": "Avoid paying for advanced certifications yourself before you have the experience they assume. Once you have a security job, ask whether your employer has a training budget that covers them." }
+        ] },
+        { "h": "Student discounts", "blocks": [
+          { "ul": [
+            "**CompTIA.** Verify your student status through SheerID to get academic pricing{{comptia-student}}.",
+            "**ISC2 Candidate.** The first year is free, then US$50 a year. It includes 10% off ISC2's official online self-paced training{{isc2-candidate}}.",
+            "**Microsoft.** Academic exam pricing after you verify your student status{{ms-student}}.",
+            "**OffSec.** Up to 10% off Learn One for full-time college students{{offsec-pricing}}.",
+            "**ISACA.** Student membership is US$25 a year plus local chapter dues{{isaca}}."
+          ] },
+          { "p": "Ask your department about vouchers before you pay full price." }
+        ] },
+        { "h": "If you target defense jobs: DoD 8140", "blocks": [
+          { "p": "Department of Defense (DoD) cyber positions follow DoD Manual 8140.03, which took effect on February 15, 2023 and replaced the old DoD 8570.01-M{{dodm-8140}}. Positions are coded to work roles, and a certification is one of several ways to qualify{{cwm-8140}}. Security+ was one of the first certifications approved{{comptia-8140}}. Check the qualification matrix for your target work role before you buy a voucher{{cwm-matrix}}." },
+          { "p": "See [Working in government or defense](/ccair/students/security-clearance/) for clearances." }
+        ] }
+      ]
+    },
+    {
+      "slug": "get-hired",
+      "nav": "Get hired",
+      "title": "Get hired: resumes, interviews and offers",
+      "metaTitle": "How Cybersecurity Students Get Hired: Resumes, Interviews, Offers",
+      "desc": "How cybersecurity students get industry jobs: one-page resumes, applicant tracking systems, LinkedIn and GitHub, referrals, technical interviews, salary research and comparing offers, plus a short guide to federal hiring.",
+      "summary": "Resumes, referrals, technical interviews, salary data, offers and federal hiring.",
+      "lede": "Every employer wants the same evidence: what you did, with what result. This page covers industry hiring first. Federal hiring follows different rules, summarized at the end.",
+      "roles": ["soc-analyst", "penetration-tester", "cloud-security-engineer", "grc-analyst", "application-security-engineer"],
+      "sections": [
+        { "h": "Write a one-page resume, then tailor it", "blocks": [
+          { "ul": [
+            "**Keep it to one page.** Career centers advise one page for new and recent undergraduates{{udel-resume}}. Two pages suit people with substantial experience, such as PhD students{{mit-resume}}.",
+            "**Lead with evidence.** Use numbers: labs completed, competition ranks, systems you supported, hours per week. Link your portfolio.",
+            "**Tailor it to each posting.** Use the posting's terms for skills you actually have{{mit-resume}}.",
+            "**List certifications with dates.** Include one in progress with your target exam date."
+          ] }
+        ] },
+        { "h": "Get through applicant tracking systems", "blocks": [
+          { "p": "Employers often collect applications in an applicant tracking system (ATS), software that recruiters use to review resumes, take notes and manage candidates. Virginia Tech's career center calls automatic rejection for missing keywords highly unlikely. Screening questions about required qualifications (knockout questions) are the more common filter, so answer them accurately{{vt-ats}}." },
+          { "p": "Use a simple single-column layout with standard section headings, and avoid tables, columns and images{{mit-resume}}. Ignore claims that most resumes never reach a human. The same career center calls that idea outdated{{vt-ats}}." }
+        ] },
+        { "h": "Show your work online", "blocks": [
+          { "ul": [
+            "**LinkedIn.** Put your target role in your headline, and list your projects and certifications. The Open to Work setting lets you choose who sees it: all members or only recruiters{{linkedin-otw}}.",
+            "**GitHub.** Pin your three best repositories. Give each a README that says what it does, how to run it and what you learned.",
+            "**A portfolio site.** One page of links to your write-ups is enough. See [Build skills](/ccair/students/skills/)."
+          ] }
+        ] },
+        { "h": "Network and ask for referrals", "blocks": [
+          { "ul": [
+            "**Go where practitioners are.** Chapter meetings, BSides events and career fairs. See [Start here](/ccair/students/) for local chapters.",
+            "**Ask for advice, not a job.** Ask for 20 minutes to learn what someone's team does and how they got there.",
+            "**Ask for a referral when a posting fits.** Send the posting link, your resume and two sentences on why you fit.",
+            "**Use your career center's job board.** Handshake, for example, partners with more than 1,500 schools and colleges{{handshake}}."
+          ] }
+        ] },
+        { "h": "Prepare for technical interviews", "blocks": [
+          { "ul": [
+            "**Practical scenarios.** Expect questions such as how you would investigate a suspicious login alert. Talk through your steps out loud, and name the logs and tools you would use.",
+            "**Take-home labs.** Some employers send a short exercise, such as a set of logs or a vulnerable app. Finish within the time limit, document your steps and say what you would do next.",
+            "**Behavioral questions with STAR.** STAR stands for Situation, Task, Action and Result. Spend most of the answer (about 60%) on the actions you personally took, and quantify the result where you can{{uw-star}}. Prepare six to eight STAR stories.",
+            "**Ask your own questions.** Ask about on-call duties, team size, mentoring and the training budget."
+          ] }
+        ] },
+        { "h": "Research pay", "blocks": [
+          { "ul": [
+            "**Bureau of Labor Statistics (BLS).** The median annual pay for information security analysts was $129,180 in May 2025. BLS projects 21% employment growth from 2025 to 2035{{bls-ooh}}.",
+            "**NACE.** Employers projected an average starting salary of $81,535 for Class of 2026 computer science bachelor's graduates (base salary only){{nace-salary}}.",
+            "**CyberSeek.** It counted 514,359 cybersecurity job listings from May 2024 through April 2025{{cyberseek-release}}, and maps demand by state and metro area{{cyberseek}}."
+          ] },
+          { "p": "A median covers all experience levels, so expect less than the BLS figure in your first job. Compare any offer with data for your own metro area." }
+        ] },
+        { "h": "Compare and negotiate offers", "id": "offers", "blocks": [
+          { "ul": [
+            "**Ask for time.** NACE calls a one-to-two-week decision window common and says less time can be undue pressure{{nace-deadlines}}. You do not need to accept an offer on the phone{{washu-negotiate}}.",
+            "**Compare total compensation.** Benefits can add 25 to 40 percent to the value of a salary{{washu-negotiate}}. Compare base pay, bonus, retirement match, health insurance, training budget and cost of living.",
+            "**Negotiate with data.** Research what similar jobs pay, treat it as a discussion, and get the updated offer in writing{{washu-negotiate}}.",
+            "**Keep your word.** Once you accept an offer, stop interviewing. Backing out later can hurt your school's relationship with that employer."
+          ] }
+        ] },
+        { "h": "If you want a federal job", "id": "federal-jobs", "blocks": [
+          { "p": "Federal civilian jobs are posted on USAJOBS{{usajobs}}. The rules differ from industry hiring in four ways." },
+          { "ul": [
+            "**Two pages at most.** Since September 27, 2025, USAJOBS limits resumes to two pages for Title 5 competitive and excepted service announcements. A longer resume makes you ineligible{{opm-2page}}.",
+            "**Complete job entries.** For each job, list the title, the employer, start and end dates by month and year, and hours worked per week{{opm-2page}}. Leave out your Social Security Number, photos and other personal data{{usajobs-leave}}.",
+            "**Pathways Programs.** The Internship Program takes students enrolled at least part-time, and the Recent Graduates Program takes applicants within two years of their degree{{opm-pathways}}.",
+            "**Formal assessments.** The Office of Personnel Management (OPM) Merit Hiring Plan requires at least one technical or alternative assessment before a hiring manager sees candidates{{opm-mhp}}."
+          ] },
+          { "p": "CISA{{cisa-careers}}, the DHS Cybersecurity Service{{dhs-cs}} and the Intelligence Community{{ic-careers}} also run their own cyber hiring. Many of these jobs need a security clearance. See [Working in government or defense](/ccair/students/security-clearance/)." }
+        ] }
+      ]
+    },
+    {
+      "slug": "research",
+      "nav": "Research",
+      "title": "Do research as a student",
+      "metaTitle": "Cybersecurity Research for Students: Workflow and Industry Value",
+      "desc": "How research experience helps cybersecurity students in industry (applied R&D, product security, threat research), plus a step-by-step workflow from topic and literature review to quad charts, posters, papers and ethics.",
+      "summary": "How research helps industry careers, plus a workflow from topic to paper.",
+      "lede": "Research shows an employer or graduate program that you can work on an open problem without an answer key. Industry hires for that skill too. This page explains where research leads, then gives the workflow we teach at CCAIR, in the order you should do it.",
+      "roles": ["ai-security-specialist", "threat-intelligence-analyst", "application-security-engineer"],
+      "sections": [
+        { "h": "How research helps an industry career", "blocks": [
+          { "ul": [
+            "**Applied research and development (R&D).** Security vendors and large technology companies hire people to build and test new detection and defense methods. Palo Alto Networks lists security research among its early-career hiring areas{{pan-early}}, and Microsoft's student careers page listed a security research internship when we checked{{ms-students}}.",
+            "**Product security.** Product security teams find flaws in their own company's software before attackers do. Research on attacks and defenses trains the same threat modeling and careful testing.",
+            "**Threat research.** Threat intelligence teams publish analyses of attacker campaigns. Clean data analysis, careful claims and clear writing are the skills a paper needs, too."
+          ] },
+          { "p": "Publications, posters and talks are portfolio items. List each on your resume with the venue and date, and link the paper or slides. A research project also gives you strong STAR stories for interviews: a problem, what you did and a measured result." }
+        ] },
+        { "h": "Work in this order", "blocks": [
+          { "ol": [
+            "**Topic.** Pick a problem that is new, important and tied to what stakeholders need. If no one studies it, ask why before you start.",
+            "**Domain literature.** Start with survey papers. Then read the last three to five years of top venues: IEEE Symposium on Security and Privacy (S&P), USENIX Security, the ACM Conference on Computer and Communications Security (CCS) and its AISec workshop, IEEE Transactions on Dependable and Secure Computing (TDSC) and IEEE Intelligence and Security Informatics (ISI). Keep a literature matrix with one fact per cell.",
+            "**Method literature.** Find the baselines and the state of the art (NeurIPS, ICLR and KDD for machine learning). Check data fit, labels, class imbalance and interpretability.",
+            "**Gaps and research questions.** Write questions that start with how or why, never yes-or-no questions.",
+            "**Design.** Show data, method and evaluation in one diagram. Name the ground truth, the baselines and the sensitivity analyses.",
+            "**Results.** Explain why each result happened, and do not overstate it.",
+            "**Front matter last.** Write the conclusion, then the introduction, then the abstract (200 to 300 words). Keep the title near eight words, with no acronyms."
+          ] }
+        ] },
+        { "h": "Report your progress", "blocks": [
+          { "ul": [
+            "**Research updates.** Put the bottom line first: your status and what you need. Number slides, caption figures, cite claims and report what failed.",
+            "**Quad chart.** One slide with four boxes: (1) objective and motivation, (2) approach and data, (3) results and impact with a metric and a baseline, (4) next steps and outputs. Use bullets, 12-point text or larger and dated milestones.",
+            "**Posters.** Put the finding in the title and build around one central figure. Use body text of 28 points or larger, and confirm the poster size with the event.",
+            "**Papers.** Turn approved slides into section headings and follow the venue's template. Read the draft aloud, then get peer review, then co-author review. Give your mentor at least a week."
+          ] }
+        ] },
+        { "h": "Work with a mentor", "blocks": [
+          { "ul": [
+            "**Meet on a regular schedule.** Missed meetings stall projects more than hard problems do.",
+            "**Separate brainstorming from updates.** Book a different meeting when you need to think through ideas.",
+            "**Ask about computing early.** Your mentor can tell you what campus computing is available for your project."
+          ] }
+        ] },
+        { "h": "Ethics and approvals", "blocks": [
+          { "p": "Complete your campus research ethics training before you start. If your project collects data from or about people (surveys, interviews, user logs), talk to your Institutional Review Board (IRB) before you collect it. The federal Common Rule (45 CFR 46) sets the baseline protections for human subjects research{{common-rule}}{{ohrp}}." },
+          { "p": "Security research can affect people who never agreed to take part, such as users of a network you measure. The Menlo Report sets out ethical principles for information and communication technology research{{menlo}}." }
+        ] },
+        { "h": "Research with CCAIR", "blocks": [
+          { "p": "CCAIR studies the security of AI systems and the use of AI for cybersecurity. Read about [current research](/ccair/#/research) and [publications](/ccair/#/publications), then use the [contact page](/ccair/#/contact) to ask about projects. Send a resume and one paragraph on the problem you want to work on." },
+          { "p": "Need data for a project? Start with [Find data](/ccair/students/data/)." }
+        ] }
+      ]
+    },
+    {
+      "slug": "data",
+      "nav": "Find data",
+      "title": "Find data for cybersecurity projects",
+      "metaTitle": "Cybersecurity Datasets for Student Projects, With Known Weaknesses",
+      "desc": "A searchable catalog of public cybersecurity datasets for student research, with access, license, size, time span, the paper to cite and each dataset's known weaknesses.",
+      "summary": "A searchable catalog of datasets, each with its known weaknesses.",
+      "lede": "Every dataset has flaws. This catalog names them next to each entry, so you can choose data that fits your question and report its limits honestly.",
+      "roles": ["ai-security-specialist", "soc-analyst", "threat-intelligence-analyst"],
+      "sections": [
+        { "h": "Use a dataset responsibly", "blocks": [
+          { "ul": [
+            "**Read the caveats first.** Every entry below names at least one known weakness. Report the dataset version and its weaknesses in your paper.",
+            "**Cite the paper the creators ask for.** Each entry links it.",
+            "**Check access and license terms.** Some datasets need a request or registration, and some limit commercial use.",
+            "**Get approval for data about people.** See the ethics section of [Do research](/ccair/students/research/)."
+          ] }
+        ] },
+        { "h": "Public frameworks to pair with your data", "blocks": [
+          { "ul": [
+            "**MITRE ATT&CK.** A knowledge base of attacker tactics and techniques, useful for labeling attacks{{attack}}.",
+            "**CVE.** The public list of identifiers for disclosed vulnerabilities{{cve}}.",
+            "**National Vulnerability Database (NVD).** NIST's database that adds severity scores and details to CVE records{{nvd}}."
+          ] }
+        ] },
+        { "h": "Dataset catalog", "id": "catalog", "blocks": [ { "catalog": true } ] }
+      ]
+    },
+    {
+      "slug": "scholarships",
+      "nav": "Scholarships",
+      "title": "Scholarships and programs for cybersecurity students",
+      "metaTitle": "Cybersecurity Scholarships and Programs: Industry, Nonprofit, Government",
+      "desc": "Industry and nonprofit cybersecurity scholarships (ISC2, ISSA, ISACA, WiCyS, CrowdStrike), company internship programs, and government programs such as CyberCorps SFS, the DoD Cyber Service Academy and SMART.",
+      "summary": "Nonprofit, industry and company programs, plus SFS and other government programs.",
+      "lede": "Professional associations, nonprofits and companies fund scholarships, training and conference trips with no service commitment. Government programs can pay for your whole degree in exchange for government work. Amounts and deadlines change each year, so confirm them on the program's own page.",
+      "roles": ["soc-analyst", "grc-analyst", "cloud-security-engineer", "incident-responder"],
+      "sections": [
+        { "h": "Professional associations and nonprofits", "blocks": [
+          { "ul": [
+            "**ISC2 Center for Cyber Safety and Education.** Academic scholarships of up to $5,000 for associate, undergraduate and graduate students, with a GPA of 2.5 or higher. The 2026 round closed on March 15, 2026, and applications reopen in 2027{{cfcse}}{{isc2-schol-2026}}. Applicants from any country may apply{{isc2-schol-2026}}.",
+            "**ISSA Education Foundation.** Scholarships for sophomores, juniors, seniors and graduate students, including $3,500 memorial awards for one undergraduate and one graduate student and $2,000 awards. The 2026 window ran from February 1 to June 15{{issaef}}.",
+            "**ISACA Foundation.** Awards of US$500 to $5,000 for undergraduate and graduate students worldwide, with eligibility that varies by award. The current cycle closes November 3, 2026{{isaca-found-pr}}. One award is for National Cyber League players at US schools{{isaca-found}}."
+          ] }
+        ] },
+        { "h": "Women in CyberSecurity (WiCyS)", "blocks": [
+          { "ul": [
+            "**Membership.** WiCyS offers a low-cost student membership that needs a school-issued email address{{wicys-join}}.",
+            "**Conference scholarships.** These cover registration (for a processing fee) and shared lodging. The round for the March 2027 conference closed September 30, 2026{{wicys-schol}}.",
+            "**Cyber Defense Challenge made possible by Target.** Open to WiCyS members with no prior experience needed. The top 10 get a WiCyS conference scholarship and coaching from Target's team. The page lists applications as opening in fall or winter 2026{{wicys-target}}.",
+            "**Security Training Scholarship.** SANS training for members 18 or older who are students or career changers, funded by WiCyS partners. The 2026 window ran through September 30{{wicys-sans}}."
+          ] }
+        ] },
+        { "h": "Company programs", "blocks": [
+          { "ul": [
+            "**CrowdStrike NextGen Scholarship.** For students in cybersecurity or AI. Finalists are invited to explore internships. The 2027-28 cycle opens in spring 2027{{crowdstrike-nextgen}}.",
+            "**Palo Alto Networks early careers.** A 12-week summer internship and a year-long Unit 42 Academy covering incident response, governance, risk and compliance, and offensive security{{pan-early}}.",
+            "**Microsoft internships.** Open to current bachelor's, master's, MBA and PhD students{{ms-students}}."
+          ] },
+          { "p": "Many other security and technology companies run similar programs. Check each company's university or early-careers page in late summer, when many large employers start recruiting{{cornell-timeline}}." }
+        ] },
+        { "h": "Government programs", "blocks": [
+          { "p": "Government programs can cover full tuition and a stipend. In return, you work in government after you graduate." },
+          { "h3": "CyberCorps Scholarship for Service (SFS)" },
+          { "p": "The National Science Foundation (NSF) funds SFS, and OPM runs the student side{{opm-sfs}}." },
+          { "ul": [
+            "**What it pays.** Tuition and mandatory education fees, plus an academic-year stipend of $27,000 for undergraduates and $37,000 for graduate students under the current solicitation{{nsf-sfs-sol}}.",
+            "**What you give back.** After graduation you work in a government cybersecurity or AI role for as long as the scholarship lasted{{opm-sfs}}{{nsf-sfs-sol}}.",
+            "**Who can apply.** U.S. citizens and lawful permanent residents enrolled full-time at a participating school. You apply through your school, and each school runs its own selection{{opm-sfs-overview}}.",
+            "**A new name.** NSF's 2026 solicitation calls the program CyberAI SFS (CyberAICorps Scholarship for Service) and covers AI as well as cybersecurity{{nsf-sfs}}."
+          ] },
+          { "p": "Georgia State University has an SFS program, according to the National Centers of Academic Excellence in Cybersecurity (NCAE-C) map{{cae-gsu}}." },
+          { "h3": "DoD Cyber Service Academy" },
+          { "p": "The Department of Defense (DoD) Cyber Service Academy replaced the DoD Cyber Scholarship Program (CySP). It covers tuition, books and fees plus a stipend, in exchange for one year of DoD civilian service for each year of support. Students must be U.S. citizens enrolled at a participating NCAE-C school{{dod-csa}}." },
+          { "p": "Stipend amounts and deadlines change each cycle. Check the NCAE-C map to see whether your school takes part{{cae-map}}, then ask your campus point of contact." },
+          { "h3": "DoD SMART Scholarship" },
+          { "p": "The Science, Mathematics and Research for Transformation (SMART) program pays full tuition and annual stipends and includes summer internships. In return you accept one-for-one civilian service after graduation. Cybersecurity is not a listed discipline, but computer science, information sciences, software engineering and data science are. Applications open August 1{{smart}}." },
+          { "h3": "CISA Pathways internships" },
+          { "p": "CISA's paid student internships are posted on USAJOBS. Interns who complete 640 hours can be eligible for noncompetitive conversion to a permanent job. Applicants must be U.S. citizens, at least 16, enrolled in school, with a GPA of 2.5 or higher{{cisa-pathways}}." },
+          { "p": "Many of these jobs need a security clearance. See [Working in government or defense](/ccair/students/security-clearance/)." }
+        ] },
+        { "h": "Search tips", "blocks": [
+          { "ul": [
+            "**Read the service terms.** Government programs that pay for school require government service afterward. Read the agreement before you accept.",
+            "**Start a year early.** Many applications need transcripts, letters and essays.",
+            "**Ask your department.** Schools often know about local scholarships that never appear in national lists."
+          ] }
+        ] }
+      ]
+    },
+    {
+      "slug": "security-clearance",
+      "nav": "Government and clearances",
+      "title": "Working in government or defense: security clearances",
+      "metaTitle": "Security Clearances for Students Considering Government or Defense Work",
+      "desc": "An optional track for cybersecurity students considering government or defense contractor jobs: how a US security clearance works, the 13 adjudicative guidelines and what to do now. General information, not legal advice.",
+      "summary": "An optional track: how clearances work and what to do now for government or defense jobs.",
+      "lede": "This page is for students considering government agencies or defense contractors, where many cybersecurity jobs require a security clearance. You cannot apply for one yourself, but the choices you make as a student shape how the process goes.",
+      "disclaimer": "General information, not legal advice. Rules differ by agency and change over time. For your own situation, ask the hiring agency's security office or a qualified attorney.",
+      "roles": ["threat-intelligence-analyst", "digital-forensics-investigator", "incident-responder", "systems-security-administrator"],
+      "sections": [
+        { "h": "How the process works", "blocks": [
+          { "ol": [
+            "**A job offer.** The employer or agency sponsors your clearance after a tentative offer.",
+            "**The questionnaire.** You complete the SF-86 (Questionnaire for National Security Positions) in NBIS eApp, the Defense Counterintelligence and Security Agency (DCSA) system{{isl-eapp}}. The government is replacing the SF-86 with the Personnel Vetting Questionnaire (PVQ), with use in all vetting cases targeted for September 2027{{qpr-q3}}.",
+            "**The investigation.** In the third quarter of fiscal year 2026, initial investigations took about 57 days for Secret and 82 days for Top Secret, counting all cases. The full process, including the decision, took about 82 and 146 days{{qpr-q3}}.",
+            "**Adjudication.** An adjudicator applies the 13 guidelines in Security Executive Agent Directive 4 (SEAD 4). The review weighs the whole person, including how serious, frequent and recent any conduct was, your age at the time and evidence of rehabilitation. Any doubt is resolved in favor of national security{{sead4}}.",
+            "**Extra steps and continuous vetting.** Some agencies add a polygraph{{icpg}}, and the National Security Agency (NSA) adds a psychological assessment{{nsa-psych}}. Once cleared, you are enrolled in continuous vetting, which has replaced periodic reinvestigations{{qpr-q3}}{{dcsa-cv}}."
+          ] },
+          { "p": "Ask the hiring office whether you can start work before the final decision. For federal applications, see [Get hired](/ccair/students/get-hired/#federal-jobs)." }
+        ] },
+        { "h": "The 13 adjudicative guidelines", "blocks": [
+          { "p": "SEAD 4 lists 13 guidelines, labeled A to M. They run from allegiance to the United States, foreign influence and personal conduct through financial considerations, drug involvement, criminal conduct and use of information technology{{sead4}}." },
+          { "p": "Guideline M matters for cybersecurity students: unauthorized access to systems is a security concern even when it starts as curiosity. Practice only on platforms and systems you have permission to use." }
+        ] },
+        { "h": "What to do now", "blocks": [
+          { "ul": [
+            "**Tell the truth.** Knowingly false statements on the form are a felony under 18 U.S.C. 1001, with up to five years in prison{{usc-1001}}{{sf86}}. Honesty falls under Guideline E{{sead4}}.",
+            "**Stop using marijuana before you apply.** Marijuana use remains a federal matter for clearances. Guidance from the Office of the Director of National Intelligence (ODNI) says past use is relevant but not determinative. It expects applicants to stop once they sign the SF-86, and it treats CBD products with more than 0.3% THC as marijuana{{odni-mj}}. An April 2026 rule moved only FDA-approved marijuana products and state-licensed medical marijuana to Schedule III{{fr-resched}}. We found no change to clearance guidance after it.",
+            "**Keep finances current.** The SF-86 asks about debts more than 120 days delinquent and about taxes not filed or paid in the last seven years{{sf86}}. Bring any defaulted student loan back into good standing before you apply.",
+            "**Keep records as you go.** The table below lists what the SF-86 asks for{{sf86}}."
+          ] },
+          { "table": { "caption": "What the SF-86 asks you to list", "head": ["Record", "How far back"], "rows": [
+            ["Addresses", "10 years, no gaps"],
+            ["Employers", "10 years"],
+            ["Schools", "10 years"],
+            ["Foreign travel", "7 years"],
+            ["Close or continuing foreign contacts", "7 years"],
+            ["Three references (not relatives)", "Together know you 7 years"]
+          ] } }
+        ] }
+      ]
+    }
+  ],
+  "refs": {
+    "niccs-nice": { "publisher": "CISA NICCS", "title": "NICE Framework work roles (v2.2.0 data)", "url": "https://niccs.cisa.gov/tools/nice-framework" },
+    "cisa-learning": { "publisher": "CISA NICCS", "title": "CISA Learning", "url": "https://niccs.cisa.gov/education-training/cisa-learning" },
+    "niccs-catalog": { "publisher": "CISA NICCS", "title": "Education and Training Catalog", "url": "https://niccs.cisa.gov/education-training/catalog" },
+    "attack-training": { "publisher": "MITRE", "title": "ATT&CK training", "url": "https://attack.mitre.org/resources/learn-more-about-attack/training/" },
+    "ms-ai-sec": { "publisher": "Microsoft Learn", "title": "AI security fundamentals learning path", "url": "https://learn.microsoft.com/en-us/training/paths/ai-security-fundamentals/" },
+    "otw": { "publisher": "OverTheWire", "title": "Wargames", "url": "https://overthewire.org/wargames/" },
+    "cylab": { "publisher": "Carnegie Mellon University CyLab", "title": "CyLab Security Academy", "url": "https://cylabacademy.org/" },
+    "thm": { "publisher": "TryHackMe", "title": "Student discount", "url": "https://help.tryhackme.com/en/articles/6494960-student-discount" },
+    "htb": { "publisher": "Hack The Box", "title": "Getting the student subscription", "url": "https://help.hackthebox.com/en/articles/13465244-getting-the-student-subscription" },
+    "sans": { "publisher": "SANS Institute", "title": "SANS Cyber Academy", "url": "https://www.sans.org/cyber-academy/" },
+    "ncl": { "publisher": "National Cyber League", "title": "National Cyber League", "url": "https://nationalcyberleague.org/" },
+    "ccdc": { "publisher": "National Collegiate Cyber Defense Competition", "title": "NCCDC", "url": "https://ccdc.io/" },
+    "secplus-v7": { "publisher": "CompTIA", "title": "Security+ V7 (SY0-701)", "url": "https://www.comptia.org/en-us/certifications/security/v7/" },
+    "secplus-v8": { "publisher": "CompTIA", "title": "Security+ V8 (SY0-801)", "url": "https://www.comptia.org/en-us/certifications/security/v8/" },
+    "cysa": { "publisher": "CompTIA", "title": "CySA+", "url": "https://www.comptia.org/en-us/certifications/cybersecurity-analyst/" },
+    "cysa-v4": { "publisher": "CompTIA", "title": "CySA+ V4 (CS0-004)", "url": "https://www.comptia.org/en-us/certifications/cybersecurity-analyst/v4/" },
+    "pentest": { "publisher": "CompTIA", "title": "PenTest+", "url": "https://www.comptia.org/en-us/certifications/pentest/" },
+    "secai": { "publisher": "CompTIA", "title": "SecAI+", "url": "https://www.comptia.org/en-us/certifications/secai/" },
+    "comptia-student": { "publisher": "CompTIA", "title": "Exam voucher discounts", "url": "https://www.comptia.org/en-us/blog/voucher-discount/" },
+    "comptia-8140": { "publisher": "CompTIA", "title": "What 8140 means for companies working with DoD", "url": "https://www.comptia.org/en-us/blog/what-8140-means-for-companies-working-with-dod/" },
+    "isc2-pricing": { "publisher": "ISC2", "title": "Exam pricing", "url": "https://www.isc2.org/register-for-exam/isc2-exam-pricing" },
+    "isc2-1mcc": { "publisher": "ISC2", "title": "One Million Certified in Cybersecurity program concludes", "url": "https://www.isc2.org/insights/2026/04/one-million-certified-cyber-conclusion" },
+    "cissp-exp": { "publisher": "ISC2", "title": "CISSP experience requirements", "url": "https://www.isc2.org/certifications/cissp/cissp-experience-requirements" },
+    "isc2-candidate": { "publisher": "ISC2", "title": "ISC2 Candidate", "url": "https://www.isc2.org/Candidate" },
+    "giac-pricing": { "publisher": "GIAC", "title": "Certification pricing", "url": "https://www.giac.org/pricing" },
+    "isaca": { "publisher": "ISACA", "title": "Become a member", "url": "https://www.isaca.org/membership/become-a-member" },
+    "ms-az500": { "publisher": "Microsoft Learn", "title": "Azure Security Engineer Associate (retired August 31, 2026)", "url": "https://learn.microsoft.com/en-us/credentials/certifications/azure-security-engineer/" },
+    "ms-sc500": { "publisher": "Microsoft Learn", "title": "Cloud and AI Security Engineer Associate", "url": "https://learn.microsoft.com/en-us/credentials/certifications/cloud-and-ai-security-engineer-associate/" },
+    "aws-scs-doc": { "publisher": "Amazon Web Services", "title": "Security - Specialty (SCS-C03) exam guide: version history", "url": "https://docs.aws.amazon.com/aws-certification/latest/security-specialty-03/security-specialty-03-appendix-b.html" },
+    "aws-scs": { "publisher": "Amazon Web Services", "title": "AWS Certified Security - Specialty", "url": "https://aws.amazon.com/certification/certified-security-specialty/" },
+    "dodm-8140": { "publisher": "Department of Defense", "title": "DoD Manual 8140.03, Cyberspace Workforce Qualification and Management Program", "url": "https://www.esd.whs.mil/Portals/54/Documents/DD/issuances/dodm/814003p.PDF" },
+    "cwm-8140": { "publisher": "DoD Cyber Workforce", "title": "DoD 8140", "url": "https://www.cyberworkforce.mil/DoD-8140/" },
+    "cwm-matrix": { "publisher": "DoD Cyber Workforce", "title": "DCWF work role qualification matrix", "url": "https://www.cyberworkforce.mil/DoD-8140/Sample-DCWF-Work-Role-Qualification-Matrix/" },
+    "usajobs": { "publisher": "OPM", "title": "USAJOBS", "url": "https://www.usajobs.gov/" },
+    "usajobs-leave": { "publisher": "U.S. Department of the Treasury", "title": "Tips for building an effective resume (USAJOBS guidance)", "url": "https://home.treasury.gov/about/careers-at-treasury/how-to-apply/resume-tips" },
+    "opm-2page": { "publisher": "OPM", "title": "Agency guidance on the two-page limit on resume length", "url": "https://www.opm.gov/policy-data-oversight/hiring-information/merit-hiring-plan-resources/agency-guidance-on-the-two-page-limit-on-resume-length" },
+    "opm-mhp": { "publisher": "OPM", "title": "Merit Hiring Plan (May 29, 2025)", "url": "https://www.opm.gov/chcoc/latest-memos/merit-hiring-plan.pdf" },
+    "opm-pathways": { "publisher": "OPM", "title": "Students and recent graduates (Pathways Programs)", "url": "https://www.opm.gov/policy-data-oversight/hiring-information/students-recent-graduates/" },
+    "ic-careers": { "publisher": "Office of the Director of National Intelligence", "title": "IntelligenceCareers.gov", "url": "https://www.intelligencecareers.gov/" },
+    "dhs-cs": { "publisher": "Department of Homeland Security", "title": "DHS Cybersecurity Service", "url": "https://www.dhs.gov/homeland-security-careers/dhs-cybersecurity-service" },
+    "cisa-careers": { "publisher": "CISA", "title": "Careers", "url": "https://www.cisa.gov/careers" },
+    "cyberseek": { "publisher": "CyberSeek", "title": "Cybersecurity supply and demand heat map", "url": "https://www.cyberseek.org/heatmap.html" },
+    "isl-eapp": { "publisher": "Defense Counterintelligence and Security Agency", "title": "Industrial Security Letter 2024-02: e-QIP to NBIS eApp", "url": "https://www.dcsa.mil/Portals/128/Documents/CTP/tools/ISL_2024_02_eQIP_to_e_APP.pdf" },
+    "qpr-q3": { "publisher": "Performance Accountability Council", "title": "Trusted Workforce 2.0 quarterly progress report, FY2026 Q3", "url": "https://assets.performance.gov/files/Personnel_Vetting_QPR_(FY26-Q3).pdf" },
+    "sead4": { "publisher": "ODNI (copy hosted by the Department of Energy)", "title": "Security Executive Agent Directive 4: National Security Adjudicative Guidelines", "url": "https://www.energy.gov/sites/prod/files/2018/02/f48/SEAD4_20170608.pdf" },
+    "icpg": { "publisher": "ODNI", "title": "ICPG 704.6, Conduct of Polygraph Examinations for Personnel Security Vetting", "url": "https://archive.dni.gov/files/documents/ICPG/ICPG-704-6.pdf" },
+    "nsa-psych": { "publisher": "IntelligenceCareers.gov", "title": "NSA suitability process", "url": "https://www.intelligencecareers.gov/nsa/suitability-process" },
+    "dcsa-cv": { "publisher": "Defense Counterintelligence and Security Agency", "title": "DCSA updates NISP contractor continuous vetting process", "url": "https://www.dcsa.mil/About-Us/News/Article/Article/4496039/dcsa-updates-nisp-contractor-continuous-vetting-process/" },
+    "usc-1001": { "publisher": "Legal Information Institute", "title": "18 U.S. Code 1001", "url": "https://www.law.cornell.edu/uscode/text/18/1001" },
+    "sf86": { "publisher": "OPM", "title": "Standard Form 86, Questionnaire for National Security Positions", "url": "https://www.opm.gov/forms/pdf_fill/sf86.pdf" },
+    "odni-mj": { "publisher": "ODNI", "title": "Security Executive Agent clarifying guidance concerning marijuana (December 21, 2021)", "url": "https://archive.dni.gov/files/NCSC/documents/Regulations/12-21-21_Memo_SecEA_Clarifying_Guidance_re_Marijuana_21-01529_U_SIGNED-FINAL.pdf" },
+    "fr-resched": { "publisher": "Federal Register", "title": "Rescheduling of FDA-approved products (April 28, 2026)", "url": "https://www.federalregister.gov/documents/2026/04/28/2026-08176/schedules-of-controlled-substances-rescheduling-of-food-and-drug-administration-approved-products" },
+    "ohrp": { "publisher": "HHS Office for Human Research Protections", "title": "Office for Human Research Protections", "url": "https://www.hhs.gov/ohrp/index.html" },
+    "common-rule": { "publisher": "HHS Office for Human Research Protections", "title": "45 CFR 46 (the Common Rule)", "url": "https://www.hhs.gov/ohrp/regulations-and-policy/regulations/45-cfr-46/index.html" },
+    "menlo": { "publisher": "Department of Homeland Security (archived)", "title": "The Menlo Report", "url": "https://www.dhs.gov/archive/science-and-technology/publication/st-menlo-report" },
+    "attack": { "publisher": "MITRE", "title": "ATT&CK", "url": "https://attack.mitre.org/" },
+    "cve": { "publisher": "CVE Program", "title": "cve.org", "url": "https://www.cve.org/" },
+    "nvd": { "publisher": "NIST", "title": "National Vulnerability Database", "url": "https://nvd.nist.gov/" },
+    "opm-sfs": { "publisher": "OPM", "title": "CyberCorps Scholarship for Service", "url": "https://sfs.opm.gov/" },
+    "opm-sfs-overview": { "publisher": "OPM", "title": "SFS student overview", "url": "https://sfs.opm.gov/Student/Overview" },
+    "nsf-sfs": { "publisher": "NSF", "title": "CyberAI SFS (CyberAICorps Scholarship for Service), NSF 26-503", "url": "https://www.nsf.gov/funding/opportunities/cyberai-sfs-cyberaicorps-scholarship-service/nsf26-503" },
+    "nsf-sfs-sol": { "publisher": "NSF", "title": "NSF 26-503 solicitation", "url": "https://www.nsf.gov/funding/opportunities/cyberai-sfs-cyberaicorps-scholarship-service/nsf26-503/solicitation" },
+    "cae-gsu": { "publisher": "NCAE-C Community", "title": "CAE map: Georgia State University", "url": "https://maps.caecommunity.org/node/12240" },
+    "cae-map": { "publisher": "NCAE-C Community", "title": "About the NCAE-C program", "url": "https://www.caecommunity.org/about-the-ncae-c-program" },
+    "dod-csa": { "publisher": "DoD Emerging Technologies Talent Marketplace", "title": "How do students apply for a DoD CSA scholarship?", "url": "https://www.dodemergingtech.com/dod-programs/cyber-service-academy-csa/how-do-students-apply-for-a-dod-csa-scholarship/" },
+    "smart": { "publisher": "SMART Scholarship Program", "title": "Eligibility", "url": "https://www.smartscholarship.org/smart/en?id=smart_eligibility" },
+    "wicys-join": { "publisher": "WiCyS", "title": "Join WiCyS", "url": "https://www.wicys.org/join" },
+    "wicys-schol": { "publisher": "WiCyS", "title": "WiCyS 2027 scholarships", "url": "https://www.wicys.org/events/wicys-2027/wicys-2027-scholarships/" },
+    "cfcse": { "publisher": "ISC2 Center for Cyber Safety and Education", "title": "Academic scholarships", "url": "https://www.iamcybersafe.org/s/academic-scholarships" },
+    "cisa-pathways": { "publisher": "CISA", "title": "Pathways interns", "url": "https://www.cisa.gov/pathways-interns" },
+    "gh-pages": { "publisher": "GitHub Docs", "title": "What is GitHub Pages?", "url": "https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages" },
+    "gh-contribute": { "publisher": "GitHub Docs", "title": "Finding ways to contribute to open source on GitHub", "url": "https://docs.github.com/en/get-started/exploring-projects-on-github/finding-ways-to-contribute-to-open-source-on-github" },
+    "wicys-chapters": { "publisher": "WiCyS", "title": "Student chapters", "url": "https://www.wicys.org/initiatives/student-chapters/" },
+    "owasp-chapters": { "publisher": "OWASP Foundation", "title": "Local chapters", "url": "https://owasp.org/chapters" },
+    "owasp-about": { "publisher": "OWASP Foundation", "title": "About OWASP", "url": "https://owasp.org/about/" },
+    "issa-student": { "publisher": "ISSA", "title": "The benefits of membership at student-friendly rates", "url": "https://issa.org/membership/the-benefits-of-membership-at-student-friendly-rates/" },
+    "isaca-chapters": { "publisher": "ISACA", "title": "Join an ISACA local chapter", "url": "https://www.isaca.org/membership/local-chapters" },
+    "bsides": { "publisher": "BSides", "title": "BSides Global Community", "url": "https://bsides.org/" },
+    "defcon-faq": { "publisher": "DEF CON", "title": "Frequently asked questions", "url": "https://defcon.org/html/links/dc-faq/dc-faq.html" },
+    "cornell-timeline": { "publisher": "Cornell University Career Services", "title": "Recruiting timeline by career pathways", "url": "https://career.cornell.edu/resources/recruiting-timeline-by-career-pathways/" },
+    "uw-internships": { "publisher": "University of Washington Career & Internship Center", "title": "Internships: recruiting candidates", "url": "https://careers.uw.edu/resources/internships-recruiting-candidates/" },
+    "handshake": { "publisher": "Handshake", "title": "Handshake for career centers", "url": "https://joinhandshake.com/career-centers/" },
+    "nace-conversion": { "publisher": "National Association of Colleges and Employers", "title": "Intern conversion rate hits highest mark in five years (April 3, 2026)", "url": "https://naceweb.org/talent-acquisition/internships/intern-conversion-rate-hits-highest-mark-in-five-years" },
+    "ctftime": { "publisher": "CTFtime", "title": "CTFtime.org: all about CTF (capture the flag)", "url": "https://ctftime.org/" },
+    "usc-1030": { "publisher": "Legal Information Institute", "title": "18 U.S. Code 1030 (Computer Fraud and Abuse Act)", "url": "https://www.law.cornell.edu/uscode/text/18/1030" },
+    "juice-shop": { "publisher": "OWASP Foundation", "title": "OWASP Juice Shop", "url": "https://owasp.org/www-project-juice-shop/" },
+    "h1-disclosure": { "publisher": "HackerOne", "title": "Vulnerability disclosure guidelines", "url": "https://www.hackerone.com/disclosure-guidelines" },
+    "h1-safe-harbor": { "publisher": "HackerOne", "title": "Safe harbor overview and FAQ", "url": "https://docs.hackerone.com/en/articles/8494502-safe-harbor-overview-faq" },
+    "h1-coc": { "publisher": "HackerOne", "title": "Code of conduct", "url": "https://www.hackerone.com/policies/code-of-conduct" },
+    "h1-terms": { "publisher": "HackerOne", "title": "Community member terms and conditions", "url": "https://www.hackerone.com/terms/community" },
+    "bugcrowd-briefs": { "publisher": "Bugcrowd", "title": "Reviewing bounty briefs", "url": "https://docs.bugcrowd.com/researchers/participating-in-program/reviewing-bounty-briefs/" },
+    "bugcrowd-sdt": { "publisher": "Bugcrowd", "title": "Standard disclosure terms", "url": "https://www.bugcrowd.com/resources/hacker-resources/standard-disclosure-terms/" },
+    "disclose-io": { "publisher": "disclose.io", "title": "Vulnerability disclosure standards and tools", "url": "https://disclose.io/" },
+    "ncl-spring": { "publisher": "National Cyber League", "title": "Spring 2026 NCL winners", "url": "https://nationalcyberleague.org/36c78798f2f680848050f322fdd34c0c" },
+    "isc2-hiring": { "publisher": "ISC2", "title": "ISC2 research: organizations must amend early-career hiring practices (June 11, 2025)", "url": "https://www.isc2.org/insights/2025/06/isc2-research-organizations-must-amend-early-career-hiring-practices" },
+    "aws-ccp": { "publisher": "Amazon Web Services", "title": "AWS Certified Cloud Practitioner", "url": "https://aws.amazon.com/certification/certified-cloud-practitioner/" },
+    "ms-az900": { "publisher": "Microsoft Learn", "title": "Microsoft Certified: Azure Fundamentals", "url": "https://learn.microsoft.com/en-us/credentials/certifications/azure-fundamentals/" },
+    "ms-sc900": { "publisher": "Microsoft Learn", "title": "Microsoft Certified: Security, Compliance, and Identity Fundamentals", "url": "https://learn.microsoft.com/en-us/credentials/certifications/security-compliance-and-identity-fundamentals/" },
+    "ms-student": { "publisher": "Microsoft Learn", "title": "Student discounts", "url": "https://learn.microsoft.com/en-us/credentials/certifications/student-discounts" },
+    "gcp-pcse": { "publisher": "Google Cloud", "title": "Professional Cloud Security Engineer", "url": "https://cloud.google.com/learn/certification/cloud-security-engineer" },
+    "splunk-user": { "publisher": "Splunk", "title": "Splunk Core Certified User", "url": "https://www.splunk.com/en_us/training/certification-track/splunk-core-certified-user.html" },
+    "splunk-cda": { "publisher": "Splunk", "title": "Splunk Certified Cybersecurity Defense Analyst", "url": "https://www.splunk.com/en_us/training/certification-track/splunk-certified-cybersecurity-defense-analyst.html" },
+    "offsec-pen200": { "publisher": "OffSec", "title": "PEN-200: Penetration Testing with Kali Linux (OSCP+)", "url": "https://www.offsec.com/courses/pen-200/" },
+    "offsec-pricing": { "publisher": "OffSec", "title": "Individual pricing", "url": "https://www.offsec.com/pricing/individual/" },
+    "udel-resume": { "publisher": "University of Delaware Lerner College", "title": "Undergraduate resume guide", "url": "https://my.lerner.udel.edu/wp-content/uploads/NEW_Undergrad_Resume_Guide.pdf" },
+    "mit-resume": { "publisher": "MIT Career Advising & Professional Development", "title": "Career toolkit: crafting an effective resume", "url": "https://capd.mit.edu/resources/career-toolkit-crafting-an-effective-resume/" },
+    "vt-ats": { "publisher": "Virginia Tech Career and Professional Development", "title": "What is an applicant tracking system? Your questions answered", "url": "https://career.vt.edu/blog/2026/07/29/what-is-an-applicant-tracking-system-your-questions-answered/" },
+    "linkedin-otw": { "publisher": "LinkedIn Help", "title": "Let recruiters know you're open to work", "url": "https://www.linkedin.com/help/linkedin/answer/67405" },
+    "uw-star": { "publisher": "University of Washington Career & Internship Center", "title": "STAR method of interviewing", "url": "https://careers.uw.edu/resources/star-method-of-interviewing/" },
+    "bls-ooh": { "publisher": "U.S. Bureau of Labor Statistics", "title": "Occupational Outlook Handbook: Information security analysts", "url": "https://www.bls.gov/ooh/computer-and-information-technology/information-security-analysts.htm" },
+    "nace-salary": { "publisher": "National Association of Colleges and Employers", "title": "Salaries expected to climb for Class of 2026 grads despite flat hiring (February 12, 2026)", "url": "https://naceweb.org/about-us/press/2026/salaries-expected-to-climb-for-class-of-2026-grads-despite-flat-hiring" },
+    "cyberseek-release": { "publisher": "CompTIA", "title": "CyberSeek expands cybersecurity workforce data coverage (June 2, 2025)", "url": "https://www.comptia.org/en/about-us/news/press-releases/cyberseek-expands-cybersecurity-workforce-data-coverage-and-enhances-user-experience/" },
+    "nace-deadlines": { "publisher": "National Association of Colleges and Employers", "title": "Advisory opinion: setting reasonable deadlines for job offers", "url": "https://www.naceweb.org/career-development/organizational-structure/advisory-opinion-setting-reasonable-deadlines-for-job-offers" },
+    "washu-negotiate": { "publisher": "Washington University in St. Louis Center for Career Engagement", "title": "Negotiating job offers", "url": "https://careers.washu.edu/negotiating-job-offers/" },
+    "pan-early": { "publisher": "Palo Alto Networks", "title": "Early careers at Palo Alto Networks", "url": "https://jobs.paloaltonetworks.com/en/early-in-career" },
+    "ms-students": { "publisher": "Microsoft Careers", "title": "Early in profession: students", "url": "https://careers.microsoft.com/v2/global/en/students" },
+    "isc2-schol-2026": { "publisher": "ISC2", "title": "Apply now for academic scholarships (March 3, 2026)", "url": "https://www.isc2.org/insights/2026/03/center-2026-scholarships" },
+    "issaef": { "publisher": "ISSA Education Foundation", "title": "Apply now for scholarships", "url": "https://issaef.org/scholarships/apply/" },
+    "isaca-found": { "publisher": "ISACA Foundation", "title": "About ISACA Foundation scholarships", "url": "https://isaca.secure-platform.com/a/page/ISACAfoundation/aboutscholarships" },
+    "isaca-found-pr": { "publisher": "ISACA", "title": "ISACA Foundation scholarship program expands access to tech and cybersecurity education (September 9, 2026)", "url": "https://www.isaca.org/about-us/newsroom/press-releases/2026/isaca-foundation-scholarship-program-expands-access-to-tech-and-cybersecurity-education" },
+    "wicys-target": { "publisher": "WiCyS", "title": "Cyber Defense Challenge made possible by Target", "url": "https://www.wicys.org/benefits/cyber-defense-challenge-made-possible-by-target/" },
+    "wicys-sans": { "publisher": "WiCyS", "title": "Security Training Scholarship", "url": "https://www.wicys.org/benefits/security-training-scholarship/" },
+    "crowdstrike-nextgen": { "publisher": "CrowdStrike", "title": "The CrowdStrike NextGen Scholarship Program", "url": "https://www.crowdstrike.com/en-us/about-us/nextgen-scholarship-program/" }
+  }
+}

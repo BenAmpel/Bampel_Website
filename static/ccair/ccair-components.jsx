@@ -1,525 +1,321 @@
-/* CCAIR Components — shared UI primitives and theme context */
-const { createContext, useContext, useState, useEffect, useRef, useCallback, memo } = React;
-
-const TweakCtx = createContext({});
-const useTweakCtx = () => useContext(TweakCtx);
-
-const ACCENT_RGB = {
-  teal: [0,221,179], blue: [59,130,246], purple: [167,139,250], amber: [245,158,11]
-};
-
-function useCounter(end, duration = 1800) {
-  const [count, setCount] = useState(0);
-  const ref = useRef(null);
-  const started = useRef(false);
-  useEffect(() => {
-    const el = ref.current; if (!el) return;
-    const obs = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting && !started.current) {
-        started.current = true;
-        const t0 = performance.now();
-        const tick = (now) => {
-          const p = Math.min((now - t0) / duration, 1);
-          const ease = 1 - Math.pow(1 - p, 3);
-          setCount(Math.floor(ease * end));
-          if (p < 1) requestAnimationFrame(tick);
-        };
-        requestAnimationFrame(tick);
-      }
-    }, { threshold: 0.3 });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [end, duration]);
-  return [count, ref];
-}
+/* CCAIR Components — shared UI primitives. Styling lives in assets/ccair.css. */
+const { useState, useEffect, useRef } = React;
 
 const REDUCE_MOTION = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-// Headline text that rises in word by word (CSS: .cw). `start` offsets the word index for multi-part titles.
-function SplitWords({ text, start = 0 }) {
-  const words = String(text).split(/(\s+)/);
-  let i = start;
-  return words.map((w, k) => /^\s+$/.test(w) || !w ? w : (
-    <span key={k} className="cw"><span style={{ '--i': i++ }}>{w}</span></span>
-  ));
+const NAV_PAGES = [
+  { id: 'research', label: 'Research' },
+  { id: 'publications', label: 'Publications' },
+  { id: 'people', label: 'People' },
+  { id: 'resources', label: 'Resources' },
+  { id: 'materials', label: 'Materials' },
+  { id: 'about', label: 'About' },
+  { id: 'contact', label: 'Contact' },
+];
+
+const hrefFor = (page) => (page === 'home' ? '#/' : '#/' + page);
+
+function Icon({ name }) {
+  const paths = {
+    menu: <path d="M4 7h16M4 12h16M4 17h16" />,
+    close: <path d="M6 6l12 12M18 6L6 18" />,
+    search: <><circle cx="11" cy="11" r="6.5" /><path d="M20 20l-4.2-4.2" /></>,
+    arrow: <path d="M5 12h14M13 6l6 6-6 6" />,
+    external: <path d="M14 5h5v5M19 5l-8 8M18 14v5H5V6h5" />,
+  };
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {paths[name]}
+    </svg>
+  );
 }
 
-function useInView(threshold = 0.15) {
+function Arrow() {
+  return <span className="arrow" aria-hidden="true">→</span>;
+}
+
+function useInView(threshold = 0.12) {
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     const el = ref.current; if (!el) return;
-    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } }, { threshold });
+    if (!('IntersectionObserver' in window)) { setVisible(true); return; }
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } }, { threshold, rootMargin: '0px 0px -40px 0px' });
     obs.observe(el);
     return () => obs.disconnect();
   }, [threshold]);
   return [ref, visible];
 }
 
-const NetworkCanvas = memo(function NetworkCanvas({ scheme = 'teal' }) {
-  const canvasRef = useRef(null);
-  const nodesRef = useRef([]);
-  const animRef = useRef(null);
-  const visibleRef = useRef(true);
-
-  useEffect(() => {
-    const canvas = canvasRef.current; if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const NUM = 55;
-    let w, h;
-
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    function resize() {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      w = canvas.offsetWidth; h = canvas.offsetHeight;
-      canvas.width = w * dpr; canvas.height = h * dpr;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
-
-    function init() {
-      resize();
-      nodesRef.current = Array.from({ length: NUM }, () => ({
-        x: Math.random() * w, y: Math.random() * h,
-        vx: (Math.random() - 0.5) * 0.35, vy: (Math.random() - 0.5) * 0.35,
-        r: Math.random() * 1.8 + 0.8,
-      }));
-    }
-
-    function draw() {
-      if (!visibleRef.current) return;
-      const rgb = ACCENT_RGB[scheme] || ACCENT_RGB.teal;
-      ctx.clearRect(0, 0, w, h);
-      const nodes = nodesRef.current;
-      for (let i = 0; i < nodes.length; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-          const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 130) {
-            ctx.beginPath(); ctx.moveTo(nodes[i].x, nodes[i].y); ctx.lineTo(nodes[j].x, nodes[j].y);
-            ctx.strokeStyle = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${0.12 * (1 - dist / 130)})`;
-            ctx.lineWidth = 0.6; ctx.stroke();
-          }
-        }
-      }
-      for (const n of nodes) {
-        n.x += n.vx; n.y += n.vy;
-        if (n.x < 0 || n.x > w) n.vx *= -1;
-        if (n.y < 0 || n.y > h) n.vy *= -1;
-        ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0.45)`;
-        ctx.fill();
-      }
-      animRef.current = requestAnimationFrame(draw);
-    }
-
-    init();
-    if (prefersReduced) {
-      draw(); cancelAnimationFrame(animRef.current);
-    } else {
-      draw();
-    }
-
-    const obs = new IntersectionObserver(([e]) => {
-      visibleRef.current = e.isIntersecting;
-      if (e.isIntersecting && !prefersReduced) {
-        cancelAnimationFrame(animRef.current);
-        animRef.current = requestAnimationFrame(draw);
-      }
-    }, { threshold: 0 });
-    obs.observe(canvas);
-
-    window.addEventListener('resize', resize);
-    return () => { cancelAnimationFrame(animRef.current); obs.disconnect(); window.removeEventListener('resize', resize); };
-  }, [scheme]);
-
-  return <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} aria-hidden="true" />;
-});
-
-// Reading progress along the top edge, plus gentle parallax for elements marked data-parallax="<speed>".
-function ScrollFX() {
-  const bar = useRef(null);
-  useEffect(() => {
-    let ticking = false;
-    const update = () => {
-      ticking = false;
-      const y = window.scrollY, h = document.documentElement.scrollHeight - window.innerHeight;
-      if (bar.current) bar.current.style.transform = 'scaleX(' + (h > 0 ? y / h : 0).toFixed(4) + ')';
-      if (REDUCE_MOTION) return;
-      document.querySelectorAll('[data-parallax]').forEach((el) => {
-        el.style.translate = '0 ' + (y * parseFloat(el.getAttribute('data-parallax'))).toFixed(1) + 'px';
-      });
-    };
-    const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
-    update();
-    return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); };
-  }, []);
-  return <div ref={bar} className="ccair-progress" aria-hidden="true"></div>;
+// Fades its content up once it scrolls into view (fade only under reduced motion, see CSS).
+function Reveal({ children, as = 'div', className = '', ...rest }) {
+  const [ref, visible] = useInView();
+  const Tag = as;
+  return <Tag ref={ref} className={'reveal' + (visible ? ' is-in' : '') + (className ? ' ' + className : '')} {...rest}>{children}</Tag>;
 }
 
-function CCAIRNav({ currentPage, onNavigate }) {
+function CCAIRNav({ currentPage }) {
   const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  const btnRef = useRef(null);
+  const sheetRef = useRef(null);
+
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', fn, { passive: true }); return () => window.removeEventListener('scroll', fn);
+    const fn = () => setScrolled(window.scrollY > 4);
+    fn();
+    window.addEventListener('scroll', fn, { passive: true });
+    return () => window.removeEventListener('scroll', fn);
   }, []);
 
-  const pages = [
-    { id: 'home', label: 'Home' }, { id: 'research', label: 'Research' },
-    { id: 'people', label: 'People' }, { id: 'resources', label: 'Resources' },
-    { id: 'about', label: 'About' }, { id: 'pathways', label: 'Career Finder' },
-  ];
+  useEffect(() => { setOpen(false); }, [currentPage]);
 
-  // Career Finder is a separate static page (/ccair/pathways/), not a hash route.
-  const handleNav = (id) => { if (id === 'pathways') { window.location.href = '/ccair/pathways/'; return; } onNavigate(id); setMobileOpen(false); };
-
-  const navStyle = {
-    position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-    background: scrolled ? 'rgba(5,10,21,0.92)' : 'rgba(5,10,21,0.5)',
-    backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-    borderBottom: `1px solid ${scrolled ? 'var(--border)' : 'transparent'}`,
-    padding: '0 clamp(20px, 4vw, 48px)', height: 64,
-    display: 'flex', alignItems: 'center', transition: 'all 0.3s ease',
-  };
-
-  const btnStyle = (active) => ({
-    background: active ? 'var(--accent-dim)' : 'none',
-    border: 'none', cursor: 'pointer', padding: '8px 14px', borderRadius: 6,
-    fontFamily: "'Manrope', sans-serif", fontSize: 13.5, fontWeight: 600,
-    color: active ? 'var(--accent)' : 'var(--text-secondary)',
-    transition: 'all 0.2s', width: '100%', textAlign: 'left', whiteSpace: 'nowrap',
-  });
+  // While the sheet is open: Escape closes it, Tab stays inside it (the toggle and the sheet's links),
+  // focus moves into it, and the page behind does not scroll.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => {
+      if (e.key === 'Escape') { setOpen(false); btnRef.current && btnRef.current.focus(); return; }
+      if (e.key !== 'Tab' || !sheetRef.current) return;
+      const items = [btnRef.current, ...sheetRef.current.querySelectorAll('a[href], button')].filter(Boolean);
+      const first = items[0], last = items[items.length - 1];
+      const inside = items.includes(document.activeElement);
+      if (e.shiftKey && (document.activeElement === first || !inside)) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && (document.activeElement === last || !inside)) { e.preventDefault(); first.focus(); }
+    };
+    document.addEventListener('keydown', onKey);
+    const first = sheetRef.current && sheetRef.current.querySelector('a');
+    first && first.focus();
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
+  }, [open]);
 
   return (
-    <nav style={navStyle} aria-label="Main navigation">
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={() => handleNav('home')}>
-        <img src="uploads/ccair-logo.png" alt="" style={{ height: 34, borderRadius: 4 }} />
-        <span className="mono" style={{ fontWeight: 700, fontSize: 15, color: 'var(--accent)', letterSpacing: 1 }}>CCAIR</span>
-      </div>
-      <div style={{ flex: 1 }}></div>
-      <div className="ccair-nav-links" style={{ display: 'flex', gap: 6 }}>
-        {pages.map(p => (
-          <button key={p.id} onClick={() => handleNav(p.id)} aria-current={currentPage === p.id ? 'page' : undefined} style={btnStyle(currentPage === p.id)}>
-            {p.label}
-          </button>
-        ))}
-      </div>
-      <button className="ccair-hamburger" onClick={() => setMobileOpen(!mobileOpen)}
-        aria-label={mobileOpen ? 'Close menu' : 'Open menu'} aria-expanded={mobileOpen}
-        style={{ display: 'none', alignItems: 'center', justifyContent: 'center', width: 44, height: 44, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', fontSize: 22 }}>
-        {mobileOpen ? '✕' : '☰'}
-      </button>
-      {mobileOpen && (
-        <div className="ccair-mobile-menu" style={{
-          display: 'none', flexDirection: 'column', position: 'absolute', top: 64, left: 0, right: 0,
-          background: 'rgba(5,10,21,0.96)', backdropFilter: 'blur(20px)', padding: '8px 20px 16px',
-          borderBottom: '1px solid var(--border)',
-        }}>
-          {pages.map(p => (
-            <button key={p.id} onClick={() => handleNav(p.id)} aria-current={currentPage === p.id ? 'page' : undefined} style={btnStyle(currentPage === p.id)}>
-              {p.label}
-            </button>
+    <header className={'nav' + (scrolled ? ' is-scrolled' : '')}>
+      <nav className="wrap nav-inner" aria-label="Main">
+        <a className="brand" href="#/" aria-label="CCAIR home">
+          <img src="uploads/brand/logo-mark-64.png" alt="" width="32" height="32" />
+          <span>CCAIR<small>Center for CyberAI Research</small></span>
+        </a>
+        <ul className="nav-links">
+          {NAV_PAGES.map((p) => (
+            <li key={p.id}><a href={hrefFor(p.id)} aria-current={currentPage === p.id ? 'page' : undefined}>{p.label}</a></li>
           ))}
+        </ul>
+        <a className="btn btn-primary btn-sm nav-cta" href="/ccair/pathways/">Career Finder</a>
+        <button ref={btnRef} type="button" className="menu-btn" onClick={() => setOpen(!open)}
+          aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} aria-controls="ccair-menu">
+          <Icon name={open ? 'close' : 'menu'} />
+        </button>
+      </nav>
+      {open && <div className="sheet-scrim" onClick={() => setOpen(false)} aria-hidden="true"></div>}
+      {open && (
+        <div id="ccair-menu" className="sheet" ref={sheetRef} onClick={(e) => { if (e.target.closest('a')) setOpen(false); }}>
+          <ul>
+            <li><a href="#/" aria-current={currentPage === 'home' ? 'page' : undefined}>Home</a></li>
+            {NAV_PAGES.map((p) => (
+              <li key={p.id}><a href={hrefFor(p.id)} aria-current={currentPage === p.id ? 'page' : undefined}>{p.label}</a></li>
+            ))}
+            <li><a href="/ccair/students/">Student guide</a></li>
+          </ul>
+          <a className="btn btn-primary" href="/ccair/pathways/">Cyber Career Finder <Arrow /></a>
         </div>
       )}
-    </nav>
+    </header>
   );
 }
 
-function PageSection({ title, subtitle, children, noPad, accent, id }) {
-  const [ref, visible] = useInView();
+function PageHead({ eyebrow, title, lede, children }) {
   return (
-    <section ref={ref} id={id} className={'grid-bg ccair-section' + (visible ? ' is-in' : '')} style={{
-      padding: noPad ? 0 : 'clamp(60px,8vw,100px) clamp(20px,5vw,80px)',
-    }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%', position: 'relative', zIndex: 1 }}>
+    <header className="page-head wrap">
+      {eyebrow && <span className="eyebrow">{eyebrow}</span>}
+      <h1>{title}</h1>
+      {lede && <p className="lede">{lede}</p>}
+      {children}
+    </header>
+  );
+}
+
+function Section({ id, eyebrow, title, intro, alt, children, labelledBy }) {
+  const headId = id ? id + '-title' : undefined;
+  return (
+    <section id={id} className={alt ? 'section-alt' : 'section'} aria-labelledby={title ? headId : labelledBy}>
+      <div className="wrap">
         {title && (
-          <div style={{ marginBottom: 48 }}>
-            {accent && <div className="mono ccair-kicker" style={{ color: 'var(--accent)', fontSize: 13, fontWeight: 700, letterSpacing: 2, marginBottom: 8, textTransform: 'uppercase' }}>{accent}</div>}
-            <h2 style={{ fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', marginBottom: subtitle ? 12 : 0 }}>{typeof title === 'string' ? <SplitWords text={title} /> : title}</h2>
-            {subtitle && <p className="ccair-sub" style={{ color: 'var(--text-secondary)', fontSize: 16, maxWidth: 640, lineHeight: 1.7 }}>{subtitle}</p>}
-          </div>
+          <Reveal className="section-head">
+            {eyebrow && <span className="eyebrow">{eyebrow}</span>}
+            <h2 id={headId}>{title}</h2>
+            {intro && <p>{intro}</p>}
+          </Reveal>
         )}
-        <div className="ccair-stagger">{children}</div>
+        {children}
       </div>
     </section>
   );
 }
 
-function GlassCard({ children, style, onClick, hover = true, glow = false }) {
-  const { cardStyle } = useTweakCtx();
-  const [hovered, setHovered] = useState(false);
-  const isGlass = cardStyle === 'glass';
-  const isSolid = cardStyle === 'solid';
+function Card({ children, className = '', ...rest }) {
+  return <div className={'card' + (className ? ' ' + className : '')} {...rest}>{children}</div>;
+}
 
-  const base = {
-    background: isGlass ? 'rgba(15,31,58,0.45)' : isSolid ? 'var(--bg-card-solid)' : 'transparent',
-    border: `1px solid ${hovered && hover ? 'rgba(var(--accent-rgb),0.25)' : 'var(--border-subtle)'}`,
-    borderRadius: 14, padding: 28, position: 'relative', overflow: 'hidden',
-    backdropFilter: isGlass ? 'blur(12px)' : 'none',
-    transition: 'all 0.3s ease',
-    transform: hovered && hover ? 'translateY(-2px)' : 'none',
-    boxShadow: hovered && hover ? '0 8px 32px rgba(0,0,0,0.3), 0 0 30px rgba(var(--accent-rgb),0.1)' : '0 2px 12px rgba(0,0,0,0.2)',
-    cursor: onClick ? 'pointer' : 'default',
-    ...style,
-  };
-
-  if (glow && hovered) base.boxShadow = `0 0 40px rgba(var(--accent-rgb),0.12), 0 8px 32px rgba(0,0,0,0.3)`;
-
+function LinkCard({ href, title, children, more = 'Learn more' }) {
   return (
-    <div className="ccair-card" style={base} onClick={onClick}
-      onMouseMove={REDUCE_MOTION ? undefined : (e) => { const r = e.currentTarget.getBoundingClientRect(); e.currentTarget.style.setProperty('--mx', (e.clientX - r.left) + 'px'); e.currentTarget.style.setProperty('--my', (e.clientY - r.top) + 'px'); }}
-      role={onClick ? 'button' : undefined}
-      tabIndex={onClick ? 0 : undefined}
-      onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } } : undefined}
-      onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
+    <a className="card card-link" href={href}>
+      <h3>{title}</h3>
       {children}
-    </div>
+      {more && <span className="more">{more} <span aria-hidden="true">→</span></span>}
+    </a>
   );
 }
 
-function StatCard({ value, label, suffix = '' }) {
-  const [count, ref] = useCounter(value);
+const TYPE_LABEL = { journal: 'Journal', conference: 'Conference', workshop: 'Workshop' };
+
+function Tag({ type, children }) {
+  return <span className={'tag' + (type ? ' tag-' + type : '')}>{children || TYPE_LABEL[type] || type}</span>;
+}
+
+const STATUS_COLOR = { 'Released': 'var(--green)', 'Active': 'var(--green)', 'Available': 'var(--green)', 'In Development': 'var(--warm)', 'Coming 2026': 'var(--accent)', 'Planning': 'var(--muted)' };
+
+function Status({ status }) {
+  return <span className="status" style={{ '--status': STATUS_COLOR[status] || 'var(--muted)' }}>{status}</span>;
+}
+
+// Bold the center director's name in an author list ("Ampel, B.M." or "B. Ampel").
+function Authors({ text }) {
+  const parts = String(text).split(/(Ampel, B\.\s?M\.|B\.\s?M?\.? ?Ampel)/);
+  return <p className="authors">{parts.map((p, i) => (i % 2 ? <strong key={i}>{p}</strong> : p))}</p>;
+}
+
+// Must match normTitle in scripts/build-ccair.js, which writes data/paper-pages.json.
+const normTitle = (s) => String(s).replace(/\bML\b/g, 'Machine Learning').replace(/\bAI\b/g, 'Artificial Intelligence').toLowerCase().replace(/[^a-z0-9]/g, '');
+
+// A "PDF" link must open a PDF. Publisher landing pages (misq.umn.edu, tandfonline, dl.acm.org/doi/..., ieeexplore,
+// AIS eLibrary article pages, hdl.handle.net, arxiv.org/abs, workshop sites) are labelled "Paper" instead.
+const isPdfUrl = (u) => /\.pdf(?:$|[?#])/i.test(u) || /arxiv\.org\/pdf\//i.test(u) || /par\.nsf\.gov\/servlets\/purl\//i.test(u)
+  || /aisel\.aisnet\.org\/cgi\/viewcontent\.cgi/i.test(u) || /dl\.acm\.org\/doi\/pdf\//i.test(u);
+
+function PublicationItem({ title, authors, venue, year, type, doi, pdf }) {
+  const { paperPages = {} } = useData();
+  const site = paperPages[normTitle(title)] || {};
+  const fullText = pdf || site.pdf;
+  const award = / — (Best Paper Award)$/.exec(venue || '');
+  const venueText = award ? venue.replace(award[0], '') : venue;
+  const links = [
+    fullText && (isPdfUrl(fullText)
+      ? { label: 'PDF', href: fullText, aria: `PDF of ${title}` }
+      : { label: 'Paper', href: fullText, aria: `Paper (publisher page) for ${title}` }),
+    site.code && { label: 'Code', href: site.code, aria: `Code for ${title}` },
+    site.data && { label: 'Data', href: site.data, aria: `Data for ${title}` },
+    doi && { label: 'DOI', href: 'https://doi.org/' + doi, aria: `DOI for ${title}` },
+  ].filter(Boolean);
   return (
-    <div ref={ref} style={{ textAlign: 'center' }}>
-      <div className="mono" style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 700, color: 'var(--accent)', lineHeight: 1 }}>
-        {count}{suffix}
+    <li className="pub">
+      <h3>{site.page ? <a className="pub-title-link" href={site.page}>{title}</a> : title}</h3>
+      <Authors text={authors} />
+      <p className="venue">{venueText}{year ? `, ${year}` : ''}{award && <> · <span className="award">{award[1]}</span></>}</p>
+      <div className="side">
+        <Tag type={type} />
+        {links.length > 0 && (
+          <span className="links">
+            {links.map((l) => <a key={l.label} href={l.href} aria-label={l.aria}>{l.label}</a>)}
+          </span>
+        )}
       </div>
-      <div style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 6, fontWeight: 600, letterSpacing: 0.5, textTransform: 'uppercase' }}>{label}</div>
-    </div>
+    </li>
   );
 }
 
-function Badge({ children, color, small }) {
-  return (
-    <span className="mono" style={{
-      display: 'inline-block', padding: small ? '2px 8px' : '4px 12px', borderRadius: 6,
-      fontSize: small ? 10 : 11, fontWeight: 700, letterSpacing: 0.5,
-      background: color ? `${color}18` : 'var(--accent-dim)',
-      color: color || 'var(--accent)',
-      border: `1px solid ${color ? `${color}30` : 'rgba(var(--accent-rgb),0.15)'}`,
-    }}>{children}</span>
-  );
+function initialsOf(name) {
+  return name.split(/\s+/).filter(Boolean).map((w) => w[0]).filter((c) => /[A-Z]/.test(c)).join('').slice(0, 2);
 }
 
-function StatusDot({ status }) {
-  const colors = { 'Released': '#22c55e', 'Active': '#22c55e', 'In Development': '#f59e0b', 'Coming 2026': '#3b82f6', 'Planning': '#8b5cf6', 'Available': '#22c55e' };
-  const c = colors[status] || '#64748b';
+function PersonCard({ name, role, meta, note, warm }) {
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600, color: c }}>
-      <span style={{ width: 7, height: 7, borderRadius: '50%', background: c, boxShadow: `0 0 8px ${c}60` }}></span>
-      {status}
-    </span>
-  );
-}
-
-function PersonCard({ name, role, dept, areas = [], isDirector }) {
-  const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2);
-  return (
-    <GlassCard glow={isDirector}>
-      <div style={{ display: 'flex', gap: 20, alignItems: isDirector ? 'flex-start' : 'center' }}>
-        <div style={{
-          width: isDirector ? 80 : 56, height: isDirector ? 80 : 56, borderRadius: 12,
-          background: `linear-gradient(135deg, rgba(var(--accent-rgb),0.2), rgba(var(--accent2-rgb),0.2))`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: isDirector ? 28 : 18, fontWeight: 700, color: 'var(--accent)',
-          flexShrink: 0, border: '1px solid rgba(var(--accent-rgb),0.15)',
-        }}>{initials}</div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontWeight: 700, fontSize: isDirector ? 20 : 16, marginBottom: 2 }}>{name}</div>
-          <div style={{ color: 'var(--accent)', fontSize: 13, fontWeight: 600, marginBottom: 2 }}>{role}</div>
-          {dept && <div style={{ color: 'var(--text-muted)', fontSize: 12.5, marginBottom: isDirector ? 12 : 4 }}>{dept}</div>}
-          {areas.length > 0 && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
-              {areas.map(a => <Badge key={a} small>{a}</Badge>)}
-            </div>
-          )}
-        </div>
+    <Card className="person">
+      <div className={'avatar avatar-md' + (warm ? ' avatar-warm' : '')} aria-hidden="true">{initialsOf(name)}</div>
+      <div>
+        <h3>{name}</h3>
+        {role && <div className="role">{role}</div>}
+        {meta && <div className="meta">{meta}</div>}
+        {note && <p>{note}</p>}
       </div>
-    </GlassCard>
+    </Card>
   );
 }
 
-function PublicationCard({ title, authors, venue, year, type }) {
-  const typeColors = { journal: '#22c55e', conference: '#3b82f6', workshop: '#a78bfa' };
+function SegmentedControl({ label, options, value, onChange }) {
   return (
-    <GlassCard style={{ padding: 22 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 8 }}>
-        <div style={{ fontWeight: 700, fontSize: 15, lineHeight: 1.4, flex: 1 }}>{title}</div>
-        <Badge color={typeColors[type]} small>{type}</Badge>
-      </div>
-      <div style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 4 }}>{authors}</div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span className="mono" style={{ color: 'var(--text-muted)', fontSize: 12 }}>{venue}</span>
-        <span className="mono" style={{ color: 'var(--text-muted)', fontSize: 12 }}>{year}</span>
-      </div>
-    </GlassCard>
-  );
-}
-
-function ResourceCard({ title, description, status, tags = [], icon }) {
-  return (
-    <GlassCard glow>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
-        <div style={{
-          width: 44, height: 44, borderRadius: 10,
-          background: 'linear-gradient(135deg, rgba(var(--accent-rgb),0.15), rgba(var(--accent2-rgb),0.1))',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 20, border: '1px solid rgba(var(--accent-rgb),0.12)',
-        }}>{icon || '◇'}</div>
-        <StatusDot status={status} />
-      </div>
-      <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 6 }}>{title}</div>
-      <div style={{ color: 'var(--text-secondary)', fontSize: 13.5, lineHeight: 1.6, marginBottom: 14 }}>{description}</div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-        {tags.map(t => <Badge key={t} small>{t}</Badge>)}
-      </div>
-    </GlassCard>
-  );
-}
-
-function Timeline({ items }) {
-  const [active, setActive] = useState(null);
-  return (
-    <div style={{ position: 'relative', paddingLeft: 28 }}>
-      <div style={{ position: 'absolute', left: 10, top: 0, bottom: 0, width: 2, background: 'var(--border-subtle)' }}></div>
-      {items.map((item, i) => (
-        <div key={item.date + '-' + item.title} style={{ position: 'relative', marginBottom: 20, cursor: 'pointer', paddingLeft: 24 }}
-          onClick={() => setActive(active === i ? null : i)}
-          tabIndex={0}
-          role="button"
-          aria-expanded={active === i}
-          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActive(active === i ? null : i); } }}>
-          <div style={{
-            position: 'absolute', left: -21, top: 6, width: 12, height: 12, borderRadius: '50%',
-            background: active === i ? 'var(--accent)' : 'var(--bg-elevated)',
-            border: `2px solid ${active === i ? 'var(--accent)' : 'rgba(var(--accent-rgb),0.3)'}`,
-            boxShadow: active === i ? '0 0 12px var(--accent-glow)' : 'none',
-            transition: 'all 0.2s',
-          }}></div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <span className="mono" style={{ fontSize: 11, color: 'var(--accent)', fontWeight: 700 }}>{item.date}</span>
-              <div style={{ fontWeight: 600, fontSize: 14, marginTop: 2 }}>{item.title}</div>
-            </div>
-            <Badge small color={
-              item.priority === 'Maximum' ? '#ef4444' : item.priority === 'High' ? '#f59e0b' : '#3b82f6'
-            }>{item.priority}</Badge>
-          </div>
-          <div style={{ color: 'var(--text-muted)', fontSize: 12, marginTop: 2 }}>{item.source}</div>
-          {active === i && item.details && (
-            <div style={{
-              marginTop: 10, padding: 14, background: 'var(--accent-dim)', borderRadius: 8,
-              fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6,
-              border: '1px solid var(--border)',
-              animation: 'fadeIn 0.2s ease',
-            }}>{item.details}</div>
-          )}
-        </div>
+    <div className="segmented" role="group" aria-label={label}>
+      {options.map((o) => (
+        <button key={o.value} type="button" aria-pressed={value === o.value} onClick={() => onChange(o.value)}>{o.label}</button>
       ))}
     </div>
   );
 }
 
-function FilterBar({ filters, active, onFilter, label }) {
+function FinderFeature({ headingLevel = 2, titleId }) {
+  const H = 'h' + headingLevel;
   return (
-    <div role="group" aria-label={label || 'Filter'} style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 28 }}>
-      {label && <span style={{ color: 'var(--text-muted)', fontSize: 13, fontWeight: 600, marginRight: 8 }}>{label}</span>}
-      {filters.map(f => (
-        <button key={f} onClick={() => onFilter(f)} aria-pressed={active === f} style={{
-          background: active === f ? 'var(--accent)' : 'var(--accent-dim)',
-          color: active === f ? 'var(--bg-base)' : 'var(--text-secondary)',
-          border: `1px solid ${active === f ? 'var(--accent)' : 'var(--border)'}`,
-          padding: '5px 14px', borderRadius: 8, cursor: 'pointer',
-          fontFamily: "'Manrope', sans-serif", fontSize: 12.5, fontWeight: 600,
-          transition: 'all 0.2s',
-        }}>{f}</button>
-      ))}
-    </div>
+    <Reveal className="feature">
+      <div>
+        <div className="feature-meta"><span className="tag tag-workshop">Free</span><span className="tag">5 minutes</span><span className="tag">Nothing stored</span></div>
+        <H id={titleId}>Not sure where you fit in cybersecurity?</H>
+        <p>The Cyber Career Pathway Finder is a plain-language quiz built on the NIST NICE Workforce Framework. It ranks
+          14 cybersecurity roles by your interests and shows the realistic first job, starter certifications, free practice
+          and US pay for each.</p>
+      </div>
+      <div className="actions">
+        <a className="btn btn-primary" href="/ccair/pathways/">Take the finder <Arrow /></a>
+        <a className="btn btn-secondary" href="/ccair/pathways/#roles">Browse the 14 roles</a>
+        <a className="btn btn-secondary" href="/ccair/students/">Read the student guide</a>
+      </div>
+    </Reveal>
   );
-}
-
-function PipelineStep({ level, description, programs, index, total }) {
-  return (
-    <div style={{ flex: 1, position: 'relative', minWidth: 200 }}>
-      <GlassCard style={{ height: '100%' }}>
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12,
-        }}>
-          <div className="mono" style={{
-            width: 32, height: 32, borderRadius: 8,
-            background: 'linear-gradient(135deg, rgba(var(--accent-rgb),0.2), rgba(var(--accent2-rgb),0.15))',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 14, fontWeight: 700, color: 'var(--accent)',
-          }}>{index + 1}</div>
-          <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--accent)' }}>{level}</div>
-        </div>
-        <div style={{ color: 'var(--text-secondary)', fontSize: 13, lineHeight: 1.6, marginBottom: 12 }}>{description}</div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-          {programs.map(p => <Badge key={p} small>{p}</Badge>)}
-        </div>
-      </GlassCard>
-      {index < total - 1 && (
-        <div style={{
-          position: 'absolute', right: -16, top: '50%', transform: 'translateY(-50%)',
-          color: 'var(--accent)', fontSize: 18, fontWeight: 700, zIndex: 2,
-        }}>→</div>
-      )}
-    </div>
-  );
-}
-
-function CButton({ children, primary, onClick, href, small }) {
-  const style = {
-    display: 'inline-flex', alignItems: 'center', gap: 8,
-    padding: small ? '7px 16px' : '10px 24px',
-    borderRadius: 8, cursor: 'pointer', fontWeight: 600,
-    fontSize: small ? 13 : 14, fontFamily: "'Manrope', sans-serif",
-    transition: 'all 0.25s ease', border: 'none', textDecoration: 'none',
-    background: primary ? 'var(--accent)' : 'var(--accent-dim)',
-    color: primary ? 'var(--bg-base)' : 'var(--accent)',
-  };
-  if (href) return <a href={href} style={style}>{children}</a>;
-  return <button type="button" onClick={onClick} style={style}>{children}</button>;
 }
 
 function CCAIRFooter() {
   return (
-    <footer style={{
-      borderTop: '1px solid var(--border-subtle)', padding: '40px clamp(20px,5vw,80px)',
-      background: 'var(--bg-surface)',
-    }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 20 }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-            <img src="uploads/ccair-logo.png" alt="" style={{ height: 28, borderRadius: 3 }} />
-            <span className="mono" style={{ fontWeight: 700, color: 'var(--accent)', fontSize: 14 }}>CCAIR</span>
+    <footer className="footer">
+      <div className="wrap">
+        <div className="footer-inner">
+          <div>
+            <a className="brand" href="#/" aria-label="CCAIR home">
+              <img src="uploads/brand/logo-mark-64.png" alt="" width="32" height="32" />
+              <span>CCAIR<small>Center for CyberAI Research</small></span>
+            </a>
+            <address className="contact-lines">
+              J. Mack Robinson College of Business, Georgia State University<br />
+              55 Park Place NW, Atlanta, GA 30303<br />
+              <a href="mailto:bampel@gsu.edu">bampel@gsu.edu</a>
+            </address>
           </div>
-          <div style={{ color: 'var(--text-muted)', fontSize: 12.5 }}>Center for CyberAI Research</div>
-          <div style={{ color: 'var(--text-muted)', fontSize: 12, marginTop: 2 }}>J. Mack Robinson School of Business, Georgia State University</div>
+          <div>
+            <h2>Center</h2>
+            <ul>
+              {NAV_PAGES.map((p) => <li key={p.id}><a href={hrefFor(p.id)}>{p.label}</a></li>)}
+            </ul>
+          </div>
+          <div>
+            <h2>Elsewhere</h2>
+            <ul>
+              <li><a href="/ccair/pathways/">Cyber Career Finder</a></li>
+              <li><a href="/ccair/students/">Student guide</a></li>
+              <li><a href="https://bampel.com/">bampel.com</a></li>
+              <li><a href="https://bampel.com/publications/">Full publication list</a></li>
+              <li><a href="https://robinson.gsu.edu/research-centers/crisp/">CRISP at Robinson</a></li>
+            </ul>
+          </div>
         </div>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ color: 'var(--text-muted)', fontSize: 12 }}>55 Park Place NW, Atlanta, GA 30303</div>
-          <a href="mailto:bampel@gsu.edu" style={{ color: 'var(--accent)', fontSize: 13, fontWeight: 600 }}>bampel@gsu.edu</a>
-        </div>
+        <p className="footer-note">© {new Date().getFullYear()} Center for CyberAI Research, Georgia State University.</p>
       </div>
     </footer>
   );
 }
 
 window.CCAIR = window.CCAIR || {};
-Object.assign(window.CCAIR, {
-  TweakCtx, useTweakCtx, ACCENT_RGB, useCounter, useInView,
-  NetworkCanvas, CCAIRNav, PageSection, GlassCard, StatCard, Badge, StatusDot,
-  PersonCard, PublicationCard, ResourceCard, Timeline, FilterBar, PipelineStep, SplitWords, ScrollFX,
-  CButton, CCAIRFooter,
-});
-Object.assign(window, {
-  TweakCtx, useTweakCtx, ACCENT_RGB, useCounter, useInView,
-  NetworkCanvas, CCAIRNav, PageSection, GlassCard, StatCard, Badge, StatusDot,
-  PersonCard, PublicationCard, ResourceCard, Timeline, FilterBar, PipelineStep, SplitWords, ScrollFX,
-  CButton, CCAIRFooter,
-});
+const CCAIR_COMPONENTS = {
+  REDUCE_MOTION, NAV_PAGES, hrefFor, Icon, Arrow, useInView, Reveal, CCAIRNav, PageHead, Section, Card, LinkCard,
+  Tag, Status, Authors, PublicationItem, PersonCard, SegmentedControl, FinderFeature, CCAIRFooter, initialsOf,
+};
+Object.assign(window.CCAIR, CCAIR_COMPONENTS);
+Object.assign(window, CCAIR_COMPONENTS);

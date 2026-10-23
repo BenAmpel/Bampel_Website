@@ -2552,8 +2552,9 @@ function runEnhancements() {
     
     if (!isPublicationPage) return;
     
-    // Check if badge already exists
-    if (document.querySelector('.altmetric-badge-container')) return;
+    // Check if badge already exists: this injected one, or the server-rendered altmetric shortcode
+    // (.altmetric-badge-section), which 21 publication pages include. Injecting a second badge there stacked two widgets.
+    if (document.querySelector('.altmetric-badge-container, .altmetric-badge-section, .altmetric-embed')) return;
     
     // Try multiple methods to find DOI
     let doi = null;
@@ -2612,7 +2613,7 @@ function runEnhancements() {
         <div data-badge-type="medium-donut" data-doi="${doi}" data-badge-popover="right" class="altmetric-embed"></div>
         <div style="flex: 1; min-width: 200px;">
           <p style="margin: 0; font-size: 0.9rem; color: #64748b;">
-            This badge shows attention from news, blogs, Twitter, policy documents, and more.
+            This badge shows attention from news, blogs, social media, policy documents, and more.
             <a href="https://www.altmetric.com/details/doi/${doi}" target="_blank" style="color: #3b82f6;">View details →</a>
           </p>
         </div>

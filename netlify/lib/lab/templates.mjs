@@ -228,4 +228,17 @@ export const TEMPLATES = {
   'vishing-study2': VISHING_STUDY2
 };
 
+// A classic interference effect to replicate (the BRM platform paper's validation study): Stroop by default; switch
+// to flanker on the Task tab.
+TEMPLATES['stroop-flanker'] = {
+  name: 'Stroop or flanker task', icon: 'cursor', type: 'reaction', minutes: 8,
+  blurb: 'A reaction-time task that reproduces a classic effect: 96 balanced congruent and incongruent trials, practice with feedback, and response times from the first display frame.',
+  content: () => ({
+    minutesPerSession: 8,
+    design: { conditions: [{ id: 'main', label: 'Everyone' }], sessions: [{ name: 'Session 1' }] },
+    task: { paradigm: 'stroop', trialsPerSession: 96, practiceTrials: 8, fixationMs: 500, responseMs: 2000, itiMs: 400, feedbackPractice: true, keys: { red: 'd', green: 'f', blue: 'j', yellow: 'k' } },
+    environment: { preload: false, fullscreen: true, desktopOnly: true, speechBrowser: false, micCheck: false, micRequired: false, headphoneCheck: false, headphoneFail: 'record', timingCheck: true, language: 'en-US' },
+    survey: { pre: [], post: [q('keyboard', 'Did you use a physical keyboard?', 'choice', { options: [{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No (touch screen or on-screen keyboard)' }], sessions: [] }), ...DEMOGRAPHICS] }
+  })
+};
 export const templateList = () => Object.entries(TEMPLATES).map(([id, t]) => ({ id, name: t.name, icon: t.icon, type: t.type, minutes: t.minutes, blurb: t.blurb }));

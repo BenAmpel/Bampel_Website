@@ -60,6 +60,7 @@
     orderItems(items).forEach(function (it) {
       if (!evalDisplay(it.displayIf, { answers: kept, ed: env.ed, condition: env.condition })) { hidden[it.id] = true; return; }
       if (it.type !== 'info' && answers && own(answers, it.id) !== undefined) kept[it.id] = answers[it.id];
+      if (it.type === 'matrix' && answers) (it.rows || []).forEach(function (r) { if (own(answers, r.id) !== undefined) kept[r.id] = answers[r.id]; });   // each row is a variable
     });
     return { hidden: hidden, answers: kept };
   }

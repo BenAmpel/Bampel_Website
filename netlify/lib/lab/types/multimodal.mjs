@@ -70,6 +70,7 @@ const textFields = [
   F('Voice answer', 'voice_typed', 'Typed alternative label', 'Type your answer instead'),
   F('Device check', 'mic_title', 'Microphone check title', 'Check your sound'),
   F('Device check', 'mic_body', 'Microphone check text', 'This study plays audio and may ask you to speak. Turn your volume up, then click Test sound. If you agreed to be recorded, your browser will ask to use your microphone: please allow it.'),
+  F('Device check', 'mic_only_body', 'Microphone check text when the setup checks already played sound', 'This study may record your spoken answers. If your browser asks to use your microphone, please allow it. The bar moves when we hear you.'),
   F('Device check', 'mic_test', 'Test sound button', 'Test sound'),
   F('Device check', 'mic_ok', 'Continue button', 'Sound works, continue'),
   F('Device check', 'mic_denied', 'Microphone blocked', 'Your microphone is blocked, so you will type instead of speaking. That is fine.'),
