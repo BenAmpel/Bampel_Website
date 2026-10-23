@@ -70,7 +70,9 @@ const spokenDigits = text => {
   }
   return out;
 };
-export function disclosures(said, { code, persona }) {
+// lossRe: for an attack whose ask is not a secret (approve a link, change bank details, pay an invoice, call the
+// caller's number), the words that mean the participant gave it; a match is the disclosure 'action'.
+export function disclosures(said, { code, persona, lossRe }) {
   const out = [], digits = spokenDigits(said).replace(/\s/g, ''), words = String(said || '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/);
   if (code && digits.includes(code)) out.push('code');
   for (const r of (persona && persona.rows) || []) {
@@ -79,6 +81,7 @@ export function disclosures(said, { code, persona }) {
     if (/^[\d\s-]+$/.test(v)) { const d = v.replace(/\D/g, ''); if (d.length >= 4 && digits.includes(d.slice(-Math.min(d.length, 6)))) out.push(r.secret); }
     else { const parts = v.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean); if (parts.length && parts.every(p => words.includes(p) || digits.includes(p))) out.push(r.secret); }
   }
+  if (lossRe && new RegExp(lossRe, 'i').test(String(said || ''))) out.push('action');
   return [...new Set(out)];
 }
 export const digitCount = said => digitsIn(said);
@@ -142,7 +145,9 @@ export function poolItems(block, c, p, byId) {
     const down = new Set();
     for (const [stratum, k] of Object.entries((c.shift && c.shift.outage) || {})) {
       const [structure, surface] = stratum.split('|');
-      const pool = items.filter(it => (it.meta || {}).structure === structure && (it.meta || {}).surface === surface).map(it => it.id);
+      // A request to call the organization back through the directory can only be completed with the directory, so
+      // it is never an outage call (the other calls in its stratum carry the outage).
+      const pool = items.filter(it => (it.meta || {}).structure === structure && (it.meta || {}).surface === surface && !(it.call && it.call.completeViaCallback)).map(it => it.id);
       shuffle(pool, seeded(`${p.code}|outage|${stratum}`)).slice(0, Number(k) || 0).forEach(id => down.add(id));
     }
     return items.map(it => ({ it, meta: { ...(it.meta || {}), shiftForm: f.shiftForm || '', directoryDown: down.has(it.id) } }));

@@ -188,7 +188,7 @@ function validateItem(it, e, conds, qids, where) {
       else if (!opt(c.script[k], 1000)) e.push(`${where}: the "${k}" line is too long (1,000 characters at most).`);
     }
     if (!opt(c.persona, 1500)) e.push(`${where}: the caller description is too long.`);
-    if (c.completeRe != null) { let ok = typeof c.completeRe === 'string' && c.completeRe.length <= 300; try { if (ok) new RegExp(c.completeRe, 'i'); } catch { ok = false; } if (!ok) e.push(`${where}: the completion pattern must be a valid pattern of 300 characters at most.`); }
+    for (const k of ['completeRe', 'lossRe']) if (c[k] != null) { let ok = typeof c[k] === 'string' && c[k].length <= 300; try { if (ok) new RegExp(c[k], 'i'); } catch { ok = false; } if (!ok) e.push(`${where}: the ${k === 'lossRe' ? 'loss' : 'completion'} pattern must be a valid pattern of 300 characters at most.`); }
     if (c.debriefName != null && !str(c.debriefName, 120)) e.push(`${where}: the debrief name is too long.`);
     if (c.audio && typeof c.audio === 'object') for (const [k, u] of Object.entries(c.audio)) if (u && !MEDIA_RE.test(u)) e.push(`${where}: the recorded "${k}" line must be an https:// address or an uploaded file.`);
   }
@@ -254,7 +254,7 @@ async function callTurn(S, pid, body, now) {
     let cls = bot.classify(said, { digitRule: !ctx.plan.persona });
     // What was disclosed is decided on the raw words, before redaction; only the labels are kept. With persona
     // secrets, only a matched secret (or the call's code) is a disclosure; a read-back employee ID is not.
-    const disclosed = X.disclosures(said, { code: turns.some(t => t.codeSent) ? ctx.trial.callCode : null, persona: ctx.plan.persona });
+    const disclosed = X.disclosures(said, { code: turns.some(t => t.codeSent) ? ctx.trial.callCode : null, persona: ctx.plan.persona, lossRe: call.intent === 'attack' ? call.lossRe : null });
     if (disclosed.length) cls = { ...cls, intent: 'comply', disclosed: true };
     // A legitimate caller's own completion pattern (the truthful answer, which may be "no") counts as completing it.
     if (call.intent === 'benign' && call.completeRe && new RegExp(call.completeRe, 'i').test(said)) cls = { ...cls, intent: 'comply' };

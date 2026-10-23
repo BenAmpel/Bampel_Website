@@ -254,6 +254,7 @@ let passer = null;
   assert(onCall.every(x => x[col('call_points')] === '10' && x[col('call_benign_completed_on_call')] === '1'), 'a legitimate request completed on the call earns 10');
   assert(routeOwn.length === 1 && routeOwn[0][col('call_points')] === '0' && routeOwn[0][col('call_benign_completed_on_call')] === '0',
     '"okay" to a request to call back does not complete it: only reaching the real number does');
+  assert.equal(routeOwn[0][col('call_directory_down')], '0', 'the request to call back through the directory is never an outage call');
   const calm2 = attacks.find(x => x[col('call_slot')] === 'atk-calm-2');
   assert(calm2[col('call_disclosed')] === '' && calm2[col('call_points')] === '0' && Number(calm2[col('call_agreed_no_disclosure')]) >= 1, '"okay" to an attacker is not a disclosure');
   // ----- post survey, debrief, bonus -----
@@ -302,6 +303,12 @@ console.log('preview participants keep the arm the researcher chose');
   }
   assert(Object.keys(seen).length === 72 && Object.values(seen).every(s => s.pre === 3 && s.post === 3), 'every clip: 3 lists pre, 3 post');
   const X = await import('../../netlify/lib/lab/types/multimodal-study.mjs');
+  // An attack whose ask is not a secret: its own loss phrases count as giving it ('action'); agreeing alone does not.
+  const lossRe = "\\b(go ahead and (change|update) (it|them)|i'?ll (call|ring) you (at|on) that number)\\b";
+  assert.deepEqual(X.disclosures('yes, go ahead and change it', { lossRe }), ['action']);
+  assert.deepEqual(X.disclosures("sure, I'll call you at that number", { lossRe }), ['action']);
+  assert.deepEqual(X.disclosures('okay, let me check with my manager first', { lossRe }), [], 'agreeing to wait is not a loss');
+  assert.equal(X.pointsFor({ intent: 'attack' }, { disclosed: ['action'], callbacks: 0 }, { disclose: -40 }), -40);
   // permuted blocks: every block of 10 has each arm twice; 50 people assigned at once take 50 distinct slots
   const { VISHING_STUDY2 } = await import('../../netlify/lib/lab/studies/vishing-study2.mjs');
   const { blobsStore } = await import('../../netlify/lib/lab/store.mjs');
