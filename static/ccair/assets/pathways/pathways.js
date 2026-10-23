@@ -13,10 +13,17 @@
   function initReveal(root) {
     var els = (root || document).querySelectorAll('.reveal:not(.in)');
     if (reduce || !('IntersectionObserver' in window)) { els.forEach(function (e) { e.classList.add('in'); }); return; }
+    var heard = false;
     var io = new IntersectionObserver(function (entries) {
+      heard = true;
       entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+      // The root reaches far above the viewport, so anything scrolled past in one jump (End key, a #fragment link,
+      // a scrollbar drag) also counts; an observer reports only changes, so a viewport root would never report those.
+    }, { rootMargin: '100000px 0px -6% 0px', threshold: 0 });
     els.forEach(function (e) { io.observe(e); });
+    // Same failsafe as the CCAIR site: the observer reports every target as soon as it is observed, so if nothing has
+    // arrived after 1.5 s it never will; show everything rather than leave content hidden.
+    setTimeout(function () { if (!heard) els.forEach(function (e) { e.classList.add('in'); }); }, 1500);
   }
   initReveal();
 

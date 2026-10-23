@@ -21,9 +21,18 @@ export const ld = (obj) => `<script type="application/ld+json">${JSON.stringify(
 export const person = { '@type': 'Person', '@id': `${SITE}/#person`, name: 'Benjamin M. Ampel', url: `${SITE}/`, jobTitle: 'Director, Center for CyberAI Research (CCAIR)' };
 export const org = { '@type': 'ResearchOrganization', '@id': `${SITE}/ccair/#org`, name: 'Center for CyberAI Research (CCAIR)', url: `${SITE}/ccair/` };
 
+// Short labels for pathways.json role fields, shared by the Pathway Finder and the Student Guide's role comparison table.
+export const HIRING = { entry: 'Entry-level', step: 'Usually a second job', emerging: 'Emerging field' };
+export const CODE_SHORT = { little: 'Little or none', some: 'Some scripting', lots: 'Regular programming' };
+
+// The site-wide sharing card (1200 x 630), used when a page has no image of its own.
+export const SHARE_IMAGE = { url: `${SITE}/media/sharing-card.png`, width: 1200, height: 630, alt: 'Benjamin M. Ampel, Assistant Professor of Computer Information Systems, Georgia State University. bampel.com' };
+
 // <head> through the analytics tag. The caller adds its JSON-LD and closes </head>.
 // Analytics is the plain gtag page view (the site-wide Google Analytics property); no custom events carry user data.
-export function head({ title, desc, url, ogTitle, ogType = 'website', css = [] }) {
+// image: { url, width, height, alt } for og:image (defaults to the site sharing card). robots: the robots meta value.
+// extra: more <head> lines (for example a feed <link>).
+export function head({ title, desc, url, ogTitle, ogType = 'website', css = [], image = SHARE_IMAGE, robots = 'index, follow, max-image-preview:large', extra = '' }) {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -32,7 +41,7 @@ export function head({ title, desc, url, ogTitle, ogType = 'website', css = [] }
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(desc)}">
 <link rel="canonical" href="${url}">
-<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="robots" content="${esc(robots)}">
 <meta name="theme-color" content="#FBF6EF" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#1D171F" media="(prefers-color-scheme: dark)">
 <meta property="og:type" content="${ogType}">
@@ -40,11 +49,15 @@ export function head({ title, desc, url, ogTitle, ogType = 'website', css = [] }
 <meta property="og:title" content="${esc(ogTitle || title)}">
 <meta property="og:description" content="${esc(desc)}">
 <meta property="og:url" content="${url}">
-<meta property="og:image" content="${SITE}/media/sharing-card.png">
+<meta property="og:image" content="${image.url}">
+<meta property="og:image:width" content="${image.width}">
+<meta property="og:image:height" content="${image.height}">
+<meta property="og:image:alt" content="${esc(image.alt)}">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image:alt" content="${esc(image.alt)}">
 <link rel="icon" type="image/png" sizes="64x64" href="/ccair/uploads/brand/logo-mark-64.png">
 <link rel="apple-touch-icon" href="/ccair/uploads/brand/apple-touch-icon.png">
-${css.map((href) => `<link rel="stylesheet" href="${href}">`).join('\n')}
+${css.map((href) => `<link rel="stylesheet" href="${href}">`).join('\n')}${extra ? '\n' + extra : ''}
 ${GA ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${GA}"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA}');</script>` : ''}`;
 }
@@ -74,18 +87,16 @@ ${scripts.map((s) => `<script src="${s}" defer></script>`).join('\n')}
 }
 
 // One sitemap for every generated CCAIR page. Each generator calls this after writing its pages, so the file is the
-// same whichever runs last.
+// same whichever runs last. Student Guide URLs and their lastmod dates come from static/ccair/data/guide-lastmod.json,
+// which scripts/build-students.mjs keeps: a page's lastmod moves only when the hash of its content changes. Pages the
+// store marks sitemap: false (for example the outcomes page while it has no data) are left out.
+export const LASTMOD_STORE = path.join(CCAIR, 'data', 'guide-lastmod.json');
 export function writeSitemap() {
   const P = readJson('pathways.json');
   const urls = [[`${SITE}/ccair/`, P.updated], [`${SITE}/ccair/pathways/`, P.updated], ...P.roles.map((r) => [`${SITE}/ccair/pathways/${r.slug}/`, P.updated])];
-  const sPath = path.join(CCAIR, 'data', 'students.json');
-  if (fs.existsSync(sPath)) {
-    const S = readJson('students.json');
-    const D = readJson('datasets.json');
-    for (const p of S.pages) {
-      const mod = p.slug === 'data' && D.updated > S.updated ? D.updated : S.updated;
-      urls.push([`${SITE}/ccair/students/${p.slug ? p.slug + '/' : ''}`, mod]);
-    }
+  if (fs.existsSync(LASTMOD_STORE)) {
+    const store = JSON.parse(fs.readFileSync(LASTMOD_STORE, 'utf8'));
+    for (const [u, e] of Object.entries(store.pages)) if (e.sitemap) urls.push([`${SITE}${u}`, e.lastmod]);
   }
   fs.writeFileSync(path.join(CCAIR, 'sitemap.xml'),
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(([u, d]) => `  <url><loc>${u}</loc><lastmod>${d}</lastmod></url>`).join('\n')}\n</urlset>\n`);
