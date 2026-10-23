@@ -205,7 +205,9 @@ input[type="search"]#mm-dsearch { width: 100%; margin: 6px 0 8px; }
 .mm-clip figcaption { font-weight: 600; margin-bottom: 6px; }
 .mm-clip audio { width: 100%; }
 .mm-pdial { border: 1px dashed var(--line-strong, var(--line)); border-radius: 14px; padding: 12px 14px; margin: 12px 0; }
-.mm-pdial .directory { max-height: 260px; overflow: auto; }
+.mm-pdial .directory { max-height: 260px; overflow: auto; list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 6px; }
+.mm-pdial .directory li { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; }
+.mm-pdial input[type="search"] { width: 100%; padding: 6px 10px; border: 1px solid var(--line-strong, var(--line)); border-radius: 8px; background: transparent; color: inherit; }
 .mm-slider { margin: 14px 0; }
 .mm-slider input[type="range"] { width: 100%; }
 .mm-slider .row { display: flex; justify-content: space-between; font-size: .8125rem; }

@@ -8,9 +8,29 @@ const TIMEOUT_MS = () => Number(process.env.LAB_ASR_TIMEOUT_MS) || 8000;
 
 export const asrConfigured = () => /^https?:\/\/[^\s]+$/.test(process.env.LAB_ASR_URL || '');
 
+// The loudest sample of a 16-bit PCM WAV, from 0 to 1 (null when the buffer is not one). Whisper invents words for
+// silence ("Thank you.", seen in the 2026-10-22 browser check), so silent audio is never sent to it.
+export function peakLevel(buf) {
+  if (!Buffer.isBuffer(buf) || buf.length < 44 || buf.toString('ascii', 0, 4) !== 'RIFF' || buf.toString('ascii', 8, 12) !== 'WAVE') return null;
+  let off = 12;
+  while (off + 8 <= buf.length) {
+    const id = buf.toString('ascii', off, off + 4), size = buf.readUInt32LE(off + 4);
+    if (id === 'data') {
+      let peak = 0;
+      for (let i = off + 8; i + 1 < Math.min(buf.length, off + 8 + size); i += 2) peak = Math.max(peak, Math.abs(buf.readInt16LE(i)));
+      return peak / 32768;
+    }
+    off += 8 + size + (size % 2);
+  }
+  return null;
+}
+const SILENCE = 0.01;   // about -40 dBFS: quieter than any speech the check-word recordings or a phone mic produce
+
 // audio: a Buffer (WAV, 16-bit PCM; the browser records it that way so the server needs no converter).
 export async function transcribe(audio, { mime = 'audio/wav' } = {}) {
   if (!asrConfigured()) return { error: 'asr_unavailable' };
+  const peak = peakLevel(audio);
+  if (peak != null && peak < SILENCE) return { text: '', ms: 0, silent: true };
   const t0 = Date.now(), form = new FormData();
   form.append('file', new Blob([audio], { type: mime }), 'clip.wav');
   form.append('response_format', 'json');

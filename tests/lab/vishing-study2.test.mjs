@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { handle } from '../../netlify/lib/lab/router.mjs';
 import { memBlobs } from './memstore.mjs';
-import { saidWord } from '../../netlify/lib/lab/asr.mjs';
+import { saidWord, peakLevel, transcribe } from '../../netlify/lib/lab/asr.mjs';
 
 const getStore = memBlobs(), OWNER = 'owner-key-0123456789abcdef';
 // CSV rows with quoted fields ("Recorded calls, first set").
@@ -29,11 +29,14 @@ await new Promise(r => fake.listen(0, '127.0.0.1', r));
 const ASR_URL = `http://127.0.0.1:${fake.address().port}/inference`;
 delete process.env.LAB_ASR_URL;
 
-// a tiny valid WAV (16 kHz mono, 0.1 s of silence)
-const wav = (() => { const n = 1600, b = Buffer.alloc(44 + n * 2); b.write('RIFF', 0); b.writeUInt32LE(36 + n * 2, 4); b.write('WAVEfmt ', 8); b.writeUInt32LE(16, 16); b.writeUInt16LE(1, 20); b.writeUInt16LE(1, 22);
-  b.writeUInt32LE(16000, 24); b.writeUInt32LE(32000, 28); b.writeUInt16LE(2, 32); b.writeUInt16LE(16, 34); b.write('data', 36); b.writeUInt32LE(n * 2, 40); return b.toString('base64'); })();
+// tiny valid WAVs (16 kHz mono, 0.1 s): a 440 Hz tone (stands in for speech) and pure silence
+const makeWav = amp => { const n = 1600, b = Buffer.alloc(44 + n * 2); b.write('RIFF', 0); b.writeUInt32LE(36 + n * 2, 4); b.write('WAVEfmt ', 8); b.writeUInt32LE(16, 16); b.writeUInt16LE(1, 20); b.writeUInt16LE(1, 22);
+  b.writeUInt32LE(16000, 24); b.writeUInt32LE(32000, 28); b.writeUInt16LE(2, 32); b.writeUInt16LE(16, 34); b.write('data', 36); b.writeUInt32LE(n * 2, 40);
+  for (let i = 0; i < n; i++) b.writeInt16LE(Math.round(amp * Math.sin(2 * Math.PI * 440 * i / 16000)), 44 + i * 2); return b.toString('base64'); };
+const wav = makeWav(8000), silentWav = makeWav(0);
 
 assert(saidWord(' A blanket.\n', 'blanket') && saidWord('Harbour', 'harbor') && !saidWord('garden', 'harbor') && !saidWord('', 'harbor'));
+assert.equal(peakLevel(Buffer.from(silentWav, 'base64')), 0); assert(peakLevel(Buffer.from(wav, 'base64')) > 0.2); assert.equal(peakLevel(Buffer.from('not a wav')), null);
 
 let r = await call('/api/lab/_lab/create', { key: OWNER, body: { id: 'vs2', name: 'Vishing Study 2', template: 'vishing-study2' } });
 assert(r.json.ok, r.text);
@@ -125,6 +128,7 @@ let passer = null;
   assert((await save(tok, 0)).json.ok);
   r = await word(tok, 1); assert.equal(r.status, 503); assert.equal(r.json.error, 'asr_unavailable', 'no speech server configured');
   process.env.LAB_ASR_URL = ASR_URL;
+  assert.deepEqual(await transcribe(Buffer.from(silentWav, 'base64')), { text: '', ms: 0, silent: true }, 'silence never reaches Whisper, which invents "Thank you." for it');
   heard = 'umm';
   r = await word(tok, 1); assert.equal(r.json.pass, false); assert.equal(r.json.attemptsLeft, 1, 'a wrong word uses an attempt; the outage did not');
   heard = 'harbor garden pencil window pillow blanket candle ladder turtle button';
