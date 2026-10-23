@@ -14,7 +14,7 @@ import { DIRECTORY, VOICES, number } from './world.mjs';
 
 const DISPOSITION = [{ value: 'legitimate', label: 'Legitimate' }, { value: 'suspicious', label: 'Suspicious' }, { value: 'report', label: 'Report to security' }];
 const callItem = (id, call, extra = {}) => ({ id, title: 'Incoming call', kind: 'call', body: '', media: '', mediaAlt: '', transcript: '', decide: true,
-  decisionPrompt: 'How would you describe that call?', decisionOptions: DISPOSITION, ask: ['confidence6'], variants: {}, ...extra, call: { maxTurns: 10, ringSeconds: 30, scored: true, ...call } });
+  decisionPrompt: 'How would you describe that call?', decisionOptions: DISPOSITION, ask: ['confidence6'], variants: {}, ...extra, call: { maxTurns: 10, ringSeconds: 30, scored: true, llm: false, ...call } });   // scripted lines only (decided 2026-10-22)
 
 // ---------- the practice call (not scored; passes if the lab's recognizer hears at least one spoken reply) ----------
 const PRACTICE = {

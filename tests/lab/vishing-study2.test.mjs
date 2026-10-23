@@ -176,7 +176,7 @@ let passer = null;
 {
   const { tok, s2, me } = passer;
   assert(Number.isInteger(me.flags.clipList) && me.flags.clipList >= 0 && me.flags.clipList < 18, 'a clip list');
-  assert(['A', 'B'].includes(me.flags.shiftForm) && typeof me.flags.slider === 'boolean' && typeof me.flags.scripted === 'boolean', JSON.stringify(me.flags));
+  assert(['A', 'B'].includes(me.flags.shiftForm) && typeof me.flags.slider === 'boolean' && me.flags.scripted === undefined, JSON.stringify(me.flags));
   const kinds = s2.trials.map(t => t.item.kind);
   assert.equal(s2.trials.length, 1 + 12 + 8 + 1 + 1 + 12 + 1 + 10, 'intro, 12 clips, 8 briefing screens, check, intro, 12 clips, shift intro, 10 calls');
   assert.equal(kinds.filter(k => k === 'audio').length, 24); assert.equal(kinds.filter(k => k === 'call').length, 10);
