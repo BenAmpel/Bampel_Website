@@ -2,7 +2,7 @@
 const { useState: usePageState, useMemo: usePageMemo } = React;
 
 const RESEARCH_PORTFOLIO = [
-  { tier: 'Core', risk: 'Established program', color: 'var(--green)', areas: [
+  { tier: 'Core', risk: 'Established program', color: 'var(--accent-2)', areas: [
     { name: 'Proactive Cyber Threat Intelligence', desc: 'Mining pre-attack signals from hacker forums, paste sites, and adversarial ecosystems' },
     { name: 'Dark Web Analytics', desc: 'Longitudinal analysis of underground communities, jargon evolution, and knowledge diffusion' },
     { name: 'Human–AI Collaboration', desc: 'How analysts and AI systems co-produce actionable intelligence in security workflows' },
@@ -12,7 +12,7 @@ const RESEARCH_PORTFOLIO = [
     { name: 'LLM Security & Robustness', desc: 'Adversarial attacks, jailbreaking, alignment evaluation, and defense for large language models' },
     { name: 'Multimodal Threat Modeling', desc: 'Integrating text, code, audio, and infrastructure signals for cross-modal threat inference' },
   ]},
-  { tier: 'Exploratory', risk: 'Early-stage exploration', color: 'var(--warm)', areas: [
+  { tier: 'Exploratory', risk: 'Early-stage exploration', color: 'var(--steel)', areas: [
     { name: 'Attacker–AI Co-evolution', desc: 'Modeling how adversaries adapt when defenders deploy AI-enabled countermeasures' },
     { name: 'Emergent Misuse of Autonomous Systems', desc: 'Anticipating novel attack surfaces created by widespread AI agent deployment' },
   ]},
@@ -104,7 +104,7 @@ function HomePage() {
         <HeroGlow heroRef={heroRef} innerRef={innerRef} />
         <div className="wrap">
           <div className="hero-inner" ref={innerRef}>
-            <img className="hero-logo" src="uploads/brand/logo-mark-512.png" alt="CCAIR logo: a shield around a speech bubble with sound waves and a cursor" width="120" height="120" />
+            <p className="hero-affil">Georgia State University · J. Mack Robinson College of Business</p>
             <h1 id="hero-title">Center for <em>CyberAI</em> Research</h1>
             <p className="lede">We study how intelligent systems can spot malicious behavior before it turns into an attack,
               and we help people and organizations act on what those systems find.</p>

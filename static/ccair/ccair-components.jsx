@@ -15,6 +15,49 @@ const NAV_PAGES = [
 
 const hrefFor = (page) => (page === 'home' ? '#/' : '#/' + page);
 
+/* Brand. GSU rules (commkit.gsu.edu): a center may not create its own logo; it uses the college sub-brand lockup with a
+   unit wordmark, supplied by Public Relations & Marketing Communications. Until those files exist the site shows a
+   plain-text wordmark. When assets/brand/official/lockup.json is switched on (see the README there), OfficialLockup
+   shows the supplied files in its place, unaltered; with "enabled": false it renders nothing. */
+const LOCKUP_DIR = '/ccair/assets/brand/official/';
+let lockupConfig = null;
+function useLockup() {
+  const [cfg, setCfg] = useState(null);
+  useEffect(() => {
+    lockupConfig = lockupConfig || fetch(LOCKUP_DIR + 'lockup.json').then((r) => (r.ok ? r.json() : null)).catch(() => null);
+    let live = true;
+    lockupConfig.then((c) => { if (live && c && c.enabled && c.files && c.files.light) setCfg(c); });
+    return () => { live = false; };
+  }, []);
+  return cfg;
+}
+// onDark: the slot sits on a dark band (the footer), so it uses the reversed file.
+function OfficialLockup({ cfg, onDark }) {
+  if (!cfg) return null;
+  const f = cfg.files;
+  return (
+    <picture className="lockup">
+      {!onDark && f.reversed && <source srcSet={LOCKUP_DIR + f.reversed} media="(prefers-color-scheme: dark)" />}
+      <img src={LOCKUP_DIR + (onDark && f.reversed ? f.reversed : f.light)} alt={cfg.alt} width={cfg.width} height={cfg.height} />
+    </picture>
+  );
+}
+function Wordmark() {
+  return (
+    <span className="wordmark">Center for CyberAI Research
+      <small><span className="wm-gsu">Georgia State University</span><span className="wm-college"> · J. Mack Robinson College of Business</span></small>
+    </span>
+  );
+}
+function Brand({ onDark }) {
+  const cfg = useLockup();
+  return (
+    <a className="brand" href="#/" aria-label={cfg ? cfg.alt + ', home' : undefined}>
+      {cfg ? <OfficialLockup cfg={cfg} onDark={onDark} /> : <Wordmark />}
+    </a>
+  );
+}
+
 function Icon({ name }) {
   const paths = {
     menu: <path d="M4 7h16M4 12h16M4 17h16" />,
@@ -183,10 +226,7 @@ function CCAIRNav({ currentPage }) {
   return (
     <header className={'nav' + (scrolled ? ' is-scrolled' : '')}>
       <nav className="wrap nav-inner" aria-label="Main">
-        <a className="brand" href="#/" aria-label="CCAIR home">
-          <img src="uploads/brand/logo-mark-64.png" alt="" width="32" height="32" />
-          <span>CCAIR<small>Center for CyberAI Research</small></span>
-        </a>
+        <Brand />
         <ul className="nav-links">
           {NAV_PAGES.map((p) => (
             <li key={p.id}><a href={hrefFor(p.id)} aria-current={currentPage === p.id ? 'page' : undefined}>{p.label}</a></li>
@@ -268,7 +308,7 @@ function Tag({ type, children }) {
   return <span className={'tag' + (type ? ' tag-' + type : '')}>{children || TYPE_LABEL[type] || type}</span>;
 }
 
-const STATUS_COLOR = { 'Released': 'var(--green)', 'Active': 'var(--green)', 'Available': 'var(--green)', 'In Development': 'var(--warm)', 'Coming 2026': 'var(--accent)', 'Planning': 'var(--muted)' };
+const STATUS_COLOR = { 'Released': 'var(--accent-2)', 'Active': 'var(--accent-2)', 'Available': 'var(--accent-2)', 'In Development': 'var(--steel)', 'Coming 2026': 'var(--accent)', 'Planning': 'var(--muted)' };
 
 function Status({ status }) {
   return <span className="status" style={{ '--status': STATUS_COLOR[status] || 'var(--muted)' }}>{status}</span>;
@@ -373,10 +413,7 @@ function CCAIRFooter() {
       <div className="wrap">
         <div className="footer-inner">
           <div>
-            <a className="brand" href="#/" aria-label="CCAIR home">
-              <img src="uploads/brand/logo-mark-64.png" alt="" width="32" height="32" />
-              <span>CCAIR<small>Center for CyberAI Research</small></span>
-            </a>
+            <Brand onDark />
             <address className="contact-lines">
               J. Mack Robinson College of Business, Georgia State University<br />
               55 Park Place NW, Atlanta, GA 30303<br />
@@ -408,7 +445,7 @@ function CCAIRFooter() {
 
 window.CCAIR = window.CCAIR || {};
 const CCAIR_COMPONENTS = {
-  REDUCE_MOTION, CAN_OBSERVE, SCROLL_TIMELINE, NAV_PAGES, hrefFor, Icon, Arrow, useInView, Reveal, CountUp, useScrollFrame, CCAIRNav, PageHead, Section, Card, LinkCard,
+  REDUCE_MOTION, CAN_OBSERVE, SCROLL_TIMELINE, NAV_PAGES, hrefFor, Icon, Arrow, useInView, Reveal, CountUp, useScrollFrame, CCAIRNav, Brand, Wordmark, OfficialLockup, PageHead, Section, Card, LinkCard,
   Tag, Status, Authors, PublicationItem, PersonCard, SegmentedControl, FinderFeature, CCAIRFooter, initialsOf,
 };
 Object.assign(window.CCAIR, CCAIR_COMPONENTS);

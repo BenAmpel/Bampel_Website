@@ -42,8 +42,8 @@ export function head({ title, desc, url, ogTitle, ogType = 'website', css = [], 
 <meta name="description" content="${esc(desc)}">
 <link rel="canonical" href="${url}">
 <meta name="robots" content="${esc(robots)}">
-<meta name="theme-color" content="#FBF6EF" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#1D171F" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#11172A" media="(prefers-color-scheme: dark)">
 <meta property="og:type" content="${ogType}">
 <meta property="og:site_name" content="CCAIR, Center for CyberAI Research">
 <meta property="og:title" content="${esc(ogTitle || title)}">
@@ -55,11 +55,33 @@ export function head({ title, desc, url, ogTitle, ogType = 'website', css = [], 
 <meta property="og:image:alt" content="${esc(image.alt)}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image:alt" content="${esc(image.alt)}">
-<link rel="icon" type="image/png" sizes="64x64" href="/ccair/uploads/brand/logo-mark-64.png">
-<link rel="apple-touch-icon" href="/ccair/uploads/brand/apple-touch-icon.png">
+<link rel="icon" type="image/svg+xml" href="/ccair/assets/brand/favicon.svg">
+<link rel="icon" type="image/png" sizes="64x64" href="/ccair/assets/brand/favicon-64.png">
+<link rel="apple-touch-icon" href="/ccair/assets/brand/apple-touch-icon.png">
+<link rel="preload" href="/ccair/assets/fonts/lato-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/ccair/assets/fonts/lato-700.woff2" as="font" type="font/woff2" crossorigin>
 ${css.map((href) => `<link rel="stylesheet" href="${href}">`).join('\n')}${extra ? '\n' + extra : ''}
 ${GA ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${GA}"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA}');</script>` : ''}`;
+}
+
+// Brand: GSU does not allow a center to make its own logo (commkit.gsu.edu). The header shows a plain-text wordmark until
+// the official Robinson sub-brand lockup is dropped into static/ccair/assets/brand/official/ and switched on in its
+// lockup.json (see the README there); then the supplied file replaces the wordmark, unaltered.
+const LOCKUP_DIR = path.join(CCAIR, 'assets', 'brand', 'official');
+export const LOCKUP = (() => {
+  try {
+    const c = JSON.parse(fs.readFileSync(path.join(LOCKUP_DIR, 'lockup.json'), 'utf8'));
+    return c.enabled && c.files && c.files.light && fs.existsSync(path.join(LOCKUP_DIR, c.files.light)) ? c : null;
+  } catch { return null; }
+})();
+export function brand() {
+  if (LOCKUP) {
+    const f = LOCKUP.files, src = (n) => `/ccair/assets/brand/official/${n}`;
+    return `<a class="brand" href="/ccair/" aria-label="${esc(LOCKUP.alt)}, home"><picture class="lockup">${f.reversed ? `<source srcset="${src(f.reversed)}" media="(prefers-color-scheme: dark)">` : ''}<img src="${src(f.light)}" alt="${esc(LOCKUP.alt)}" width="${LOCKUP.width}" height="${LOCKUP.height}"></picture></a>`;
+  }
+  // On phones the header keeps the short name so the page links fit; the footer always carries the full name.
+  return `<a class="brand" href="/ccair/"><span class="wordmark"><span class="wm-full">Center for CyberAI Research</span><span class="wm-short">CCAIR</span><small>Georgia State University</small></span></a>`;
 }
 
 // Sticky header. links: [{ href, label, current?, hideSm? }]
@@ -67,7 +89,7 @@ export function top(links) {
   return `<a class="skip" href="#main">Skip to content</a>
 <div class="backdrop" aria-hidden="true"><div class="glow g1"></div><div class="glow g2"></div></div>
 <header class="top"><div class="wrap">
-  <a class="brand" href="/ccair/"><img src="/ccair/uploads/brand/logo-mark-64.png" alt="" width="30" height="30">CCAIR</a>
+  ${brand()}
   <nav aria-label="Main">
     ${links.map((l) => `<a href="${l.href}"${l.hideSm ? ' class="hide-sm"' : ''}${l.current ? ' aria-current="page"' : ''}>${esc(l.label)}</a>`).join('\n    ')}
   </nav>
@@ -77,7 +99,7 @@ export function top(links) {
 // Footer and closing tags. scripts: list of script URLs (deferred).
 export function foot({ note, scripts = [] }) {
   return `<footer><div class="wrap">
-  <span>Center for CyberAI Research (CCAIR) · Georgia State University · ${esc(note)}</span>
+  <span><b>Center for CyberAI Research (CCAIR)</b><br>Georgia State University · J. Mack Robinson College of Business<br>${esc(note)}</span>
   <span><a href="/ccair/">CCAIR</a> · <a href="/ccair/pathways/">Pathway Finder</a> · <a href="/ccair/students/">Student guide</a> · <a href="/teaching/">Teaching</a></span>
 </div></footer>
 ${scripts.map((s) => `<script src="${s}" defer></script>`).join('\n')}
