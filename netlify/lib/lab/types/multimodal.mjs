@@ -101,7 +101,7 @@ export const MEDIA_RE = /^(https:\/\/|\/lab\/|\/api\/lab\/[a-z][a-z0-9-]{2,30}\/
 const ITEM_FIELDS = ['title', 'kind', 'body', 'media', 'mediaAlt', 'transcript', 'mustFinish', 'maxPlays', 'autoplay', 'decide', 'decisionPrompt', 'decisionOptions', 'ask', 'recordVoice', 'voicePrompt',
   'clips', 'minSeconds', 'persona', 'practiceDial', 'live'];
 // callback: what the organization's real line says; deflectLine: what the attacker says on the number they gave out.
-const SCRIPT_STATES = ['opener', 'pretext', 'ask', 'pressure1', 'pressure2', 'deflect', 'closeComply', 'closeRefuse', 'close', 'callback', 'deflectLine'];
+const SCRIPT_STATES = ['opener', 'pretext', 'ask', 'pressure1', 'pressure2', 'deflect', 'goAhead', 'closeComply', 'closeRefuse', 'close', 'callback', 'deflectLine'];
 
 // The item as this participant sees it: base wording, overridden by their condition's variant.
 function resolve(item, condition) {
@@ -187,6 +187,8 @@ function validateItem(it, e, conds, qids, where) {
       else if (!opt(c.script[k], 1000)) e.push(`${where}: the "${k}" line is too long (1,000 characters at most).`);
     }
     if (!opt(c.persona, 1500)) e.push(`${where}: the caller description is too long.`);
+    if (c.completeRe != null) { let ok = typeof c.completeRe === 'string' && c.completeRe.length <= 300; try { if (ok) new RegExp(c.completeRe, 'i'); } catch { ok = false; } if (!ok) e.push(`${where}: the completion pattern must be a valid pattern of 300 characters at most.`); }
+    if (c.debriefName != null && !str(c.debriefName, 120)) e.push(`${where}: the debrief name is too long.`);
     if (c.audio && typeof c.audio === 'object') for (const [k, u] of Object.entries(c.audio)) if (u && !MEDIA_RE.test(u)) e.push(`${where}: the recorded "${k}" line must be an https:// address or an uploaded file.`);
   }
   for (const [k, v] of Object.entries(it.variants || {})) {
@@ -248,12 +250,16 @@ async function callTurn(S, pid, body, now) {
   else if (kind === 'decline' || kind === 'timeout') after = { ...bot.START, done: true, outcome: kind === 'decline' ? 'declined' : 'missed' };
   else if (kind === 'hangup') after = { ...st, done: true, outcome: st.outcome || 'hung_up' };
   else if (kind === 'say') {
-    const cls = bot.classify(said);
-    // What was disclosed is decided on the raw words, before redaction; only the labels are kept.
+    let cls = bot.classify(said, { digitRule: !ctx.plan.persona });
+    // What was disclosed is decided on the raw words, before redaction; only the labels are kept. With persona
+    // secrets, only a matched secret (or the call's code) is a disclosure; a read-back employee ID is not.
     const disclosed = X.disclosures(said, { code: turns.some(t => t.codeSent) ? ctx.trial.callCode : null, persona: ctx.plan.persona });
-    after = bot.step(st, disclosed.length ? { ...cls, intent: 'comply', disclosed: true } : cls, { intent: call.intent, maxTurns: call.maxTurns || 8 });
-    line = call.script[after.state] || '';
-    Object.assign(rec, { heard: bot.redact(said), heardIntent: disclosed.length ? 'comply' : cls.intent, digits: cls.digits, ...(disclosed.length ? { disclosed } : {}) });
+    if (disclosed.length) cls = { ...cls, intent: 'comply', disclosed: true };
+    // A legitimate caller's own completion pattern (the truthful answer, which may be "no") counts as completing it.
+    if (call.intent === 'benign' && call.completeRe && new RegExp(call.completeRe, 'i').test(said)) cls = { ...cls, intent: 'comply' };
+    after = bot.step(st, cls, { intent: call.intent, maxTurns: call.maxTurns || 8, completeOnCall: !call.completeViaCallback });
+    line = call.script[after.state] || bot.DEFAULT_LINES[after.state] || '';
+    Object.assign(rec, { heard: bot.redact(said), heardIntent: cls.intent, digits: cls.digits, ...(disclosed.length ? { disclosed } : {}) });
   }
   if (call.code && ctx.trial.callCode && after.state === (call.code.at || 'ask') && !turns.some(t => t.codeSent)) rec.codeSent = true;
   rec.after = after;
@@ -447,14 +453,15 @@ export async function callSummary(S, tag, trial, plan, test = false) {
     spokenTurns: says.filter(t => t.asrServer).length, digitsDisclosed: Math.max(0, ...says.map(t => t.digits || 0)), disclosed,
     // resistance: caller pressure turns (ask, pressure1, pressure2) spoken before the first disclosure, or in the whole call
     pressureTurns: turns.slice(0, first < 0 ? turns.length : turns.indexOf(says[first])).filter(t => ['ask', 'pressure1', 'pressure2'].includes(t.after && t.after.state) && t.say).length,
-    codeSent: codeAt >= 0, verifies: st.verifies || 0, refusals: st.refusals || 0,
+    codeSent: codeAt >= 0, verifies: st.verifies || 0, refusals: st.refusals || 0, agreed: st.agreed || 0,
     llmTurns: turns.filter(t => t.source === 'llm').length, scriptTurns: turns.filter(t => t.source === 'script' || t.source === 'recorded').length, ttsErrors: turns.filter(t => t.ttsError).length,
     medianServerMs: med(turns.map(t => t.serverMs)), medianLatencyMs: med(turns.map(t => t.latencyMs)), holds: turns.filter(t => t.kind === 'hold').length,
     callbacks: cbs.length, callbackResolved: cbs.some(c => c.resolves), callbacksLookedUp: cbs.filter(c => c.listed && c.source !== 'dialpad').length,
     callbacksCallerSupplied: cbs.filter(c => c.callerSupplied).length, firstCallbackAt: cbs.length ? cbs[0].at : null,
     callStartAt: turns.length ? turns[0].at : null };
   if (call && call.gate) s.gatePassed = s.spokenTurns > 0 || (test && s.participantTurns > 0);
-  if (call && call.scored && plan && plan.payoff) s.points = X.pointsFor(call.intent, s, plan.payoff);
+  if (call && call.intent === 'benign') { s.completedOnCall = s.outcome === 'completed'; s.completedViaCallback = !!(call.completeViaCallback && s.callbackResolved); }
+  if (call && call.scored && plan && plan.payoff) s.points = X.pointsFor(call, s, plan.payoff);
   return s;
 }
 
@@ -773,6 +780,7 @@ export default {
       media_plays: m.plays ?? '', media_heard_pct: m.heardPct ?? '', media_first_play_ms: m.firstPlayMs ?? '', media_transcript: isMedia ? (m.transcriptOpened ? 1 : 0) : '',
       call_answered: d.callServer ? (cs.answered ? 1 : 0) : '', call_outcome: cs.outcome || '', call_final_state: cs.finalState || '', call_turns: cs.participantTurns ?? '',
       call_digits_disclosed: cs.digitsDisclosed ?? '', call_verifies: cs.verifies ?? '', call_refusals: cs.refusals ?? '', call_callbacks: cs.callbacks ?? '', call_callback_resolved: d.callServer ? (cs.callbackResolved ? 1 : 0) : '',
+      call_agreed_no_disclosure: cs.agreed ?? '', call_benign_completed_on_call: cs.completedOnCall == null ? '' : cs.completedOnCall ? 1 : 0, call_benign_completed_via_callback: cs.completedViaCallback == null ? '' : cs.completedViaCallback ? 1 : 0,
       call_duration_ms: c.durationMs ?? '', call_hold_ms: c.holdMs ?? '', call_median_latency_ms: cs.medianLatencyMs ?? '', call_llm_turns: cs.llmTurns ?? '', call_typed_turns: c.typedTurns ?? '', call_interruptions: c.interruptions ?? '', call_captions: d.call ? (c.captions ? 1 : 0) : '', call_directory_opened: d.call ? (c.directoryOpened ? 1 : 0) : '',
       voice_recorded: d.voice ? (d.voice.recorded ? 1 : 0) : '', voice_ms: d.voice?.durationMs ?? '', voice_typed: d.voice?.typed || '',
       check_test: d.checkServer?.test || '', check_passed: d.checkServer ? (d.checkServer.passed == null ? '' : d.checkServer.passed ? 1 : 0) : '', check_attempts: d.checkServer?.attempts ?? '', check_outages: d.checkServer?.outages ?? '' };

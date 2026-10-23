@@ -51,15 +51,19 @@ function attack({ org, dept, ask, askKind, urgent, n, voice }) {
       pressure2: urgent ? 'If we cannot finish this on this call, Northwind will be responsible for the loss.' : 'I just need that one detail, and I will not need to call again.',
       deflect: `You can reach me directly at ${ATTACKER_NUMBERS[n].replace(/[()]/g, '').replace(/-/g, ' ')}, but it is much faster to finish this now.`,
       deflectLine: `${org}, this is Jordan. Thanks for calling back. Go ahead and read me that detail now.`,
+      goAhead: urgent ? 'Good. Go ahead, I am ready for it now.' : 'Great, thank you. Go ahead whenever you are ready.',
       closeComply: 'Thank you, that is all I needed. You are all set.', closeRefuse: 'All right. Have a good day.', close: 'I have to let you go now. Goodbye.',
       callback: `Thank you for calling ${org}. I do not see any call from us to Northwind today, and we never ask for codes or passwords by phone. Please do not share anything with that caller.`
     }
   };
 }
-function benign({ org, dept, ask, urgent, n, voice, routeOwn }) {
+function benign({ org, dept, ask, urgent, n, voice, routeOwn, complete }) {
   const cb = number(dept);
   return {
     caller: 'Incoming call', number: '', debriefName: org.replace(/^the /, ''), callbackNumber: cb, intent: 'benign', voice,
+    // Completion: a request to call back is completed only by reaching the real number; any other request by the
+    // truthful answer on the call (`complete`, when that answer is not a plain yes).
+    ...(routeOwn ? { completeViaCallback: true } : {}), ...(complete ? { completeRe: complete } : {}),
     persona: `A real employee of ${org}. ${urgent ? 'Urgent but polite.' : 'Calm and routine.'}`,
     script: {
       opener: urgent ? `Hello, this is Morgan from ${org}. I am calling about something time-sensitive for Northwind Supply.` : `Hi, this is Casey from ${org}. Is this the Northwind front desk?`,
@@ -87,9 +91,9 @@ const SLOTS = {
   'ben-urgent-1': [{ topic: 'financial', org: 'Tallgrass Bank', dept: 'Tallgrass Bank, Fraud Prevention', urgent: true, routeOwn: true, ask: 'Please hang up and call Tallgrass Fraud Prevention at the number in your company directory, so you know it is really us.' },
     { topic: 'community', org: 'Riverton Water and Power', dept: 'Riverton Water & Power, Business Accounts', urgent: true, routeOwn: true, ask: 'Please call Business Accounts back at the number in your directory today so we can restore the autopay.' }],
   'ben-urgent-2': [{ topic: 'community', org: 'the Riverton Fire Marshal\'s Office', dept: 'Riverton Fire Marshal\'s Office', urgent: true, ask: 'An inspector is on the way this afternoon. Can you confirm someone will be at the front desk until five?' },
-    { topic: 'financial', org: 'Keystone Card Services', dept: 'Keystone Card Services, Corporate Cards', urgent: true, ask: 'We blocked a charge on the card ending in the four digits on file. Can you confirm whether anyone at Northwind made a purchase at Orchard Office Furniture today? Just yes or no.' }],
+    { topic: 'financial', org: 'Keystone Card Services', dept: 'Keystone Card Services, Corporate Cards', urgent: true, ask: 'We blocked a charge on the card ending in the four digits on file. Can you confirm whether anyone at Northwind made a purchase at Orchard Office Furniture today? Just yes or no.', complete: "\\b(yes|yeah|no|nope|nobody|no one|not that i know|i don'?t think so)\\b" }],
   'ben-calm-1': [{ topic: 'community', org: 'Brightway Parcel', dept: 'Brightway Parcel, Riverton Depot', ask: 'We have a delivery for 2200 Calder Way tomorrow morning. Can you confirm the front desk opens at eight?' },
-    { topic: 'financial', org: 'Tallgrass Bank', dept: 'Tallgrass Bank, Business Services', ask: 'Your new deposit slips are ready. Would you like them mailed to the office, or picked up at the branch?' }],
+    { topic: 'financial', org: 'Tallgrass Bank', dept: 'Tallgrass Bank, Business Services', ask: 'Your new deposit slips are ready. Would you like them mailed to the office, or picked up at the branch?', complete: '\\b(mail|mailed|post|pick (them )?up|picked up|pickup|branch)\\b' }],
   'ben-calm-2': [{ topic: 'financial', org: 'Ashby Mutual Insurance', dept: 'Ashby Mutual Insurance, Commercial', ask: 'We mailed the renewal packet last week. Could you confirm it arrived? Nothing else is needed.' },
     { topic: 'community', org: 'the Riverton Business Association', dept: 'Riverton Business Association', ask: 'We are confirming attendance for Thursday\'s breakfast. Is Northwind still planning to send someone?' }],
   'ben-calm-3': [{ topic: 'community', org: 'Calder Properties', dept: 'Calder Properties, Building Management', ask: 'The elevator inspection is Thursday morning. Can you confirm someone at the front desk can let the inspector in at nine?' },

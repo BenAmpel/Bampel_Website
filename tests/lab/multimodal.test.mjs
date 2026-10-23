@@ -54,6 +54,23 @@ import * as content from '../../netlify/lib/lab/content.mjs';
   assert.equal(b.outcome, 'disclosed');
   b = bot.step({ ...bot.START, state: 'ask', lastPressure: 'ask' }, bot.classify('yes it arrived'), { intent: 'benign' });
   assert.equal(b.outcome, 'completed');
+  // Agreeing is not disclosing: "okay" makes an attacker wait for it, then press on; it never ends the call.
+  let g = bot.step({ ...bot.START, state: 'ask', lastPressure: 'ask' }, bot.classify('okay, sure'), o);
+  assert.equal(g.state, 'goAhead'); assert(!g.done); assert.equal(g.agreed, 1);
+  g = bot.step(g, bot.classify('okay'), o); assert.equal(g.state, 'pressure1', 'a second "okay" with nothing given: the caller presses on');
+  assert.equal(bot.classify('okay, hold on').intent, 'hold', '"hold on" wins over "okay"');
+  assert.notEqual(bot.classify('Is this fraud prevention?').intent, 'refuse', 'naming the department is not a refusal');
+  assert.equal(bot.classify('that sounds like fraud').intent, 'refuse');
+  assert.equal(bot.classify("I'm fine").intent, 'other', '"fine" is not agreement');
+  assert.equal(bot.classify("who's calling?").intent, 'verify');
+  assert.equal(bot.classify('no, I will not read you 4 8 2 1', { digitRule: false }).intent, 'refuse', 'without the digit rule, digits alone are not compliance');
+  // A request to verify before the ask is answered at once, then the caller goes on to the ask.
+  let v = bot.step({ ...bot.START, state: 'opener' }, bot.classify("who's calling?"), o); assert.equal(v.state, 'deflect');
+  v = bot.step(v, bot.classify('hmm'), o); assert.equal(v.state, 'ask');
+  // A legitimate caller is not ended by one "no"; a request to call back is "agreed", not completed, on the call.
+  let n = bot.step({ ...bot.START, state: 'ask', lastPressure: 'ask' }, bot.classify('no'), { intent: 'benign' }); assert(!n.done);
+  n = bot.step(n, bot.classify('no, not interested'), { intent: 'benign' }); assert.equal(n.outcome, 'refused');
+  assert.equal(bot.step({ ...bot.START, state: 'ask', lastPressure: 'ask' }, bot.classify('okay'), { intent: 'benign', completeOnCall: false }).outcome, 'agreed');
   let m = { ...bot.START, state: 'opener' };
   for (let i = 0; i < 4; i++) m = bot.step(m, bot.classify('hmm'), { intent: 'attack', maxTurns: 4 });
   assert.equal(m.outcome, 'max_turns');

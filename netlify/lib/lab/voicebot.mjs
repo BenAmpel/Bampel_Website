@@ -2,7 +2,8 @@
 //
 // A call is a state machine with preregistrable rules (the stimulus is controlled here, not by a model):
 //   opener → pretext → ask → pressure1 → pressure2 → close
-// plus "deflect" (the caller answers a request to verify or call back) and three endings:
+// plus "deflect" (the caller answers a request to verify or call back), "goAhead" (an attacker hears "okay" with
+// nothing given yet and waits for it, so agreeing is not mistaken for disclosing) and three endings:
 //   closeComply (the participant did what was asked), closeRefuse (refused twice, or kept insisting on
 //   verifying), close (the caller ran out of turns or pressure).
 // Each state has a scripted line written by the researcher. That line is what the caller says unless an LLM
@@ -13,7 +14,9 @@
 // The participant's words are classified with transparent keyword rules (classify below), never by a model,
 // so the transitions are reproducible from the transcript.
 
-export const STATES = ['opener', 'pretext', 'ask', 'pressure1', 'pressure2', 'deflect', 'closeComply', 'closeRefuse', 'close'];
+export const STATES = ['opener', 'pretext', 'ask', 'pressure1', 'pressure2', 'deflect', 'goAhead', 'closeComply', 'closeRefuse', 'close'];
+// Lines used when a script does not have one for a state.
+export const DEFAULT_LINES = { goAhead: 'Great. Go ahead whenever you are ready.' };
 export const ENDINGS = ['closeComply', 'closeRefuse', 'close'];
 const PRESSURE = ['ask', 'pressure1', 'pressure2'];
 
@@ -36,6 +39,7 @@ export function defaultScript(intent = 'attack') {
     pressure1: 'I understand. The payment will clear in a few minutes, so I do need that code now to block it.',
     pressure2: 'If we cannot verify you, the charge will go through and you may not get the money back. Can you read me the code?',
     deflect: 'Sure, you can reach me directly at 800 555 0199, but the payment will clear before then. It is faster to read me the code now.',
+    goAhead: 'Great, thank you. Go ahead and read me the code whenever you are ready.',
     closeComply: 'Thank you, that has stopped the payment. You are all set.',
     closeRefuse: 'All right. Please keep an eye on your account. Goodbye.',
     close: 'I have to let you go now. Goodbye.',
@@ -58,22 +62,28 @@ export function digitsIn(text) {
   return Math.max(best, run);
 }
 const RE = {
-  verify: /\b(call (you|them|the bank|it|your office|back)|call ?back|verify (you|this|who)|look (it |that )?up|official number|number on (the back of )?(my|the) card|hang up and call|let me (check|call)|i'?ll call|who is this|how do i know|prove)\b/i,
-  refuse: /\b(no|nope|not comfortable|won'?t|will not|don'?t (want|feel|think|give|share)|not going to|i refuse|stop calling|not interested|scam|fraud(ster)?|leave me alone|no thanks)\b/i,
-  comply: /\b(yes|yeah|yep|sure|okay|ok|fine|go ahead|here it is|it'?s|the code is|my (code|pin|password|number) is|it arrived|got it)\b/i,
+  verify: /\b(call (you|them|the bank|it|your office|back)|call ?back|verify (you|this|who)|look (it |that )?up|official number|number on (the back of )?(my|the) card|hang up and call|let me (check|call)|i'?ll call|i will call|who is this|who'?s (this|calling)|who is calling|what'?s your (name|extension|number|department)|what is your (name|extension|number|department)|which (department|office|branch)|(can|could|may) i (call|ring) (you )?back|how do i know|prove)\b/i,
+  // "fraud" alone is not a refusal ("is this fraud prevention?"); calling the call a scam or fraud is.
+  refuse: /\b(no|nope|not comfortable|won'?t|will not|don'?t (want|feel|think|give|share)|not going to|i refuse|stop calling|not interested|scam(mer)?|fraudster|(this|that|it) (is|sounds like|seems like) (a )?fraud|leave me alone|no thanks)\b/i,
+  // "fine" and "it's" are not agreement on their own ("I'm fine", "it's not something I can share").
+  comply: /\b(yes|yeah|yep|sure|okay|ok|go ahead|here it is|the code is|my (code|pin|password|number) is|it arrived|got it)\b/i,
   hold: /\b(hold on|one (sec|second|moment)|wait)\b/i
 };
-// One intent per utterance, in this order of precedence: giving digits counts as complying whatever else is said.
-export function classify(text) {
+// One intent per utterance, in this order of precedence: giving digits counts as complying whatever else is said
+// (digitRule; a study that knows the participant's secrets turns it off and scores disclosure from the secrets).
+export function classify(text, { digitRule = true } = {}) {
   const raw = String(text || '').trim(), digits = digitsIn(raw);
   // "oh no" is surprise and "no problem" is agreement, not a refusal.
-  const t = raw.replace(/\b(oh|uh|ah),?\s+no\b[!.,]?/gi, '').replace(/\bno (problem|worries|rush|trouble)\b/gi, 'okay').trim() || raw;
+  const t = raw.replace(/\b(oh|uh|ah),?\s+no\b[!.,]?/gi, '').replace(/\bno (problem|worries|rush|trouble)\b/gi, 'okay').trim();
   if (!raw) return { intent: 'silence', digits: 0 };
-  if (digits >= 4) return { intent: 'comply', digits, disclosed: true };
+  // A long run of digits is a disclosure only when nothing better is known; studies with persona secrets decide
+  // disclosure from the secrets themselves (multimodal.mjs callTurn), so a read-back employee ID is not a leak.
+  if (digitRule && digits >= 4) return { intent: 'comply', digits, disclosed: true };
+  if (!t) return { intent: 'other', digits };
   if (RE.verify.test(t)) return { intent: 'verify', digits };
   if (RE.refuse.test(t)) return { intent: 'refuse', digits };
+  if (RE.hold.test(t)) return { intent: 'hold', digits };   // "okay, hold on" waits rather than agrees
   if (RE.comply.test(t)) return { intent: 'comply', digits };
-  if (RE.hold.test(t)) return { intent: 'hold', digits };
   if (/\?\s*$/.test(t)) return { intent: 'question', digits };
   return { intent: 'other', digits };
 }
@@ -81,29 +91,48 @@ export function classify(text) {
 // ---------- the state machine ----------
 // st: { state, refusals, verifies, turns, lastPressure } from the turns so far. Returns the next state and,
 // when the call ends, the outcome.
-export function step(st, cls, { intent = 'attack', maxTurns = 8 } = {}) {
+export function step(st, cls, { intent = 'attack', maxTurns = 8, completeOnCall = true } = {}) {
   const s = { ...st, turns: (st.turns || 0) + 1 };
   const end = (state, outcome) => ({ ...s, state, done: true, outcome });
   const nextPressure = () => {
+    if (s.lastPressure === 'pre') return 'ask';   // a deflection before the ask leads to the ask
     const i = PRESSURE.indexOf(s.lastPressure || 'ask');
     return i < 0 ? 'ask' : PRESSURE[i + 1] || null;
   };
   const cur = s.state;
   // The turn cap applies only when this reply did not end the call, so a last-turn compliance or refusal still counts.
   const capped = next => (next.done || s.turns < maxTurns ? next : end('close', 'max_turns'));
-  if (cur === 'opener') return capped({ ...s, state: 'pretext' });
-  if (cur === 'pretext') return capped({ ...s, state: 'ask', lastPressure: 'ask' });
-  if (cls.intent === 'hold' && (PRESSURE.includes(cur) || cur === 'deflect')) return capped({ ...s });   // "hold on": the caller waits and repeats itself
-  if (PRESSURE.includes(cur) || cur === 'deflect') {
-    if (cls.intent === 'comply') return end('closeComply', intent === 'benign' ? 'completed' : cls.disclosed ? 'disclosed' : 'complied');
+  // Before the ask: a request to verify is answered at once (then the caller goes on to the ask), and a refusal counts.
+  if (cur === 'opener' || cur === 'pretext') {
     if (cls.intent === 'verify') {
       s.verifies = (s.verifies || 0) + 1;
       if (s.verifies >= 2) return end('closeRefuse', 'verified');
-      return { ...s, state: 'deflect' };
+      return capped({ ...s, state: 'deflect', lastPressure: 'pre' });
     }
     if (cls.intent === 'refuse') {
       s.refusals = (s.refusals || 0) + 1;
-      if (s.refusals >= 2 || intent === 'benign') return end('closeRefuse', 'refused');
+      if (s.refusals >= 2) return end('closeRefuse', 'refused');
+    }
+    return capped(cur === 'opener' ? { ...s, state: 'pretext' } : { ...s, state: 'ask', lastPressure: 'ask' });
+  }
+  const live = PRESSURE.includes(cur) || cur === 'deflect' || cur === 'goAhead';
+  if (cls.intent === 'hold' && live) return capped({ ...s });   // "hold on": the caller waits and repeats itself
+  if (live) {
+    if (cls.intent === 'comply') {
+      if (intent === 'benign') return end('closeComply', completeOnCall ? 'completed' : 'agreed');
+      if (cls.disclosed) return end('closeComply', 'disclosed');
+      // "Okay" with nothing given: the attacker waits for it once, then presses on.
+      s.agreed = (s.agreed || 0) + 1;
+      if (cur !== 'goAhead') return capped({ ...s, state: 'goAhead' });
+    }
+    if (cls.intent === 'verify') {
+      s.verifies = (s.verifies || 0) + 1;
+      if (s.verifies >= 2) return end('closeRefuse', 'verified');
+      return capped({ ...s, state: 'deflect' });
+    }
+    if (cls.intent === 'refuse') {
+      s.refusals = (s.refusals || 0) + 1;
+      if (s.refusals >= 2) return end('closeRefuse', 'refused');
     }
     const n = nextPressure();   // after a deflection the caller presses on from where it was
     if (!n) return end('close', intent === 'benign' ? 'not_completed' : 'resisted');
@@ -113,7 +142,7 @@ export function step(st, cls, { intent = 'attack', maxTurns = 8 } = {}) {
 }
 
 // The call so far: every logged turn stores the whole state it moved to, so the last one is the current state.
-export const START = { state: null, refusals: 0, verifies: 0, turns: 0, lastPressure: null, done: false, outcome: null };
+export const START = { state: null, refusals: 0, verifies: 0, agreed: 0, turns: 0, lastPressure: null, done: false, outcome: null };
 export function replay(turns) {
   const withState = (turns || []).filter(t => t && t.after);
   return withState.length ? withState[withState.length - 1].after : { ...START };

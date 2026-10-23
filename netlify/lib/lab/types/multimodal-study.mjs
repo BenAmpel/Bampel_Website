@@ -152,14 +152,16 @@ export function poolItems(block, c, p, byId) {
 export const POOLS = ['clips:pre', 'clips:post', 'shift'];
 
 // ---------- payoff ----------
-// Points for one scored call: an attack where any secret was disclosed loses `disclose`; a legitimate request
-// completed (on the call, or by calling the organization's real number back) earns `benignComplete`; each
-// callback costs `callback`. Reporting or refusing earns nothing either way.
-export function pointsFor(intent, s, payoff) {
+// Points for one scored call: an attack loses `disclose` when a secret was disclosed (or, for an attack whose ask is
+// a callback, when the participant called the number it gave); a legitimate request earns `benignComplete` when it
+// was completed on the call, or, only for a request to call the organization back (completeViaCallback), when the
+// participant reached its real number. Each callback costs `callback`. Reporting or refusing earns nothing.
+export function pointsFor(call, s, payoff) {
   if (!payoff) return null;
+  const intent = call.intent;
   let pts = 0;
-  if (intent === 'attack' && s.disclosed && s.disclosed.length) pts += Number(payoff.disclose) || 0;
-  if (intent === 'benign' && (s.outcome === 'completed' || s.callbackResolved)) pts += Number(payoff.benignComplete) || 0;
+  if (intent === 'attack' && ((s.disclosed && s.disclosed.length) || (call.lossOnCallerCallback && s.callbacksCallerSupplied > 0))) pts += Number(payoff.disclose) || 0;
+  if (intent === 'benign' && (s.outcome === 'completed' || (call.completeViaCallback && s.callbackResolved))) pts += Number(payoff.benignComplete) || 0;
   pts += (Number(payoff.callback) || 0) * (s.callbacks || 0);
   return pts;
 }

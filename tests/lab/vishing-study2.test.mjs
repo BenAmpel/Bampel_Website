@@ -223,12 +223,17 @@ let passer = null;
   const codeCalls = attacks.filter(x => x[col('call_code_sent')] === '1');
   assert.equal(codeCalls.length, 2, 'two attacks send a code');
   assert(codeCalls.every(x => x[col('call_disclosed')] === 'code' && x[col('call_points')] === '-42'), 'reading the code back is a disclosure: -40, and the callback costs 2');
-  assert(benign.every(x => x[col('call_points')] === '10'), 'a benign request completed on the call earns 10');
+  const routeOwn = benign.filter(x => x[col('call_slot')] === 'ben-urgent-1'), onCall = benign.filter(x => x[col('call_slot')] !== 'ben-urgent-1');
+  assert(onCall.every(x => x[col('call_points')] === '10' && x[col('call_benign_completed_on_call')] === '1'), 'a legitimate request completed on the call earns 10');
+  assert(routeOwn.length === 1 && routeOwn[0][col('call_points')] === '0' && routeOwn[0][col('call_benign_completed_on_call')] === '0',
+    '"okay" to a request to call back does not complete it: only reaching the real number does');
+  const calm2 = attacks.find(x => x[col('call_slot')] === 'atk-calm-2');
+  assert(calm2[col('call_disclosed')] === '' && calm2[col('call_points')] === '0' && Number(calm2[col('call_agreed_no_disclosure')]) >= 1, '"okay" to an attacker is not a disclosure');
   // ----- post survey, debrief, bonus -----
   r = await call(P + 'survey', { body: { token: tok, session: 2, kind: 'post', data: { prev_post: '30', verify_cost: '3', tlx_mental: '40', demand_probe: 'spot scams', bot_suspect: 'some', attn_check: 'sometimes' } } });
   assert(r.json.ok && r.json.status.finished, r.text);
   const db = (await call(P + 'debrief', { body: { token: tok } })).json;
-  assert.equal(db.calls.length, 10); assert.equal(db.points, 2 * -42 + 5 * 10, 'the debrief totals the shift');
+  assert.equal(db.calls.length, 10); assert.equal(db.points, 2 * -42 + 4 * 10, 'the debrief totals the shift');
   assert(db.calls.every(c => c.transcript.length > 0) && !JSON.stringify(db).match(/\b\d{6}\b/), 'own transcript, with the code redacted');
   const bonus = await call(P + 'admin/bonus.csv', { key: OWNER });
   assert.equal(bonus.status, 200, bonus.text);
@@ -290,8 +295,11 @@ console.log('preview participants keep the arm the researcher chose');
   assert.deepEqual(X.disclosures('no, I will call you back', { code: '415273', persona }), []);
   // expected points by policy: accept, verify (call the real number back), refuse; verify is best between .05 and .80
   const pay = { benignComplete: 10, disclose: -40, callback: -2 };
-  const ev = (p, policy) => policy === 'accept' ? (1 - p) * X.pointsFor('benign', { outcome: 'completed', callbacks: 0 }, pay) + p * X.pointsFor('attack', { disclosed: ['code'], callbacks: 0 }, pay)
-    : policy === 'verify' ? (1 - p) * X.pointsFor('benign', { callbackResolved: true, callbacks: 1 }, pay) + p * X.pointsFor('attack', { disclosed: [], callbacks: 1 }, pay) : 0;
+  const B = { intent: 'benign' }, A = { intent: 'attack' };
+  const ev = (p, policy) => policy === 'accept' ? (1 - p) * X.pointsFor(B, { outcome: 'completed', callbacks: 0 }, pay) + p * X.pointsFor(A, { disclosed: ['code'], callbacks: 0 }, pay)
+    : policy === 'verify' ? (1 - p) * X.pointsFor(B, { outcome: 'completed', callbackResolved: true, callbacks: 1 }, pay) + p * X.pointsFor(A, { disclosed: [], callbacks: 1 }, pay) : 0;
+  assert.equal(X.pointsFor(B, { outcome: 'not_completed', callbackResolved: true, callbacks: 1 }, pay), -2, 'a callback alone does not complete a legitimate request');
+  assert.equal(X.pointsFor({ intent: 'benign', completeViaCallback: true }, { outcome: 'agreed', callbackResolved: true, callbacks: 1 }, pay), 8, 'unless the request was to call back');
   const best = p => ['accept', 'verify', 'refuse'].reduce((a, b) => (ev(p, b) > ev(p, a) ? b : a));
   assert.deepEqual([0.03, 0.06, 0.5, 0.79, 0.81].map(best), ['accept', 'verify', 'verify', 'verify', 'refuse']);
   console.log('clip lists balanced; disclosure detected on spoken and written digits and passwords; verify is optimal for p between .05 and .80');
