@@ -442,9 +442,16 @@
     store(key, JSON.stringify(kept));
     return out;
   }
+  // The study's gate is closed (its voice system is down or full). Nothing was assigned; the participant can retry.
+  function showRetry(why) {
+    show('<h1>Please try again in a few minutes</h1><p>' + (why === 'lab_busy' ? 'Many people are taking this part of the study right now.' : 'The study\'s phone system is not available at the moment.') +
+      ' Your place is kept. Nothing has started yet, so you lose nothing by waiting.</p><div class="actions"><button id="retry">Try again</button></div>');
+    document.getElementById('retry').addEventListener('click', function () { this.disabled = true; startSession(); });
+  }
   function startSession() {
     api('session', { token: S.token, embedded: embeddedFromUrl() }).then(function (r) {
       if (r.error === 'not_yet' || r.error === 'finished') return refresh();
+      if (r.error === 'voice_unavailable' || r.error === 'lab_busy') return showRetry(r.error);
       if (r.error) return showLogin(ERR[r.error] || ERR.server_error);
       S.plan = r;
       if (!S.lab && window.TraceLab) { S.lab = TraceLab.create({ study: studyId, version: '3.0.0', sink: { type: 'local' }, mouseSampleMs: 50 }); S.lab.start(); }

@@ -9,6 +9,15 @@ const TIMEOUT_MS = () => Number(process.env.LAB_TTS_TIMEOUT_MS) || 5000;
 
 export const ttsConfigured = () => /^https?:\/\/[^\s]+$/.test(process.env.LAB_TTS_URL || '');
 
+// Is the voice service answering? (voice_server.py: GET /health gives { ok: true }.)
+export async function ttsHealthy(ms = 3000) {
+  if (!ttsConfigured()) return false;
+  try {
+    const r = await fetch(new URL('/health', process.env.LAB_TTS_URL), { signal: AbortSignal.timeout(ms) });
+    return r.ok && (await r.json()).ok === true;
+  } catch { return false; }
+}
+
 export async function synthesize(text, { voice = 'af_heart', speed = 1 } = {}) {
   if (!ttsConfigured()) return { error: 'tts_unavailable' };
   const t0 = Date.now();

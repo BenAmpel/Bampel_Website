@@ -118,6 +118,9 @@ export const VISHING_STUDY2 = {
       // Permuted blocks of 10 (each arm twice per block), fixed in advance by the seed (decided 2026-10-22). The list is
       // exported for the preregistration from the console: admin/allocation.csv. Do not change the seed after launch.
       randomization: { method: 'blocks', blockSize: 10, seed: 'vishing-study2-v1' },
+      // Session 2 (where the arm is assigned) opens only while the mini's speech and voice services answer, and for at
+      // most 8 people started in the last hour (provisional; set the cap from the pilot's load test).
+      gate: { session: 2, voice: true, maxActive: 8, activeMinutes: 60 },
       // Exploratory real-time suspicion slider: half of each arm, in the first (pre-training) set of recorded calls, so the
       // post-training clips that carry H1 and H2 are never rated while listening (decided 2026-10-22).
       sliderBlock: 'clips:pre',

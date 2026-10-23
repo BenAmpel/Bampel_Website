@@ -19,6 +19,8 @@ import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { setNew, update, getMany, inBatches, deleteKeys } from './store.mjs';
 import { getContent, itemsFor, domainAllowed } from './content.mjs';
 import { resolve as resolveLogic, publicQuestions } from './logic.mjs';
+import { asrHealthy } from './asr.mjs';
+import { ttsHealthy } from './tts.mjs';
 
 export const TOKEN_HOURS = 12;
 const DEFAULT_GAP = 6;
@@ -266,6 +268,12 @@ export async function startSession(S, code, now = Date.now(), extra = {}) {
   if (st.finished) return { error: 'finished', status: 409 };
   if (!st.available) return { error: 'not_yet', status: 409, availableAt: st.availableAt };
   const n = st.nextSession;
+  // Before a session's plan (and a deferred arm) is created, the study's gate must be open; a closed gate asks the
+  // participant to try again later and assigns nothing, so an outage never strands someone mid-session with an arm.
+  if (!(await getPlan(S, p, n))) {
+    const why = await sessionGate(S, c, n, now);
+    if (why) { await S.store.set(`gated/${why}/${p.code}-${now}`, { at: now, session: n }); return { error: why, status: 503, retryAfterSec: 120 }; }
+  }
   if (!p.condition && n >= assignAt(S, c)) p = await assignNow(S, p, now);
   // Per-participant counterbalancing the type assigns with the arm (for example a clip list), kept on the record.
   if (p.condition && !p.flags && n >= assignAt(S, c) && S.type.assignFlags) {
@@ -364,6 +372,24 @@ export async function enroll(S, ids, opts, now, rand) {
     else made.push(await S.store.get(pKey(id)));
   }
   return made;
+}
+
+// design.gate = { session, voice, maxActive, activeMinutes }: before that session starts, the lab's speech and voice
+// services must answer (voice: true) and fewer than maxActive people may have started it in the last activeMinutes
+// (default 60), which caps how many live sessions the voice machine serves at once. Returns why it is closed, or null.
+export async function sessionGate(S, c, n, now = Date.now(), health = { asr: asrHealthy, tts: ttsHealthy }) {
+  const g = c && c.design && c.design.gate;
+  if (!g || Number(g.session) !== n) return null;
+  if (g.voice) {
+    const [a, t] = await Promise.all([health.asr(), health.tts()]);
+    if (!a || !t) return 'voice_unavailable';
+  }
+  if (Number(g.maxActive) > 0) {
+    const since = now - (Number(g.activeMinutes) || 60) * 60000;
+    const active = (await S.store.list('started/')).filter(k => { const m = k.match(/\/s(\d+)-(\d+)$/); return m && Number(m[1]) === n && Number(m[2]) >= since; }).length;
+    if (active >= Number(g.maxActive)) return 'lab_busy';
+  }
+  return null;
 }
 
 // Deferred assignment: a study whose type says so (assignAtSession > 1) picks the arm when the participant starts

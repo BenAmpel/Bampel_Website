@@ -5,6 +5,7 @@
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { handle } from '../../netlify/lib/lab/router.mjs';
+import { sessionGate } from '../../netlify/lib/lab/engine.mjs';
 import { memBlobs } from './memstore.mjs';
 import { saidWord, peakLevel, transcribe } from '../../netlify/lib/lab/asr.mjs';
 
@@ -22,12 +23,17 @@ const call = async (path, { body, key } = {}) => {
   return { status: res.status, json, text };
 };
 
-// A stand-in for the lab's whisper-server: it "hears" every check word, or nothing.
+// A stand-in for the lab's Mac mini: whisper-server (POST /inference "hears" every check word, or nothing; GET / is
+// its page) and the voice service (GET /health, POST /tts returns a WAV).
 let heard = 'harbor garden pencil window pillow blanket candle ladder turtle button';
-const fake = createServer((req, res) => { req.resume(); req.on('end', () => { res.setHeader('content-type', 'application/json'); res.end(JSON.stringify({ text: heard })); }); });
+const fake = createServer((req, res) => { req.resume(); req.on('end', () => {
+  if (req.url === '/health') { res.setHeader('content-type', 'application/json'); return res.end(JSON.stringify({ ok: true })); }
+  if (req.url === '/tts') { res.setHeader('content-type', 'audio/wav'); return res.end(Buffer.from(wav, 'base64')); }
+  if (req.method === 'GET') return res.end('whisper');
+  res.setHeader('content-type', 'application/json'); res.end(JSON.stringify({ text: heard })); }); });
 await new Promise(r => fake.listen(0, '127.0.0.1', r));
-const ASR_URL = `http://127.0.0.1:${fake.address().port}/inference`;
-delete process.env.LAB_ASR_URL;
+const ASR_URL = `http://127.0.0.1:${fake.address().port}/inference`, TTS_URL = `http://127.0.0.1:${fake.address().port}/tts`;
+delete process.env.LAB_ASR_URL; delete process.env.LAB_TTS_URL;
 
 // tiny valid WAVs (16 kHz mono, 0.1 s): a 440 Hz tone (stands in for speech) and pure silence
 const makeWav = amp => { const n = 1600, b = Buffer.alloc(44 + n * 2); b.write('RIFF', 0); b.writeUInt32LE(36 + n * 2, 4); b.write('WAVEfmt ', 8); b.writeUInt32LE(16, 16); b.writeUInt16LE(1, 20); b.writeUInt16LE(1, 22);
@@ -138,6 +144,10 @@ let passer = null;
   r = await call(P + 'survey', { body: { token: tok, session: 1, kind: 'post', data: {} } });
   assert(r.json.ok && r.json.status.available && r.json.status.nextSession === 2, 'session 2 follows at once');
   assert.deepEqual(await markers(), [], 'no arm until session 2 starts');
+  r = await call(P + 'session', { body: { token: tok } });
+  assert.equal(r.status, 503); assert.equal(r.json.error, 'voice_unavailable', 'session 2 does not open while the voice service is down');
+  assert.deepEqual(await markers(), [], 'and nobody is assigned an arm');
+  process.env.LAB_TTS_URL = TTS_URL;
   const s2 = (await call(P + 'session', { body: { token: tok } })).json;
   assert.equal(s2.session, 2);
   const m = await markers(); assert.equal(m.length, 1, 'exactly one arm marker: the participant who passed');
@@ -147,6 +157,17 @@ let passer = null;
   assert.equal(alloc[1][alloc[0].indexOf('arm')], me.condition, 'the first participant past screening gets the first slot of the pre-set list');
   assert.equal(alloc.slice(1).filter(x => x[alloc[0].indexOf('used')] === '1').length, 1, 'one slot used');
   passer = { tok, s2, me };
+}
+// ---------- the session gate: voice health and the cap on live sessions ----------
+{
+  const now = Date.now(), up = { asr: async () => true, tts: async () => true };
+  const S = { store: { list: async () => [...Array.from({ length: 8 }, (_, i) => `started/P${i}/s2-${now - 6e4}`), `started/Q/s1-${now}`, `started/R/s2-${now - 2 * 3600e3}`] } };
+  const gate = extra => ({ design: { gate: { session: 2, voice: true, ...extra } } });
+  assert.equal(await sessionGate(S, gate({ maxActive: 8 }), 2, now, up), 'lab_busy', '8 people started session 2 in the last hour');
+  assert.equal(await sessionGate(S, gate({ maxActive: 9 }), 2, now, up), null, 'session 1 starts and older starts do not count');
+  assert.equal(await sessionGate(S, gate({ maxActive: 8 }), 1, now, up), null, 'only the gated session is gated');
+  assert.equal(await sessionGate(S, gate({}), 2, now, { asr: async () => true, tts: async () => false }), 'voice_unavailable');
+  console.log('session gate: closed while the voice service is down or 8 sessions are live; nothing assigned');
 }
 // ---------- session 2: counterbalancing, passive trials, training, the scored shift ----------
 {

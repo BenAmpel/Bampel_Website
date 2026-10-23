@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- CCAIR lab speech recognition (whisper.cpp) on the lab Mac mini, bound to its Tailscale address.
+     KeepAlive restarts it after a crash or when Tailscale was not up yet; caffeinate -i keeps the mini from idle
+     sleep while it serves. Installed by install.sh in this folder. -->
+<plist version="1.0"><dict>
+<key>Label</key><string>com.benampel.ccair-whisper</string>
+<key>ProgramArguments</key><array>
+  <string>/usr/bin/caffeinate</string><string>-i</string>
+  <string>/opt/homebrew/bin/whisper-server</string>
+  <string>-m</string><string>/Users/benampel/whisper-models/ggml-large-v3-turbo.bin</string>
+  <string>--host</string><string>100.85.210.3</string><string>--port</string><string>8178</string><string>-l</string><string>en</string>
+</array>
+<key>RunAtLoad</key><true/>
+<key>KeepAlive</key><true/>
+<key>ThrottleInterval</key><integer>30</integer>
+<key>StandardOutPath</key><string>/Users/benampel/Library/Logs/ccair-whisper.log</string>
+<key>StandardErrorPath</key><string>/Users/benampel/Library/Logs/ccair-whisper.err</string>
+</dict></plist>

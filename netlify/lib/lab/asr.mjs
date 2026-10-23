@@ -8,6 +8,12 @@ const TIMEOUT_MS = () => Number(process.env.LAB_ASR_TIMEOUT_MS) || 8000;
 
 export const asrConfigured = () => /^https?:\/\/[^\s]+$/.test(process.env.LAB_ASR_URL || '');
 
+// Is the recognizer answering? (whisper-server serves its page at /.) Used before a session that needs it starts.
+export async function asrHealthy(ms = 3000) {
+  if (!asrConfigured()) return false;
+  try { return (await fetch(new URL('/', process.env.LAB_ASR_URL), { signal: AbortSignal.timeout(ms) })).ok; } catch { return false; }
+}
+
 // The loudest sample of a 16-bit PCM WAV, from 0 to 1 (null when the buffer is not one). Whisper invents words for
 // silence ("Thank you.", seen in the 2026-10-22 browser check), so silent audio is never sent to it.
 export function peakLevel(buf) {
