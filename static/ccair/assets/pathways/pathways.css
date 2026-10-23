@@ -1,35 +1,48 @@
-/* CCAIR Cyber Career Pathway Finder. Matches the CCAIR center site (assets/ccair.css) and the Behavioral Lab:
-   warm light-first brand palette (terracotta accent, plum ink and secondary, sage, peach, cream) with a warm-dark
-   mode and system fonts. Overrides for the old dark-only colours are at the end of this file. */
+/* CCAIR Cyber Career Pathway Finder (and, with students.css, the Student Guide). Georgia State University web colors
+   and type, matching the CCAIR center site (assets/ccair.css): white page, Georgia State Blue #0039A6 accent and links,
+   Light Gray #EEEEEE surfaces, Blue Steel #374057 secondary ink, Cool Blue #0071CE for non-text highlights; headings
+   black (white in the dark scheme). The dark scheme is built from the same family (GSU gives no dark guidance).
+   Lato is self-hosted (../fonts/, SIL OFL). Overrides for colours written for the old dark-only theme are at the end. */
+@font-face { font-family: "Lato"; font-style: normal; font-weight: 300; font-display: swap; src: url("../fonts/lato-300.woff2") format("woff2"); }
+@font-face { font-family: "Lato"; font-style: normal; font-weight: 400; font-display: swap; src: url("../fonts/lato-400.woff2") format("woff2"); }
+@font-face { font-family: "Lato"; font-style: italic; font-weight: 400; font-display: swap; src: url("../fonts/lato-400-italic.woff2") format("woff2"); }
+@font-face { font-family: "Lato"; font-style: normal; font-weight: 700; font-display: swap; src: url("../fonts/lato-700.woff2") format("woff2"); }
 :root {
   color-scheme: light dark;
-  --bg: #FBF6EF; --surface: #F6EDE2; --elevated: #FFFFFF;
-  --card: #FFFFFF; --card-solid: #FFFFFF; --ans-bg: #F6EDE2;
-  --accent: #A94A26; --accent-rgb: 169, 74, 38; --accent-dim: rgba(180, 81, 43, 0.09); --accent-glow: rgba(180, 81, 43, 0.24);
-  --accent2: #3B2A4A; --accent2-rgb: 59, 42, 74;
+  --bg: #FFFFFF; --surface: #EEEEEE; --elevated: #FFFFFF;
+  --card: #FFFFFF; --card-solid: #FFFFFF; --ans-bg: #F5F5F5;
+  --accent: #0039A6; --accent-rgb: 0, 57, 166; --accent-dim: rgba(0, 57, 166, 0.07); --accent-glow: rgba(0, 57, 166, 0.22);
+  --accent2: #374057; --accent2-rgb: 55, 64, 87;
+  --cool-rgb: 0, 113, 206;
   --on-accent: #FFFFFF;
-  --text: #2B2233; --text2: #4D4152; --muted: #6A5C66;
-  --border: rgba(180, 81, 43, 0.24); --border-soft: rgba(43, 34, 51, 0.10);
-  --faint: rgba(43, 34, 51, 0.06); --faint-2: rgba(43, 34, 51, 0.10);
-  --nav-bg: rgba(251, 246, 239, 0.74);
-  --shadow: 0 1px 2px rgba(43, 26, 18, 0.04), 0 8px 24px rgba(43, 26, 18, 0.06);
+  --heading: #000000;
+  --text: #1A1A1A; --text2: #3D4049; --muted: #5A5D66;
+  --border: rgba(0, 57, 166, 0.26); --border-soft: rgba(0, 0, 0, 0.10);
+  --faint: rgba(0, 0, 0, 0.05); --faint-2: rgba(0, 0, 0, 0.10);
+  --nav-bg: rgba(255, 255, 255, 0.80);
+  --shadow: 0 1px 2px rgba(10, 20, 45, 0.05), 0 8px 24px rgba(10, 20, 45, 0.07);
+  --footer-bg: #374057; --footer-text: #FFFFFF; --footer-text-2: #DDE1EA; --footer-link-hover: #97CAEB;
   --radius: 20px; --radius-sm: 14px;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, Roboto, "Helvetica Neue", sans-serif;
+  /* Labels, counters and codes that used a monospace face are set in Lato too (GSU: Lato for web), with tabular figures. */
+  --mono: "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --sans: "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #1D171F; --surface: #2A2230; --elevated: #322938;
-    --card: #2A2230; --card-solid: #2A2230; --ans-bg: #322938;
-    --accent: #F0936A; --accent-rgb: 240, 147, 106; --accent-dim: rgba(240, 147, 106, 0.14); --accent-glow: rgba(240, 147, 106, 0.28);
-    --accent2: #E9D8F0; --accent2-rgb: 233, 216, 240;
-    --on-accent: #2B1A12;
-    --text: #F6EDE4; --text2: #DDCFCF; --muted: #C2B2B9;
-    --border: rgba(240, 147, 106, 0.32); --border-soft: rgba(255, 255, 255, 0.09);
+    --bg: #11172A; --surface: #1A2136; --elevated: #212941;
+    --card: #1A2136; --card-solid: #1A2136; --ans-bg: #212941;
+    --accent: #97CAEB; --accent-rgb: 151, 202, 235; --accent-dim: rgba(151, 202, 235, 0.12); --accent-glow: rgba(151, 202, 235, 0.26);
+    --accent2: #D3DAE8; --accent2-rgb: 211, 218, 232;
+    --cool-rgb: 0, 174, 239;
+    --on-accent: #0B1A33;
+    --heading: #FFFFFF;
+    --text: #FFFFFF; --text2: #DCE1EA; --muted: #B9C0CE;
+    --border: rgba(151, 202, 235, 0.34); --border-soft: rgba(255, 255, 255, 0.10);
     --faint: rgba(255, 255, 255, 0.06); --faint-2: rgba(255, 255, 255, 0.10);
-    --nav-bg: rgba(29, 23, 31, 0.74);
+    --nav-bg: rgba(17, 23, 42, 0.80);
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
+    --footer-bg: #0B1020; --footer-text: #FFFFFF; --footer-text-2: #DCE1EA; --footer-link-hover: #97CAEB;
   }
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -42,7 +55,7 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .skip:focus { left: 16px; }
 /* The skip link moves focus to <main tabindex="-1">; no focus ring around the whole page. */
 main[tabindex="-1"]:focus { outline: none; }
-.mono { font-family: var(--mono); }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 .wrap { width: min(1120px, 100% - 32px); margin-inline: auto; }
 .narrow { width: min(780px, 100% - 32px); margin-inline: auto; }
 
@@ -61,8 +74,10 @@ main[tabindex="-1"]:focus { outline: none; }
 .top { position: sticky; top: 0; z-index: 20; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   background: rgba(5, 10, 21, 0.72); border-bottom: 1px solid var(--border-soft); }
 .top .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 16px; }
-.brand { display: flex; align-items: center; gap: 10px; color: var(--text); font-weight: 800; letter-spacing: 0.02em; }
-.brand img { height: 30px; width: 30px; border-radius: 6px; }
+/* Text wordmark only (GSU does not allow center-made logos); the official lockup replaces it when supplied. */
+.brand { display: flex; align-items: center; gap: 10px; color: var(--heading); font-weight: 700; line-height: 1.15; flex: none; }
+.brand small { display: block; font-size: 12px; font-weight: 400; color: var(--text2); margin-top: 1px; }
+.brand .lockup img { display: block; height: 40px; width: auto; }
 .brand:hover { text-decoration: none; }
 .top nav { display: flex; gap: 4px; flex-wrap: wrap; }
 .top nav a { color: var(--text2); font-size: 14px; font-weight: 600; padding: 6px 12px; border-radius: 999px; }
@@ -81,8 +96,11 @@ main[tabindex="-1"]:focus { outline: none; }
   color: var(--accent); border: 1px solid var(--border); background: var(--accent-dim); padding: 6px 14px; border-radius: 999px; }
 .eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); animation: blink 2.4s ease-in-out infinite; }
 @keyframes blink { 50% { opacity: 0.35; } }
-h1 { font-size: clamp(38px, 6.4vw, 72px); line-height: 1.04; letter-spacing: -0.025em; font-weight: 800; margin: 22px auto 0; max-width: 15ch; }
-.grad { color: var(--accent); }
+h1, h2, h3 { color: var(--heading); }
+/* GSU web type: large H1s in Lato Light, H2 and below in Lato Bold. */
+h1 { font-size: clamp(38px, 6.4vw, 72px); line-height: 1.08; letter-spacing: -0.012em; font-weight: 300; margin: 22px auto 0; max-width: 15ch; }
+.grad { color: var(--accent); font-weight: 700; }
+@media (prefers-color-scheme: dark) { .grad { color: var(--heading); } }
 .lede { font-size: clamp(17px, 2vw, 20px); color: var(--text2); max-width: 60ch; margin: 22px auto 0; }
 .hero-cta { margin-top: 34px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 .btn { display: inline-flex; align-items: center; gap: 10px; font: 700 16px/1 var(--sans); padding: 16px 26px; border-radius: 999px; border: 1px solid transparent;
@@ -101,8 +119,8 @@ h1 { font-size: clamp(38px, 6.4vw, 72px); line-height: 1.04; letter-spacing: -0.
 /* Sections */
 section.block { padding: clamp(56px, 8vw, 96px) 0; }
 .kicker { font-family: var(--mono); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); }
-h2 { font-size: clamp(28px, 4vw, 44px); line-height: 1.12; letter-spacing: -0.02em; margin-top: 10px; }
-h3 { font-size: 20px; line-height: 1.3; }
+h2 { font-size: clamp(28px, 4vw, 44px); line-height: 1.14; letter-spacing: -0.01em; font-weight: 700; margin-top: 10px; }
+h3 { font-size: 20px; line-height: 1.3; font-weight: 700; }
 .sub { color: var(--text2); margin-top: 12px; max-width: 62ch; }
 
 .steps3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 36px; }
@@ -214,7 +232,7 @@ h3 { font-size: 20px; line-height: 1.3; }
 .bars { list-style: none; display: grid; gap: 8px; margin-top: 14px; }
 .bars li { display: grid; grid-template-columns: minmax(140px, 260px) 1fr; gap: 12px; align-items: center; font-size: 14px; }
 .bars .b { height: 8px; border-radius: 99px; background: rgba(255,255,255,0.06); overflow: hidden; }
-.bars .b i { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 99px; transform-origin: left; animation: grow 0.9s var(--ease) both; }
+.bars .b i { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), rgb(var(--cool-rgb))); border-radius: 99px; transform-origin: left; animation: grow 0.9s var(--ease) both; }
 @keyframes grow { from { transform: scaleX(0); } }
 .res-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translate(-50%, 20px); background: var(--accent); color: #03141a; font-weight: 700; padding: 12px 18px; border-radius: 999px;
@@ -273,9 +291,13 @@ ol.refs li .mono { position: absolute; left: 0; color: var(--accent); }
 ol.refs li:target { color: var(--text); }
 
 /* Footer */
-footer { border-top: 1px solid var(--border-soft); padding: 40px 0 60px; margin-top: 40px; color: var(--muted); font-size: 14px; }
+/* Blue Steel band with white text (GSU secondary palette); deep navy in the dark scheme. */
+footer { padding: 40px 0 56px; margin-top: 40px; background: var(--footer-bg); color: var(--footer-text-2); font-size: 14px; line-height: 1.6; }
 footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; }
-footer a { color: var(--text2); }
+footer b { color: var(--footer-text); font-weight: 700; }
+footer a { color: var(--footer-text); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+footer a:hover { color: var(--footer-link-hover); }
+footer :focus-visible { outline-color: #97CAEB; }
 
 /* Scroll reveal (only when JS runs and motion is allowed) */
 .js .reveal { opacity: 0; transform: translate3d(0, 20px, 0); transition: opacity 0.6s var(--ease), transform 0.7s var(--ease); transition-delay: var(--d, 0s); }
@@ -292,7 +314,7 @@ footer a { color: var(--text2); }
 
 /* Reading progress along the top edge. */
 .scroll-progress { position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 30; transform-origin: 0 50%; transform: scaleX(0);
-  background: linear-gradient(90deg, var(--accent), var(--accent2)); box-shadow: 0 0 12px var(--accent-glow); pointer-events: none; }
+  background: linear-gradient(90deg, var(--accent), rgb(var(--cool-rgb))); box-shadow: none; pointer-events: none; }
 
 /* Pointer spotlight on cards. */
 .role-card, .card, .res a, .match { position: relative; isolation: isolate; }
@@ -319,7 +341,7 @@ footer a { color: var(--text2); }
 .matching .interlude-bar i { animation-duration: 1.5s; }
 @keyframes fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 .matching { position: relative; text-align: center; padding: 90px 0 70px; overflow: hidden; }
-.matching .qtext { min-height: 1.4em; color: var(--accent); margin-top: 18px; }
+.matching .qtext { min-height: 1.4em; color: var(--heading); margin-top: 18px; }
 .scan { position: absolute; left: -10%; right: -10%; height: 90px; top: -90px; pointer-events: none;
   background: linear-gradient(180deg, transparent, rgba(var(--accent-rgb), 0.16), transparent); animation: scanDown 1.5s var(--ease) infinite; }
 @keyframes scanDown { to { top: 100%; } }
@@ -359,33 +381,36 @@ footer a { color: var(--text2); }
   .badge { border: 1px solid #999 !important; color: #111 !important; background: none !important; }
 }
 
-/* ---------- Warm restyle: overrides for colours that were written for the old dark-only theme ---------- */
+/* ---------- GSU restyle: overrides for colours that were written for the old dark-only theme ---------- */
 .backdrop::before { display: none; }
 .glow { animation: none; opacity: 0.6; filter: blur(110px); }
-.glow.g1 { background: rgba(246, 201, 168, 0.45); }
-.glow.g2 { background: rgba(143, 179, 155, 0.28); }
-@media (prefers-color-scheme: dark) { .glow.g1 { background: rgba(240, 147, 106, 0.10); } .glow.g2 { background: rgba(156, 198, 170, 0.08); } }
+.glow.g1 { background: rgba(151, 202, 235, 0.40); }
+.glow.g2 { background: rgba(0, 113, 206, 0.12); }
+@media (prefers-color-scheme: dark) { .glow.g1 { background: rgba(0, 113, 206, 0.16); } .glow.g2 { background: rgba(151, 202, 235, 0.08); } }
 .top { background: var(--nav-bg); -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%); }
-.brand img { border-radius: 8px; box-shadow: 0 0 0 1px var(--border-soft); }
 .top nav a:hover, .top nav a[aria-current] { background: var(--faint); }
 .skip, .btn-primary, .chip[aria-pressed="true"], .toast { color: var(--on-accent); }
 .btn-primary { box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08); }
 .btn-primary:hover { transform: none; box-shadow: 0 4px 14px -6px var(--accent-glow); }
 .btn:active { transform: scale(0.97); }
 .btn-ghost { background: var(--elevated); border-color: var(--faint-2); }
-.eyebrow { font-family: var(--sans); letter-spacing: 0.04em; font-weight: 600; color: var(--accent2); background: rgba(var(--accent2-rgb), 0.08); border-color: transparent; }
-.eyebrow .dot { background: var(--accent2); box-shadow: none; animation: none; }
-.kicker { font-family: var(--sans); letter-spacing: 0.04em; font-weight: 600; color: var(--accent2); }
+.eyebrow { font-family: var(--sans); letter-spacing: 0.06em; font-weight: 700; color: var(--accent); background: var(--accent-dim); border-color: transparent; }
+.eyebrow .dot { background: var(--accent); box-shadow: none; animation: none; }
+.kicker { font-family: var(--sans); letter-spacing: 0.06em; font-weight: 700; color: var(--accent); }
 .stat b { font-family: var(--sans); font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
 .stat span { letter-spacing: 0.02em; text-transform: none; }
 .card, .role-card, .faq details, .match { box-shadow: var(--shadow); }
-.role-card:hover { transform: translateY(-2px); box-shadow: 0 2px 4px rgba(29, 24, 16, 0.04), 0 18px 40px -18px rgba(var(--accent-rgb), 0.35); }
+.role-card:hover { transform: translateY(-2px); box-shadow: 0 2px 4px rgba(10, 20, 45, 0.04), 0 18px 40px -18px rgba(var(--accent-rgb), 0.35); }
 .badge.step { color: var(--accent); background: var(--accent-dim); border-color: transparent; }
 .badge.emerging { color: var(--accent2); background: rgba(var(--accent2-rgb), 0.10); border-color: transparent; }
-.quiz { background: var(--card); border-color: var(--border-soft); box-shadow: 0 2px 4px rgba(29, 24, 16, 0.04), 0 24px 60px -30px rgba(29, 24, 16, 0.25); }
+.quiz { background: var(--card); border-color: var(--border-soft); box-shadow: 0 2px 4px rgba(10, 20, 45, 0.04), 0 24px 60px -30px rgba(10, 20, 45, 0.25); }
 .ring .track, .radar .grid { stroke: var(--faint-2); }
 .ans { background: var(--ans-bg); }
 .bars .b, .interlude-bar { background: var(--faint); }
-.match.first { background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.07), rgba(var(--accent2-rgb), 0.05)); }
+.match.first { background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.07), rgba(var(--cool-rgb), 0.04)); }
 @media (prefers-reduced-transparency: reduce) { .top { background: var(--bg); -webkit-backdrop-filter: none; backdrop-filter: none; } }
 @media (prefers-reduced-motion: reduce) { .btn:active { transform: none; } .role-card:hover { transform: none; } }
+/* GSU: the old "step" and "emerging" badge hues (blue, amber) are replaced with GSU Blue and Blue Steel above. */
+.top .wrap { height: 68px; }
+.brand .wm-short { display: none; }
+@media (max-width: 640px) { .brand small, .brand .wm-full { display: none; } .brand .wm-short { display: inline; } }

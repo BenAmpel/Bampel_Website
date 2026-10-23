@@ -335,8 +335,10 @@ function outcomesSections() {
 }
 
 /* ---------- Sharing images ---------- */
-const OG_VERSION = 'og-1';
-const logoUri = `data:image/png;base64,${fs.readFileSync(path.join(CCAIR, 'uploads', 'brand', 'logo-mark-128.png')).toString('base64')}`;
+const OG_VERSION = 'og-2-gsu';
+// No logo on the cards: GSU does not allow a center to make its own (commkit.gsu.edu); the text names the center instead.
+// Lato comes from the self-hosted files by a relative URL (the SVG sits in static/ccair/students/og/), so the SVG and its
+// hash are the same on every machine.
 function wrap(text, max) {
   const lines = []; let line = '';
   for (const w of text.split(/\s+/)) {
@@ -346,21 +348,23 @@ function wrap(text, max) {
   return lines;
 }
 function ogSvg(title, eyebrow, pathLabel) {
-  let size = 68, lines = wrap(title, 27);
-  if (lines.length > 3) { size = 56; lines = wrap(title, 33); }
-  const lh = Math.round(size * 1.16), y0 = 300 - ((lines.length - 1) * lh) / 2;
+  let size = 66, lines = wrap(title, 28);
+  if (lines.length > 3) { size = 54; lines = wrap(title, 34); }
+  const lh = Math.round(size * 1.18), y0 = 296 - ((lines.length - 1) * lh) / 2;
+  const F = "'Lato', 'Helvetica Neue', Arial, sans-serif";
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-<defs>
-  <radialGradient id="g1" cx="0.12" cy="0.05" r="0.6"><stop offset="0" stop-color="#A94A26" stop-opacity="0.22"/><stop offset="1" stop-color="#A94A26" stop-opacity="0"/></radialGradient>
-  <radialGradient id="g2" cx="0.95" cy="0.85" r="0.55"><stop offset="0" stop-color="#3B2A4A" stop-opacity="0.18"/><stop offset="1" stop-color="#3B2A4A" stop-opacity="0"/></radialGradient>
-</defs>
-<rect width="1200" height="630" fill="#FBF6EF"/><rect width="1200" height="630" fill="url(#g1)"/><rect width="1200" height="630" fill="url(#g2)"/>
-<rect x="0" y="0" width="1200" height="10" fill="#A94A26"/>
-<text x="80" y="118" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="24" letter-spacing="4" fill="#A94A26">${esc(eyebrow.toUpperCase())}</text>
-${lines.map((l, i) => `<text x="80" y="${Math.round(y0 + i * lh + size * 0.35)}" font-family="-apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif" font-weight="700" font-size="${size}" fill="#2B2233">${esc(l)}</text>`).join('\n')}
-<image href="${logoUri}" x="80" y="490" width="64" height="64"/>
-<text x="164" y="516" font-family="-apple-system, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif" font-weight="700" font-size="26" fill="#3B2A4A">Center for CyberAI Research (CCAIR)</text>
-<text x="164" y="550" font-family="-apple-system, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif" font-size="22" fill="#6A5C66">Georgia State University · ${esc(pathLabel)}</text>
+<style>
+@font-face { font-family: 'Lato'; font-weight: 400; src: url('../../assets/fonts/lato-400.woff2') format('woff2'); }
+@font-face { font-family: 'Lato'; font-weight: 700; src: url('../../assets/fonts/lato-700.woff2') format('woff2'); }
+</style>
+<rect width="1200" height="630" fill="#FFFFFF"/>
+<rect x="0" y="0" width="1200" height="14" fill="#0039A6"/>
+<rect x="0" y="470" width="1200" height="160" fill="#EEEEEE"/>
+<text x="80" y="122" font-family="${F}" font-weight="700" font-size="24" letter-spacing="3" fill="#0039A6">${esc(eyebrow.toUpperCase())}</text>
+${lines.map((l, i) => `<text x="80" y="${Math.round(y0 + i * lh + size * 0.35)}" font-family="${F}" font-weight="700" font-size="${size}" fill="#000000">${esc(l)}</text>`).join('\n')}
+<text x="80" y="530" font-family="${F}" font-weight="700" font-size="28" fill="#000000">Center for CyberAI Research (CCAIR)</text>
+<text x="80" y="568" font-family="${F}" font-weight="400" font-size="22" fill="#374057">Georgia State University · J. Mack Robinson College of Business</text>
+<text x="1120" y="122" text-anchor="end" font-family="${F}" font-weight="400" font-size="20" fill="#5A5D66">${esc(pathLabel)}</text>
 </svg>
 `;
 }
@@ -388,7 +392,7 @@ function ogImages(pages) {
     fs.writeFileSync(svgFile, svg);
     const fresh = fs.existsSync(png) && manifest.images[key]?.hash === hash;
     if (!fresh && chrome) {
-      const r = spawnSync(chrome, ['--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check', `--user-data-dir=${path.join(os.tmpdir(), 'ccair-og-chrome')}`, '--hide-scrollbars', '--force-device-scale-factor=1', '--default-background-color=FBF6EFFF',
+      const r = spawnSync(chrome, ['--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check', `--user-data-dir=${path.join(os.tmpdir(), 'ccair-og-chrome')}`, '--hide-scrollbars', '--force-device-scale-factor=1', '--default-background-color=FFFFFFFF',
         '--window-size=1200,630', `--screenshot=${png}`, `file://${svgFile}`], { stdio: 'ignore', timeout: 30000 });
       if (r.status === 0 && fs.existsSync(png)) { manifest.images[key] = { hash, title }; rendered++; }
     }
@@ -502,7 +506,7 @@ function pageHtml(p, idx, main, order, modified, image, robots) {
   };
   const scripts = [`/ccair/assets/pathways/pathways.js?v=${ASSET_V}-anon2`, ...(p.slug === 'data' ? [`/ccair/assets/students/students.js?v=${ASSET_V}-2`] : [])];
   return `${baseHead({ title: p.metaTitle, ogTitle: p.title, desc: p.desc, url, ogType: 'article', image, robots, extra: feedLink,
-    css: [`/ccair/assets/pathways/pathways.css?v=${ASSET_V}-warm4`, `/ccair/assets/students/students.css?v=${ASSET_V}-2`] })}
+    css: [`/ccair/assets/pathways/pathways.css?v=${ASSET_V}-gsu1`, `/ccair/assets/students/students.css?v=${ASSET_V}-gsu1`] })}
 <meta property="article:modified_time" content="${modified}">
 ${ld(graph)}
 </head>
@@ -518,7 +522,7 @@ ${baseFoot({ note: `Last verified ${S.verified}`, scripts })}`;
 function printPage({ slug, title, desc, intro, body, parent }) {
   const url = `${BASE}print/${slug}/`;
   return `${baseHead({ title: `${title} (printable) | CCAIR Student Guide`, desc, url, robots: 'noindex, follow', image: OG_IMAGES.index,
-    css: [`/ccair/assets/students/print.css?v=${ASSET_V}-1`], extra: '<meta name="color-scheme" content="light">' })}
+    css: [`/ccair/assets/students/print.css?v=${ASSET_V}-gsu1`], extra: '<meta name="color-scheme" content="light">' })}
 </head>
 <body class="printable">
 <a class="skip" href="#main">Skip to content</a>
@@ -574,7 +578,7 @@ function feedXml() {
   <link rel="alternate" type="text/html" href="${BASE}"/>
   <updated>${updated}T12:00:00Z</updated>
   <author><name>Center for CyberAI Research (CCAIR)</name><uri>${SITE}/ccair/</uri></author>
-  <icon>${SITE}/ccair/uploads/brand/logo-mark-128.png</icon>
+  <icon>${SITE}/ccair/assets/brand/apple-touch-icon.png</icon>
 ${S.changes.map((c) => `  <entry>
     <title>${x(c.title)}</title>
     <id>tag:bampel.com,${c.date}:ccair-students/${slugify(c.title)}</id>

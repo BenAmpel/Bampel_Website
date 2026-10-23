@@ -43,7 +43,7 @@ try {
   assert(lab.out.includes('CCAIR Behavioral Lab is running') && lab.out.includes('sign in with the owner key'), lab.out);
   const key = (await readFile(join(dir, 'owner-key.txt'), 'utf8')).trim();
   assert(key.length >= 16, 'an owner key is made on the first run');
-  let r = await fetch(lab.base + '/lab/'); assert.equal(r.status, 200); assert((await r.text()).includes('hero.webp'));
+  let r = await fetch(lab.base + '/lab/'); assert.equal(r.status, 200); assert((await r.text()).includes('Georgia State University · J. Mack Robinson College of Business'), 'the lab home page carries the text wordmark');
   r = await fetch(lab.base + '/'); assert.equal(r.url, lab.base + '/lab/', 'the root address goes to the lab');
   r = await fetch(lab.base + '/lab/media/samples/voicemail-bank.mp3', { headers: { range: 'bytes=0-99' } });
   assert.equal(r.status, 206, 'media files answer range requests'); assert.equal((await r.arrayBuffer()).byteLength, 100);

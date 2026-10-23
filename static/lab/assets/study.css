@@ -1,51 +1,64 @@
 /* CCAIR Behavioral Lab: the shared look of every lab page (participant pages, researcher console, guide).
-   Warm and calm around the study, neutral inside it: stimuli (emails, AI advice, media frames) sit on plain
-   white with grey borders, so the styling does not steer judgments. Colors are tokens; every text pair meets
-   WCAG AA, and control borders meet 3:1 (WCAG 1.4.11). Dark mode, reduced motion, reduced transparency, and
-   increased contrast are all handled at the bottom. */
+   Georgia State University web standards (commkit.gsu.edu): Georgia State Blue #0039A6 on white as the strongest
+   pair, the GSU secondary blues and grays for support, red only for errors, Lato as the web typeface (self-hosted,
+   so no visitor data goes to a font service and font-src 'self' holds). Official and calm around the study, neutral
+   inside it: stimuli (emails, AI advice, vignettes, media frames, the softphone, reaction-time panels) keep their own
+   fixed colors and the system font they were piloted with (--stim-font), so the rebrand does not change them.
+   Every text pair meets WCAG AA and control borders meet 3:1 (WCAG 1.4.11); see static/lab/README.md ("Brand").
+   Dark mode (not covered by GSU guidance) uses deep navy and Light Blue from the same family. */
+@font-face { font-family: "Lato"; font-style: normal; font-weight: 300; font-display: swap; src: url(/ccair/assets/fonts/lato-300.woff2) format("woff2"); }
+@font-face { font-family: "Lato"; font-style: normal; font-weight: 400; font-display: swap; src: url(/ccair/assets/fonts/lato-400.woff2) format("woff2"); }
+@font-face { font-family: "Lato"; font-style: italic; font-weight: 400; font-display: swap; src: url(/ccair/assets/fonts/lato-400-italic.woff2) format("woff2"); }
+@font-face { font-family: "Lato"; font-style: normal; font-weight: 700; font-display: swap; src: url(/ccair/assets/fonts/lato-700.woff2) format("woff2"); }
 :root {
-  --bg: #fbf6ef;            /* cream */
-  --bg-2: #f4eadc;          /* sand, for quiet panels */
+  --gsu-blue: #0039a6;      /* Georgia State Blue: primary */
+  --bg: #ffffff;
+  --bg-2: #eeeeee;          /* GSU Light Gray, for quiet panels */
   --card: #ffffff;
-  --text: #2b2233;          /* plum ink */
-  --muted: #6a5c66;
-  --line: #eadfd2;
-  --line-strong: #9a897e;   /* 3:1 against card and cream */
-  --accent: #b4512b;        /* terracotta, 5:1 with white */
-  --accent-hover: #9c4423;
+  --text: #1f2229;
+  --heading: #000000;       /* GSU: headings in black or Georgia State Blue only */
+  --heading-brand: #0039a6;
+  --muted: #545a66;
+  --line: #d9dce3;
+  --line-strong: #767679;   /* GSU Dark Gray (Cool Gray 9): 4.5:1 on white, 3.9:1 on Light Gray */
+  --accent: #0039a6;        /* Georgia State Blue, 10.4:1 with white */
+  --accent-hover: #002a7a;
   --accent-text: #ffffff;
-  --accent-soft: #fbe5d6;
-  --plum: #3b2a4a;
-  --sage: #4f7a5f;
-  --sage-soft: #e3efe6;
-  --link: #9a3f1f;
-  --status-bg: #f6efe6;
+  --accent-soft: #e8f1fa;   /* a wash of GSU Light Blue */
+  --accent-2: #0071ce;      /* GSU Cool Blue: secondary (saved, done, level meters) */
+  --accent-2-soft: #e5f1fb;
+  --steel: #374057;         /* GSU Blue Steel */
+  --steel-text: #ffffff;
+  --link: #0039a6;
+  --status-bg: #f3f5f8;
   --mail-bg: #ffffff;
-  --stim-line: #d6d8de;     /* neutral grey around stimuli */
-  --error: #a8261b;
-  --warn: #8a5a00;
+  --stim-line: #d6d8de;     /* neutral grey around stimuli (unchanged) */
+  --error: #c60c30;         /* GSU Red Accent, errors only */
+  --error-text: #ffffff;    /* text on a red fill */
+  --warn: #7a5000;
   --warn-bg: #fff3d9;
-  --shadow: 0 1px 2px rgba(59, 42, 74, .06), 0 10px 30px rgba(59, 42, 74, .07);
-  --shadow-lift: 0 2px 4px rgba(59, 42, 74, .08), 0 16px 40px rgba(59, 42, 74, .12);
-  --radius: 20px;
-  --radius-sm: 12px;
+  --shadow: 0 1px 2px rgba(0, 25, 75, .06), 0 8px 24px rgba(0, 25, 75, .06);
+  --shadow-lift: 0 2px 4px rgba(0, 25, 75, .08), 0 14px 36px rgba(0, 25, 75, .11);
+  --radius: 14px;
+  --radius-sm: 10px;
   --ease: cubic-bezier(.2, .8, .2, 1);   /* close to a critically damped spring: fast start, no overshoot */
-  --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font: "Lato", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --stim-font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #1d171f; --bg-2: #261e29; --card: #2a2230; --text: #f6ede4; --muted: #c2b2b9; --line: #3e3342; --line-strong: #87777f;
-    --accent: #f0936a; --accent-hover: #f6a885; --accent-text: #26140b; --accent-soft: #4a2b20; --plum: #e9d8f0; --sage: #9cc6aa; --sage-soft: #233a2c;
-    --link: #f4a67f; --status-bg: #332a37; --mail-bg: #f9f9fa; --stim-line: #5b5560; --error: #ff9a8f; --warn: #ffcf7a; --warn-bg: #3d3018;
+    --bg: #0b1630; --bg-2: #13213f; --card: #172648; --text: #f2f5fa; --heading: #ffffff; --heading-brand: #ffffff; --muted: #b8c2d6; --line: #2b3b63; --line-strong: #7f8db0;
+    --accent: #97caeb; --accent-hover: #b9dcf2; --accent-text: #0b1630; --accent-soft: #1d3566; --accent-2: #5cc8f2; --accent-2-soft: #12304d; --steel: #97caeb; --steel-text: #0b1630;
+    --link: #97caeb; --status-bg: #1d2c50; --mail-bg: #f9f9fa; --stim-line: #5b5560; --error: #ff8fa3; --error-text: #0b1630; --warn: #ffcf7a; --warn-bg: #3a2f14;
     --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 30px rgba(0, 0, 0, .25); --shadow-lift: 0 2px 4px rgba(0, 0, 0, .35), 0 16px 40px rgba(0, 0, 0, .35); color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #1d171f; --bg-2: #261e29; --card: #2a2230; --text: #f6ede4; --muted: #c2b2b9; --line: #3e3342; --line-strong: #87777f;
-  --accent: #f0936a; --accent-hover: #f6a885; --accent-text: #26140b; --accent-soft: #4a2b20; --plum: #e9d8f0; --sage: #9cc6aa; --sage-soft: #233a2c;
-  --link: #f4a67f; --status-bg: #332a37; --mail-bg: #f9f9fa; --stim-line: #5b5560; --error: #ff9a8f; --warn: #ffcf7a; --warn-bg: #3d3018;
+  --bg: #0b1630; --bg-2: #13213f; --card: #172648; --text: #f2f5fa; --heading: #ffffff; --heading-brand: #ffffff; --muted: #b8c2d6; --line: #2b3b63; --line-strong: #7f8db0;
+  --accent: #97caeb; --accent-hover: #b9dcf2; --accent-text: #0b1630; --accent-soft: #1d3566; --accent-2: #5cc8f2; --accent-2-soft: #12304d; --steel: #97caeb; --steel-text: #0b1630;
+  --link: #97caeb; --status-bg: #1d2c50; --mail-bg: #f9f9fa; --stim-line: #5b5560; --error: #ff8fa3; --error-text: #0b1630; --warn: #ffcf7a; --warn-bg: #3a2f14;
   --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 30px rgba(0, 0, 0, .25); --shadow-lift: 0 2px 4px rgba(0, 0, 0, .35), 0 16px 40px rgba(0, 0, 0, .35); color-scheme: dark;
 }
 *, *::before, *::after { box-sizing: border-box; }
@@ -62,7 +75,8 @@ body {
 .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: clamp(20px, 4vw, 36px); box-shadow: var(--shadow); }
 .progress { color: var(--muted); font-size: .8125rem; font-weight: 600; letter-spacing: .01em; margin: 0 0 12px; font-variant-numeric: tabular-nums; }
 /* Size-specific tracking: big type tightens, small type opens up slightly. */
-h1 { font-size: clamp(1.5rem, 1.2rem + 1.2vw, 1.875rem); line-height: 1.15; letter-spacing: -.02em; font-weight: 700; margin: 0 0 14px; }
+h1, h2, h3 { color: var(--heading); }
+h1 { font-size: clamp(1.5rem, 1.2rem + 1.2vw, 1.875rem); line-height: 1.15; letter-spacing: -.01em; font-weight: 700; margin: 0 0 14px; }
 h2 { font-size: 1.3125rem; line-height: 1.25; letter-spacing: -.012em; font-weight: 700; margin: 0 0 12px; }
 h3 { font-size: 1.0625rem; line-height: 1.3; letter-spacing: -.005em; }
 p { margin: 0 0 12px; }
@@ -104,7 +118,8 @@ button[disabled] { opacity: .45; cursor: not-allowed; }
 button:focus-visible, a.btn:focus-visible { outline-offset: 3px; border-radius: 999px; }
 h1:focus, h2:focus, h3:focus { outline: none; }
 
-/* Simulated email client: neutral on purpose. */
+/* Simulated email client: neutral on purpose (colors and font fixed, so the lab's brand does not reach the stimulus). */
+.mail, .statusbar { font-family: var(--stim-font); }
 .mail { border: 1px solid var(--stim-line); border-radius: 10px; background: var(--mail-bg); color: #1c2330; overflow: hidden; }
 .mail-head { padding: 12px 14px; border-bottom: 1px solid var(--stim-line); font-size: .875rem; }
 .mail-head div { margin: 2px 0; }
@@ -119,10 +134,14 @@ th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--lin
 th { color: var(--muted); font-weight: 600; }
 .table-scroll { overflow-x: auto; }
 
-/* A small brand line above the study card. */
-.lab-head { display: flex; align-items: center; gap: 10px; max-width: 760px; margin: 0 auto 18px; color: var(--muted); font-size: .875rem; font-weight: 600; letter-spacing: .01em; }
-.lab-head img { width: 30px; height: 30px; border-radius: 9px; }
-.lab-head span b { color: var(--text); font-weight: 700; }
+/* A small text wordmark above the study card (GSU rules: no unit logo; the official Robinson College lockup drops
+   into .lockup-slot once University Marketing provides it, and until then the slot renders nothing). */
+.lab-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; max-width: 760px; margin: 0 auto 18px; padding-top: 10px; border-top: 4px solid var(--accent); }
+.wordmark { display: grid; gap: 1px; line-height: 1.25; color: var(--heading-brand); text-decoration: none; }
+.wordmark b { font-weight: 700; font-size: 1rem; letter-spacing: .005em; }
+.wordmark small { color: var(--muted); font-size: .8125rem; font-weight: 400; }
+.lockup-slot:empty { display: none; }
+.lockup-slot img { display: block; height: 44px; width: auto; }
 
 @media (max-width: 560px) { .likert { grid-template-columns: 1fr; } body { padding: 16px 12px 80px; } .actions { flex-wrap: wrap; } .actions > button, .actions > a.btn { flex: 1 1 auto; } }
 /* Reduced motion: no movement at all, only instant or cross-fade changes. */
@@ -131,7 +150,9 @@ th { color: var(--muted); font-weight: 600; }
   button:active, .option:active, a.btn:active { transform: none !important; }
 }
 @media (prefers-contrast: more) {
-  :root { --line: #8f8178; --line-strong: #5f5249; --muted: #4c3f47; --shadow: none; --shadow-lift: none; }
+  :root { --line: #767679; --line-strong: #4a4d55; --muted: #3c414c; --shadow: none; --shadow-lift: none; }
   .card { border-width: 2px; }
 }
+@media (prefers-contrast: more) and (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --line: #7f8db0; --line-strong: #c3cce0; --muted: #dbe1ec; } }
+@media (prefers-contrast: more) { :root[data-theme="dark"] { --line: #7f8db0; --line-strong: #c3cce0; --muted: #dbe1ec; } }
 @media (prefers-reduced-transparency: reduce) { .glass { background: var(--card) !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; } }

@@ -49,7 +49,7 @@ function DataProvider({ children }) {
     return (
       <div className="state" role="status">
         <div>
-          <img src="uploads/brand/logo-mark-128.png" alt="" />
+          <span className="state-dot" aria-hidden="true"></span>
           <p>Loading the center…</p>
         </div>
       </div>
