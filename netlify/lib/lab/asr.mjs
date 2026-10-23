@@ -5,13 +5,16 @@
 // decide what an outage means (an equipment check lets the participant continue, flagged).
 
 const TIMEOUT_MS = () => Number(process.env.LAB_ASR_TIMEOUT_MS) || 8000;
+// When the mini is reached through its public gateway (scripts/vishing-study2/mini/gateway.py, behind Tailscale
+// Funnel), every request carries the shared secret LAB_SERVICE_TOKEN; on the private network it is not needed.
+export const serviceAuth = () => (process.env.LAB_SERVICE_TOKEN ? { authorization: `Bearer ${process.env.LAB_SERVICE_TOKEN}` } : {});
 
 export const asrConfigured = () => /^https?:\/\/[^\s]+$/.test(process.env.LAB_ASR_URL || '');
 
 // Is the recognizer answering? (whisper-server serves its page at /.) Used before a session that needs it starts.
 export async function asrHealthy(ms = 3000) {
   if (!asrConfigured()) return false;
-  try { return (await fetch(new URL('/', process.env.LAB_ASR_URL), { signal: AbortSignal.timeout(ms) })).ok; } catch { return false; }
+  try { return (await fetch(new URL('/', process.env.LAB_ASR_URL), { headers: serviceAuth(), signal: AbortSignal.timeout(ms) })).ok; } catch { return false; }
 }
 
 // The loudest sample of a 16-bit PCM WAV, from 0 to 1 (null when the buffer is not one). Whisper invents words for
@@ -42,7 +45,7 @@ export async function transcribe(audio, { mime = 'audio/wav' } = {}) {
   form.append('response_format', 'json');
   form.append('temperature', '0');
   try {
-    const res = await fetch(process.env.LAB_ASR_URL, { method: 'POST', body: form, signal: AbortSignal.timeout(TIMEOUT_MS()) });
+    const res = await fetch(process.env.LAB_ASR_URL, { method: 'POST', headers: serviceAuth(), body: form, signal: AbortSignal.timeout(TIMEOUT_MS()) });
     if (!res.ok) return { error: 'asr_failed', status: res.status, ms: Date.now() - t0 };
     const j = await res.json();
     return { text: String(j.text || '').trim().slice(0, 2000), ms: Date.now() - t0 };

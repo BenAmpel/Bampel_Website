@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- CCAIR lab service gateway (gateway.py) on the lab Mac mini: localhost only, behind Tailscale Funnel, and it
+     passes requests to Whisper (8178) and the voice service (8179) only with the shared token in
+     ~/.config/ccair/gateway-token. System Python (standard library only). Installed by install.sh in this folder. -->
+<plist version="1.0"><dict>
+<key>Label</key><string>com.benampel.ccair-gateway</string>
+<key>ProgramArguments</key><array>
+  <string>/usr/bin/python3</string>
+  <string>/Users/benampel/ccair-voice/gateway.py</string>
+  <string>--host</string><string>127.0.0.1</string><string>--port</string><string>8180</string>
+  <string>--token-file</string><string>/Users/benampel/.config/ccair/gateway-token</string>
+  <string>--asr</string><string>http://100.85.210.3:8178</string>
+  <string>--tts</string><string>http://100.85.210.3:8179</string>
+</array>
+<key>WorkingDirectory</key><string>/Users/benampel/ccair-voice</string>
+<key>RunAtLoad</key><true/>
+<key>KeepAlive</key><true/>
+<key>ThrottleInterval</key><integer>10</integer>
+<key>StandardOutPath</key><string>/Users/benampel/Library/Logs/ccair-gateway.log</string>
+<key>StandardErrorPath</key><string>/Users/benampel/Library/Logs/ccair-gateway.err</string>
+</dict></plist>
