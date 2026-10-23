@@ -1,9 +1,12 @@
 /* CCAIR Behavioral Lab: shared layout for the guide, support, sign-in, and account pages (with study.css and admin.css). */
-.labbar { border-bottom: 1px solid var(--line); background: var(--card); margin: -24px -16px 24px; padding: 12px 16px; }
+.labbar { border-top: 4px solid var(--accent); border-bottom: 1px solid var(--line); background: var(--card); margin: -24px -16px 24px; padding: 12px 16px; }
 /* Full-bleed bar: its negative margin matches the body padding in study.css (24px 16px, and 16px 12px on phones). */
 @media (max-width: 560px) { .labbar { margin: -16px -12px 20px; padding: 12px; } }
 .labbar .inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
-.labbar .brand { font-weight: 700; color: var(--text); text-decoration: none; }
+/* Text wordmark only (GSU rules: no unit logo); .lockup-slot in study.css takes the official lockup later. */
+.labbar .brand { text-decoration: none; }
+.labbar nav a { font-weight: 700; text-decoration: none; }
+.labbar nav a:hover, .labbar nav a[aria-current=page] { text-decoration: underline; text-underline-offset: .3em; text-decoration-thickness: 2px; }
 .labbar nav a { margin-left: 16px; color: var(--link); }
 .labbar nav a:first-child { margin-left: 0; }
 .labfoot { max-width: 760px; margin: 24px auto 0; color: var(--muted); font-size: 14px; }
@@ -11,6 +14,7 @@
 .card a.btn, .card a.btn:visited { color: var(--accent-text); }
 .card a.btn.secondary { color: var(--accent); }
 .wrap.wide { max-width: 860px; }
+.page h1, .page h2 { color: var(--heading-brand); }
 .page h1 { font-size: 26px; }
 .page h2 { margin-top: 28px; font-size: 20px; }
 .page h3 { font-size: 16px; margin: 18px 0 6px; }

@@ -4,63 +4,69 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CCAIR Behavioral Lab</title>
-<link rel="icon" type="image/png" sizes="32x32" href="/lab/assets/brand/logo-mark-32.png">
-<link rel="apple-touch-icon" href="/lab/assets/brand/apple-touch-icon.png">
-<meta name="theme-color" content="#fbf6ef">
+<link rel="icon" href="/lab/assets/brand/favicon.svg" type="image/svg+xml">
+<link rel="icon" type="image/png" sizes="32x32" href="/lab/assets/brand/favicon-32.png">
+<link rel="apple-touch-icon" href="/lab/assets/brand/touch-icon-180.png">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b1630" media="(prefers-color-scheme: dark)">
 <meta name="description" content="Browser-based studies of how people judge cyber threats, from the Center for CyberAI Research (CCAIR) at Georgia State University.">
 <link rel="canonical" href="https://bampel.com/lab/">
 <link rel="stylesheet" href="/lab/assets/study.css">
 <style>
-  /* Lab home: the shared tokens from study.css, laid out as a page. System fonts only, so no visitor data goes to a font service. */
+  /* Lab home: the shared tokens from study.css, laid out as a page. Georgia State web standards: GSU Blue and white,
+     Lato (self-hosted, so no visitor data goes to a font service), a text wordmark and no unit logo. */
   body { padding: 0; }
   .mono { font-family: var(--mono); }
   .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
-  header { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 78%, transparent); -webkit-backdrop-filter: blur(18px) saturate(170%); backdrop-filter: blur(18px) saturate(170%); border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent); }
-  header .wrap { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 12px; padding-bottom: 12px; flex-wrap: wrap; }
-  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; color: var(--text); text-decoration: none; letter-spacing: -.01em; }
-  .brand img { width: 34px; height: 34px; border-radius: 10px; }
-  .brand span { color: var(--accent); }
-  nav a { color: var(--muted); text-decoration: none; margin-left: 18px; font-size: .9375rem; font-weight: 600; }
+  header.site { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--card) 92%, transparent); -webkit-backdrop-filter: blur(18px) saturate(170%); backdrop-filter: blur(18px) saturate(170%); border-top: 4px solid var(--gsu-blue); border-bottom: 1px solid var(--line); }
+  header.site .wrap { display: flex; justify-content: space-between; align-items: center; gap: 12px 20px; padding-top: 10px; padding-bottom: 10px; flex-wrap: wrap; }
+  .brandrow { display: flex; align-items: center; gap: 16px; }
+  nav a { color: var(--link); text-decoration: none; margin-left: 18px; font-size: .9375rem; font-weight: 700; }
   nav a:first-child { margin-left: 0; }
-  nav a:hover { color: var(--accent); }
-  .hero { display: grid; grid-template-columns: 1.05fr 1fr; gap: clamp(20px, 4vw, 48px); align-items: center; padding: clamp(36px, 7vw, 80px) 0 40px; }
-  .hero img { width: 100%; height: auto; border-radius: 28px; box-shadow: var(--shadow-lift); }
-  .eyebrow { color: var(--accent); font-size: .75rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
-  .hero h1 { font-size: clamp(2.1rem, 1.4rem + 3vw, 3.4rem); line-height: 1.04; letter-spacing: -.03em; margin: 12px 0 18px; }
-  .lede { color: var(--muted); font-size: 1.125rem; line-height: 1.6; max-width: 600px; }
+  nav a:hover { text-decoration: underline; text-underline-offset: .3em; text-decoration-thickness: 2px; }
+  .hero-band { background: var(--hero-bg, #0039a6); color: #ffffff; }
+  :root { --hero-bg: #0039a6; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --hero-bg: #13213f; } }
+  :root[data-theme="dark"] { --hero-bg: #13213f; }
+  .hero { max-width: 1080px; margin: 0 auto; padding: clamp(40px, 7vw, 84px) 20px clamp(36px, 6vw, 64px); }
+  .eyebrow { color: #97caeb; font-size: .8125rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+  .hero h1 { color: #ffffff; font-weight: 300; font-size: clamp(2.1rem, 1.4rem + 3vw, 3.4rem); line-height: 1.1; letter-spacing: -.01em; margin: 12px 0 18px; max-width: 860px; }
+  .hero .lede { color: #ffffff; font-size: 1.125rem; line-height: 1.6; max-width: 720px; margin: 0; }
+  .hero :focus-visible { outline-color: #ffffff; }
+  .lede { color: var(--muted); }
   section { padding: 36px 0; }
-  section h2 { font-size: 1.75rem; letter-spacing: -.02em; margin: 0 0 18px; }
+  section h2 { color: var(--heading-brand); font-size: 1.75rem; letter-spacing: -.01em; margin: 0 0 18px; }
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
-  .card { border-radius: 22px; padding: 22px; }
+  .card { border-radius: var(--radius); padding: 22px; }
+  .grid .card { border-top: 4px solid var(--accent); }
   .card h3 { margin: 0 0 6px; font-size: 1.0625rem; }
   .card p { margin: 0; color: var(--muted); font-size: .9375rem; }
-  .tag { display: inline-block; font-size: .75rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); margin-bottom: 10px; }
+  .tag { display: inline-block; font-size: .75rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--text); margin-bottom: 10px; }
   .study { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
   .btn { display: inline-flex; }
   ul.plain { padding-left: 18px; color: var(--muted); margin: 0; }
   ul.plain li { margin: 6px 0; }
   footer { border-top: 1px solid var(--line); padding: 24px 0 40px; color: var(--muted); font-size: .8125rem; }
-  @media (max-width: 760px) { .hero { grid-template-columns: 1fr; } .hero img { order: -1; } nav a { margin-left: 12px; } }
+  @media (max-width: 760px) { nav a { margin-left: 12px; } }
 </style>
 </head>
 <body>
-<header>
+<header class="site">
   <div class="wrap">
-    <a class="brand" href="/lab/"><img src="/lab/assets/brand/logo-mark-64.png" alt="" width="34" height="34">CCAIR <span>Behavioral Lab</span></a>
+    <div class="brandrow"><a class="wordmark" href="/lab/"><b>CCAIR Behavioral Lab</b><small>Georgia State University · J. Mack Robinson College of Business</small></a><span class="lockup-slot" data-official-lockup></span></div>
     <nav><a href="/ccair/">CCAIR</a><a href="#studies">Studies</a><a href="#data">Data &amp; privacy</a><a href="#researchers">For researchers</a><a href="/">bampel.com</a></nav>
   </div>
 </header>
 
-<main class="wrap">
+<div class="hero-band">
   <div class="hero">
-    <div>
     <div class="eyebrow">Center for CyberAI Research · Georgia State University</div>
     <h1>How people judge cyber threats, measured as they decide.</h1>
     <p class="lede">The CCAIR Behavioral Lab runs browser-based studies of security decisions such as spotting phishing, judging links, and responding to suspicious calls. Each study records the answer and how the person arrived at it (timing, hesitation, where attention went), so we can study the decision process rather than only its outcome.</p>
-    </div>
-    <img src="/lab/assets/brand/hero.webp" alt="" width="768" height="512">
   </div>
+</div>
 
+<main class="wrap">
   <section id="studies">
     <h2>Studies</h2>
     <div class="card study">
@@ -99,7 +105,7 @@
 
   <section id="researchers">
     <h2>For researchers</h2>
-    <p style="color:var(--text2);max-width:720px">Researchers can run studies in the lab: surveys and vignettes (including imports from Qualtrics, LimeSurvey, and REDCap), security-alert tasks, and economic games, live or asynchronous. Access is by invitation.</p>
+    <p style="max-width:720px">Researchers can run studies in the lab: surveys and vignettes (including imports from Qualtrics, LimeSurvey, and REDCap), security-alert tasks, and economic games, live or asynchronous. Access is by invitation.</p>
     <p><a class="btn" href="/lab/guide/">Read the researcher guide</a> <a href="/lab/signin/" style="margin-left:14px">Researcher sign-in</a></p>
     <p style="color:var(--muted);font-size:14px">These two links open your email app with a prepared message: <a href="mailto:bampel@gsu.edu?subject=CCAIR%20Behavioral%20Lab&amp;body=Name%3A%0AInstitution%20and%20email%3A%0AStudy%20(title%20and%20short%20description)%3A%0AIRB%20status%3A%0AWhat%20you%20need%3A">Request researcher access</a> · <a href="mailto:bampel@gsu.edu?subject=CCAIR%20Behavioral%20Lab&amp;body=Name%3A%0AYour%20message%3A">Contact the lab</a>. Messages go to the lab director's university inbox (bampel@gsu.edu). Nothing is sent from this page. <a href="/lab/support/">Support and FAQ</a></p>
   </section>

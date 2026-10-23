@@ -39,7 +39,16 @@ Starts the whole lab on this computer (Node 20 or newer; no `npm install` needed
 | Build step: the commit being built, for design files, codebooks and bundles | `scripts/lab/build-info.mjs` (netlify.toml build command) writes `netlify/lib/lab/build-info.mjs` |
 | File-backed store with Blobs semantics (write-once via atomic `link`, compare-and-swap under a per-key lock) | `scripts/lab/filestore.mjs` |
 | Sample stimuli for the templates | `static/lab/media/samples/`, rebuilt by `npm run lab:samples` (macOS `say`, ffmpeg, Chrome) |
-| Brand assets (logo, icons, illustration; generated with ChatGPT in the lab's palette) | `static/lab/assets/brand/` |
+| Brand assets: neutral favicon (a plain GSU Blue square, no symbol) and line icons for the console; no logo (see "Brand" below) | `static/lab/assets/brand/` |
+
+## Brand (Georgia State University web standards)
+
+The lab follows the Georgia State Communications ToolKit (commkit.gsu.edu): web colors, Lato, and the logo rules.
+
+- **Colors.** Georgia State Blue `#0039A6` on white is the primary pair; GSU Light Gray, Dark Gray (Cool Gray 9), Cool Blue `#0071CE`, Light Blue `#97CAEB` and Blue Steel `#374057` support it. Red (`#C60C30`) is for errors only. Headings are black or Georgia State Blue. Dark mode (not covered by GSU guidance) uses deep navy with Light Blue accents. Tokens live at the top of `assets/study.css`; every text pair meets WCAG AA.
+- **Type.** Lato 300/400/700 and 400 italic, self-hosted from `/ccair/assets/fonts/` (SIL OFL), so lab pages keep `font-src 'self'`.
+- **Logos.** GSU does not allow a center to create its own logo, and the university logo must not be recreated or generated. The lab shows a text wordmark ("CCAIR Behavioral Lab" over "Georgia State University · J. Mack Robinson College of Business") and an empty `<span class="lockup-slot" data-official-lockup>` next to it. When University Marketing (PRMC) or the Robinson College communications director supplies the official Robinson sub-brand lockup with the CCAIR unit wordmark, put the files in `static/lab/assets/brand/official/` (SVG preferred, PNG fallback; never recolor or alter them; clear space of half the flame height) and place an `<img>` inside each slot (`index.html`, `s/index.html`, the `labbar` pages, and the two brand bars in `engine/admin.js`). Until then the slot renders nothing. The earlier ChatGPT-made mark, illustration and icons were removed.
+- **Stimuli are not branded.** The softphone, simulated emails, AI advice box, vignettes, text items, media frames and reaction-time panel keep their fixed colors and the system font (`--stim-font`), so the rebrand changes none of them.
 
 ## Templates, preview, and online panels
 

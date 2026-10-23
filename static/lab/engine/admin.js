@@ -79,7 +79,7 @@
   if (!studyId) return labConsole();
 
   // ======================= study admin =======================
-  root.innerHTML = '<div class="who"><div class="brandmark"><img src="/lab/assets/brand/logo-mark-128.png" alt="" width="48" height="48"><h1 style="margin:0" id="title">Study admin</h1></div><span id="whoami" class="muted"></span></div>' + SIGNIN + '<div id="app" hidden>' +
+  root.innerHTML = '<div class="who"><div class="brandmark"><span class="wordmark"><b>CCAIR Behavioral Lab</b><small>Georgia State University · J. Mack Robinson College of Business</small></span><h1 style="margin:0" id="title">Study admin</h1></div><span id="whoami" class="muted"></span></div>' + SIGNIN + '<div id="app" hidden>' +
     '<p class="muted links" id="links"></p>' +
     '<div class="preview-bar" id="previewbar" hidden><div><strong>See it as a participant</strong><span class="muted">Opens the study in a new tab as a test participant (left out of real counts), with no wait between sessions.</span></div>' +
       '<div class="row"><label id="pvcondwrap">Arm <select id="pvcond"></select></label><button type="button" class="primary" id="preview">Preview as a participant</button></div><p class="muted" id="pvout" role="status"></p></div>' +
@@ -832,7 +832,7 @@
   // Any other signed-in researcher: "My studies", the studies their account can open.
   function labConsole() {
     document.title = 'Lab console';
-    root.innerHTML = '<div class="who"><div class="brandmark"><img src="/lab/assets/brand/logo-mark-128.png" alt="" width="48" height="48"><h1 style="margin:0" id="ctitle">CCAIR Lab: studies</h1></div><span id="whoami" class="muted"></span></div>' + SIGNIN + '<div id="app" hidden>' +
+    root.innerHTML = '<div class="who"><div class="brandmark"><span class="wordmark"><b>CCAIR Behavioral Lab</b><small>Georgia State University · J. Mack Robinson College of Business</small></span><h1 style="margin:0" id="ctitle">CCAIR Lab: studies</h1></div><span id="whoami" class="muted"></span></div>' + SIGNIN + '<div id="app" hidden>' +
       '<p class="muted" id="cintro"></p>' +
       '<div class="table-wrap"><table id="stbl"></table></div><div id="clonebox"></div>' +
       '<div data-owner><div class="section start"><h2>Start a new study</h2><p class="muted">Pick a starting point. Each one is a complete, working study: you can preview it as a participant straight away, then change anything on its Study content tab.</p>' +
