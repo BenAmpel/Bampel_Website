@@ -34,24 +34,111 @@ function Arrow() {
   return <span className="arrow" aria-hidden="true">→</span>;
 }
 
-function useInView(threshold = 0.12) {
+/* ---------- Motion ----------
+   Content is visible by default. The hidden pre-state of a reveal applies only under html.motion-ok, set here once
+   JavaScript has confirmed IntersectionObserver exists, so the page reads fully without JavaScript, in print, and for
+   crawlers that never scroll. Under reduced motion the reveals are short opacity fades and nothing moves (see CSS). */
+const CAN_OBSERVE = typeof window !== 'undefined' && 'IntersectionObserver' in window;
+if (CAN_OBSERVE) document.documentElement.classList.add('motion-ok');
+// Scroll-driven CSS animations (progress bar, hero parallax) run on the compositor; older browsers get a rAF fallback.
+const SCROLL_TIMELINE = typeof CSS !== 'undefined' && CSS.supports && CSS.supports('animation-timeline: scroll()');
+
+// One shared observer for every reveal. Elements that enter together are staggered top-to-bottom, left-to-right,
+// 70 ms apart (capped), so a grid sweeps in as a group while a lone card scrolled into view never waits.
+const STAGGER_MS = 70, STAGGER_MAX = 6;
+const revealWatcher = CAN_OBSERVE ? (() => {
+  const pending = new Map();
+  let heard = false, failsafe = null;
+  const release = (el, delay) => {
+    const cb = pending.get(el); if (!cb) return;
+    pending.delete(el); io.unobserve(el); cb(delay);
+  };
+  // The root reaches far above the viewport, so an element counts once its top has passed 94% of the viewport height,
+  // including one skipped over in a single frame (End key, scrollbar drag, restored position). An observer only reports
+  // changes, so with a plain viewport root those would never be reported and would stay hidden.
+  const io = new IntersectionObserver((entries) => {
+    heard = true;
+    const entering = [];
+    entries.forEach((e) => {
+      if (!e.isIntersecting) return;
+      // Already above the viewport: show it at once, nothing to animate, and it takes no stagger slot.
+      if (e.boundingClientRect.bottom <= 0) release(e.target, 0); else entering.push(e);
+    });
+    entering.sort((a, b) => (a.boundingClientRect.top - b.boundingClientRect.top) || (a.boundingClientRect.left - b.boundingClientRect.left))
+      .forEach((e, k) => release(e.target, Math.min(k, STAGGER_MAX) * STAGGER_MS));
+  }, { rootMargin: '100000px 0px -6% 0px', threshold: 0 });
+  return {
+    watch(el, cb) {
+      pending.set(el, cb); io.observe(el);
+      // An observer reports every target once as soon as it is observed. If nothing has arrived after 1.5 s it never
+      // will (a broken or suspended implementation), so show everything rather than leave content hidden.
+      if (!heard && !failsafe) failsafe = setTimeout(() => { failsafe = null; if (!heard) [...pending.keys()].forEach((t) => release(t, 0)); }, 1500);
+      return () => { pending.delete(el); io.unobserve(el); };
+    },
+  };
+})() : null;
+
+function useInView() {
   const ref = useRef(null);
-  const [visible, setVisible] = useState(false);
+  const [state, setState] = useState({ visible: !CAN_OBSERVE, delay: 0 });
   useEffect(() => {
-    const el = ref.current; if (!el) return;
-    if (!('IntersectionObserver' in window)) { setVisible(true); return; }
-    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } }, { threshold, rootMargin: '0px 0px -40px 0px' });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [threshold]);
-  return [ref, visible];
+    const el = ref.current; if (!el || !revealWatcher) return;
+    return revealWatcher.watch(el, (delay) => setState({ visible: true, delay }));
+  }, []);
+  return [ref, state.visible, state.delay];
 }
 
-// Fades its content up once it scrolls into view (fade only under reduced motion, see CSS).
-function Reveal({ children, as = 'div', className = '', ...rest }) {
-  const [ref, visible] = useInView();
+// Sweeps its content up once it scrolls into view (an opacity fade only under reduced motion, see CSS).
+function Reveal({ children, as = 'div', className = '', style, ...rest }) {
+  const [ref, visible, delay] = useInView();
   const Tag = as;
-  return <Tag ref={ref} className={'reveal' + (visible ? ' is-in' : '') + (className ? ' ' + className : '')} {...rest}>{children}</Tag>;
+  const s = delay ? { ...style, '--rd': delay + 'ms' } : style;
+  return <Tag ref={ref} className={'reveal' + (visible ? ' is-in' : '') + (className ? ' ' + className : '')} style={s} {...rest}>{children}</Tag>;
+}
+
+// Counts a statistic up from zero the first time it is seen. Screen readers and crawlers get the real number from the
+// hidden copy; the visible digits are padded with figure spaces to the final width so the count shifts no layout.
+function CountUp({ value }) {
+  const ref = useRef(null);
+  const n = Number(value) || 0;
+  const animate = !!revealWatcher && !REDUCE_MOTION && n > 1;
+  const [shown, setShown] = useState(animate ? 0 : n);
+  useEffect(() => {
+    if (!animate) { setShown(n); return; }
+    let raf = 0;
+    const stop = revealWatcher.watch(ref.current, (delay) => {
+      const t0 = performance.now() + delay + 200, dur = 1100;
+      const tick = (now) => {
+        const p = Math.min(1, Math.max(0, (now - t0) / dur));
+        setShown(Math.round(n * (1 - Math.pow(1 - p, 4))));
+        if (p < 1) raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+    });
+    return () => { stop(); cancelAnimationFrame(raf); };
+  }, [n]);
+  return (
+    <>
+      <span ref={ref} aria-hidden="true">{String(shown).padStart(String(n).length, ' ')}</span>
+      <span className="sr-only">{n}</span>
+    </>
+  );
+}
+
+// rAF-throttled, passive scroll listener; fn receives scrollY. Runs once on mount so state matches a restored position.
+function useScrollFrame(fn, enabled = true) {
+  const fnRef = useRef(fn);
+  fnRef.current = fn;
+  useEffect(() => {
+    if (!enabled) return;
+    let raf = 0;
+    const run = () => { raf = 0; fnRef.current(window.scrollY); };
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(run); };
+    run();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); cancelAnimationFrame(raf); };
+  }, [enabled]);
 }
 
 function CCAIRNav({ currentPage }) {
@@ -59,13 +146,16 @@ function CCAIRNav({ currentPage }) {
   const [open, setOpen] = useState(false);
   const btnRef = useRef(null);
   const sheetRef = useRef(null);
+  const barRef = useRef(null);
 
-  useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 4);
-    fn();
-    window.addEventListener('scroll', fn, { passive: true });
-    return () => window.removeEventListener('scroll', fn);
-  }, []);
+  // The nav material fades in and the bar condenses once the page moves. The reading-progress bar is a scroll-driven
+  // CSS animation where supported; elsewhere it is set here, one write per frame, after the reads.
+  useScrollFrame((y) => {
+    setScrolled(y > 4);
+    if (SCROLL_TIMELINE || !barRef.current) return;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    barRef.current.style.transform = 'scaleX(' + (max > 0 ? Math.min(1, y / max) : 0).toFixed(4) + ')';
+  });
 
   useEffect(() => { setOpen(false); }, [currentPage]);
 
@@ -108,6 +198,7 @@ function CCAIRNav({ currentPage }) {
           <Icon name={open ? 'close' : 'menu'} />
         </button>
       </nav>
+      <div className="scroll-progress" ref={barRef} aria-hidden="true"></div>
       {open && <div className="sheet-scrim" onClick={() => setOpen(false)} aria-hidden="true"></div>}
       {open && (
         <div id="ccair-menu" className="sheet" ref={sheetRef} onClick={(e) => { if (e.target.closest('a')) setOpen(false); }}>
@@ -158,13 +249,16 @@ function Card({ children, className = '', ...rest }) {
   return <div className={'card' + (className ? ' ' + className : '')} {...rest}>{children}</div>;
 }
 
+// The reveal sits on a wrapper so the link's own hover lift and press keep their transitions.
 function LinkCard({ href, title, children, more = 'Learn more' }) {
   return (
-    <a className="card card-link" href={href}>
-      <h3>{title}</h3>
-      {children}
-      {more && <span className="more">{more} <span aria-hidden="true">→</span></span>}
-    </a>
+    <Reveal className="card-slot">
+      <a className="card card-link" href={href}>
+        <h3>{title}</h3>
+        {children}
+        {more && <span className="more">{more} <span aria-hidden="true">→</span></span>}
+      </a>
+    </Reveal>
   );
 }
 
@@ -209,7 +303,7 @@ function PublicationItem({ title, authors, venue, year, type, doi, pdf }) {
     doi && { label: 'DOI', href: 'https://doi.org/' + doi, aria: `DOI for ${title}` },
   ].filter(Boolean);
   return (
-    <li className="pub">
+    <Reveal as="li" className="pub">
       <h3>{site.page ? <a className="pub-title-link" href={site.page}>{title}</a> : title}</h3>
       <Authors text={authors} />
       <p className="venue">{venueText}{year ? `, ${year}` : ''}{award && <> · <span className="award">{award[1]}</span></>}</p>
@@ -221,7 +315,7 @@ function PublicationItem({ title, authors, venue, year, type, doi, pdf }) {
           </span>
         )}
       </div>
-    </li>
+    </Reveal>
   );
 }
 
@@ -314,7 +408,7 @@ function CCAIRFooter() {
 
 window.CCAIR = window.CCAIR || {};
 const CCAIR_COMPONENTS = {
-  REDUCE_MOTION, NAV_PAGES, hrefFor, Icon, Arrow, useInView, Reveal, CCAIRNav, PageHead, Section, Card, LinkCard,
+  REDUCE_MOTION, CAN_OBSERVE, SCROLL_TIMELINE, NAV_PAGES, hrefFor, Icon, Arrow, useInView, Reveal, CountUp, useScrollFrame, CCAIRNav, PageHead, Section, Card, LinkCard,
   Tag, Status, Authors, PublicationItem, PersonCard, SegmentedControl, FinderFeature, CCAIRFooter, initialsOf,
 };
 Object.assign(window.CCAIR, CCAIR_COMPONENTS);

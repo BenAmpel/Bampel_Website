@@ -1,5 +1,5 @@
 /* CCAIR App — shell with hash routing and page focus management */
-const { useState, useEffect, useRef } = React;
+const { useState, useEffect, useLayoutEffect, useRef } = React;
 
 class ErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { error: null }; }
@@ -30,6 +30,28 @@ function pageFromHash() {
   return VALID_PAGES.includes(h) ? h : 'home';
 }
 
+// Route transitions. The new page slides in from the side its nav link sits on (later pages from the right, earlier
+// from the left) while the old one fades the other way, so moving through the nav feels spatially consistent. Uses
+// same-document View Transitions where available (the nav keeps its own layer and stays put); elsewhere the new page
+// simply sweeps in (CSS .page). Never under reduced motion. Any click or key press during a transition finishes it at
+// once, and a new route mid-transition replaces it, so nothing waits on an animation.
+const CAN_VIEW_TRANSITION = typeof document !== 'undefined' && typeof document.startViewTransition === 'function' && !REDUCE_MOTION;
+if (CAN_VIEW_TRANSITION) document.documentElement.classList.add('has-vt');
+let activeTransition = null;
+const skipActive = () => { if (activeTransition) activeTransition.skipTransition(); };
+if (CAN_VIEW_TRANSITION) { window.addEventListener('pointerdown', skipActive, true); window.addEventListener('keydown', skipActive, true); }
+
+function routeTo(next, apply) {
+  const from = VALID_PAGES.indexOf(document.documentElement.dataset.page || 'home'), to = VALID_PAGES.indexOf(next);
+  document.documentElement.dataset.navDir = to < from ? 'back' : 'forward';
+  document.documentElement.dataset.page = next;
+  if (!CAN_VIEW_TRANSITION || document.visibilityState !== 'visible') { apply(); return; }
+  document.documentElement.dataset.vt = '';
+  const vt = document.startViewTransition(() => ReactDOM.flushSync(apply));
+  activeTransition = vt;
+  vt.finished.finally(() => { if (activeTransition === vt) { activeTransition = null; delete document.documentElement.dataset.vt; } });
+}
+
 function CCAIRApp() {
   const [page, setPage] = useState(pageFromHash);
   const mainRef = useRef(null);
@@ -37,12 +59,14 @@ function CCAIRApp() {
 
   // Pages are hash routes, so plain links work, the back button works, and nothing waits on a transition.
   useEffect(() => {
-    const onHash = () => setPage(pageFromHash());
+    document.documentElement.dataset.page = pageFromHash();
+    const onHash = () => { const next = pageFromHash(); routeTo(next, () => setPage(next)); };
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
 
-  useEffect(() => {
+  // Layout effect: the scroll reset and focus happen in the same commit as the new page, inside the view transition.
+  useLayoutEffect(() => {
     document.title = TITLES[page] || TITLES.home;
     if (firstRender.current) { firstRender.current = false; return; }
     window.scrollTo(0, 0);

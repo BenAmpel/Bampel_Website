@@ -32,7 +32,7 @@ const short = (r) => r.short || r.name;
 // 'an IT Auditor', 'an AI Security Specialist', 'a SOC Analyst'.
 const an = (name) => (/^[AEIOU]/.test(name) ? 'an ' : 'a ') + name;
 
-const head = (o) => baseHead({ ...o, css: [`/ccair/assets/pathways/pathways.css?v=${ASSET_V}-warm3`] });
+const head = (o) => baseHead({ ...o, css: [`/ccair/assets/pathways/pathways.css?v=${ASSET_V}-warm4`] });
 
 function top(current) {
   return baseTop([
@@ -44,7 +44,7 @@ function top(current) {
   ]);
 }
 
-const foot = () => baseFoot({ note: `Reviewed ${D.updated}`, scripts: [`/ccair/assets/pathways/pathways.js?v=${ASSET_V}-anon1`] });
+const foot = () => baseFoot({ note: `Reviewed ${D.updated}`, scripts: [`/ccair/assets/pathways/pathways.js?v=${ASSET_V}-anon2`] });
 
 function faqHtml(faq) {
   return `<div class="faq">${faq.map((f, i) => `<details class="reveal" style="--d:${(i * 0.05).toFixed(2)}s"><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join('')}</div>`;

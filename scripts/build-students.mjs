@@ -191,14 +191,14 @@ function page(p, idx) {
   };
 
   return `${baseHead({ title: p.metaTitle, ogTitle: p.title, desc: p.desc, url, ogType: 'article',
-    css: [`/ccair/assets/pathways/pathways.css?v=${ASSET_V}-warm3`, `/ccair/assets/students/students.css?v=${ASSET_V}-1`] })}
+    css: [`/ccair/assets/pathways/pathways.css?v=${ASSET_V}-warm4`, `/ccair/assets/students/students.css?v=${ASSET_V}-1`] })}
 <meta property="article:modified_time" content="${modified}">
 ${ld(graph)}
 </head>
 <body>
 ${baseTop(navLinks(p))}
 ${body}
-${baseFoot({ note: `Last verified ${S.verified}`, scripts: [`/ccair/assets/pathways/pathways.js?v=${ASSET_V}-anon1`, ...(p.slug === 'data' ? [`/ccair/assets/students/students.js?v=${ASSET_V}-1`] : [])] })}`;
+${baseFoot({ note: `Last verified ${S.verified}`, scripts: [`/ccair/assets/pathways/pathways.js?v=${ASSET_V}-anon2`, ...(p.slug === 'data' ? [`/ccair/assets/students/students.js?v=${ASSET_V}-1`] : [])] })}`;
 }
 
 /* ---------- Checks ---------- */

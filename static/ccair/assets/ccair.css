@@ -24,6 +24,10 @@
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --radius: 20px; --radius-sm: 14px; --radius-xs: 10px;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Motion: a critically damped spring (no overshoot) for things that arrive; --ease for quick responses to the pointer.
+     Reveal distance and stagger stay small so content sweeps in rather than flying. */
+  --spring: var(--ease);
+  --reveal-y: 20px;
   --nav-h: 60px;
   --gutter: clamp(16px, 4vw, 40px);
 }
@@ -43,6 +47,12 @@
     --shadow-lg: 0 2px 4px rgba(0, 0, 0, 0.3), 0 18px 48px rgba(0, 0, 0, 0.35);
     --hero-glow-1: rgba(240, 147, 106, 0.14); --hero-glow-2: rgba(156, 198, 170, 0.10);
   }
+}
+
+/* Sampled 1 - (1 + wt)e^-wt with w = 9.2: settles without overshoot, like a damping-1.0 spring. */
+@supports (transition-timing-function: linear(0, 1)) {
+  :root { --spring: linear(0, 0.0571, 0.1793, 0.3192, 0.4533, 0.571, 0.6691, 0.7483, 0.8106, 0.8587, 0.8954, 0.9231, 0.9437,
+    0.959, 0.9703, 0.9785, 0.9845, 0.9889, 0.992, 0.9943, 0.9959, 0.9971, 0.9979, 0.9985, 1); }
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -70,10 +80,24 @@ h1[tabindex="-1"]:focus { outline: none; }
 .nav { position: sticky; top: 0; z-index: 100; height: var(--nav-h);
   border-bottom: 1px solid transparent; transition: border-color 0.3s var(--ease); }
 /* The blur lives on a pseudo-element: backdrop-filter on .nav itself would make it the containing block of the
-   position: fixed menu sheet and scrim it holds, collapsing the scrim to zero height. */
-.nav::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+   position: fixed menu sheet and scrim it holds, collapsing the scrim to zero height.
+   At the top of the page the bar is clear; once content scrolls under it the material fades in, a soft scroll-edge
+   shadow replaces a hard rule, and the brand mark condenses. Opacity and transform only. */
+.nav::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0; transition: opacity 0.35s var(--ease);
   background: var(--nav-bg); -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%); }
+.nav::after { content: ''; position: absolute; left: 0; right: 0; top: 100%; height: 14px; pointer-events: none; opacity: 0;
+  background: linear-gradient(to bottom, rgba(43, 26, 18, 0.07), transparent); transition: opacity 0.35s var(--ease); }
 .nav.is-scrolled { border-bottom-color: var(--line); }
+.nav.is-scrolled::before, .nav.is-scrolled::after { opacity: 1; }
+.nav .brand img { transition: transform 0.35s var(--ease); transform-origin: 0 50%; }
+.nav.is-scrolled .brand img { transform: scale(0.875); }
+/* Reading progress: a hairline of accent along the bottom edge of the bar, scaled with the scroll position. */
+.scroll-progress { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; pointer-events: none; transform: scaleX(0); transform-origin: 0 50%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-strong)); border-radius: 0 2px 2px 0; }
+@supports (animation-timeline: scroll()) {
+  .scroll-progress { animation: progress linear both; animation-timeline: scroll(root block); }
+  @keyframes progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+}
 .nav-inner { height: 100%; display: flex; align-items: center; gap: 16px; }
 .brand { display: inline-flex; align-items: center; gap: 10px; color: var(--text); font-weight: 700; font-size: 17px; letter-spacing: -0.01em; border-radius: 10px; }
 .brand:hover { text-decoration: none; }
@@ -124,11 +148,37 @@ h1[tabindex="-1"]:focus { outline: none; }
 .btn-sm { padding: 9px 16px; font-size: 14px; }
 .btn .arrow { transition: transform 0.2s var(--ease); }
 .btn:hover .arrow { transform: translateX(3px); }
+/* Pointer devices: buttons rise a pixel toward the cursor; the press (scale 0.97) always wins. */
+@media (hover: hover) {
+  .btn-primary:hover, .btn-secondary:hover { transform: translateY(-1px); }
+  .btn-primary:hover { box-shadow: 0 6px 18px -6px var(--accent-line); }
+  .btn-secondary:hover { box-shadow: var(--shadow); }
+  .btn:hover:active { transform: scale(0.97); }
+}
 
 /* ---------- Page and section rhythm ---------- */
 main { flex: 1; }
-.page { animation: pageIn 0.35s var(--ease); }
-@keyframes pageIn { from { opacity: 0; } }
+/* Route change without View Transitions: the new page sweeps in from the side of its nav link (see ccair-app.jsx). */
+.page { animation: pageIn 0.45s var(--spring) backwards; }
+@keyframes pageIn { from { opacity: 0; transform: translate3d(var(--page-x, 0), 0, 0); } }
+html[data-nav-dir="forward"] { --page-x: 24px; }
+html[data-nav-dir="back"] { --page-x: -24px; }
+.has-vt .page { animation: none; }
+/* With View Transitions the nav keeps its own layer while the page underneath trades places. */
+/* The old page clears quickly and the new one follows 60 ms later, so the two rarely overlap as text. */
+::view-transition-old(root) { animation: vtOut 0.16s cubic-bezier(0.4, 0, 1, 1) both; }
+::view-transition-new(root) { animation: vtIn 0.44s var(--spring) 60ms both; }
+@keyframes vtOut { to { opacity: 0; transform: translate3d(calc(var(--page-x, 24px) * -0.5), 0, 0); } }
+@keyframes vtIn { from { opacity: 0; transform: translate3d(var(--page-x, 24px), 0, 0); } }
+/* Named only while a transition runs: a named element is a backdrop root, which would empty the nav's blur. */
+html[data-vt] .nav { view-transition-name: ccair-nav; }
+::view-transition-group(ccair-nav) { animation-duration: 0.2s; }
+/* Page titles arrive in sequence: eyebrow, title, lede, then anything after. */
+.page-head > * { animation: rise 0.7s var(--spring) backwards; }
+.page-head > :nth-child(2) { animation-delay: 60ms; }
+.page-head > :nth-child(3) { animation-delay: 120ms; }
+.page-head > :nth-child(n+4) { animation-delay: 180ms; }
+@keyframes rise { from { opacity: 0; transform: translate3d(0, 16px, 0); } }
 .page-head { padding: clamp(48px, 8vw, 96px) 0 clamp(8px, 2vw, 16px); }
 .eyebrow { display: inline-block; font-size: 13px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--warm); margin-bottom: 12px; }
 .page-head h1 { font-size: clamp(36px, 5.6vw, 60px); line-height: 1.05; letter-spacing: -0.025em; max-width: 18ch; }
@@ -148,17 +198,24 @@ main { flex: 1; }
 .grid-3 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
 .grid-4 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); }
 
-/* Reveal on scroll: a short fade-up, fades only under reduced motion. */
-.reveal { opacity: 0; transform: translateY(12px); transition: opacity 0.6s var(--ease), transform 0.6s var(--ease); }
-.reveal.is-in { opacity: 1; transform: none; }
+/* Reveal on scroll: content sweeps up into place, staggered within a group (--rd, set per element by the observer).
+   The hidden pre-state needs html.motion-ok (added by JavaScript once the observer is available), so without JavaScript
+   everything simply shows. An opacity fade only under reduced motion (below). */
+.motion-ok .reveal { transition: opacity 0.55s var(--ease) var(--rd, 0ms), transform 0.7s var(--spring) var(--rd, 0ms); }
+.motion-ok .reveal:not(.is-in) { opacity: 0; transform: translate3d(0, var(--reveal-y), 0); }
+.card-slot { display: flex; }
+.card-slot > .card-link { flex: 1; }
 
 /* ---------- Cards ---------- */
 .card { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: clamp(20px, 2.4vw, 28px); box-shadow: var(--shadow-sm); }
 .card h3 { font-size: 19px; line-height: 1.3; letter-spacing: -0.012em; margin-bottom: 8px; }
 .card p { color: var(--text-2); font-size: 15.5px; line-height: 1.6; }
-.card-link { display: block; color: inherit; transition: box-shadow 0.25s var(--ease), border-color 0.25s, transform 0.12s ease-out; }
-.card-link:hover { text-decoration: none; box-shadow: var(--shadow); border-color: var(--line-strong); }
-.card-link:active { transform: scale(0.99); }
+.card-link { display: block; color: inherit; transition: box-shadow 0.3s var(--ease), border-color 0.25s, transform 0.3s var(--ease); }
+.card-link:hover { text-decoration: none; box-shadow: var(--shadow-lg); border-color: var(--line-strong); }
+.card-link:active { transform: scale(0.99); transition-duration: 0.12s; }
+@media (hover: hover) { .card-link:hover { transform: translateY(-3px); } .card-link:hover:active { transform: translateY(-1px) scale(0.99); } }
+.card-link .more span { display: inline-block; transition: transform 0.25s var(--ease); }
+.card-link:hover .more span { transform: translateX(3px); }
 .card-link .more { display: inline-flex; gap: 6px; margin-top: 14px; color: var(--accent); font-weight: 600; font-size: 15px; }
 .card-num { font: 600 13px/1 var(--sans); color: var(--warm); letter-spacing: 0.04em; margin-bottom: 14px; display: block; }
 .list-check { list-style: none; margin-top: 6px; }
@@ -168,7 +225,10 @@ main { flex: 1; }
 /* Chips and tags */
 .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
 .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; line-height: 1; padding: 7px 11px; border-radius: 999px; background: var(--surface-2); color: var(--text-2); }
+a.chip { transition: background 0.2s, color 0.2s, transform 0.2s var(--ease); }
 a.chip:hover { background: var(--accent-soft); color: var(--accent); text-decoration: none; }
+@media (hover: hover) { a.chip:hover { transform: translateY(-1px); } }
+a.chip:active { transform: scale(0.97); }
 .tag { display: inline-flex; align-items: center; font-size: 12px; font-weight: 600; letter-spacing: 0.02em; padding: 4px 9px; border-radius: 999px; background: var(--surface-2); color: var(--text-2); white-space: nowrap; }
 .tag-journal { background: var(--accent-soft); color: var(--accent); }
 .tag-conference { background: var(--warm-soft); color: var(--warm); }
@@ -178,8 +238,34 @@ a.chip:hover { background: var(--accent-soft); color: var(--accent); text-decora
 
 /* ---------- Hero ---------- */
 .hero { position: relative; overflow: hidden; padding: clamp(56px, 10vw, 120px) 0 clamp(48px, 7vw, 80px); text-align: center; isolation: isolate; }
-.hero::before { content: ''; position: absolute; inset: -20% -10% auto; height: 120%; z-index: -1; pointer-events: none;
-  background: radial-gradient(45% 55% at 28% 30%, var(--hero-glow-1), transparent 70%), radial-gradient(40% 50% at 75% 25%, var(--hero-glow-2), transparent 70%); }
+/* Two soft color fields on their own layers, so they can drift at different rates as the hero scrolls away. */
+.hero-glow { position: absolute; inset: -20% -10% auto; height: 120%; z-index: -1; pointer-events: none; animation: glowIn 1.6s var(--ease) backwards; }
+.hero-glow i { position: absolute; inset: 0; will-change: transform; }
+.hero-glow i:nth-child(1) { background: radial-gradient(45% 55% at 28% 30%, var(--hero-glow-1), transparent 70%); }
+.hero-glow i:nth-child(2) { background: radial-gradient(40% 50% at 75% 25%, var(--hero-glow-2), transparent 70%); }
+@keyframes glowIn { from { opacity: 0; } }
+/* Entrance: logo, headline, lede, actions and stats arrive in one choreographed sweep, 90 ms apart. */
+.hero-inner > *, .hero .stats { animation: heroIn 0.9s var(--spring) backwards; }
+.hero-inner > .hero-logo { animation-name: heroLogo; }
+.hero h1 { animation-delay: 90ms; }
+.hero-inner > .lede { animation-delay: 180ms; }
+.hero-cta { animation-delay: 270ms; }
+.hero .stats { animation-delay: 380ms; }
+@keyframes heroIn { from { opacity: 0; transform: translate3d(0, 24px, 0); } }
+@keyframes heroLogo { from { opacity: 0; transform: translate3d(0, 12px, 0) scale(0.92); } }
+/* Scroll depth on the compositor: the color fields drift and part as the hero leaves, the headline block lags a
+   little behind the page. Browsers without scroll-driven animations get the same motion from HeroGlow's rAF loop. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .hero { view-timeline: --hero block; }
+    .hero-glow i:nth-child(1) { animation: glowDriftA linear both; animation-timeline: --hero; animation-range: exit 0% exit 100%; }
+    .hero-glow i:nth-child(2) { animation: glowDriftB linear both; animation-timeline: --hero; animation-range: exit 0% exit 100%; }
+    .hero-inner { animation: heroLag linear both; animation-timeline: --hero; animation-range: exit 0% exit 100%; }
+    @keyframes glowDriftA { to { transform: translate3d(0, 26vh, 0) scale(1.08); } }
+    @keyframes glowDriftB { to { transform: translate3d(-10vw, 12vh, 0); } }
+    @keyframes heroLag { to { transform: translate3d(0, 90px, 0); } }
+  }
+}
 .hero-logo { width: clamp(96px, 11vw, 120px); height: auto; margin: 0 auto 28px; border-radius: 28px; box-shadow: var(--shadow); }
 .hero h1 { font-size: clamp(40px, 7vw, 76px); line-height: 1.03; letter-spacing: -0.03em; max-width: 14ch; margin-inline: auto; }
 .hero h1 em { font-style: normal; color: var(--accent); }
@@ -190,7 +276,7 @@ a.chip:hover { background: var(--accent-soft); color: var(--accent); text-decora
 .stat { padding: 20px 12px; text-align: center; }
 .stat + .stat { border-left: 1px solid var(--line); }
 .stat b { display: block; font: 700 clamp(28px, 3.6vw, 38px)/1.05 var(--display); letter-spacing: -0.02em; color: var(--text); font-variant-numeric: tabular-nums; }
-.stat span { display: block; margin-top: 6px; font-size: 13.5px; color: var(--muted); line-height: 1.35; }
+.stat dt span { display: block; margin-top: 6px; font-size: 13.5px; color: var(--muted); line-height: 1.35; }
 @media (max-width: 600px) {
   .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .stat:nth-child(3) { border-left: 0; }
@@ -316,8 +402,15 @@ a.chip:hover { background: var(--accent-soft); color: var(--accent); text-decora
 
 /* ---------- Accessibility preferences ---------- */
 @media (prefers-reduced-motion: reduce) {
-  .reveal { transform: none; transition: opacity 0.3s linear; }
-  .btn:active, .card-link:active, .segmented button:active { transform: none; }
+  /* Nothing moves: reveals and route changes are brief opacity fades, entrances and parallax are off, stats show
+     their final numbers (CountUp), and hover and press keep only their color and shadow changes. */
+  .motion-ok .reveal { transition: opacity 0.15s linear; }
+  .motion-ok .reveal:not(.is-in) { transform: none; }
+  .page { animation: fade 0.15s linear; }
+  .page-head > *, .hero-inner > *, .hero-inner > .hero-logo, .hero .stats, .hero-glow { animation: none; }
+  .btn, .btn:hover, .btn:active, .card-link, .card-link:hover, .card-link:active, a.chip:hover, a.chip:active,
+  .segmented button:active, .nav .brand img { transform: none !important; }
+  .card-link .more span, .card-link:hover .more span { transform: none; }
   .sheet { animation: fade 0.15s linear; }
   .btn .arrow, .btn:hover .arrow { transition: none; transform: none; }
   .state img { animation: none; }
@@ -344,9 +437,10 @@ a.chip:hover { background: var(--accent-soft); color: var(--accent); text-decora
     --green: #467055; --green-soft: rgba(70, 112, 85, 0.12);
     --line: #BBBBBB; --line-strong: #999999; }
   body { background: #FFFFFF; color: var(--text); }
-  .nav, .footer, .menu-btn, .hero::before, .sheet, .sheet-scrim, .skip { display: none !important; }
+  .nav, .footer, .menu-btn, .sheet, .sheet-scrim, .skip { display: none !important; }
   .card, .stats, .feature { box-shadow: none; }
-  .reveal { opacity: 1; transform: none; }
+  .reveal, .motion-ok .reveal:not(.is-in) { opacity: 1; transform: none; }
+  .hero-glow, .scroll-progress { display: none !important; }
 }
 
 /* Skip-link target: focused programmatically, no ring around the whole page */

@@ -66,29 +66,57 @@ const JOIN_AREAS = [
 ];
 
 const byYearDesc = (a, b) => (b.year || 0) - (a.year || 0);
+
+// Hero depth: two soft color fields drift at different rates as the hero scrolls away and the headline block lags
+// slightly behind the page, so the hero reads as layered. Where scroll-driven CSS animations exist the stylesheet does
+// this on the compositor; otherwise one rAF write per frame, only while the hero is on screen. Off under reduced motion.
+function HeroGlow({ heroRef, innerRef }) {
+  const aRef = React.useRef(null), bRef = React.useRef(null);
+  const box = React.useRef({ top: 0, h: 1 });
+  React.useEffect(() => {
+    const measure = () => { const h = heroRef.current; if (h) box.current = { top: h.offsetTop, h: h.offsetHeight || 1 }; };
+    measure();
+    window.addEventListener('resize', measure, { passive: true });
+    return () => window.removeEventListener('resize', measure);
+  }, []);
+  useScrollFrame((y) => {
+    const { top, h } = box.current;
+    const p = Math.max(0, Math.min(1, (y - top + 60) / h));
+    if (p >= 1 && box.current.done) return;
+    box.current.done = p >= 1;
+    if (aRef.current) aRef.current.style.transform = `translate3d(0, ${(p * 26).toFixed(2)}vh, 0) scale(${(1 + p * 0.08).toFixed(4)})`;
+    if (bRef.current) bRef.current.style.transform = `translate3d(${(p * -10).toFixed(2)}vw, ${(p * 12).toFixed(2)}vh, 0)`;
+    if (innerRef.current) innerRef.current.style.transform = `translate3d(0, ${(p * 90).toFixed(1)}px, 0)`;
+  }, !REDUCE_MOTION && !SCROLL_TIMELINE);
+  return <div className="hero-glow" aria-hidden="true"><i ref={aRef}></i><i ref={bRef}></i></div>;
+}
 const STAT_STYLE = { display: 'flex', flexDirection: 'column-reverse', justifyContent: 'flex-end' };
 
 function HomePage() {
   const { publications, people, news, courses } = useData();
   const phdCount = (people.students || []).length + (people.mentees || []).length;
   const recent = publications.filter((p) => p.type === 'journal').slice().sort(byYearDesc).slice(0, 3);
+  const heroRef = React.useRef(null), innerRef = React.useRef(null);
 
   return (
     <div className="page">
-      <section className="hero" aria-labelledby="hero-title">
+      <section className="hero" aria-labelledby="hero-title" ref={heroRef}>
+        <HeroGlow heroRef={heroRef} innerRef={innerRef} />
         <div className="wrap">
-          <img className="hero-logo" src="uploads/brand/logo-mark-512.png" alt="CCAIR logo: a shield around a speech bubble with sound waves and a cursor" width="120" height="120" />
-          <h1 id="hero-title">Center for <em>CyberAI</em> Research</h1>
-          <p className="lede">We study how intelligent systems can spot malicious behavior before it turns into an attack,
-            and we help people and organizations act on what those systems find.</p>
-          <div className="hero-cta">
-            <a className="btn btn-primary" href="#/research">Explore our research <Arrow /></a>
-            <a className="btn btn-secondary" href="/ccair/pathways/">Find your cyber career path</a>
+          <div className="hero-inner" ref={innerRef}>
+            <img className="hero-logo" src="uploads/brand/logo-mark-512.png" alt="CCAIR logo: a shield around a speech bubble with sound waves and a cursor" width="120" height="120" />
+            <h1 id="hero-title">Center for <em>CyberAI</em> Research</h1>
+            <p className="lede">We study how intelligent systems can spot malicious behavior before it turns into an attack,
+              and we help people and organizations act on what those systems find.</p>
+            <div className="hero-cta">
+              <a className="btn btn-primary" href="#/research">Explore our research <Arrow /></a>
+              <a className="btn btn-secondary" href="/ccair/pathways/">Find your cyber career path</a>
+            </div>
           </div>
           <dl className="stats">
             {[[publications.length, 'Publications'], [phdCount, 'Ph.D. students mentored'], [2, 'Best paper awards'], [courses.length, 'Courses taught']].map(([n, label]) => (
               // dt before dd for assistive tech; column-reverse keeps the number on top.
-              <div key={label} className="stat" style={STAT_STYLE}><dt><span>{label}</span></dt><dd><b>{n}</b></dd></div>
+              <div key={label} className="stat" style={STAT_STYLE}><dt><span>{label}</span></dt><dd><b><CountUp value={n} /></b></dd></div>
             ))}
           </dl>
         </div>
@@ -119,15 +147,15 @@ function HomePage() {
       </Section>
 
       <Section id="news" eyebrow="News" title="What's new at the center">
-        <Reveal as="ul" className="news">
+        <ul className="news">
           {news.map((n) => (
-            <li key={n.date + n.title}>
+            <Reveal as="li" key={n.date + n.title}>
               <time>{n.date}</time>
               <span className="title">{n.title}</span>
               <span className="tag">{n.tag}</span>
-            </li>
+            </Reveal>
           ))}
-        </Reveal>
+        </ul>
       </Section>
 
       <Section id="students" labelledBy="students-title">
@@ -348,12 +376,12 @@ function ResourcesPage() {
         <div className="toolbar"><SegmentedControl label="Asset type" options={tabs} value={tab} onChange={setTab} /></div>
         <div className="grid grid-3">
           {byCategory(tab).map((r) => (
-            <div key={r.title} className="card">
+            <Reveal key={r.title} className="card">
               <div style={{ marginBottom: 12 }}><Status status={r.status} /></div>
               <h3>{r.title}</h3>
               <p>{r.description}</p>
               <div className="chips">{(r.tags || []).map((t) => <span key={t} className="chip">{t}</span>)}</div>
-            </div>
+            </Reveal>
           ))}
         </div>
       </Section>
@@ -478,14 +506,14 @@ function AboutPage() {
       </Section>
 
       <Section id="courses" alt title="Courses" intro="Security and AI courses taught by the center director at Georgia State, with student evaluation scores.">
-        <Reveal as="ul" className="rows">
+        <ul className="rows">
           {courses.map((c) => (
-            <li key={c.code}>
+            <Reveal as="li" key={c.code}>
               <span><span className="code">{c.code}</span><span className="t">{c.title}</span></span>
               <span className="r">{c.level} · {c.rating}</span>
-            </li>
+            </Reveal>
           ))}
-        </Reveal>
+        </ul>
       </Section>
 
       <Section id="support" title="Research support" intro="Grants led by center faculty, plus the federal and defense sponsors acknowledged across CCAIR publications.">
