@@ -1,15 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!-- CCAIR lab voice (Kokoro TTS, voice_server.py) on the lab Mac mini, bound to its Tailscale address.
-     The Python environment lives on the Extreme SSD; if the SSD is not mounted yet, the start fails and KeepAlive
-     retries every 30 s. Installed by install.sh in this folder. -->
+     Everything it needs is on the internal disk, so it no longer depends on the Extreme SSD being mounted:
+       ~/ccair-voice/python  standalone CPython 3.12.15 (copied from the SSD build, without its global packages)
+       ~/ccair-voice/venv    built on it: python -m venv, then pip install -r ~/ccair-voice/requirements.lock.txt
+       ~/ccair-voice/hf      its own copy of the Kokoro-82M weights (mlx-community bf16 and prince-canuma), read offline
+     (verified 2026-10-22: no file open on the SSD). Installed by install.sh in this folder. -->
 <plist version="1.0"><dict>
 <key>Label</key><string>com.benampel.ccair-voice</string>
 <key>ProgramArguments</key><array>
-  <string>/Volumes/Extreme SSD/_tools/kokoro/venv/bin/python</string>
+  <string>/Users/benampel/ccair-voice/venv/bin/python</string>
   <string>/Users/benampel/ccair-voice/voice_server.py</string>
   <string>--host</string><string>100.85.210.3</string><string>--port</string><string>8179</string>
 </array>
+<key>EnvironmentVariables</key><dict>
+  <key>HF_HOME</key><string>/Users/benampel/ccair-voice/hf</string>
+  <key>HF_HUB_OFFLINE</key><string>1</string>
+</dict>
 <key>WorkingDirectory</key><string>/Users/benampel/ccair-voice</string>
 <key>RunAtLoad</key><true/>
 <key>KeepAlive</key><true/>
