@@ -79,7 +79,7 @@ function blockHtml(b, cite, page) {
     </table></div>`;
   }
   if (b.cards) return cardsHtml();
-  if (b.catalog) return catalogHtml(cite);
+  if (b.catalog) return catalogHtml();
   throw new Error(`Unknown block in page "${page.slug}": ${JSON.stringify(b).slice(0, 80)}`);
 }
 
@@ -88,9 +88,8 @@ const orNot = (v) => (v && String(v).trim() ? esc(v) : '<span class="muted">Not 
 const slugify = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 function datasetHtml(d) {
-  const hay = [d.name, d.category, d.subcategory, d.description, d.dataType, d.access, d.license, d.caveats].join(' ').toLowerCase();
   const id = `ds-${slugify(d.name)}`;
-  return `<li class="ds reveal" data-cat="${esc(d.category)}" data-text="${esc(hay)}">
+  return `<li class="ds reveal" data-cat="${esc(d.category)}">
   <article aria-labelledby="${id}">
     <h3 id="${id}">${esc(d.name)}</h3>
     <p class="ds-tags"><span class="badge entry">${esc(d.category)}</span>${d.subcategory ? `<span class="ds-sub">${esc(d.subcategory)}</span>` : ''}</p>
@@ -109,7 +108,7 @@ function datasetHtml(d) {
 </li>`;
 }
 
-function catalogHtml(cite) {
+function catalogHtml() {
   const list = [...DS.datasets].sort((a, b) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name));
   const cats = [...new Set(list.map((d) => d.category))].sort();
   const n = list.length;
@@ -118,12 +117,12 @@ function catalogHtml(cite) {
   ${n < CATALOG_TARGET ? `<div class="note reveal"><b>The catalog is growing.</b> This page lists ${word(n)} so far. The full catalog of cybersecurity datasets is being added.</div>` : ''}
   <form class="ds-controls" data-ds-controls hidden role="search" aria-label="Filter datasets">
     <div class="field"><label for="ds-q">Search datasets</label><input id="ds-q" type="search" autocomplete="off" spellcheck="false" placeholder="For example: phishing, PCAP, malware"></div>
-    <div class="field"><label for="ds-cat">Category</label><select id="ds-cat"><option value="">All categories</option>${cats.map((c) => `<option value="${esc(c)}">${esc(c)}</option>`).join('')}</select></div>
+    <div class="field"><label for="ds-cat">Category</label><select id="ds-cat"><option value="">All categories</option>${cats.map((c) => `<option value="${esc(c)}">${esc(c)} (${list.filter((d) => d.category === c).length})</option>`).join('')}</select></div>
   </form>
   <p class="ds-status" id="ds-status" role="status" aria-live="polite">Showing ${word(n)}.</p>
   <ul class="ds-list" id="ds-list" data-total="${n}">${list.map(datasetHtml).join('\n')}</ul>
   <p class="ds-empty body" id="ds-empty" hidden>No datasets match. Clear the search or choose another category.</p>
-  <p class="body reveal">The example entry draws on the dataset's own page${cite('cic-ids2017')}, the paper its creators ask you to cite${cite('sharafaldin')} and an independent audit of its labels${cite('engelen')}.</p>`;
+  <p class="body reveal">Descriptions and caveats come from the CCAIR dataset catalog. Each entry shows the date its link was last checked; confirm access and license terms on the dataset's own page before you use it.</p>`;
 }
 
 /* ---------- Page ---------- */
