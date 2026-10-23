@@ -5,7 +5,7 @@
 // StreamNest, Eastbrook College Registrar, Pinewave Wireless), never from the directory or a test-call pretext.
 //
 // Each screen is one item whose wording, clips and exercise vary by arm (variants), so assignment needs no code.
-// Audio: Kokoro voices V1-V4, phone band; rendered by scripts/vishing-study2/render-audio.mjs from CLIP_JOBS below.
+// Audio: the one study voice (world.mjs VOICE, through the V1-V4 slots), phone band; rendered by scripts/vishing-study2/render-audio.mjs from CLIP_JOBS below.
 import { VOICES } from './world.mjs';
 
 const AUDIO = '/lab/media/vishing-study2/training/';
@@ -18,6 +18,17 @@ const A0_SWAP = 'A front desk is often the first voice a caller hears. Callers f
 const A1_SWAP = 'Most calls a front desk receives from organizations are legitimate. Out of every 100 unexpected calls from a company or office, the large majority are routine: a reminder, a notice, a question about an account. Treating a legitimate call as a scam has real costs. A customer goes unserved, a colleague waits, a payment is delayed and the caller has to start again. Being careful is good; flagging every unfamiliar caller is not.';
 const A0_OVERVIEW = 'Most workplace calls are routine: scheduling an appointment, confirming a detail, returning a voicemail. A clear call saves time for both people; an unclear one produces follow-up calls and delays. Call etiquette is a small set of habits that keep routine calls clear.';
 
+// The practice directory for the exercises has only the four training organizations (never the shift's directory).
+// Every arm's exercise ends with one lookup and call (R3.5), so A4 differs in what it says about looking a number up,
+// not in having done it; A4's call is a verification, the others' are an ordinary call to a listed number.
+const PRACTICE_DIRECTORY = [
+  { name: 'Pinewave Wireless, Customer Care', dept: 'Phone carrier', number: '(800) 555-0171', greeting: 'Thanks for calling Pinewave Wireless. How can I help?' },
+  { name: 'StreamNest Support', dept: 'Streaming service', number: '(800) 555-0172', greeting: 'StreamNest Support, how can I help?' },
+  { name: 'Lakeview Health, Billing Office', dept: 'Hospital billing', number: '(800) 555-0173', greeting: 'Lakeview Health billing, how can I help?' },
+  { name: 'Eastbrook College Registrar', dept: 'College', number: '(800) 555-0174', greeting: 'Registrar\'s office, how can I help?' }
+].map((d, i) => ({ ...d, media: AUDIO + `dir-${i + 1}.mp3` }));
+const dialTo = i => ({ directory: PRACTICE_DIRECTORY, target: PRACTICE_DIRECTORY[i].number, say: PRACTICE_DIRECTORY[i].greeting, media: PRACTICE_DIRECTORY[i].media });
+
 // screens[arm] = [s2..s8]: { title, body, clips: [clip, clip], exercise? }
 const A0 = [
   { title: 'Why call etiquette matters', body: A0_OVERVIEW + '\n\n' + A0_SWAP },
@@ -27,41 +38,41 @@ const A0 = [
   { title: 'Pace and tone', body: 'Speak at a steady pace, and slow down for numbers, spellings and names. Use a calm, friendly tone: a flat tone sounds uninterested, a rushed one sounds impatient, and listeners can hear a smile.',
     clips: [clip('a0-3', 'V2', 'slow on numbers', 'The confirmation number is four, seven, two, nine, one. Again, that\'s four, seven, two, nine, one.'),
       clip('a0-4', 'V4', 'calm, smiling', 'Thanks for holding. I\'ve got that in front of me now, so let\'s take it one step at a time.')] },
-  { title: 'Transfers and messages', body: 'When you transfer a call, say who you are transferring the caller to and why, and stay on the line until that person answers. When you take a message, write down the name, number, time and reason, and read it back before you finish.',
+  { title: 'Transfers and messages', body: 'When you transfer a call, say who you are transferring the caller to and why, and stay on the line until that person answers. When you take a message, write down the name, time, reason and when they will try again, and read it back before you finish.',
     clips: [clip('a0-5', 'V1', 'helpful', 'I\'m going to transfer you to Jordan, who handles plan changes at Pinewave. I\'ll stay on until Jordan picks up.'),
-      clip('a0-6', 'V3', 'careful', 'Let me read that back. Kim Alvarez, five five five, two one eight four, about the account update, called at two fifteen. Is that right?')] },
-  { title: 'Scheduling and voicemail', body: 'Offer two or three specific times instead of asking "when are you free?", then repeat the date, time and place. Keep a voicemail under 30 seconds: your name, your number and the reason, with the number said slowly twice.',
+      clip('a0-6', 'V3', 'careful', 'Let me read that back. Kim Alvarez, about the account update, called at two fifteen and will try again after four. Is that right?')] },
+  { title: 'Scheduling and voicemail', body: 'Offer two or three specific times instead of asking "when are you free?", then repeat the date, time and place. Keep a voicemail under 30 seconds: your name, the reason, and when you will try again.',
     clips: [clip('a0-7', 'V2', 'upbeat', 'I have Tuesday at ten or Wednesday at two. Which works better for you?'),
-      clip('a0-8', 'V4', 'clear', 'Hi Sam, it\'s Lee from StreamNest support, returning your call about the household plan. I\'m at five five five, three four zero six until five today. Again, five five five, three four zero six.')] },
-  { title: 'Exercise: take a message', body: 'Play the voicemail, then fill in the message slip: name, number, reason and best time to call back.',
-    clips: [clip('a0-x', 'V3', 'neutral', 'Hi, this is Robin Chen from the Eastbrook College Registrar. I\'m calling about the room booking for the March information session. You can reach me at five five five, seven seven one two, any time after one.', 'Voicemail')],
-    ask: ['slip_name', 'slip_number', 'slip_reason', 'slip_time'] },
+      clip('a0-8', 'V4', 'clear', 'Hi Sam, it\'s Lee from StreamNest support, returning your call about the household plan. I\'ll try you again after one today; no need to call us back.')] },
+  { title: 'Exercise: take a message', body: 'Play the voicemail and fill in the message slip: name, reason and when they will try again. Then call the Registrar from the practice directory.',
+    clips: [clip('a0-x', 'V3', 'neutral', 'Hi, this is Robin Chen from the Eastbrook College Registrar. I\'m calling about the room booking for the March information session. I\'ll try again after one, so no need to call me back.', 'Voicemail')],
+    ask: ['slip_name', 'slip_reason', 'slip_time'], practiceDial: dialTo(3) },
   { title: 'Summary', body: 'Clear calls follow a simple pattern: greet the person and give your name, state your purpose, keep a steady pace and a calm tone, offer specific options, repeat the details and confirm the next step.\n\n' + CLOSING }
 ];
 const A1 = A0.map((s, i) => i === 0 ? { ...s, body: A0_OVERVIEW + '\n\n' + A1_SWAP } : s);
 
 const A2 = [
-  { title: 'What voice phishing is', body: 'Voice phishing is when criminals use phone calls to trick people into giving up sensitive information or money. Attackers may pretend to be a hospital billing office, a streaming service, a college office or your phone carrier. They may spoof caller ID, or use AI voice cloning to sound like someone you know. Losses include stolen money, leaked customer data, reputational damage and fines. Experts point to four cues. Each of the next screens plays a malicious and a legitimate example.' },
+  { title: 'What voice phishing is', body: 'Voice phishing is when criminals use phone calls to trick people into giving up sensitive information or money. Attackers may pretend to be a hospital billing office, a streaming service, a college office or your phone carrier. They may spoof caller ID, or pretend to be someone you know. Losses include stolen money, leaked customer data, reputational damage and fines. Experts point to four cues. Each of the next screens plays a malicious and a legitimate example.' },
   { title: 'Cue 1: urgency or pressure', body: 'Attackers create time pressure so you act before you think: deadlines in minutes, threats that something will happen "right now", demands to stay on the line, or a manager who is "waiting". Legitimate organizations rarely need an answer during the call, and they let you respond when it suits you.',
     clips: [clip('a2-1', 'V2', 'urgent', 'This is Pinewave Wireless. Your line will be shut off in the next ten minutes unless you confirm your account PIN right now.', 'Malicious example'),
       clip('a2-2', 'V1', 'calm, straightforward', 'This is Pinewave Wireless calling about some unusual activity on your account. Please call us back at the number on your bill whenever it\'s convenient.', 'Legitimate example')] },
   { title: 'Cue 2: requests for sensitive data', body: 'Attackers ask for what unlocks an account: passwords, PINs and one-time codes, sometimes after small pieces such as a date of birth. Legitimate organizations already hold what they need, and they say plainly that they will never ask for these by phone.',
     clips: [clip('a2-3', 'V4', 'urgent', 'I just need your password and the code we texted you to verify your StreamNest account.', 'Malicious example'),
       clip('a2-4', 'V3', 'calm, straightforward', 'StreamNest will never ask for your password or your verification code over the phone.', 'Legitimate example')] },
-  { title: 'Cue 3: tone and prosody', body: 'Listen to how the caller sounds. A flat, robotic delivery can point to a recorded or AI-generated voice, and an emotion that does not fit the message, such as cheerfulness about fraud, is a warning sign. Legitimate callers sound even and attentive.',
+  { title: 'Cue 3: tone and prosody', body: 'Listen to how the caller sounds against what they are saying. An emotion that does not fit the message, such as cheerfulness about fraud, is a warning sign, and so is a tone that swings without reason. Legitimate callers sound even and attentive.',
     clips: [clip('a2-5', 'V2', 'laughs, happy', 'Hi there! I\'m so excited to tell you your Lakeview Health account is being sent to collections for fraud!', 'Malicious example (mismatched emotion)'),
       clip('a2-6', 'V1', 'calm', 'This is the Lakeview Health billing office. We\'re mailing you a statement for your recent visit. Please follow the instructions in the letter.', 'Legitimate example')] },
   { title: 'Cue 4: scare tactics', body: 'Attackers threaten arrest, cancellation or legal action, and offer a single way out that only they control: pay now, or read the code now. Legitimate organizations send formal notices in writing and never demand payment on the spot.',
     clips: [clip('a2-7', 'V4', 'very serious', 'If you don\'t pay this fee immediately, your enrollment will be cancelled and your transcript will be withheld.', 'Malicious example'),
       clip('a2-8', 'V3', 'calm', 'This is the Eastbrook College Registrar. We send all official notices in writing. We will never demand immediate payment over the phone.', 'Legitimate example')] },
-  { title: 'Exercise: spot the cues', body: 'Play the call, then tick every cue you heard: urgency, a request for sensitive data, odd tone, scare tactics or none.',
+  { title: 'Exercise: spot the cues', body: 'Play the call, then tick every cue you heard: urgency, a request for sensitive data, odd tone, scare tactics or none. Then find Pinewave in the practice directory and call it.',
     clips: [clip('a2-x', 'V2', 'urgent, stern', 'This is Pinewave security. Your number is being moved to another phone in five minutes. Read me the code we just sent or you\'ll lose service permanently.', 'Practice call')],
-    ask: ['cue_tick'] },
+    ask: ['cue_tick'], practiceDial: dialTo(0) },
   { title: 'Summary', body: 'Four cues signal a voice phishing call: urgency or pressure, requests for sensitive data, odd tone or prosody, and scare tactics. No single cue proves a call is malicious, but the more cues a call shows, the more careful you should be. When you hear them, slow down, share nothing and contact the organization through a number you already trust.\n\n' + CLOSING }
 ];
 
 const A3 = [
-  { title: 'What a legitimate call sounds like', body: 'Most calls that reach a front desk come from real organizations doing ordinary business: a billing office with a question, a service provider with a notice, a school office confirming a detail. These calls follow a familiar pattern. Knowing it makes them quicker to handle, and makes it easier to notice a call that does not fit. Each of the next screens describes one feature and plays two legitimate examples.' },
+  { title: 'What a legitimate call sounds like', body: 'Calls that reach a front desk from real organizations doing ordinary business follow a familiar pattern: a billing office with a question, a service provider with a notice, a school office confirming a detail. Knowing the pattern makes these calls quicker to handle, and makes it easier to notice a call that does not fit. Each of the next screens describes one feature and plays two legitimate examples.' },
   { title: 'Feature 1: a clear identity and an existing relationship', body: 'Legitimate callers give their name, organization and department, and say why they are calling you in particular. They refer to a relationship you already have, and they use details they already hold, such as a date of service or the last four digits of an account, instead of asking you for them.',
     clips: [clip('a3-1', 'V1', 'calm, professional', 'Hi, this is Dana in the Lakeview Health billing office. I\'m calling about the statement for your visit on March third, the account ending in four one two.', 'Example'),
       clip('a3-2', 'V3', 'friendly', 'Hello, this is Marcus from the Eastbrook College Registrar, calling about your transcript request from last Tuesday.', 'Example')] },
@@ -74,19 +85,12 @@ const A3 = [
   { title: 'Feature 4: official follow-up', body: 'They point you to the organization\'s usual channels: a letter, the app or portal, or the main number on your bill. They are comfortable with you dealing with it later, in writing or through those channels, because the records will still be there.',
     clips: [clip('a3-7', 'V2', 'calm', 'This is the Eastbrook College Registrar. We\'ve mailed you the official notice. Please follow the instructions in the letter.', 'Example'),
       clip('a3-8', 'V4', 'friendly', 'This is StreamNest. If you have any questions about the change, the number on your monthly statement reaches our support team.', 'Example')] },
-  { title: 'Exercise: hear the pattern', body: 'Play the call, then tick every feature you heard: identity and relationship, unhurried pace, clear purpose and stated limits, official follow-up.',
+  { title: 'Exercise: hear the pattern', body: 'Play the call, then tick every feature you heard: identity and relationship, unhurried pace, clear purpose and stated limits, official follow-up. Then call Lakeview Health from the practice directory.',
     clips: [clip('a3-x', 'V3', 'calm, professional', 'Hi, this is Robin at the Lakeview Health billing office about your visit on the twelfth. There\'s a small balance, but nothing is due today, and we never take card numbers by phone. You\'ll get a statement in the mail.', 'Practice call')],
-    ask: ['feature_tick'] },
+    ask: ['feature_tick'], practiceDial: dialTo(2) },
   { title: 'Summary', body: 'A typical legitimate call from an organization has four features: a clear identity and an existing relationship, an unhurried pace, a clear purpose with stated limits, and official follow-up. Each feature on its own is common; together they describe how ordinary institutional calls tend to sound. The more of them a call has, the more it sounds like ordinary business.\n\n' + CLOSING }
 ];
 
-// The practice directory for A4 has only the four training organizations (never the shift's directory).
-const PRACTICE_DIRECTORY = [
-  { name: 'Pinewave Wireless, Customer Care', dept: 'Phone carrier', number: '(800) 555-0171', greeting: 'Thanks for calling Pinewave Wireless. How can I help?' },
-  { name: 'StreamNest Support', dept: 'Streaming service', number: '(800) 555-0172', greeting: 'StreamNest Support, how can I help?' },
-  { name: 'Lakeview Health, Billing Office', dept: 'Hospital billing', number: '(800) 555-0173', greeting: 'Lakeview Health billing, how can I help?' },
-  { name: 'Eastbrook College Registrar', dept: 'College', number: '(800) 555-0174', greeting: 'Registrar\'s office, how can I help?' }
-];
 const A4X = clip('a4-x', 'V1', 'calm', 'Thanks for calling Pinewave Wireless. I don\'t see any call from us to you today, and we never ask customers to read back codes. Thanks for checking with us.', 'Pinewave answers');
 const A4 = [
   { title: 'Four questions for any call that asks for something', body: 'A caller\'s tone tells you little: a calm, polite caller can be a criminal, and an urgent one can be a real fraud team. Caller ID can show any number. What a caller cannot change is the structure of what they want. Before you act on any call that asks you to do something, ask four questions:\n\n1. Who started this contact?\n2. What am I being asked to do?\n3. Through whose channel?\n4. Can I verify myself first?' },
@@ -102,7 +106,7 @@ const A4 = [
   { title: 'Question 4: can I verify myself first?', body: 'You can almost always end the call, look the organization up yourself in a directory or on your card or bill, and call back. Never use a number the caller gives you. Real organizations accept this. A caller who resists is giving you the answer.',
     clips: [clip('a4-7', 'V3', 'calm', 'Of course. Please call the Registrar\'s main line from the college website, and they\'ll have this on file.', 'Accepts verification'),
       clip('a4-8', 'V4', 'calm, persistent', 'You could, but this has to be done during this call. I\'ll give you my direct line instead: five five five, zero one nine eight.', 'Resists verification')] },
-  { title: 'Exercise: look it up and call back', body: 'A caller claiming to be Pinewave Wireless asked you to read back a code. Search the practice directory, call the number listed there and hear what the company says.',
+  { title: 'Exercise: look it up and call back', body: 'A caller claiming to be Pinewave Wireless asked you to read back a code. Search the practice directory, call the number listed there and hear what the company says. Do not use any number the caller gave you.',
     practiceDial: { directory: PRACTICE_DIRECTORY, target: '(800) 555-0171', say: A4X.text, media: AUDIO + 'a4-x.mp3' } },
   { title: 'Summary', body: 'If a caller started the contact and wants an action through their own channel, do not act during the call. Look the organization up yourself and call back. Tone, politeness and caller ID do not change the answer.\n\n' + CLOSING }
 ];
@@ -133,9 +137,8 @@ const q = (id, text, type, extra = {}) => ({ id, text, type, required: true, sho
 const ch = (id, text, opts, conds) => q(id, text, 'choice', { options: opts.map(([value, label]) => ({ value, label })), conditions: conds });
 export const TRAINING_QUESTIONS = [
   q('slip_name', 'Message slip: caller\'s name', 'text', { conditions: ['a0', 'a1'] }),
-  q('slip_number', 'Message slip: call-back number', 'text', { conditions: ['a0', 'a1'] }),
   q('slip_reason', 'Message slip: reason for the call', 'text', { conditions: ['a0', 'a1'] }),
-  q('slip_time', 'Message slip: best time to call back', 'text', { conditions: ['a0', 'a1'] }),
+  q('slip_time', 'Message slip: when they will try again', 'text', { conditions: ['a0', 'a1'] }),
   q('cue_tick', 'Which cues did you hear? Tick every one.', 'multi', { conditions: ['a2'], options: [['urgency', 'Urgency or pressure'], ['data', 'A request for sensitive data'], ['tone', 'Odd tone'], ['scare', 'Scare tactics'], ['none', 'None']].map(([value, label]) => ({ value, label })) }),
   q('feature_tick', 'Which features did you hear? Tick every one.', 'multi', { conditions: ['a3'], options: [['identity', 'A clear identity and relationship'], ['pace', 'An unhurried pace'], ['purpose', 'A clear purpose and stated limits'], ['followup', 'Official follow-up']].map(([value, label]) => ({ value, label })) }),
   // knowledge checks (4 per arm; the correct option is first here and shuffled on screen by the order below)
@@ -163,4 +166,5 @@ export const KC_KEY = { kc_e1: 'purpose', kc_e2: 'options', kc_e3: 'under30', kc
 // Every training clip to render (render-audio.mjs).
 export const CLIP_JOBS = Object.values(ARMS).flat().flatMap(s => s.clips || []).concat([A4X])
   .filter((c, i, all) => all.findIndex(x => x.id === c.id) === i)
-  .map(c => ({ file: `training/${c.id}.mp3`, text: c.text, voice: c.voice, phone: true }));
+  .map(c => ({ file: `training/${c.id}.mp3`, text: c.text, voice: c.voice, phone: true }))
+  .concat(PRACTICE_DIRECTORY.map((d, i) => ({ file: `training/dir-${i + 1}.mp3`, text: d.greeting, voice: VOICES.V1, phone: true })));

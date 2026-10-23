@@ -516,7 +516,7 @@
         '<p class="phone-status" id="ph-status" aria-live="off">0:00</p>' + (plan.recording ? '<p class="rec-note" id="ph-rec" hidden><span class="dot" aria-hidden="true"></span>' + ui.Th('call_recording') + '</p>' : '') + authHtml() +
         '<div class="captions" id="ph-captions" aria-live="polite" hidden></div>' +
         '<div class="phone-talk">' + (canSpeak ? '<button type="button" class="talk" id="ph-talk" disabled>' + ui.Th('call_talk') + '</button><p class="interim muted" id="ph-interim" aria-live="polite"></p>' : '') +
-        '<form id="ph-typeform" class="typeform"><label for="ph-type">' + ui.Th('call_type_label') + '</label><div class="row"><input type="text" id="ph-type" autocomplete="off" disabled><button type="submit" class="secondary" id="ph-send" disabled>' + ui.Th('call_send') + '</button></div></form></div>' +
+        '<form id="ph-typeform" class="typeform"' + (call.scored && canSpeak ? ' hidden' : '') + '><label for="ph-type">' + ui.Th('call_type_label') + '</label><div class="row"><input type="text" id="ph-type" autocomplete="off" disabled><button type="submit" class="secondary" id="ph-send" disabled>' + ui.Th('call_send') + '</button></div></form></div>' +
         '<div class="phone-btns small"><label class="check"><input type="checkbox" id="ph-cc"> ' + ui.Th('call_captions') + '</label><button type="button" class="secondary" id="ph-hold">' + ui.Th('call_hold') + '</button>' +
         ((plan.directory || []).length ? '<button type="button" class="secondary" id="ph-dirlive">' + ui.Th('directory_open') + '</button>' : '') +
         '<button type="button" class="decline" id="ph-hang">' + ui.Th('call_hangup') + '</button></div><div id="ph-dirbox-live" hidden></div>', 'live'));
@@ -545,6 +545,8 @@
       if (talk) talk.addEventListener('click', function () { if (listening) { if (st.stopListen) st.stopListen(); else if (recog) recog.stop(); } else listen(); });
       turn('answer').then(function (r) { if (!r || r.error) return failed(); callerSays(r); });
     }
+    // In a scored call the reply is spoken; the type box appears only if the microphone or the recognizer fails twice.
+    function showType(why) { var f = document.getElementById('ph-typeform'); if (f && f.hidden) { f.hidden = false; logUi('type_box_shown:' + why); } }
     function setInput(on) { ['ph-type', 'ph-send', 'ph-talk'].forEach(function (id) { var el = document.getElementById(id); if (el) el.disabled = !on; }); }
     function caption(who, text) {
       var c = document.getElementById('ph-captions'); if (!c) return;
@@ -572,7 +574,10 @@
       caption('you', audio ? '…' : text); if (audio) { var c = document.getElementById('ph-captions'); st.pendingCaption = c && c.lastChild; }
       busy = true; setInput(false); st.sentAt = now();
       turn('say', audio ? null : text, audio).then(function (r) {
-        if (r && r.error === 'asr_unavailable') { busy = false; setInput(true); var s = document.getElementById('ph-interim'); if (s) s.textContent = 'We could not hear that. Please say it again, or type it.'; return; }
+        if (r && r.error === 'asr_unavailable') {
+          busy = false; st.asrFails = (st.asrFails || 0) + 1; if (st.asrFails >= 2) showType('asr');
+          setInput(true); var s = document.getElementById('ph-interim'); if (s) s.textContent = document.getElementById('ph-typeform').hidden ? 'We could not hear that. Please say it again.' : 'We could not hear that. Please say it again, or type it.'; return;
+        }
         if (!r || r.error) { if (r && r.error === 'call_over') return hangUp(true); return failed(); }
         callerSays(r);
       });
@@ -581,7 +586,7 @@
     function listenServer() {
       var talk = document.getElementById('ph-talk'), interim = document.getElementById('ph-interim');
       (stream ? Promise.resolve(stream) : getMic()).then(function (s) {
-        if (!s) { micBlocked = true; if (talk) talk.hidden = true; return; }
+        if (!s) { micBlocked = true; if (talk) talk.hidden = true; showType('mic'); return; }
         var wr; try { wr = wavRecorder(s); } catch (e) { return; }
         listening = true; talk.classList.add('rec'); talk.textContent = ui.T('call_listening'); if (interim) interim.textContent = '';
         st.stopListen = function () {

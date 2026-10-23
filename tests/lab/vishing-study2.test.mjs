@@ -160,6 +160,8 @@ let passer = null;
   const train = s2.trials.filter(t => t.item.title && t.block === 3);
   assert.equal(train.length, 8, 'eight briefing screens');
   assert(train.slice(2, 6).every(t => t.item.clips.length === 2) && train.every(t => t.item.minSeconds > 0), 'two examples on each part screen, a minimum time on each');
+  assert.equal(train.filter(t => t.item.practiceDial && t.item.practiceDial.target).length, 1, 'every arm\'s exercise has one directory lookup');
+  assert(train.every(t => !(t.item.practiceDial) || t.item.practiceDial.directory.every(d => d.media)), 'practice-directory greetings are rendered in the study voice');
   const calls = s2.trials.filter(t => t.item.kind === 'call');
   assert(calls.every(t => t.item.call.scored && !t.item.call.intent && !t.item.call.script), 'the browser never learns whether a call is an attack');
   assert(calls.every(t => t.item.call.caller === 'Incoming call' && t.item.call.number === ''), 'no caller ID: every call rings as "Incoming call" with no number');

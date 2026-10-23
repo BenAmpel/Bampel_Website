@@ -457,7 +457,8 @@ export async function callSummary(S, tag, trial, plan, test = false) {
     llmTurns: turns.filter(t => t.source === 'llm').length, scriptTurns: turns.filter(t => t.source === 'script' || t.source === 'recorded').length, ttsErrors: turns.filter(t => t.ttsError).length,
     medianServerMs: med(turns.map(t => t.serverMs)), medianLatencyMs: med(turns.map(t => t.latencyMs)), holds: turns.filter(t => t.kind === 'hold').length,
     callbacks: cbs.length, callbackResolved: cbs.some(c => c.resolves), callbacksLookedUp: cbs.filter(c => c.listed && c.source !== 'dialpad').length,
-    callbacksCallerSupplied: cbs.filter(c => c.callerSupplied).length, firstCallbackAt: cbs.length ? cbs[0].at : null,
+    callbacksCallerSupplied: cbs.filter(c => c.callerSupplied).length, callbacksDialpadListed: cbs.filter(c => c.listed && c.source === 'dialpad').length,
+    callbackResolvedVia: (cbs.find(c => c.resolves) || {}).source || null, firstCallbackAt: cbs.length ? cbs[0].at : null,
     callStartAt: turns.length ? turns[0].at : null };
   if (call && call.gate) s.gatePassed = s.spokenTurns > 0 || (test && s.participantTurns > 0);
   if (call && call.intent === 'benign') { s.completedOnCall = s.outcome === 'completed'; s.completedViaCallback = !!(call.completeViaCallback && s.callbackResolved); }
@@ -780,7 +781,7 @@ export default {
       media_plays: m.plays ?? '', media_heard_pct: m.heardPct ?? '', media_first_play_ms: m.firstPlayMs ?? '', media_transcript: isMedia ? (m.transcriptOpened ? 1 : 0) : '',
       call_answered: d.callServer ? (cs.answered ? 1 : 0) : '', call_outcome: cs.outcome || '', call_final_state: cs.finalState || '', call_turns: cs.participantTurns ?? '',
       call_digits_disclosed: cs.digitsDisclosed ?? '', call_verifies: cs.verifies ?? '', call_refusals: cs.refusals ?? '', call_callbacks: cs.callbacks ?? '', call_callback_resolved: d.callServer ? (cs.callbackResolved ? 1 : 0) : '',
-      call_agreed_no_disclosure: cs.agreed ?? '', call_benign_completed_on_call: cs.completedOnCall == null ? '' : cs.completedOnCall ? 1 : 0, call_benign_completed_via_callback: cs.completedViaCallback == null ? '' : cs.completedViaCallback ? 1 : 0,
+      call_callbacks_dialpad_listed: cs.callbacksDialpadListed ?? '', call_callback_resolved_via: cs.callbackResolvedVia || '', call_agreed_no_disclosure: cs.agreed ?? '', call_benign_completed_on_call: cs.completedOnCall == null ? '' : cs.completedOnCall ? 1 : 0, call_benign_completed_via_callback: cs.completedViaCallback == null ? '' : cs.completedViaCallback ? 1 : 0,
       call_duration_ms: c.durationMs ?? '', call_hold_ms: c.holdMs ?? '', call_median_latency_ms: cs.medianLatencyMs ?? '', call_llm_turns: cs.llmTurns ?? '', call_typed_turns: c.typedTurns ?? '', call_interruptions: c.interruptions ?? '', call_captions: d.call ? (c.captions ? 1 : 0) : '', call_directory_opened: d.call ? (c.directoryOpened ? 1 : 0) : '',
       voice_recorded: d.voice ? (d.voice.recorded ? 1 : 0) : '', voice_ms: d.voice?.durationMs ?? '', voice_typed: d.voice?.typed || '',
       check_test: d.checkServer?.test || '', check_passed: d.checkServer ? (d.checkServer.passed == null ? '' : d.checkServer.passed ? 1 : 0) : '', check_attempts: d.checkServer?.attempts ?? '', check_outages: d.checkServer?.outages ?? '' };
