@@ -1,6 +1,9 @@
 // Study 2 phone calls: the practice call (session 1, a hard gate with one retry) and the 10-call softphone shift.
 //
-// Shift mix: 5 attacks (3 calm, 1 of them with caller ID spoofed to a directory number; 2 urgent) and 5 benign
+// No caller ID (decision 2026-10-22): every call, the practice call included, rings as "Incoming call" with no number,
+// so nothing on the screen predicts whether a call is an attack and there is no displayed number to call back.
+//
+// Shift mix: 5 attacks (3 calm, 2 urgent) and 5 benign
 // (2 urgent but legitimate, 3 calm requests), every benign caller also asking for something with no value transfer.
 // The directory is down on 4 calls per participant (decision 2026-10-22; multimodal-study.mjs poolItems). Topics (financial / community) are counterbalanced: form A and form B swap the topic of every slot, and
 // each participant gets one form (balanced within arm). Order is shuffled per participant.
@@ -15,7 +18,7 @@ const callItem = (id, call, extra = {}) => ({ id, title: 'Incoming call', kind: 
 
 // ---------- the practice call (not scored; passes if the lab's recognizer hears at least one spoken reply) ----------
 const PRACTICE = {
-  caller: 'Warehouse Receiving', number: number('Warehouse Receiving, Northwind'), callbackNumber: number('Warehouse Receiving, Northwind'), intent: 'benign', maxTurns: 6, ringSeconds: 45, scored: false, llm: false, voice: VOICES.V2,
+  caller: 'Incoming call', number: '', debriefName: 'Warehouse Receiving', callbackNumber: number('Warehouse Receiving, Northwind'), intent: 'benign', maxTurns: 6, ringSeconds: 45, scored: false, llm: false, voice: VOICES.V2,
   persona: 'Sam, a friendly coworker in the Northwind warehouse.',
   script: {
     opener: 'Hey Alex, it\'s Sam down in receiving. Got a second?',
@@ -35,11 +38,10 @@ export const PRACTICE_ITEMS = [
 
 // ---------- the shift (placeholders) ----------
 const ATTACKER_NUMBERS = ['(404) 555-0186', '(404) 555-0188', '(404) 555-0191', '(404) 555-0193', '(404) 555-0195'];
-const UNKNOWN_IDS = ['(470) 555-0179', '(678) 555-0177', '(762) 555-0176', '(470) 555-0175', '(678) 555-0174'];
-function attack({ org, dept, ask, askKind, urgent, spoof, n, voice }) {
+function attack({ org, dept, ask, askKind, urgent, n, voice }) {
   const cb = number(dept);
   return {
-    caller: spoof ? dept : 'Unknown caller', number: spoof ? cb : UNKNOWN_IDS[n], callbackNumber: cb, deflectNumber: ATTACKER_NUMBERS[n], intent: 'attack', voice,
+    caller: 'Incoming call', number: '', debriefName: org.replace(/^the /, ''), callbackNumber: cb, deflectNumber: ATTACKER_NUMBERS[n], intent: 'attack', voice,
     ...(askKind === 'code' ? { code: { service: org, at: 'ask' } } : {}),
     persona: `A caller claiming to be from ${org}. ${urgent ? 'Urgent and insistent.' : 'Calm, polite and patient.'}`,
     script: {
@@ -57,7 +59,7 @@ function attack({ org, dept, ask, askKind, urgent, spoof, n, voice }) {
 function benign({ org, dept, ask, urgent, n, voice, routeOwn }) {
   const cb = number(dept);
   return {
-    caller: org.replace(/^the /, ''), number: cb, callbackNumber: cb, intent: 'benign', voice,
+    caller: 'Incoming call', number: '', debriefName: org.replace(/^the /, ''), callbackNumber: cb, intent: 'benign', voice,
     persona: `A real employee of ${org}. ${urgent ? 'Urgent but polite.' : 'Calm and routine.'}`,
     script: {
       opener: urgent ? `Hello, this is Morgan from ${org}. I am calling about something time-sensitive for Northwind Supply.` : `Hi, this is Casey from ${org}. Is this the Northwind front desk?`,
@@ -74,8 +76,8 @@ function benign({ org, dept, ask, urgent, n, voice, routeOwn }) {
 const SLOTS = {
   'atk-calm-1': [{ topic: 'financial', org: 'Keystone Card Services', dept: 'Keystone Card Services, Corporate Cards', askKind: 'code', ask: 'I just texted a six-digit code to the company phone. Could you read it back to me so I can verify the account?' },
     { topic: 'community', org: 'Calder Properties', dept: 'Calder Properties, Building Management', askKind: 'code', ask: 'Our system just sent a six-digit access code to your phone. Could you read it back so I can update the badge list?' }],
-  'atk-calm-spoof': [{ topic: 'financial', org: 'Tallgrass Bank', dept: 'Tallgrass Bank, Fraud Prevention', askKind: 'code', spoof: true, ask: 'You can see we are calling from the number in your directory. I just sent a six-digit code to confirm it is you. Could you read it to me?' },
-    { topic: 'community', org: 'Riverton Water and Power', dept: 'Riverton Water & Power, Business Accounts', askKind: 'code', spoof: true, ask: 'You can see this is our listed number. I just sent a six-digit code for the account change. Could you read it to me?' }],
+  'atk-calm-3': [{ topic: 'financial', org: 'Tallgrass Bank', dept: 'Tallgrass Bank, Fraud Prevention', askKind: 'code', ask: 'I just sent a six-digit code to the company phone to confirm I am speaking with the right person. Could you read it to me?' },
+    { topic: 'community', org: 'Riverton Water and Power', dept: 'Riverton Water & Power, Business Accounts', askKind: 'code', ask: 'I just sent a six-digit code for the account change. Could you read it to me?' }],
   'atk-urgent-1': [{ topic: 'community', org: 'the Harlan County Tax Office', dept: 'Harlan County Tax Office', askKind: 'password', urgent: true, ask: 'To stop the penalty, I need to log in to Northwind\'s business portal with you. What is the portal password?' },
     { topic: 'financial', org: 'PayLark Payroll', dept: 'PayLark Payroll', askKind: 'password', urgent: true, ask: 'To stop the payroll run, I need the Northwind portal password right now.' }],
   'atk-urgent-2': [{ topic: 'financial', org: 'Meridian Ridge Credit Union', dept: 'Meridian Ridge Credit Union', askKind: 'account', urgent: true, ask: 'I need Northwind\'s full company account number to freeze the transfer. What is it?' },
@@ -93,14 +95,14 @@ const SLOTS = {
   'ben-calm-3': [{ topic: 'community', org: 'Calder Properties', dept: 'Calder Properties, Building Management', ask: 'The elevator inspection is Thursday morning. Can you confirm someone at the front desk can let the inspector in at nine?' },
     { topic: 'financial', org: 'Ashby Mutual Insurance', dept: 'Ashby Mutual Insurance, Commercial', ask: 'We updated Northwind\'s certificate of insurance. Could you confirm the office address on it is still 2200 Calder Way?' }]
 };
-const VOICE_BY_SLOT = { 'atk-calm-2': VOICES.V1, 'ben-calm-3': VOICES.V3, 'atk-calm-1': VOICES.V2, 'atk-calm-spoof': VOICES.V1, 'atk-urgent-1': VOICES.V4, 'atk-urgent-2': VOICES.V3, 'ben-urgent-1': VOICES.V3, 'ben-urgent-2': VOICES.V4, 'ben-calm-1': VOICES.V1, 'ben-calm-2': VOICES.V2 };
+const VOICE_BY_SLOT = { 'atk-calm-2': VOICES.V1, 'ben-calm-3': VOICES.V3, 'atk-calm-1': VOICES.V2, 'atk-calm-3': VOICES.V1, 'atk-urgent-1': VOICES.V4, 'atk-urgent-2': VOICES.V3, 'ben-urgent-1': VOICES.V3, 'ben-urgent-2': VOICES.V4, 'ben-calm-1': VOICES.V1, 'ben-calm-2': VOICES.V2 };
 
 export const SHIFT_ITEMS = [], SHIFT_FORMS = { A: [], B: [] };
 Object.entries(SLOTS).forEach(([slot, forms], n) => forms.forEach((s, f) => {
   const id = `call-${slot}-${'ab'[f]}`, isAttack = slot.startsWith('atk'), urgent = !!s.urgent;
   const spec = isAttack ? attack({ ...s, urgent, n: n % 5, voice: VOICE_BY_SLOT[slot] }) : benign({ ...s, urgent, n, voice: VOICE_BY_SLOT[slot] });
   SHIFT_ITEMS.push(callItem(id, { ...spec, placeholder: true }, { meta: { slot, structure: isAttack ? 'attack' : 'benign', surface: urgent ? 'urgent' : 'calm', topic: s.topic,
-    callerId: isAttack ? (s.spoof ? 'spoofed' : 'unknown') : 'matches', askKind: s.askKind || 'none', placeholder: true } }));
+    askKind: s.askKind || 'none', placeholder: true } }));
   SHIFT_FORMS['AB'[f]].push(id);
 }));
 export const PLACEHOLDER_CALLS = SHIFT_ITEMS.length;

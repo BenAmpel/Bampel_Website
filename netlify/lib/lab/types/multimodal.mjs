@@ -303,7 +303,7 @@ async function callBack(S, pid, body, now) {
     duringCall: body.duringCall === true });
   const voice = callerSupplied ? call.voice : (entry && entry.voice) || 'af_sarah';
   const v = entry || callerSupplied ? await voiceFor(S, say, voice, now) : {};
-  return { say, name: callerSupplied ? call.caller : entry ? entry.name : null, audio: v.audio || null };
+  return { say, name: callerSupplied ? (call.number ? call.caller : null) : entry ? entry.name : null, audio: v.audio || null };
 }
 
 // Whether a gated item (a practice call) was passed, for the item that retries it.
@@ -328,7 +328,7 @@ async function debrief(S, pid) {
       if (t.item.kind !== 'call' || !t.item.call || !t.item.call.scored) continue;
       const tag = `${p.code}/s${plan.session}/t${t.index}`, s = await callSummary(S, tag, t, plan);
       const turns = (await getMany(S.store, (await S.store.list(`calls/${tag}/`)).sort())).map(([, v]) => v).filter(Boolean);
-      out.push({ caller: t.item.call.caller, intent: t.item.call.intent, outcome: s ? s.outcome : 'not reached', points: s ? s.points : 0, disclosed: s ? s.disclosed : [], callbacks: s ? s.callbacks : 0,
+      out.push({ caller: t.item.call.debriefName || t.item.call.caller, intent: t.item.call.intent, outcome: s ? s.outcome : 'not reached', points: s ? s.points : 0, disclosed: s ? s.disclosed : [], callbacks: s ? s.callbacks : 0,
         transcript: turns.flatMap(v => [v.heard ? { who: 'you', text: v.heard } : null, v.say ? { who: 'caller', text: v.say } : null]).filter(Boolean) });
     }
   }

@@ -471,7 +471,7 @@
       return run;
     }
     function phone(inner, cls) {
-      return '<h2 class="sr">' + esc(it.title) + '</h2><div class="phone ' + (cls || '') + '"><div class="phone-top"><div class="avatar" aria-hidden="true">' + esc((call.caller || '?').charAt(0)) + '</div>' +
+      return '<h2 class="sr">' + esc(it.title) + '</h2><div class="phone ' + (cls || '') + '"><div class="phone-top"><div class="avatar" aria-hidden="true">' + (call.number ? esc((call.caller || '?').charAt(0)) : '') + '</div>' +
         '<div class="caller"><strong>' + esc(call.caller) + '</strong><span>' + esc(call.number || '') + '</span></div></div>' + inner + '</div>';
     }
     // Codes that "arrive" on the participant's authenticator during this call.
@@ -494,7 +494,7 @@
       });
     } else ringNow();
     function ringNow() {
-      ui.show(phone('<p class="phone-status" id="ph-status">' + ui.Th('call_incoming') + '</p><div class="phone-btns"><button type="button" class="decline" id="ph-decline">' + ui.Th('call_decline') + '</button>' +
+      ui.show(phone('<p class="phone-status" id="ph-status">' + (call.number ? ui.Th('call_incoming') : '') + '</p><div class="phone-btns"><button type="button" class="decline" id="ph-decline">' + ui.Th('call_decline') + '</button>' +
         '<button type="button" class="answer" id="ph-answer">' + ui.Th('call_answer') + '</button></div>', 'ringing'));
       st.ringT0 = now(); ring.start();
       ringTimer = setTimeout(function () { ring.stop(); st.endedBy = 'timeout'; turn('timeout').then(function () { afterCall(ui.T('call_missed')); }); }, Math.max(5, Number(call.ringSeconds) || 30) * 1000);
@@ -548,7 +548,7 @@
     function setInput(on) { ['ph-type', 'ph-send', 'ph-talk'].forEach(function (id) { var el = document.getElementById(id); if (el) el.disabled = !on; }); }
     function caption(who, text) {
       var c = document.getElementById('ph-captions'); if (!c) return;
-      var p = document.createElement('p'); p.className = who; p.textContent = (who === 'caller' ? call.caller + ': ' : 'You: ') + text; c.appendChild(p); c.scrollTop = c.scrollHeight;
+      var p = document.createElement('p'); p.className = who; p.textContent = (who === 'caller' ? (call.number ? call.caller : 'Caller') + ': ' : 'You: ') + text; c.appendChild(p); c.scrollTop = c.scrollHeight;
     }
     // The participant can talk over the caller, as on a real phone: input opens as soon as the caller starts
     // speaking, and replying cuts the caller off (counted in "interruptions"). busy = waiting for the server.

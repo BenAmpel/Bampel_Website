@@ -162,6 +162,7 @@ let passer = null;
   assert(train.slice(2, 6).every(t => t.item.clips.length === 2) && train.every(t => t.item.minSeconds > 0), 'two examples on each part screen, a minimum time on each');
   const calls = s2.trials.filter(t => t.item.kind === 'call');
   assert(calls.every(t => t.item.call.scored && !t.item.call.intent && !t.item.call.script), 'the browser never learns whether a call is an attack');
+  assert(calls.every(t => t.item.call.caller === 'Incoming call' && t.item.call.number === ''), 'no caller ID: every call rings as "Incoming call" with no number');
   assert(!JSON.stringify(s2).includes('callbackNumber') && !JSON.stringify(s2).includes('deflect'), 'nor which number resolves it');
 
   // ----- the first set of clips: a live decision with a change, the decided key, confidence -----
