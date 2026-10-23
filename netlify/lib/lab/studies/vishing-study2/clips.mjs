@@ -48,7 +48,8 @@ for (let set = 0; set < 3; set++) for (let form = 0; form < 2; form++) for (let 
 }
 
 export const CLIP_LIBRARY = {
-  clips: CLIPS.map(({ id, media, transcript, meta }) => ({ id, media, transcript, meta })),
+  // agentText: the clip's words, sent only to simulated participants (agent mode, test codes) since they cannot listen.
+  clips: CLIPS.map(({ id, media, transcript, meta, text }) => ({ id, media, transcript, meta, agentText: text })),
   lists: LISTS,
   // Each clip becomes an audio item: answer while it plays (mouse-tracked), then confidence on six points.
   template: { title: 'Recorded call', body: 'Listen to this call to the Northwind front desk. Decide whether it is legitimate or suspicious.', live: true, mustFinish: true, maxPlays: 1, decide: true, ask: ['confidence6'] }

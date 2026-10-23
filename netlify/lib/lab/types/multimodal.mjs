@@ -97,9 +97,10 @@ const int = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi;
 const jsonSize = v => { try { return JSON.stringify(v).length; } catch { return Infinity; } };
 export const MEDIA_RE = /^(https:\/\/|\/lab\/|\/api\/lab\/[a-z][a-z0-9-]{2,30}\/file\/)[^\s"'<>]+$/;
 // clips (audio examples inside a text screen), minSeconds (least time on the screen), persona (show the role card),
-// practiceDial (a practice directory to look a number up and call it), live (answer while an audio clip plays).
+// practiceDial (a practice directory to look a number up and call it), live (answer while an audio clip plays),
+// agentText (what an audio or video item says, shown only to simulated participants in agent mode; see publicTrial).
 const ITEM_FIELDS = ['title', 'kind', 'body', 'media', 'mediaAlt', 'transcript', 'mustFinish', 'maxPlays', 'autoplay', 'decide', 'decisionPrompt', 'decisionOptions', 'ask', 'recordVoice', 'voicePrompt',
-  'clips', 'minSeconds', 'persona', 'practiceDial', 'live'];
+  'clips', 'minSeconds', 'persona', 'practiceDial', 'live', 'agentText'];
 // callback: what the organization's real line says; deflectLine: what the attacker says on the number they gave out.
 const SCRIPT_STATES = ['opener', 'pretext', 'ask', 'pressure1', 'pressure2', 'deflect', 'goAhead', 'closeComply', 'closeRefuse', 'close', 'callback', 'deflectLine'];
 
@@ -159,7 +160,7 @@ function validateItem(it, e, conds, qids, where) {
     else if (!MEDIA_RE.test(it.media)) e.push(`${where}: the ${it.kind} address must start with https:// (or be a file uploaded to this study).`);
   }
   if (it.kind === 'image' && !str(it.mediaAlt, 500)) e.push(`${where}: describe the image for screen-reader users (Image description).`);
-  if (!opt(it.body, 20000) || !opt(it.transcript, 20000) || !opt(it.mediaAlt, 500) || !opt(it.voicePrompt, 1000) || !opt(it.decisionPrompt, 300)) e.push(`${where}: a text field is too long.`);
+  if (!opt(it.body, 20000) || !opt(it.transcript, 20000) || !opt(it.agentText, 20000) || !opt(it.mediaAlt, 500) || !opt(it.voicePrompt, 1000) || !opt(it.decisionPrompt, 300)) e.push(`${where}: a text field is too long.`);
   if (it.maxPlays != null && it.maxPlays !== '' && !int(it.maxPlays, 0, 20)) e.push(`${where}: the play limit must be a whole number from 0 (no limit) to 20.`);
   if (it.decisionOptions && it.decisionOptions.length) validateOptions(it.decisionOptions, e, `${where}, decision`);
   if (Array.isArray(it.ask)) { const bad = it.ask.filter(q => !qids.includes(q)); if (bad.length) e.push(`${where}: asks questions that do not exist (${bad.join(', ')}).`); }
@@ -355,6 +356,13 @@ async function checkContext(S, pid, body, test) {
   if (attempt > 1 && !prior[attempt - 2]) return { error: 'out_of_order', status: 409 };
   return { ...ctx, plan, attempt };
 }
+// Simulated participants (agent mode, test participants only) cannot hear tones or speak, so they skip the
+// equipment checks; the check record says so (agent: true).
+const agentPass = (ctx, body) => !!(ctx.p.test && ctx.plan && body.agent === true);
+async function agentPassed(S, ctx, test, now) {
+  await setNew(S.store, checkKey(ctx.tag, test, ctx.attempt), { at: now, pass: true, agent: true });
+  return { pass: true, attemptsLeft: 0 };
+}
 // Where a check stands, so a reload resumes it: { passed, nextAttempt } (nextAttempt > attempts: all used).
 async function checkStatus(S, pid, body) {
   const ctx = await trialContext(S, pid, body);
@@ -369,6 +377,7 @@ async function checkHeadphones(S, pid, body, now) {
   const ctx = await checkContext(S, pid, body, 'headphones');
   if (ctx.error) return ctx;
   if (ctx.repeat) return { pass: ctx.repeat.pass, attemptsLeft: ctx.plan.attempts - ctx.attempt };
+  if (agentPass(ctx, body)) return agentPassed(S, ctx, 'headphones', now);
   const rounds = ctx.plan.rounds[ctx.attempt - 1], picks = Array.isArray(body.choices) ? body.choices.slice(0, rounds.length).map(Number) : [];
   if (picks.length !== rounds.length || !picks.every(x => int(x, 1, 3))) return { error: 'bad_choices', status: 400 };
   const correct = picks.filter((x, i) => rounds[i][x - 1] === 'quiet').length, pass = correct >= ctx.plan.pass;
@@ -379,6 +388,7 @@ async function checkWord(S, pid, body, now) {
   const ctx = await checkContext(S, pid, body, 'word');
   if (ctx.error) return ctx;
   if (ctx.repeat) return { pass: ctx.repeat.pass, attemptsLeft: ctx.plan.attempts - ctx.attempt };
+  if (agentPass(ctx, body)) return agentPassed(S, ctx, 'word', now);
   // Researchers previewing (test participants only) may type the word instead of saying it.
   if (ctx.p.test && typeof body.typed === 'string') {
     const target = ctx.plan.words[ctx.attempt - 1].word, pass = saidWord(body.typed, target);
@@ -697,6 +707,8 @@ export default {
       trials: order.map(({ it, block, meta, blockTitle }, i) => make(it, i, block, meta, blockTitle)),
       practice: session === 1 && c.design.practice && c.practice ? make(c.practice, 'practice', 0) : null,
       ...(persona ? { persona } : {}), ...(c.payoff ? { payoff: c.payoff } : {}), flags: p.flags || null,
+      // Agent mode (simulated participants) is open to test participants only, so agentText never reaches a real one.
+      ...(p.test ? { agent: true } : {}),
       asr: asrConfigured() ? 'server' : 'browser'
     };
   },
@@ -704,7 +716,8 @@ export default {
   // What the browser gets: never the item ID, the condition's variant name, or a call's script and intent
   // (the caller's lines arrive one at a time from call/turn).
   publicTrial(t, plan) {
-    const { id, variant, call, check, ...item } = t.item;
+    const { id, variant, call, check, agentText, ...item } = t.item;
+    if (plan.agent && agentText) item.agentText = agentText;
     if (call) item.call = { caller: call.caller, number: call.number || '', ringSeconds: call.ringSeconds || 30, voice: call.voice || null, scored: !!call.scored,
       ...(call.gate ? { gate: { retryOf: call.gate.retryOf || null, final: !!call.gate.final } } : {}) };
     if (t.meta && t.meta.slider) item.slider = true;
@@ -717,7 +730,7 @@ export default {
     return { item, block: t.block, decision: t.decision };
   },
   publicPlanExtras: plan => ({ questions: publicQuestions(plan.questions, plan.condition), directory: (plan.directory || []).map(x => ({ name: x.name, number: x.number, dept: x.dept || '' })), recording: !!plan.recording,
-    persona: X.publicPersona(plan.persona), asr: plan.asr || 'browser', payoff: plan.payoff ? { benignComplete: plan.payoff.benignComplete, disclose: plan.payoff.disclose, callback: plan.payoff.callback } : null }),
+    persona: X.publicPersona(plan.persona), asr: plan.asr || 'browser', agent: !!plan.agent, payoff: plan.payoff ? { benignComplete: plan.payoff.benignComplete, disclose: plan.payoff.disclose, callback: plan.payoff.callback } : null }),
 
   // Attaches the server's record of a call to the answer before it is cleaned and saved; anything the browser
   // sent under that name is replaced. Returns nothing, so the engine saves as usual.

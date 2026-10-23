@@ -16,6 +16,15 @@
   function fmtTime(s) { s = Math.max(0, Math.round(s || 0)); return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2); }
   function paras(text, esc) { return String(text || '').split(/\n\s*\n/).filter(Boolean).map(function (p) { return '<p>' + esc(p).replace(/\n/g, '<br>') + '</p>'; }).join(''); }
   function needsSound(it) { return it.kind === 'audio' || it.kind === 'video' || it.kind === 'call' || it.recordVoice; }
+  // Agent mode: simulated participants (the sim-panel runner) cannot listen or speak. It is on only when the tab asks
+  // for it (?agent=1, kept for the tab) and the server's plan allows it (test participants only). Recordings then show
+  // their words, the caller's lines appear as captions, replies are typed, and the equipment checks are skipped.
+  try { if (/[?&]agent=1(&|$)/.test(location.search)) sessionStorage.setItem('lab-agent', '1'); } catch (e) {}
+  var agentOn = false;
+  function agentMode(plan) { var asked = false; try { asked = sessionStorage.getItem('lab-agent') === '1'; } catch (e) {} return !!(asked && plan && plan.agent); }
+  function agentHtml(text, esc) {
+    return '<div class="mm-agent" data-agent="transcript"><p class="muted">Agent mode: what this recording says</p>' + (text ? paras(text, esc) : '<p class="muted">(No words were provided for this recording.)</p>') + '</div>';
+  }
   function blobToBase64(blob) {
     return new Promise(function (res, rej) { var r = new FileReader(); r.onload = function () { res(String(r.result).split(',')[1] || ''); }; r.onerror = rej; r.readAsDataURL(blob); });
   }
@@ -31,6 +40,11 @@
   }
   // Speaks a line. A recorded clip (audio URL) plays through a phone-band filter instead of the synthetic voice.
   function speak(text, opts, onStart, onEnd) {
+    if (agentOn) {   // nothing to hear: the line is "spoken" at once (the caption carries the words)
+      var fin = false, end = function () { if (!fin) { fin = true; if (onEnd) onEnd(); } };
+      setTimeout(function () { if (!fin && onStart) onStart(); setTimeout(end, 50); }, 30);
+      return { stop: end, pause: function () {}, resume: function () {} };
+    }
     opts = opts || {};
     var ended = false, done = function () { if (!ended) { ended = true; if (onEnd) onEnd(); } };
     if (opts.audio) {
@@ -301,7 +315,7 @@
   function clipsHtml(it, esc) {
     return (it.clips || []).map(function (c, i) {
       return '<figure class="mm-clip"><figcaption>' + esc(c.label || ('Example ' + (i + 1))) + '</figcaption><audio controls preload="none" src="' + esc(c.media) + '" data-clip="' + i + '"></audio>' +
-        (c.transcript ? '<details class="mm-transcript"><summary>' + ui0('transcript_label') + '</summary><p>' + esc(c.transcript) + '</p></details>' : '') + '</figure>';
+        (c.transcript ? '<details class="mm-transcript"' + (agentOn ? ' open data-agent="transcript"' : '') + '><summary>' + ui0('transcript_label') + '</summary><p>' + esc(c.transcript) + '</p></details>' : '') + '</figure>';
     }).join('');
   }
   var ui0 = function (k) { return k === 'transcript_label' ? 'Show transcript' : k; };
@@ -315,6 +329,7 @@
     var it = ctx.trial.item, plan = ctx.plan, esc = ui.esc, dec = ctx.trial.decision, qs = answersFor(it, plan);
     var state = { t0: now(), decision: null }, live = { startMs: null, changes: [], decidedMs: null, decidedClipMs: null, final: null, late: false, clipMs: null }, slider = it.slider ? [] : null;
     ui.show('<h2>' + esc(it.title) + '</h2><div class="mm-item mm-k-audio" data-trace="item">' + paras(it.body, esc) + '<audio id="mm-el" preload="auto" src="' + esc(it.media) + '"></audio>' +
+      (agentOn ? agentHtml(it.agentText || it.transcript, esc) : '') +
       '<div class="mm-bar" aria-hidden="true"><span id="mm-fill"></span></div></div>' +
       '<fieldset class="q-group mt" data-name="decision"><legend class="q">' + esc(dec.prompt) + '</legend><div class="mt-area" id="mt-area" data-n="' + dec.options.length + '">' +
       dec.options.map(function (o, i) { return '<button type="button" class="mt-opt" data-value="' + esc(o.value) + '" data-trace="decision:' + esc(o.value) + '" style="--i:' + i + '" disabled>' + esc(o.label) + '</button>'; }).join('') +
@@ -329,6 +344,8 @@
     var path = [], tracking = false, ended = false, t0 = 0, sl = document.getElementById('mm-sl'), slTimer = null;
     var m = state.media = { plays: 0, pauses: 0, firstPlayMs: null, endedMs: null, heardPct: 0, durationMs: null, transcriptOpened: false };
     function clipMs() { return Math.round((el.currentTime || 0) * 1000); }
+    // In agent mode the clip is not played: its words are on screen, and it "ends" a moment after Start.
+    function play() { if (agentOn) { setTimeout(function () { el.dispatchEvent(new Event('ended')); }, 1500); return Promise.resolve(); } return el.play(); }
     function move(e) { var t = Math.round(now() - t0); if (tracking && path.length < 1400 && t - path[path.length - 1][2] >= 8) path.push([Math.round(e.clientX), Math.round(e.clientY), t]); }
     function key(e) { if ((e.code === 'Space' || e.key === ' ') && live.startMs != null && live.decidedMs == null && !ended) { e.preventDefault(); live.decidedMs = Math.round(now() - state.t0); live.decidedClipMs = clipMs(); ctx.record('decided', live.decidedClipMs); ls.textContent = 'Marked as decided.'; } }
     document.addEventListener('keydown', key);
@@ -337,7 +354,7 @@
       if (it.locked && !ended) {
         live.startMs = Math.round(now() - state.t0); start.hidden = true; document.getElementById('mt-hint').hidden = true;
         if (sl) { sl.disabled = false; slTimer = setInterval(function () { slider.push([clipMs(), Number(sl.value)]); }, 250); }
-        el.play().catch(function () { ls.textContent = 'The clip could not play.'; });
+        play().catch(function () { ls.textContent = 'The clip could not play.'; });
         return;
       }
       if (it.locked && ended) {
@@ -350,7 +367,7 @@
       start.hidden = true; document.getElementById('mt-hint').hidden = true; area.classList.add('live');
       opts.forEach(function (o) { o.disabled = false; }); document.addEventListener('pointermove', move);
       if (sl) { sl.disabled = false; slTimer = setInterval(function () { slider.push([clipMs(), Number(sl.value)]); }, 250); }
-      el.play().catch(function () { ls.textContent = 'The clip could not play. Click an answer to continue.'; });
+      play().catch(function () { ls.textContent = 'The clip could not play. Click an answer to continue.'; });
     });
     el.addEventListener('loadedmetadata', function () { m.durationMs = Math.round(el.duration * 1000); });
     el.addEventListener('play', function () { m.plays++; if (m.firstPlayMs == null) m.firstPlayMs = Math.round(now() - state.t0); });
@@ -372,7 +389,7 @@
       box.disabled = false; submit.disabled = false; ls.textContent = '';
     }
     el.addEventListener('ended', function () {
-      ended = true; m.endedMs = Math.round(now() - state.t0); m.heardPct = 100; live.clipMs = Math.round(el.duration * 1000);
+      ended = true; m.endedMs = Math.round(now() - state.t0); m.heardPct = agentOn ? 0 : 100; live.clipMs = isFinite(el.duration) ? Math.round(el.duration * 1000) : null;
       if (slTimer) { clearInterval(slTimer); slTimer = null; if (sl) sl.disabled = true; }
       document.removeEventListener('keydown', key);
       if (it.locked) { start.textContent = 'Answer'; start.hidden = false; ls.textContent = 'The call has ended. Click Answer, then choose.'; return; }
@@ -394,7 +411,7 @@
     if (it.kind === 'audio' && it.live && dec) return renderLive(ctx, ui);
     var state = { t0: now(), decision: null };
     var media = it.kind === 'image' ? '<figure class="mm-figure"><img src="' + esc(it.media) + '" alt="' + esc(it.mediaAlt || '') + '" data-trace="image"></figure>'
-      : it.kind === 'audio' || it.kind === 'video' ? playerHtml(it, ui) : '';
+      : it.kind === 'audio' || it.kind === 'video' ? playerHtml(it, ui) + (agentOn ? agentHtml(it.agentText || it.transcript, esc) : '') : '';
     var gate = (it.kind === 'audio' || it.kind === 'video') && it.mustFinish;
     // A training screen waits for its minimum time, every example played to the end, and the practice call made.
     var nClips = (it.clips || []).length, screen = { dwellMs: 0, clipsPlayed: 0, clipsEnded: 0, dialed: [], reachedTarget: false }, ended = {}, timeOk = !(it.minSeconds > 0);
@@ -413,6 +430,7 @@
       if (!left.length && !gate) submit.disabled = false;
     }
     if (screenGate) {
+      if (agentOn) screen.clipsEnded = nClips;   // the examples' words are shown open; only the minimum time still applies
       if (!timeOk) setTimeout(function () { timeOk = true; screenReady(); }, it.minSeconds * 1000);
       root.querySelectorAll('audio[data-clip]').forEach(function (a) {
         a.addEventListener('play', function () { screen.clipsPlayed++; ctx.record('clip_play', Number(a.getAttribute('data-clip'))); root.querySelectorAll('audio[data-clip]').forEach(function (o) { if (o !== a) o.pause(); }); });
@@ -430,7 +448,11 @@
       }
       screenReady();
     }
-    if (it.kind === 'audio' || it.kind === 'video') wireMedia(root, it, ui, state, function () { box.disabled = false; submit.disabled = false; var g = document.getElementById('mm-gate'); if (g) g.hidden = true; });
+    if (it.kind === 'audio' || it.kind === 'video') {
+      var heard = function () { box.disabled = false; submit.disabled = false; var g = document.getElementById('mm-gate'); if (g) g.hidden = true; };
+      wireMedia(root, it, ui, state, heard);
+      if (agentOn) heard();
+    }
     wireDecision(root, dec, state, ctx);
     wireVoice(root, it, plan, ui, state);
     var set = ui.questionSet(box, qs, msg, submit, function (n, v) { ctx.record(n, v); });
@@ -520,6 +542,7 @@
         '<div class="phone-btns small"><label class="check"><input type="checkbox" id="ph-cc"> ' + ui.Th('call_captions') + '</label><button type="button" class="secondary" id="ph-hold">' + ui.Th('call_hold') + '</button>' +
         ((plan.directory || []).length ? '<button type="button" class="secondary" id="ph-dirlive">' + ui.Th('directory_open') + '</button>' : '') +
         '<button type="button" class="decline" id="ph-hang">' + ui.Th('call_hangup') + '</button></div><div id="ph-dirbox-live" hidden></div>', 'live'));
+      if (agentOn) document.getElementById('ph-captions').hidden = false;   // the caller's words, for an agent that cannot listen
       var dl = document.getElementById('ph-dirlive');
       if (dl) dl.addEventListener('click', function () {
         st.directoryOpened = true; logUi('directory_open_live');
@@ -727,6 +750,17 @@
       });
     };
 
+    if (agentOn) return begin(function () {
+      ui.show('<h2>' + esc(it.title) + '</h2><p class="mm-agent" data-agent="check">Agent mode: simulated participants skip this equipment check.</p><div class="actions"><button type="button" id="mm-ckagent">' + ui.Th('submit_button') + '</button></div><div id="mm-ckmsg"></div>');
+      document.getElementById('mm-ckagent').addEventListener('click', function () {
+        this.disabled = true;
+        ui.call(k.test === 'headphones' ? 'check/headphones' : 'check/word', { session: ctx.plan.session, index: ctx.index, attempt: attempt, agent: true }).then(function (res) {
+          if (res && res.error) { var m = document.getElementById('mm-ckmsg'); if (m) m.innerHTML = ui.errorBox(res.error); return; }
+          result(res, function () {});
+        });
+      });
+    });
+
     if (k.test === 'headphones') {
       var round = function (note) {
         var picks = [], r = 0, rounds = k.rounds[attempt - 1];
@@ -814,9 +848,11 @@
     },
     runTrial: function (ctx, ui) {
       var it = ctx.trial.item;
+      agentOn = agentMode(ctx.plan);
+      if (agentOn) micBlocked = true;   // replies are typed
       if (it.kind !== 'check') myInfo(ctx.plan, ui);
       if (it.kind === 'check') return runCheck(ctx, ui);
-      if (needsSound(it) && !soundChecked[ctx.plan.session] && !(ctx.content && ctx.content.noSoundCheck)) return soundCheck(ctx, ui, function () { impl.runTrial(ctx, ui); });
+      if (needsSound(it) && !agentOn && !soundChecked[ctx.plan.session] && !(ctx.content && ctx.content.noSoundCheck)) return soundCheck(ctx, ui, function () { impl.runTrial(ctx, ui); });
       if (it.kind === 'call') return runCall(ctx, ui);
       renderItem(ctx, ui);
     }

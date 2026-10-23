@@ -129,7 +129,7 @@ export function poolItems(block, c, p, byId) {
       ids.slice(0, Math.floor(ids.length / 2)).forEach(id => locked.add(id));
     }
     return picked.map(clip => ({
-      it: { ...(lib.template || {}), id: `clip-${clip.id}`, kind: 'audio', title: (lib.template && lib.template.title) || 'Recorded call', media: clip.media, transcript: clip.transcript || '', variants: {} },
+      it: { ...(lib.template || {}), id: `clip-${clip.id}`, kind: 'audio', title: (lib.template && lib.template.title) || 'Recorded call', media: clip.media, transcript: clip.transcript || '', agentText: clip.agentText || '', variants: {} },
       meta: { ...(clip.meta || {}), clipId: clip.id, phase, clipList: f.clipList ?? 0, slider: !!(f.slider && c.design.sliderBlock === block.pool), locked: locked.has(clip.id) }
     }));
   }
