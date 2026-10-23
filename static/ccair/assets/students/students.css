@@ -83,3 +83,54 @@
   .toc, .guide-nav, .pager, .ds-controls { display: none !important; }
   .table-wrap { overflow: visible; box-shadow: none; }
 }
+
+/* Answer-first summaries under question headings */
+.answer { margin-top: 12px; padding: 14px 18px; border-left: 3px solid var(--accent); background: var(--accent-dim); border-radius: 0 12px 12px 0; color: var(--text); font-size: 17px; }
+.answer b { color: var(--text); }
+
+/* Who is this guide for */
+.audiences { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 18px; }
+@media (max-width: 640px) { .audiences { grid-template-columns: 1fr; } }
+.aud { background: var(--card); border: 1px solid var(--border-soft); border-radius: var(--radius-sm); padding: 20px; box-shadow: var(--shadow); min-width: 0; }
+.aud.wide { grid-column: 1 / -1; }
+.aud h3 { font-size: 18px; margin: 0; }
+.aud > p { margin-top: 8px; color: var(--text2); font-size: 15px; }
+.aud ul.list { margin-top: 10px; font-size: 15px; }
+.aud-links { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.aud-links a { display: inline-block; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border); font-size: 14px; font-weight: 600; color: var(--accent); text-decoration: none !important; }
+.aud-links a:hover { background: var(--accent-dim); }
+
+/* Coming-soon card */
+.guide-cards .card.soon { border-style: dashed; }
+.guide-cards .card .badge { align-self: flex-start; margin-bottom: 8px; }
+
+/* Wide comparison tables keep their columns and scroll sideways on phones */
+.table-wrap table.wide { min-width: 680px; }
+.table-wrap td { overflow-wrap: normal; }
+
+/* Ask CCAIR */
+.ask { margin-top: 36px; padding: 20px 22px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--card); box-shadow: var(--shadow); }
+.ask h2 { font-size: 20px; margin: 0; }
+.ask p { margin-top: 10px; color: var(--text2); font-size: 15px; }
+.ask a { text-decoration: underline; text-underline-offset: 3px; }
+
+/* What changed */
+.changes { list-style: none; display: grid; gap: 14px; margin-top: 14px; }
+.changes li { padding-left: 16px; border-left: 2px solid var(--border); }
+.changes time { display: block; font: 600 12px var(--mono); letter-spacing: 0.06em; color: var(--muted); }
+.changes a { font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.changes p { margin-top: 4px; color: var(--text2); font-size: 15px; }
+
+/* Dataset catalog download */
+.download { margin-top: 20px; padding: 18px 20px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--card); box-shadow: var(--shadow); }
+.download-h { font-weight: 700; color: var(--text); }
+.download-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+.btn-dl { display: inline-block; padding: 9px 16px; border-radius: 999px; background: var(--accent); color: var(--on-accent) !important; font-weight: 700; font-size: 15px; }
+.btn-dl:hover { text-decoration: none; filter: brightness(1.06); }
+.download-cite { margin-top: 12px; font-size: 14px; color: var(--text2); overflow-wrap: anywhere; }
+.download-note { margin-top: 6px; font-size: 13px; color: var(--muted); }
+
+@media print {
+  .ask, .download-links { display: none !important; }
+  .js .reveal { opacity: 1 !important; transform: none !important; }
+}

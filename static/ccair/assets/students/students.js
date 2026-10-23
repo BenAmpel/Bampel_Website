@@ -1,8 +1,14 @@
-/* CCAIR Student Guide: dataset catalog search and category filter (progressive enhancement).
-   Without JavaScript the full list shows and the controls stay hidden. Nothing typed here is stored or sent,
-   and no analytics event is recorded. */
+/* CCAIR Student Guide: dataset catalog search and category filter, and the print button on the printable one-pagers
+   (progressive enhancement). Without JavaScript the full list shows and the controls stay hidden. Nothing typed here
+   is stored or sent, and no analytics event is recorded. */
 (function () {
   'use strict';
+  var printBtn = document.querySelector('[data-print]');
+  if (printBtn) {
+    printBtn.hidden = false;
+    printBtn.addEventListener('click', function () { window.print(); });
+  }
+
   var form = document.querySelector('[data-ds-controls]');
   var list = document.getElementById('ds-list');
   if (!form || !list) return;

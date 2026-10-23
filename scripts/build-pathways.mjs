@@ -4,7 +4,7 @@
 // Run by `npm run build:ccair` (netlify.toml build command), before Hugo copies static/ into public/.
 import fs from 'node:fs';
 import path from 'node:path';
-import { CCAIR as ccair, SITE, esc, ld, person as reviewer, org, head as baseHead, top as baseTop, foot as baseFoot, writeSitemap, readJson } from './ccair-static.mjs';
+import { CCAIR as ccair, SITE, esc, ld, person as reviewer, org, head as baseHead, top as baseTop, foot as baseFoot, writeSitemap, readJson, HIRING, CODE_SHORT } from './ccair-static.mjs';
 
 const out = path.join(ccair, 'pathways');
 const D = readJson('pathways.json');
@@ -12,13 +12,11 @@ const HUB = `${SITE}/ccair/pathways/`;
 const ASSET_V = D.updated.replace(/-/g, '');
 
 const money = (n) => '$' + n.toLocaleString('en-US');
-const HIRING = { entry: 'Entry-level', step: 'Usually a second job', emerging: 'Emerging field' };
 const CODE = {
   little: 'Very little. Comfort with computers matters more than programming; basic scripting can help later.',
   some: "Some. Basic scripting (for example Python or Bash) helps, but you don't need to be a software developer.",
   lots: 'Yes. Programming is a regular part of this job.'
 };
-const CODE_SHORT = { little: 'Little or none', some: 'Some scripting', lots: 'Regular programming' };
 const FAMILY = {
   'soc-analyst': 'Defend', 'incident-responder': 'Defend', 'systems-security-administrator': 'Defend',
   'digital-forensics-investigator': 'Investigate', 'threat-intelligence-analyst': 'Investigate',
