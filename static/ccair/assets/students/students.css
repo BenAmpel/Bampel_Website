@@ -1,0 +1,85 @@
+/* CCAIR Student Guide. Loaded after ../pathways/pathways.css, which supplies the palette (light and dark), header,
+   footer, cards, lists, citations and motion. This file adds only what the guide needs on top: meta line, warning
+   box, tables that scroll on phones, page lists, pager and the dataset catalog. */
+.students .guide-hero h1 { max-width: 24ch; }
+.guide-meta { margin-top: 14px; font-size: 14px; color: var(--muted); }
+.guide-meta .verified { color: var(--text); font-weight: 600; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.muted { color: var(--muted); font-weight: 500; }
+
+/* Paragraph links are underlined so they do not rely on colour alone. */
+.students p.body a, .students ul.list a, .students ol.list a, .students td a, .students th a, .students .note a, .students .warn a, .students .lede a, .students .reviewed a {
+  text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.students sup.cite a { text-decoration: none; }
+
+.warn { margin-top: 20px; padding: 16px 18px; border-radius: 14px; border: 1px solid var(--border); border-left: 4px solid var(--accent);
+  background: var(--accent-dim); color: var(--text); font-size: 15px; }
+.warn b { color: var(--text); }
+
+/* On this page / guide contents */
+.toc, .guide-nav { margin: 8px 0 24px; padding: 18px 20px; border: 1px solid var(--border-soft); border-radius: var(--radius-sm); background: var(--card); box-shadow: var(--shadow); }
+.toc-h { font-size: 13px; font-weight: 700; color: var(--accent2); letter-spacing: 0.02em; }
+.toc ul, .guide-nav ol { list-style: none; margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px 8px; }
+.toc a, .guide-nav a { display: inline-block; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border-soft); color: var(--text2); font-size: 14px; font-weight: 600; }
+.toc a:hover, .guide-nav a:hover { border-color: var(--border); color: var(--text); text-decoration: none; }
+.guide-nav a[aria-current="page"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.guide-nav { margin-top: 24px; }
+.students section { scroll-margin-top: 80px; }
+
+/* Tables: atomic cells; the wrapper scrolls sideways on narrow screens instead of the page. */
+.table-wrap { margin-top: 18px; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border-soft); border-radius: var(--radius-sm); background: var(--card); box-shadow: var(--shadow); }
+.table-wrap:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.table-wrap table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.table-wrap caption { caption-side: top; text-align: left; padding: 14px 16px 6px; font-size: 13px; color: var(--muted); font-weight: 600; }
+.table-wrap th, .table-wrap td { text-align: left; vertical-align: top; padding: 10px 16px; border-top: 1px solid var(--border-soft); color: var(--text2); }
+.table-wrap thead th { font: 700 11px var(--sans); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); border-top: 0; }
+.table-wrap tbody th { color: var(--text); font-weight: 600; }
+@media (max-width: 560px) { .table-wrap table { font-size: 14px; } .table-wrap th, .table-wrap td { padding: 9px 10px; } }
+
+/* Guide page cards on the start page */
+.guide-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 18px; }
+@media (max-width: 640px) { .guide-cards { grid-template-columns: 1fr; } }
+.guide-cards .card { display: flex; flex-direction: column; color: var(--text); text-decoration: none !important; padding: 20px; }
+.guide-cards .card h3 { margin-top: 0; font-size: 18px; }
+.guide-cards .card .go { margin-top: 10px; color: var(--accent); font-weight: 700; font-size: 14px; }
+
+/* Previous / next */
+.pager { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 36px; }
+.pager a { display: flex; flex-direction: column; padding: 14px 18px; border: 1px solid var(--border-soft); border-radius: var(--radius-sm); background: var(--card); color: var(--text); font-weight: 700; box-shadow: var(--shadow); }
+.pager a span { font-size: 12px; font-weight: 600; color: var(--muted); }
+.pager a:hover { border-color: var(--border); text-decoration: none; }
+.pager .next { text-align: right; }
+
+/* Dataset catalog */
+.ds-controls { display: grid; grid-template-columns: 1.4fr 1fr; gap: 12px; margin-top: 20px; }
+@media (max-width: 560px) { .ds-controls { grid-template-columns: 1fr; } }
+.ds-controls[hidden] { display: none; }
+.field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.field label { font-size: 14px; font-weight: 700; color: var(--text); }
+.field input, .field select { width: 100%; font: 500 16px var(--sans); color: var(--text); background: var(--elevated); border: 1px solid var(--muted); border-radius: 12px; padding: 11px 14px; }
+.field input::placeholder { color: var(--muted); opacity: 1; }
+.field input:focus-visible, .field select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-color: var(--accent); }
+.ds-status { margin-top: 14px; font-size: 14px; color: var(--muted); }
+.ds-list { list-style: none; display: grid; gap: 16px; margin-top: 12px; }
+.ds article { background: var(--card); border: 1px solid var(--border-soft); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); }
+.ds[hidden] { display: none; }
+.ds h3 { font-size: 21px; overflow-wrap: anywhere; }
+.ds-tags { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
+.ds-tags .badge { white-space: normal; }
+.ds-sub { font-size: 13px; color: var(--text2); }
+.ds-desc { margin-top: 12px; color: var(--text2); }
+.ds-caveat { margin-top: 14px; padding: 14px 16px; border-radius: 12px; border-left: 4px solid var(--accent); background: var(--accent-dim); }
+.ds-caveat-h { font-weight: 700; color: var(--text); font-size: 14px; }
+.ds-caveat p + p { margin-top: 4px; color: var(--text); font-size: 15px; }
+.ds-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 18px; margin-top: 16px; }
+@media (max-width: 640px) { .ds-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.ds-facts dt { font: 700 11px var(--sans); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.ds-facts dd { margin-top: 3px; font-size: 15px; color: var(--text); overflow-wrap: anywhere; }
+.ds-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.ds-links a { border: 1px solid var(--border); border-radius: 999px; padding: 7px 14px; font-weight: 700; font-size: 14px; }
+.ds-links a:hover { background: var(--accent-dim); text-decoration: none; }
+
+@media print {
+  .toc, .guide-nav, .pager, .ds-controls { display: none !important; }
+  .table-wrap { overflow: visible; box-shadow: none; }
+}

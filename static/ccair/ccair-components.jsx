@@ -116,6 +116,7 @@ function CCAIRNav({ currentPage }) {
             {NAV_PAGES.map((p) => (
               <li key={p.id}><a href={hrefFor(p.id)} aria-current={currentPage === p.id ? 'page' : undefined}>{p.label}</a></li>
             ))}
+            <li><a href="/ccair/students/">Student guide</a></li>
           </ul>
           <a className="btn btn-primary" href="/ccair/pathways/">Cyber Career Finder <Arrow /></a>
         </div>
@@ -266,6 +267,7 @@ function FinderFeature({ headingLevel = 2, titleId }) {
       <div className="actions">
         <a className="btn btn-primary" href="/ccair/pathways/">Take the finder <Arrow /></a>
         <a className="btn btn-secondary" href="/ccair/pathways/#roles">Browse the 14 roles</a>
+        <a className="btn btn-secondary" href="/ccair/students/">Read the student guide</a>
       </div>
     </Reveal>
   );
@@ -297,6 +299,7 @@ function CCAIRFooter() {
             <h2>Elsewhere</h2>
             <ul>
               <li><a href="/ccair/pathways/">Cyber Career Finder</a></li>
+              <li><a href="/ccair/students/">Student guide</a></li>
               <li><a href="https://bampel.com/">bampel.com</a></li>
               <li><a href="https://bampel.com/publications/">Full publication list</a></li>
               <li><a href="https://robinson.gsu.edu/research-centers/crisp/">CRISP at Robinson</a></li>

@@ -1,0 +1,20 @@
+{
+  "updated": "2026-10-22",
+  "datasets": [
+    {
+      "name": "CIC-IDS2017",
+      "category": "Network traffic and intrusion detection",
+      "subcategory": "Network intrusion detection",
+      "description": "Five days of emulated enterprise traffic with benign activity and common network attacks; PCAP and labeled flow features.",
+      "access": "Public for researchers; download from the dataset page",
+      "link": "https://www.unb.ca/cic/datasets/ids-2017.html",
+      "dataType": "PCAP, flow CSV",
+      "size": "",
+      "timeSpan": "July 3-7, 2017",
+      "license": "Public for researchers with citation required",
+      "paper": "https://doi.org/10.5220/0006639801080116",
+      "caveats": "Engelen et al. (2021) documented flow construction and labeling errors in the released CSV files. Benign traffic comes from scripted user profiles rather than real users. Attack classes such as Heartbleed and infiltration have very few samples.",
+      "checked": "2026-09-27"
+    }
+  ]
+}
