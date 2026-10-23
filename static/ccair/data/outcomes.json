@@ -1,0 +1,30 @@
+{
+  "updated": "2026-10-23",
+  "status": "collecting",
+  "about": "Aggregate internship and first-job outcomes for CCAIR and Georgia State CIS students, rendered by scripts/build-students.mjs at /ccair/students/outcomes/. While rows is empty the page says the data is being collected, carries noindex and stays out of the sitemap.",
+  "rules": {
+    "minCell": 5,
+    "minPayN": 10,
+    "privacy": [
+      "Enter group counts only. Never enter a student's name, ID, email or any other field that identifies one person.",
+      "Any group with fewer than minCell students is not shown. Suppressed groups are added together into one 'Other (smaller groups)' line, which is shown only if it reaches minCell itself.",
+      "medianPay is shown only when count is at least minPayN. Leave it out otherwise.",
+      "employerName is shown only when employerConsent is true, meaning the employer agreed to be named. Without consent the row counts toward its employer type only.",
+      "Record where each count came from in source (for example the career office report and its date)."
+    ]
+  },
+  "fields": {
+    "year": "Graduation or internship year (number, for example 2026)",
+    "program": "Program label, for example 'BBA CIS', 'MS Information Systems', 'PhD CIS' or 'CCAIR research students'",
+    "level": "undergraduate | masters | doctoral",
+    "kind": "internship | full-time",
+    "employerType": "Private sector | Government | Nonprofit | Higher education | Continuing education",
+    "role": "Job family, ideally a Pathway Finder role name (for example 'SOC Analyst') or 'Other security role' or 'Non-security role'",
+    "count": "Number of students in this group (whole number)",
+    "medianPay": "Optional. Median annual base pay in US dollars, only when count >= minPayN",
+    "employerName": "Optional. Only with employerConsent: true",
+    "employerConsent": "Optional. true when the employer agreed to be named",
+    "source": "Where the count came from"
+  },
+  "rows": []
+}

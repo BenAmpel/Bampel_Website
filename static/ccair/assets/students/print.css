@@ -1,0 +1,48 @@
+/* CCAIR Student Guide printable one-pagers (/ccair/students/print/...). Light theme only (forced, also on screen),
+   sized for US Letter with 0.5 in margins so each sheet prints on one page. System fonts, no motion, no backdrop. */
+:root { color-scheme: light; --ink: #2B2233; --ink2: #4D4152; --muted: #5E5160; --accent: #A94A26; --rule: #D9CFC4; --paper: #FFFFFF; --cream: #FBF6EF; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { background: var(--cream); }
+body.printable { font: 400 10.5pt/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif; color: var(--ink); background: var(--cream); }
+a { color: var(--accent); }
+.skip { position: absolute; left: -9999px; top: 8px; background: var(--accent); color: #fff; padding: 8px 14px; border-radius: 8px; z-index: 10; }
+.skip:focus { left: 16px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+main[tabindex="-1"]:focus { outline: none; }
+.p-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; max-width: 8.5in; margin: 0 auto; padding: 16px; font-size: 15px; font-weight: 600; }
+.p-btn { font: 700 15px/1 inherit; font-family: inherit; color: #fff; background: var(--accent); border: 0; border-radius: 999px; padding: 11px 18px; cursor: pointer; }
+.p-btn[hidden] { display: none; }
+main { display: block; max-width: 8.5in; margin: 0 auto 32px; padding: 0.5in; background: var(--paper); box-shadow: 0 1px 2px rgba(43,26,18,.06), 0 8px 24px rgba(43,26,18,.08); }
+.p-head { border-bottom: 2px solid var(--accent); padding-bottom: 8px; margin-bottom: 10px; }
+.p-eyebrow { font: 600 8.5pt ui-monospace, "SF Mono", Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+h1 { font-size: 20pt; line-height: 1.15; margin-top: 2px; }
+.p-intro { color: var(--ink2); margin-top: 4px; }
+h2 { font-size: 11.5pt; color: var(--accent); margin: 0 0 4px; }
+.p-cols { columns: 2; column-gap: 0.35in; }
+.p-group { break-inside: avoid; margin-bottom: 10px; }
+.check { list-style: none; }
+.check li { position: relative; padding-left: 20px; margin-bottom: 4px; break-inside: avoid; }
+.check .box { position: absolute; left: 0; top: 2px; width: 11px; height: 11px; border: 1.3px solid var(--ink); border-radius: 2px; }
+.p-rule { margin-bottom: 8px; }
+.p-table { width: 100%; border-collapse: collapse; font-size: 8pt; line-height: 1.22; margin-bottom: 8px; }
+.p-table caption { text-align: left; font-weight: 700; font-size: 10.5pt; color: var(--accent); padding-bottom: 3px; }
+.p-table th, .p-table td { text-align: left; vertical-align: top; padding: 2px 5px; border-bottom: 1px solid var(--rule); }
+.p-roles td:last-child { width: 46%; }
+.p-certs th[scope="row"] { width: 30%; }
+.p-table thead th { font-size: 7.5pt; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); border-bottom: 1.5px solid var(--ink); }
+.p-table tbody th { font-weight: 600; }
+.p-foot { margin-top: 10px; padding-top: 6px; border-top: 1px solid var(--rule); font-size: 8pt; color: var(--muted); }
+@media (max-width: 640px) {
+  main { padding: 20px 16px; margin: 0 0 24px; }
+  .p-cols { columns: 1; }
+  .p-table { display: block; overflow-x: auto; }
+}
+@page { size: letter; margin: 0.5in; }
+@media print {
+  html, body.printable { background: #fff; }
+  .screen-only, .skip { display: none !important; }
+  main { max-width: none; margin: 0; padding: 0; box-shadow: none; }
+  a { color: var(--ink); text-decoration: none; }
+  .p-cols { columns: 2; }
+  .p-table { display: table; }
+}
