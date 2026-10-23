@@ -141,6 +141,9 @@ let passer = null;
   r = await word(tok, 2); assert.equal(r.json.pass, true, r.text);
   r = await save(tok, 1); assert(r.json.ok && !r.json.screenedOut, r.text);
   await onboard(tok, plan);
+  // A call that rang out, answered again after a page reload, is over, not out of order (the skipped practice retry).
+  assert((await turn(tok, 1, 6, 0, 'timeout')).json.done);
+  assert.equal((await turn(tok, 1, 6, 0, 'answer')).json.error, 'call_over', 'answering a missed call after a reload ends it cleanly');
   r = await call(P + 'survey', { body: { token: tok, session: 1, kind: 'post', data: {} } });
   assert(r.json.ok && r.json.status.available && r.json.status.nextSession === 2, 'session 2 follows at once');
   assert.deepEqual(await markers(), [], 'no arm until session 2 starts');

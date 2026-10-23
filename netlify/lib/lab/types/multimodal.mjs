@@ -229,6 +229,8 @@ async function callTurn(S, pid, body, now) {
     ...(heard != null ? { heard } : {}), ...(r.codeSent && ctx.trial.callCode ? { code: { service: call.code.service || call.caller, value: ctx.trial.callCode } } : {}) });
   const existing = await S.store.get(key);
   if (existing && existing.kind === kind) return pub(existing);   // a retried request gets the same answer
+  // The call already rang out or was declined (the page was reloaded while it rang): it is over, not out of order.
+  if (existing && seq === 0 && existing.after && existing.after.done) return { error: 'call_over', status: 409 };
   if (existing) return { error: 'out_of_order', status: 409, next: (await S.store.list(prefix)).length };
   const keys = (await S.store.list(prefix)).sort();
   if (keys.length !== seq) return { error: 'out_of_order', status: 409, next: keys.length };

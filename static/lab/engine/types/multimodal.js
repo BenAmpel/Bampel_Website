@@ -566,7 +566,7 @@
       });
       var talk = document.getElementById('ph-talk');
       if (talk) talk.addEventListener('click', function () { if (listening) { if (st.stopListen) st.stopListen(); else if (recog) recog.stop(); } else listen(); });
-      turn('answer').then(function (r) { if (!r || r.error) return failed(); callerSays(r); });
+      turn('answer').then(function (r) { if (r && r.error === 'call_over') return hangUp(true); if (!r || r.error) return failed(); callerSays(r); });
     }
     // In a scored call the reply is spoken; the type box appears only if the microphone or the recognizer fails twice.
     function showType(why) { var f = document.getElementById('ph-typeform'); if (f && f.hidden) { f.hidden = false; logUi('type_box_shown:' + why); } }
