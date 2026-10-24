@@ -599,11 +599,6 @@ function runEnhancements() {
             }, 100);
           }
         }
-        
-        // Animate timeline items
-        if (entry.target.classList.contains('timeline-item')) {
-          entry.target.classList.add('visible');
-        }
       }
     });
   }, observerOptions);
@@ -611,7 +606,6 @@ function runEnhancements() {
   // Observe all animated elements
   document.querySelectorAll('.stat-card').forEach(el => observer.observe(el));
   document.querySelectorAll('.skill-bar').forEach(el => observer.observe(el));
-  document.querySelectorAll('.timeline-item').forEach(el => observer.observe(el));
   
   // Store original widths for skill bars
   document.querySelectorAll('.skill-progress').forEach(bar => {

@@ -1195,20 +1195,13 @@ section#about img {
   100% { transform: translateX(100%); }
 }
 
-/* Timeline styling - start hidden for animation */
+/* Timeline styling. Visible by default (it used to start hidden until a script added .visible, so without scripts the
+   timeline never appeared); the slide-in is the scroll-driven reveal in assets/css/prestige-polish.css. */
 .timeline-item {
   position: relative;
   padding-left: 35px;
   padding-bottom: 30px;
   border-left: 3px solid #1565c0;
-  opacity: 0;
-  transform: translateX(-20px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
-.timeline-item.visible {
-  opacity: 1;
-  transform: translateX(0);
 }
 
 .timeline-item:last-child {

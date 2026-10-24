@@ -5,4 +5,3 @@
 -->
 {{ $pp := resources.Get "css/prestige-polish.css" | minify | fingerprint }}
 <link rel="stylesheet" href="{{ $pp.RelPermalink }}" integrity="{{ $pp.Data.Integrity }}">
-{{ partial "functions/js_tag" (dict "path" "js/site/reveal.js" "attrs" "defer") }}
