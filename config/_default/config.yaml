@@ -33,6 +33,16 @@ module:
 ## ADVANCED
 ############################
 
+# hugo_stats.json (tags, classes and ids of the rendered pages) feeds the unused-CSS pass; see postcss.config.js.
+build:
+  buildStats:
+    enable: true
+  cachebusters:
+    - source: 'hugo_stats\.json'
+      target: 'css'
+    - source: 'postcss\.config\.js'
+      target: 'css'
+
 enableGitInfo: false
 summaryLength: 30
 pagination:

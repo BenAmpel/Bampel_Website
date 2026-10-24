@@ -150,6 +150,10 @@
     {{- $style = $style | minify -}}
   {{- end -}}
   {{ $style := slice $css_bundle_head $style | resources.Concat "css/wowchemy.css" }}
+  {{/* Unused-CSS removal (postcss.config.js): only on the second pass of the Netlify build, when hugo_stats.json is current. */}}
+  {{- if eq (getenv "WC_PURGE_CSS") "true" -}}
+    {{- $style = $style | css.PostCSS (dict "config" "postcss.config.js") -}}
+  {{- end -}}
   {{- if eq (getenv "WC_POST_CSS") "true" -}}
     {{- $style = $style | postCSS -}}
   {{- end -}}

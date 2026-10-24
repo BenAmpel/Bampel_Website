@@ -215,7 +215,7 @@ body, p, span, div, li, td, th {
 a {
   color: #58a6ff !important;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: color 0.2s ease, text-shadow 0.2s ease;
   
   &:hover {
     color: #00ff41 !important;
@@ -245,7 +245,7 @@ header {
   a {
     font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
     color: #c9d1d9 !important;
-    transition: all 0.2s ease;
+    transition: color 0.2s ease, text-shadow 0.2s ease;
     
     &:hover {
       color: #00ff41 !important;
@@ -403,7 +403,7 @@ input[type="submit"] {
   color: #00ff41 !important;
   border-radius: 6px;
   padding: 10px 20px;
-  transition: all 0.3s ease;
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease, color 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 1px;
   
@@ -427,7 +427,7 @@ article {
   background: linear-gradient(135deg, rgba(13, 17, 23, 0.8) 0%, rgba(22, 27, 34, 0.9) 100%) !important;
   border: 1px solid rgba(0, 255, 65, 0.2) !important;
   border-radius: 12px;
-  transition: all 0.3s ease;
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
   
   &:hover {
     border-color: rgba(0, 255, 65, 0.5) !important;
@@ -454,7 +454,7 @@ details,
     padding: 15px 20px;
     cursor: pointer;
     border-bottom: 1px solid rgba(0, 255, 65, 0.2);
-    transition: all 0.3s ease;
+    transition: background 0.3s ease, text-shadow 0.3s ease;
     
     &:hover {
       background: rgba(0, 255, 65, 0.15) !important;
@@ -530,7 +530,7 @@ input, textarea, select {
   color: #c9d1d9 !important;
   border-radius: 6px;
   padding: 10px 15px;
-  transition: all 0.3s ease;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
   
   &:focus {
     border-color: #00ff41 !important;
@@ -707,7 +707,7 @@ section#hero h1 {
 
 // ===== NAVBAR GLITCH HOVER =====
 .navbar-brand {
-  transition: all 0.1s ease;
+  transition: color 0.1s ease, text-shadow 0.1s ease, transform 0.1s ease;
   
   &:hover {
     color: #00ff00 !important;
@@ -723,7 +723,7 @@ section h1, section h2 {
   text-shadow: 0 0 5px rgba(0, 255, 65, 0.3);
   display: inline-block;
   position: relative;
-  transition: all 0.3s ease;
+  transition: text-shadow 0.3s ease;
   
   // Glitch effect applied via section header rules
   
@@ -941,7 +941,7 @@ section#about .hb-about-content,
     color: #58a6ff !important;
     text-decoration: none;
     border-bottom: 1px dashed #58a6ff;
-    transition: all 0.2s ease;
+    transition: color 0.2s ease, border-bottom-color 0.2s ease, text-shadow 0.2s ease;
     
     &:hover {
       color: #00ff41 !important;
@@ -1145,7 +1145,7 @@ section#about .bio-explorer-tab,
   text-transform: uppercase;
   letter-spacing: 1px;
   font-weight: 600;
-  transition: all 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 section#about .bio-explorer-tab.is-active,
@@ -1686,7 +1686,7 @@ section#about .bio-chip,
   text-transform: uppercase;
   letter-spacing: 1px;
   font-weight: 600;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
 
 section#about .bio-chip:hover,
@@ -1893,7 +1893,7 @@ section#about ul:not(.network-icon):not(.social-icons) {
       color: #00ff41 !important;
       text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
       padding-left: 25px;
-      transition: all 0.2s ease;
+      transition: color 0.2s ease, text-shadow 0.2s ease, padding-left 0.2s ease;
     }
   }
 }
@@ -1994,7 +1994,7 @@ section#about .network-icon,
 .hb-about .social-icons {
   a {
     color: #8b949e !important;
-    transition: all 0.3s ease;
+    transition: color 0.3s ease, transform 0.3s ease, text-shadow 0.3s ease;
     
     &:hover {
       color: #00ff41 !important;
@@ -2004,7 +2004,7 @@ section#about .network-icon,
   }
   
   i, svg {
-    transition: all 0.3s ease;
+    transition: color 0.3s ease, fill 0.3s ease, stroke 0.3s ease;
   }
 }
 
@@ -3296,7 +3296,7 @@ body:not(.dark) {
   padding: 4px 8px;
   border-radius: 4px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
   white-space: nowrap;
 }
 
@@ -3334,7 +3334,7 @@ body:not(.dark) .theme-toggle-label {
   padding: 2px 6px;
   margin: 0 2px;
   border-radius: 2px;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease, text-decoration-color 0.3s ease;
   user-select: none;
   display: inline;
   position: relative;
@@ -3429,7 +3429,7 @@ body:not(.dark) .theme-toggle-label {
   border-radius: 4px;
   margin: 10px 0;
   cursor: help;
-  transition: all 0.4s ease;
+  transition: background 0.4s ease, color 0.4s ease;
   user-select: none;
   position: relative;
   overflow: hidden;
@@ -3633,7 +3633,7 @@ body:not(.dark) .visitor-terminal {
 body.dark .__dimensions_badge_embed__ {
   filter: none; // Remove grayscale - was making badge invisible
   opacity: 1;
-  transition: all 0.3s ease;
+  transition: filter 0.3s ease, opacity 0.3s ease;
   
   &:hover {
     filter: brightness(1.1);
@@ -3682,7 +3682,7 @@ body:not(.dark) .dimensions-badge-section {
 body.dark .altmetric-embed {
   filter: grayscale(80%) contrast(110%);
   opacity: 0.85;
-  transition: all 0.3s ease;
+  transition: filter 0.3s ease, opacity 0.3s ease;
   
   &:hover {
     filter: none;

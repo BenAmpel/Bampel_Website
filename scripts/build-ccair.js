@@ -64,10 +64,13 @@ for (const f of fs.readdirSync(path.join(ccairDir, 'data'))) {
   if (hits.length) console.warn('CCAIR warning: %s looks like it holds internal notes:\n  %s', f, hits.join('\n  '));
 }
 
+// One file for the whole app (was four requests). Each source file is still transpiled on its own and wrapped in its own
+// function, exactly as before (they share state only through window.CCAIR), then joined in load order.
 Promise.all(
   files.map((f) =>
     esbuild.build({
       entryPoints: [path.join(ccairDir, `${f}.jsx`)],
+      write: false,
       outfile: path.join(ccairDir, 'dist', `${f}.js`),
       jsx: 'transform',
       jsxFactory: 'React.createElement',
@@ -80,7 +83,13 @@ Promise.all(
     })
   )
 )
-  .then(() => console.log('CCAIR build complete: %d files transpiled', files.length))
+  .then((results) => {
+    const dist = path.join(ccairDir, 'dist');
+    fs.rmSync(dist, { recursive: true, force: true });
+    fs.mkdirSync(dist, { recursive: true });
+    fs.writeFileSync(path.join(dist, 'ccair.js'), results.map((r) => r.outputFiles[0].text.trimEnd()).join('\n') + '\n');
+    console.log('CCAIR build complete: %d files bundled into dist/ccair.js', files.length);
+  })
   .catch((err) => {
     console.error('CCAIR build failed:', err);
     process.exit(1);
