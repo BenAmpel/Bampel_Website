@@ -304,6 +304,60 @@ a.chip:active { transform: scale(0.97); }
   .stat:nth-child(n+3) { border-top: 1px solid var(--line); }
 }
 
+/* ---------- Photos (data/photos.json; README in assets/photos/) ---------- */
+/* Photo hero: the headline block sits on the photo under a Georgia State Blue scrim. The scrim is measured against the
+   actual image so white text clears WCAG AA over its lightest pixels; the dark scheme deepens it toward navy. */
+.photo-hero { padding: 0 0 clamp(8px, 2vw, 16px); }
+.hero-stage { position: relative; isolation: isolate; overflow: hidden; padding: clamp(72px, 12vw, 150px) 0 clamp(64px, 9vw, 112px); background: #0B1A33; }
+.hero-photo { position: absolute; inset: 0; z-index: -1; }
+.hero-photo picture, .hero-photo img { display: block; width: 100%; height: 100%; }
+.hero-photo img { object-fit: cover; object-position: var(--focal, 50% 50%); }
+.hero-photo::after { content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(0, 30, 92, 0.74) 0%, rgba(0, 43, 127, 0.70) 45%, rgba(4, 14, 40, 0.84) 100%); }
+/* Phones put the lede over the lit towers, so the scrim is a little denser there. */
+@media (max-width: 700px) { .hero-photo::after { background: linear-gradient(180deg, rgba(0, 30, 92, 0.78) 0%, rgba(0, 43, 127, 0.76) 50%, rgba(4, 14, 40, 0.86) 100%); } }
+@media (prefers-color-scheme: dark) {
+  .hero-photo::after { background: linear-gradient(180deg, rgba(4, 14, 40, 0.80) 0%, rgba(0, 32, 96, 0.72) 45%, rgba(17, 23, 42, 0.92) 100%); }
+}
+.photo-hero .hero-affil { color: #E6EBF5; }
+.photo-hero h1, .photo-hero h1 em { color: #FFFFFF; }
+.photo-hero .hero-inner > .lede { color: #F2F4F8; }
+.photo-hero .hero-stage .btn-primary { background: #FFFFFF; color: #0039A6; }
+.photo-hero .hero-stage .btn-primary:hover { background: #E8F1FA; }
+.photo-hero .hero-stage .btn-secondary { background: rgba(255, 255, 255, 0.10); color: #FFFFFF; border-color: rgba(255, 255, 255, 0.70); }
+.photo-hero .hero-stage .btn-secondary:hover { background: rgba(255, 255, 255, 0.18); border-color: #FFFFFF; }
+.photo-hero .hero-stage :focus-visible { outline-color: #FFFFFF; }
+.photo-hero .stats { margin-top: clamp(28px, 4vw, 44px); }
+.photo-hero .hero-credit { position: absolute; right: var(--gutter); bottom: 12px; left: var(--gutter); margin: 0; text-align: right; color: #E6EBF5; }
+.photo-hero .hero-credit a { color: #FFFFFF; }
+@media (max-width: 700px) { .hero-photo img { object-position: var(--focal-m, var(--focal, 50% 50%)); } }
+
+/* Photo bands: a wide photo between a page's heading and its first section, with its credit underneath. */
+.photo-band { margin-top: clamp(20px, 3.5vw, 36px); margin-bottom: clamp(32px, 5vw, 56px); }
+.photo-frame { position: relative; overflow: hidden; border-radius: var(--radius); aspect-ratio: 21 / 9; background: var(--surface-2); }
+.photo-frame picture, .photo-frame img { display: block; width: 100%; height: 100%; }
+.photo-frame img { object-fit: cover; object-position: var(--focal, 50% 50%); }
+@media (max-width: 700px) { .photo-frame { aspect-ratio: 4 / 3; border-radius: var(--radius-sm); } }
+@media (prefers-color-scheme: dark) { .photo-frame img { filter: brightness(0.92); } }
+.photo-credit { margin-top: 8px; font-size: 12.5px; line-height: 1.4; color: var(--muted); text-align: right; }
+.photo-credit a { color: inherit; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+.photo-credit a:hover { color: var(--accent); }
+.photo-hero .hero-credit a:hover { color: #97CAEB; }
+.photo-credits { list-style: none; max-width: 860px; }
+.photo-credits li { padding: 12px 0; border-bottom: 1px solid var(--line); color: var(--text-2); font-size: 15px; line-height: 1.55; }
+.photo-credits li:first-child { border-top: 1px solid var(--line); }
+.photo-credits a { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+/* Depth: the photo drifts a few percent inside its frame as it scrolls past (compositor-driven; none when motion is
+   reduced or scroll-driven animations are unsupported). */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .photo-frame img { scale: 1.08; animation: photoDrift linear both; animation-timeline: view(); }
+    @keyframes photoDrift { from { translate: 0 -3%; } to { translate: 0 3%; } }
+    .hero-photo img { animation: heroPhotoDrift linear both; animation-timeline: --hero; animation-range: exit 0% exit 100%; }
+    @keyframes heroPhotoDrift { from { transform: scale(1.04); } to { transform: translate3d(0, 6%, 0) scale(1.12); } }
+  }
+}
+
 /* Feature band (Pathway Finder, joining) */
 .feature { display: grid; grid-template-columns: 1.4fr 1fr; gap: clamp(20px, 4vw, 48px); align-items: center;
   background: var(--surface); border: 1px solid var(--line); border-radius: calc(var(--radius) + 6px); padding: clamp(24px, 4vw, 48px); box-shadow: var(--shadow); }
@@ -467,6 +521,10 @@ a.chip:active { transform: scale(0.97); }
   .card, .stats, .feature { box-shadow: none; }
   .reveal, .motion-ok .reveal:not(.is-in) { opacity: 1; transform: none; }
   .hero-glow, .scroll-progress { display: none !important; }
+  /* Photos are left off paper; the photo hero prints as plain black text. */
+  .hero-photo, .photo-band, .hero-credit { display: none !important; }
+  .hero-stage { background: none; padding: 24px 0; }
+  .photo-hero .hero-affil, .photo-hero h1, .photo-hero h1 em, .photo-hero .hero-inner > .lede { color: #000000; }
 }
 
 /* Skip-link target: focused programmatically, no ring around the whole page */

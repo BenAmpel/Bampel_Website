@@ -14,12 +14,13 @@ const DATA_FILES = {
   news: 'data/news.json',
   materials: 'data/materials.json',
   paperPages: 'data/paper-pages.json',
+  photos: 'data/photos.json',
 };
 // What a page gets when its file fails to load, so one failed fetch empties one section instead of the whole site.
 // paper-pages.json is generated at build time (scripts/build-ccair.js); the site still works if it is missing.
 const FALLBACKS = {
   publications: [], people: { students: [], mentees: [], affiliates: [] }, resources: [],
-  funding: { grants: [], awarded: [], collaborations: [] }, courses: [], news: [], materials: [], paperPages: {},
+  funding: { grants: [], awarded: [], collaborations: [] }, courses: [], news: [], materials: [], paperPages: {}, photos: { photos: [] },
 };
 
 function DataProvider({ children }) {

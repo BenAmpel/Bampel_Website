@@ -412,6 +412,77 @@ function FinderFeature({ headingLevel = 2, titleId }) {
   );
 }
 
+/* ---------- Photos ----------
+   data/photos.json lists every photo and the slot it fills ("home-hero", "research-band", ...). Files live in
+   assets/photos/ as <base>-<width>.<avif|webp|jpg>. Swapping a slot for a GSU Digital Asset Library photo is an edit to
+   that file (see assets/photos/README.md); nothing here names a picture. The same markup is written for the static
+   pages by photoHtml in scripts/ccair-static.mjs. */
+const PHOTO_DIR = '/ccair/assets/photos/';
+const photoSrcset = (base, widths, ext) => widths.map((w) => `${PHOTO_DIR}${base}-${w}.${ext} ${w}w`).join(', ');
+function usePhoto(slot) {
+  const { photos } = useData();
+  return ((photos && photos.photos) || []).find((p) => p.slot === slot) || null;
+}
+// priority: the hero image, fetched eagerly and first; everything else loads lazily.
+function Picture({ photo, sizes, priority }) {
+  const m = photo.mobile;
+  const fb = photo.fallbackWidths || photo.widths;
+  const style = { '--focal': photo.focal || '50% 50%' };
+  if (m) style['--focal-m'] = m.focal || photo.focal || '50% 50%';
+  return (
+    <picture>
+      {m && <source type="image/avif" media={m.media} srcSet={photoSrcset(m.base, m.widths, 'avif')} sizes="100vw" width={m.width} height={m.height} />}
+      {m && <source type="image/webp" media={m.media} srcSet={photoSrcset(m.base, m.widths, 'webp')} sizes="100vw" width={m.width} height={m.height} />}
+      {m && <source media={m.media} srcSet={photoSrcset(m.base, m.fallbackWidths || m.widths, 'jpg')} sizes="100vw" width={m.width} height={m.height} />}
+      <source type="image/avif" srcSet={photoSrcset(photo.base, photo.widths, 'avif')} sizes={sizes} />
+      <source type="image/webp" srcSet={photoSrcset(photo.base, photo.widths, 'webp')} sizes={sizes} />
+      <img src={`${PHOTO_DIR}${photo.base}-${fb[fb.length - 1]}.jpg`} srcSet={photoSrcset(photo.base, fb, 'jpg')} sizes={sizes}
+        width={photo.width} height={photo.height} alt={photo.alt} style={style} decoding="async"
+        loading={priority ? 'eager' : 'lazy'} fetchpriority={priority ? 'high' : undefined} />
+    </picture>
+  );
+}
+// Short visible credit: "Photo: Author / License", the author linking to the source page and the license to its deed.
+function PhotoCredit({ photo }) {
+  const c = photo.credit || {};
+  const who = c.sourceUrl ? <a href={c.sourceUrl}>{c.author}</a> : c.author;
+  return <>Photo: {who}{c.license && <> / {c.licenseUrl ? <a href={c.licenseUrl} rel="license">{c.license}</a> : c.license}</>}</>;
+}
+const BAND_SIZES = '(min-width: 1200px) 1120px, calc(100vw - 32px)';
+// A wide photo between a page's heading and its first section. Renders nothing when the slot is empty.
+function PhotoBand({ slot }) {
+  const photo = usePhoto(slot);
+  if (!photo) return null;
+  return (
+    <Reveal as="figure" className="photo-band wrap">
+      <div className="photo-frame"><Picture photo={photo} sizes={BAND_SIZES} /></div>
+      <figcaption className="photo-credit"><PhotoCredit photo={photo} /></figcaption>
+    </Reveal>
+  );
+}
+// Full attribution for every photo (title, author, license, source, changes), for the About page.
+function PhotoCredits() {
+  const { photos } = useData();
+  const list = (photos && photos.photos) || [];
+  if (!list.length) return null;
+  return (
+    <ul className="photo-credits">
+      {list.map((p) => {
+        const c = p.credit || {};
+        return (
+          <li key={p.id}>
+            {c.sourceUrl ? <a href={c.sourceUrl}>{c.title || p.id}</a> : (c.title || p.id)}
+            {c.author && <> by {c.author}</>}
+            {c.license && <>, {c.licenseUrl ? <a href={c.licenseUrl} rel="license">{c.license}</a> : c.license}</>}
+            {c.source && <>, via {c.source}</>}.
+            {c.changes && <> Changes: {c.changes}.</>}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 function CCAIRFooter() {
   return (
     <footer className="footer">
@@ -452,6 +523,7 @@ window.CCAIR = window.CCAIR || {};
 const CCAIR_COMPONENTS = {
   REDUCE_MOTION, CAN_OBSERVE, SCROLL_TIMELINE, NAV_PAGES, hrefFor, Icon, Arrow, useInView, Reveal, CountUp, useScrollFrame, CCAIRNav, Brand, Wordmark, OfficialLockup, PageHead, Section, Card, LinkCard,
   Tag, Status, Authors, PublicationItem, PersonCard, SegmentedControl, FinderFeature, CCAIRFooter, initialsOf,
+  usePhoto, Picture, PhotoCredit, PhotoBand, PhotoCredits,
 };
 Object.assign(window.CCAIR, CCAIR_COMPONENTS);
 Object.assign(window, CCAIR_COMPONENTS);

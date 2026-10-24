@@ -97,30 +97,48 @@ function HomePage() {
   const phdCount = (people.students || []).length + (people.mentees || []).length;
   const recent = publications.filter((p) => p.type === 'journal').slice().sort(byYearDesc).slice(0, 3);
   const heroRef = React.useRef(null), innerRef = React.useRef(null);
+  const photo = usePhoto('home-hero');
+
+  const heroText = (
+    <div className="hero-inner" ref={innerRef}>
+      <p className="hero-affil">Georgia State University · J. Mack Robinson College of Business</p>
+      <h1 id="hero-title">Center for <em>CyberAI</em> Research</h1>
+      <p className="lede">We study how intelligent systems can spot malicious behavior before it turns into an attack,
+        and we help people and organizations act on what those systems find.</p>
+      <div className="hero-cta">
+        <a className="btn btn-primary" href="#/research">Explore our research <Arrow /></a>
+        <a className="btn btn-secondary" href="/ccair/pathways/">Find your cyber career path</a>
+      </div>
+    </div>
+  );
+  const stats = (
+    <dl className="stats">
+      {[[publications.length, 'Publications'], [phdCount, 'Ph.D. students mentored'], [2, 'Best paper awards'], [courses.length, 'Courses taught']].map(([n, label]) => (
+        // dt before dd for assistive tech; column-reverse keeps the number on top.
+        <div key={label} className="stat" style={STAT_STYLE}><dt><span>{label}</span></dt><dd><b><CountUp value={n} /></b></dd></div>
+      ))}
+    </dl>
+  );
 
   return (
     <div className="page">
-      <section className="hero" aria-labelledby="hero-title" ref={heroRef}>
-        <HeroGlow heroRef={heroRef} innerRef={innerRef} />
-        <div className="wrap">
-          <div className="hero-inner" ref={innerRef}>
-            <p className="hero-affil">Georgia State University · J. Mack Robinson College of Business</p>
-            <h1 id="hero-title">Center for <em>CyberAI</em> Research</h1>
-            <p className="lede">We study how intelligent systems can spot malicious behavior before it turns into an attack,
-              and we help people and organizations act on what those systems find.</p>
-            <div className="hero-cta">
-              <a className="btn btn-primary" href="#/research">Explore our research <Arrow /></a>
-              <a className="btn btn-secondary" href="/ccair/pathways/">Find your cyber career path</a>
-            </div>
+      {photo ? (
+        // Photo hero: the headline sits on the photo under a Georgia State Blue scrim (white text, AA over the darkest
+        // and lightest parts of the image); the stats follow on the page background.
+        <section className="hero photo-hero" aria-labelledby="hero-title" ref={heroRef}>
+          <div className="hero-stage">
+            <div className="hero-photo"><Picture photo={photo} sizes="100vw" priority /></div>
+            <div className="wrap">{heroText}</div>
+            <p className="photo-credit hero-credit"><PhotoCredit photo={photo} /></p>
           </div>
-          <dl className="stats">
-            {[[publications.length, 'Publications'], [phdCount, 'Ph.D. students mentored'], [2, 'Best paper awards'], [courses.length, 'Courses taught']].map(([n, label]) => (
-              // dt before dd for assistive tech; column-reverse keeps the number on top.
-              <div key={label} className="stat" style={STAT_STYLE}><dt><span>{label}</span></dt><dd><b><CountUp value={n} /></b></dd></div>
-            ))}
-          </dl>
-        </div>
-      </section>
+          <div className="wrap">{stats}</div>
+        </section>
+      ) : (
+        <section className="hero" aria-labelledby="hero-title" ref={heroRef}>
+          <HeroGlow heroRef={heroRef} innerRef={innerRef} />
+          <div className="wrap">{heroText}{stats}</div>
+        </section>
+      )}
 
       <Section id="pillars" eyebrow="What we study" title="Three questions guide our work"
         intro="CCAIR shifts security from reacting to attacks toward anticipating them. Each project maps to one of these research pillars.">
@@ -179,6 +197,7 @@ function ResearchPage() {
     <div className="page">
       <PageHead eyebrow="Research" title="Anticipating attacks, not just reacting to them"
         lede="CCAIR investigates how intelligent systems can anticipate, interpret, and adapt to malicious behavior before exploitation. All center activities, proposals, and artifacts map to at least one of three research primitives." />
+      <PhotoBand slot="research-band" />
 
       <Section id="primitives" title="Research primitives" intro="The foundational questions every project contributes to.">
         <div className="grid grid-3">
@@ -315,6 +334,7 @@ function PeoplePage() {
     <div className="page">
       <PageHead eyebrow="People" title="The people behind CCAIR"
         lede="A small, collaborative group of faculty and Ph.D. researchers working across Georgia State and partner universities." />
+      <PhotoBand slot="people-band" />
 
       {d && <Section id="director" title="Director">
         <Reveal className="card director">
@@ -376,6 +396,7 @@ function ResourcesPage() {
     <div className="page">
       <PageHead eyebrow="Resources" title="Shared tools for students and researchers"
         lede="Free career guidance for students, and research assets designed to outlive individual grants and serve the CyberAI community." />
+      <PhotoBand slot="resources-band" />
 
       <Section id="students" title="For students" intro="Free guides for students deciding where they fit in cybersecurity.">
         <FinderFeature headingLevel={3} />
@@ -589,6 +610,11 @@ function AboutPage() {
             <Reveal key={p.name} className="card"><h3>{p.name}</h3><p>{p.desc}</p></Reveal>
           ))}
         </div>
+      </Section>
+
+      <Section id="photo-credits" alt title="Photo credits"
+        intro="The photos on this site show Georgia State's downtown campus and the Atlanta skyline. Each is used under the license shown. Photos under CC BY-SA stay under CC BY-SA after our cropping and resizing.">
+        <Reveal><PhotoCredits /></Reveal>
       </Section>
     </div>
   );

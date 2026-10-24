@@ -1,0 +1,135 @@
+{
+  "note": "Photos on the CCAIR site, Pathway Finder and Student Guide. Each photo fills one slot. Files live in static/ccair/assets/photos/ as <base>-<width>.<avif|webp|jpg>. To swap in a GSU Digital Asset Library photo, follow static/ccair/assets/photos/README.md, then run npm run build:ccair.",
+  "updated": "2026-10-24",
+  "photos": [
+    {
+      "id": "skyline-dusk",
+      "slot": "home-hero",
+      "base": "skyline-dusk",
+      "widths": [640, 1280, 1920],
+      "fallbackWidths": [640, 1280],
+      "width": 1920,
+      "height": 1280,
+      "focal": "50% 38%",
+      "mobile": {
+        "media": "(max-width: 700px)",
+        "base": "skyline-dusk-portrait",
+        "widths": [640, 1280],
+        "fallbackWidths": [640, 1280],
+        "width": 1280,
+        "height": 1600,
+        "focal": "50% 30%"
+      },
+      "alt": "Downtown Atlanta's skyline at dusk, seen from the Jackson Street Bridge, with light trails from evening traffic on the Downtown Connector.",
+      "credit": {
+        "source": "Wikimedia Commons",
+        "title": "Jackson Street Bridge, Atlanta, United States (Unsplash vXtX07KVcE8)",
+        "author": "Joey Kyber",
+        "license": "CC0 1.0",
+        "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Jackson_Street_Bridge,_Atlanta,_United_States_(Unsplash_vXtX07KVcE8).jpg",
+        "changes": "Resized, a portrait crop made for phones, converted to AVIF, WebP and JPEG"
+      }
+    },
+    {
+      "id": "skyline-day",
+      "slot": "pathways-hero",
+      "base": "skyline-day",
+      "widths": [640, 1280, 1920],
+      "fallbackWidths": [640, 1280],
+      "width": 1920,
+      "height": 1280,
+      "focal": "55% 35%",
+      "alt": "Downtown Atlanta's skyline on a clear summer morning, seen from the Jackson Street Bridge above the Downtown Connector.",
+      "credit": {
+        "source": "Wikimedia Commons",
+        "title": "Atlanta skyline from Jackson Street Bridge 2020",
+        "author": "Marc Merlin",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Atlanta_skyline_from_Jackson_Street_Bridge_2020.jpg",
+        "changes": "Cropped (edges trimmed), resized, converted to AVIF, WebP and JPEG"
+      }
+    },
+    {
+      "id": "library-plaza",
+      "slot": "students-hero",
+      "base": "library-plaza",
+      "widths": [640, 1280, 1920],
+      "fallbackWidths": [640, 1280],
+      "width": 1920,
+      "height": 1280,
+      "focal": "45% 55%",
+      "alt": "The Georgia State University Library plaza in late-afternoon sun, with fountains, lamp posts and the library's brick walls.",
+      "credit": {
+        "source": "Wikimedia Commons",
+        "title": "GSU Library Plaza",
+        "author": "Hwi.padam",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:GSU_Library_Plaza.jpg",
+        "changes": "Cropped (right side, with passers-by, removed), resized, converted to AVIF, WebP and JPEG"
+      }
+    },
+    {
+      "id": "dahlberg-hall",
+      "slot": "research-band",
+      "base": "dahlberg-hall",
+      "widths": [640, 1280, 1920],
+      "fallbackWidths": [640, 1280],
+      "width": 1920,
+      "height": 1280,
+      "focal": "50% 35%",
+      "alt": "The white marble facade and tall windows of Dahlberg Hall on Georgia State University's downtown Atlanta campus, under a clear blue sky.",
+      "credit": {
+        "source": "Wikimedia Commons",
+        "title": "Dahlberg Hall, Georgia State University, Atlanta, GA (46559469545)",
+        "author": "Warren LeMay",
+        "license": "CC0 1.0",
+        "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dahlberg_Hall,_Georgia_State_University,_Atlanta,_GA_(46559469545).jpg",
+        "changes": "Cropped, resized, converted to AVIF, WebP and JPEG"
+      }
+    },
+    {
+      "id": "park-place",
+      "slot": "people-band",
+      "base": "park-place",
+      "widths": [640, 1280, 1920],
+      "fallbackWidths": [640, 1280],
+      "width": 1920,
+      "height": 1280,
+      "focal": "45% 40%",
+      "alt": "The 25 Park Place tower, part of Georgia State University's downtown campus, framed by the trees of Woodruff Park.",
+      "credit": {
+        "source": "Wikimedia Commons",
+        "title": "25 Park Place in downtown Atlanta, view from Woodruff Park",
+        "author": "Marc Merlin",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:25_Park_Place_in_downtown_Atlanta,_view_from_Woodruff_Park.jpg",
+        "changes": "Cropped to a landscape frame, resized, converted to AVIF, WebP and JPEG"
+      }
+    },
+    {
+      "id": "aderhold",
+      "slot": "resources-band",
+      "base": "aderhold",
+      "widths": [640, 1280, 1920],
+      "fallbackWidths": [640, 1280],
+      "width": 1920,
+      "height": 1280,
+      "focal": "45% 50%",
+      "alt": "The brick and glass front of the Helen M. Aderhold Learning Center, a Georgia State University classroom building in downtown Atlanta.",
+      "credit": {
+        "source": "Wikimedia Commons",
+        "title": "Helen M. Aderhold Learning Center 2",
+        "author": "JJonahJackalope",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Helen_M._Aderhold_Learning_Center_2.jpg",
+        "changes": "Cropped (parked car removed), resized, converted to AVIF, WebP and JPEG"
+      }
+    }
+  ]
+}
