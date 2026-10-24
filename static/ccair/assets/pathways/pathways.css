@@ -55,6 +55,9 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .skip:focus { left: 16px; }
 /* The skip link moves focus to <main tabindex="-1">; no focus ring around the whole page. */
 main[tabindex="-1"]:focus { outline: none; }
+/* Headings that receive focus from script (results) show no ring; the content below is the focus target. */
+.results h2[tabindex="-1"]:focus { outline: none; }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 .wrap { width: min(1120px, 100% - 32px); margin-inline: auto; }
 .narrow { width: min(780px, 100% - 32px); margin-inline: auto; }
@@ -193,6 +196,7 @@ h3 { font-size: 20px; line-height: 1.3; font-weight: 700; }
 .neither { margin-top: 12px; text-align: center; }
 .linkbtn { background: none; border: 0; color: var(--text2); font: 600 14px var(--sans); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; padding: 8px; }
 .linkbtn:hover { color: var(--text); }
+.linkbtn.picked { color: var(--accent); font-weight: 700; text-decoration-thickness: 2px; }
 .linkbtn[disabled] { opacity: 0.35; cursor: default; }
 .quiz-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 26px; gap: 12px; color: var(--muted); font-size: 13px; }
 .intro-card { text-align: center; padding: 24px 0; }
@@ -339,6 +343,7 @@ footer :focus-visible { outline-color: #97CAEB; }
 .interlude-bar { height: 3px; border-radius: 99px; background: rgba(255,255,255,0.06); overflow: hidden; margin: 30px auto 0; max-width: 240px; }
 .interlude-bar i { display: block; height: 100%; background: var(--accent); transform-origin: left; animation: fill 2.2s linear forwards; }
 .matching .interlude-bar i { animation-duration: 1.5s; }
+.interlude.held .interlude-bar { display: none; }
 @keyframes fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 .matching { position: relative; text-align: center; padding: 90px 0 70px; overflow: hidden; }
 .matching .qtext { min-height: 1.4em; color: var(--heading); margin-top: 18px; }

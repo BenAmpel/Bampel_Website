@@ -120,7 +120,8 @@ ${top('hub')}
     <p class="kicker reveal">The finder</p>
     <h2 class="reveal">Which cyber role fits you?</h2>
     <div class="quiz-shell reveal">
-      <div class="quiz" id="quiz" aria-live="polite">
+      <p class="sr-only" id="pf-status" role="status"></p>
+      <div class="quiz" id="quiz">
         <noscript><p>The quiz needs JavaScript. You can still browse every role guide below.</p></noscript>
       </div>
     </div>
