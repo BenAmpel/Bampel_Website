@@ -28,7 +28,7 @@
 #
 # Why each source is listed (inventory taken by loading every page in the sitemap plus /care/ and /lab/ in headless Chrome):
 #   script-src  'unsafe-inline': the theme hooks (layouts/partials/hooks), the shortcodes and the JSON-LD blocks use inline <script>.
-#               www.googletagmanager.com (gtag), cdn.jsdelivr.net (tsparticles, typed.js, Fuse, mark.js), d1bxh8uas1mnw7.cloudfront.net
+#               www.googletagmanager.com (gtag), cdn.jsdelivr.net (tsparticles, Fuse, mark.js), d1bxh8uas1mnw7.cloudfront.net
 #               and embed.altmetric.com and api.altmetric.com (Altmetric badges, JSONP), badge.dimensions.ai (Dimensions badges),
 #               cdnjs.buymeacoffee.com (support widget), identity.netlify.com (Netlify Identity widget the theme loads on the home page).
 #               (React for /ccair/ is served from /ccair/vendor/, so unpkg.com is no longer allowed.)
@@ -40,11 +40,13 @@
 #   connect-src Google Analytics collect endpoints, Altmetric and Dimensions metric APIs.
 #   frame-src   www.buymeacoffee.com (the support widget iframe).
 # Not allowed: any other origin, object/embed, framing of this site by anyone, a changed <base>, form posts to other sites.
+# upgrade-insecure-requests: nothing on these pages loads over http:// (checked in the build output, 2026-10-24); the directive
+# makes the browser fetch any http:// subresource that slips in later over https:// instead.
 [[headers]]
   for = "/*"
   [headers.values]
     X-Frame-Options = "DENY"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://cdn.jsdelivr.net https://d1bxh8uas1mnw7.cloudfront.net https://embed.altmetric.com https://api.altmetric.com https://badge.dimensions.ai https://cdnjs.buymeacoffee.com https://identity.netlify.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://badge.dimensions.ai https://embed.altmetric.com; font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://badges.altmetric.com https://cdn.altmetric.com https://cdn.buymeacoffee.com https://server.arcgisonline.com https://www.googletagmanager.com https://www.google-analytics.com; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://api.altmetric.com https://metrics-api.dimensions.ai https://badge.dimensions.ai; frame-src https://www.buymeacoffee.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://cdn.jsdelivr.net https://d1bxh8uas1mnw7.cloudfront.net https://embed.altmetric.com https://api.altmetric.com https://badge.dimensions.ai https://cdnjs.buymeacoffee.com https://identity.netlify.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://badge.dimensions.ai https://embed.altmetric.com; font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://badges.altmetric.com https://cdn.altmetric.com https://cdn.buymeacoffee.com https://server.arcgisonline.com https://www.googletagmanager.com https://www.google-analytics.com; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://api.altmetric.com https://metrics-api.dimensions.ai https://badge.dimensions.ai; frame-src https://www.buymeacoffee.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
     Permissions-Policy = "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
 
 # Self-hosted Lato and React (audit 2026-10-24): these files were answered with "max-age=0, must-revalidate", so every visit
@@ -56,6 +58,75 @@
 
 [[headers]]
   for = "/ccair/vendor/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Hugo Pipes bundles (2026-10-24). The production build puts a content hash in each of these names (the theme's md5 or
+# sha256 fingerprint), so a changed file always gets a new name and the old one can be cached for a year. Only these
+# fingerprinted names are listed: /js/*.js also holds unhashed site scripts (bio_*.js, pub-loader.js, ...) that keep the
+# default revalidation, as do images, data and PDFs.
+[[headers]]
+  for = "/css/wowchemy.*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/css/vendor-bundle.min.*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/css/head-inline.min.*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/css/prestige-polish.min.*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/css/body-end.min.*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/css/research_dashboard.min.*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/js/vendor-bundle.min.*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/js/wowchemy-init.min.*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/js/wowchemy-headroom.*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/js/head-enhancements.min.*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/js/body-end.min.*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/js/research_dashboard.min.*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/en/js/wowchemy.min.*.js"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 

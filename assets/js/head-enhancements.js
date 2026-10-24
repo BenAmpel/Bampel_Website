@@ -1,5 +1,9 @@
-// Run enhancements after page is fully loaded
+// Run enhancements once, when the DOM is ready. (It used to run four times, on DOMContentLoaded and 100, 500 and 1000 ms
+// after load, which stacked observers and click handlers; the parts that look for late content keep their own timers.)
+let enhancementsRan = false;
 function runEnhancements() {
+  if (enhancementsRan) return;
+  enhancementsRan = true;
   const prefersReducedMotion = window.matchMedia
     ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
     : false;
@@ -98,47 +102,10 @@ function runEnhancements() {
   // Apply glitch data-text immediately
   applyGlitchToHeaders();
   
-  // Re-apply after a delay to catch dynamically loaded content
+  // Re-apply after a delay, and once more after load, to catch headings that other scripts add
   setTimeout(applyGlitchToHeaders, 500);
   setTimeout(applyGlitchToHeaders, 1500);
-  
-  // ===== HERO SECTION TYPING EFFECT =====
-  function initHeroTyping() {
-    // Find the hero section typed-text element
-    const typedElement = document.querySelector('.terminal-hero .typed-text') ||
-                         document.querySelector('section#hero .typed-text') ||
-                         document.querySelector('.hb-hero .typed-text') ||
-                         document.querySelector('.wg-hero .typed-text');
-    
-    if (!typedElement || typedElement.dataset.initialized) return;
-    typedElement.dataset.initialized = 'true';
-    
-    // Initialize Typed.js for hero section
-    if (typeof Typed !== 'undefined') {
-      new Typed(typedElement, {
-        strings: [
-          '> Initializing System...',
-          '> Loading Profile: <span style="color:#00ff41">Benjamin M. Ampel</span>',
-          '> Status: <span style="color:#ffbd2e">Assistant Professor @ GSU</span>',
-          '> Research: <span style="color:#58a6ff">AI Security</span> // <span style="color:#ff6b6b">Threat Intel</span> // <span style="color:#7ee787">LLMs</span>',
-          '> Ready. <span style="color:#00ff41">█</span>'
-        ],
-        typeSpeed: 40,
-        backSpeed: 20,
-        backDelay: 2000,
-        startDelay: 500,
-        showCursor: true,
-        cursorChar: '▊',
-        contentType: 'html',
-        loop: true,
-        loopCount: Infinity,
-        smartBackspace: true
-      });
-    }
-  }
-  
-  // Initialize hero typing effect
-  setTimeout(initHeroTyping, 300);
+  window.addEventListener('load', () => setTimeout(applyGlitchToHeaders, 500), { once: true });
   
   // ===== GLITCH EFFECT FOR NAME =====
   function initGlitchEffect() {
@@ -201,16 +168,6 @@ function runEnhancements() {
   
   // Initialize glitch effect
   setTimeout(initGlitchEffect, 100);
-  
-  // ===== HIGH-RES AVATAR REPLACEMENT =====
-  // Replace Hugo's processed avatar with full-resolution static version
-  const avatarImages = document.querySelectorAll('.avatar img, .hb-about-avatar img, .about-avatar img, [class*="avatar"] img');
-  avatarImages.forEach(img => {
-    if (img.src && !img.src.includes('/media/avatar.png')) {
-      img.src = '/media/avatar.png';
-      img.srcset = '/media/avatar.png 1x, /media/avatar.png 2x';
-    }
-  });
   
   // ===== ADVERSARIAL NOISE OVERLAY FOR AVATAR =====
   // Inject overlay elements for the adversarial perturbation effect
@@ -359,7 +316,7 @@ function runEnhancements() {
               <summary>Research Footprint</summary>
               <div class="viz-content">
                 <div id="home-footprint-map" style="display:none; height:440px; border-radius:8px; overflow:hidden;"></div>
-                <img src="/images/research-map.png" alt="World map marking the cities of conferences where Benjamin Ampel presented and the institutions of his collaborators" class="viz-image" id="map-img">
+                <img src="/images/research-map.png" alt="World map marking the cities of conferences where Benjamin Ampel presented and the institutions of his collaborators" class="viz-image" id="map-img" width="2291" height="1438" loading="lazy" decoding="async">
                 <p class="viz-caption">Conference presentations and collaborator institutions worldwide &mdash; derived automatically from the publication record</p>
               </div>
             </details>
@@ -957,115 +914,13 @@ function runEnhancements() {
   
   addCiteButtons();
   
-  // ===== ALTMETRIC BADGE INJECTION =====
-  function addAltmetricBadge() {
-    // Check if we're on a publication page
-    const isPublicationPage = window.location.pathname.includes('/publication/') ||
-                               window.location.pathname.includes('/journal_publication/') ||
-                               window.location.pathname.includes('/conference_publication/') ||
-                               window.location.pathname.includes('/workshop_publication/') ||
-                               window.location.pathname.includes('/book_chapter/');
-    
-    if (!isPublicationPage) return;
-    
-    // Check if badge already exists: this injected one, or the server-rendered altmetric shortcode
-    // (.altmetric-badge-section), which 21 publication pages include. Injecting a second badge there stacked two widgets.
-    if (document.querySelector('.altmetric-badge-container, .altmetric-badge-section, .altmetric-embed')) return;
-    
-    // Try multiple methods to find DOI
-    let doi = null;
-    
-    // Method 1: Look for explicit doi.org link
-    const allLinks = document.querySelectorAll('a[href*="doi.org"]');
-    allLinks.forEach(link => {
-      if (!doi) {
-        const doiMatch = link.href.match(/doi\.org\/(.+?)(?:\?|$)/);
-        if (doiMatch) doi = doiMatch[1];
-      }
-    });
-    
-    // Method 2: Look for DOI button (Hugo Blox style)
-    if (!doi) {
-      const doiButtons = document.querySelectorAll('.btn, .btn-outline-primary, [class*="btn"]');
-      doiButtons.forEach(btn => {
-        if (btn.textContent && btn.textContent.trim().toUpperCase() === 'DOI' && btn.href) {
-          const match = btn.href.match(/doi\.org\/(.+?)(?:\?|$)/);
-          if (match) doi = match[1];
-        }
-      });
-    }
-    
-    // Method 3: Look for citation_doi meta tag
-    if (!doi) {
-      const metaDoi = document.querySelector('meta[name="citation_doi"]');
-      if (metaDoi && metaDoi.content) doi = metaDoi.content;
-    }
-    
-    if (!doi) return;
-    
-    // Find where to insert the badge - try multiple Hugo Blox selectors
-    const articleContainer = document.querySelector('.article-container') || 
-                             document.querySelector('.pub-content') ||
-                             document.querySelector('.page-body') ||
-                             document.querySelector('article') ||
-                             document.querySelector('main .container') ||
-                             document.querySelector('main');
-    
-    if (!articleContainer) return;
-    
-    // Create the badge container
-    const badgeContainer = document.createElement('div');
-    badgeContainer.className = 'altmetric-badge-container';
-    badgeContainer.style.cssText = 'margin: 30px 0; padding: 20px; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 12px; border: 1px solid #e2e8f0;';
-    
-    // Check for dark mode
-    if (document.body.classList.contains('dark')) {
-      badgeContainer.style.cssText = 'margin: 30px 0; padding: 20px; background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border-radius: 12px; border: 1px solid #475569;';
-    }
-    
-    badgeContainer.innerHTML = `
-      <h4 style="margin: 0 0 15px 0; font-size: 1rem; font-weight: 600;">Altmetric Attention Score</h4>
-      <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
-        <div data-badge-type="medium-donut" data-doi="${doi}" data-badge-popover="right" class="altmetric-embed"></div>
-        <div style="flex: 1; min-width: 200px;">
-          <p style="margin: 0; font-size: 0.9rem; color: #64748b;">
-            This badge shows attention from news, blogs, social media, policy documents, and more.
-            <a href="https://www.altmetric.com/details/doi/${doi}" target="_blank" style="color: #3b82f6;">View details →</a>
-          </p>
-        </div>
-      </div>
-    `;
-    
-    // Append to article
-    articleContainer.appendChild(badgeContainer);
-    
-    // Re-initialize Altmetric embeds - try multiple times
-    function initAltmetric() {
-      if (typeof _altmetric_embed_init === 'function') {
-        _altmetric_embed_init();
-      }
-    }
-    initAltmetric();
-    setTimeout(initAltmetric, 500);
-    setTimeout(initAltmetric, 1500);
-  }
-  
-  // Run Altmetric badge injection with multiple delays to ensure DOM is ready
-  setTimeout(addAltmetricBadge, 300);
-  setTimeout(addAltmetricBadge, 1000);
-  setTimeout(addAltmetricBadge, 2000);
+  // Altmetric badges come only from the altmetric shortcode (layouts/shortcodes/altmetric.html), which loads embed.js on
+  // its own page. A copy injected here on the other publication pages showed an empty "?" donut.
   
 }
 
-// Run on multiple events to ensure it works with Hugo Blox
+// The script is deferred, so the DOM is parsed when it runs; DOMContentLoaded has not fired yet.
 document.addEventListener('DOMContentLoaded', runEnhancements);
-window.addEventListener('load', function() {
-  setTimeout(runEnhancements, 100);
-  setTimeout(runEnhancements, 500);
-  setTimeout(runEnhancements, 1000);
-});
-
-// Altmetric badges are now rendered via Hugo templates in layouts/*/single.html
 
 // =============================================================================
 // ===== FOOTER TERMINAL (static build info, no visitor data, no network) =====
