@@ -330,6 +330,9 @@ function PublicationsPage() {
 function PeoplePage() {
   const { people } = useData();
   const d = people.director;
+  // A mentee with "now" (where they landed) has finished; "mentoredAt" says where Dr. Ampel mentored them.
+  const current = (people.mentees || []).filter((s) => !s.now);
+  const former = (people.mentees || []).filter((s) => s.now);
   return (
     <div className="page">
       <PageHead eyebrow="People" title="The people behind CCAIR"
@@ -361,8 +364,15 @@ function PeoplePage() {
         </div>
         <h3 className="group-label">Mentees at partner universities</h3>
         <div className="grid grid-3">
-          {(people.mentees || []).map((s) => <Reveal key={s.name}><PersonCard name={s.name} role={s.role} meta={[s.org, s.years].filter(Boolean).join(' · ')} photo={s.photo} warm /></Reveal>)}
+          {current.map((s) => <Reveal key={s.name}><PersonCard name={s.name} role={s.role} meta={[s.org, s.years].filter(Boolean).join(' · ')} photo={s.photo} warm /></Reveal>)}
         </div>
+        {former.length > 0 && <>
+          <h3 className="group-label">Former mentees</h3>
+          <div className="grid grid-3">
+            {former.map((s) => <Reveal key={s.name}><PersonCard name={s.name} role={s.role} photo={s.photo} warm
+              meta={[s.mentoredAt && `Mentored at ${s.mentoredAt}`, s.years].filter(Boolean).join(' · ')} note={`Now at ${s.now}`} /></Reveal>)}
+          </div>
+        </>}
       </Section>
 
       <Section id="affiliates" title="Faculty affiliates" intro="Internal and external faculty contributing to shared CCAIR artifacts across research primitives.">
