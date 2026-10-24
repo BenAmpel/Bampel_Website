@@ -588,6 +588,7 @@
     // speaking, and replying cuts the caller off (counted in "interruptions"). busy = waiting for the server.
     function callerSays(r) {
       busy = false;
+      if (st.ended) return;   // a reply that arrives after hanging up is never spoken over the after-call screen
       if (r.heard != null && st.pendingCaption) { st.pendingCaption.textContent = 'You: ' + (r.heard || '(nothing heard)'); st.pendingCaption = null; }
       if (r.code) addCode(r.code);
       if (r.say) caption('caller', r.say);
@@ -654,9 +655,11 @@
       if (voice) voice.stop(); if (recog) { try { recog.abort(); } catch (e) {} } if (st.stopClock) st.stopClock();
       if (st.holdAt != null) { st.holdMs += now() - st.holdAt; st.holdAt = null; }
       st.durationMs = Math.round(now() - st.callT0);
-      var after = byServer ? Promise.resolve() : turn('hangup');
+      // Hang up always works at once: the screen moves on now, and the hang-up turn is recorded in order behind any reply
+      // still pending (the save waits for it, below), so a slow or lost reply can never hold the participant on the call.
+      st.hangupSent = byServer ? Promise.resolve() : turn('hangup');
       st.recording = rec ? rec.stop().then(function (out) { if (stream) stream.getTracks().forEach(function (t) { t.stop(); }); return upload(ui, ctx, 'call', out); }) : Promise.resolve(false);
-      after.then(function () { afterCall(ui.T('call_ended') + ' · ' + fmtTime(st.durationMs / 1000)); });
+      afterCall(ui.T('call_ended') + ' · ' + fmtTime(st.durationMs / 1000));
     }
 
     // 2. after the call: the directory (call a number back), then the decision and questions
@@ -678,7 +681,7 @@
         if (!set.check()) return;
         submit.disabled = true; msg.innerHTML = '<p class="muted">Saving…</p>';
         if (window.speechSynthesis) speechSynthesis.cancel();
-        (st.recording || Promise.resolve(false)).then(function () {
+        Promise.all([st.recording || Promise.resolve(false), st.hangupSent || Promise.resolve()]).then(function () {   // the server scores the call from its turns
           ctx.submit({ answers: set.answers, decision: state.decision, decisionMs: state.decisionMs, trajectory: state.trajectory, rtMs: Math.round(now() - st.t0),
             call: { answered: st.answered, ringMs: st.ringMs, durationMs: st.durationMs || 0, holdMs: Math.round(st.holdMs), typedTurns: st.typed, spokenTurns: st.spoken, interruptions: st.interruptions || 0, captions: st.captions, directoryOpened: st.directoryOpened, endedBy: st.endedBy, latencies: st.latencies },
             uiEvents: takeUiLog() },
