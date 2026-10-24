@@ -74,3 +74,10 @@ jobs:
 
       - name: Internal links
         run: node scripts/check-links.mjs public
+
+      # Font Awesome is subset to the icons in use (scripts/subset_fontawesome.py); a new icon must be added to the subset.
+      - name: Icon fonts cover every icon in use
+        run: |
+          set -euo pipefail
+          python3 -m pip install --quiet fonttools==4.60.2 brotli==1.2.1
+          python3 scripts/subset_fontawesome.py --build public --check
