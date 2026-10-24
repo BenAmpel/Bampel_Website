@@ -7,6 +7,16 @@
   var next = (function () { var n = new URLSearchParams(location.search).get('next') || ''; return /^\/lab\/[A-Za-z0-9\/_.#?=&-]*$/.test(n) && n.indexOf('//') < 0 ? n : '/lab/admin/'; })();
   function view(html) { root.innerHTML = html; var h = root.querySelector('h1'); if (h) { h.setAttribute('tabindex', '-1'); h.focus(); } }
   function go() { location.href = next; }
+  // Shows a validation message beside the field that needs fixing: text in the alert line, the field marked invalid and
+  // described by it, and focus moved to it (WCAG 3.3.1). The mark clears when the person types.
+  function fieldError(inputId, msg) {
+    var f = document.getElementById(inputId), err = document.getElementById('err');
+    err.textContent = msg;
+    if (!f) return;
+    f.setAttribute('aria-invalid', 'true'); f.setAttribute('aria-describedby', 'err');
+    f.addEventListener('input', function () { f.removeAttribute('aria-invalid'); f.removeAttribute('aria-describedby'); }, { once: true });
+    f.focus();
+  }
   function store(r) { A.setSession({ token: r.token, expiresAt: r.expiresAt, name: r.account.name, email: r.account.email, labOwner: r.account.labOwner }); }
 
   function signinView(msg, email, needCode, pw) {
@@ -21,7 +31,7 @@
     f.addEventListener('submit', function (e) {
       e.preventDefault();
       var em = document.getElementById('email').value.trim(), pw = document.getElementById('pw').value, code = needCode ? document.getElementById('code').value.trim() : '';
-      if (!em || !pw) return (document.getElementById('err').textContent = 'Enter your email and password.');
+      if (!em || !pw) return fieldError(!em ? 'email' : 'pw', 'Enter your email and password.');
       document.getElementById('go').disabled = true;
       A.api('auth/signin', { email: em, password: pw, code: code }, true).then(function (r) {
         if (r.ok) { store(r.data); return go(); }
@@ -42,7 +52,7 @@
     document.getElementById('f').addEventListener('submit', function (e) {
       e.preventDefault();
       var pw = document.getElementById('pw').value, pw2 = document.getElementById('pw2').value;
-      if (pw !== pw2) return (document.getElementById('err').textContent = 'The two passwords are not the same.');
+      if (pw !== pw2) return fieldError('pw2', 'The two passwords are not the same.');
       document.getElementById('go').disabled = true;
       A.api('auth/accept', { token: token, name: invite ? document.getElementById('name').value : undefined, password: pw, password2: pw2 }, true).then(function (r) {
         if (!r.ok) { document.getElementById('go').disabled = false; document.getElementById('err').textContent = A.message(r.data); return; }

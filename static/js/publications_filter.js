@@ -20,6 +20,9 @@
 
   const safeFetch = (url) => fetch(url).then((r) => (r.ok ? r.json() : null)).catch(() => null);
 
+  // Titles, URLs, awards and names come from JSON; escape them so a quote or ampersand cannot break the markup.
+  const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
   const normalizeTypeLabel = (value) => {
     const map = { journal: 'Journal', conference: 'Conference', workshop: 'Workshop' };
     return map[value] || value;
@@ -29,8 +32,8 @@
     const id = `pub-filter-${group}-${String(value).replace(/[^a-z0-9]+/gi, '-')}`;
     return `
       <label for="${id}" class="pub-filter-option">
-        <input type="checkbox" id="${id}" data-group="${group}" data-value="${value}">
-        <span>${label}</span>
+        <input type="checkbox" id="${id}" data-group="${group}" data-value="${esc(value)}">
+        <span>${esc(label)}</span>
       </label>
     `;
   };
@@ -42,7 +45,7 @@
     state.venue.forEach((val) => chips.push(`Venue: ${val}`));
     state.author.forEach((val) => chips.push(`Co-author: ${val}`));
     summaryEl.innerHTML = chips.length
-      ? chips.map((chip) => `<span class="pub-filter-chip">${chip}</span>`).join('')
+      ? chips.map((chip) => `<span class="pub-filter-chip">${esc(chip)}</span>`).join('')
       : '<span class="pub-filter-empty">No filters applied</span>';
   };
 
@@ -62,18 +65,18 @@
         (b) => `<span class="pub-badge pub-badge--${b.toLowerCase()}" title="${b === 'FT50' ? 'Financial Times Top 50 journal' : 'UT Dallas Top 24 journal'}">${b}</span>`
       );
       if (pub.award) {
-        chips.push(`<span class="pub-badge pub-badge--award" title="${pub.award}">\u{1F3C6} ${pub.award}</span>`);
+        chips.push(`<span class="pub-badge pub-badge--award" title="${esc(pub.award)}">\u{1F3C6} ${esc(pub.award)}</span>`);
       }
       return chips.length ? `<span class="pub-badges">${chips.join('')}</span>` : '';
     };
 
     listEl.innerHTML = sorted.map((pub) => {
-      const authors = Array.isArray(pub.authors) ? pub.authors.join(', ') : '';
+      const authors = Array.isArray(pub.authors) ? esc(pub.authors.join(', ')) : '';
       const typeLabel = normalizeTypeLabel(pub.type || '');
-      const meta = [pub.year, pub.venue, typeLabel].filter(Boolean).join(' · ');
+      const meta = esc([pub.year, pub.venue, typeLabel].filter(Boolean).join(' · '));
       const title = pub.url
-        ? `<a href="${pub.url}" class="pub-title">${pub.title}</a>`
-        : `<span class="pub-title">${pub.title}</span>`;
+        ? `<a href="${esc(pub.url)}" class="pub-title">${esc(pub.title)}</a>`
+        : `<span class="pub-title">${esc(pub.title)}</span>`;
       return `
         <div class="pub-item">
           ${title}${badgesFor(pub)}

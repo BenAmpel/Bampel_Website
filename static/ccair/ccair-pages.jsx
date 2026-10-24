@@ -1,5 +1,5 @@
 /* CCAIR Pages — all page content */
-const { useState: usePageState, useMemo: usePageMemo } = React;
+const { useState: usePageState, useMemo: usePageMemo, useEffect: usePageEffect, useDeferredValue: usePageDeferred } = React;
 
 const RESEARCH_PORTFOLIO = [
   { tier: 'Core', risk: 'Established program', color: 'var(--accent-2)', areas: [
@@ -27,7 +27,7 @@ const CONSTRUCTS = [
 const PIPELINE = [
   { level: "K–12", description: "Early exposure to CyberAI concepts through local school partnerships and outreach programs.", programs: ["School Outreach", "CyberAI Literacy", "Community Partnerships"] },
   { level: "Undergraduate", description: "Course-embedded research experiences and summer cohorts with sanitized center data.", programs: ["Course-Embedded Research", "CyberAI Fundamentals", "Summer Research Cohorts"] },
-  { level: "Master's", description: "Bridge between instruction and research — students contribute to data curation and benchmarking.", programs: ["CIS 8684: CTI", "CIS 8080: Security", "CyberCorps SFS (via CRISP)"] },
+  { level: "Master's", description: "Bridge between instruction and research: students contribute to data curation and benchmarking.", programs: ["CIS 8684: CTI", "CIS 8080: Security", "CyberCorps SFS (via CRISP)"] },
   { level: "Doctoral", description: "PhD students lead CCAIR research with dissertations contributing durable center artifacts.", programs: ["Dissertation Research", "Center Publications", "Conference Leadership"] },
 ];
 
@@ -40,7 +40,7 @@ const PILLARS = [
       { name: 'PHI-NEXT', href: 'https://bampel.com/journal_publication/phi-hacker-jmis/' },
       { name: 'HackerSignal', href: 'https://bampel.com/conference_publication/hackersignal-a-large-scale-multi-source-dataset-linking-hacker-communi/' },
     ] },
-  { n: '02', title: 'Ambiguity-Aware Intelligence', desc: 'AI systems that operate under adversarial uncertainty — reasoning about ambiguity, deception, and partial information.',
+  { n: '02', title: 'Ambiguity-Aware Intelligence', desc: 'AI systems that operate under adversarial uncertainty: reasoning about ambiguity, deception, and partial information.',
     points: ['Robust ML under adversarial label noise', 'Adversarially resilient architectures', 'Agentic systems with adaptive decision-making', 'Treating uncertainty as a first-class design constraint'],
     systems: [
       { name: 'Adaptive Phishing GAN', href: 'https://bampel.com/conference_publication/adaptive-phishing-gan-cars-2026/' },
@@ -93,7 +93,7 @@ function HeroGlow({ heroRef, innerRef }) {
 const STAT_STYLE = { display: 'flex', flexDirection: 'column-reverse', justifyContent: 'flex-end' };
 
 function HomePage() {
-  const { publications, people, news, courses } = useData();
+  const { publications, people, news, courses, paperPages } = useData();
   const phdCount = (people.students || []).length + (people.mentees || []).length;
   const recent = publications.filter((p) => p.type === 'journal').slice().sort(byYearDesc).slice(0, 3);
   const heroRef = React.useRef(null), innerRef = React.useRef(null);
@@ -141,7 +141,7 @@ function HomePage() {
 
       <Section id="recent" alt eyebrow="Recent work" title="Selected journal articles">
         <Reveal as="ul" className="pub-list card" style={{ paddingBlock: 4 }}>
-          {recent.map((p) => <PublicationItem key={p.title} {...p} />)}
+          {recent.map((p) => <PublicationItem key={p.title} {...p} paperPages={paperPages} />)}
         </Reveal>
         <div className="section-foot"><a className="btn btn-secondary" href="#/publications">All {publications.length} publications <Arrow /></a></div>
       </Section>
@@ -233,17 +233,36 @@ function ResearchPage() {
   );
 }
 
+const PUB_TYPES = ['all', 'journal', 'conference', 'workshop'];
+function readPubFilter() {
+  const h = window.location.hash, i = h.indexOf('?');
+  const p = new URLSearchParams(i >= 0 ? h.slice(i + 1) : '');
+  const type = p.get('type');
+  return { type: PUB_TYPES.includes(type) ? type : 'all', q: (p.get('q') || '').slice(0, 200) };
+}
+
 function PublicationsPage() {
-  const { publications } = useData();
-  const [type, setType] = usePageState('all');
-  const [query, setQuery] = usePageState('');
+  const { publications, paperPages } = useData();
+  // The filter lives in the address (#/publications?type=journal&q=phishing), so a filtered list can be shared and survives a reload.
+  const initial = usePageMemo(readPubFilter, []);
+  const [type, setType] = usePageState(initial.type);
+  const [query, setQuery] = usePageState(initial.q);
+  const deferredQuery = usePageDeferred(query);
+  usePageEffect(() => {
+    const qs = new URLSearchParams();
+    if (type !== 'all') qs.set('type', type);
+    if (query.trim()) qs.set('q', query.trim());
+    const s = qs.toString();
+    // replaceState does not fire hashchange, so this never re-routes or adds history entries.
+    try { window.history.replaceState(null, '', '#/publications' + (s ? '?' + s : '')); } catch (e) { /* the filter still works without the address */ }
+  }, [type, query]);
 
   const counts = usePageMemo(() => publications.reduce((acc, p) => { acc[p.type] = (acc[p.type] || 0) + 1; return acc; }, {}), [publications]);
   const filtered = usePageMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = deferredQuery.trim().toLowerCase();
     return publications.filter((p) => (type === 'all' || p.type === type) &&
       (!q || [p.title, p.authors, p.venue, String(p.year)].join(' ').toLowerCase().includes(q)));
-  }, [publications, type, query]);
+  }, [publications, type, deferredQuery]);
   const years = usePageMemo(() => {
     const groups = new Map();
     filtered.slice().sort(byYearDesc).forEach((p) => {
@@ -270,7 +289,7 @@ function PublicationsPage() {
             <label className="search">
               <span className="sr-only">Search publications</span>
               <Icon name="search" />
-              <input type="search" placeholder="Search titles, authors, venues" value={query} onChange={(e) => setQuery(e.target.value)} />
+              <input type="search" name="q" autoComplete="off" spellCheck={false} placeholder="Search titles, authors, venues…" value={query} onChange={(e) => setQuery(e.target.value)} />
             </label>
             <SegmentedControl label="Publication type" options={options} value={type} onChange={setType} />
           </div>
@@ -279,7 +298,7 @@ function PublicationsPage() {
           {years.map(([year, items]) => (
             <div key={year}>
               <h2 className="pub-year">{year}</h2>
-              <ul className="pub-list">{items.map((p) => <PublicationItem key={p.title} {...p} />)}</ul>
+              <ul className="pub-list">{items.map((p) => <PublicationItem key={p.title} {...p} paperPages={paperPages} />)}</ul>
             </div>
           ))}
           <p className="pub-count">Showing {filtered.length} of {publications.length}. <a href="https://bampel.com/publications/">Full list on bampel.com</a></p>
@@ -413,18 +432,21 @@ const KIND_LABEL = { dataset: 'Dataset', stimuli: 'Stimulus library', instrument
 
 function CopyButton({ text, label }) {
   const [done, setDone] = usePageState(false);
+  const [failed, setFailed] = usePageState(false);
   const timer = React.useRef(null);
   React.useEffect(() => () => clearTimeout(timer.current), []);
   if (!navigator.clipboard) return null;
-  const copy = () => navigator.clipboard.writeText(text).then(() => {
-    setDone(true);
+  const flash = (ok) => {
+    setDone(ok); setFailed(!ok);
     clearTimeout(timer.current);
-    timer.current = setTimeout(() => setDone(false), 1800);
-  });
+    timer.current = setTimeout(() => { setDone(false); setFailed(false); }, 1800);
+  };
+  // A denied clipboard (a permissions block, an insecure frame) rejects; say so instead of failing silently.
+  const copy = () => navigator.clipboard.writeText(text).then(() => flash(true), () => flash(false));
   return (
     <>
-      <button type="button" className="btn btn-secondary btn-sm" onClick={copy} aria-label={done ? 'Citation copied' : label}>{done ? 'Copied' : 'Copy citation'}</button>
-      <span className="sr-only" role="status">{done ? 'Citation copied' : ''}</span>
+      <button type="button" className="btn btn-secondary btn-sm" onClick={copy} aria-label={done ? 'Citation copied' : failed ? 'Copy failed. Select the citation text and copy it by hand.' : label}>{done ? 'Copied' : failed ? 'Copy failed' : 'Copy citation'}</button>
+      <span className="sr-only" role="status">{done ? 'Citation copied' : failed ? 'Copy failed. Select the citation text and copy it by hand.' : ''}</span>
     </>
   );
 }
@@ -598,7 +620,7 @@ function ContactPage() {
           <Reveal className="card">
             <h3>Robinson cyber ecosystem</h3>
             <ul className="list-check">
-              <li><a href="https://robinson.gsu.edu/research-centers/crisp/">CRISP — Center for Research in Information Security &amp; Privacy</a></li>
+              <li><a href="https://robinson.gsu.edu/research-centers/crisp/">CRISP (Center for Research in Information Security &amp; Privacy)</a></li>
               <li>NSF CyberCorps® Scholarship for Service participant</li>
               <li>NSA/DHS CAE Cyber Defense designated program</li>
             </ul>

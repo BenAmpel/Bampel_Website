@@ -52,7 +52,8 @@
 {{/* Progressive Web App (PWA) Icon */}}
 <link rel="icon" type="image/png" href="{{ (partial "functions/get_icon" 32).RelPermalink }}" />
 <link rel="apple-touch-icon" type="image/png" href="{{ (partial "functions/get_icon" 180).RelPermalink }}" />
-{{ $theme_color := ($scr.Get "primary") | default site.Params.appearance.primary_color | default "#fff" }}
+{{/* The site is dark only (page background #0a0a0a), so the browser chrome matches it. */}}
+{{ $theme_color := "#0a0a0a" }}
 <meta name="theme-color" content="{{ $theme_color }}" />
 
 {{/* Get page image for social sharing. */}}
@@ -83,7 +84,7 @@
 {{ $title := partial "functions/get_page_title" . }}
 
 {{/* Twitter metadata. */}}
-<meta property="twitter:card" content="{{ $twitter_card }}" />
+{{/* twitter:card is emitted once, by layouts/partials/hooks/head-start/seo-identity.html (summary_large_image with the sharing card). A second tag here made validators report a duplicate. */}}
 {{ with site.Params.marketing.seo.twitter }}
   <meta property="twitter:site" content="@{{ . }}" />
   <meta property="twitter:creator" content="@{{ . }}" />

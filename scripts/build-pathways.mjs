@@ -62,7 +62,7 @@ function roleCard(r, i) {
 function hub() {
   const entry = D.roles.filter((r) => r.hiring === 'entry').map((r) => r.name);
   const faq = [
-    { q: 'Which cybersecurity job is right for me?', a: `Start with what you enjoy rather than what sounds impressive. The CCAIR Pathway Finder asks ${TAPS} quick, plain-language questions about activities you would enjoy and ranks 14 cybersecurity roles for you, with the realistic first job, starter certifications and free practice for each.` },
+    { q: 'Which cybersecurity job is right for me?', a: `Start with what you enjoy rather than what sounds impressive. The CCAIR Pathway Finder asks ${TAPS} plain-language questions about activities you would enjoy and ranks 14 cybersecurity roles for you, with the realistic first job, starter certifications and free practice for each.` },
     { q: 'What cybersecurity jobs are entry-level?', a: `Roles commonly hired straight from school or a bootcamp include ${entry.join(', ')}. Others, such as penetration tester and incident responder, are usually reached after one to three years in a related first job.` },
     { q: 'Do I need to know how to code to work in cybersecurity?', a: 'No. Many roles, including GRC analyst, IT auditor, privacy analyst, security awareness and SOC analyst, need little or no programming. Coding matters most in application security, cloud security and AI security.' },
     { q: 'Which certification should I get first?', a: 'For most beginners, CompTIA Security+ or ISC2 Certified in Cybersecurity (CC) is a sensible first credential. The best choice depends on the role: each role guide lists starter and later certifications.' },
@@ -101,7 +101,7 @@ ${top('hub')}
     </div>
     <div class="stats reveal" style="--d:.32s">
       <div class="stat"><b data-count="${D.roles.length}">${D.roles.length}</b><span>Roles explained</span></div>
-      <div class="stat"><b data-count="5" data-pre="~" data-suf=" min">~5 min</b><span>${TAPS} quick taps</span></div>
+      <div class="stat"><b data-count="5" data-pre="~" data-suf=" min">~5 min</b><span>${TAPS} taps</span></div>
       <div class="stat"><b>0</b><span>Answers stored</span></div>
     </div>
   </div></section>
@@ -120,7 +120,8 @@ ${top('hub')}
     <p class="kicker reveal">The finder</p>
     <h2 class="reveal">Which cyber role fits you?</h2>
     <div class="quiz-shell reveal">
-      <div class="quiz" id="quiz" aria-live="polite">
+      <p class="sr-only" id="pf-status" role="status"></p>
+      <div class="quiz" id="quiz">
         <noscript><p>The quiz needs JavaScript. You can still browse every role guide below.</p></noscript>
       </div>
     </div>

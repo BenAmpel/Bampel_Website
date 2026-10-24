@@ -1,0 +1,35 @@
+// Local copy of the theme file. The only change: the check mark is written as the CSS escape \2705 instead of the literal
+// character. Dart Sass puts a byte-order mark at the start of compressed output that holds any non-ASCII character, and
+// that mark broke the first rule of the stylesheet. Keep every .scss file here ASCII-only.
+.svg-icon {
+  display: inline-flex;
+  align-self: center;
+  height: 0.9em;
+  width: 0.9em;
+}
+
+.svg-icon.svg-baseline {
+  bottom: 0.1em;
+  line-height: 1;
+  position: relative;
+}
+
+// Emoji task lists
+
+.task-list input[type='checkbox']:checked {
+  appearance: initial;
+  width: 1em;
+  height: 1em;
+  border: none;
+  background: initial;
+  position: relative;
+}
+
+.task-list input[type='checkbox']:not(:checked) {
+  width: 0.9em;
+  height: 0.9em;
+}
+
+.task-list input[type='checkbox']:checked::after {
+  content: '\2705';
+}

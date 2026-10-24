@@ -1,0 +1,12 @@
+# Overrides the theme's "minimal" font pack (params.yaml: font: minimal).
+# The theme version requests Montserrat and Roboto, which no rule on this site uses. This one requests the faces the site
+# does use (CLAUDE.md, Typography): Fira Code for headings and data, Merriweather for prose, Playfair Display for display
+# text, and Roboto Mono as the fallback. The theme adds display=swap and loads the stylesheet without blocking render.
+name = "Minimal"
+
+google_fonts = "family=Fira+Code:wght@400;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Playfair+Display:wght@400;700&family=Roboto+Mono"
+
+heading_font = "Montserrat"
+body_font = "Roboto"
+nav_font = "Roboto"
+mono_font = "Roboto Mono"

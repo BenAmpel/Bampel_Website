@@ -30,6 +30,8 @@
   {{- end -}}
   <script src="{{ $js_bundle.RelPermalink }}"></script>
 
+  <a class="skip-link" href="#main">Skip to main content</a>
+
   {{ partial "search" . }}
 
   {{ if .Params.announcement.text -}}
@@ -46,7 +48,7 @@
   {{ partial $block_path . }}
   </div>
 
-  <div class="page-body">
+  <main class="page-body" id="main" tabindex="-1">
     {{/* Breadcrumb */}}
     {{/* Don't apply to Book layout as that has different breadcrumb placement. */}}
     {{ if .Params.show_breadcrumb | and (ne .Type "book") }}
@@ -58,7 +60,7 @@
     {{ end }}
 
     {{ block "main" . }}{{ end }}
-  </div>
+  </main>
 
   <div class="page-footer">
     {{/* Docs and Updates layouts include the site footer in a different location. */}}

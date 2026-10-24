@@ -132,7 +132,8 @@
   var tabKey = 'lab_admin_tab_' + studyId;
   function showTab(name) {
     document.querySelectorAll('section[data-tab]').forEach(function (s) { s.hidden = s.getAttribute('data-tab') !== name; });
-    $('tabs').querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-selected', b.getAttribute('data-tab') === name ? 'true' : 'false'); });
+    // aria-current, not aria-selected: aria-selected is only valid on role=tab, and these are plain buttons.
+    $('tabs').querySelectorAll('button').forEach(function (b) { if (b.getAttribute('data-tab') === name) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); });
     try { sessionStorage.setItem(tabKey, name); } catch (e) {}
     err();
     if (name === 'participants') { load(); if (can('owner')) loadBackup(); }
@@ -624,7 +625,7 @@
   }
   function genCode() { var a = '23456789ABCDEFGHJKMNPQRSTVWXYZ', s = '', r = new Uint32Array(8); (window.crypto || {}).getRandomValues ? crypto.getRandomValues(r) : r.forEach(function (x, i) { r[i] = Math.random() * 4294967296; }); for (var i = 0; i < 8; i++) s += a[r[i] % a.length]; return s; }
   function renderEditor() {
-    $('subtabs').innerHTML = subs().map(function (s) { return '<button type="button" data-sub="' + s[0] + '" aria-selected="' + (s[0] === sub) + '">' + s[1] + '</button>'; }).join('');
+    $('subtabs').innerHTML = subs().map(function (s) { return '<button type="button" data-sub="' + s[0] + '"' + (s[0] === sub ? ' aria-current="true"' : '') + '>' + s[1] + '</button>'; }).join('');
     var h = '';
     if (sub === 'pre' || sub === 'post') {
       h = '<p class="muted">' + (sub === 'pre' ? 'Shown at the start of a session, before the items. By default only in session 1; list other session numbers to ask again (for example, 1, 4).' : 'Shown at the end of a session. Leave "Sessions" blank to ask every session.') +

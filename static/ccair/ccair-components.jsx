@@ -24,10 +24,15 @@ let lockupConfig = null;
 function useLockup() {
   const [cfg, setCfg] = useState(null);
   useEffect(() => {
-    lockupConfig = lockupConfig || fetch(LOCKUP_DIR + 'lockup.json').then((r) => (r.ok ? r.json() : null)).catch(() => null);
     let live = true;
-    lockupConfig.then((c) => { if (live && c && c.enabled && c.files && c.files.light) setCfg(c); });
-    return () => { live = false; };
+    // The config is a switch for files that do not exist yet ("enabled": false), so it is read when the browser is idle
+    // instead of competing with the data files for the first paint.
+    const idle = window.requestIdleCallback || ((f) => setTimeout(f, 1500));
+    const handle = idle(() => {
+      lockupConfig = lockupConfig || fetch(LOCKUP_DIR + 'lockup.json').then((r) => (r.ok ? r.json() : null)).catch(() => null);
+      lockupConfig.then((c) => { if (live && c && c.enabled && c.files && c.files.light) setCfg(c); });
+    });
+    return () => { live = false; if (window.cancelIdleCallback && window.requestIdleCallback) window.cancelIdleCallback(handle); };
   }, []);
   return cfg;
 }
@@ -328,8 +333,8 @@ const normTitle = (s) => String(s).replace(/\bML\b/g, 'Machine Learning').replac
 const isPdfUrl = (u) => /\.pdf(?:$|[?#])/i.test(u) || /arxiv\.org\/pdf\//i.test(u) || /par\.nsf\.gov\/servlets\/purl\//i.test(u)
   || /aisel\.aisnet\.org\/cgi\/viewcontent\.cgi/i.test(u) || /dl\.acm\.org\/doi\/pdf\//i.test(u);
 
-function PublicationItem({ title, authors, venue, year, type, doi, pdf }) {
-  const { paperPages = {} } = useData();
+// paperPages comes from the page, so a row does not subscribe to the whole data context and memo can skip unchanged rows.
+const PublicationItem = React.memo(function PublicationItem({ title, authors, venue, year, type, doi, pdf, paperPages = {} }) {
   const site = paperPages[normTitle(title)] || {};
   const fullText = pdf || site.pdf;
   const award = / — (Best Paper Award)$/.exec(venue || '');
@@ -357,7 +362,7 @@ function PublicationItem({ title, authors, venue, year, type, doi, pdf }) {
       </div>
     </Reveal>
   );
-}
+});
 
 function initialsOf(name) {
   return name.split(/\s+/).filter(Boolean).map((w) => w[0]).filter((c) => /[A-Z]/.test(c)).join('').slice(0, 2);

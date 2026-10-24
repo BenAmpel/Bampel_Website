@@ -3,7 +3,8 @@
 
 // ===== FONT IMPORTS =====
 // Fira Code for Cyber/Terminal mode, Merriweather + Playfair Display for Manuscript mode
-@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Playfair+Display:wght@400;700&display=swap');
+// Fira Code, Merriweather and Playfair Display load from <head> (data/fonts/minimal.toml). An @import here was dropped by
+// browsers because Sass puts a byte-order mark in front of it.
 
 // ===== HIGH-SEVERITY CYBERPUNK GLITCH SYSTEM =====
 // Violent, jerky, instant digital glitches with RGB splitting (chromatic aberration)
@@ -378,7 +379,7 @@ ul:not(.navbar-nav):not(.social-icons):not(.network-icon) {
     padding-left: 20px;
     
     &::before {
-      content: '▸';
+      content: '\25B8';
       position: absolute;
       left: 0;
       color: #00ff41;
@@ -538,7 +539,7 @@ input, textarea, select {
   }
   
   &::placeholder {
-    color: #6e7681 !important;
+    color: #8b949e !important;
   }
 }
 
@@ -1159,11 +1160,13 @@ section#about .bio-explorer-tab[aria-selected="true"],
   box-shadow: 0 0 12px rgba(0, 255, 65, 0.25);
 }
 
-section#about .bio-explorer-tab:focus,
-.wg-about .bio-explorer-tab:focus,
-.hb-about .bio-explorer-tab:focus {
-  outline: none;
-  box-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
+// Focus rings (audit 2026-10-24): full-opacity cyan outline, 12.3:1 against #0d1117 (WCAG 1.4.11 asks for 3:1). The old
+// glows were 40% alpha cyan (2.84:1) with outline: none, and the tab rule also wiped the selected tab's own glow.
+section#about .bio-explorer-tab:focus-visible,
+.wg-about .bio-explorer-tab:focus-visible,
+.hb-about .bio-explorer-tab:focus-visible {
+  outline: 2px solid #00e5ff;
+  outline-offset: 2px;
 }
 
 section#about .bio-explorer-panel,
@@ -1729,9 +1732,9 @@ section#about .bio-chip:focus-visible::after,
 section#about .bio-chip:focus-visible,
 .wg-about .bio-chip:focus-visible,
 .hb-about .bio-chip:focus-visible {
-  outline: none;
+  outline: 2px solid #00e5ff;
+  outline-offset: 2px;
   border-color: rgba(0, 229, 255, 0.7);
-  box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.4);
 }
 
 section#about .bio-highlight-flash,
@@ -1879,7 +1882,7 @@ section#about ul:not(.network-icon):not(.social-icons) {
     padding-left: 20px;
     
     &::before {
-      content: '▸';
+      content: '\25B8';
       color: #00ff41;
       position: absolute;
       left: 0;
@@ -2216,7 +2219,7 @@ section#about .container,
 
 // Status bar at bottom of about section
 section#about::after {
-  content: '─────────────────────────────────────────────────────────────';
+  content: '\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500';
   display: block;
   text-align: center;
   color: rgba(0, 255, 65, 0.2);
@@ -2847,7 +2850,7 @@ body:not(.dark) {
         
         &::before {
           color: #666 !important;
-          content: '•' !important;
+          content: '\2022' !important;
         }
         
         &:hover {
@@ -5286,8 +5289,8 @@ body:not(.dark) .pub-filter-reset {
 }
 
 .impact-card:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.5);
+  outline: 2px solid #00e5ff;
+  outline-offset: 2px;
 }
 
 body:not(.dark) .impact-card {
@@ -5498,4 +5501,117 @@ section .container {
     padding-top: 1.1rem !important;
     padding-bottom: 1.1rem !important;
   }
+}
+
+// ===== SKIP LINK AND MAIN LANDMARK (audit 2026-10-24) =====
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 100000;
+  padding: 10px 16px;
+  background: #0a0a0a;
+  color: #00ff41 !important;
+  border: 2px solid #00ff41;
+  border-radius: 4px;
+  font-family: 'Fira Code', 'Roboto Mono', monospace;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+  outline: 2px solid #00e5ff;
+  outline-offset: 2px;
+}
+
+// The skip link moves focus here; the region is not a control, so it shows no ring.
+main#main:focus {
+  outline: none;
+}
+
+// ===== FOCUS RINGS ON THE LIGHT THEME (audit 2026-10-24) =====
+// Cyan is 1.54:1 on white; the navy ring is 10:1.
+body:not(.dark) section#about .bio-explorer-tab:focus-visible,
+body:not(.dark) .wg-about .bio-explorer-tab:focus-visible,
+body:not(.dark) .hb-about .bio-explorer-tab:focus-visible,
+body:not(.dark) section#about .bio-chip:focus-visible,
+body:not(.dark) .wg-about .bio-chip:focus-visible,
+body:not(.dark) .hb-about .bio-chip:focus-visible,
+body:not(.dark) .impact-card:focus-visible {
+  outline-color: #0b3d91;
+}
+
+// ===== DARK COLOR SCHEME (audit 2026-10-24) =====
+// The site is dark only (params.yaml leaves theme_day empty). Without this the scrollbars and unstyled controls rendered light.
+:root {
+  color-scheme: dark;
+}
+
+// ===== EDUCATION TIMELINE ON PHONES (audit 2026-10-24) =====
+// A horizontal scroller put the second and third steps off-screen at 375px with only a "Scroll" hint. Below 700px the steps stack.
+@media (max-width: 700px) {
+  section#about .edu-path,
+  .wg-about .edu-path,
+  .hb-about .edu-path {
+    flex-direction: column;
+    overflow-x: visible;
+    scroll-snap-type: none;
+    padding-bottom: 8px;
+  }
+
+  section#about .edu-path::before,
+  .wg-about .edu-path::before,
+  .hb-about .edu-path::before,
+  section#about .edu-path::after,
+  .wg-about .edu-path::after,
+  .hb-about .edu-path::after,
+  section#about .edu-scroll-hint,
+  .wg-about .edu-scroll-hint,
+  .hb-about .edu-scroll-hint {
+    display: none;
+  }
+
+  section#about .edu-step,
+  .wg-about .edu-step,
+  .hb-about .edu-step {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+// ===== TOUCH TARGETS (audit 2026-10-24) =====
+// WCAG 2.5.8: a pointer target is at least 24 by 24 CSS px unless it sits inside a sentence. These were 17 to 23px high.
+.navbar-toggler {
+  min-width: 36px;
+  min-height: 36px;
+}
+
+a.nav-link.js-search {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.network-icon li a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+}
+
+section#about h3 > a,
+.selected-pubs-more > a,
+.wg-research-impact-overview p > a:only-child {
+  display: inline-block;
+  padding: 4px 0;
+}
+
+// Later widget titles are h2 now (one h1 per page); keep them the size the h1 had (2.25rem, the theme's .section-heading h1).
+.section-heading h2.h1 {
+  font-size: 2.25rem;
 }

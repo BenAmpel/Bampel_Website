@@ -28,7 +28,7 @@ code { font-size: 13px; }
 nav.tabs { display: flex; gap: 4px; flex-wrap: wrap; margin: 18px 0; padding: 4px; background: var(--bg-2); border-radius: 999px; width: fit-content; max-width: 100%; }
 nav.tabs button { background: transparent; color: var(--muted); border: 0; border-radius: 999px; padding: 7px 16px; min-height: 38px; font-weight: 600; }
 nav.tabs button:hover:not([disabled]) { background: color-mix(in srgb, var(--card) 70%, transparent); color: var(--text); border: 0; }
-nav.tabs button[aria-selected=true], nav.tabs button[aria-selected=true]:hover { background: var(--card); color: var(--text); box-shadow: 0 1px 2px rgba(0, 25, 75, .12), 0 2px 8px rgba(0, 25, 75, .08); }
+nav.tabs button[aria-current=true], nav.tabs button[aria-current=true]:hover { background: var(--card); color: var(--text); box-shadow: 0 1px 2px rgba(0, 25, 75, .12), 0 2px 8px rgba(0, 25, 75, .08); }
 nav.sub button { font-size: 14px; }
 .who { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
 .pill { font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: 999px; background: var(--bg-2); color: var(--muted); }

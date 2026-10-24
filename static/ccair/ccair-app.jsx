@@ -82,7 +82,7 @@ function CCAIRApp() {
     <DataProvider>
       <CCAIRNav currentPage={page} />
       <main id="main-content" ref={mainRef}>
-        <ErrorBoundary key={page}><Page /></ErrorBoundary>
+        <DataGate><ErrorBoundary key={page}><Page /></ErrorBoundary></DataGate>
       </main>
       <CCAIRFooter />
     </DataProvider>

@@ -60,6 +60,8 @@ input[type=text], input[type=email] { width: 100%; min-height: 50px; padding: 10
 input.code { letter-spacing: 1px; text-transform: uppercase; }
 label.field { display: block; font-size: 15px; font-weight: 600; margin: 4px 0 6px; }
 .error { color: var(--error); font-size: 15px; margin-top: 10px; }
+.q-error { color: var(--error); font-size: 15px; font-weight: 600; margin: 8px 0 0; }
+.q-error.note { color: var(--warn); }
 select { font: inherit; min-height: 50px; padding: 8px 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--line-strong); background: var(--card); color: var(--text); }
 .actions.split { justify-content: space-between; gap: 8px; flex-wrap: wrap; }
 /* Vignettes: an item as plain text or as an email, optionally with an image. */

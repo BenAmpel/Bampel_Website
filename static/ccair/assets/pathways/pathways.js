@@ -214,7 +214,7 @@
   function intro() {
     mount.innerHTML = '';
     var w = el('div', { class: 'intro-card qcard' },
-      '<p class="part">About 5 minutes · ' + TOTAL + ' quick taps</p>' +
+      '<p class="part">About 5 minutes · ' + TOTAL + ' taps</p>' +
       '<h3 class="qtext" style="min-height:0" tabindex="-1">Tap how much each activity appeals to you. There are no wrong answers, and you don\'t need any cyber knowledge yet.</h3>' +
       '<p>You\'ll get your top 3 roles, why they fit, the realistic first job, which certifications to start with and free places to practise.</p>' +
       '<div class="hero-cta"><button class="btn btn-primary" id="pf-start">Start <span class="arrow" aria-hidden="true">&rarr;</span></button></div>' +
@@ -224,7 +224,7 @@
   }
 
   var PARTS = {
-    b: ['Part 2 of 3', 'This or that', 'Nice work. Now a few quick either-or choices that separate jobs that sound alike.'],
+    b: ['Part 2 of 3', 'This or that', 'Nice work. Now a few either-or choices that separate jobs that sound alike.'],
     c: ['Part 3 of 3', 'About you', 'Last stretch: five short questions about your background and what you want.']
   };
   var seenPart = {};
@@ -235,7 +235,13 @@
       '<div class="stage"><div class="qcard interlude"><p class="part">' + P[0] + '</p><h3 class="qtext" tabindex="-1">' + P[1] + '</h3>' +
       '<p class="sub">' + P[2] + '</p><div class="hero-cta"><button class="btn btn-primary" id="pf-go">Continue <span class="arrow" aria-hidden="true">&rarr;</span></button></div>' +
       '<div class="interlude-bar" aria-hidden="true"><i></i></div></div></div>';
-    var go = document.getElementById('pf-go'), t = setTimeout(function () { show(i, 1, true); }, reduce ? 2500 : 2200);
+    var go = document.getElementById('pf-go'), card = mount.querySelector('.interlude'), t = setTimeout(function () { show(i, 1, true); }, reduce ? 2500 : 2200);
+    // The screen moves on by itself, so any sign that someone is reading or using it stops the timer (WCAG 2.2.1).
+    // Continue always works.
+    function hold() { clearTimeout(t); card.classList.add('held'); }
+    card.addEventListener('pointerenter', hold);
+    go.addEventListener('focus', hold);
+    card.addEventListener('keydown', hold);
     go.addEventListener('click', function () { clearTimeout(t); show(i, 1, true); });
     mount.querySelector('.qtext').focus({ preventScroll: true });
     if (!reduce) mount.querySelector('.ring').classList.add('pulse');
@@ -252,20 +258,20 @@
       html += '<p class="prompt">Would you enjoy&hellip;</p><h3 class="qtext" tabindex="-1">' + esc(st.text) + '</h3>' +
         '<div class="answers three" role="group" aria-label="Your answer">' +
         ['Not for me', 'Maybe', 'Yes!'].map(function (l, v) {
-          return '<button class="ans' + (cur === v ? ' picked' : '') + '" data-v="' + v + '"><kbd aria-hidden="true">' + (v + 1) + '</kbd>' + l + '</button>';
+          return '<button class="ans' + (cur === v ? ' picked' : '') + '" data-v="' + v + '" aria-pressed="' + (cur === v) + '"><kbd aria-hidden="true">' + (v + 1) + '</kbd>' + l + '</button>';
         }).join('') + '</div>';
     } else if (st.kind === 'b') {
       html += '<p class="prompt">Which sounds more like you?</p><h3 class="qtext" tabindex="-1">This or that?</h3>' +
         '<div class="answers two" role="group" aria-label="Pick one">' +
         [st.pair.a[0], st.pair.b[0]].map(function (l, v) {
-          return '<button class="ans' + (cur === v ? ' picked' : '') + '" data-v="' + v + '"><kbd aria-hidden="true">' + (v + 1) + '</kbd>' + esc(l) + '</button>';
-        }).join('') + '</div><div class="neither"><button class="linkbtn' + (cur === 2 ? ' picked' : '') + '" data-v="2">Neither appeals to me</button></div>';
+          return '<button class="ans' + (cur === v ? ' picked' : '') + '" data-v="' + v + '" aria-pressed="' + (cur === v) + '"><kbd aria-hidden="true">' + (v + 1) + '</kbd>' + esc(l) + '</button>';
+        }).join('') + '</div><div class="neither"><button class="linkbtn' + (cur === 2 ? ' picked' : '') + '" data-v="2" aria-pressed="' + (cur === 2) + '">Neither appeals to me</button></div>';
     } else {
       var opts = st.ctx.options;
-      html += '<p class="prompt">One of ' + C.length + ' quick questions about you</p><h3 class="qtext" tabindex="-1">' + esc(st.ctx.q) + '</h3>' +
+      html += '<p class="prompt">One of ' + C.length + ' questions about you</p><h3 class="qtext" tabindex="-1">' + esc(st.ctx.q) + '</h3>' +
         '<div class="answers' + (opts.length <= 3 ? ' three' : '') + '" role="group" aria-label="Your answer">' +
         opts.map(function (o, v) {
-          return '<button class="ans' + (cur === v ? ' picked' : '') + '" data-v="' + v + '">' + (v < 9 ? '<kbd aria-hidden="true">' + (v + 1) + '</kbd>' : '') + esc(o.label) + '</button>';
+          return '<button class="ans' + (cur === v ? ' picked' : '') + '" data-v="' + v + '" aria-pressed="' + (cur === v) + '">' + (v < 9 ? '<kbd aria-hidden="true">' + (v + 1) + '</kbd>' : '') + esc(o.label) + '</button>';
         }).join('') + '</div>';
     }
     html += '</div></div><div class="quiz-foot"><button class="linkbtn" id="pf-back"' + (i === 0 ? ' disabled' : '') + '>&larr; Back</button>' +
@@ -285,6 +291,7 @@
     if (st.kind === 'a') ansA[st.key] = v; else if (st.kind === 'b') ansB[st.key] = v; else ansC[st.key] = v;
     if (!started) { started = true; track('quiz_started'); }
     btn.classList.add('picked');
+    btn.setAttribute('aria-pressed', 'true');
     busy = true;
     var card = mount.querySelector('.qcard');
     setTimeout(function () {
@@ -299,6 +306,9 @@
 
   document.addEventListener('keydown', function (e) {
     if (!mount.querySelector('.qcard [data-v]') || e.metaKey || e.ctrlKey || e.altKey) return;
+    // Shortcuts belong to the quiz: act only while focus is inside it (each question moves focus to its heading), so
+    // digits, Backspace and the arrow keys keep their normal job everywhere else on the page (WCAG 2.1.4).
+    if (!mount.contains(document.activeElement)) return;
     var t = e.target; if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
     var n = parseInt(e.key, 10);
     if (n >= 1 && n <= 9) {
@@ -391,7 +401,16 @@
       '<button class="btn btn-ghost" id="pf-print">Print or save as PDF</button>' +
       '<button class="btn btn-ghost" id="pf-again">Start over</button></div></div>';
     mount.innerHTML = html;
-    if (animate) mount.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    var rh = mount.querySelector('.results h2');
+    if (rh) rh.setAttribute('tabindex', '-1');
+    if (animate) {
+      mount.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+      // Move focus to the results heading (the questions' DOM was replaced, so focus would fall to <body>) and say what
+      // is there. Only the status line is a live region; the results themselves are not.
+      if (rh) rh.focus({ preventScroll: true });
+      var live = document.getElementById('pf-status');
+      if (live) live.textContent = 'Your results are ready. Top match: ' + BY[top[0]].name + '. Then ' + BY[top[1]].name + ' and ' + BY[top[2]].name + '.';
+    }
     document.getElementById('pf-copy').addEventListener('click', function () {
       var url = location.origin + location.pathname + '#r=' + encode();
       var ok = function () { toast('Link copied. Only you have it: nothing is stored on our side.'); };

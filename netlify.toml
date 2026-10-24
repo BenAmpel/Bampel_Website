@@ -26,8 +26,8 @@
 #   script-src  'unsafe-inline': the theme hooks (layouts/partials/hooks), the shortcodes and the JSON-LD blocks use inline <script>.
 #               www.googletagmanager.com (gtag), cdn.jsdelivr.net (tsparticles, typed.js, Fuse, mark.js), d1bxh8uas1mnw7.cloudfront.net
 #               and embed.altmetric.com and api.altmetric.com (Altmetric badges, JSONP), badge.dimensions.ai (Dimensions badges),
-#               cdnjs.buymeacoffee.com (support widget), identity.netlify.com (Netlify Identity widget the theme loads on the home page),
-#               unpkg.com (React for /care/).
+#               cdnjs.buymeacoffee.com (support widget), identity.netlify.com (Netlify Identity widget the theme loads on the home page).
+#               (React for /ccair/ is served from /ccair/vendor/, so unpkg.com is no longer allowed.)
 #   style-src   'unsafe-inline': inline <style> blocks and style="" attributes in the same hooks and shortcodes.
 #               fonts.googleapis.com (Google Fonts), cdn.jsdelivr.net (academicons), badge.dimensions.ai, embed.altmetric.com.
 #   font-src    data: (icon fonts embedded in the Altmetric and Dimensions badge CSS), fonts.gstatic.com (Google Fonts files), cdn.jsdelivr.net (academicons font).
@@ -40,8 +40,20 @@
   for = "/*"
   [headers.values]
     X-Frame-Options = "DENY"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://cdn.jsdelivr.net https://d1bxh8uas1mnw7.cloudfront.net https://embed.altmetric.com https://api.altmetric.com https://badge.dimensions.ai https://cdnjs.buymeacoffee.com https://identity.netlify.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://badge.dimensions.ai https://embed.altmetric.com; font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://badges.altmetric.com https://cdn.altmetric.com https://cdn.buymeacoffee.com https://server.arcgisonline.com https://www.googletagmanager.com https://www.google-analytics.com; connect-src 'self' https://api.ipify.org https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://api.altmetric.com https://metrics-api.dimensions.ai https://badge.dimensions.ai; frame-src https://www.buymeacoffee.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://cdn.jsdelivr.net https://d1bxh8uas1mnw7.cloudfront.net https://embed.altmetric.com https://api.altmetric.com https://badge.dimensions.ai https://cdnjs.buymeacoffee.com https://identity.netlify.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://badge.dimensions.ai https://embed.altmetric.com; font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://badges.altmetric.com https://cdn.altmetric.com https://cdn.buymeacoffee.com https://server.arcgisonline.com https://www.googletagmanager.com https://www.google-analytics.com; connect-src 'self' https://api.ipify.org https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://api.altmetric.com https://metrics-api.dimensions.ai https://badge.dimensions.ai; frame-src https://www.buymeacoffee.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'"
     Permissions-Policy = "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
+
+# Self-hosted Lato and React (audit 2026-10-24): these files were answered with "max-age=0, must-revalidate", so every visit
+# re-checked them. The Lato files never change under the same name. React is a pinned version; the path would change with it.
+[[headers]]
+  for = "/ccair/assets/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/ccair/vendor/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
 
 # Lab pages (2026-10-22). Each lab block sets a whole Content-Security-Policy: a block's value replaces the site-wide one
 # above, so a policy of only "frame-ancestors 'none'" would leave these pages with no script or object limits.
