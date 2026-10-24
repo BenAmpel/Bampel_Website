@@ -568,7 +568,9 @@
         else { st.holdMs += now() - st.holdAt; st.holdAt = null; if (voice) voice.resume(); b.textContent = ui.T('call_hold'); setInput(!busy); turn('resume'); }
       });
       document.getElementById('ph-typeform').addEventListener('submit', function (e) {
-        e.preventDefault(); var box = document.getElementById('ph-type'), v = box.value.trim(); if (!v || busy || st.holdAt != null) return;
+        e.preventDefault(); var box = document.getElementById('ph-type'), v = box.value.trim();
+        if (v && busy) { var w = document.getElementById('ph-interim'); if (w) w.textContent = 'Wait for the caller to answer before you reply.'; return; }   // said, not silently dropped
+        if (!v || busy || st.holdAt != null) return;
         box.value = ''; st.typed++; st.lastWasSpoken = false; say(v);
       });
       var talk = document.getElementById('ph-talk');
