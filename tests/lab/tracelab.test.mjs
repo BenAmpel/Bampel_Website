@@ -12,6 +12,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { keepRaw, trialRow } from '../../netlify/lib/lab/engine.mjs';
 import triage from '../../netlify/lib/lab/types/alert-triage.mjs';
+import { traceDq, dqColumns } from '../../netlify/lib/lab/quality.mjs';
 const here = p => fileURLToPath(new URL(p, import.meta.url));
 
 let clock = 0;
@@ -32,7 +33,7 @@ win.document = doc;
 vm.createContext(sandbox);
 vm.runInContext(readFileSync(here('../../static/lab/tracelab/tracelab.js'), 'utf8'), sandbox);
 const TraceLab = sandbox.window.TraceLab;
-assert.equal(TraceLab.VERSION, '0.2.0');
+assert.equal(TraceLab.VERSION, '0.3.0');
 
 const lab = TraceLab.create({ study: 't', mouseSampleMs: 50 }).start();
 const field = el('INPUT', 'name'), panel = el('DIV', 'panel', 'evidence'), clip = { tagName: 'AUDIO', id: 'clip', currentTime: 0, duration: 10, muted: false, volume: 1,
@@ -68,7 +69,7 @@ clip.played = ranges([[0, 2], [8, 10]]); clip.currentTime = 10; at(10000, doc, '
 clock = 14000;
 const f = lab.endItem({}).features;
 
-assert.equal(f.traceVersion, '0.2.0');
+assert.equal(f.traceVersion, '0.3.0');
 assert.equal(f.windowBlurs, 1, 'only the window itself losing focus counts');
 assert.equal(f.firstInteractionMs, 3000);
 // inputs at 3000, 3280 and 6000 (key presses), 9001-9100 (scrolling), 9200-9700 (pointer); the item ends at 14000
@@ -109,6 +110,34 @@ lab.beginItem('t2');
 assert.equal(lab.reopenItem([]), false, 'once the next item has started, the last one stays closed');
 console.log('a failed save reopens the item with its traces and raw events');
 
+// 0.3.0: scripted input. A script's events carry isTrusted false; the lab's pages only click buttons right after a real press.
+lab.endItem({}); clock = 30000; lab.beginItem('t3');
+const human = [0, 180, 420, 530, 900, 1010, 1300, 1620, 1700, 2050, 2190, 2600, 2700, 3010, 3400, 3480, 3900];   // uneven, as people type
+for (const ms of human) { at(30000 + ms, doc, 'keydown', { target: field, key: 'a', code: 'KeyA' }); at(30040 + ms, doc, 'keyup', { target: field, key: 'a', code: 'KeyA' }); }
+at(34000, doc, 'keydown', { target: field, key: 'Enter', code: 'Enter' }); at(34100, doc, 'click', { target: panel, isTrusted: false });   // the page clicks after a real key: fine
+const hf = lab.endItem({}).features;
+assert.equal(hf.untrustedInputs, 0); assert.equal(hf.unpressedClicks, 0, 'a page click right after a real key is not scripted');
+assert(hf.keyIntervalCv > 0.3, `human typing varies (${hf.keyIntervalCv})`); assert.equal(hf.keyIntervalCount, 16);
+clock = 40000; lab.beginItem('t4');
+for (let i = 0; i < 20; i++) at(40000 + i * 50, doc, 'keydown', { target: field, key: 'b', code: 'KeyB', isTrusted: false });   // a script typing every 50 ms
+at(42000, doc, 'input', { target: field, isTrusted: false }); at(45000, doc, 'click', { target: panel, isTrusted: false });           // and clicking with no press
+const bf = lab.endItem({}).features;
+assert.equal(bf.untrustedInputs, 21); assert.equal(bf.unpressedClicks, 1); assert.equal(bf.keyIntervalCv, 0, 'a fixed rate does not vary');
+assert(lab.events.some(e => e.type === 'scripted' && e.event === 'click'), 'scripted events are marked in the raw log');
+console.log('0.3.0: scripted input and click-without-press counted; typing variation measured');
+
+// the participant-level flags built from trials
+const humanTrials = Array.from({ length: 6 }, () => ({ traces: { ...hf, firstAnswerMs: 4200, durationMs: 9000, hiddenMs: 0 } }));
+const botTrials = Array.from({ length: 6 }, () => ({ traces: { ...bf, firstAnswerMs: 300, durationMs: 1200, hiddenMs: 600 } }));
+const hq = traceDq(humanTrials), bq = traceDq(botTrials);
+assert.deepEqual([hq.dq_scripted, hq.dq_even_typing, hq.dq_fast_answers, hq.dq_hidden_share], [0, 0, 0, 0], 'a person raises nothing');
+assert.deepEqual([bq.dq_scripted, bq.dq_scripted_events, bq.dq_even_typing, bq.dq_fast_answers, bq.dq_fast_answer_share, bq.dq_hidden_share], [1, 132, 1, 1, 1, 0.5]);
+assert.equal(traceDq(botTrials, 'reaction').dq_fast_answers, '', 'fast answers are the point of a reaction-time task');
+assert.deepEqual(Object.values(traceDq([{ traces: { durationMs: 5, firstAnswerMs: 2000 } }])).slice(0, 4), ['', '', '', ''], 'before 0.3.0: blank, not clean');
+assert.equal(dqColumns([], {}, null, botTrials).dq_flags, 3, 'scripted, even typing, fast answers');
+assert.equal(dqColumns([], {}, null, humanTrials).dq_flags, 0);
+console.log('dq: scripted input, machine-even typing and too-fast answers flag the participant; a person raises none');
+
 // the server keeps a long log by thinning pointer moves, and says how much it kept
 const long = Array.from({ length: 30000 }, (_, i) => ({ t: i, type: i % 10 ? 'move' : 'click', x: i, y: i }));
 const kept = keepRaw(long);
@@ -117,7 +146,7 @@ assert.equal(kept.filter(e => e.type === 'click').length, 3000, 'every non-move 
 assert.deepEqual(keepRaw([{ t: 1, type: 'click' }, null, 3]), [{ t: 1, type: 'click' }]);
 const S = { type: { trialRow: () => ({}) } };
 const row = trialRow(S, { code: 'X', session: 1, index: 0, data: { traces: f, raw: { sent: 10, kept: 9 } } }, null);
-assert.equal(row.trace_version, '0.2.0'); assert.equal(row.window_blurs, 1); assert.equal(row.key_interval_ms, 280); assert.equal(row.no_input_ms, f.noInputMs);
+assert.equal(row.trace_version, '0.3.0'); assert.equal(row.window_blurs, 1); assert.equal(row.key_interval_ms, 280); assert.equal(row.no_input_ms, f.noInputMs);
 assert.equal(row.raw_events, 9); assert.equal(row.raw_events_sent, 10); assert.equal(row.pointer_type, 'touch');
 const old = trialRow(S, { code: 'X', session: 1, index: 0, data: { traces: { durationMs: 5, windowBlurs: 4 } } }, null);
 assert.equal(old.trace_version, '0.1.0'); assert.equal(old.window_blurs, '', '0.1.0 counted field blurs: left blank'); assert.equal(old.key_interval_ms, '');
