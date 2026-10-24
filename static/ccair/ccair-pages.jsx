@@ -586,7 +586,11 @@ function AboutPage() {
         </div>
       </Section>
 
-      <Section id="governance" alt title="Governance">
+      <Section id="friends" alt title="Friends of CCAIR" intro="Labs and centers we collaborate with.">
+        <FriendsGrid />
+      </Section>
+
+      <Section id="governance" title="Governance">
         <div className="grid grid-4">
           {[
             { role: 'Center Director', desc: 'Sets research direction, primary liaison to funding agencies and university leadership.' },
@@ -599,7 +603,7 @@ function AboutPage() {
         </div>
       </Section>
 
-      <Section id="environment" title="Strategic environment" intro="CCAIR operates within Georgia State University's interdisciplinary R1 environment.">
+      <Section id="environment" alt title="Strategic environment" intro="CCAIR operates within Georgia State University's interdisciplinary R1 environment.">
         <div className="grid grid-4">
           {[
             { name: 'CHAI Center', desc: 'Collaborative Human-AI center with GSU and Duke University leadership.' },
@@ -612,10 +616,11 @@ function AboutPage() {
         </div>
       </Section>
 
-      <Section id="photo-credits" alt title="Photo credits"
+      <Section id="photo-credits" title="Photo credits"
         intro="The campus and skyline photos on this site show Georgia State's downtown campus and the Atlanta skyline. Each is used under the license shown. Photos under CC BY-SA stay under CC BY-SA after our cropping and resizing. The People page headshots are listed after them.">
         <Reveal><PhotoCredits /></Reveal>
         <Reveal><PeoplePhotoCredits /></Reveal>
+        <Reveal><FriendsLogoCredits /></Reveal>
       </Section>
     </div>
   );

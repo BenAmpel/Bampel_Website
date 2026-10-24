@@ -64,6 +64,25 @@ for (const f of fs.readdirSync(path.join(ccairDir, 'data'))) {
   if (hits.length) console.warn('CCAIR warning: %s looks like it holds internal notes:\n  %s', f, hits.join('\n  '));
 }
 
+// Friends of CCAIR: every entry needs a name, link, source page and retrieval date, and either a self-hosted logo (whose
+// size must match the file, so the page reserves the right space) or a text wordmark. SVG logos must carry no scripts or
+// external references, since the site's CSP serves images only from 'self'.
+function checkFriends() {
+  const list = JSON.parse(fs.readFileSync(path.join(ccairDir, 'data', 'friends.json'), 'utf8')).friends || [];
+  for (const f of list) {
+    for (const k of ['id', 'name', 'description', 'url', 'source', 'retrieved']) if (!f[k]) throw new Error(`friends.json: "${f.id || f.name}" needs ${k}`);
+    if (!f.logo) { if (!f.wordmark || !f.wordmark.name) throw new Error(`friends.json: "${f.id}" needs a logo or a wordmark`); continue; }
+    const file = path.join(ccairDir, 'assets', 'friends', f.logo.file);
+    if (!fs.existsSync(file)) throw new Error(`friends.json: missing file assets/friends/${f.logo.file}`);
+    if (!f.logo.alt || !f.logo.width || !f.logo.height) throw new Error(`friends.json: "${f.id}" logo needs alt, width and height`);
+    const buf = fs.readFileSync(file);
+    if (f.logo.file.endsWith('.png') && (buf.readUInt32BE(16) !== f.logo.width || buf.readUInt32BE(20) !== f.logo.height)) throw new Error(`friends.json: "${f.id}" width/height do not match ${f.logo.file}`);
+    if (f.logo.file.endsWith('.svg') && /<script|\bon\w+\s*=|(?:xlink:)?href\s*=\s*["'](?!#)|<foreignObject/i.test(buf.toString('utf8'))) throw new Error(`friends.json: ${f.logo.file} has scripts or external references`);
+  }
+  return list.length;
+}
+console.log('CCAIR friends: %d organizations checked', checkFriends());
+
 Promise.all(
   files.map((f) =>
     esbuild.build({

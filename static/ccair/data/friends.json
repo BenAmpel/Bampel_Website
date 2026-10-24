@@ -1,0 +1,49 @@
+{
+  "_about": "Friends of CCAIR (About page). A logo is used only as the organization publishes it on its own site, self-hosted unaltered under assets/friends/ (scaled in CSS, never recolored or cropped). An organization whose site shows no logo of its own gets a plain text wordmark (wordmark.name over wordmark.sub, in Lato, GSU Blue) instead; logo is then null.",
+  "friends": [
+    {
+      "id": "arizona-ai-lab",
+      "name": "Artificial Intelligence Laboratory, University of Arizona",
+      "description": "Founded and led by Regents' Professor Hsinchun Chen in the Eller College of Management.",
+      "url": "https://eller.arizona.edu/departments-research/centers-labs/artificial-intelligence",
+      "logo": null,
+      "wordmark": { "name": "Artificial Intelligence Lab", "sub": "University of Arizona" },
+      "logoNote": "The lab's site (ai.arizona.edu, which redirects to the Eller page) shows only the University of Arizona and Eller College marks and a photo banner, no lab logo.",
+      "source": "https://eller.arizona.edu/departments-research/centers-labs/artificial-intelligence",
+      "retrieved": "2026-10-24"
+    },
+    {
+      "id": "iu-dsail",
+      "name": "Data Science and Artificial Intelligence Lab (DSAIL), Indiana University",
+      "description": "Kelley School of Business lab building data science and AI-enabled analytics for societally relevant applications.",
+      "url": "https://dsail.kelley.iu.edu/",
+      "logo": null,
+      "wordmark": { "name": "DSAIL", "sub": "Kelley School of Business, Indiana University" },
+      "logoNote": "The lab's site uses the standard Indiana University web template with the IU trident only, no lab logo.",
+      "source": "https://dsail.kelley.iu.edu/",
+      "retrieved": "2026-10-24"
+    },
+    {
+      "id": "gsu-chai",
+      "name": "Collaborative Human-AI (CHAI) Center, Georgia State University",
+      "description": "Center of Excellence led by Georgia State with Duke University and the U.S. Army Research Laboratory.",
+      "url": "https://chai.gsu.edu/",
+      "logo": null,
+      "wordmark": { "name": "CHAI Center", "sub": "Collaborative Human-AI Center, Georgia State University" },
+      "logoNote": "The center's site shows only the Georgia State University mark (GSU units may not create their own logos), no CHAI logo or lockup.",
+      "source": "https://chai.gsu.edu/",
+      "retrieved": "2026-10-24"
+    },
+    {
+      "id": "gsu-cdin",
+      "name": "Center for Digital Innovation, Georgia State University",
+      "description": "Robinson College research center on using digital innovation to solve business and societal problems.",
+      "url": "https://www.cdin.net/",
+      "logo": { "file": "cdin-lockup.png", "type": "image/png", "width": 750, "height": 437, "alt": "Center for Digital Innovation logo" },
+      "logoNote": "Official Georgia State University / J. Mack Robinson College of Business lockup with the center's unit line, from the header of the center's site. Used unaltered with its built-in clear space; metadata stripped and recompressed losslessly.",
+      "source": "https://www.cdin.net/",
+      "imageUrl": "https://images.squarespace-cdn.com/content/v1/5887a45829687f87b3fc62db/89a7f17f-4edd-4af6-a7a7-1d4432d384d4/RCB-LOGO_CDIN_2-30perc.png",
+      "retrieved": "2026-10-24"
+    }
+  ]
+}

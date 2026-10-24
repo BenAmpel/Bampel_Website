@@ -525,6 +525,55 @@ function PhotoCredits() {
   );
 }
 
+/* Friends of CCAIR (About page), from data/friends.json. Each logo sits on a white tile in both color schemes, so a
+   dark-ink logo stays legible on the dark theme without altering the logo. Logos are shown exactly as the organization
+   publishes them (scaled to a common height in CSS); an organization with no logo of its own gets a plain text wordmark. */
+const FRIENDS_DIR = '/ccair/assets/friends/';
+
+function FriendTile({ f }) {
+  return (
+    <li className="friend">
+      <a className="friend-tile" href={f.url} target="_blank" rel="noopener">
+        {f.logo ? (
+          <img src={FRIENDS_DIR + f.logo.file} width={f.logo.width} height={f.logo.height} alt={f.logo.alt} loading="lazy" decoding="async" />
+        ) : (
+          <>
+            <span className="friend-wordmark" aria-hidden="true">
+              <span className="friend-wm-name">{f.wordmark.name}</span>
+              <span className="friend-wm-sub">{f.wordmark.sub}</span>
+            </span>
+            <span className="sr-only">{f.name}</span>
+          </>
+        )}
+        <span className="sr-only"> (opens in a new tab)</span>
+      </a>
+      {f.description && <p>{f.description}</p>}
+    </li>
+  );
+}
+
+function FriendsGrid() {
+  const { friends } = useData();
+  const list = (friends && friends.friends) || [];
+  if (!list.length) return null;
+  return <Reveal as="ul" className="friends">{list.map((f) => <FriendTile key={f.id} f={f} />)}</Reveal>;
+}
+
+function FriendsLogoCredits() {
+  const { friends } = useData();
+  const list = ((friends && friends.friends) || []).filter((f) => f.logo);
+  return (
+    <div className="people-credits">
+      <p>Logos are trademarks of their respective organizations and are used to identify collaborators.</p>
+      {list.length > 0 && (
+        <ul className="photo-credits">
+          {list.map((f) => <li key={f.id}>{f.logo.alt}, from <a href={f.source}>{f.source.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')}</a> (retrieved {f.retrieved}).</li>)}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 function CCAIRFooter() {
   return (
     <footer className="footer">
@@ -565,7 +614,7 @@ window.CCAIR = window.CCAIR || {};
 const CCAIR_COMPONENTS = {
   REDUCE_MOTION, CAN_OBSERVE, SCROLL_TIMELINE, NAV_PAGES, hrefFor, Icon, Arrow, useInView, Reveal, CountUp, useScrollFrame, CCAIRNav, Brand, Wordmark, OfficialLockup, PageHead, Section, Card, LinkCard,
   Tag, Status, Authors, PublicationItem, PersonCard, SegmentedControl, FinderFeature, CCAIRFooter, initialsOf,
-  usePhoto, Picture, PhotoCredit, PhotoBand, PhotoCredits, Avatar, PeoplePhotoCredits,
+  usePhoto, Picture, PhotoCredit, PhotoBand, PhotoCredits, Avatar, PeoplePhotoCredits, FriendsGrid, FriendsLogoCredits,
 };
 Object.assign(window.CCAIR, CCAIR_COMPONENTS);
 Object.assign(window, CCAIR_COMPONENTS);
