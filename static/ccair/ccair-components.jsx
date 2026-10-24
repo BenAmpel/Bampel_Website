@@ -1,7 +1,12 @@
 /* CCAIR Components — shared UI primitives. Styling lives in assets/ccair.css. */
 const { useState, useEffect, useRef } = React;
 
-const REDUCE_MOTION = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+// Follows the OS setting live: the other files read the global (window.REDUCE_MOTION), which is kept in step here.
+const REDUCE_MOTION_MQ = typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+let REDUCE_MOTION = !!(REDUCE_MOTION_MQ && REDUCE_MOTION_MQ.matches);
+if (REDUCE_MOTION_MQ && REDUCE_MOTION_MQ.addEventListener) {
+  REDUCE_MOTION_MQ.addEventListener('change', (e) => { REDUCE_MOTION = e.matches; window.REDUCE_MOTION = e.matches; window.CCAIR.REDUCE_MOTION = e.matches; });
+}
 
 const NAV_PAGES = [
   { id: 'research', label: 'Research' },
@@ -13,7 +18,7 @@ const NAV_PAGES = [
   { id: 'contact', label: 'Contact' },
 ];
 
-const hrefFor = (page) => (page === 'home' ? '#/' : '#/' + page);
+const hrefFor = (page) => (page === 'home' ? '/ccair/' : '/ccair/' + page + '/');
 
 /* Brand. GSU rules (commkit.gsu.edu): a center may not create its own logo; it uses the college sub-brand lockup with a
    unit wordmark, supplied by Public Relations & Marketing Communications. Until those files exist the site shows a
@@ -57,7 +62,7 @@ function Wordmark() {
 function Brand({ onDark }) {
   const cfg = useLockup();
   return (
-    <a className="brand" href="#/" aria-label={cfg ? cfg.alt + ', home' : undefined}>
+    <a className="brand" href="/ccair/" aria-label={cfg ? cfg.alt + ', home' : undefined}>
       {cfg ? <OfficialLockup cfg={cfg} onDark={onDark} /> : <Wordmark />}
     </a>
   );
@@ -144,17 +149,20 @@ function Reveal({ children, as = 'div', className = '', style, ...rest }) {
   return <Tag ref={ref} className={'reveal' + (visible ? ' is-in' : '') + (className ? ' ' + className : '')} style={s} {...rest}>{children}</Tag>;
 }
 
-// Counts a statistic up from zero the first time it is seen. Screen readers and crawlers get the real number from the
-// hidden copy; the visible digits are padded with figure spaces to the final width so the count shifts no layout.
+// Counts a statistic up from zero the first time it is seen. The real number is rendered first, so a snapshot taken
+// before the count runs (a crawler, a background tab) shows it; it drops to zero only in the count's first frame. Screen
+// readers get the number from the hidden copy; the visible digits are padded with figure spaces to the final width so
+// the count shifts no layout.
 function CountUp({ value }) {
   const ref = useRef(null);
   const n = Number(value) || 0;
-  const animate = !!revealWatcher && !REDUCE_MOTION && n > 1;
-  const [shown, setShown] = useState(animate ? 0 : n);
+  const [shown, setShown] = useState(n);
   useEffect(() => {
-    if (!animate) { setShown(n); return; }
+    if (!revealWatcher || REDUCE_MOTION || n <= 1) { setShown(n); return; }
     let raf = 0;
     const stop = revealWatcher.watch(ref.current, (delay) => {
+      if (REDUCE_MOTION) { setShown(n); return; }
+      // The first frame drops the number to zero; where frames never run (a background tab, a snapshot) it stays put.
       const t0 = performance.now() + delay + 200, dur = 1100;
       const tick = (now) => {
         const p = Math.min(1, Math.max(0, (now - t0) / dur));
@@ -239,7 +247,7 @@ function CCAIRNav({ currentPage }) {
         </ul>
         <a className="btn btn-primary btn-sm nav-cta" href="/ccair/pathways/">Career Finder</a>
         <button ref={btnRef} type="button" className="menu-btn" onClick={() => setOpen(!open)}
-          aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} aria-controls="ccair-menu">
+          aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} aria-controls={open ? 'ccair-menu' : undefined}>
           <Icon name={open ? 'close' : 'menu'} />
         </button>
       </nav>
@@ -248,7 +256,7 @@ function CCAIRNav({ currentPage }) {
       {open && (
         <div id="ccair-menu" className="sheet" ref={sheetRef} onClick={(e) => { if (e.target.closest('a')) setOpen(false); }}>
           <ul>
-            <li><a href="#/" aria-current={currentPage === 'home' ? 'page' : undefined}>Home</a></li>
+            <li><a href="/ccair/" aria-current={currentPage === 'home' ? 'page' : undefined}>Home</a></li>
             {NAV_PAGES.map((p) => (
               <li key={p.id}><a href={hrefFor(p.id)} aria-current={currentPage === p.id ? 'page' : undefined}>{p.label}</a></li>
             ))}
@@ -277,7 +285,7 @@ function PageHead({ eyebrow, title, lede, photo: slot, children }) {
   return (
     <header className="photo-hero page-hero">
       <div className="hero-stage">
-        <div className="hero-photo"><Picture photo={photo} sizes="100vw" priority /></div>
+        <div className="hero-photo"><Picture photo={photo} sizes="100vw" priority decorative /></div>
         <div className="page-head wrap">{head}</div>
         <p className="photo-credit hero-credit"><PhotoCredit photo={photo} /></p>
       </div>
@@ -334,6 +342,7 @@ function Status({ status }) {
 
 // Bold the center director's name in an author list ("Ampel, B.M." or "B. Ampel").
 function Authors({ text }) {
+  if (!text) return null;
   const parts = String(text).split(/(Ampel, B\.\s?M\.|B\.\s?M?\.? ?Ampel)/);
   return <p className="authors">{parts.map((p, i) => (i % 2 ? <strong key={i}>{p}</strong> : p))}</p>;
 }
@@ -378,7 +387,7 @@ const PublicationItem = React.memo(function PublicationItem({ title, authors, ve
 });
 
 function initialsOf(name) {
-  return name.split(/\s+/).filter(Boolean).map((w) => w[0]).filter((c) => /[A-Z]/.test(c)).join('').slice(0, 2);
+  return String(name || '').split(/\s+/).filter(Boolean).map((w) => w[0]).filter((c) => /[A-Z]/.test(c)).join('').slice(0, 2);
 }
 
 /* ---------- People ----------
@@ -423,12 +432,13 @@ function PeoplePhotoCredits() {
   );
 }
 
-function PersonCard({ name, role, meta, note, warm, photo }) {
+function PersonCard({ name, role, meta, note, warm, photo, headingLevel = 3 }) {
+  const H = 'h' + headingLevel;
   return (
     <Card className="person">
       <Avatar name={name} photo={photo} warm={warm} />
       <div>
-        <h3>{name}</h3>
+        <H>{name}</H>
         {role && <div className="role">{role}</div>}
         {meta && <div className="meta">{meta}</div>}
         {note && <p>{note}</p>}
@@ -437,9 +447,9 @@ function PersonCard({ name, role, meta, note, warm, photo }) {
   );
 }
 
-function SegmentedControl({ label, options, value, onChange }) {
+function SegmentedControl({ label, options, value, onChange, className }) {
   return (
-    <div className="segmented" role="group" aria-label={label}>
+    <div className={'segmented' + (className ? ' ' + className : '')} role="group" aria-label={label}>
       {options.map((o) => (
         <button key={o.value} type="button" aria-pressed={value === o.value} onClick={() => onChange(o.value)}>{o.label}</button>
       ))}
@@ -455,7 +465,7 @@ function FinderFeature({ headingLevel = 2, titleId }) {
         <div className="feature-meta"><span className="tag tag-workshop">Free</span><span className="tag">5 minutes</span><span className="tag">Nothing stored</span></div>
         <H id={titleId}>Not sure where you fit in cybersecurity?</H>
         <p>The Cyber Career Pathway Finder is a plain-language quiz built on the NIST NICE Workforce Framework. It ranks
-          14 cybersecurity roles by your interests and shows the realistic first job, starter certifications, free practice
+          14 cybersecurity roles by your interests and shows the realistic first job, starter certifications, free practice,
           and US pay for each.</p>
       </div>
       <div className="actions">
@@ -479,7 +489,9 @@ function usePhoto(slot) {
   return ((photos && photos.photos) || []).find((p) => p.slot === slot) || null;
 }
 // priority: the hero image, fetched eagerly and first; everything else loads lazily.
-function Picture({ photo, sizes, priority }) {
+// decorative: a background under a scrim, where the heading carries the meaning (alt=""); the visible credit and the
+// About page credits keep the description.
+function Picture({ photo, sizes, priority, decorative }) {
   const m = photo.mobile;
   const fb = photo.fallbackWidths || photo.widths;
   const style = { '--focal': photo.focal || '50% 50%' };
@@ -492,7 +504,7 @@ function Picture({ photo, sizes, priority }) {
       <source type="image/avif" srcSet={photoSrcset(photo.base, photo.widths, 'avif')} sizes={sizes} />
       <source type="image/webp" srcSet={photoSrcset(photo.base, photo.widths, 'webp')} sizes={sizes} />
       <img src={`${PHOTO_DIR}${photo.base}-${fb[fb.length - 1]}.jpg`} srcSet={photoSrcset(photo.base, fb, 'jpg')} sizes={sizes}
-        width={photo.width} height={photo.height} alt={photo.alt} style={style} decoding="async"
+        width={photo.width} height={photo.height} alt={decorative ? '' : photo.alt} style={style} decoding="async"
         loading={priority ? 'eager' : 'lazy'} fetchpriority={priority ? 'high' : undefined} />
     </picture>
   );
@@ -502,18 +514,6 @@ function PhotoCredit({ photo }) {
   const c = photo.credit || {};
   const who = c.sourceUrl ? <a href={c.sourceUrl}>{c.author}</a> : c.author;
   return <>Photo: {who}{c.license && <> / {c.licenseUrl ? <a href={c.licenseUrl} rel="license">{c.license}</a> : c.license}</>}</>;
-}
-const BAND_SIZES = '(min-width: 1200px) 1120px, calc(100vw - 32px)';
-// A wide photo between a page's heading and its first section. Renders nothing when the slot is empty.
-function PhotoBand({ slot }) {
-  const photo = usePhoto(slot);
-  if (!photo) return null;
-  return (
-    <Reveal as="figure" className="photo-band wrap">
-      <div className="photo-frame"><Picture photo={photo} sizes={BAND_SIZES} /></div>
-      <figcaption className="photo-credit"><PhotoCredit photo={photo} /></figcaption>
-    </Reveal>
-  );
 }
 // Full attribution for every photo (title, author, license, source, changes), for the About page.
 function PhotoCredits() {
@@ -596,7 +596,7 @@ function CCAIRFooter() {
             <Brand onDark />
             <address className="contact-lines">
               J. Mack Robinson College of Business, Georgia State University<br />
-              55 Park Place NW, Atlanta, GA 30303<br />
+              55 Park Place NE, Atlanta, GA 30303<br />
               <a href="mailto:bampel@gsu.edu">bampel@gsu.edu</a>
             </address>
           </div>
@@ -627,7 +627,7 @@ window.CCAIR = window.CCAIR || {};
 const CCAIR_COMPONENTS = {
   REDUCE_MOTION, CAN_OBSERVE, SCROLL_TIMELINE, NAV_PAGES, hrefFor, Icon, Arrow, useInView, Reveal, CountUp, useScrollFrame, CCAIRNav, Brand, Wordmark, OfficialLockup, PageHead, Section, Card, LinkCard,
   Tag, Status, Authors, PublicationItem, PersonCard, SegmentedControl, FinderFeature, CCAIRFooter, initialsOf,
-  usePhoto, Picture, PhotoCredit, PhotoBand, PhotoCredits, Avatar, PeoplePhotoCredits, FriendsGrid, FriendsLogoCredits,
+  usePhoto, Picture, PhotoCredit, PhotoCredits, Avatar, PeoplePhotoCredits, FriendsGrid, FriendsLogoCredits,
 };
 Object.assign(window.CCAIR, CCAIR_COMPONENTS);
 Object.assign(window, CCAIR_COMPONENTS);

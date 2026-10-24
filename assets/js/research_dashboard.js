@@ -153,7 +153,7 @@
       loadStyleOnce(buildUrl("vendor/leaflet-markercluster/MarkerCluster.Default.css")),
     ]).then(() =>
       Promise.all([
-        loadScriptOnce(buildUrl("vendor/echarts/echarts.min.js"), () => window.echarts),
+        loadScriptOnce(buildUrl("vendor/echarts/5.4.3/echarts.custom.min.js"), () => window.echarts), // trimmed build: scripts/build-echarts.mjs
         loadScriptOnce(buildUrl("vendor/leaflet/leaflet.js"), () => window.L),
       ]).then(() =>
         loadScriptOnce(
@@ -1264,21 +1264,25 @@
       .catch((error) => console.error("Dashboard Error:", error));
   }
 
+  // ECharts, Leaflet and the payload load only when the dashboard is about to be seen: on opening its section, or, when
+  // the section starts open, once the dashboard comes within 300 px of the viewport (it sits below the funding table).
+  function whenNearViewport(callback) {
+    if (!("IntersectionObserver" in window)) { callback(); return; }
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        observer.disconnect();
+        callback();
+      }
+    }, { rootMargin: "300px 0px" });
+    observer.observe(wrapper);
+  }
   const dashboardDetails = wrapper.closest("details");
   if (dashboardDetails) {
     dashboardDetails.addEventListener("toggle", () => {
       if (dashboardDetails.open) initDashboard();
     });
-    if (dashboardDetails.open) initDashboard();
-  } else if ("IntersectionObserver" in window) {
-    const observer = new IntersectionObserver((entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) {
-        initDashboard();
-        observer.disconnect();
-      }
-    });
-    observer.observe(wrapper);
+    if (dashboardDetails.open) whenNearViewport(initDashboard);
   } else {
-    initDashboard();
+    whenNearViewport(initDashboard);
   }
 })();

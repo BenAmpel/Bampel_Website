@@ -3,19 +3,19 @@ const { createContext, useContext, useState: useDataState, useEffect: useDataEff
 
 const DataCtx = createContext(null);
 // Load status for DataGate. The shell (nav, footer) renders at once; only the page area waits for the data.
-const DataStatusCtx = createContext({ loading: true, error: null });
+const DataStatusCtx = createContext({ loading: true, error: null, partial: false });
 
 const DATA_FILES = {
-  publications: 'data/publications.json',
-  people: 'data/people.json',
-  resources: 'data/resources.json',
-  funding: 'data/funding.json',
-  courses: 'data/courses.json',
-  news: 'data/news.json',
-  materials: 'data/materials.json',
-  paperPages: 'data/paper-pages.json',
-  photos: 'data/photos.json',
-  friends: 'data/friends.json',
+  publications: '/ccair/data/publications.json',
+  people: '/ccair/data/people.json',
+  resources: '/ccair/data/resources.json',
+  funding: '/ccair/data/funding.json',
+  courses: '/ccair/data/courses.json',
+  news: '/ccair/data/news.json',
+  materials: '/ccair/data/materials.json',
+  paperPages: '/ccair/data/paper-pages.json',
+  photos: '/ccair/data/photos.json',
+  friends: '/ccair/data/friends.json',
 };
 // What a page gets when its file fails to load, so one failed fetch empties one section instead of the whole site.
 // paper-pages.json is generated at build time (scripts/build-ccair.js); the site still works if it is missing.
@@ -25,7 +25,7 @@ const FALLBACKS = {
 };
 
 function DataProvider({ children }) {
-  const [state, setState] = useDataState({ data: null, loading: true, error: null });
+  const [state, setState] = useDataState({ data: null, loading: true, error: null, partial: false });
 
   useDataEffect(() => {
     const entries = Object.entries(DATA_FILES);
@@ -45,11 +45,11 @@ function DataProvider({ children }) {
         if (failed.length) console.warn('CCAIR data:', failed.join('; '));
         // Only show the error screen when nothing loaded at all.
         if (failed.length === entries.length) setState({ data: null, loading: false, error: failed[0] });
-        else setState({ data, loading: false, error: null });
+        else setState({ data, loading: false, error: null, partial: failed.length > 0 });
       });
   }, []);
 
-  const status = React.useMemo(() => ({ loading: state.loading, error: state.error }), [state.loading, state.error]);
+  const status = React.useMemo(() => ({ loading: state.loading, error: state.error, partial: state.partial }), [state.loading, state.error, state.partial]);
   return (
     <DataStatusCtx.Provider value={status}>
       <DataCtx.Provider value={state.data}>{children}</DataCtx.Provider>
@@ -59,7 +59,7 @@ function DataProvider({ children }) {
 
 // Wrap the page area in this. Anything outside it (nav, footer) renders before the data arrives.
 function DataGate({ children }) {
-  const { loading, error } = useContext(DataStatusCtx);
+  const { loading, error, partial } = useContext(DataStatusCtx);
   if (loading) {
     return (
       <div className="state" role="status">
@@ -81,6 +81,18 @@ function DataGate({ children }) {
           </button>
         </div>
       </div>
+    );
+  }
+  // Some files failed: the page still renders from the fallbacks, but says so instead of showing empty sections silently.
+  if (partial) {
+    return (
+      <>
+        <div className="data-notice wrap" role="status">
+          <p>Some content did not load.</p>
+          <button type="button" className="btn btn-secondary btn-sm" onClick={() => window.location.reload()}>Reload the page</button>
+        </div>
+        {children}
+      </>
     );
   }
   return children;

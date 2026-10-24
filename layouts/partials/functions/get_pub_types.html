@@ -1,0 +1,7 @@
+{{/* Shadowed from Wowchemy v5 for Hugo 0.168: site.Data -> hugo.Data */}}
+{{/* Get Publication Types */}}
+{{ $pub_types := slice }}
+{{ range hugo.Data.publication_types.types }}
+  {{ $pub_types = $pub_types | append (i18n . | default "Uncategorized") }}
+{{ end }}
+{{ return $pub_types }}

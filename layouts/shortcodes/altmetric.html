@@ -1,7 +1,9 @@
 {{/* Altmetric Badge Shortcode - Usage: {{< altmetric doi="10.xxxx/xxxxx" >}} */}}
 {{ $doi := .Get "doi" }}
 {{ if $doi }}
-<div class="altmetric-badge-section" style="margin: 30px 0; padding: 20px; background: #f5f5f5; border-radius: 12px; border: 1px solid #ddd;">
+{{/* The box starts hidden: the Altmetric donut is a "?" placeholder until the API answers, and stays "?" when it has no record
+   for the DOI. The script below shows the box once the donut carries a score. */}}
+<div class="altmetric-badge-section" hidden style="margin: 30px 0; padding: 20px; background: #f5f5f5; border-radius: 12px; border: 1px solid #ddd;">
   <style>
     .dark .altmetric-badge-section {
       background: rgba(10,10,10,0.6) !important;
@@ -19,28 +21,5 @@
     </div>
   </div>
 </div>
-<script type="text/javascript">
-(function() {
-  function initBadge() {
-    if (typeof _altmetric_embed_init === 'function') {
-      _altmetric_embed_init();
-    } else {
-      // Load the script if not present
-      var s = document.createElement('script');
-      s.src = 'https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js';
-      s.onload = function() {
-        if (typeof _altmetric_embed_init === 'function') _altmetric_embed_init();
-      };
-      document.head.appendChild(s);
-    }
-  }
-  if (document.readyState === 'complete') {
-    initBadge();
-  } else {
-    window.addEventListener('load', initBadge);
-  }
-  setTimeout(initBadge, 1000);
-  setTimeout(initBadge, 3000);
-})();
-</script>
+{{ if not (.Page.Store.Get "js_altmetric_badge") }}{{ .Page.Store.Set "js_altmetric_badge" true }}{{ with resources.Get "js/widgets/altmetric-badge.js" | minify | fingerprint }}<script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" defer></script>{{ end }}{{ end }}
 {{ end }}

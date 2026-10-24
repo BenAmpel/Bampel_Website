@@ -46,6 +46,7 @@ url_pdf: https://www.researchgate.net/profile/Benjamin-Ampel/publication/3704929
 # To use, add an image named `featured.jpg/png` to your page's folder. 
 image:
   caption: 'Replication Results'
+  alt_text: 'Path model of the replication results: social information consumption on a social networking site predicts envy (0.184), which predicts lower cognitive (-0.323) and affective (-0.511) well-being and more self-enhancement (0.169). Consumption also predicts self-enhancement directly (0.208); its direct paths to well-being are not significant.'
   focal_point: ""
   preview_only: false
 

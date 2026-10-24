@@ -4,9 +4,12 @@
   # "scheduled" build hook (~/.purplelink/bin/netlify-batch-build.sh); hook builds are never skipped by this line.
   ignore = "git log -1 --format=%B | grep -qF '[deploy now]' && exit 1 || exit 0"
   # scripts/lab/build-info.mjs writes the commit being built (COMMIT_REF) into the lab functions, which cannot read it at run time.
+  # Dart Sass (Hugo deprecated its built-in libsass in v0.153): the pinned release is downloaded, checked against
+  # DART_SASS_SHA256 and unpacked to /tmp, outside the published folder. Hugo finds the `sass` binary on PATH.
+  # npm ci installs exactly what package-lock.json pins (and fails if package.json disagrees with it).
   # Two Hugo passes: the first only writes hugo_stats.json (every tag, class and id on the rendered pages) into a scratch folder;
   # the second removes unused rules from css/wowchemy.css with PostCSS and PurgeCSS (postcss.config.js) and writes the site.
-  command = "npm install && node scripts/lab/build-info.mjs && npm run build:ccair && hugo --gc --minify --destination \"$(mktemp -d)\" && WC_PURGE_CSS=true hugo --gc --minify --ignoreCache"
+  command = "curl -sSfL -o /tmp/dart-sass.tar.gz https://github.com/sass/dart-sass/releases/download/${DART_SASS_VERSION}/dart-sass-${DART_SASS_VERSION}-linux-x64.tar.gz && printf '%s  %s\\n' ${DART_SASS_SHA256} /tmp/dart-sass.tar.gz | sha256sum -c - && tar -xzf /tmp/dart-sass.tar.gz -C /tmp && export PATH=/tmp/dart-sass:$PATH && npm ci && node scripts/lab/build-info.mjs && npm run build:ccair && hugo --gc --minify --destination \"$(mktemp -d)\" && WC_PURGE_CSS=true hugo --gc --minify --ignoreCache"
   publish = "public"
 
 # Site-wide security headers (added 2026-10-16). HSTS, nosniff and Referrer-Policy come from the _headers file that the
@@ -25,28 +28,44 @@
 # pages it serves; tests/lab/headers.test.mjs checks the lab blocks. Keep each value on one line, in double quotes.
 #
 # Why each source is listed (inventory taken by loading every page in the sitemap plus /care/ and /lab/ in headless Chrome):
-#   script-src  'unsafe-inline': the theme hooks (layouts/partials/hooks), the shortcodes and the JSON-LD blocks use inline <script>.
-#               www.googletagmanager.com (gtag), cdn.jsdelivr.net (tsparticles, typed.js, Fuse, mark.js), d1bxh8uas1mnw7.cloudfront.net
+#   script-src  no 'unsafe-inline' (2026-10-24): every script is a file. Shortcode and hook scripts live in assets/js and load
+#               fingerprinted with integrity; stylesheets that load late use data-swap + js/css-swap.js instead of onload=.
+#               JSON-LD blocks are data, not scripts, so the policy does not apply to them.
+#               www.googletagmanager.com (gtag; fonts, Fuse, mark.js and academicons are self-hosted under /fonts/
+#               and /vendor/ since 2026-10-24, and Netlify CMS at /admin/ was retired, so jsDelivr is no longer needed), d1bxh8uas1mnw7.cloudfront.net
 #               and embed.altmetric.com and api.altmetric.com (Altmetric badges, JSONP), badge.dimensions.ai (Dimensions badges),
-#               cdnjs.buymeacoffee.com (support widget), identity.netlify.com (Netlify Identity widget the theme loads on the home page).
+#               cdnjs.buymeacoffee.com (support widget).
 #               (React for /ccair/ is served from /ccair/vendor/, so unpkg.com is no longer allowed.)
 #   style-src   'unsafe-inline': inline <style> blocks and style="" attributes in the same hooks and shortcodes.
-#               fonts.googleapis.com (Google Fonts), cdn.jsdelivr.net (academicons), badge.dimensions.ai, embed.altmetric.com.
-#   font-src    data: (icon fonts embedded in the Altmetric and Dimensions badge CSS), fonts.gstatic.com (Google Fonts files), cdn.jsdelivr.net (academicons font).
+#               badge.dimensions.ai, embed.altmetric.com (badge CSS). Fonts and academicons are self-hosted.
+#   font-src    'self' (self-hosted Google Fonts and academicons) and data: (icon fonts embedded in the badge CSS).
 #   img-src     data: and blob: (inline icons, map and chart canvases), Altmetric badge images, the Buy Me a Coffee widget image,
 #               ArcGIS map tiles (Leaflet visitor map), and the Google Analytics and Tag Manager pixels.
 #   connect-src Google Analytics collect endpoints, Altmetric and Dimensions metric APIs.
 #   frame-src   www.buymeacoffee.com (the support widget iframe).
 # Not allowed: any other origin, object/embed, framing of this site by anyone, a changed <base>, form posts to other sites.
+# upgrade-insecure-requests: nothing on these pages loads over http:// (checked in the build output, 2026-10-24); the directive
+# makes the browser fetch any http:// subresource that slips in later over https:// instead.
 [[headers]]
   for = "/*"
   [headers.values]
     X-Frame-Options = "DENY"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://cdn.jsdelivr.net https://d1bxh8uas1mnw7.cloudfront.net https://embed.altmetric.com https://api.altmetric.com https://badge.dimensions.ai https://cdnjs.buymeacoffee.com https://identity.netlify.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://badge.dimensions.ai https://embed.altmetric.com; font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://badges.altmetric.com https://cdn.altmetric.com https://cdn.buymeacoffee.com https://server.arcgisonline.com https://www.googletagmanager.com https://www.google-analytics.com; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://api.altmetric.com https://metrics-api.dimensions.ai https://badge.dimensions.ai; frame-src https://www.buymeacoffee.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'"
+    # Pages opened from this site in a new tab, or that open it, cannot reach back into its window object.
+    Cross-Origin-Opener-Policy = "same-origin"
+    # Speculation rules (static/speculation-rules.json): Chrome and Edge prefetch a same-site page when the pointer rests on a
+    # link to it, so the next page opens almost at once. Prefetch only (no prerender, so no page script runs early); the
+    # lab and file downloads are excluded. Sent as a header so the CSP needs no inline script.
+    Speculation-Rules = "\"/speculation-rules.json\""
+    Content-Security-Policy = "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://d1bxh8uas1mnw7.cloudfront.net https://embed.altmetric.com https://api.altmetric.com https://badge.dimensions.ai https://cdnjs.buymeacoffee.com; style-src 'self' 'unsafe-inline' https://badge.dimensions.ai https://embed.altmetric.com; font-src 'self' data:; img-src 'self' data: blob: https://badges.altmetric.com https://cdn.altmetric.com https://cdn.buymeacoffee.com https://server.arcgisonline.com https://www.googletagmanager.com https://www.google-analytics.com; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://api.altmetric.com https://metrics-api.dimensions.ai https://badge.dimensions.ai; frame-src https://www.buymeacoffee.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
     Permissions-Policy = "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
 
 # Self-hosted Lato and React (audit 2026-10-24): these files were answered with "max-age=0, must-revalidate", so every visit
 # re-checked them. The Lato files never change under the same name. React is a pinned version; the path would change with it.
+[[headers]]
+  for = "/speculation-rules.json"
+  [headers.values]
+    Content-Type = "application/speculationrules+json"
+
 [[headers]]
   for = "/ccair/assets/fonts/*"
   [headers.values]
@@ -57,12 +76,140 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
+# Hugo Pipes bundles (2026-10-24). The production build puts a content hash in each of these names (the theme's md5 or
+# sha256 fingerprint), so a changed file always gets a new name and the old one can be cached for a year. Only these
+# fingerprinted names are listed: /js/*.js used to hold unhashed site scripts (now in /js/site/, fingerprinted) that kept the
+# default revalidation, as do images, data and PDFs.
+[[headers]]
+  for = "/css/wowchemy.*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/css/vendor-bundle.min.*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/css/head-inline.min.*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/css/prestige-polish.min.*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/css/body-end.min.*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/css/research_dashboard.min.*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/js/vendor-bundle.min.*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/js/wowchemy-init.min.*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/js/wowchemy-headroom.*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/js/head-enhancements.min.*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/js/body-end.min.*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/js/research_dashboard.min.*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/en/js/wowchemy.min.*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Fingerprinted site scripts and widget styles (2026-10-24): everything under /js/site/, /js/widgets/ and /css/widgets/
+# is written by layouts/partials/functions/js_tag.html, css_tag.html or a fingerprinting resources.Get, so every name
+# there carries its content hash. The self-hosted Google Fonts files are named by hash (fonts.css itself is not, and is
+# not matched). Vendored libraries live in version-numbered folders, so an update changes the path.
+[[headers]]
+  for = "/js/site/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/js/widgets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/css/widgets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/js/ga-init.min.*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/js/css-swap.min.*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/fonts/google/*.woff2"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/vendor/fuse/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/vendor/mark/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/vendor/academicons/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/data/home-footprint.min.*.json"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/vendor/echarts/5.4.3/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
 # Lab pages (2026-10-22). Each lab block sets a whole Content-Security-Policy: a block's value replaces the site-wide one
 # above, so a policy of only "frame-ancestors 'none'" would leave these pages with no script or object limits.
 # Inventory (every page under static/lab and the scripts it loads, checked in headless Chrome with zero "Refused to" errors):
 #   script-src  'self' only: every lab page loads its scripts from /lab/ (participant.js adds the study type's script and
-#               logic.js, also from /lab/). No inline <script>, no inline event handlers, no eval. The one exception is the
-#               TraceLab demo (/lab/studies/demo-phishing/), which has an inline script and its own block below.
+#               logic.js, also from /lab/). No inline <script>, no inline event handlers, no eval (the TraceLab demo's script
+#               moved to demo.js on 2026-10-24, so it needs no block of its own).
 #   style-src   'unsafe-inline': the pages build their HTML with style="" attributes. Stylesheets are all under /lab/.
 #   img-src, media-src  https: because a study's images, audio and video may be any https:// address (the content checks in
 #               netlify/lib/lab/types allow that); blob: for media preloaded before a session and for voice recordings played
@@ -81,11 +228,6 @@
     Permissions-Policy = "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(self), payment=(), usb=(), autoplay=(self), fullscreen=(self)"
     X-Robots-Tag = "noindex"
     Referrer-Policy = "same-origin"
-
-[[headers]]
-  for = "/lab/studies/demo-phishing/*"
-  [headers.values]
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; connect-src 'self' https:; font-src 'self'; frame-src 'none'; worker-src 'none'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'"
 
 [[headers]]
   for = "/lab/studies/*/admin.html"
@@ -156,7 +298,11 @@
   status = 200
 
 [build.environment]
-  HUGO_VERSION = "0.148.2"
+  # Hugo 0.168 (Oct 2026). The theme (Wowchemy v5, Aug 2023) is frozen; layouts/ shadows the theme files that used
+  # functions newer Hugo removed or deprecated (each shadow starts with a "Shadowed from" note).
+  HUGO_VERSION = "0.168.0"
+  DART_SASS_VERSION = "1.106.1"
+  DART_SASS_SHA256 = "ad99cccb90de4ad2926e03e32d819c83baf32c3dbff56da92df0eed10e604d60"
   HUGO_ENV = "production"
   HUGO_ENABLEGITINFO = "true"
   NODE_VERSION = "22"

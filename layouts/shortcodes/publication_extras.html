@@ -7,22 +7,9 @@
 {{ $currentUrl := $page.RelPermalink }}
 {{ if not (hasSuffix $currentUrl "/") }}{{ $currentUrl = printf "%s/" $currentUrl }}{{ end }}
 
-{{ $abstract := $page.Params.abstract | default "" }}
-{{ $abstractClean := replaceRE "\\r|\\n" " " $abstract | replaceRE "\\s+" " " | trim " " }}
-
+{{/* Key contributions come only from key_contributions front matter. (An older fallback that split the abstract into
+   sentences never produced output, and background sentences are not contributions.) */}}
 {{ $contribs := $page.Params.key_contributions }}
-{{ if not $contribs }}
-  {{ $scratch := newScratch }}
-  {{ $scratch.Set "auto" (slice) }}
-  {{ $sentences := split $abstractClean "." }}
-  {{ range $sentences }}
-    {{ $s := trim . " " }}
-    {{ if gt (len $s) 30 }}
-      {{ $scratch.Set "auto" (append ($scratch.Get "auto") (printf "%s." $s)) }}
-    {{ end }}
-  {{ end }}
-  {{ $contribs = first 3 ($scratch.Get "auto") }}
-{{ end }}
 
 {{ $authors := slice }}
 {{ range $page.Params.authors }}
@@ -48,11 +35,9 @@
   {{ if ne . "" }}{{ $doi = . }}{{ end }}
 {{ end }}
 
-{{ $pubData := .Site.Data.publications }}
-{{ if isSet $pubData 0 }}
-{{ else if isSet $pubData "individualPublications" }}
-  {{ $pubData = $pubData.individualPublications }}
-{{ end }}
+{{/* static/data/publications.json is the catalog the Scholar workflow keeps current (the browser scripts fetch it too). */}}
+{{ $pubData := os.ReadFile "static/data/publications.json" | transform.Unmarshal }}
+{{ if reflect.IsMap $pubData }}{{ $pubData = $pubData.individualPublications | default slice }}{{ end }}
 
 {{ $current := dict }}
 {{ range $pubData }}
@@ -62,7 +47,6 @@
 {{ end }}
 
 {{ $currentTitle := $page.Title | default $current.title }}
-{{ $currentVenue := $current.venue | default $venuePlain }}
 {{ $currentType := $current.type | default "" }}
 
 {{ $bibEntryType := "misc" }}
@@ -72,6 +56,10 @@
   {{ $bibEntryType = "inproceedings" }}
 {{ end }}
 {{ $bibVenueField := cond (eq $bibEntryType "article") "journal" "booktitle" }}
+{{/* Citation venue: the catalog's journal name (e.g. "MIS Quarterly"); for proceedings the full title from front matter,
+   since the catalog only has a short name ("ICIS"). */}}
+{{ $currentVenue := $venuePlain | default $current.venue }}
+{{ if eq $bibEntryType "article" }}{{ $currentVenue = $current.venue | default $venuePlain }}{{ end }}
 
 {{/* ---------- Cite box: APA 7 and Chicago author-date ----------
   Names: "Benjamin M. Ampel" -> APA "Ampel, B. M.", Chicago (first author) "Ampel, Benjamin M.". Suffixes (Jr., Sr., II-IV)
@@ -233,7 +221,7 @@
 {{ range $pubData }}
   {{ if ne .url $currentUrl }}
     {{ $score := 0 }}
-    {{ if and $currentVenue (eq .venue $currentVenue) }}{{ $score = add $score 3 }}{{ end }}
+    {{ if and $current.venue (eq .venue $current.venue) }}{{ $score = add $score 3 }}{{ end }}
     {{ if and $currentType (eq .type $currentType) }}{{ $score = add $score 2 }}{{ end }}
     {{ $tokens := slice }}
     {{ $cleanCandidate := replaceRE "[^a-z0-9 ]" "" (lower .title) }}
@@ -254,22 +242,20 @@
   {{ with $page.Params.plain_summary }}
   <div class="pub-plain" role="note" aria-label="Plain-language summary">
     <span class="pub-plain-tag">In Plain Terms</span>
-    <p>{{ . }}</p>
+    <p>{{ . | markdownify }}</p>
   </div>
   {{ end }}
   <div class="pub-extras-grid">
+    {{ with $contribs }}
     <div class="pub-extras-card">
       <h3>Key Contributions</h3>
-      {{ if $contribs }}
-        <ul>
-          {{ range $contribs }}
-            <li>{{ . }}</li>
-          {{ end }}
-        </ul>
-      {{ else }}
-        <p class="pub-muted">Key contributions will be added soon.</p>
-      {{ end }}
+      <ul>
+        {{ range . }}
+          <li>{{ . }}</li>
+        {{ end }}
+      </ul>
     </div>
+    {{ end }}
 
     <div class="pub-extras-card">
       <h3>Artifacts</h3>
@@ -296,22 +282,20 @@
       {{ end }}
     </div>
 
+    {{ if gt (len $related) 0 }}
     <div class="pub-extras-card">
       <h3>Related Papers</h3>
-      {{ if gt (len $related) 0 }}
-        <ul class="pub-related">
-          {{ range first 3 $related }}
-            {{ $item := .item }}
-            <li>
-              <a href="{{ $item.url | relURL }}">{{ $item.title }}</a>
-              <span>{{ $item.year }} · {{ $item.venue }}</span>
-            </li>
-          {{ end }}
-        </ul>
-      {{ else }}
-        <p class="pub-muted">Related papers will appear as the catalog grows.</p>
-      {{ end }}
+      <ul class="pub-related">
+        {{ range first 3 $related }}
+          {{ $item := .item }}
+          <li>
+            <a href="{{ $item.url | relURL }}">{{ $item.title }}</a>
+            <span>{{ $item.year }} · {{ $item.venue }}</span>
+          </li>
+        {{ end }}
+      </ul>
     </div>
+    {{ end }}
 
     <div class="pub-extras-card">
       <h3>Cite this</h3>
@@ -331,37 +315,4 @@
   </div>
 </div>
 
-<style>
-.pub-extras { margin-top: 2rem; }
-.pub-plain { position:relative; border:1px solid rgba(0,229,255,0.35); border-left:4px solid var(--clr-cyan, #00e5ff); border-radius:14px; padding:16px 18px 14px; margin-bottom:18px; background:linear-gradient(180deg, rgba(0,229,255,0.10), rgba(0,229,255,0.04)); }
-.pub-plain-tag { display:inline-block; font-size:0.66rem; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:var(--clr-cyan, #00e5ff); margin-bottom:6px; }
-.pub-plain p { margin:0; font-size:0.95rem; line-height:1.55; color:var(--text, #c9d1d9); }
-body:not(.dark) .pub-plain { background:rgba(0,150,180,0.06); border-color:rgba(0,120,150,0.35); }
-body:not(.dark) .pub-plain-tag { color:#0b6b80; }
-body:not(.dark) .pub-plain p { color:#1a2a33; }
-.pub-extras-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:16px; }
-.pub-extras-card { border:1px solid var(--card-border, #333); border-radius:14px; padding:16px; background:var(--card-bg, rgba(0,0,0,0.25)); box-shadow:0 8px 20px rgba(0,0,0,0.12); }
-.pub-extras-card h3 { margin:0 0 10px; font-size:0.9rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--clr-green); }
-.pub-extras-card ul { margin:0; padding-left:18px; }
-.pub-extras-card li { margin-bottom:6px; font-size:0.82rem; line-height:1.4; }
-.pub-muted { font-size:0.8rem; opacity:0.7; }
-.pub-artifacts { display:flex; flex-wrap:wrap; gap:8px; }
-.pub-chip { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; padding:6px 10px; border-radius:999px; border:1px solid rgba(0,229,255,0.35); color:#bde8ff; background:rgba(0,229,255,0.1); text-decoration:none; }
-.pub-related { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px; }
-.pub-related li { display:flex; flex-direction:column; gap:2px; }
-.pub-related a { color:var(--clr-cyan); text-decoration:none; font-size:0.82rem; }
-.pub-related span { font-size:0.72rem; opacity:0.7; }
-.pub-citation { display:flex; flex-direction:column; gap:10px; }
-.pub-citation-text { font-size:0.8rem; line-height:1.4; background:rgba(0,0,0,0.35); border-radius:10px; padding:10px; border:1px solid rgba(0,255,65,0.2); }
-.pub-citation-actions { display:flex; flex-wrap:wrap; gap:8px; }
-.pub-cite-label { font-weight:700; font-size:0.66rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--clr-green); margin-right:4px; }
-.pub-bibtex summary { cursor:pointer; font-size:0.72rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--clr-green); }
-.pub-bibtex pre { margin:8px 0 0; max-width:100%; overflow-x:auto; white-space:pre; font-size:0.72rem; line-height:1.45; background:rgba(0,0,0,0.35); border:1px solid rgba(0,255,65,0.2); border-radius:10px; padding:10px; }
-body:not(.dark) .pub-bibtex pre { background:rgba(255,255,255,0.9); }
-.pub-copy { align-self:flex-start; border-radius:999px; border:1px solid rgba(0,255,65,0.4); color:var(--clr-green); background:rgba(0,255,65,0.12); padding:6px 12px; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; cursor:pointer; }
-.pub-copy.copied { color:#111; background:var(--clr-green); }
-
-body:not(.dark) .pub-extras-card { background:rgba(255,255,255,0.92); }
-body:not(.dark) .pub-extras-card h3 { color:#0b7a2f; }
-body:not(.dark) .pub-citation-text { background:rgba(255,255,255,0.9); }
-</style>
+{{ partial "functions/css_tag" "css/widgets/publication-extras.css" }}

@@ -97,14 +97,17 @@
   }
 
   /* ---------- Role filters (hub) ---------- */
-  var chips = document.querySelectorAll('.chip[data-filter]');
+  // The new count goes to a visually hidden status line, so screen reader users hear what the filter did.
+  var chips = document.querySelectorAll('.chip[data-filter]'), filterStatus = document.getElementById('pf-filter-status');
   chips.forEach(function (c) {
     c.addEventListener('click', function () {
-      var f = c.getAttribute('data-filter');
+      var f = c.getAttribute('data-filter'), cards = document.querySelectorAll('.role-card[data-hiring]'), shown = 0;
       chips.forEach(function (x) { x.setAttribute('aria-pressed', x === c ? 'true' : 'false'); });
-      document.querySelectorAll('.role-card[data-hiring]').forEach(function (card) {
+      cards.forEach(function (card) {
         card.hidden = !(f === 'all' || card.getAttribute('data-hiring') === f);
+        if (!card.hidden) shown++;
       });
+      if (filterStatus) filterStatus.textContent = 'Showing ' + shown + ' of ' + cards.length + ' roles.';
     });
   });
 
@@ -162,7 +165,7 @@
   /* ---------- Scoring ---------- */
   function score() {
     var s = {}; ROLES.forEach(function (r) { s[r.slug] = 0; });
-    // Activity taps: each role's total, standardised within the person so a student who taps "Yes!" to
+    // Activity taps: each role's total, standardized within the person so a student who taps "Yes!" to
     // everything (or nothing) is compared with their own average. Simulation: removes answer-style bias.
     var sums = {}; ROLES.forEach(function (r) { sums[r.slug] = 0; });
     A.forEach(function (it, i) { sums[it.role] += ansA[i] || 0; });
@@ -216,7 +219,7 @@
     var w = el('div', { class: 'intro-card qcard' },
       '<p class="part">About 5 minutes · ' + TOTAL + ' taps</p>' +
       '<h3 class="qtext" style="min-height:0" tabindex="-1">Tap how much each activity appeals to you. There are no wrong answers, and you don\'t need any cyber knowledge yet.</h3>' +
-      '<p>You\'ll get your top 3 roles, why they fit, the realistic first job, which certifications to start with and free places to practise.</p>' +
+      '<p>You\'ll get your top 3 roles, why they fit, the realistic first job, which certifications to start with and free places to practice.</p>' +
       '<div class="hero-cta"><button class="btn btn-primary" id="pf-start">Start <span class="arrow" aria-hidden="true">&rarr;</span></button></div>' +
       '<p class="privacy-note">Nothing you answer is saved or sent anywhere. We only count, anonymously, how many people start and finish.</p>');
     mount.appendChild(w);
@@ -228,21 +231,14 @@
     c: ['Part 3 of 3', 'About you', 'Last stretch: five short questions about your background and what you want.']
   };
   var seenPart = {};
+  // The checkpoint waits for Continue: it never moves on by itself, so nobody is cut off mid-read (WCAG 2.2.1).
   function interstitial(i, kind) {
     seenPart[kind] = true;
     var P = PARTS[kind], done = ansA.concat(ansB, ansC).filter(function (x) { return x !== null; }).length;
     mount.innerHTML = '<div class="quiz-head"><span class="part">Checkpoint</span>' + ring(done) + '</div>' +
       '<div class="stage"><div class="qcard interlude"><p class="part">' + P[0] + '</p><h3 class="qtext" tabindex="-1">' + P[1] + '</h3>' +
-      '<p class="sub">' + P[2] + '</p><div class="hero-cta"><button class="btn btn-primary" id="pf-go">Continue <span class="arrow" aria-hidden="true">&rarr;</span></button></div>' +
-      '<div class="interlude-bar" aria-hidden="true"><i></i></div></div></div>';
-    var go = document.getElementById('pf-go'), card = mount.querySelector('.interlude'), t = setTimeout(function () { show(i, 1, true); }, reduce ? 2500 : 2200);
-    // The screen moves on by itself, so any sign that someone is reading or using it stops the timer (WCAG 2.2.1).
-    // Continue always works.
-    function hold() { clearTimeout(t); card.classList.add('held'); }
-    card.addEventListener('pointerenter', hold);
-    go.addEventListener('focus', hold);
-    card.addEventListener('keydown', hold);
-    go.addEventListener('click', function () { clearTimeout(t); show(i, 1, true); });
+      '<p class="sub">' + P[2] + '</p><div class="hero-cta"><button class="btn btn-primary" id="pf-go">Continue <span class="arrow" aria-hidden="true">&rarr;</span></button></div></div></div>';
+    document.getElementById('pf-go').addEventListener('click', function () { show(i, 1, true); });
     mount.querySelector('.qtext').focus({ preventScroll: true });
     if (!reduce) mount.querySelector('.ring').classList.add('pulse');
   }
@@ -322,9 +318,10 @@
     track('quiz_finished');
     try { history.replaceState(null, '', '#r=' + encode()); } catch (e) {}
     if (reduce) return results(r, true);
-    // A short "matching" moment: role names flick past while the scan line sweeps.
-    mount.innerHTML = '<div class="matching" role="status"><div class="scan" aria-hidden="true"></div><p class="part">Matching you to 14 roles</p>' +
-      '<p class="qtext flick">&nbsp;</p><div class="interlude-bar" aria-hidden="true"><i></i></div></div>';
+    // A short "matching" moment: role names flick past while the scan line sweeps. Not a live region: the names change
+    // every 110 ms, and #pf-status announces the result once it is on screen.
+    mount.innerHTML = '<div class="matching"><div class="scan" aria-hidden="true"></div><p class="part">Matching you to ' + ROLES.length + ' roles</p>' +
+      '<p class="qtext flick" aria-hidden="true">&nbsp;</p><div class="interlude-bar" aria-hidden="true"><i></i></div></div>';
     var f = mount.querySelector('.flick'), names = ROLES.map(function (x) { return x.name; }), n = 0;
     var iv = setInterval(function () { f.textContent = names[n++ % names.length]; }, 110);
     setTimeout(function () { clearInterval(iv); results(r, true); }, 1500);
@@ -373,9 +370,9 @@
         '<h3>' + esc(ro.name) + ' <span class="badge ' + ro.hiring + '">' + HIRING[ro.hiring] + '</span></h3>' +
         '<p class="tag">' + esc(ro.tagline) + '</p><div class="why">' + whyFor(slug) + '</div><dl class="facts">' +
         '<div><dt>Getting in</dt><dd>' + esc(route) + '</dd></div>' +
-        '<div><dt>Start with</dt><dd>' + esc(ro.certsStart.join(', ')) + '</dd></div>' +
-        '<div><dt>Practise free</dt><dd>' + ro.resources.slice(0, 2).map(function (x) { return '<a href="' + esc(x.url) + '" rel="noopener" target="_blank">' + esc(x.name) + '</a>'; }).join(', ') + '</dd></div>' +
-        (pay ? '<div><dt>Median US pay</dt><dd>' + money(pay.median) + ' <span class="mono" style="color:var(--muted);font-size:12px">BLS, ' + esc(D.sources.blsDate) + '</span></dd></div>' : '') +
+        (ro.certsStart.length ? '<div><dt>Start with</dt><dd>' + esc(ro.certsStart.join(', ')) + '</dd></div>' : '<div><dt>Certifications</dt><dd>' + esc(ro.certsNote || '') + '</dd></div>') +
+        '<div><dt>Practice free</dt><dd>' + ro.resources.slice(0, 2).map(function (x) { return '<a href="' + esc(x.url) + '" rel="noopener" target="_blank">' + esc(x.name) + '<span class="sr-only"> (opens in a new tab)</span></a>'; }).join(', ') + '</dd></div>' +
+        (pay ? '<div><dt>Median pay, all experience levels</dt><dd>' + money(pay.median) + ' <span class="mono" style="color:var(--muted);font-size:12px">BLS, ' + esc(D.sources.blsDate) + '</span></dd></div>' : '') +
         '</dl><a class="go" href="' + slug + '/">Read the full ' + esc(ro.name) + ' guide &rarr;</a></div></article>';
     });
     html += '</div>';
@@ -390,7 +387,7 @@
     if (setting === 0) notes.push('<b>Government work.</b> Many government and law enforcement cyber jobs need a security clearance, which usually requires US citizenship and a background check. Agencies sponsor the clearance after hiring.');
     notes.forEach(function (n) { html += '<div class="note">' + n + '</div>'; });
     html += '<div class="shape"><div>' + radar(r) + '</div><div><h3>Your cyber shape</h3><p class="sub">How your answers spread across six areas of the field. Most people lean toward two or three.</p>' +
-      '<details class="all"><summary>See all 14 roles ranked</summary><ul class="bars">';
+      '<details class="all"><summary>See all ' + ROLES.length + ' roles ranked</summary><ul class="bars">';
     var vals = r.order.map(function (s) { return r.s[s]; }), lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals), span = hi - lo || 1;
     r.order.forEach(function (s, i) {
       var w = Math.max(4, Math.round(100 * (r.s[s] - lo) / span));

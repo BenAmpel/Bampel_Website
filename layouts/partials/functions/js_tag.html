@@ -1,0 +1,9 @@
+{{- /* A script from assets/, minified and fingerprinted (content hash in the file name, so it can be cached for a year;
+     see the Cache-Control rules in netlify.toml) and loaded with integrity.
+     Usage: {{ partial "functions/js_tag" (dict "path" "js/site/impact_stats.js" "attrs" "defer") }} */ -}}
+{{- with resources.Get .path -}}
+  {{- $js := . | minify | fingerprint -}}
+  <script src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}"{{ with $.attrs }} {{ . | safeHTMLAttr }}{{ end }}></script>
+{{- else -}}
+  {{- errorf "js_tag: assets/%s not found" .path -}}
+{{- end -}}

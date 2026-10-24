@@ -1,0 +1,22 @@
+# Weekly update pull requests for the build's npm packages and for the GitHub Actions the workflows use (pinned by
+# commit). Hugo and Dart Sass are pinned in netlify.toml, which Dependabot cannot read; .github/workflows/version-watch.yml
+# covers them. The Wowchemy theme (go.mod) is left out on purpose: it is frozen at an Aug 2023 commit and patched through
+# shadow files in layouts/, so a theme update needs a manual port, not a version bump.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      build-tools:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ['*']

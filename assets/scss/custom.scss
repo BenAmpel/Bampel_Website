@@ -5261,6 +5261,29 @@ textarea:focus-visible {
   box-shadow: 0 0 0 3px var(--focus-glow);
 }
 
+// Leaflet controls sit on white, so the dark theme's light link colour left them near 1.5:1. Navy is 10:1 on white. The home
+// page's footprint map needs these too (research_dashboard.scss has the same rules for /research/).
+.leaflet-control-zoom a,
+.leaflet-control-zoom a:hover,
+.leaflet-control-zoom a span,
+.leaflet-control-attribution a {
+  color: #0b3d91 !important;
+}
+
+.leaflet-control-attribution,
+.leaflet-control-attribution span {
+  color: #333 !important;
+}
+
+// <summary> (spoilers, filters, BibTeX) and the hamburger had no focus ring: the theme sets summary:focus { outline: none }
+// and .navbar-toggler:focus { outline: none !important; box-shadow: none !important }.
+summary:focus-visible,
+.navbar-toggler:focus-visible {
+  outline: 2px solid var(--focus-ring) !important;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px var(--focus-glow) !important;
+}
+
 .centrality-item:focus-visible,
 .impact-card:focus-visible {
   border-color: rgba(0, 229, 255, 0.7);
@@ -5555,4 +5578,50 @@ section#about h3 > a,
 // Later widget titles are h2 now (one h1 per page); keep them the size the h1 had (2.25rem, the theme's .section-heading h1).
 .section-heading h2.h1 {
   font-size: 2.25rem;
+}
+
+// ===== SMALL TEXT FLOOR (audit 2026-10-24) =====
+// These labels, chips and tabs rendered at 9.7 to 11.6px (0.65 to 0.77rem on the 15px root), hard to read on a phone.
+// max() keeps them at 12px or the rem size, whichever is larger, so a bigger browser font setting still scales them.
+// !important because most of them are styled in the shortcodes' own <style> blocks, which come later in the page.
+// (Axis and grid labels inside the research charts are left as they are; they sit in fixed-width grids.)
+.bio-explorer-kicker,
+.bio-explorer-tab,
+.bio-explorer-cta,
+.bio-quicklink,
+.bio-story-btn,
+.bio-chip,
+.bio-sidenote,
+.pub-badge,
+.impact-stats-updated,
+.impact-tag,
+.impact-meta,
+.featured-kicker,
+.featured-updated,
+.featured-meta,
+.featured-link,
+.talks-summary,
+.talks-tag,
+.talks-tag .count,
+.talks-type,
+.talks-tag-chip,
+.awards-badge,
+.service-toggle,
+.service-pill,
+.media-summary,
+.media-year,
+.media-type,
+.media-featured-label,
+.media-tag,
+.paper-diff-btn,
+.paper-diff-link,
+.paper-diff-label,
+.paper-diff-chip,
+.pub-filter-reset,
+.pub-filter-empty,
+.impact-inspector-title,
+.collab-chip,
+.collab-spotlight-title,
+.cae-chip {
+  font-size: max(12px, 0.75rem) !important;
 }

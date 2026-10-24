@@ -11,11 +11,34 @@ export const CCAIR = path.join(ROOT, 'static', 'ccair');
 export const SITE = 'https://bampel.com';
 
 const params = fs.readFileSync(path.join(ROOT, 'config', '_default', 'params.yaml'), 'utf8');
-export const GA = (params.match(/google_analytics:\s*'([^']+)'/) || [])[1] || '';
+// Quoted with single or double quotes, or not at all. An empty value means no analytics on the generated pages.
+export const GA = (params.match(/^\s*google_analytics:\s*['"]?([^'"\s#]+)['"]?/m) || [])[1] || '';
+if (!GA) console.warn('ccair-static: no google_analytics id found in config/_default/params.yaml; the generated pages carry no analytics tag.');
 
 export const readJson = (rel) => JSON.parse(fs.readFileSync(path.join(CCAIR, 'data', rel), 'utf8'));
 
+// The data files are published as they are (/ccair/data/*.json), so an internal note must not sit in one: a key named
+// TODO, FIXME, NOTE or XXX, or a value that reads like one. Stops the build and names the place. Keep notes for editors
+// in the generator's comments or in a README next to the data file.
+const NOTE_KEY = /^_?(TODO|FIXME|NOTE|XXX)$/;
+const NOTE_VALUE = /^\s*(to be added|placeholder)\b|\bben to confirm\b|\b(TBD|TODO|FIXME)\b/i;
+export function assertNoInternalNotes(obj, file) {
+  const walk = (v, at) => {
+    if (typeof v === 'string') { if (NOTE_VALUE.test(v)) throw new Error(`${file}: ${at} looks like an internal note: "${v.slice(0, 60)}"`); }
+    else if (Array.isArray(v)) v.forEach((x, i) => walk(x, `${at}[${i}]`));
+    else if (v && typeof v === 'object') for (const [k, x] of Object.entries(v)) {
+      if (NOTE_KEY.test(k)) throw new Error(`${file}: key "${at ? at + '.' : ''}${k}" is an internal note; move it out of the published data file`);
+      walk(x, at ? `${at}.${k}` : k);
+    }
+  };
+  walk(obj, '');
+}
+
 export const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+// "October 17, 2026" from "2026-10-17": the one date format on every generated page.
+export const fmtDate = (d) => new Date(`${d}T12:00:00Z`).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+// Appended inside every link that opens in a new tab, so screen reader users hear it before they follow it (WCAG 3.2.5).
+export const NEW_TAB = '<span class="sr-only"> (opens in a new tab)</span>';
 export const ld = (obj) => `<script type="application/ld+json">${JSON.stringify(obj).replace(/</g, '\\u003c')}</script>`;
 
 export const person = { '@type': 'Person', '@id': `${SITE}/#person`, name: 'Benjamin M. Ampel', url: `${SITE}/`, jobTitle: 'Director, Center for CyberAI Research (CCAIR)' };
@@ -30,6 +53,8 @@ export const SHARE_IMAGE = { url: `${SITE}/media/sharing-card.png`, width: 1200,
 
 // <head> through the analytics tag. The caller adds its JSON-LD and closes </head>.
 // Analytics is the plain gtag page view (the site-wide Google Analytics property); no custom events carry user data.
+// page_location leaves out the URL fragment: a shared quiz results link carries the packed answers in #r=..., and GA's
+// default page_location is the full location.href.
 // image: { url, width, height, alt } for og:image (defaults to the site sharing card). robots: the robots meta value.
 // extra: more <head> lines (for example a feed <link>).
 export function head({ title, desc, url, ogTitle, ogType = 'website', css = [], image = SHARE_IMAGE, robots = 'index, follow, max-image-preview:large', extra = '' }) {
@@ -61,8 +86,7 @@ export function head({ title, desc, url, ogTitle, ogType = 'website', css = [], 
 <link rel="preload" href="/ccair/assets/fonts/lato-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/ccair/assets/fonts/lato-700.woff2" as="font" type="font/woff2" crossorigin>
 ${css.map((href) => `<link rel="stylesheet" href="${href}">`).join('\n')}${extra ? '\n' + extra : ''}
-${GA ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${GA}"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA}');</script>` : ''}`;
+${GA ? `<script src="/ccair/assets/ga-init.js" data-ga-id="${GA}"></script>` : ''}`;
 }
 
 // Brand: GSU does not allow a center to make its own logo (commkit.gsu.edu). The header shows a plain-text wordmark until
@@ -161,16 +185,19 @@ ${scripts.map((s) => `<script src="${s}" defer></script>`).join('\n')}
 // One sitemap for every generated CCAIR page. Each generator calls this after writing its pages, so the file is the
 // same whichever runs last. Student Guide URLs and their lastmod dates come from static/ccair/data/guide-lastmod.json,
 // which scripts/build-students.mjs keeps: a page's lastmod moves only when the hash of its content changes. Pages the
-// store marks sitemap: false (for example the outcomes page while it has no data) are left out.
+// store marks sitemap: false (for example the outcomes page while it has no data) are left out. /ccair/ (the React app
+// home) has no lastmod: no single data file dates its content.
 export const LASTMOD_STORE = path.join(CCAIR, 'data', 'guide-lastmod.json');
 export function writeSitemap() {
   const P = readJson('pathways.json');
-  const urls = [[`${SITE}/ccair/`, P.updated], [`${SITE}/ccair/pathways/`, P.updated], ...P.roles.map((r) => [`${SITE}/ccair/pathways/${r.slug}/`, P.updated])];
+  // The CCAIR app's own pages (/ccair/<page>/, prerendered by scripts/build-ccair.js) have no lastmod either.
+  const appPages = ['research', 'publications', 'people', 'resources', 'materials', 'about', 'contact'].map((p) => [`${SITE}/ccair/${p}/`, null]);
+  const urls = [[`${SITE}/ccair/`, null], ...appPages, [`${SITE}/ccair/pathways/`, P.updated], ...P.roles.map((r) => [`${SITE}/ccair/pathways/${r.slug}/`, P.updated])];
   if (fs.existsSync(LASTMOD_STORE)) {
     const store = JSON.parse(fs.readFileSync(LASTMOD_STORE, 'utf8'));
     for (const [u, e] of Object.entries(store.pages)) if (e.sitemap) urls.push([`${SITE}${u}`, e.lastmod]);
   }
   fs.writeFileSync(path.join(CCAIR, 'sitemap.xml'),
-    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(([u, d]) => `  <url><loc>${u}</loc><lastmod>${d}</lastmod></url>`).join('\n')}\n</urlset>\n`);
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(([u, d]) => `  <url><loc>${u}</loc>${d ? `<lastmod>${d}</lastmod>` : ''}</url>`).join('\n')}\n</urlset>\n`);
   return urls.length;
 }

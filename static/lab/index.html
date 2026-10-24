@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CCAIR Behavioral Lab</title>
+<title>CCAIR Behavioral Lab | Georgia State University</title>
 <link rel="icon" href="/lab/assets/brand/favicon.svg" type="image/svg+xml">
 <link rel="icon" type="image/png" sizes="32x32" href="/lab/assets/brand/favicon-32.png">
 <link rel="apple-touch-icon" href="/lab/assets/brand/touch-icon-180.png">
@@ -11,12 +11,25 @@
 <meta name="theme-color" content="#0b1630" media="(prefers-color-scheme: dark)">
 <meta name="description" content="Browser-based studies of how people judge cyber threats, from the Center for CyberAI Research (CCAIR) at Georgia State University.">
 <link rel="canonical" href="https://bampel.com/lab/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="CCAIR, Center for CyberAI Research">
+<meta property="og:title" content="CCAIR Behavioral Lab, Georgia State University">
+<meta property="og:description" content="Browser-based studies of how people judge cyber threats, from the Center for CyberAI Research (CCAIR) at Georgia State University.">
+<meta property="og:url" content="https://bampel.com/lab/">
+<meta property="og:image" content="https://bampel.com/media/sharing-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Benjamin M. Ampel, Assistant Professor of Computer Information Systems, Georgia State University. bampel.com">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image:alt" content="Benjamin M. Ampel, Assistant Professor of Computer Information Systems, Georgia State University. bampel.com">
 <link rel="stylesheet" href="/lab/assets/study.css">
 <style>
   /* Lab home: the shared tokens from study.css, laid out as a page. Georgia State web standards: GSU Blue and white,
      Lato (self-hosted, so no visitor data goes to a font service), a text wordmark and no unit logo. */
   body { padding: 0; }
-  .mono { font-family: var(--mono); }
+  .skip { position: absolute; left: -9999px; top: 8px; z-index: 100; background: var(--accent); color: var(--accent-text); padding: 8px 14px; border-radius: 8px; font-weight: 700; }
+  .skip:focus { left: 16px; }
+  main:focus { outline: none; }
   .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
   header.site { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--card) 92%, transparent); -webkit-backdrop-filter: blur(18px) saturate(170%); backdrop-filter: blur(18px) saturate(170%); border-top: 4px solid var(--gsu-blue); border-bottom: 1px solid var(--line); }
   header.site .wrap { display: flex; justify-content: space-between; align-items: center; gap: 12px 20px; padding-top: 10px; padding-bottom: 10px; flex-wrap: wrap; }
@@ -53,10 +66,11 @@
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <header class="site">
   <div class="wrap">
     <div class="brandrow"><a class="wordmark" href="/lab/"><b>CCAIR Behavioral Lab</b><small>Georgia State University · J. Mack Robinson College of Business</small></a><span class="lockup-slot" data-official-lockup></span></div>
-    <nav><a href="/ccair/">CCAIR</a><a href="#studies">Studies</a><a href="#data">Data &amp; privacy</a><a href="#researchers">For researchers</a><a href="/">bampel.com</a></nav>
+    <nav aria-label="Main"><a href="/ccair/">CCAIR</a><a href="#studies">Studies</a><a href="#data">Data &amp; privacy</a><a href="#researchers">For researchers</a><a href="/">bampel.com</a></nav>
   </div>
 </header>
 
@@ -68,12 +82,12 @@
   </div>
 </div>
 
-<main class="wrap">
+<main class="wrap" id="main" tabindex="-1">
   <section id="studies">
     <h2>Studies</h2>
     <div class="card study">
       <div>
-        <span class="tag mono">Demo · no data leaves your browser</span>
+        <span class="tag">Demo · no data leaves your browser</span>
         <h3>Email judgment demo</h3>
         <p>Judge two emails and a link, explain one decision, and see what the lab records. About three minutes.</p>
       </div>
@@ -82,7 +96,7 @@
     <div id="live">
     <div class="card study">
       <div>
-        <span class="tag mono">Pilot · GSU email sign-in</span>
+        <span class="tag">Pilot · GSU email sign-in</span>
         <h3>Security alert verification</h3>
         <p>Four weekly sessions of security alert triage, with and without an AI assistant. GSU students sign in with their university email.</p>
       </div>
@@ -126,16 +140,6 @@
 <footer>
   <div class="wrap">CCAIR Behavioral Lab · Directed by Dr. Benjamin M. Ampel · <a href="mailto:bampel@gsu.edu?subject=CCAIR%20Behavioral%20Lab&amp;body=Name%3A%0AYour%20message%3A">bampel@gsu.edu</a> · <a href="/lab/support/">Support</a> · <a href="/lab/guide/">Researcher guide</a></div>
 </footer>
-<script>
-  // Listed studies come from the lab registry (/api/lab/_lab/studies); the card above is the fallback.
-  fetch('/api/lab/_lab/studies').then(function (r) { return r.ok ? r.json() : null; }).then(function (list) {
-    if (!list || !list.length) return;
-    var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
-    document.getElementById('live').innerHTML = list.map(function (s) {
-      return '<div class="card study" style="margin-top:14px"><div><span class="tag mono">Live · email sign-in</span><h3>' + esc(s.name) + '</h3><p>' + esc(s.description) + '</p></div>' +
-        '<a class="btn" href="' + esc(s.paths.participant) + '">Sign in</a></div>';
-    }).join('');
-  }).catch(function () {});
-</script>
+<script src="/lab/landing.js"></script>
 </body>
 </html>

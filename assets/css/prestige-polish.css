@@ -1,6 +1,13 @@
-/* ===== Cross-page view transitions (MPA, progressive enhancement) ===== */
-@view-transition { navigation: auto; }
+/* ===== Cross-page view transitions (MPA, progressive enhancement) =====
+   Opted in only when the visitor has not asked for reduced motion (with the opt-in outside this query, reduced-motion
+   visitors still got the browser's default crossfade). The navbar has its own transition name and no animation, so it
+   stays put while the page content changes beneath it (2026-10-24). */
 @media not (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: auto; }
+  #navbar-main { view-transition-name: site-navbar; }
+  ::view-transition-group(site-navbar),
+  ::view-transition-old(site-navbar),
+  ::view-transition-new(site-navbar) { animation: none; }
   ::view-transition-old(root) {
     animation: vt-fade-out 0.22s ease both;
   }
@@ -16,30 +23,44 @@
   }
 }
 
-/* ===== Scroll reveal ===== */
-[data-reveal] {
-  opacity: 0;
-  transform: translateY(18px);
-  transition:
-    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
-    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
-  will-change: opacity, transform;
+/* ===== Scroll reveal (2026-10-24: CSS scroll-driven animation; replaces assets/js/site/reveal.js) =====
+   Each card fades and rises as it enters the viewport, tied to scroll position, so whatever is already on screen at load
+   is simply visible and nothing can be left hidden. Content is visible by default: browsers without scroll-driven
+   animations, and visitors who prefer reduced motion, see it without the effect. The animation moves `translate` (not
+   `transform`), so the cards' hover lifts still work. Timeline items slide in from the left. */
+/* Collapsible sections clip their rounded corners with overflow: hidden (custom.scss), which also makes each one a scroll
+   container, so a view() timeline inside it tracks that box (which never scrolls) instead of the page, and nothing in a
+   collapsible section revealed. overflow: clip clips the same way without creating a scroll container. The bio box keeps
+   its own overflow-y: auto (more specific rule). */
+@supports (overflow: clip) {
+  details, .spoiler, [class*=spoiler], [class*=collapsible] { overflow: clip; }
 }
-[data-reveal].is-revealed {
-  opacity: 1;
-  transform: none;
-  will-change: auto;
-}
-.reveals-off [data-reveal] {
-  opacity: 1 !important;
-  transform: none !important;
-  transition: none !important;
-}
-@media (prefers-reduced-motion: reduce) {
-  [data-reveal] {
-    opacity: 1 !important;
-    transform: none !important;
-    transition: none !important;
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .home-section .wg-box, .home-section .col-12 > section,
+    .pub-item,
+    .article-widget .media, .people-widget .col,
+    .impact-card,
+    .talk-card, .award-card, .media-card, .course-card,
+    .journal-pub, .conference-pub,
+    .article-container > *:not(script):not(style) {
+      animation: reveal-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 40%;
+    }
+    .timeline-item {
+      animation: reveal-slide linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 45%;
+    }
+    @keyframes reveal-rise {
+      from { opacity: 0; translate: 0 18px; }
+      to { opacity: 1; translate: none; }
+    }
+    @keyframes reveal-slide {
+      from { opacity: 0; translate: -20px 0; }
+      to { opacity: 1; translate: none; }
+    }
   }
 }
 
@@ -50,8 +71,7 @@
   border-left: 2px solid rgba(0, 229, 255, 0.25);
   transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
               border-color 0.28s ease, box-shadow 0.28s ease,
-              background 0.28s ease,
-              opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
+              background 0.28s ease;
 }
 .pub-item:hover {
   transform: translateY(-3px) translateX(2px);
@@ -119,4 +139,20 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
   outline: 2px solid rgba(0, 229, 255, 0.7);
   outline-offset: 2px;
   border-radius: 2px;
+}
+
+/* ===== Neon title links (2026-10-24) =====
+   Title links (publication titles in the lists, list-page titles and links inside headings) glow green on hover and keyboard focus; with motion allowed,
+   the glow arrives through a two-frame chromatic glitch (magenta and cyan offsets), in keeping with the terminal theme.
+   Decoration only: the text colour, and so its contrast, does not change. */
+.dark :is(:is(h1, h2, h3, h4) a, a.pub-title, .article-title a, .section-subheading a):is(:hover, :focus-visible) {
+  text-shadow: 0 0 6px rgba(0, 255, 65, 0.55), 0 0 18px rgba(0, 255, 65, 0.25);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .dark :is(:is(h1, h2, h3, h4) a, a.pub-title, .article-title a, .section-subheading a):is(:hover, :focus-visible) { animation: heading-glitch 0.32s steps(1) both; }
+  @keyframes heading-glitch {
+    0% { text-shadow: -2px 0 #e040fb, 2px 0 #00e5ff; translate: 1px 0; }
+    34% { text-shadow: 2px 0 #e040fb, -2px 0 #00e5ff; translate: -1px 0; }
+    67%, 100% { text-shadow: 0 0 6px rgba(0, 255, 65, 0.55), 0 0 18px rgba(0, 255, 65, 0.25); translate: none; }
+  }
 }

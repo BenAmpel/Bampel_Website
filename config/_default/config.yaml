@@ -24,10 +24,20 @@ removePathAccents: true
 
 module:
   imports:
-    - path: github.com/wowchemy/wowchemy-hugo-themes/modules/wowchemy-plugin-netlify-cms
     - path: github.com/wowchemy/wowchemy-hugo-themes/modules/wowchemy-plugin-netlify
-    - path: github.com/wowchemy/wowchemy-hugo-themes/modules/wowchemy-plugin-reveal
     - path: github.com/wowchemy/wowchemy-hugo-themes/modules/wowchemy/v5
+  # The project's own folders (Hugo's defaults, which a mounts list replaces), plus static/images mounted into assets/ as
+  # well, so templates can make WebP versions of the map PNGs that scripts/generate_map.py rewrites each month.
+  mounts:
+    - { source: content, target: content }
+    - { source: data, target: data }
+    - { source: layouts, target: layouts }
+    - { source: i18n, target: i18n }
+    - { source: archetypes, target: archetypes }
+    - { source: assets, target: assets }
+    # The coauthor-network and impact-dashboard PNGs (about 1.2 MB) are written by the metrics scripts but shown nowhere.
+    - { source: static, target: static, files: ["! images/coauthor-network*.png", "! images/impact-dashboard*.png"] }
+    - { source: static/images, target: assets/images }
 
 ############################
 ## ADVANCED
@@ -62,7 +72,10 @@ outputs:
   section: [HTML, RSS]
 imaging:
   resampleFilter: lanczos
-  quality: 100
+  jpeg:
+    quality: 100
+  webp:
+    quality: 100
   anchor: smart
 timeout: 600000
 taxonomies:
@@ -95,3 +108,6 @@ minify:
 services:
   googleAnalytics:
     id: ''
+  # Feeds carry each item's abstract or summary as plain text (layouts/_default/rss.xml); the 20 newest items.
+  rss:
+    limit: 20

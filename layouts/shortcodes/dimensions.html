@@ -1,7 +1,8 @@
 {{/* Dimensions Badge Shortcode - Usage: {{< dimensions doi="10.xxxx/xxxxx" >}} */}}
 {{ $doi := .Get "doi" }}
 {{ if $doi }}
-<div class="dimensions-badge-section">
+{{/* Hidden until the badge reports a citation count: for a DOI Dimensions does not know, it shows "?". */}}
+<div class="dimensions-badge-section" hidden>
   <h4 style="margin: 0 0 15px 0; font-size: 1rem; font-weight: 600;">Dimensions Citation Metrics</h4>
   <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
     <span class="__dimensions_badge_embed__" data-doi="{{ $doi }}" data-style="large_rectangle" data-legend="hover-right"></span>
@@ -13,22 +14,5 @@
     </div>
   </div>
 </div>
-<script>
-(function() {
-  // Load the Dimensions script if not already loaded
-  if (typeof __dimensions_embed === 'undefined') {
-    var script = document.createElement('script');
-    script.src = 'https://badge.dimensions.ai/badge.js';
-    script.charset = 'utf-8';
-    script.onload = function() {
-      if (typeof __dimensions_embed !== 'undefined' && __dimensions_embed.addBadges) {
-        __dimensions_embed.addBadges();
-      }
-    };
-    document.head.appendChild(script);
-  } else {
-    __dimensions_embed.addBadges();
-  }
-})();
-</script>
+{{ if not (.Page.Store.Get "js_dimensions_badge") }}{{ .Page.Store.Set "js_dimensions_badge" true }}{{ with resources.Get "js/widgets/dimensions-badge.js" | minify | fingerprint }}<script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" defer></script>{{ end }}{{ end }}
 {{ end }}

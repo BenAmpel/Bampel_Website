@@ -1,0 +1,83 @@
+# Build and test every change the way Netlify will build it: the same Hugo and Dart Sass versions (read from
+# netlify.toml, so the two cannot drift apart), npm ci from package-lock.json, both Hugo passes with PurgeCSS, then the
+# lab tests and an internal link check of the built site. Netlify still deploys on its own schedule; this only reports.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+          cache: npm
+
+      # Hugo modules (the Wowchemy theme) are fetched with the Go toolchain.
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: stable
+          cache: false
+
+      - name: Install Hugo and Dart Sass (versions from netlify.toml, checksums verified)
+        run: |
+          set -euo pipefail
+          HUGO_VERSION=$(sed -nE 's/^ *HUGO_VERSION *= *"([^"]+)".*/\1/p' netlify.toml)
+          DART_SASS_VERSION=$(sed -nE 's/^ *DART_SASS_VERSION *= *"([^"]+)".*/\1/p' netlify.toml)
+          DART_SASS_SHA256=$(sed -nE 's/^ *DART_SASS_SHA256 *= *"([^"]+)".*/\1/p' netlify.toml)
+          test -n "$HUGO_VERSION" && test -n "$DART_SASS_VERSION" && test -n "$DART_SASS_SHA256"
+          mkdir -p "$RUNNER_TEMP/bin"
+          cd "$RUNNER_TEMP"
+          curl -sSfLO "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.tar.gz"
+          curl -sSfL -o hugo_checksums.txt "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_${HUGO_VERSION}_checksums.txt"
+          grep " hugo_extended_${HUGO_VERSION}_linux-amd64.tar.gz\$" hugo_checksums.txt | sha256sum -c -
+          tar -xzf "hugo_extended_${HUGO_VERSION}_linux-amd64.tar.gz" -C "$RUNNER_TEMP/bin" hugo
+          curl -sSfL -o dart-sass.tar.gz "https://github.com/sass/dart-sass/releases/download/${DART_SASS_VERSION}/dart-sass-${DART_SASS_VERSION}-linux-x64.tar.gz"
+          printf '%s  %s\n' "$DART_SASS_SHA256" dart-sass.tar.gz | sha256sum -c -
+          tar -xzf dart-sass.tar.gz -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+          echo "$RUNNER_TEMP/dart-sass" >> "$GITHUB_PATH"
+
+      - run: npm ci
+
+      - name: Build (same steps as the netlify.toml build command)
+        env:
+          HUGO_ENV: production
+        run: |
+          set -euo pipefail
+          hugo version
+          sass --version
+          npm run build:ccair
+          hugo --gc --minify --destination "$RUNNER_TEMP/pass1"
+          WC_PURGE_CSS=true hugo --gc --minify --ignoreCache 2>&1 | tee "$RUNNER_TEMP/hugo.log"
+          if grep -E "WARN|ERROR" "$RUNNER_TEMP/hugo.log"; then
+            echo "::error::Hugo printed warnings or errors (the build is kept warning-free)"; exit 1
+          fi
+
+      - name: Lab tests
+        run: npm run test:lab
+
+      - name: Internal links
+        run: node scripts/check-links.mjs public
+
+      # Font Awesome is subset to the icons in use (scripts/subset_fontawesome.py); a new icon must be added to the subset.
+      - name: Icon fonts cover every icon in use
+        run: |
+          set -euo pipefail
+          python3 -m pip install --quiet fonttools==4.60.2 brotli==1.2.1
+          python3 scripts/subset_fontawesome.py --build public --check

@@ -28,7 +28,7 @@ const PIPELINE = [
   { level: "K–12", description: "Early exposure to CyberAI concepts through local school partnerships and outreach programs.", programs: ["School Outreach", "CyberAI Literacy", "Community Partnerships"] },
   { level: "Undergraduate", description: "Course-embedded research experiences and summer cohorts with sanitized center data.", programs: ["Course-Embedded Research", "CyberAI Fundamentals", "Summer Research Cohorts"] },
   { level: "Master's", description: "Bridge between instruction and research: students contribute to data curation and benchmarking.", programs: ["CIS 8684: CTI", "CIS 8080: Security", "CyberCorps SFS (via CRISP)"] },
-  { level: "Doctoral", description: "PhD students lead CCAIR research with dissertations contributing durable center artifacts.", programs: ["Dissertation Research", "Center Publications", "Conference Leadership"] },
+  { level: "Doctoral", description: "Ph.D. students lead CCAIR research with dissertations contributing durable center artifacts.", programs: ["Dissertation Research", "Center Publications", "Conference Leadership"] },
 ];
 
 // The three research pillars, each with the published systems that put it into practice.
@@ -62,10 +62,19 @@ const JOIN_AREAS = [
   { area: 'Phishing & Social Engineering', desc: 'AI-driven detection and generation analysis of phishing campaigns' },
   { area: 'Proactive Threat Hunting', desc: 'Predictive models and early-warning systems for emerging cyber threats' },
   { area: 'Human–AI Collaboration', desc: 'Designing AI tools that augment analyst decision-making in SOC environments' },
-  { area: 'Generative AI for Security', desc: 'Leveraging LLMs for vulnerability analysis, code auditing, and threat modeling' },
+  { area: 'Generative AI for Security', desc: 'LLMs for vulnerability analysis, code auditing, and threat modeling' },
 ];
 
 const byYearDesc = (a, b) => (b.year || 0) - (a.year || 0);
+
+// News dates are display text ("Aug 2026", "Spring 2026", "2026"); <time> gets the machine-readable month or year.
+const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+function newsDatetime(text) {
+  const m = /(?:([A-Za-z]{3})[A-Za-z]*\.?\s+)?(\d{4})/.exec(text || '');
+  if (!m) return undefined;
+  const mi = m[1] ? MONTHS.indexOf(m[1].toLowerCase()) : -1;
+  return mi >= 0 ? `${m[2]}-${String(mi + 1).padStart(2, '0')}` : m[2];
+}
 
 // Hero depth: two soft color fields drift at different rates as the hero scrolls away and the headline block lags
 // slightly behind the page, so the hero reads as layered. Where scroll-driven CSS animations exist the stylesheet does
@@ -95,6 +104,7 @@ const STAT_STYLE = { display: 'flex', flexDirection: 'column-reverse', justifyCo
 function HomePage() {
   const { publications, people, news, courses, paperPages } = useData();
   const phdCount = (people.students || []).length + (people.mentees || []).length;
+  const bestPapers = publications.filter((p) => / — Best Paper Award$/.test(p.venue || '')).length;
   const recent = publications.filter((p) => p.type === 'journal').slice().sort(byYearDesc).slice(0, 3);
   const heroRef = React.useRef(null), innerRef = React.useRef(null);
   const photo = usePhoto('home-hero');
@@ -106,14 +116,14 @@ function HomePage() {
       <p className="lede">We study how intelligent systems can spot malicious behavior before it turns into an attack,
         and we help people and organizations act on what those systems find.</p>
       <div className="hero-cta">
-        <a className="btn btn-primary" href="#/research">Explore our research <Arrow /></a>
+        <a className="btn btn-primary" href="/ccair/research/">Explore our research <Arrow /></a>
         <a className="btn btn-secondary" href="/ccair/pathways/">Find your cyber career path</a>
       </div>
     </div>
   );
   const stats = (
     <dl className="stats">
-      {[[publications.length, 'Publications'], [phdCount, 'Ph.D. students mentored'], [2, 'Best paper awards'], [courses.length, 'Courses taught']].map(([n, label]) => (
+      {[[publications.length, 'Publications'], [phdCount, 'Ph.D. students mentored'], [bestPapers, 'Best paper awards'], [courses.length, 'Courses taught']].map(([n, label]) => (
         // dt before dd for assistive tech; column-reverse keeps the number on top.
         <div key={label} className="stat" style={STAT_STYLE}><dt><span>{label}</span></dt><dd><b><CountUp value={n} /></b></dd></div>
       ))}
@@ -127,7 +137,7 @@ function HomePage() {
         // and lightest parts of the image); the stats follow on the page background.
         <section className="hero photo-hero" aria-labelledby="hero-title" ref={heroRef}>
           <div className="hero-stage">
-            <div className="hero-photo"><Picture photo={photo} sizes="100vw" priority /></div>
+            <div className="hero-photo"><Picture photo={photo} sizes="100vw" priority decorative /></div>
             <div className="wrap">{heroText}</div>
             <p className="photo-credit hero-credit"><PhotoCredit photo={photo} /></p>
           </div>
@@ -154,21 +164,21 @@ function HomePage() {
             </Reveal>
           ))}
         </div>
-        <div className="section-foot"><a className="btn btn-plain" href="#/research">How the research agenda fits together <Arrow /></a></div>
+        <div className="section-foot"><a className="btn btn-plain" href="/ccair/research/">How the research agenda fits together <Arrow /></a></div>
       </Section>
 
       <Section id="recent" alt eyebrow="Recent work" title="Selected journal articles">
         <Reveal as="ul" className="pub-list card" style={{ paddingBlock: 4 }}>
           {recent.map((p) => <PublicationItem key={p.title} {...p} paperPages={paperPages} />)}
         </Reveal>
-        <div className="section-foot"><a className="btn btn-secondary" href="#/publications">All {publications.length} publications <Arrow /></a></div>
+        <div className="section-foot"><a className="btn btn-secondary" href="/ccair/publications/">All {publications.length} publications <Arrow /></a></div>
       </Section>
 
       <Section id="news" eyebrow="News" title="What's new at the center">
         <ul className="news">
           {news.map((n) => (
             <Reveal as="li" key={n.date + n.title}>
-              <time>{n.date}</time>
+              <time dateTime={newsDatetime(n.date)}>{n.date}</time>
               <span className="title">{n.title}</span>
               <span className="tag">{n.tag}</span>
             </Reveal>
@@ -182,9 +192,9 @@ function HomePage() {
 
       <Section id="explore" eyebrow="Get to know us" title="Find your way around">
         <div className="grid grid-3">
-          <LinkCard href="#/people" title="People" more="Meet the team"><p>The director, graduate researchers, and faculty affiliates behind the center.</p></LinkCard>
-          <LinkCard href="#/resources" title="Resources" more="See resources"><p>Datasets, benchmarks, tools, and free career guides for students.</p></LinkCard>
-          <LinkCard href="#/contact" title="Work with us" more="Get in touch"><p>Prospective students, collaborators, and partners: here is how to reach us.</p></LinkCard>
+          <LinkCard href="/ccair/people/" title="People" more="Meet the team"><p>The director, graduate researchers, and faculty affiliates behind the center.</p></LinkCard>
+          <LinkCard href="/ccair/resources/" title="Resources" more="See resources"><p>Datasets, benchmarks, tools, and free career guides for students.</p></LinkCard>
+          <LinkCard href="/ccair/contact/" title="Work with us" more="Get in touch"><p>Prospective students, collaborators, and partners: here is how to reach us.</p></LinkCard>
         </div>
       </Section>
     </div>
@@ -246,7 +256,7 @@ function ResearchPage() {
             <Reveal key={o.title} className="card"><h3>{o.title}</h3><p>{o.desc}</p></Reveal>
           ))}
         </div>
-        <div className="section-foot"><a className="btn btn-secondary" href="#/publications">Read the {publications.length} publications <Arrow /></a></div>
+        <div className="section-foot"><a className="btn btn-secondary" href="/ccair/publications/">Read the {publications.length} publications <Arrow /></a></div>
       </Section>
     </div>
   );
@@ -254,15 +264,14 @@ function ResearchPage() {
 
 const PUB_TYPES = ['all', 'journal', 'conference', 'workshop'];
 function readPubFilter() {
-  const h = window.location.hash, i = h.indexOf('?');
-  const p = new URLSearchParams(i >= 0 ? h.slice(i + 1) : '');
+  const p = new URLSearchParams(window.location.search);
   const type = p.get('type');
   return { type: PUB_TYPES.includes(type) ? type : 'all', q: (p.get('q') || '').slice(0, 200) };
 }
 
 function PublicationsPage() {
   const { publications, paperPages } = useData();
-  // The filter lives in the address (#/publications?type=journal&q=phishing), so a filtered list can be shared and survives a reload.
+  // The filter lives in the address (/ccair/publications/?type=journal&q=phishing), so a filtered list can be shared and survives a reload.
   const initial = usePageMemo(readPubFilter, []);
   const [type, setType] = usePageState(initial.type);
   const [query, setQuery] = usePageState(initial.q);
@@ -272,8 +281,8 @@ function PublicationsPage() {
     if (type !== 'all') qs.set('type', type);
     if (query.trim()) qs.set('q', query.trim());
     const s = qs.toString();
-    // replaceState does not fire hashchange, so this never re-routes or adds history entries.
-    try { window.history.replaceState(null, '', '#/publications' + (s ? '?' + s : '')); } catch (e) { /* the filter still works without the address */ }
+    // replaceState does not fire popstate, so this never re-routes or adds history entries.
+    try { window.history.replaceState(null, '', '/ccair/publications/' + (s ? '?' + s : '')); } catch (e) { /* the filter still works without the address */ }
   }, [type, query]);
 
   const counts = usePageMemo(() => publications.reduce((acc, p) => { acc[p.type] = (acc[p.type] || 0) + 1; return acc; }, {}), [publications]);
@@ -285,17 +294,20 @@ function PublicationsPage() {
   const years = usePageMemo(() => {
     const groups = new Map();
     filtered.slice().sort(byYearDesc).forEach((p) => {
-      if (!groups.has(p.year)) groups.set(p.year, []);
-      groups.get(p.year).push(p);
+      const y = p.year || 'Undated';
+      if (!groups.has(y)) groups.set(y, []);
+      groups.get(y).push(p);
     });
     return [...groups.entries()];
   }, [filtered]);
 
+  // The counts drop out on phones (CSS) so the four buttons fit on one row.
+  const seg = (text, n) => <>{text}<span className="seg-count"> {n}</span></>;
   const options = [
-    { value: 'all', label: `All ${publications.length}` },
-    { value: 'journal', label: `Journals ${counts.journal || 0}` },
-    { value: 'conference', label: `Conferences ${counts.conference || 0}` },
-    { value: 'workshop', label: `Workshops ${counts.workshop || 0}` },
+    { value: 'all', label: seg('All', publications.length) },
+    { value: 'journal', label: seg('Journals', counts.journal || 0) },
+    { value: 'conference', label: seg('Conferences', counts.conference || 0) },
+    { value: 'workshop', label: seg('Workshops', counts.workshop || 0) },
   ];
 
   return (
@@ -310,7 +322,7 @@ function PublicationsPage() {
               <Icon name="search" />
               <input type="search" name="q" autoComplete="off" spellCheck={false} placeholder="Search titles, authors, venues…" value={query} onChange={(e) => setQuery(e.target.value)} />
             </label>
-            <SegmentedControl label="Publication type" options={options} value={type} onChange={setType} />
+            <SegmentedControl label="Publication type" className="pub-types" options={options} value={type} onChange={setType} />
           </div>
           <p className="sr-only" aria-live="polite">{filtered.length} publications shown</p>
           {years.length === 0 && <p className="empty">No publications match that search. Try a different word or type.</p>}
@@ -360,16 +372,16 @@ function PeoplePage() {
       <Section id="students" alt title="Graduate researchers" intro="Ph.D. students advised and mentored by CCAIR faculty at Georgia State and partner institutions.">
         <h3 className="group-label">Georgia State University</h3>
         <div className="grid grid-3">
-          {(people.students || []).map((s) => <Reveal key={s.name}><PersonCard name={s.name} role={s.role} meta={[s.org, s.years].filter(Boolean).join(' · ')} photo={s.photo} /></Reveal>)}
+          {(people.students || []).map((s) => <Reveal key={s.name}><PersonCard name={s.name} role={s.role} meta={[s.org, s.years].filter(Boolean).join(' · ')} photo={s.photo} headingLevel={4} /></Reveal>)}
         </div>
         <h3 className="group-label">Mentees at partner universities</h3>
         <div className="grid grid-3">
-          {current.map((s) => <Reveal key={s.name}><PersonCard name={s.name} role={s.role} meta={[s.org, s.years].filter(Boolean).join(' · ')} photo={s.photo} warm /></Reveal>)}
+          {current.map((s) => <Reveal key={s.name}><PersonCard name={s.name} role={s.role} meta={[s.org, s.years].filter(Boolean).join(' · ')} photo={s.photo} warm headingLevel={4} /></Reveal>)}
         </div>
         {former.length > 0 && <>
           <h3 className="group-label">Former mentees</h3>
           <div className="grid grid-3">
-            {former.map((s) => <Reveal key={s.name}><PersonCard name={s.name} role={s.role} photo={s.photo} warm
+            {former.map((s) => <Reveal key={s.name}><PersonCard name={s.name} role={s.role} photo={s.photo} warm headingLevel={4}
               meta={[s.mentoredAt && `Mentored at ${s.mentoredAt}`, s.years].filter(Boolean).join(' · ')} note={`Now at ${s.now}`} /></Reveal>)}
           </div>
         </>}
@@ -389,7 +401,7 @@ function PeoplePage() {
             <h2 id="join-title">Want to do research with us?</h2>
             <p>CCAIR is recruiting motivated Ph.D. and M.S. students who are curious about the intersection of AI and cybersecurity.</p>
           </div>
-          <div className="actions"><a className="btn btn-primary" href="#/contact">How to join <Arrow /></a></div>
+          <div className="actions"><a className="btn btn-primary" href="/ccair/contact/">How to join <Arrow /></a></div>
         </Reveal>
       </Section>
     </div>
@@ -416,9 +428,9 @@ function ResourcesPage() {
         <Reveal className="feature">
           <div>
             <h2 id="materials-title">Research materials hub</h2>
-            <p>Datasets, tools and other reusable materials from CCAIR studies, with a "how to cite" line and a DOI link where they exist.</p>
+            <p>Datasets, tools, and other reusable materials from CCAIR studies, with a “how to cite” line and a DOI link where they exist.</p>
           </div>
-          <div className="actions"><a className="btn btn-primary" href="#/materials">Browse materials <Arrow /></a></div>
+          <div className="actions"><a className="btn btn-primary" href="/ccair/materials/">Browse materials <Arrow /></a></div>
         </Reveal>
       </Section>
 
@@ -476,7 +488,7 @@ function CopyButton({ text, label }) {
   const copy = () => navigator.clipboard.writeText(text).then(() => flash(true), () => flash(false));
   return (
     <>
-      <button type="button" className="btn btn-secondary btn-sm" onClick={copy} aria-label={done ? 'Citation copied' : failed ? 'Copy failed. Select the citation text and copy it by hand.' : label}>{done ? 'Copied' : failed ? 'Copy failed' : 'Copy citation'}</button>
+      <button type="button" className="btn btn-secondary btn-sm" onClick={copy} aria-label={label}>{done ? 'Copied' : failed ? 'Copy failed' : 'Copy citation'}</button>
       <span className="sr-only" role="status">{done ? 'Citation copied' : failed ? 'Copy failed. Select the citation text and copy it by hand.' : ''}</span>
     </>
   );
@@ -498,7 +510,7 @@ function MaterialsPage() {
 
   return (
     <div className="page">
-      <PageHead eyebrow="Research materials" title="Data, stimuli, instruments and tools"
+      <PageHead eyebrow="Research materials" title="Data, stimuli, instruments, and tools"
         lede="Materials from CCAIR studies that other researchers and educators can reuse. Entries say how to cite them and link to the version of record where one exists." />
       <section className="section" aria-labelledby="materials-list-title">
         <div className="wrap">
@@ -606,7 +618,7 @@ function AboutPage() {
             { role: 'Center Director', desc: 'Sets research direction, primary liaison to funding agencies and university leadership.' },
             { role: 'Faculty Affiliates', desc: 'Contribute to shared center artifacts (data, benchmarks, systems) on specific projects.' },
             { role: 'External Advisory Council', desc: 'Annual review of research direction, relevance, and translational opportunities.' },
-            { role: 'Graduate Researchers', desc: 'PhD and MS students driving research under faculty supervision.' },
+            { role: 'Graduate Researchers', desc: 'Ph.D. and M.S. students driving research under faculty supervision.' },
           ].map((g) => (
             <Reveal key={g.role} className="card"><h3>{g.role}</h3><p>{g.desc}</p></Reveal>
           ))}
@@ -639,7 +651,7 @@ function AboutPage() {
 function ContactPage() {
   return (
     <div className="page">
-      <PageHead eyebrow="Contact" title="We'd love to hear from you"
+      <PageHead eyebrow="Contact" title="Get in touch"
         lede="Interested in collaboration, joining the lab, or learning more about CCAIR? Email is the best way to reach us." >
         <div className="hero-cta" style={{ justifyContent: 'flex-start' }}>
           <a className="btn btn-primary" href="mailto:bampel@gsu.edu">Email Dr. Ampel <Arrow /></a>
@@ -656,14 +668,14 @@ function ContactPage() {
               <a href="mailto:bampel@gsu.edu">bampel@gsu.edu</a><br />
               Department of Computer Information Systems<br />
               J. Mack Robinson College of Business<br />
-              55 Park Place NW, Atlanta, GA 30303
+              55 Park Place NE, Atlanta, GA 30303
             </address>
           </Reveal>
           <Reveal className="card">
             <h3>Robinson cyber ecosystem</h3>
             <ul className="list-check">
               <li><a href="https://robinson.gsu.edu/research-centers/crisp/">CRISP (Center for Research in Information Security &amp; Privacy)</a></li>
-              <li>NSF CyberCorps® Scholarship for Service participant</li>
+              <li>NSF CyberCorps Scholarship for Service participant</li>
               <li>NSA/DHS CAE Cyber Defense designated program</li>
             </ul>
           </Reveal>
@@ -683,7 +695,7 @@ function ContactPage() {
           <ul className="list-check">
             <li>Background in computer science, information systems, cybersecurity, or a related field</li>
             <li>Interest in applied machine learning / NLP for security problems</li>
-            <li>Programming experience in Python; familiarity with PyTorch or HuggingFace a plus</li>
+            <li>Programming experience in Python; familiarity with PyTorch or Hugging Face a plus</li>
             <li>Strong writing skills and interest in publishing at top venues</li>
           </ul>
           <p style={{ marginTop: 16 }}>Interested? Reach out with your CV and a brief description of your research interests.</p>

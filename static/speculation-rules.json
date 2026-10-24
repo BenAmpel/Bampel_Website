@@ -1,0 +1,16 @@
+{
+  "prefetch": [
+    {
+      "source": "document",
+      "where": {
+        "and": [
+          { "href_matches": "/*" },
+          { "not": { "href_matches": "/lab/*" } },
+          { "not": { "href_matches": "/*\\.(pdf|csv|json|xml|zip|bib|txt)" } },
+          { "not": { "selector_matches": "[download], [rel~=nofollow], [target=_blank]" } }
+        ]
+      },
+      "eagerness": "moderate"
+    }
+  ]
+}

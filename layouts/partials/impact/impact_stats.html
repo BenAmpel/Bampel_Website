@@ -1,4 +1,24 @@
-<div class="impact-stats" data-impact-stats data-baseurl="{{ "/" | relURL }}">
+{{- /* The home page needs two small parts of data/dashboard_payload.json (463 KB): impactStats for this box, embedded
+     below, and the research footprint for the home map, written as its own small fingerprinted file. Both are read at
+     build time, so the monthly metrics update still flows through. */ -}}
+{{- $payload := os.ReadFile "static/data/dashboard_payload.json" | transform.Unmarshal -}}
+{{- $footprint := resources.FromString "data/home-footprint.json" ($payload.footprint | jsonify) | minify | fingerprint -}}
+{{- /* WebP versions of the research map PNGs (550 KB each; scripts/generate_map.py writes them) for the home page's
+     Research Footprint fallback image, which assets/js/head-enhancements.js builds. */ -}}
+{{- $mapSets := dict -}}
+{{- range $theme, $file := dict "light" "images/research-map.png" "dark" "images/research-map-dark.png" -}}
+  {{- with resources.Get $file -}}
+    {{- $img := . -}}
+    {{- $set := slice -}}
+    {{- range slice 800 1400 2291 -}}
+      {{- if le . $img.Width -}}{{- $set = $set | append (printf "%s %dw" ($img.Resize (printf "%dx webp q80" .)).RelPermalink .) -}}{{- end -}}
+    {{- end -}}
+    {{- $mapSets = merge $mapSets (dict $theme (delimit $set ", ")) -}}
+  {{- end -}}
+{{- end -}}
+<span hidden id="research-map-srcsets" data-light="{{ $mapSets.light }}" data-dark="{{ $mapSets.dark }}"></span>
+<script type="application/json" id="impact-stats-data">{{ $payload.impactStats | jsonify | safeJS }}</script>
+<div class="impact-stats" data-impact-stats data-baseurl="{{ "/" | relURL }}" data-footprint-url="{{ $footprint.RelPermalink }}">
   <div class="impact-stats-header">
     <div class="impact-stats-title">Impact Snapshot</div>
     <div class="impact-stats-updated" data-impact-updated>Updated --</div>
@@ -61,4 +81,4 @@
     </div>
   </div>
 </div>
-<script src="/js/impact_stats.js" defer></script>
+{{ partial "functions/js_tag" (dict "path" "js/site/impact_stats.js" "attrs" "defer") }}

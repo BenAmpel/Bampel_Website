@@ -36,8 +36,8 @@
         "summary" ($content | plainify)
         "section" "talks"
         "type" "talks"
-        "permalink" (printf "%s#talks" $.Site.BaseURL)
-        "relpermalink" "#talks"
+        "permalink" (printf "%scv/#talks" $.Site.BaseURL)
+        "relpermalink" "/cv/#talks"
         "authors" nil
         "tags" $tags
         "date" 0
@@ -70,8 +70,8 @@
         "summary" ($content | plainify)
         "section" "service"
         "type" "service"
-        "permalink" (printf "%s#service" $.Site.BaseURL)
-        "relpermalink" "#service"
+        "permalink" (printf "%scv/#service" $.Site.BaseURL)
+        "relpermalink" "/cv/#service"
         "authors" nil
         "tags" (slice (.category | default "Service"))
         "date" 0
@@ -103,8 +103,8 @@
         "summary" ($content | plainify)
         "section" "teaching"
         "type" "teaching"
-        "permalink" (printf "%s#teaching" $.Site.BaseURL)
-        "relpermalink" "#teaching"
+        "permalink" (printf "%steaching/#teaching" $.Site.BaseURL)
+        "relpermalink" "/teaching/#teaching"
         "authors" nil
         "tags" (slice (.institution | default "Teaching"))
         "date" 0

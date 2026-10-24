@@ -1,0 +1,22 @@
+{{- /* Shadowed from wowchemy-plugin-netlify (2026-10-24): no X-XSS-Protection (deprecated; the old XSS auditor it
+     switched on could itself be abused, and the CSP in netlify.toml does that job), HSTS for two years with preload,
+     and the manifest's content type on the path the pages actually link (/manifest.webmanifest, not /index.webmanifest).
+     X-Frame-Options and the Content-Security-Policy come from netlify.toml. */ -}}
+{{- $csp_policy := site.Params.security.csp.policy | default "" -}}
+{{- $csp_report_only := site.Params.security.csp.report_only | default false -}}
+{{- $allow_frame := site.Params.security.allow_frame | default false -}}
+{{- $default_perms := "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()" -}}
+{{- $permissions_policy := site.Params.security.permissions.policy | default $default_perms -}}
+# Netlify headers
+# Automatically generated (layouts/index.headers)
+/*
+  {{if not $allow_frame}}X-Frame-Options: DENY{{end}}
+  X-Content-Type-Options: nosniff
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  Referrer-Policy: strict-origin-when-cross-origin
+  {{with $csp_policy}}Content-Security-Policy{{if $csp_report_only}}-Report-Only{{end}}: {{replaceRE "(\\s\\s+)" " " (trim . " ")}}{{end}}
+  {{with $permissions_policy}}Permissions-Policy: {{replaceRE "(\\s\\s+)" " " (trim . " ")}}{{end}}
+/manifest.webmanifest
+  Content-Type: application/manifest+json
+/index.xml
+  Content-Type: application/rss+xml

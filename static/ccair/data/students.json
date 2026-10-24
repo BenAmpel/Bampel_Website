@@ -10,9 +10,8 @@
   ],
   "changesNote": "One entry per change a student would notice, newest first. The hub's What changed list and /ccair/students/feed.xml both read this list. Dates are YYYY-MM-DD; url is a guide path.",
   "ask": {
-    "contact": "/ccair/#/contact",
-    "officeHours": "",
-    "TODO": "Ben: to show office hours in the Ask CCAIR box on every guide page, put them in officeHours (for example \"Tuesdays, 2 to 4 p.m., by appointment\"). Leave it empty to show nothing."
+    "contact": "/ccair/contact/",
+    "officeHours": ""
   },
   "alerts": {
     "email": "bampel@gsu.edu",
@@ -26,7 +25,7 @@
       "nav": "Start here",
       "title": "Plan your cybersecurity career, year by year",
       "metaTitle": "CCAIR Student Guide: A Year-by-Year Plan for a Cybersecurity Career",
-      "desc": "A free, sourced plan for cybersecurity students aiming at industry jobs: target roles, a portfolio, student clubs and local chapters, internship recruiting timelines and the final-year job search, from the Center for CyberAI Research.",
+      "desc": "A free, sourced plan for cybersecurity students aiming at industry jobs: target roles, a portfolio, clubs, internships and the final-year job search.",
       "summary": "A year-by-year plan: target roles, a portfolio, communities and internship timing.",
       "lede": "This guide turns the advice we give Center for CyberAI Research (CCAIR) students into a plan for a security career in industry. That covers security teams at companies, managed security and detection providers, consulting and audit firms, product security teams, cloud providers and startups. Government work is one track among these, with its own page at the end. Dates, prices and rules change often, so every one of them links to the public source we checked.",
       "roles": ["soc-analyst", "cloud-security-engineer", "application-security-engineer", "grc-analyst"],
@@ -98,7 +97,7 @@
         { "h": "Do I need a security clearance?", "toc": "If you are considering government or defense work", "id": "if-you-are-considering-government-or-defense-work", "answer": "**Only for many government and defense contractor jobs.** If that track interests you, start a records file now, because the questionnaire asks for 10 years of addresses, employers and schools.", "blocks": [
           { "p": "Many government and defense contractor jobs require a security clearance. If that track interests you, start a records file now. The clearance questionnaire asks for 10 years of addresses, employers and schools, and 7 years of foreign travel and close foreign contacts{{sf86}}. [Working in government or defense](/ccair/students/security-clearance/) covers the process, and [Get hired](/ccair/students/get-hired/#federal-jobs) covers federal applications." }
         ] },
-        { "h": "The rest of this guide", "blocks": [ { "cards": true } ] }
+        { "h": "The rest of this guide", "id": "the-rest-of-this-guide", "blocks": [ { "cards": true } ] }
       ]
     },
     {
@@ -106,7 +105,7 @@
       "nav": "Build skills",
       "title": "Build skills and a portfolio employers can check",
       "metaTitle": "Hands-On Cybersecurity Skills and a Portfolio: A Student Guide",
-      "desc": "How cybersecurity students build hands-on skills and a portfolio employers can check: home labs, capture-the-flag challenges, write-ups, open source, legal bug bounty work, free training, competitions and local conferences.",
+      "desc": "How cybersecurity students build hands-on skills and a portfolio employers can check: home labs, capture the flag, write-ups, bug bounties and contests.",
       "summary": "Home labs, CTFs, write-ups, open source, legal bug bounties, free training and conferences.",
       "lede": "Employers hire for evidence that you can do the work. A portfolio of labs, write-ups and contributions is that evidence. Free training gives you the concepts, and practice gives you the hands-on time.",
       "roles": ["soc-analyst", "penetration-tester", "threat-intelligence-analyst", "application-security-engineer", "ai-security-specialist"],
@@ -177,7 +176,7 @@
       "nav": "Certifications",
       "title": "Certifications: what employers ask for, and when",
       "metaTitle": "Cybersecurity Certifications for Students: What Employers Ask For",
-      "desc": "Which cybersecurity certifications employers ask for at entry level and in cloud, security operations and offensive security roles, with current exam versions, prices, student discounts and when to wait.",
+      "desc": "Which cybersecurity certifications employers ask for at entry level and in cloud, SOC and offensive roles, with exam versions, prices and discounts.",
       "summary": "Entry, cloud, SOC and offensive certifications, prices, discounts and when to wait.",
       "lede": "Read five job postings for your target role before you buy anything. Most students need one entry certification before their first job. Leave advanced ones until you have the experience they assume, or until an employer pays for them.",
       "roles": ["soc-analyst", "penetration-tester", "cloud-security-engineer", "ai-security-specialist", "grc-analyst"],
@@ -273,7 +272,7 @@
       "nav": "Get hired",
       "title": "Get hired: resumes, interviews and offers",
       "metaTitle": "How Cybersecurity Students Get Hired: Resumes, Interviews, Offers",
-      "desc": "How cybersecurity students get industry jobs: one-page resumes, applicant tracking systems, LinkedIn and GitHub, referrals, technical interviews, salary research and comparing offers, plus a short guide to federal hiring.",
+      "desc": "How cybersecurity students get industry jobs: resumes, LinkedIn and GitHub, referrals, technical interviews, salary research, offers and federal hiring.",
       "summary": "Resumes, referrals, technical interviews, salary data, offers and federal hiring.",
       "lede": "Every employer wants the same evidence: what you did, with what result. This page covers industry hiring first. Federal hiring follows different rules, summarized at the end.",
       "roles": ["soc-analyst", "penetration-tester", "cloud-security-engineer", "grc-analyst", "application-security-engineer"],
@@ -346,7 +345,7 @@
       "nav": "Research",
       "title": "Do research as a student",
       "metaTitle": "Cybersecurity Research for Students: Workflow and Industry Value",
-      "desc": "How research experience helps cybersecurity students in industry (applied R&D, product security, threat research), plus a step-by-step workflow from topic and literature review to quad charts, posters, papers and ethics.",
+      "desc": "How research experience helps cybersecurity students in industry, plus a step-by-step workflow from topic and literature review to posters and papers.",
       "summary": "How research helps industry careers, plus a workflow from topic to paper.",
       "lede": "Research shows an employer or graduate program that you can work on an open problem without an answer key. Industry hires for that skill too. This page explains where research leads, then gives the workflow we teach at CCAIR, in the order you should do it.",
       "roles": ["ai-security-specialist", "threat-intelligence-analyst", "application-security-engineer"],
@@ -390,7 +389,7 @@
           { "p": "Security research can affect people who never agreed to take part, such as users of a network you measure. The Menlo Report sets out ethical principles for information and communication technology research{{menlo}}." }
         ] },
         { "h": "How do I join CCAIR research?", "toc": "Research with CCAIR", "id": "research-with-ccair", "answer": "**Read about current research, then use the contact page.** Send a resume and one paragraph on the problem you want to work on.", "blocks": [
-          { "p": "CCAIR studies the security of AI systems and the use of AI for cybersecurity. Read about [current research](/ccair/#/research) and [publications](/ccair/#/publications), then use the [contact page](/ccair/#/contact) to ask about projects. Send a resume and one paragraph on the problem you want to work on." },
+          { "p": "CCAIR studies the security of AI systems and the use of AI for cybersecurity. Read about [current research](/ccair/research/) and [publications](/ccair/publications/), then use the [contact page](/ccair/contact/) to ask about projects. Send a resume and one paragraph on the problem you want to work on." },
           { "p": "Need data for a project? Start with [Find data](/ccair/students/data/)." }
         ] }
       ]
@@ -400,7 +399,7 @@
       "nav": "Find data",
       "title": "Find data for cybersecurity projects",
       "metaTitle": "Cybersecurity Datasets for Student Projects, With Known Weaknesses",
-      "desc": "A searchable catalog of public cybersecurity datasets for student research, with access, license, size, time span, the paper to cite and each dataset's known weaknesses.",
+      "desc": "A searchable catalog of public cybersecurity datasets for student research, with access, license, size, the paper to cite and each one's known weaknesses.",
       "summary": "A searchable catalog of datasets, each with its known weaknesses.",
       "lede": "Every dataset has flaws. This catalog names them next to each entry, so you can choose data that fits your question and report its limits honestly.",
       "roles": ["ai-security-specialist", "soc-analyst", "threat-intelligence-analyst"],
@@ -427,8 +426,8 @@
       "slug": "scholarships",
       "nav": "Scholarships",
       "title": "Scholarships and programs for cybersecurity students",
-      "metaTitle": "Cybersecurity Scholarships and Programs: Industry, Nonprofit, Government",
-      "desc": "Industry and nonprofit cybersecurity scholarships (ISC2, ISSA, ISACA, WiCyS, CrowdStrike), company internship programs, and government programs such as CyberCorps SFS, the DoD Cyber Service Academy and SMART.",
+      "metaTitle": "Cybersecurity Scholarships: Industry, Nonprofit and Government",
+      "desc": "Industry and nonprofit cybersecurity scholarships (ISC2, ISSA, ISACA, WiCyS), company internship programs, and government programs such as CyberCorps SFS.",
       "summary": "Nonprofit, industry and company programs, plus SFS and other government programs.",
       "lede": "Professional associations, nonprofits and companies fund scholarships, training and conference trips with no service commitment. Government programs can pay for your whole degree in exchange for government work. Amounts and deadlines change each year, so confirm them on the program's own page.",
       "roles": ["soc-analyst", "grc-analyst", "cloud-security-engineer", "incident-responder"],
@@ -489,8 +488,8 @@
       "slug": "security-clearance",
       "nav": "Government and clearances",
       "title": "Working in government or defense: security clearances",
-      "metaTitle": "Security Clearances for Students Considering Government or Defense Work",
-      "desc": "An optional track for cybersecurity students considering government or defense contractor jobs: how a US security clearance works, the 13 adjudicative guidelines and what to do now. General information, not legal advice.",
+      "metaTitle": "Security Clearances for Students Aiming at Government or Defense",
+      "desc": "An optional track for students considering government or defense jobs: how a US security clearance works and what to do now. Not legal advice.",
       "summary": "An optional track: how clearances work and what to do now for government or defense jobs.",
       "lede": "This page is for students considering government agencies or defense contractors, where many cybersecurity jobs require a security clearance. You cannot apply for one yourself, but the choices you make as a student shape how the process goes.",
       "disclaimer": "General information, not legal advice. Rules differ by agency and change over time. For your own situation, ask the hiring agency's security office or a qualified attorney.",
@@ -534,7 +533,7 @@
     "nav": "Where students go",
     "title": "Where CCAIR and CIS students go",
     "metaTitle": "Where CCAIR and CIS Students Go: Internships and First Jobs",
-    "desc": "Aggregate internship and first-job outcomes for CCAIR and Georgia State CIS students: employer types, roles and counts, with small groups suppressed to protect privacy.",
+    "desc": "Aggregate internship and first-job outcomes for CCAIR and Georgia State CIS students by employer type and role, with small groups hidden for privacy.",
     "lede": "This page will show where CCAIR and Georgia State Computer Information Systems (CIS) students land internships and first jobs. It reports group counts only, never individual students.",
     "roles": ["soc-analyst", "grc-analyst", "cloud-security-engineer", "application-security-engineer"]
   },

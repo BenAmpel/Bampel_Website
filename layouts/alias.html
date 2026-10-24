@@ -1,0 +1,12 @@
+{{- /* Redirect page for aliases and /page/1/ paginator URLs. Hugo's built-in template dropped the robots noindex line in
+     v0.158; this restores it so search engines index the target, not the redirect. */ -}}
+<!DOCTYPE html>
+<html lang="{{ site.Language.Locale | default "en-us" }}">
+  <head>
+    <title>{{ .Permalink }}</title>
+    <link rel="canonical" href="{{ .Permalink }}">
+    <meta name="robots" content="noindex">
+    <meta charset="utf-8">
+    <meta http-equiv="refresh" content="0; url={{ .Permalink }}">
+  </head>
+</html>
