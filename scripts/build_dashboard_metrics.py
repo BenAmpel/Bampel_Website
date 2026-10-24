@@ -36,12 +36,25 @@ NAME_MAP = {
     'J Hu': 'James Hu', 'J. Hu': 'James Hu',
     'CH Yang': 'Chi-Heng Yang', 'JF Nunamaker Jr': 'Jay Nunamaker',
     'C Marx': 'Carolin Marx', 'C Dacosta': 'Cade Dacosta',
-    'C Zhang': 'Chengjun Zhang', 'M Hashim': 'Matthew Hashim',
-    'M Wagner': 'Mason Wagner', 'RY Reyes': 'Raul Reyes',
+    'C Zhang': 'Chengjun Zhang', 'M Hashim': 'Matthew Hashim', 'Matthew J. Hashim': 'Matthew Hashim',
+    'M Wagner': 'Mason Wagner', 'RY Reyes': 'Raul Reyes', 'Raul Y. Reyes': 'Raul Reyes', 'Raul Y Reyes': 'Raul Reyes',
     'S Yang': 'Shanchieh Yang', 'Y Li': 'Yidong Li', 'Y. Li': 'Yidong Li'
 }
 
 MAIN_AUTHOR = 'Benjamin Ampel'
+
+
+def warn_name_variants(names):
+    """Print author names that differ only by middle initials (e.g. "Raul Reyes" and "Raul Y. Reyes"), which the
+    collaboration network would otherwise show as two people. Fix a real duplicate by adding it to NAME_MAP."""
+    groups = defaultdict(set)
+    for name in names:
+        parts = name.replace('.', ' ').split()
+        if len(parts) >= 2:
+            groups[(parts[0].lower(), parts[-1].lower())].add(name)
+    for variants in groups.values():
+        if len(variants) > 1:
+            print(f"WARNING possible duplicate author in the collaboration network: {sorted(variants)} (add to NAME_MAP)")
 
 
 def load_json(path: Path):
@@ -324,6 +337,7 @@ def main():
         if key in citations:
             pub['citations'] = citations[key]
 
+    warn_name_variants({normalize_name(a) for pub in publications for a in author_list(pub.get('authors'))})
     centrality = compute_centrality(publications)
     collaboration = compute_collaboration(publications)
 
