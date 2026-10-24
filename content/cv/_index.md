@@ -51,7 +51,7 @@ sections:
       title: Contact
       email: bampel@gsu.edu
       address:
-        street: 55 Park Place NW
+        street: 55 Park Place NE
         city: Atlanta
         region: GA
         postcode: '30303'
@@ -60,7 +60,7 @@ sections:
       coordinates:
         latitude: '33.7537'
         longitude: '-84.3886'
-      directions: J. Mack Robinson School of Business, Department of Computer Information Systems
+      directions: J. Mack Robinson College of Business, Department of Computer Information Systems
       autolink: true
     design:
       columns: '1'

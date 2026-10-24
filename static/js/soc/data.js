@@ -9,7 +9,7 @@ window.AMPEL_DATA = {
     affil: "Georgia State University · J. Mack Robinson College of Business",
     location: "Atlanta, GA",
     email: "bampel@gsu.edu",
-    address: "55 Park Place NW, Atlanta, GA 30303",
+    address: "55 Park Place NE, Atlanta, GA 30303",
     tagline: "AI-enabled cybersecurity researcher building LLM and threat-intelligence systems that make defense proactive.",
     photo: "https://bampel.com/authors/admin/avatar_hu_8612e623253cf18f.png",
     links: [
