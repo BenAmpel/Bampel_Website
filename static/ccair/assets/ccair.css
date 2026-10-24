@@ -275,7 +275,7 @@ a.chip:active { transform: scale(0.97); }
    little behind the page. Browsers without scroll-driven animations get the same motion from HeroGlow's rAF loop. */
 @media (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: view()) {
-    .hero { view-timeline: --hero block; }
+    .hero, .page-hero { view-timeline: --hero block; }
     .hero-glow i:nth-child(1) { animation: glowDriftA linear both; animation-timeline: --hero; animation-range: exit 0% exit 100%; }
     .hero-glow i:nth-child(2) { animation: glowDriftB linear both; animation-timeline: --hero; animation-range: exit 0% exit 100%; }
     .hero-inner { animation: heroLag linear both; animation-timeline: --hero; animation-range: exit 0% exit 100%; }
@@ -331,6 +331,14 @@ a.chip:active { transform: scale(0.97); }
 .photo-hero .hero-credit { position: absolute; right: var(--gutter); bottom: 12px; left: var(--gutter); margin: 0; text-align: right; color: #E6EBF5; }
 .photo-hero .hero-credit a { color: #FFFFFF; }
 @media (max-width: 700px) { .hero-photo img { object-position: var(--focal-m, var(--focal, 50% 50%)); } }
+/* Page heroes: PageHead with a photo slot. Same scrim and white type as the home hero, in a shorter stage. The scrim's
+   lightest stop (0.70) keeps white text at about 5.4:1 even over a pure white pixel, so any campus photo clears AA. */
+.page-hero { margin-bottom: clamp(24px, 4vw, 48px); padding: 0; }
+.page-hero .hero-stage { padding: clamp(64px, 10vw, 128px) 0 clamp(56px, 8vw, 96px); }
+.page-hero .page-head { padding: 0; }
+.page-hero .eyebrow, .page-hero h1 { color: #FFFFFF; }
+.page-hero .page-head .lede { color: #F2F4F8; }
+.page-hero .page-head :focus-visible { outline-color: #FFFFFF; }
 
 /* Photo bands: a wide photo between a page's heading and its first section, with its credit underneath. */
 .photo-band { margin-top: clamp(20px, 3.5vw, 36px); margin-bottom: clamp(32px, 5vw, 56px); }

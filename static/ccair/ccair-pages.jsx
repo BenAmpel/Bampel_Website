@@ -196,8 +196,8 @@ function ResearchPage() {
   return (
     <div className="page">
       <PageHead eyebrow="Research" title="Anticipating attacks, not just reacting to them"
-        lede="CCAIR investigates how intelligent systems can anticipate, interpret, and adapt to malicious behavior before exploitation. All center activities, proposals, and artifacts map to at least one of three research primitives." />
-      <PhotoBand slot="research-band" />
+        lede="CCAIR investigates how intelligent systems can anticipate, interpret, and adapt to malicious behavior before exploitation. All center activities, proposals, and artifacts map to at least one of three research primitives."
+        photo="research-band" />
 
       <Section id="primitives" title="Research primitives" intro="The foundational questions every project contributes to.">
         <div className="grid grid-3">
@@ -333,8 +333,8 @@ function PeoplePage() {
   return (
     <div className="page">
       <PageHead eyebrow="People" title="The people behind CCAIR"
-        lede="A small, collaborative group of faculty and Ph.D. researchers working across Georgia State and partner universities." />
-      <PhotoBand slot="people-band" />
+        lede="A small, collaborative group of faculty and Ph.D. researchers working across Georgia State and partner universities."
+        photo="people-band" />
 
       {d && <Section id="director" title="Director">
         <Reveal className="card director">
@@ -395,8 +395,8 @@ function ResourcesPage() {
   return (
     <div className="page">
       <PageHead eyebrow="Resources" title="Shared tools for students and researchers"
-        lede="Free career guidance for students, and research assets designed to outlive individual grants and serve the CyberAI community." />
-      <PhotoBand slot="resources-band" />
+        lede="Free career guidance for students, and research assets designed to outlive individual grants and serve the CyberAI community."
+        photo="resources-band" />
 
       <Section id="students" title="For students" intro="Free guides for students deciding where they fit in cybersecurity.">
         <FinderFeature headingLevel={3} />
