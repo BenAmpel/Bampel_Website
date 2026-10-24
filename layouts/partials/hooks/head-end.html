@@ -4,8 +4,8 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://d1bxh8uas1mnw7.cloudfront.net" crossorigin>
 
-<!-- tsParticles for animated background (defer: init runs on DOMContentLoaded) -->
-<script defer src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js"></script>
+<!-- tsParticles (46 KB compressed) is not loaded here: the home page background loads it only when #about exists and the
+     visitor has not asked for reduced motion (see PARTICLE BACKGROUND below). -->
 
 <!-- Typed.js for terminal typing effect (defer: init runs on DOMContentLoaded) -->
 <script defer src="https://cdn.jsdelivr.net/npm/typed.js@2.0.16/dist/typed.umd.js"></script>
@@ -2305,7 +2305,8 @@ function runEnhancements() {
   
   // ===== PARTICLE BACKGROUND =====
   const aboutSection = document.getElementById('about');
-  if (aboutSection && typeof tsParticles !== 'undefined') {
+  const startParticles = () => {
+    if (typeof tsParticles === 'undefined' || document.getElementById('tsparticles')) return;
     // Create particle container
     const particleContainer = document.createElement('div');
     particleContainer.id = 'tsparticles';
@@ -2358,6 +2359,14 @@ function runEnhancements() {
       },
       detectRetina: true
     });
+  };
+  // The moving background is decoration that plays on its own, so it never starts under prefers-reduced-motion (WCAG 2.2.2),
+  // and its script is fetched only on the page that uses it.
+  if (aboutSection && !prefersReducedMotion) {
+    const particleScript = document.createElement('script');
+    particleScript.src = 'https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js';
+    particleScript.onload = startParticles;
+    document.head.appendChild(particleScript);
   }
   
   // Map and dashboard are now static PNG images with theme switching
