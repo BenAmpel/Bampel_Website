@@ -1,7 +1,9 @@
 {{/* Altmetric Badge Shortcode - Usage: {{< altmetric doi="10.xxxx/xxxxx" >}} */}}
 {{ $doi := .Get "doi" }}
 {{ if $doi }}
-<div class="altmetric-badge-section" style="margin: 30px 0; padding: 20px; background: #f5f5f5; border-radius: 12px; border: 1px solid #ddd;">
+{{/* The box starts hidden: the Altmetric donut is a "?" placeholder until the API answers, and stays "?" when it has no record
+   for the DOI. The script below shows the box once the donut carries a score. */}}
+<div class="altmetric-badge-section" hidden style="margin: 30px 0; padding: 20px; background: #f5f5f5; border-radius: 12px; border: 1px solid #ddd;">
   <style>
     .dark .altmetric-badge-section {
       background: rgba(10,10,10,0.6) !important;
@@ -21,12 +23,19 @@
 </div>
 <script type="text/javascript">
 (function() {
+  var box = document.currentScript.previousElementSibling;
+  var watch = new MutationObserver(function() {
+    if (/score=\d/.test(box.innerHTML)) { box.hidden = false; watch.disconnect(); }
+  });
+  watch.observe(box, { childList: true, subtree: true, attributes: true });
+
+  // embed.js is loaded only on pages with this shortcode (not site-wide).
   function initBadge() {
     if (typeof _altmetric_embed_init === 'function') {
       _altmetric_embed_init();
-    } else {
-      // Load the script if not present
+    } else if (!document.getElementById('altmetric-embed-loader')) {
       var s = document.createElement('script');
+      s.id = 'altmetric-embed-loader';
       s.src = 'https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js';
       s.onload = function() {
         if (typeof _altmetric_embed_init === 'function') _altmetric_embed_init();
@@ -39,8 +48,6 @@
   } else {
     window.addEventListener('load', initBadge);
   }
-  setTimeout(initBadge, 1000);
-  setTimeout(initBadge, 3000);
 })();
 </script>
 {{ end }}

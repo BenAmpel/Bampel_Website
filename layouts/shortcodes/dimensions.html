@@ -1,7 +1,8 @@
 {{/* Dimensions Badge Shortcode - Usage: {{< dimensions doi="10.xxxx/xxxxx" >}} */}}
 {{ $doi := .Get "doi" }}
 {{ if $doi }}
-<div class="dimensions-badge-section">
+{{/* Hidden until the badge reports a citation count: for a DOI Dimensions does not know, it shows "?". */}}
+<div class="dimensions-badge-section" hidden>
   <h4 style="margin: 0 0 15px 0; font-size: 1rem; font-weight: 600;">Dimensions Citation Metrics</h4>
   <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
     <span class="__dimensions_badge_embed__" data-doi="{{ $doi }}" data-style="large_rectangle" data-legend="hover-right"></span>
@@ -15,6 +16,13 @@
 </div>
 <script>
 (function() {
+  var box = document.currentScript.previousElementSibling;
+  var watch = new MutationObserver(function() {
+    var link = box.querySelector('.__dimensions_Link');
+    if (link && /^\d/.test(link.getAttribute('aria-label') || '')) { box.hidden = false; watch.disconnect(); }
+  });
+  watch.observe(box, { childList: true, subtree: true, attributes: true, attributeFilter: ['aria-label'] });
+
   // Load the Dimensions script if not already loaded
   if (typeof __dimensions_embed === 'undefined') {
     var script = document.createElement('script');
