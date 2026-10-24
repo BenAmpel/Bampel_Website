@@ -728,7 +728,8 @@ function runEnhancements() {
   // and its script is fetched only on the page that uses it.
   if (aboutSection && !prefersReducedMotion) {
     const particleScript = document.createElement('script');
-    particleScript.src = 'https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js';
+    particleScript.src = '/vendor/tsparticles/2.12.0/tsparticles.bundle.min.js';
+    particleScript.integrity = 'sha512-W/UhCgUnBrqWd6HtR1wS+twNkVYvwxB1Hqtm9d/0HOWynEcr7t1BOQn1x55ziHQJtn+tU0Fzih1SAawRr6YFmA==';
     particleScript.onload = startParticles;
     document.head.appendChild(particleScript);
   }

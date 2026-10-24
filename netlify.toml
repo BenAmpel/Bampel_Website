@@ -31,13 +31,14 @@
 #   script-src  no 'unsafe-inline' (2026-10-24): every script is a file. Shortcode and hook scripts live in assets/js and load
 #               fingerprinted with integrity; stylesheets that load late use data-swap + js/css-swap.js instead of onload=.
 #               JSON-LD blocks are data, not scripts, so the policy does not apply to them.
-#               www.googletagmanager.com (gtag), cdn.jsdelivr.net (tsparticles, Fuse, mark.js), d1bxh8uas1mnw7.cloudfront.net
+#               www.googletagmanager.com (gtag), cdn.jsdelivr.net (only Netlify CMS on /admin/; fonts, Fuse, mark.js, academicons
+#               and tsParticles are self-hosted under /fonts/ and /vendor/ since 2026-10-24), d1bxh8uas1mnw7.cloudfront.net
 #               and embed.altmetric.com and api.altmetric.com (Altmetric badges, JSONP), badge.dimensions.ai (Dimensions badges),
 #               cdnjs.buymeacoffee.com (support widget), identity.netlify.com (Netlify Identity widget the theme loads on the home page).
 #               (React for /ccair/ is served from /ccair/vendor/, so unpkg.com is no longer allowed.)
 #   style-src   'unsafe-inline': inline <style> blocks and style="" attributes in the same hooks and shortcodes.
-#               fonts.googleapis.com (Google Fonts), cdn.jsdelivr.net (academicons), badge.dimensions.ai, embed.altmetric.com.
-#   font-src    data: (icon fonts embedded in the Altmetric and Dimensions badge CSS), fonts.gstatic.com (Google Fonts files), cdn.jsdelivr.net (academicons font).
+#               badge.dimensions.ai, embed.altmetric.com (badge CSS). Fonts and academicons are self-hosted.
+#   font-src    'self' (self-hosted Google Fonts and academicons) and data: (icon fonts embedded in the badge CSS).
 #   img-src     data: and blob: (inline icons, map and chart canvases), Altmetric badge images, the Buy Me a Coffee widget image,
 #               ArcGIS map tiles (Leaflet visitor map), and the Google Analytics and Tag Manager pixels.
 #   connect-src Google Analytics collect endpoints, Altmetric and Dimensions metric APIs.
@@ -49,7 +50,7 @@
   for = "/*"
   [headers.values]
     X-Frame-Options = "DENY"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://cdn.jsdelivr.net https://d1bxh8uas1mnw7.cloudfront.net https://embed.altmetric.com https://api.altmetric.com https://badge.dimensions.ai https://cdnjs.buymeacoffee.com https://identity.netlify.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://badge.dimensions.ai https://embed.altmetric.com; font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://badges.altmetric.com https://cdn.altmetric.com https://cdn.buymeacoffee.com https://server.arcgisonline.com https://www.googletagmanager.com https://www.google-analytics.com; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://api.altmetric.com https://metrics-api.dimensions.ai https://badge.dimensions.ai; frame-src https://www.buymeacoffee.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://cdn.jsdelivr.net https://d1bxh8uas1mnw7.cloudfront.net https://embed.altmetric.com https://api.altmetric.com https://badge.dimensions.ai https://cdnjs.buymeacoffee.com https://identity.netlify.com; style-src 'self' 'unsafe-inline' https://badge.dimensions.ai https://embed.altmetric.com; font-src 'self' data:; img-src 'self' data: blob: https://badges.altmetric.com https://cdn.altmetric.com https://cdn.buymeacoffee.com https://server.arcgisonline.com https://www.googletagmanager.com https://www.google-analytics.com; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://api.altmetric.com https://metrics-api.dimensions.ai https://badge.dimensions.ai; frame-src https://www.buymeacoffee.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
     Permissions-Policy = "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
 
 # Self-hosted Lato and React (audit 2026-10-24): these files were answered with "max-age=0, must-revalidate", so every visit
