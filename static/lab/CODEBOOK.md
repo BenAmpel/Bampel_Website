@@ -73,8 +73,10 @@ Trials CSV: one row per item (alert, scenario) answered. Surveys CSV: one row pe
 | `scroll_px` | Distance scrolled on the page and in scrollable panels together (TraceLab 0.1.0 counted the page only) |
 | `window_blurs` | Times the browser window lost focus. Blank for TraceLab 0.1.0 records, which also counted every time the participant left a form field |
 | `keystrokes`, `deletions`, `paste_count` | Keys pressed, Backspace/Delete presses, paste actions. Which keys were pressed is never recorded |
+| `key_interval_cv` | Variation of between-key times (standard deviation / mean). People type unevenly; near 0 means software typing at a fixed rate |
+| `scripted_events` | Input events made by a script during the trial: pointer, key or typing events the browser marks untrusted, and clicks with no real press or key in the second before. The lab's own pages never create these. Blank before TraceLab 0.3.0 |
 | `key_interval_ms`, `key_hold_ms`, `typing_pauses` | Median time between typing keys (pauses of 2 s or more left out), median time a key was held, and the number of such pauses |
-| `trace_version` | TraceLab version that recorded the measures; `0.1.0` = before the October 2026 revision |
+| `trace_version` | TraceLab version that recorded the measures; `0.1.0` = before the October 2026 revision; `0.3.0` added `scripted_events` and `key_interval_cv` |
 | `raw_events`, `raw_events_sent` | Raw events stored and sent. A very long log keeps every event but thins pointer moves; 0 stored means the log was too large to keep |
 | `views` | Times the trial screen was shown (more than 1 means the page was reloaded mid-trial) |
 | `viewport_w`, `viewport_h` | Browser window size at submission |

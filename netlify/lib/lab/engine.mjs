@@ -590,6 +590,7 @@ function traceColumns(tr, raw) {
     first_interaction_ms: v('firstInteractionMs'), no_input_ms: v('noInputMs'), longest_no_input_ms: v('longestNoInputMs'),
     clicks: v('clicks'), pointer_type: v('pointerType'), scroll_px: v('scrollPx'), window_blurs: t.traceVersion ? v('windowBlurs') : '',
     keystrokes: v('keystrokes'), deletions: v('deletions'), paste_count: v('pastes'), key_interval_ms: v('keyIntervalMedianMs'), key_hold_ms: v('keyHoldMedianMs'), typing_pauses: v('typingPauses'),
+    key_interval_cv: v('keyIntervalCv'), scripted_events: 'untrustedInputs' in t ? (t.untrustedInputs || 0) + (t.unpressedClicks || 0) : '',
     trace_version: t.traceVersion || (tr ? '0.1.0' : ''), raw_events: raw ? raw.kept : '', raw_events_sent: raw ? raw.sent : ''
   };
 }

@@ -28,12 +28,16 @@
 (function (global) {
   'use strict';
 
-  var VERSION = '0.2.0';
+  var VERSION = '0.3.0';
   var IDLE_GAP_MS = 500;        // pointer still this long counts toward idleMs
   var NO_INPUT_MS = 2000;       // no input of any kind this long counts toward noInputMs
   var TYPING_PAUSE_MS = 2000;   // a gap between keys this long is a pause, not a between-key time
   var FLIP_MIN_PX = 3;          // horizontal moves smaller than this never count as a direction change (as in trajectory.mjs)
   var INPUT_TYPES = ['move', 'down', 'click', 'key_down', 'wheel', 'scroll', 'input'];
+  // Input events a person makes and the lab's own pages never create: one with isTrusted false was made by a script.
+  // (Clicks are different: the pages click a few buttons themselves, always right after a real press or key.)
+  var SCRIPTABLE = ['pointermove', 'pointerdown', 'keydown', 'keyup', 'input', 'wheel'];
+  var PRESS_WINDOW_MS = 1000;
 
   function now() { return performance.now(); }
   function round(x, d) { var p = Math.pow(10, d || 0); return Math.round(x * p) / p; }
@@ -63,6 +67,16 @@
     if (!a.length) return null;
     var s = a.slice().sort(function (x, y) { return x - y; }), m = s.length >> 1;
     return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+  }
+
+  // Coefficient of variation (sd / mean) of between-key times; people type unevenly (about 0.4 and up), a script
+  // that types at a fixed rate does not. Null below 5 intervals.
+  function cv(a) {
+    if (a.length < 5) return null;
+    var m = a.reduce(function (s, x) { return s + x; }, 0) / a.length;
+    if (!m) return null;
+    var v = a.reduce(function (s, x) { return s + (x - m) * (x - m); }, 0) / a.length;
+    return round(Math.sqrt(v) / m, 3);
   }
 
   function isField(el) {
@@ -143,9 +157,18 @@
 
   TraceLab.prototype._on = function (target, name, fn, opts) {
     var self = this;
-    var h = function (e) { try { fn.call(self, e); } catch (err) { /* never break the study page */ } };
+    var h = function (e) { try { self._trust(name, e); fn.call(self, e); } catch (err) { /* never break the study page */ } };
     target.addEventListener(name, h, opts || { passive: true, capture: true });
     this._handlers.push([target, name, h, opts || { passive: true, capture: true }]);
+  };
+
+  // Scripted input: input events with isTrusted false, and clicks made by a script with no real press or key in the
+  // second before them. Real presses (trusted pointerdown and keydown) are remembered for that window.
+  TraceLab.prototype._trust = function (name, e) {
+    if (!e || e.isTrusted !== false) { if (name === 'pointerdown' || name === 'keydown') this._lastPress = now(); return; }
+    var c = this.current;
+    if (SCRIPTABLE.indexOf(name) >= 0) { if (c) c.untrustedInputs++; this._log('scripted', { event: name }); }
+    else if (name === 'click' && now() - (this._lastPress == null ? -Infinity : this._lastPress) > PRESS_WINDOW_MS) { if (c) c.unpressedClicks++; this._log('scripted', { event: name }); }
   };
 
   TraceLab.prototype.start = function () {
@@ -274,7 +297,7 @@
       lastMove: null, path: 0, moves: 0, speeds: [], xFlips: 0, lastDx: 0, idleGaps: 0, idleMs: 0,
       clicks: 0, clickTargets: {}, hovers: {}, pointerTypes: {}, scrollDist: 0, scrollers: {}, wheel: 0,
       keys: 0, chars: 0, deletions: 0, pastes: 0, pasteChars: 0, copies: 0,
-      keyIntervals: [], keyHolds: [], typingPauses: 0, lastKeyAt: null, fields: {},
+      keyIntervals: [], keyHolds: [], typingPauses: 0, lastKeyAt: null, fields: {}, untrustedInputs: 0, unpressedClicks: 0,
       answers: [], hiddenMs: 0, hiddenAt: d && d.hidden ? t : null, blurs: 0, media: {}, mediaEls: {}
     };
     // A field that already has focus (autofocus) starts its clock with the item.
@@ -418,6 +441,10 @@
         keyIntervalMedianMs: c.keyIntervals.length ? round(median(c.keyIntervals), 1) : null,
         keyHoldMedianMs: c.keyHolds.length ? round(median(c.keyHolds), 1) : null,
         typingPauses: c.typingPauses,
+        keyIntervalCount: c.keyIntervals.length,
+        keyIntervalCv: cv(c.keyIntervals),
+        untrustedInputs: c.untrustedInputs,
+        unpressedClicks: c.unpressedClicks,
         fields: c.fields,
         pastes: c.pastes,
         pasteChars: c.pasteChars,

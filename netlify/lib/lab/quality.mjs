@@ -49,7 +49,7 @@ export async function saveDq(S, E, code, session, data, now = Date.now()) {
 // The dq_* columns for one participant: their sessions' dq records, the participant record, and the content.
 // fast completion: a finished session shorter than a quarter of the minutes the study says it takes.
 export const FAST_SHARE = 0.25, FAST_KEY_MS = 30;
-export function dqColumns(dqs, p, c) {
+export function dqColumns(dqs, p, c, trials = [], typeId = '') {
   const sum = k => dqs.reduce((n, d) => n + (d[k] || 0), 0), any = k => dqs.some(d => d[k]);
   const keys = sum('keys'), fast = sum('fastKeys');
   const minutes = Object.values(p.sessions || {}).filter(s => s.startedAt && s.completedAt).map(s => (s.completedAt - s.startedAt) / 60000);
@@ -57,10 +57,34 @@ export function dqColumns(dqs, p, c) {
   const row = {
     dq_honeypot: any('honeypot') ? 1 : 0, dq_webdriver: any('webdriver') ? 1 : 0, dq_paste_count: sum('pastes'), dq_paste_chars: sum('pasteChars'), dq_injected_chars: sum('injectedChars'),
     dq_fast_keys_share: keys ? Math.round(fast / keys * 100) / 100 : '', dq_fast_typing: keys >= 20 && fast / keys > 0.5 ? 1 : 0,
-    dq_fast_completion: per && minutes.some(m => m < per * FAST_SHARE) ? 1 : 0, dq_duplicate_panel: p.panel && p.panel.sessions.length > 1 ? 1 : 0
+    dq_fast_completion: per && minutes.some(m => m < per * FAST_SHARE) ? 1 : 0, dq_duplicate_panel: p.panel && p.panel.sessions.length > 1 ? 1 : 0,
+    ...traceDq(trials, typeId)
   };
-  row.dq_flags = ['dq_honeypot', 'dq_webdriver', 'dq_fast_typing', 'dq_fast_completion', 'dq_duplicate_panel'].reduce((n, k) => n + row[k], 0) + (row.dq_paste_count ? 1 : 0) + (row.dq_injected_chars ? 1 : 0);
+  row.dq_flags = ['dq_honeypot', 'dq_webdriver', 'dq_fast_typing', 'dq_fast_completion', 'dq_duplicate_panel', 'dq_scripted', 'dq_even_typing', 'dq_fast_answers']
+    .reduce((n, k) => n + (row[k] === 1 ? 1 : 0), 0) + (row.dq_paste_count ? 1 : 0) + (row.dq_injected_chars ? 1 : 0);
   return row;
+}
+
+// Signals from the trials' TraceLab measures (0.3.0 and later for scripted input and typing rhythm). Blank when no
+// trial carries the measure, so participants from before it do not read as clean.
+export const EVEN_TYPING_CV = 0.15, EVEN_TYPING_MIN_KEYS = 15, FAST_ANSWER_MS = 1000, FAST_ANSWER_SHARE = 0.5, FAST_ANSWER_MIN_TRIALS = 5;
+export function traceDq(trials, typeId = '') {
+  const tr = trials.map(t => t && t.traces).filter(t => t && typeof t === 'object');
+  const scored = tr.filter(t => 'untrustedInputs' in t);
+  const scripted = scored.reduce((n, t) => n + (t.untrustedInputs || 0) + (t.unpressedClicks || 0), 0);
+  const typed = tr.filter(t => t.keyIntervalCv != null && (t.keyIntervalCount || 0) >= EVEN_TYPING_MIN_KEYS);
+  const cvMin = typed.length ? Math.min(...typed.map(t => t.keyIntervalCv)) : null;
+  // Reaction-time tasks are meant to be answered within a second; there it is not a signal.
+  const answered = typeId === 'reaction' ? [] : tr.filter(t => typeof t.firstAnswerMs === 'number');
+  const fastShare = answered.length ? answered.filter(t => t.firstAnswerMs < FAST_ANSWER_MS).length / answered.length : null;
+  const shown = tr.reduce((n, t) => n + (t.durationMs || 0), 0), hidden = tr.reduce((n, t) => n + (t.hiddenMs || 0), 0);
+  return {
+    dq_scripted_events: scored.length ? scripted : '', dq_scripted: scored.length ? (scripted > 0 ? 1 : 0) : '',
+    dq_typing_cv_min: cvMin == null ? '' : cvMin, dq_even_typing: cvMin == null ? '' : cvMin < EVEN_TYPING_CV ? 1 : 0,
+    dq_fast_answer_share: fastShare == null ? '' : Math.round(fastShare * 100) / 100,
+    dq_fast_answers: fastShare == null ? '' : answered.length >= FAST_ANSWER_MIN_TRIALS && fastShare >= FAST_ANSWER_SHARE ? 1 : 0,
+    dq_hidden_share: shown ? Math.round(hidden / shown * 100) / 100 : ''
+  };
 }
 export const DQ_CODEBOOK = [
   ['dq_flags', 'integer', 'How many of the data-quality flags below are raised (0 = none). Flags are signals to review, not proof: attention checks alone no longer catch AI agents (Westwood 2025, PNAS), so the lab records behavior that software shows and people rarely do.'],
@@ -72,5 +96,12 @@ export const DQ_CODEBOOK = [
   ['dq_fast_keys_share', 'number', 'Share of key presses in text boxes that came under 30 ms after the previous one (people rarely type that fast).'],
   ['dq_fast_typing', 'binary', 'More than half of 20 or more key presses came under 30 ms apart.', '0 = no; 1 = yes'],
   ['dq_fast_completion', 'binary', 'A session was finished in under a quarter of the minutes the study says it takes.', '0 = no; 1 = yes'],
-  ['dq_duplicate_panel', 'binary', 'The same panel ID opened the study with more than one panel session ID (for example two Prolific submissions).', '0 = no; 1 = yes']
+  ['dq_duplicate_panel', 'binary', 'The same panel ID opened the study with more than one panel session ID (for example two Prolific submissions).', '0 = no; 1 = yes'],
+  ['dq_scripted_events', 'integer', 'Input events made by a script rather than a person during trials: pointer, key or typing events the browser marks as untrusted, and clicks with no real press or key in the second before (blank before TraceLab 0.3.0).'],
+  ['dq_scripted', 'binary', 'Any scripted input during trials. The lab\'s own pages never create such events.', '0 = no; 1 = yes'],
+  ['dq_typing_cv_min', 'number', 'Lowest variation of between-key times (standard deviation / mean) in a trial with 15 or more typed keys. People type unevenly (about 0.4 and up); software typing at a fixed rate comes out near 0. Blank = not enough typing.'],
+  ['dq_even_typing', 'binary', 'Typing in some trial was machine-even (variation under 0.15).', '0 = no; 1 = yes'],
+  ['dq_fast_answer_share', 'number', 'Share of trials whose first answer came within 1 s of the item appearing (not computed for reaction-time tasks).'],
+  ['dq_fast_answers', 'binary', 'Half or more of 5 or more trials were answered within 1 s, faster than the item could be read.', '0 = no; 1 = yes'],
+  ['dq_hidden_share', 'number', 'Share of trial time the browser tab was hidden (the participant was elsewhere). Not a flag: context for attention.']
 ];
