@@ -109,6 +109,9 @@ const broken = links ? links.filter((r) => r.status === 0 || (r.status >= 400 &&
 const blocked = links ? links.filter((r) => r.status === 403 || r.status === 429) : [];
 const moved = links ? links.filter((r) => r.status && r.status < 400 && r.final && r.final.replace(/\/$/, '') !== r.url.replace(/\/$/, '')) : [];
 const cell = (s) => String(s).replace(/\|/g, '\\|');
+// Hosts that refuse scripts (403/429): they usually open fine in a browser, but only a person can check them.
+const host = (u) => { try { return new URL(u).host.replace(/^www\./, ''); } catch { return u; } };
+const blockedHosts = [...blocked.reduce((m, r) => m.set(host(r.url), (m.get(host(r.url)) || 0) + 1), new Map())].sort((a, b) => b[1] - a[1]);
 const lines = [
   `# CCAIR Student Guide freshness report`,
   '',
@@ -132,8 +135,8 @@ const lines = [
   ...(links ? [
     '', '## Broken links', '',
     ...(broken.length ? ['| URL | Used in | Result |', '|---|---|---|', ...broken.map((r) => `| ${r.url} | ${cell(r.where)} | ${r.status || cell(r.error)} |`)] : ['None.']),
-    '', '## Blocked to scripts (open by hand)', '',
-    ...(blocked.length ? ['| URL | Used in | Status |', '|---|---|---|', ...blocked.map((r) => `| ${r.url} | ${cell(r.where)} | ${r.status} |`)] : ['None.']),
+    '', '## Blocked to scripts: check by hand', '',
+    ...(blocked.length ? [`Open these in a browser. Hosts: ${blockedHosts.map(([h, n]) => `${h} (${n})`).join(', ')}.`, '', '| URL | Used in | Status |', '|---|---|---|', ...blocked.map((r) => `| ${r.url} | ${cell(r.where)} | ${r.status} |`)] : ['None.']),
     '', '## Redirected (update the URL if the move is permanent)', '',
     ...(moved.length ? ['| URL | Now at | Used in |', '|---|---|---|', ...moved.map((r) => `| ${r.url} | ${r.final} | ${cell(r.where)} |`)] : ['None.'])
   ] : []),
