@@ -2,6 +2,7 @@ import { core } from './compat.mjs';
 import { content } from './compat.mjs';
 import assert from 'node:assert/strict';
 import { memStore } from './memstore.mjs';
+import { seeded } from '../../netlify/lib/lab/engine.mjs';
 const store=memStore({latency:0}), m={get:k=>store.m.has(k)?store.m.get(k).v:undefined, entries:()=>[...store.m.entries()].map(([k,x])=>[k,x.v]), values:()=>[...store.m.values()].map(x=>x.v)};
 
 const now=Date.UTC(2026,9,5,15);
@@ -74,9 +75,10 @@ const first=x1row[h.indexOf('first_panel')]; assert.equal(x1row[h.indexOf('evide
 console.log('CSV adds columns for custom evidence panels; breadth uses each alert\'s panel count');
 const list=(await core.listParticipants(store,now)).filter(p=>p.completedSessions>0); assert(list.length===3 && list.every(p=>p.totalSessions===2 && p.completedSessions===2));
 const ex=await core.exportAll(store); assert(!JSON.stringify(ex.participants).includes('"truth"'),'plans leak into participant export'); assert(Object.values(firstPlans).every(p=>p.trials.every(t=>!('id' in t.alert))),'alert id sent to browser');
-// across many participants, all four rotations and both answer orders occur
-const rots=new Set(), ans=new Set();
-for (let i=0;i<24;i++){ const q=(await core.createParticipants(store,1,{gapDays:0,test:true},now)).created[0].code; await core.consent(store,q,true,now); const pl=await core.startSession(store,q,now);
+// across many participants, all four rotations and both answer orders occur. Codes come from a fixed seed so the
+// run is repeatable, and enrollment continues until every rotation and order has appeared (capped well above need).
+const rots=new Set(), ans=new Set(), codeRand=seeded('flex-design|counterbalance');
+for (let i=0;i<200 && (rots.size<4 || ans.size<2);i++){ const q=(await core.createParticipants(store,1,{gapDays:0,test:true},now,codeRand)).created[0].code; await core.consent(store,q,true,now); const pl=await core.startSession(store,q,now);
   const t=pl.trials.find(t=>t.alert.panels.length===4); const base=(await content.getContent(store)).alerts.find(x=>x.title===t.alert.title&&x.summary===t.alert.summary).panels.map(k=>k.key); rots.add(base.indexOf(t.alert.panels[0].key)); ans.add(pl.answerOrder[0]); }
 assert.equal(rots.size,4,'all panel rotations used'); assert.equal(ans.size,2,'both answer orders used');
 console.log('counterbalancing: fixed within participant, all rotations and both answer orders across participants');
