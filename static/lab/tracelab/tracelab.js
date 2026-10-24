@@ -4,12 +4,13 @@
  *
  * Captures, after consent only:
  *   - timing: item duration, first-interaction latency, idle gaps
- *   - pointer: sampled cursor path, clicks, hovers over [data-trace] targets
- *   - scrolling and wheel input
- *   - keyboard: key category and timing (never the key itself), text edits, paste/copy/cut
- *   - attention: tab hidden time, window focus loss, resizes
+ *   - pointer: sampled cursor path, clicks, hovers over [data-trace] targets, pointer type (mouse, touch, pen)
+ *   - scrolling (the page and scrollable panels inside it) and wheel input
+ *   - keyboard: key category and timing (never the key itself), hold and between-key times, text edits,
+ *     paste/copy/cut, and time spent in each form field
+ *   - attention: tab hidden time, window focus loss, resizes, stretches with no input at all
  *   - answers: every change to a response, not just the final value
- *   - media: play/pause/seek/ended and share of the clip heard for <audio>/<video>
+ *   - media: play/pause/seek/ended, seconds actually played (not skipped over), muted at the end, for <audio>/<video>
  *   - device context: viewport, screen, pointer type, touch support, language, timezone
  *
  * Usage:
@@ -18,6 +19,7 @@
  *   lab.beginItem('q1', rootElement);    // mark an item (page/question)
  *   lab.recordAnswer('q1', value);       // call on every answer change
  *   lab.endItem({ choice: 'phishing' }); // final response for the item
+ *   lab.reopenItem(rawEvents);           // the save failed: resume the item that endItem() closed
  *   const payload = await lab.finish();  // features + raw events, sent to the sink
  *
  * Sinks: 'local' (nothing leaves the browser), 'post' (JSON to an approved URL),
@@ -26,8 +28,12 @@
 (function (global) {
   'use strict';
 
-  var VERSION = '0.1.0';
-  var IDLE_GAP_MS = 500;
+  var VERSION = '0.2.0';
+  var IDLE_GAP_MS = 500;        // pointer still this long counts toward idleMs
+  var NO_INPUT_MS = 2000;       // no input of any kind this long counts toward noInputMs
+  var TYPING_PAUSE_MS = 2000;   // a gap between keys this long is a pause, not a between-key time
+  var FLIP_MIN_PX = 3;          // horizontal moves smaller than this never count as a direction change (as in trajectory.mjs)
+  var INPUT_TYPES = ['move', 'down', 'click', 'key_down', 'wheel', 'scroll', 'input'];
 
   function now() { return performance.now(); }
   function round(x, d) { var p = Math.pow(10, d || 0); return Math.round(x * p) / p; }
@@ -52,6 +58,28 @@
     if (el.id) return '#' + el.id;
     return el.tagName ? el.tagName.toLowerCase() : null;
   }
+
+  function median(a) {
+    if (!a.length) return null;
+    var s = a.slice().sort(function (x, y) { return x - y; }), m = s.length >> 1;
+    return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+  }
+
+  function isField(el) {
+    if (!el || !el.tagName) return false;
+    var t = el.tagName;
+    return t === 'INPUT' || t === 'TEXTAREA' || t === 'SELECT' || !!el.isContentEditable;
+  }
+
+  // Seconds of a clip actually played: the union of its played ranges, so skipping ahead never counts as heard.
+  function playedSeconds(m) {
+    var r = m && m.played, s = 0;
+    if (!r || !r.length) return 0;
+    for (var i = 0; i < r.length; i++) s += r.end(i) - r.start(i);
+    return s;
+  }
+
+  function finiteOrNull(x) { return typeof x === 'number' && isFinite(x) ? x : null; }
 
   function participantFromUrl() {
     var q = new URLSearchParams(global.location.search);
@@ -91,7 +119,20 @@
     this._handlers = [];
     this._lastMove = 0;
     this._hover = {};
+    this._sampled = {};   // last raw-log time per throttled stream (scroll per scroller, wheel)
+    this._scrollPos = {};
+    this._keysDown = {};  // key code -> press time, held only in memory to pair a press with its release
+    this._focus = null;
   }
+
+  // Throttled streams (scrolling, wheel) are summed on every event but written to the raw log at most once per
+  // sampling interval, so a fast scroll cannot flood the log.
+  TraceLab.prototype._due = function (key) {
+    var t = now();
+    if (t - (this._sampled[key] || -Infinity) < this.opts.mouseSampleMs) return false;
+    this._sampled[key] = t;
+    return true;
+  };
 
   TraceLab.prototype._log = function (type, data) {
     var ev = Object.assign({ t: round(now() - this.t0, 1), type: type, item: this.current ? this.current.id : null }, data || {});
@@ -121,7 +162,10 @@
       this._lastMove = t;
       this._log('move', { x: e.clientX, y: e.clientY, pt: e.pointerType });
     });
-    this._on(d, 'pointerdown', function (e) { this._log('down', { x: e.clientX, y: e.clientY, pt: e.pointerType, target: targetId(e.target) }); });
+    this._on(d, 'pointerdown', function (e) {
+      this._log('down', { x: e.clientX, y: e.clientY, pt: e.pointerType, target: targetId(e.target) });
+      if (this.current && e.pointerType) this.current.pointerTypes[e.pointerType] = (this.current.pointerTypes[e.pointerType] || 0) + 1;
+    });
     this._on(d, 'click', function (e) { this._log('click', { x: e.clientX, y: e.clientY, target: targetId(e.target) }); });
     this._on(d, 'pointerover', function (e) {
       var id = targetId(e.target);
@@ -140,10 +184,54 @@
       delete this._hover[id];
       this._log('hover_out', { target: id, dwell: round(now() - start, 1) });
     });
-    this._on(global, 'scroll', function () { this._log('scroll', { y: Math.round(global.scrollY) }); });
-    this._on(d, 'wheel', function (e) { this._log('wheel', { dy: Math.round(e.deltaY) }); });
-    this._on(d, 'keydown', function (e) { this._log('key_down', { k: keyCategory(e), target: targetId(e.target), repeat: !!e.repeat }); });
-    this._on(d, 'keyup', function (e) { this._log('key_up', { k: keyCategory(e) }); });
+    // Scroll events do not bubble, but a capturing listener on the document sees the page's and every panel's.
+    this._on(d, 'scroll', function (e) {
+      var el = e.target, page = !el || el === d || el === d.documentElement || el === d.body;
+      var key = page ? 'page' : (targetId(el) || 'element'), y = Math.round(page ? (global.scrollY || 0) : (el.scrollTop || 0));
+      // A panel's position before its first scroll event is not known; panels start at the top, so take 0 (the page's
+      // starting position is read when the item begins).
+      var prev = this._scrollPos[key];
+      if (prev == null && !page) prev = 0;
+      this._scrollPos[key] = y;
+      if (this.current && prev != null) {
+        var c = this.current, dy = Math.abs(y - prev);
+        c.scrollDist += dy;
+        if (!page) c.scrollers[key] = (c.scrollers[key] || 0) + dy;
+      }
+      if (this._due('scroll:' + key)) this._log('scroll', { target: key, y: y });
+    });
+    this._on(d, 'wheel', function (e) {
+      if (this.current) this.current.wheel += Math.abs(e.deltaY || 0);
+      this._wheelPending = (this._wheelPending || 0) + (e.deltaY || 0);
+      if (this._due('wheel')) { this._log('wheel', { dy: Math.round(this._wheelPending) }); this._wheelPending = 0; }
+    });
+    this._on(d, 'keydown', function (e) {
+      // A press is paired with its release by code, or by key when there is no code (some virtual keyboards); the
+      // pair lives only in memory and is never logged.
+      var k = keyCategory(e), t = now(), id = e.code || e.key;
+      if (!e.repeat && id) this._keysDown[id] = t;
+      this._log('key_down', { k: k, target: targetId(e.target), repeat: !!e.repeat });
+      var c = this.current;
+      if (c && !e.repeat && (k === 'char' || k === 'space' || k === 'backspace' || k === 'delete')) {
+        if (c.lastKeyAt != null) { var gap = t - c.lastKeyAt; if (gap >= TYPING_PAUSE_MS) c.typingPauses++; else c.keyIntervals.push(gap); }
+        c.lastKeyAt = t;
+      }
+    });
+    this._on(d, 'keyup', function (e) {
+      var id = e.code || e.key, down = id ? this._keysDown[id] : null, hold = down != null ? round(now() - down, 1) : null;
+      if (id) delete this._keysDown[id];
+      this._log('key_up', { k: keyCategory(e), hold: hold });
+      if (this.current && hold != null && hold < 2000) this.current.keyHolds.push(hold);
+    });
+    // Time in each form field, and keyboard visits to [data-trace] targets (the keyboard user's hover).
+    this._on(d, 'focusin', function (e) {
+      var el = e.target, traced = el && el.closest && el.closest('[data-trace]');
+      if (!isField(el) && !traced) return;
+      this._closeFocus();   // a field removed from the page while focused never sends focusout
+      this._focus = { id: targetId(el), t: now() };
+      this._log('focus_in', { target: this._focus.id });
+    });
+    this._on(d, 'focusout', function () { this._closeFocus(); });
     this._on(d, 'input', function (e) {
       var v = e.target && typeof e.target.value === 'string' ? e.target.value.length : null;
       this._log('input', { target: targetId(e.target), inputType: e.inputType || null, len: v });
@@ -155,14 +243,19 @@
     this._on(d, 'copy', function (e) { this._log('copy', { target: targetId(e.target) }); });
     this._on(d, 'cut', function (e) { this._log('cut', { target: targetId(e.target) }); });
     this._on(d, 'visibilitychange', function () { this._log(d.hidden ? 'hidden' : 'visible'); });
-    this._on(global, 'blur', function () { this._log('window_blur'); });
-    this._on(global, 'focus', function () { this._log('window_focus'); });
+    // blur and focus on form fields reach a capturing window listener too; only the window's own count.
+    this._on(global, 'blur', function (e) { if (e.target === global) this._log('window_blur'); });
+    this._on(global, 'focus', function (e) { if (e.target === global) this._log('window_focus'); });
     this._on(global, 'resize', function () { this._log('resize', { w: global.innerWidth, h: global.innerHeight }); });
+    // Media events do not bubble; the capturing listener sees them. A play before the clip's length is known
+    // (metadata still loading) is kept, with dur null until it is.
     ['play', 'pause', 'seeked', 'ended'].forEach(function (name) {
       this._on(d, name, function (e) {
         var m = e.target;
-        if (!m || !m.duration) return;
-        this._log('media_' + name, { target: targetId(m), at: round(m.currentTime, 2), dur: round(m.duration, 2) });
+        if (!m || !('currentTime' in m)) return;
+        var id = targetId(m), dur = finiteOrNull(m.duration);
+        if (this.current && id) this.current.mediaEls[id] = m;
+        this._log('media_' + name, { target: id, at: round(m.currentTime || 0, 2), dur: dur == null ? null : round(dur, 2), heard: round(playedSeconds(m), 2) });
       });
     }, this);
     this._log('start', { device: this.device });
@@ -172,22 +265,42 @@
   TraceLab.prototype.beginItem = function (id, rootEl) {
     if (!this.started) throw new Error('TraceLab: call start() after consent, before beginItem()');
     if (this.current) this.endItem(null);
+    this._closed = null;   // a new item: the previous one can no longer be reopened
     this._hover = {};
+    this._scrollPos = { page: Math.round(global.scrollY || 0) };
+    var t = now() - this.t0, d = global.document, active = d && d.activeElement;
     this.current = {
-      id: id, root: rootEl || null, t: now() - this.t0, firstInteraction: null,
+      id: id, root: rootEl || null, t: t, firstInteraction: null, lastInput: t, noInputMs: 0, longestNoInput: 0,
       lastMove: null, path: 0, moves: 0, speeds: [], xFlips: 0, lastDx: 0, idleGaps: 0, idleMs: 0,
-      clicks: 0, clickTargets: {}, hovers: {}, scrollDist: 0, lastScroll: null, wheel: 0,
+      clicks: 0, clickTargets: {}, hovers: {}, pointerTypes: {}, scrollDist: 0, scrollers: {}, wheel: 0,
       keys: 0, chars: 0, deletions: 0, pastes: 0, pasteChars: 0, copies: 0,
-      answers: [], hiddenMs: 0, hiddenAt: null, blurs: 0, media: {}
+      keyIntervals: [], keyHolds: [], typingPauses: 0, lastKeyAt: null, fields: {},
+      answers: [], hiddenMs: 0, hiddenAt: d && d.hidden ? t : null, blurs: 0, media: {}, mediaEls: {}
     };
+    // A field that already has focus (autofocus) starts its clock with the item.
+    this._focus = active && isField(active) ? { id: targetId(active), t: now() } : null;
     this._log('item_begin', { id: id });
     return this;
   };
 
+  TraceLab.prototype._closeFocus = function () {
+    var f = this._focus, c = this.current;
+    this._focus = null;
+    if (!f) return;
+    var ms = now() - f.t;
+    this._log('focus_out', { target: f.id, ms: round(ms, 1) });
+    if (c && f.id) {
+      var x = c.fields[f.id] || (c.fields[f.id] = { visits: 0, ms: 0 });
+      x.visits++; x.ms = round(x.ms + ms, 1);
+    }
+  };
+
   TraceLab.prototype._accumulate = function (ev) {
     var c = this.current;
-    var interactive = ['move', 'down', 'click', 'key_down', 'wheel', 'scroll', 'input'];
-    if (c.firstInteraction == null && interactive.indexOf(ev.type) >= 0 && ev.t > c.t) c.firstInteraction = ev.t - c.t;
+    if (INPUT_TYPES.indexOf(ev.type) >= 0) {
+      if (c.firstInteraction == null && ev.t > c.t) c.firstInteraction = ev.t - c.t;
+      this._noInput(ev.t);
+    }
     switch (ev.type) {
       case 'move':
         if (c.lastMove) {
@@ -196,7 +309,7 @@
           c.path += dist; c.moves++;
           if (dt > 0) c.speeds.push(dist / dt);
           if (dt > IDLE_GAP_MS) { c.idleGaps++; c.idleMs += dt; }
-          if (dx !== 0) { if (c.lastDx !== 0 && Math.sign(dx) !== Math.sign(c.lastDx)) c.xFlips++; c.lastDx = dx; }
+          if (Math.abs(dx) >= FLIP_MIN_PX) { if (c.lastDx !== 0 && Math.sign(dx) !== Math.sign(c.lastDx)) c.xFlips++; c.lastDx = dx; }
         }
         c.lastMove = { x: ev.x, y: ev.y, t: ev.t };
         break;
@@ -208,11 +321,6 @@
         var h = c.hovers[ev.target] || (c.hovers[ev.target] = { count: 0, dwellMs: 0 });
         h.count++; h.dwellMs = round(h.dwellMs + ev.dwell, 1);
         break;
-      case 'scroll':
-        if (c.lastScroll != null) c.scrollDist += Math.abs(ev.y - c.lastScroll);
-        c.lastScroll = ev.y;
-        break;
-      case 'wheel': c.wheel += Math.abs(ev.dy); break;
       case 'key_down':
         c.keys++;
         if (ev.k === 'char' || ev.k === 'space') c.chars++;
@@ -225,13 +333,22 @@
       case 'window_blur': c.blurs++; break;
       default:
         if (ev.type.indexOf('media_') === 0 && ev.target) {
-          var m = c.media[ev.target] || (c.media[ev.target] = { plays: 0, seeks: 0, ended: false, maxAt: 0, firstPlayMs: null, dur: ev.dur });
+          var m = c.media[ev.target] || (c.media[ev.target] = { plays: 0, seeks: 0, ended: false, maxAt: 0, firstPlayMs: null, dur: null, heardSec: 0 });
           if (ev.type === 'media_play') { m.plays++; if (m.firstPlayMs == null) m.firstPlayMs = round(ev.t - c.t, 1); }
           if (ev.type === 'media_seeked') m.seeks++;
           if (ev.type === 'media_ended') m.ended = true;
+          if (ev.dur != null) m.dur = ev.dur;
           m.maxAt = Math.max(m.maxAt, ev.at || 0);
+          m.heardSec = Math.max(m.heardSec, ev.heard || 0);
         }
     }
+  };
+
+  // Time with no input of any kind: each gap of NO_INPUT_MS or more between inputs (from the item's start, and up to its end).
+  TraceLab.prototype._noInput = function (t) {
+    var c = this.current, gap = t - c.lastInput;
+    if (gap >= NO_INPUT_MS) { c.noInputMs += gap; if (gap > c.longestNoInput) c.longestNoInput = gap; }
+    c.lastInput = t;
   };
 
   TraceLab.prototype.recordAnswer = function (field, value) {
@@ -245,6 +362,9 @@
     if (!c) return null;
     var end = now() - this.t0;
     if (c.hiddenAt != null) { c.hiddenMs += end - c.hiddenAt; c.hiddenAt = null; }
+    this._closeFocus();
+    if (this._focus === null && global.document && isField(global.document.activeElement)) this._focus = { id: targetId(global.document.activeElement), t: now() };   // still in the field: the next item's clock starts now
+    this._noInput(end);
     Object.keys(this._hover).forEach(function (id) {
       var h = c.hovers[id] || (c.hovers[id] = { count: 0, dwellMs: 0 });
       h.count++; h.dwellMs = round(h.dwellMs + (now() - this._hover[id]), 1);
@@ -253,7 +373,14 @@
     var fields = {};
     c.answers.forEach(function (a) { fields[a.field] = (fields[a.field] || 0) + 1; });
     var changes = Object.keys(fields).reduce(function (s, f) { return s + Math.max(0, fields[f] - 1); }, 0);
-    Object.keys(c.media).forEach(function (k) { var m = c.media[k]; m.shareHeard = m.dur ? round(Math.min(1, m.maxAt / m.dur), 3) : null; });
+    Object.keys(c.media).forEach(function (k) {
+      var m = c.media[k], el = c.mediaEls[k];
+      if (el) { m.heardSec = Math.max(m.heardSec, playedSeconds(el)); if (m.dur == null) m.dur = finiteOrNull(el.duration); m.mutedAtEnd = !!(el.muted || el.volume === 0); }
+      m.heardSec = round(m.heardSec, 2);
+      m.shareHeard = m.dur ? round(Math.min(1, m.heardSec / m.dur), 3) : null;     // played, not skipped over
+      m.furthestShare = m.dur ? round(Math.min(1, m.maxAt / m.dur), 3) : null;    // furthest point reached (0.1.0's shareHeard)
+    });
+    var pts = Object.keys(c.pointerTypes).sort(function (a, b) { return c.pointerTypes[b] - c.pointerTypes[a]; });
     var item = {
       id: c.id,
       startMs: round(c.t, 1),
@@ -261,6 +388,7 @@
       response: response,
       answers: c.answers,
       features: {
+        traceVersion: VERSION,
         durationMs: round(end - c.t, 1),
         firstInteractionMs: c.firstInteraction == null ? null : round(c.firstInteraction, 1),
         firstAnswerMs: c.answers.length ? c.answers[0].t : null,
@@ -274,14 +402,23 @@
         mouseXFlips: c.xFlips,
         idleGaps: c.idleGaps,
         idleMs: round(c.idleMs, 1),
+        noInputMs: round(c.noInputMs, 1),
+        longestNoInputMs: round(c.longestNoInput, 1),
         clicks: c.clicks,
         clickTargets: c.clickTargets,
         hovers: c.hovers,
+        pointerTypes: c.pointerTypes,
+        pointerType: pts.length ? pts[0] : null,
         scrollPx: Math.round(c.scrollDist),
+        scrollers: c.scrollers,
         wheelPx: Math.round(c.wheel),
         keystrokes: c.keys,
         charsTyped: c.chars,
         deletions: c.deletions,
+        keyIntervalMedianMs: c.keyIntervals.length ? round(median(c.keyIntervals), 1) : null,
+        keyHoldMedianMs: c.keyHolds.length ? round(median(c.keyHolds), 1) : null,
+        typingPauses: c.typingPauses,
+        fields: c.fields,
         pastes: c.pastes,
         pasteChars: c.pasteChars,
         copies: c.copies,
@@ -292,8 +429,27 @@
     };
     this._log('item_end', { id: c.id });
     this.items.push(item);
+    this._closed = c;
     this.current = null;
     return item;
+  };
+
+  // Undo the last endItem() when its data could not be saved: the item goes on as if it had never ended, so a
+  // retried save keeps everything recorded before the failure. rawEvents are the events taken out of lab.events
+  // for the failed save; they go back in front of anything logged since.
+  TraceLab.prototype.reopenItem = function (rawEvents) {
+    var c = this._closed;
+    if (!c || this.current) return false;
+    this._closed = null;
+    this.current = c;
+    this.items.pop();
+    if (rawEvents && rawEvents.length) {
+      var since = this.events.splice(0);
+      for (var i = rawEvents.length - 1; i >= 0; i--) if (rawEvents[i].type === 'item_end') { rawEvents = rawEvents.slice(0, i); break; }
+      Array.prototype.push.apply(this.events, rawEvents.concat(since));
+    }
+    this._log('item_reopen', { id: c.id });
+    return true;
   };
 
   TraceLab.prototype.stop = function () {

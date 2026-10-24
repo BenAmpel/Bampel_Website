@@ -77,7 +77,7 @@ const task = { paradigm: 'stroop', keys: { red: 'd', green: 'f', blue: 'j', yell
 let marked = 0;
 const done = new Promise(res => sandbox.impl.runTrial({ plan: { task }, trial: { stim: { target: 'blue', word: 'red', practice: false } }, markOnset: () => marked++, submit: f => { submitted = f; res(); } }, ui));
 assert(/<kbd>D<\/kbd> Red/.test(html) && /rt-fix/.test(html), 'fixation and the answer keys');
-keyHandler({ key: 'j', timeStamp: 900, repeat: false, preventDefault() {} });   // too early: before the stimulus, ignored
+keyHandler({ key: 'j', timeStamp: 900, repeat: false, preventDefault() {} });   // too early: before the stimulus, not an answer but counted as an anticipation
 frameTs = 1000;
 await new Promise(r => setTimeout(r, 20));
 assert.match(stageEl.innerHTML, /color:#1d6fd1">RED</, 'the word RED in blue ink');
@@ -85,7 +85,25 @@ assert.equal(marked, 1, 'the engine is told when the stimulus appeared');
 keyHandler({ key: 'J', timeStamp: 1523.4, repeat: false, preventDefault() {} });
 await done;
 const sent = JSON.parse(JSON.stringify(submitted)); sent.rtMs = Math.round(sent.rtMs * 100) / 100;   // the server keeps 0.01 ms
-assert.deepEqual(sent, { response: 'blue', key: 'j', rtMs: 523.4, timedOut: false, via: 'key' }, 'response time from the first frame of the stimulus');
+assert.deepEqual(sent, { response: 'blue', key: 'j', rtMs: 523.4, timedOut: false, via: 'key', earlyPresses: 1, otherKeys: 0, hiddenAtStimulus: false }, 'response time from the first frame of the stimulus; the early press is an anticipation');
 assert.equal(keyHandler, null, 'the key listener is removed after the answer');
 assert.match(sandbox.impl.instructions({ task, trials: [{ stim: { practice: true } }] }, ui), /ink colour/);
 console.log('browser: early keys ignored, RT from the stimulus frame, listener removed');
+
+// a tap is timed when the finger lands, not when it lifts (the click that follows is ignored); a touch during the
+// fixation cross is an anticipation, and a stray key after the stimulus is counted
+{
+  const b = { h: {}, addEventListener(t, f) { this.h[t] = f; }, getAttribute: () => 'red' };
+  btns.push(b); submitted = null; frameTs = 3000;
+  const tapped = new Promise(res => sandbox.impl.runTrial({ plan: { task }, trial: { stim: { target: 'red', word: 'red', practice: false } }, markOnset() {}, submit: f => { submitted = f; res(); } }, ui));
+  b.h.pointerdown({ pointerType: 'touch', timeStamp: 2990 });   // during the fixation cross
+  await new Promise(r => setTimeout(r, 20));
+  keyHandler({ key: 'x', timeStamp: 3100, repeat: false, preventDefault() {} });
+  b.h.pointerdown({ pointerType: 'touch', timeStamp: 3412 });   // finger down
+  b.h.click({ detail: 1, timeStamp: 3490 });                     // finger up: not the answer time
+  await tapped;
+  const t = JSON.parse(JSON.stringify(submitted));
+  assert.deepEqual([t.via, Math.round(t.rtMs), t.earlyPresses, t.otherKeys, t.hiddenAtStimulus], ['tap', 412, 1, 1, false]);
+  btns.length = 0;
+}
+console.log('browser: taps timed on touch-down; anticipations and stray keys counted');

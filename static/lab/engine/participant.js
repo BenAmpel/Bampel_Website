@@ -598,6 +598,7 @@
       if (r.error === 'voice_unavailable' || r.error === 'lab_busy') return showRetry(r.error);
       if (r.error) return showLogin(ERR[r.error] || ERR.server_error);
       S.plan = r;
+      dqStart(r.session);
       if (!S.lab && window.TraceLab) { S.lab = TraceLab.create({ study: studyId, version: '3.0.0', sink: { type: 'local' }, mouseSampleMs: 50 }); S.lab.start(); }
       measureFrames();
       runChecks(r.session, function () { if (env().preload) return preloadPlan(S.plan, 0); next(); });
@@ -861,10 +862,14 @@
         var data = Object.assign({}, fields, { answerLog: answerLog, traces: feats ? feats.features : null, rawEvents: raw, viewport: { w: window.innerWidth, h: window.innerHeight },
           timing: { onsetMs: onset, onsetDelayMs: onset != null ? onset - t0 : null, frameMs: S.frameMs, preloaded: env().preload ? !!S.preloaded : null },
           fullscreen: env().fullscreen ? { atOnset: fsAtOnset, exitsMs: (S.fsExits || []).filter(function (x) { return x >= t0; }).map(function (x) { return x - t0; }) } : undefined });
-        if (S.lab && !S.deviceSent[p.session] && !isPractice) { data.device = S.lab.device; S.deviceSent[p.session] = true; }
+        var sendsDevice = !!(S.lab && !S.deviceSent[p.session] && !isPractice);
+        if (sendsDevice) data.device = S.lab.device;
         dqFlush(p.session);
         api('trial', { token: S.token, session: p.session, index: index, data: data }).then(function (r) {
-          if (r.error) { if (S.lab) S.lab.beginItem(isPractice ? 'practice' : 't' + index, stage); return onError && onError(ERR[r.error] || ERR.server_error); }
+          // A failed save resumes the same item, with its clock, traces and raw events intact, so the retry sends
+          // everything recorded since the item began (not only what happened after the error).
+          if (r.error) { if (S.lab && !S.lab.reopenItem(raw)) S.lab.beginItem(isPractice ? 'practice' : 't' + index, stage); return onError && onError(ERR[r.error] || ERR.server_error); }
+          if (sendsDevice) S.deviceSent[p.session] = true;
           if (r.screenedOut) return showScreenedOut();
           if (isPractice) { p.practiceDone = true; return showPracticeDone(); }
           p.trials.forEach(function (x) { if (x.index === index) x.done = true; });
@@ -943,6 +948,11 @@
   // Watched for the whole session in this tab, sent as running totals when a page or item is submitted. Only counts
   // and timing are kept, never the text typed or pasted.
   var DQ = { honeypot: false, webdriver: !!(typeof navigator !== 'undefined' && navigator.webdriver), pastes: 0, pasteChars: 0, injectedChars: 0, keys: 0, fastKeys: 0 }, dqSent = '', lastKey = 0, keyBudget = 0;
+  // Counts are sent per session and per page load: the server keeps the highest report of each load and adds the
+  // loads up, so a reload (which starts the counts again) adds to the session instead of being hidden by the max, and
+  // the next session of a one-sitting study does not repeat the counts of the one before.
+  var DQ_COUNTS = ['pastes', 'pasteChars', 'injectedChars', 'keys', 'fastKeys'], dqBase = {}, dqLoad = Math.random().toString(36).slice(2, 12) + Date.now().toString(36);
+  function dqStart(session) { if (dqBase.session !== session) { dqBase = { session: session }; DQ_COUNTS.forEach(function (k) { dqBase[k] = DQ[k]; }); } }
   function isTextBox(t) { return t && (t.tagName === 'TEXTAREA' || (t.tagName === 'INPUT' && /^(text|search|email|number|tel|url)?$/.test(t.type || ''))) && !t.classList.contains('hp-input'); }
   if (document.addEventListener) {
     document.addEventListener('keydown', function (e) {
@@ -967,9 +977,12 @@
   function honeypotHtml() { return '<div class="hp-field" aria-hidden="true"><label>Leave this box empty<input type="text" class="hp-input" name="hp_extra_info" tabindex="-1" autocomplete="off"></label></div>'; }
   function honeypotCheck() { var h = stage.querySelector && stage.querySelector('.hp-input'); if (h && h.value) DQ.honeypot = true; }
   function dqFlush(session) {
-    var s = JSON.stringify(DQ);
-    if (s === dqSent || !S.token || !session) return;
-    dqSent = s; post('dq', { token: S.token, session: session, data: DQ });   // best effort: no retry, never blocks the page
+    if (!S.token || !session) return;
+    var d = { honeypot: DQ.honeypot, webdriver: DQ.webdriver, load: dqLoad };
+    DQ_COUNTS.forEach(function (k) { d[k] = DQ[k] - (dqBase.session === session ? dqBase[k] || 0 : 0); });
+    var s = session + JSON.stringify(d);
+    if (s === dqSent) return;
+    dqSent = s; post('dq', { token: S.token, session: session, data: d });   // best effort: no retry, never blocks the page
   }
 
   // ---------- what study types get ----------
@@ -978,7 +991,7 @@
     // Study types with their own server routes (for example the economic game's polling) call them with the sign-in token.
     call: function (route, body) { return api(route, Object.assign({ token: S.token }, body)); } };
   window.LabEngine = { registerType: function (id, impl) { types[id] = impl; }, ui: ui,
-    internals: { S: S, mediaUrls: mediaUrls, swapUrls: swapUrls, preloadPlan: preloadPlan, runChecks: runChecks, DQ: DQ, dqFlush: dqFlush, honeypotHtml: honeypotHtml,
+    internals: { S: S, mediaUrls: mediaUrls, swapUrls: swapUrls, preloadPlan: preloadPlan, runChecks: runChecks, DQ: DQ, dqFlush: dqFlush, dqStart: dqStart, honeypotHtml: honeypotHtml,
       showLogin: showLogin, showConsent: showConsent, showStatus: showStatus, showFinished: showFinished, headphoneStep: headphoneStep, micStep: micStep, runTrial: runTrial, measureFrames: measureFrames } };   // for tests (tests/lab/*.test.mjs)
 
   // ---------- boot ----------

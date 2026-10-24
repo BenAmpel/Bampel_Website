@@ -147,7 +147,8 @@ export default {
     const row = { item_id: r.itemId, item_title: r.item?.title || '', item_kind: r.item?.kind || '', item_variant: r.item?.variant || '',
       rt_ms: d.rtMs ?? '', first_answer_ms: tr.firstAnswerMs ?? '', answer_changes: tr.answerChanges ?? '',
       link_hovers: linkHovers.reduce((n, [, h]) => n + (h.count || 0), 0), link_hover_ms: Math.round(linkHovers.reduce((n, [, h]) => n + (h.dwellMs || 0), 0)),
-      link_clicks: linkClicks.reduce((n, [, c]) => n + c, 0) };
+      link_clicks: linkClicks.reduce((n, [, c]) => n + c, 0),
+      link_focus: tr.traceVersion ? Object.entries(tr.fields || {}).filter(([k]) => k.startsWith('link:')).reduce((n, [, f]) => n + (f.visits || 0), 0) : '' };
     for (const q of r.questions || Object.keys(d.answers || {})) row[`a_${q}`] = (d.answers || {})[q] ?? '';
     return row;
   },

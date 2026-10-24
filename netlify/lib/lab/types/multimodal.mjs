@@ -764,7 +764,9 @@ export default {
     const points = dec && dec.mouseTracking ? cleanPoints(d.trajectory) : [];
     const m = d.media && typeof d.media === 'object' ? d.media : null;
     const media = m ? { plays: num(m.plays, 0, 1000), pauses: num(m.pauses, 0, 1000), seeks: num(m.seeks, 0, 1000), firstPlayMs: num(m.firstPlayMs, 0, 864e5), endedMs: num(m.endedMs, 0, 864e5),
-      heardPct: num(m.heardPct, 0, 100), durationMs: num(m.durationMs, 0, 864e5), transcriptOpened: m.transcriptOpened === true } : null;
+      heardPct: num(m.heardPct, 0, 100), durationMs: num(m.durationMs, 0, 864e5), transcriptOpened: m.transcriptOpened === true, error: m.error === true || undefined } : null;
+    // A keyboard or touch answer has no pointer path between Start and the answer, so its curvature is not measured.
+    const mtInput = ['mouse', 'pen', 'touch', 'keyboard'].includes(d.mtInput) ? d.mtInput : null, pathInput = !mtInput || mtInput === 'mouse' || mtInput === 'pen';
     const c = d.call && typeof d.call === 'object' ? d.call : null;
     const call = c ? { answered: c.answered === true, ringMs: num(c.ringMs, 0, 36e5), durationMs: num(c.durationMs, 0, 36e5), holdMs: num(c.holdMs, 0, 36e5), typedTurns: num(c.typedTurns, 0, 200),
       spokenTurns: num(c.spokenTurns, 0, 200), interruptions: num(c.interruptions, 0, 200), captions: c.captions === true, directoryOpened: c.directoryOpened === true, endedBy: ['participant', 'caller', 'timeout'].includes(c.endedBy) ? c.endedBy : null,
@@ -772,7 +774,7 @@ export default {
     const v = d.voice && typeof d.voice === 'object' ? d.voice : null;
     return {
       answers: cleanAnswers(d.answers, questionsFor(plan, t), { condition: plan.condition, embedded: plan.embedded }),
-      decision, decisionMs: decision ? num(d.decisionMs, 0, 864e5) : null, trajectory: points.length ? points : null, mt: points.length ? trajectoryMetrics(points) : null,
+      decision, decisionMs: decision ? num(d.decisionMs, 0, 864e5) : null, trajectory: points.length ? points : null, mt: points.length && pathInput ? trajectoryMetrics(points) : null, mtInput,
       rtMs: num(d.rtMs, 0, 864e5), answerLog, traces: small(d.traces, 50000), media, call, callServer: small(d.callServer, 4000), checkServer: small(d.checkServer, 2000),
       voice: v ? { recorded: v.recorded === true && !!plan.recording, durationMs: num(v.durationMs, 0, 36e5), typed: typeof v.typed === 'string' ? v.typed.slice(0, 4000) : '' } : null,
       viewport: d.viewport ? { w: num(d.viewport.w, 0, 20000), h: num(d.viewport.h, 0, 20000) } : null, device: small(d.device, 4000), selfTest: d.selfTest === true || undefined,
@@ -794,7 +796,9 @@ export default {
       rt_ms: d.rtMs ?? '', first_answer_ms: tr.firstAnswerMs ?? '', answer_changes: tr.answerChanges ?? '',
       decision: d.decision ?? '', decision_ms: d.decisionMs ?? '', decision_changes: changes ? changes - 1 : '',
       mt_mad: mt.mad ?? '', mt_auc: mt.auc ?? '', mt_xflips: mt.xFlips ?? '', mt_init_ms: mt.initMs ?? '', mt_move_ms: mt.moveMs ?? '',
+      mt_input: d.mtInput || '',
       media_plays: m.plays ?? '', media_heard_pct: m.heardPct ?? '', media_first_play_ms: m.firstPlayMs ?? '', media_transcript: isMedia ? (m.transcriptOpened ? 1 : 0) : '',
+      media_pauses: m.pauses ?? '', media_ended_ms: m.endedMs ?? '', media_error: d.media ? (m.error ? 1 : 0) : '', call_ring_ms: c.ringMs ?? '',
       call_answered: d.callServer ? (cs.answered ? 1 : 0) : '', call_outcome: cs.outcome || '', call_final_state: cs.finalState || '', call_turns: cs.participantTurns ?? '',
       call_digits_disclosed: cs.digitsDisclosed ?? '', call_verifies: cs.verifies ?? '', call_refusals: cs.refusals ?? '', call_callbacks: cs.callbacks ?? '', call_callback_resolved: d.callServer ? (cs.callbackResolved ? 1 : 0) : '',
       call_callbacks_dialpad_listed: cs.callbacksDialpadListed ?? '', call_callback_resolved_via: cs.callbackResolvedVia || '', call_agreed_no_disclosure: cs.agreed ?? '', call_benign_completed_on_call: cs.completedOnCall == null ? '' : cs.completedOnCall ? 1 : 0, call_benign_completed_via_callback: cs.completedViaCallback == null ? '' : cs.completedViaCallback ? 1 : 0,

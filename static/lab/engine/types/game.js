@@ -279,6 +279,7 @@
     var key = 'play:' + s.round + ':' + s.step;
     if (fresh(run, key)) {
       run.t0 = performance.now(); run.hidden = 0;
+      if (run.hiddenAt != null) run.hiddenAt = run.t0;   // drawn while the tab was hidden: count hidden time from now, not from before the screen existed
       var form = decisionForm(ctx, s.entries), head = s.entries.length === 1 ? s.entries[0].label : g.stages[0].label;
       ui.show('<h1>' + esc(head) + '</h1>' + (s.practice ? '<p class="soft">' + ui.Th('game_practice_note') + '</p>' : '') + noticeBlock(ctx, s.notices) + roleBlock(ctx, s.role, s.roleLabel) + shownBlock(ctx, s.shown) + timerHtml(ui) +
         '<div id="gm-form">' + form.html + '</div><div id="gm-msg" role="alert"></div><div class="actions"><button id="gm-go">' + ui.Th('game_submit') + '</button></div><p class="muted" id="gm-progress" aria-live="polite"></p>');
@@ -403,6 +404,7 @@
       return;
     }
     var form = decisionForm(ctx, s.entries), t0 = performance.now(); run.hidden = 0;
+    if (run.hiddenAt != null) run.hiddenAt = t0;   // as above: hidden time starts with this screen
     ui.show('<h1>' + esc(s.entries.length === 1 ? s.entries[0].label : title) + '</h1>' + (s.practice ? '<p class="soft">' + ui.Th('game_practice_note') + '</p>' : '') + roleBlock(ctx, s.role, s.roleLabel) + '<div id="gm-form">' + form.html + '</div>' +
       '<div id="gm-msg" role="alert"></div><div class="actions"><button id="gm-go">' + ui.Th('game_submit') + '</button></div>');
     var go = document.getElementById('gm-go');
