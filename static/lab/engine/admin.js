@@ -93,7 +93,7 @@
       '<button type="button" class="danger secondary" data-role="owner" id="deltest">Delete all test participants</button></div>' +
       '<p class="muted" id="exprog"></p><div class="row"><button type="button" class="secondary" data-codebook="csv">Download this study\'s codebook (CSV)</button><button type="button" class="secondary" data-codebook="md">Codebook as a document (Markdown)</button></div>' +
       '<p class="muted">The study\'s codebook lists every column of the downloads: its name, kind, allowed values and their labels, the question text, and the conditions and sessions it applies to. It is made from the current study content, so download it again after you change the questions. General definitions: <a href="/lab/CODEBOOK.md" target="_blank" rel="noopener">lab codebook</a>. Test participants are included and marked in the <code>test</code> column unless "Real participants only" is ticked.</p>' +
-      '<p class="muted" id="summary"></p><div class="table-wrap"><table id="tbl"></table></div>' +
+      '<p class="muted" id="summary"></p><div class="table-wrap"><table id="tbl"></table></div><div class="section rp" id="replaybox" hidden></div>' +
       '<div class="section" data-role="owner"><h2>Backups</h2><p class="muted">Every hour the study data is copied to a separate backup store on Netlify (answers once, changing records every time). That protects against mistakes and bugs. For a copy outside Netlify, download a complete backup (every record, raw traces, emails, study content, team, and activity log) and save it to GSU-approved storage, for example weekly. It contains emails, so treat it as identifiable data. Deleting a participant also removes them from the backup store.</p>' +
         '<p id="bkstatus" class="muted"></p><div class="row"><button type="button" class="secondary" id="bkrun">Run backup now</button><button type="button" class="secondary" id="bkdl">Download complete backup (.json.gz)</button></div><p id="bkprog" class="muted"></p></div>' +
       '<div class="section" data-role="owner"><h2>Live self-test</h2><p class="muted">Runs one throwaway test participant per group through every session of the current design on this live site (practice, surveys, every item), then checks what was saved and what the exports say, and deletes the test participants. Real participants are not touched.</p>' +
@@ -263,18 +263,21 @@
       var by = {}; real.forEach(function (p) { by[p.condition] = (by[p.condition] || 0) + 1; });
       $('summary').textContent = rows.length + ' participants (' + (rows.length - real.length) + ' test). Real participants by condition: ' +
         (Object.keys(by).map(function (k) { return k + ' ' + by[k]; }).join(', ') || 'none yet') + '. Finished all sessions: ' + real.filter(function (p) { return p.completedSessions >= p.totalSessions; }).length + '.';
-      var head = ['Study ID', 'Sign-in', 'Label', 'Condition', 'Test', 'Consent', 'Sessions done', 'In progress', 'Next opens', 'Gap', 'Last seen'].concat(can('owner') ? [''] : []);
+      var head = ['Study ID', 'Sign-in', 'Label', 'Condition', 'Test', 'Consent', 'Sessions done', 'In progress', 'Next opens', 'Gap', 'Last seen', 'Behavior'].concat(can('owner') ? [''] : []);
       $('tbl').innerHTML = '<tr>' + head.map(function (h) { return '<th>' + h + '</th>'; }).join('') + '</tr>' + rows.map(function (p) {
         return '<tr><td><code>' + esc(p.code) + '</code></td><td>' + esc(p.type) + '</td><td>' + esc(p.label) + '</td><td>' + esc(p.condition) + '</td><td>' + (p.test ? 'yes ' : '') +
           (can('manager') ? '<button type="button" class="secondary small" data-settest="' + esc(p.code) + '|' + (p.test ? '0' : '1') + '">' + (p.test ? 'Mark real' : 'Mark test') + '</button>' : '') + '</td><td>' +
           (p.declined ? 'declined' : p.consented ? 'yes' : '') + '</td><td>' + p.completedSessions + ' / ' + p.totalSessions + '</td><td>' + (p.inProgress ? p.inProgress + ' / ' + p.inProgressOf : '') + '</td><td>' +
           (p.nextSession ? 'S' + p.nextSession + ' ' + esc(fmt(p.availableAt)) : 'done') + '</td><td>' + p.gapDays + 'd</td><td>' + esc(fmt(p.lastSeenAt)) + '</td>' +
+          '<td><button type="button" class="secondary small" data-replay="' + esc(p.code) + '" aria-label="Replay ' + esc(p.code) + '\'s trials">Replay</button></td>' +
           (can('owner') ? '<td><button type="button" class="danger secondary small" data-del="' + esc(p.code) + '">Delete</button></td>' : '') + '</tr>';
       }).join('');
     }).catch(function (e) { err(e.message); });
   }
   $('refresh').addEventListener('click', load);
   $('tbl').addEventListener('click', function (e) {
+    var rp = e.target.getAttribute && e.target.getAttribute('data-replay');
+    if (rp) return openReplay(rp, e.target);
     var v = e.target.getAttribute && e.target.getAttribute('data-settest');
     if (v) { var parts = v.split('|'); return postJSON('set-test', { id: parts[0], test: parts[1] === '1' }).then(load).catch(function (x) { err(x.message); }); }
     var id = e.target.getAttribute && e.target.getAttribute('data-del'); if (!id) return;
@@ -283,6 +286,17 @@
       (p.test ? '' : '\n\nThis is a REAL participant. Only do this if they withdrew or asked for their data to be removed.') + '\n\nThis cannot be undone.')) return;
     postJSON('delete', { id: id }).then(function (r) { load(); setTimeout(function () { $('summary').insertAdjacentHTML('afterbegin', '<span class="ok">Deleted ' + esc(r.code) + ' and ' + r.records + ' records.</span> '); }, 600); }).catch(function (x) { err(x.message); });
   });
+  // Trial replay (replay.js, loaded the first time it is used): the participant's raw traces and trial rows.
+  function openReplay(code, from) {
+    var box = $('replaybox');
+    box.hidden = false; box.innerHTML = '<p class="muted" role="status">Loading the behavior traces for ' + esc(code) + '…</p>'; err();
+    Promise.all([window.LabReplay ? true : loadScript('/lab/engine/replay.js'), getJSON('raw?codes=' + encodeURIComponent(code)), getJSON('rows?kind=trials&codes=' + encodeURIComponent(code))]).then(function (r) {
+      if (!window.LabReplay) throw new Error('The replay viewer could not be loaded.');
+      if (r[1] && r[1].error) throw new Error(r[1].error);
+      window.LabReplay.open(box, { code: code, raw: r[1], rows: r[2], esc: esc, onClose: function () { if (from && from.focus) from.focus(); } });
+      box.scrollIntoView({ block: 'start' }); var h = box.querySelector('h2'); if (h) { h.tabIndex = -1; h.focus({ preventScroll: true }); }
+    }).catch(function (e) { box.innerHTML = ''; box.hidden = true; err(e.message); });
+  }
   $('selftest').addEventListener('click', function () {
     var btn = $('selftest'), keep = $('stkeep').checked, groups = me.conditions, results = [];
     btn.disabled = true; err(); $('stout').innerHTML = '';

@@ -138,3 +138,38 @@ audio.ed-preview { width: 100%; }
 .mt-demo span:first-child { left: 10px; } .mt-demo span:nth-child(2) { right: 10px; } .mt-demo span:nth-child(3):not(:last-child) { left: 50%; transform: translateX(-50%); }
 .mt-demo i { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); font-style: normal; font-size: 12px; font-weight: 700; padding: 4px 14px; border-radius: 999px; background: var(--accent); color: var(--accent-text); }
 @media (prefers-reduced-motion: reduce) { .tpl-card:hover:not([disabled]) { transform: none; } }
+
+/* ---------- trial replay (replay.js) ---------- */
+.rp-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.rp-head h2 { margin: 0; }
+.rp-stats { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+.rp-chip { font-size: 12.5px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--muted); }
+.rp-chip strong { color: var(--text); }
+.rp-chip.rp-bad { border-color: var(--error); color: var(--error); } .rp-chip.rp-bad strong { color: var(--error); }
+.rp-chip.rp-warn { background: var(--warn-bg); color: var(--warn); } .rp-chip.rp-warn strong { color: var(--warn); }
+.rp-stage-wrap { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--status-bg); max-height: 70vh; }
+.rp-stage { display: block; width: 100%; height: auto; max-height: 70vh; }
+.rp-screen { fill: var(--card); stroke: var(--line-strong); stroke-width: 2; }
+.rp-path { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.rp-path-rest { fill: none; stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 4 4; vector-effect: non-scaling-stroke; }
+.rp-cursor { fill: var(--accent); stroke: var(--card); stroke-width: 2; }
+.rp-click circle { fill: var(--card); stroke: var(--accent); stroke-width: 2; }
+.rp-click text { font: 700 11px var(--font); fill: var(--accent); }
+.rp-scripted-mark { font: 700 13px var(--font); fill: var(--error); }
+.rp-empty { font: 15px var(--font); fill: var(--muted); }
+.rp-controls { margin: 10px 0 4px; align-items: center; }
+.rp-controls input[type=range] { flex: 1; min-width: 160px; accent-color: var(--accent); }
+.rp-timeline { display: block; width: 100%; cursor: pointer; }
+.rp-lane { stroke: var(--line); stroke-width: 1; }
+.rp-lane-label, .rp-axis { font: 11px var(--font); fill: var(--muted); }
+.rp-m-pointer { fill: color-mix(in srgb, var(--accent) 35%, transparent); }
+.rp-m-click, .rp-m-answer { fill: var(--accent); }
+.rp-m-key { fill: var(--steel); }
+.rp-m-scroll, .rp-m-media { fill: var(--line-strong); }
+.rp-m-field, .rp-m-hover { fill: color-mix(in srgb, var(--accent) 22%, transparent); stroke: var(--accent); stroke-width: .75; }
+.rp-m-away { fill: var(--warn-bg); stroke: var(--warn); stroke-width: .75; }
+.rp-m-scripted { fill: var(--error); }
+.rp-head-line { stroke: var(--error); stroke-width: 1.5; }
+.rp-log { margin-top: 10px; }
+.rp-log table { font-size: 12.5px; }
+.rp-log tr.rp-bad td { color: var(--error); }
