@@ -370,7 +370,6 @@ footer .photo-credits p { margin-top: 6px; }
 .interlude-bar { height: 3px; border-radius: 99px; background: rgba(255,255,255,0.06); overflow: hidden; margin: 30px auto 0; max-width: 240px; }
 .interlude-bar i { display: block; height: 100%; background: var(--accent); transform-origin: left; animation: fill 2.2s linear forwards; }
 .matching .interlude-bar i { animation-duration: 1.5s; }
-.interlude.held .interlude-bar { display: none; }
 @keyframes fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 .matching { position: relative; text-align: center; padding: 90px 0 70px; overflow: hidden; }
 .matching .qtext { min-height: 1.4em; color: var(--heading); margin-top: 18px; }
@@ -445,4 +444,4 @@ footer .photo-credits p { margin-top: 6px; }
 /* GSU: the old "step" and "emerging" badge hues (blue, amber) are replaced with GSU Blue and Blue Steel above. */
 .top .wrap { height: 68px; }
 .brand .wm-short { display: none; }
-@media (max-width: 640px) { .brand small, .brand .wm-full { display: none; } .brand .wm-short { display: inline; } }
+@media (max-width: 640px) { .brand small, .brand .wm-full { display: none; } .brand .wm-short { display: inline; } .brand { min-height: 24px; padding: 4px 0; } }

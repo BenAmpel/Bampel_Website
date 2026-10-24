@@ -38,7 +38,7 @@ import crypto from 'node:crypto';
 import os from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { CCAIR, ROOT, SITE, esc, ld, person, org, head as baseHead, top as baseTop, foot as baseFoot, writeSitemap, readJson,
-  HIRING, CODE_SHORT, SHARE_IMAGE, LASTMOD_STORE, photoHtml } from './ccair-static.mjs';
+  HIRING, CODE_SHORT, SHARE_IMAGE, LASTMOD_STORE, photoHtml, fmtDate, NEW_TAB, assertNoInternalNotes } from './ccair-static.mjs';
 
 const S = readJson('students.json');
 const DS = readJson('datasets.json');
@@ -51,7 +51,7 @@ const out = path.join(CCAIR, 'students');
 const OG_DIR = path.join(CCAIR, 'assets', 'students', 'og');
 const BASE = `${SITE}/ccair/students/`;
 const ASSET_V = S.updated.replace(/-/g, '');
-const PUBLISHED = '2026-10-22';
+const PUBLISHED = '2026-10-22'; // datePublished for a page without its own "published" date (YYYY-MM-DD) in students.json
 const TODAY = new Date().toISOString().slice(0, 10);
 const CATALOG_TARGET = 10; // below this many entries the data page says the full catalog is still being added
 const CSV_PATH = '/ccair/students/data/ccair-cyber-datasets.csv';
@@ -75,7 +75,7 @@ function makeCiter() {
   const list = () => order.length ? `<section id="sources" aria-labelledby="sources-h"><h2 id="sources-h">Sources</h2>
     <p class="body">We checked each source in ${esc(S.verified)}. Rules, prices and dates change, so confirm them on the source before you act.</p>
     <ol class="refs">${order.map((id, i) => { const x = S.refs[id];
-      return `<li id="ref-${i + 1}"><span class="mono">[${i + 1}]</span> ${esc(x.publisher)}. <a href="${esc(x.url)}" rel="noopener" target="_blank">${esc(x.title)}</a>.</li>`; }).join('')}</ol></section>` : '';
+      return `<li id="ref-${i + 1}"><span class="mono">[${i + 1}]</span> ${esc(x.publisher)}. <a href="${esc(x.url)}" rel="noopener" target="_blank">${esc(x.title)}${NEW_TAB}</a>.</li>`; }).join('')}</ol></section>` : '';
   return { cite, list, order };
 }
 
@@ -90,7 +90,7 @@ function md(text, cite) {
   h = h.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
   h = h.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, t, u) => {
     const ext = /^https?:/.test(u);
-    return `<a href="${u}"${ext ? ' rel="noopener" target="_blank"' : ''}>${t}</a>`;
+    return `<a href="${u}"${ext ? ' rel="noopener" target="_blank"' : ''}>${t}${ext ? NEW_TAB : ''}</a>`;
   });
   return h;
 }
@@ -131,11 +131,12 @@ function tableHtml(t, cite, cls = '') {
     </table></div>`;
 }
 
-// The 14 Pathway Finder roles compared. Every cell comes from pathways.json (no new numbers).
-const roleRows = () => P.roles.map((r) => ({ r, cells: [HIRING[r.hiring], CODE_SHORT[r.code], r.certsStart.join(', '), r.feeder] }));
+// The Pathway Finder roles compared. Every cell comes from pathways.json (no new numbers). A role with no starter
+// certification shows its certsNote instead.
+const roleRows = () => P.roles.map((r) => ({ r, cells: [HIRING[r.hiring], CODE_SHORT[r.code], r.certsStart.length ? r.certsStart.join(', ') : r.certsNote, r.feeder] }));
 function roleTableHtml() {
-  return `<div class="table-wrap reveal" role="region" aria-label="The 14 Pathway Finder roles compared" tabindex="0"><table class="wide">
-      <caption>The 14 Pathway Finder roles compared (from each role guide)</caption>
+  return `<div class="table-wrap reveal" role="region" aria-label="The ${P.roles.length} Pathway Finder roles compared" tabindex="0"><table class="wide">
+      <caption>The ${P.roles.length} Pathway Finder roles compared (from each role guide)</caption>
       <thead><tr><th scope="col">Role</th><th scope="col">First job?</th><th scope="col">Coding</th><th scope="col">Starter certifications</th><th scope="col">Usual way in</th></tr></thead>
       <tbody>${roleRows().map(({ r, cells }) => `<tr><th scope="row"><a href="/ccair/pathways/${r.slug}/">${esc(r.name)}</a></th>${cells.map((c) => `<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody>
     </table></div>`;
@@ -184,17 +185,19 @@ function datasetHtml(d) {
       <div><dt>Time span</dt><dd>${orNot(d.timeSpan)}</dd></div>
       <div><dt>Link checked</dt><dd>${orNot(d.checked)}</dd></div>
     </dl>
-    <p class="ds-links">${d.link ? `<a href="${esc(d.link)}" rel="noopener" target="_blank">Dataset page<span class="sr-only"> for ${esc(d.name)}</span></a>` : ''}${d.paper ? `<a href="${esc(d.paper)}" rel="noopener" target="_blank">Paper to cite<span class="sr-only"> for ${esc(d.name)}</span></a>` : ''}</p>
+    <p class="ds-links">${d.link ? `<a href="${esc(d.link)}" rel="noopener" target="_blank">Dataset page<span class="sr-only"> for ${esc(d.name)} (opens in a new tab)</span></a>` : ''}${d.paper ? `<a href="${esc(d.paper)}" rel="noopener" target="_blank">Paper to cite<span class="sr-only"> for ${esc(d.name)} (opens in a new tab)</span></a>` : ''}</p>
   </article>
 </li>`;
 }
 
 const sortedDatasets = () => [...DS.datasets].sort((a, b) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name));
 
+const kb = (text) => `${Math.max(1, Math.round(Buffer.byteLength(text, 'utf8') / 1000))} KB`;
 function downloadHtml() {
+  const rows = `${DS.datasets.length} rows`;
   return `<div class="download reveal" id="download" style="--d:.2s">
     <p class="download-h">Download the whole catalog</p>
-    <p class="download-links"><a class="btn-dl" href="${CSV_PATH}" download>CSV<span class="sr-only"> file of the dataset catalog</span>, ${DS.datasets.length} rows</a><a class="btn-dl" href="${JSON_PATH}" download>JSON<span class="sr-only"> file of the dataset catalog</span></a></p>
+    <p class="download-links"><a class="btn-dl" href="${CSV_PATH}" download>CSV<span class="sr-only"> file of the dataset catalog</span>, ${rows}, ${kb(DOWNLOADS.csv)}</a><a class="btn-dl" href="${JSON_PATH}" download>JSON<span class="sr-only"> file of the dataset catalog</span>, ${rows}, ${kb(DOWNLOADS.json)}</a></p>
     <p class="download-cite"><b>How to cite this catalog:</b> ${esc(CITATION)}</p>
     <p class="download-note">Version ${esc(DS.updated)}. Cite each dataset's own paper as well, and follow each dataset's own license.</p>
   </div>`;
@@ -226,7 +229,7 @@ function datasetLd() {
   return {
     '@type': 'Dataset', '@id': `${BASE}data/#dataset`, name: CATALOG_NAME, alternateName: 'CCAIR dataset catalog',
     description: `A catalog of ${DS.datasets.length} public cybersecurity datasets in ${cats.length} categories, compiled by the Center for CyberAI Research (CCAIR) at Georgia State University for student research. Each entry gives the dataset's access method, license, data type, size, time span, the paper its creators ask you to cite, the date CCAIR last checked its link, and at least one known weakness.`,
-    url: `${BASE}data/`, version: DS.updated, datePublished: PUBLISHED, dateModified: DS.updated, inLanguage: 'en-US', isAccessibleForFree: true,
+    url: `${BASE}data/`, version: DS.updated, datePublished: (S.pages.find((p) => p.slug === 'data') || {}).published || PUBLISHED, dateModified: DS.updated, inLanguage: 'en-US', isAccessibleForFree: true,
     creator: orgFull, publisher: orgFull, maintainer: { '@type': 'Person', '@id': person['@id'], name: person.name, url: person.url },
     keywords: ['cybersecurity datasets', 'security research data', 'machine learning for security', ...cats],
     creditText: CITATION,
@@ -242,18 +245,23 @@ function csvCell(v) {
   const s = String(v ?? '');
   return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
-function writeDownloads() {
+// The CSV and JSON text, built once so the download buttons can state their sizes.
+function downloadFiles() {
   const list = sortedDatasets();
-  const dir = path.join(out, 'data');
-  fs.mkdirSync(dir, { recursive: true });
   // UTF-8 with a byte order mark so spreadsheet apps read accented characters correctly; CRLF rows (RFC 4180).
   const csv = '﻿' + [COLUMNS.map(([k]) => k), ...list.map((d) => COLUMNS.map(([k]) => d[k]))].map((r) => r.map(csvCell).join(',')).join('\r\n') + '\r\n';
-  fs.writeFileSync(path.join(dir, 'ccair-cyber-datasets.csv'), csv);
-  fs.writeFileSync(path.join(dir, 'ccair-cyber-datasets.json'), JSON.stringify({
+  const json = JSON.stringify({
     name: CATALOG_NAME, version: DS.updated, url: `${BASE}data/`, publisher: org.name, citation: CITATION,
     note: 'Each dataset keeps its own license and terms; check them on the dataset page before use.',
     fields: Object.fromEntries(COLUMNS), datasets: list.map((d) => Object.fromEntries(COLUMNS.map(([k]) => [k, d[k] ?? ''])))
-  }, null, 2) + '\n');
+  }, null, 2) + '\n';
+  return { csv, json };
+}
+function writeDownloads() {
+  const dir = path.join(out, 'data');
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, 'ccair-cyber-datasets.csv'), DOWNLOADS.csv);
+  fs.writeFileSync(path.join(dir, 'ccair-cyber-datasets.json'), DOWNLOADS.json);
 }
 
 /* ---------- Outcomes ---------- */
@@ -418,6 +426,8 @@ const navLinks = (p) => [
 
 const mailto = (subject, body) => `mailto:${S.alerts.email}?subject=${encodeURIComponent(subject)}${body ? `&body=${encodeURIComponent(body)}` : ''}`;
 
+// Office hours: put them in ask.officeHours in students.json (for example "Tuesdays, 2 to 4 p.m., by appointment") to
+// show them in the Ask CCAIR box on every guide page. Leave it empty to show nothing.
 function askHtml() {
   const a = S.ask;
   return `<aside class="ask reveal" aria-labelledby="ask-h">
@@ -429,7 +439,6 @@ function askHtml() {
   </aside>`;
 }
 
-const fmtDate = (d) => new Date(`${d}T12:00:00Z`).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
 function changesHtml() {
   return `<section id="what-changed" aria-labelledby="what-changed-h"><h2 id="what-changed-h" class="reveal">What changed</h2>
     <ul class="changes">${S.changes.slice(0, 5).map((c) => `<li class="reveal"><time datetime="${c.date}">${fmtDate(c.date)}</time> <a href="${esc(c.url)}">${esc(c.title)}</a><p>${esc(c.text)}</p></li>`).join('')}</ul>
@@ -479,7 +488,7 @@ function pageMain(p, idx) {
     ${next ? `<a class="next" href="${pageUrl(next)}"><span>Next</span>${esc(next.nav)}</a>` : `<a class="next" href="/ccair/"><span>Back to</span>CCAIR home</a>`}
   </nav>`}
   <nav class="guide-nav reveal" aria-label="Student guide contents"><p class="toc-h">Student guide contents</p><ol>${S.pages.map((x) => `<li><a href="${pageUrl(x)}"${x === p ? ' aria-current="page"' : ''}>${esc(x.nav)}</a></li>`).join('')}</ol></nav>
-  <p class="reviewed">Last verified: ${esc(S.verified)}. Written for students by the <a href="/ccair/">Center for CyberAI Research (CCAIR)</a> at Georgia State University. Found an outdated fact? Tell us through the <a href="/ccair/#/contact">contact page</a>.</p>
+  <p class="reviewed">Last verified: ${esc(standalone ? fmtDate(OC.updated) : S.verified)}. Written for students by the <a href="/ccair/">Center for CyberAI Research (CCAIR)</a> at Georgia State University. Found an outdated fact? Tell us through the <a href="/ccair/#/contact">contact page</a>.</p>
 </div></main>`;
   return { main, order };
 }
@@ -496,7 +505,7 @@ function pageHtml(p, idx, main, order, modified, image, robots) {
         isPartOf: { '@type': 'WebSite', name: 'Benjamin M. Ampel', url: `${SITE}/` }, publisher: { '@id': org['@id'] }, reviewedBy: { '@id': person['@id'] },
         lastReviewed: S.updated, breadcrumb: { '@id': `${url}#breadcrumb` }, mainEntity: { '@id': `${url}#article` } },
       { '@type': 'Article', '@id': `${url}#article`, headline: p.title, description: p.desc, url, mainEntityOfPage: { '@id': url },
-        author: { '@id': person['@id'] }, publisher: { '@id': org['@id'] }, datePublished: PUBLISHED, dateModified: modified,
+        author: { '@id': person['@id'] }, publisher: { '@id': org['@id'] }, datePublished: p.published || PUBLISHED, dateModified: modified,
         inLanguage: 'en-US', isAccessibleForFree: true, isPartOf: { '@type': 'CreativeWorkSeries', name: 'CCAIR Student Guide', url: BASE },
         audience: { '@type': 'EducationalAudience', educationalRole: 'student' }, about: { '@type': 'Thing', name: 'Cybersecurity careers and education' },
         image: image.url, citation: order.map((id) => S.refs[id].url) },
@@ -504,16 +513,16 @@ function pageHtml(p, idx, main, order, modified, image, robots) {
       ...(p.slug === 'data' ? [datasetLd()] : [])
     ]
   };
-  const scripts = [`/ccair/assets/pathways/pathways.js?v=${ASSET_V}-anon2`, ...(p.slug === 'data' ? [`/ccair/assets/students/students.js?v=${ASSET_V}-2`] : [])];
+  const scripts = [`/ccair/assets/pathways/pathways.js?v=${ASSET_V}-anon3`, ...(p.slug === 'data' ? [`/ccair/assets/students/students.js?v=${ASSET_V}-2`] : [])];
   return `${baseHead({ title: p.metaTitle, ogTitle: p.title, desc: p.desc, url, ogType: 'article', image, robots, extra: feedLink,
-    css: [`/ccair/assets/pathways/pathways.css?v=${ASSET_V}-gsu1-photos1`, `/ccair/assets/students/students.css?v=${ASSET_V}-gsu1`] })}
+    css: [`/ccair/assets/pathways/pathways.css?v=${ASSET_V}-gsu1-photos2`, `/ccair/assets/students/students.css?v=${ASSET_V}-gsu1`] })}
 <meta property="article:modified_time" content="${modified}">
 ${ld(graph)}
 </head>
 <body>
 ${baseTop(navLinks(p))}
 ${main}
-${baseFoot({ note: `Last verified ${S.verified}`, scripts, photoCredits: true })}`;
+${baseFoot({ note: `Last verified ${idx < 0 ? fmtDate(OC.updated) : S.verified}`, scripts, photoCredits: true })}`;
 }
 
 /* ---------- Printable one-pagers ---------- */
@@ -591,6 +600,8 @@ ${S.changes.map((c) => `  <entry>
 }
 
 /* ---------- Checks ---------- */
+assertNoInternalNotes(S, 'students.json');
+assertNoInternalNotes(DS, 'datasets.json');
 for (const d of DS.datasets) {
   for (const k of ['name', 'category', 'description', 'link']) if (!d[k]) throw new Error(`datasets.json: "${d.name || '?'}" is missing ${k}`);
   for (const k of ['link', 'paper']) if (d[k] && !/^https?:\/\//.test(d[k])) throw new Error(`datasets.json: "${d.name}" ${k} is not an http(s) URL`);
@@ -601,9 +612,12 @@ for (const p of S.pages) {
   const ids = p.sections.map(sectionId);
   const dup = ids.find((id, i) => ids.indexOf(id) !== i);
   if (dup) throw new Error(`students.json: duplicate section id "${dup}" on page "${p.slug}"`);
+  for (const s of p.sections) if (!s.id) console.warn(`students.json: section "${s.h}" on page "${p.slug || 'index'}" has no id; its anchor (#${sectionId(s)}) changes if the heading is reworded`);
+  if (p.published && !/^\d{4}-\d{2}-\d{2}$/.test(p.published)) throw new Error(`students.json: page "${p.slug}" published is not YYYY-MM-DD`);
 }
 checkOutcomes();
 OUTCOMES.sections = outcomesSections();
+const DOWNLOADS = downloadFiles();
 
 /* ---------- Write ---------- */
 fs.rmSync(out, { recursive: true, force: true });
@@ -640,8 +654,8 @@ files.set(path.join(out, 'print', 'checklist', 'index.html'), printPage({ slug: 
   desc: 'A one-page printable checklist of the CCAIR Student Guide plan: first month, every semester, every year, final year and local community.',
   intro: 'Tick each box as you go. The full guide explains every step and links its sources.', body: checklistBody(), parent: ['Student guide', '/ccair/students/'] }));
 files.set(path.join(out, 'print', 'certifications', 'index.html'), printPage({ slug: 'certifications', title: 'Cybersecurity certification map',
-  desc: 'A one-page printable map of cybersecurity certifications: who each is for, when to take it, what it costs, and the starter certifications for 14 roles.',
-  intro: 'Who each certification is for, when to take it and what it costs, plus the starter certifications for 14 roles.', body: certMapBody(), parent: ['Certifications', '/ccair/students/certifications/'] }));
+  desc: `A one-page printable map of cybersecurity certifications: who each is for, when to take it, what it costs, and the starter certifications for ${P.roles.length} roles.`,
+  intro: `Who each certification is for, when to take it and what it costs, plus the starter certifications for ${P.roles.length} roles.`, body: certMapBody(), parent: ['Certifications', '/ccair/students/certifications/'] }));
 files.set(path.join(out, 'feed.xml'), feedXml());
 
 // Every link to a guide page or anchor must resolve (keeps renamed headings from breaking links).
