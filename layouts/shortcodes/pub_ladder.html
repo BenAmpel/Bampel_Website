@@ -27,7 +27,7 @@
 .pll-header { margin-bottom:20px; }
 .pll-loader { opacity:0.5; padding:20px 0; font-size:0.85rem; }
 .pll-grid { display:grid; grid-template-columns:48px repeat(4,1fr); gap:6px 10px; align-items:center; }
-.pll-cell-head { font-size:0.62rem; text-transform:uppercase; letter-spacing:0.06em; opacity:0.6; text-align:center; padding-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.08); }
+.pll-cell-head { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.06em; font-weight:600; text-align:center; padding-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.08); }
 .pll-cell-yr { font-size:0.75rem; font-weight:600; opacity:0.8; text-align:right; padding-right:8px; letter-spacing:0.02em; }
 .pll-cell-dots { min-height:32px; display:flex; flex-wrap:wrap; gap:5px; align-items:center; justify-content:center; padding:5px 6px; border-radius:8px; border:1px solid transparent; }
 .pll-cell-dots:not(:empty) { background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.06); }
@@ -59,8 +59,8 @@ body:not(.dark) .pll-tip { background:rgba(255,255,255,0.98); color:#222; border
 @media (max-width:560px) {
   .pll-grid { grid-template-columns:36px repeat(4,1fr); gap:4px 5px; }
   .pll-dot { width:8px; height:8px; }
-  .pll-cell-head { font-size:0.5rem; }
-  .pll-cell-yr { font-size:0.65rem; padding-right:4px; }
+  .pll-cell-head { font-size:0.7rem; text-transform:none; letter-spacing:0; }
+  .pll-cell-yr { font-size:0.7rem; padding-right:4px; }
 }
 </style>
 
