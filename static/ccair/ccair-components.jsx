@@ -368,10 +368,52 @@ function initialsOf(name) {
   return name.split(/\s+/).filter(Boolean).map((w) => w[0]).filter((c) => /[A-Z]/.test(c)).join('').slice(0, 2);
 }
 
-function PersonCard({ name, role, meta, note, warm }) {
+/* ---------- People ----------
+   A headshot from data/people.json ("photo": {"slug", "source", "credit", "alt"}) is a circular <picture> of files in
+   assets/people/ named <slug>-<160|320>.<avif|webp|jpg> (square, face-centered crops). Without a photo the avatar shows
+   the person's initials, hidden from assistive technology because the name is the heading beside it. */
+const PEOPLE_DIR = '/ccair/assets/people/';
+const AVATAR_PX = { md: 64, lg: 144 };
+const peopleSrcset = (slug, ext) => `${PEOPLE_DIR}${slug}-160.${ext} 160w, ${PEOPLE_DIR}${slug}-320.${ext} 320w`;
+function Avatar({ name, photo, size = 'md', warm }) {
+  const px = AVATAR_PX[size] || AVATAR_PX.md;
+  if (photo && photo.slug) {
+    const sizes = px + 'px';
+    return (
+      <picture className={'avatar avatar-' + size + ' avatar-photo'}>
+        <source type="image/avif" srcSet={peopleSrcset(photo.slug, 'avif')} sizes={sizes} />
+        <source type="image/webp" srcSet={peopleSrcset(photo.slug, 'webp')} sizes={sizes} />
+        <img src={`${PEOPLE_DIR}${photo.slug}-160.jpg`} srcSet={peopleSrcset(photo.slug, 'jpg')} sizes={sizes}
+          width={px} height={px} alt={photo.alt || name} loading="lazy" decoding="async" />
+      </picture>
+    );
+  }
+  return <div className={'avatar avatar-' + size + (warm ? ' avatar-warm' : '')} aria-hidden="true">{initialsOf(name)}</div>;
+}
+
+// "Headshots courtesy of ..." for the About page, naming each institution once and linking every profile photo's source.
+function PeoplePhotoCredits() {
+  const { people } = useData();
+  const list = [...(people.affiliates || []), ...(people.students || []), ...(people.mentees || [])].filter((p) => p.photo && p.photo.source);
+  if (!list.length) return null;
+  const inst = [...new Set(list.map((p) => p.photo.credit).filter(Boolean))];
+  const joined = inst.length < 3 ? inst.join(' and ') : inst.slice(0, -1).join(', ') + ', and ' + inst[inst.length - 1];
+  return (
+    <div className="people-credits">
+      <p>Headshots courtesy of {joined}, used with permission. The director's headshot is his own.</p>
+      <ul className="photo-credits">
+        {list.map((p) => (
+          <li key={p.name}><a href={p.photo.source}>{p.name}</a>, {p.photo.credit}.</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function PersonCard({ name, role, meta, note, warm, photo }) {
   return (
     <Card className="person">
-      <div className={'avatar avatar-md' + (warm ? ' avatar-warm' : '')} aria-hidden="true">{initialsOf(name)}</div>
+      <Avatar name={name} photo={photo} warm={warm} />
       <div>
         <h3>{name}</h3>
         {role && <div className="role">{role}</div>}
@@ -523,7 +565,7 @@ window.CCAIR = window.CCAIR || {};
 const CCAIR_COMPONENTS = {
   REDUCE_MOTION, CAN_OBSERVE, SCROLL_TIMELINE, NAV_PAGES, hrefFor, Icon, Arrow, useInView, Reveal, CountUp, useScrollFrame, CCAIRNav, Brand, Wordmark, OfficialLockup, PageHead, Section, Card, LinkCard,
   Tag, Status, Authors, PublicationItem, PersonCard, SegmentedControl, FinderFeature, CCAIRFooter, initialsOf,
-  usePhoto, Picture, PhotoCredit, PhotoBand, PhotoCredits,
+  usePhoto, Picture, PhotoCredit, PhotoBand, PhotoCredits, Avatar, PeoplePhotoCredits,
 };
 Object.assign(window.CCAIR, CCAIR_COMPONENTS);
 Object.assign(window, CCAIR_COMPONENTS);
