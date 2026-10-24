@@ -8,7 +8,7 @@
   # DART_SASS_SHA256 and unpacked to /tmp, outside the published folder. Hugo finds the `sass` binary on PATH.
   # Two Hugo passes: the first only writes hugo_stats.json (every tag, class and id on the rendered pages) into a scratch folder;
   # the second removes unused rules from css/wowchemy.css with PostCSS and PurgeCSS (postcss.config.js) and writes the site.
-  command = "curl -sSfL -o /tmp/dart-sass.tar.gz https://github.com/sass/dart-sass/releases/download/${DART_SASS_VERSION}/dart-sass-${DART_SASS_VERSION}-linux-x64.tar.gz && echo \"${DART_SASS_SHA256}  /tmp/dart-sass.tar.gz\" | sha256sum -c - && tar -xzf /tmp/dart-sass.tar.gz -C /tmp && export PATH=\"/tmp/dart-sass:$PATH\" && npm install && node scripts/lab/build-info.mjs && npm run build:ccair && hugo --gc --minify --destination \"$(mktemp -d)\" && WC_PURGE_CSS=true hugo --gc --minify --ignoreCache"
+  command = "curl -sSfL -o /tmp/dart-sass.tar.gz https://github.com/sass/dart-sass/releases/download/${DART_SASS_VERSION}/dart-sass-${DART_SASS_VERSION}-linux-x64.tar.gz && printf '%s  %s\\n' ${DART_SASS_SHA256} /tmp/dart-sass.tar.gz | sha256sum -c - && tar -xzf /tmp/dart-sass.tar.gz -C /tmp && export PATH=/tmp/dart-sass:$PATH && npm install && node scripts/lab/build-info.mjs && npm run build:ccair && hugo --gc --minify --destination \"$(mktemp -d)\" && WC_PURGE_CSS=true hugo --gc --minify --ignoreCache"
   publish = "public"
 
 # Site-wide security headers (added 2026-10-16). HSTS, nosniff and Referrer-Policy come from the _headers file that the
