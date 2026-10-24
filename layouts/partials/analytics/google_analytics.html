@@ -1,14 +1,3 @@
 <!-- Google tag (gtag.js). Loaded only on bampel.com itself: local test runs and Netlify preview builds also render this
      partial, and on 2026-10-17 one localhost test of the Pathway Finder sent 720 page views into the live property. -->
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  if (/(^|\.)bampel\.com$/.test(location.hostname)) {
-    var gt = document.createElement('script');
-    gt.async = true;
-    gt.src = 'https://www.googletagmanager.com/gtag/js?id=G-H1EF4V6LP8';
-    document.head.appendChild(gt);
-    gtag('js', new Date());
-    gtag('config', 'G-H1EF4V6LP8');
-  }
-</script>
+{{ with resources.Get "js/ga-init.js" | minify | fingerprint }}<script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" data-ga-id="G-H1EF4V6LP8"></script>{{ end }}

@@ -53,7 +53,11 @@ for (const p of LAB_PAGES) {
 assert(/connect-src 'self' https:/.test(csp('/lab/s/x')), 'participant pages may preload media from other https sites');
 assert(/connect-src 'self';/.test(csp('/lab/admin/')) && /connect-src 'self';/.test(csp('/lab/studies/verification/admin.html')), 'admin pages talk to this site only');
 assert(/microphone=\(\)/.test(pp('/')) && /microphone=\(\)/.test(pp('/lab/signin/')), 'the rest of the site keeps the microphone off');
-assert(/script-src 'self' 'unsafe-inline'/.test(csp('/lab/studies/demo-phishing/index.html')), 'the TraceLab demo keeps its inline script');
+// No page runs inline script (2026-10-24): every script is a file, so no script-src may allow 'unsafe-inline'.
+for (const p of ['/', '/cv/', '/ccair/', '/ccair/pathways/', '/lab/', '/lab/studies/demo-phishing/index.html']) {
+  const scriptSrc = (csp(p).match(/script-src [^;]+/) || [''])[0];
+  assert(scriptSrc && !scriptSrc.includes("'unsafe-inline'"), `${p}: script-src allows inline script: ${scriptSrc}`);
+}
 // The Wowchemy plugin's own Permissions-Policy (config/_default/params.yaml) matches the lab blocks, so it never blocks the microphone.
 const params = readFileSync(new URL('../../config/_default/params.yaml', import.meta.url), 'utf8');
 assert.equal((params.match(/^\s+policy:\s*'([^']+)'/m) || [])[1], pp('/lab/s/x'), 'params.yaml security.permissions.policy = the lab policy in netlify.toml');

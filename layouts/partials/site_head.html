@@ -26,7 +26,7 @@
     {{ if hasPrefix . "family=" }}
       {{/* If `google_fonts` starts with "family=", use API v2 (https://developers.google.com/fonts/docs/css2) */}}
       <link rel="preload" as="style" {{ printf "href=\"https://fonts.googleapis.com/css2?%s&display=swap\"" . | safeHTMLAttr }}>
-      <link rel="stylesheet" {{ printf "href=\"https://fonts.googleapis.com/css2?%s&display=swap\"" . | safeHTMLAttr }} media="print" onload="this.media='all'">
+      <link rel="stylesheet" {{ printf "href=\"https://fonts.googleapis.com/css2?%s&display=swap\"" . | safeHTMLAttr }} media="print" data-swap>
     {{ else }}
       {{ errorf "There is a new version of Google Fonts. Learn how to upgrade your font pack at https://wowchemy.com/docs/customization/#custom-font" }}
     {{ end }}
@@ -64,7 +64,7 @@
     {{/* PostProcess must be last action in the pipeline */}}
     {{- $stylesheets = $stylesheets | resources.PostProcess -}}
   {{- end -}}
-  <link rel="stylesheet" href="{{$stylesheets.RelPermalink}}" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="{{$stylesheets.RelPermalink}}" media="print" data-swap>
 
   {{ $scr.Set "vendor_css_filename" "main.min.css" }}
   {{ $scr.Set "vendor_js_filename" "main.min.js" }}
@@ -74,7 +74,7 @@
   {{ else }}
     {{ $scr.Set "use_cdn" 1 }}
     {{ if site.Params.extensions.academicons.enable }}
-      {{ printf "<link rel=\"stylesheet\" href=\"%s\" integrity=\"%s\" crossorigin=\"anonymous\" media=\"print\" onload=\"this.media='all'\">" (printf $css.academicons.url $css.academicons.version) $css.academicons.sri | safeHTML }}
+      {{ printf "<link rel=\"stylesheet\" href=\"%s\" integrity=\"%s\" crossorigin=\"anonymous\" media=\"print\" data-swap>" (printf $css.academicons.url $css.academicons.version) $css.academicons.sri | safeHTML }}
     {{ end }}
 
     {{/* Workaround `.HasShortcode "gallery"` not parsing page resources (widget page sections) */}}
@@ -104,13 +104,13 @@
       {{ end }}
     {{ end }}
     {{ if $has_gallery | or site.Params.require_fancybox }}
-      {{ printf "<link rel=\"stylesheet\" href=\"%s\" integrity=\"%s\" crossorigin=\"anonymous\" media=\"print\" onload=\"this.media='all'\">" (printf $css.fancybox.url $css.fancybox.version) $css.fancybox.sri | safeHTML }}
+      {{ printf "<link rel=\"stylesheet\" href=\"%s\" integrity=\"%s\" crossorigin=\"anonymous\" media=\"print\" data-swap>" (printf $css.fancybox.url $css.fancybox.version) $css.fancybox.sri | safeHTML }}
     {{ end }}
 
     {{/* Maps CSS. */}}
     {{ $map_provider := lower site.Params.features.map.provider }}
     {{ if in (slice "mapnik" "mapbox") $map_provider }}
-      {{ printf "<link rel=\"stylesheet\" href=\"%s\" integrity=\"%s\" crossorigin=\"anonymous\" media=\"print\" onload=\"this.media='all'\">" (printf $css.leaflet.url $css.leaflet.version) $css.leaflet.sri | safeHTML }}
+      {{ printf "<link rel=\"stylesheet\" href=\"%s\" integrity=\"%s\" crossorigin=\"anonymous\" media=\"print\" data-swap>" (printf $css.leaflet.url $css.leaflet.version) $css.leaflet.sri | safeHTML }}
     {{ end }}
 
     {{ if eq (lower site.Params.features.search.provider) "algolia" }}
@@ -196,8 +196,8 @@
   {{ else }}
     {{ $hl_theme_light_css := resources.Get $hl_theme_light_path | minify }}
     {{ $hl_theme_dark_css := resources.Get $hl_theme_dark_path | minify }}
-    <link rel="stylesheet" href="{{ $hl_theme_light_css.RelPermalink }}" title="hl-light" media="print" onload="this.media='all'" {{ if ne ($scr.Get "light") true }}disabled{{end}}>
-    <link rel="stylesheet" href="{{ $hl_theme_dark_css.RelPermalink }}" title="hl-dark" media="print" onload="this.media='all'" {{ if eq ($scr.Get "light") true }}disabled{{end}}>
+    <link rel="stylesheet" href="{{ $hl_theme_light_css.RelPermalink }}" title="hl-light" media="print" data-swap {{ if ne ($scr.Get "light") true }}disabled{{end}}>
+    <link rel="stylesheet" href="{{ $hl_theme_dark_css.RelPermalink }}" title="hl-dark" media="print" data-swap {{ if eq ($scr.Get "light") true }}disabled{{end}}>
   {{ end }}
 
   {{/* Load SEO module */}}
@@ -211,20 +211,7 @@
          #invite_token=... style hash on the home page, so it now loads only then. wowchemy-init.js registers the
          "send me to /admin/ after login" handler only if the widget already exists when it runs, so the same handler
          is registered here once the widget has loaded. The CMS at /admin/ loads the widget itself. */}}
-    <script>
-    (function () {
-      if (!/[#&](invite|recovery|confirmation|email_change|access)_token=/.test(location.hash)) return;
-      var s = document.createElement('script');
-      s.src = 'https://identity.netlify.com/v1/netlify-identity-widget.js';
-      s.onload = function () {
-        if (!window.netlifyIdentity) return;
-        window.netlifyIdentity.on('init', function (user) {
-          if (!user) window.netlifyIdentity.on('login', function () { document.location.href = '/admin/'; });
-        });
-      };
-      document.head.appendChild(s);
-    })();
-    </script>
+    {{ with resources.Get "js/identity-invite.js" | minify | fingerprint }}<script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}"></script>{{ end }}
   {{ end }}
 
   {{/* RSS Feed */}}
@@ -244,4 +231,6 @@
     {{ partial "custom_head" . }}
   {{ end }}
   {{ partial "functions/get_hook" (dict "hook" "head-end" "context" .) }}
+  {{/* Switches the data-swap stylesheets above to media="all" once they load (no inline onload handlers). */}}
+  {{ with resources.Get "js/css-swap.js" | minify | fingerprint }}<script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}"></script>{{ end }}
 </head>

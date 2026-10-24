@@ -101,9 +101,10 @@ function checkPeopleAndPublications() {
 console.log('CCAIR people and publications: %d publications checked', checkPeopleAndPublications());
 
 // Home hero preload. The hero <picture> is rendered only after the scripts and data/photos.json load, so the browser
-// would find the LCP image three round trips late. index.html carries a small inline script (between the markers below,
-// rewritten here from the "home-hero" slot) that preloads the same AVIF candidates the Picture component asks for, and
+// would find the LCP image three round trips late. dist/hero-preload.js (written here from the "home-hero"
+// slot and loaded from between the markers in index.html, so the page has no inline script) that preloads the same AVIF candidates the Picture component asks for, and
 // only when the address is the home route, so the inner pages (which have their own heroes or none) do not fetch it.
+let heroPreloadJs = '';
 function writeHeroPreload() {
   const file = path.join(ccairDir, 'index.html');
   const html = fs.readFileSync(file, 'utf8');
@@ -118,24 +119,24 @@ function writeHeroPreload() {
     if (photo.mobile) links.push({ media: photo.mobile.media, srcset: set(photo.mobile.base, photo.mobile.widths) });
     links.push({ media: photo.mobile ? `not all and ${photo.mobile.media}` : 'all', srcset: set(photo.base, photo.widths) });
   }
-  const script = !links.length ? '' : `
-  <script>
-    (function () {
-      if (!/^(#\\/?)?$/.test(location.hash.split('?')[0])) return;
-      ${JSON.stringify(links)}.forEach(function (l) {
-        var el = document.createElement('link');
-        el.rel = 'preload'; el.as = 'image'; el.type = 'image/avif'; el.media = l.media;
-        el.setAttribute('imagesrcset', l.srcset); el.setAttribute('imagesizes', '100vw'); el.setAttribute('fetchpriority', 'high');
-        document.head.appendChild(el);
-      });
-    })();
-  </script>
-  `;
+  const js = !links.length ? '' : `/* Written by scripts/build-ccair.js from data/photos.json (slot "home-hero"). */
+(function () {
+  if (!/^(#\\/?)?$/.test(location.hash.split('?')[0])) return;
+  ${JSON.stringify(links)}.forEach(function (l) {
+    var el = document.createElement('link');
+    el.rel = 'preload'; el.as = 'image'; el.type = 'image/avif'; el.media = l.media;
+    el.setAttribute('imagesrcset', l.srcset); el.setAttribute('imagesizes', '100vw'); el.setAttribute('fetchpriority', 'high');
+    document.head.appendChild(el);
+  });
+})();
+`;
+  heroPreloadJs = js; // written into dist/ after the bundle step resets that folder
+  const script = !links.length ? '' : '\n  <script src="dist/hero-preload.js"></script>\n  ';
   const next = html.slice(0, a + start.length) + script + html.slice(b);
   if (next !== html) fs.writeFileSync(file, next);
   return links.length;
 }
-console.log('CCAIR home hero: %d preload candidates written to index.html', writeHeroPreload());
+console.log('CCAIR home hero: %d preload candidates written to dist/hero-preload.js', writeHeroPreload());
 
 // One file for the whole app (was four requests). Each source file is still transpiled on its own and wrapped in its own
 // function, exactly as before (they share state only through window.CCAIR), then joined in load order.
@@ -161,6 +162,7 @@ Promise.all(
     fs.rmSync(dist, { recursive: true, force: true });
     fs.mkdirSync(dist, { recursive: true });
     fs.writeFileSync(path.join(dist, 'ccair.js'), results.map((r) => r.outputFiles[0].text.trimEnd()).join('\n') + '\n');
+    if (heroPreloadJs) fs.writeFileSync(path.join(dist, 'hero-preload.js'), heroPreloadJs);
     console.log('CCAIR build complete: %d files bundled into dist/ccair.js', files.length);
   })
   .catch((err) => {

@@ -14,29 +14,5 @@
     </div>
   </div>
 </div>
-<script>
-(function() {
-  var box = document.currentScript.previousElementSibling;
-  var watch = new MutationObserver(function() {
-    var link = box.querySelector('.__dimensions_Link');
-    if (link && /^\d/.test(link.getAttribute('aria-label') || '')) { box.hidden = false; watch.disconnect(); }
-  });
-  watch.observe(box, { childList: true, subtree: true, attributes: true, attributeFilter: ['aria-label'] });
-
-  // Load the Dimensions script if not already loaded
-  if (typeof __dimensions_embed === 'undefined') {
-    var script = document.createElement('script');
-    script.src = 'https://badge.dimensions.ai/badge.js';
-    script.charset = 'utf-8';
-    script.onload = function() {
-      if (typeof __dimensions_embed !== 'undefined' && __dimensions_embed.addBadges) {
-        __dimensions_embed.addBadges();
-      }
-    };
-    document.head.appendChild(script);
-  } else {
-    __dimensions_embed.addBadges();
-  }
-})();
-</script>
+{{ if not (.Page.Store.Get "js_dimensions_badge") }}{{ .Page.Store.Set "js_dimensions_badge" true }}{{ with resources.Get "js/widgets/dimensions-badge.js" | minify | fingerprint }}<script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" defer></script>{{ end }}{{ end }}
 {{ end }}

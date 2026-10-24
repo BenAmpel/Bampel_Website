@@ -86,8 +86,7 @@ export function head({ title, desc, url, ogTitle, ogType = 'website', css = [], 
 <link rel="preload" href="/ccair/assets/fonts/lato-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/ccair/assets/fonts/lato-700.woff2" as="font" type="font/woff2" crossorigin>
 ${css.map((href) => `<link rel="stylesheet" href="${href}">`).join('\n')}${extra ? '\n' + extra : ''}
-${GA ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${GA}"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA}',{page_location:location.origin+location.pathname+location.search});</script>` : ''}`;
+${GA ? `<script src="/ccair/assets/ga-init.js" data-ga-id="${GA}"></script>` : ''}`;
 }
 
 // Brand: GSU does not allow a center to make its own logo (commkit.gsu.edu). The header shows a plain-text wordmark until

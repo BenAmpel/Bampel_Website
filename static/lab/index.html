@@ -140,16 +140,6 @@
 <footer>
   <div class="wrap">CCAIR Behavioral Lab · Directed by Dr. Benjamin M. Ampel · <a href="mailto:bampel@gsu.edu?subject=CCAIR%20Behavioral%20Lab&amp;body=Name%3A%0AYour%20message%3A">bampel@gsu.edu</a> · <a href="/lab/support/">Support</a> · <a href="/lab/guide/">Researcher guide</a></div>
 </footer>
-<script>
-  // Listed studies come from the lab registry (/api/lab/_lab/studies); the card above is the fallback.
-  fetch('/api/lab/_lab/studies').then(function (r) { return r.ok ? r.json() : null; }).then(function (list) {
-    if (!list || !list.length) return;
-    var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
-    document.getElementById('live').innerHTML = list.map(function (s) {
-      return '<div class="card study" style="margin-top:14px"><div><span class="tag">Live · email sign-in</span><h3>' + esc(s.name) + '</h3><p>' + esc(s.description) + '</p></div>' +
-        '<a class="btn" href="' + esc(s.paths.participant) + '">Sign in</a></div>';
-    }).join('');
-  }).catch(function () {});
-</script>
+<script src="/lab/landing.js"></script>
 </body>
 </html>
