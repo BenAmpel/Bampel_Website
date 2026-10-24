@@ -17,7 +17,7 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
 .impact-map-legend .legend-row { display:flex; align-items:center; gap:6px; margin-bottom:4px; }
 .impact-map-legend .legend-row:last-child { margin-bottom:0; }
 .impact-legend-dot { width:8px; height:8px; border-radius:50%; background:var(--legend-color); box-shadow:0 0 6px rgba(0,0,0,0.4); }
-.impact-map-inspector { position:absolute; top:92px; right:16px; width:230px; z-index:20; background:rgba(0,0,0,0.48); border:1px solid var(--card-border, #333); border-radius:12px; padding:10px; font-size:0.75rem; color:#e0e0e0; backdrop-filter: blur(6px); pointer-events:auto; }
+.impact-map-inspector { position:absolute; top:auto; bottom:16px; right:16px; width:230px; z-index:20; background:rgba(0,0,0,0.48); border:1px solid var(--card-border, #333); border-radius:12px; padding:10px; font-size:0.75rem; color:#e0e0e0; backdrop-filter: blur(6px); pointer-events:auto; }
 .impact-inspector-title { font-size:0.75rem; text-transform:uppercase; opacity:0.7; margin-bottom:6px; }
 .impact-inspector-body { line-height:1.4; margin-bottom:8px; opacity:0.9; }
 .impact-inspector-actions { display:flex; gap:6px; margin-bottom:8px; }
