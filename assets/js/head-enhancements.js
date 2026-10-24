@@ -309,6 +309,10 @@ function runEnhancements() {
     });
     
     if (targetElement) {
+      // WebP versions of the map (layouts/partials/impact/impact_stats.html); the PNG stays as the fallback src.
+      const mapSets = document.getElementById('research-map-srcsets');
+      const mapSrcset = mapSets ? mapSets.getAttribute(document.body.classList.contains('dark') ? 'data-dark' : 'data-light') : '';
+      const mapSrcsetAttr = mapSrcset ? ` srcset="${mapSrcset}" sizes="(max-width: 1400px) 100vw, 1324px"` : '';
       const vizHTML = `
         <div class="viz-grid" style="margin-top: 30px; grid-template-columns: 1fr;">
           <div class="viz-column">
@@ -316,7 +320,7 @@ function runEnhancements() {
               <summary>Research Footprint</summary>
               <div class="viz-content">
                 <div id="home-footprint-map" style="display:none; height:440px; border-radius:8px; overflow:hidden;"></div>
-                <img src="/images/research-map.png" alt="World map marking the cities of conferences where Benjamin Ampel presented and the institutions of his collaborators" class="viz-image" id="map-img" width="2291" height="1438" loading="lazy" decoding="async">
+                <img src="/images/research-map.png"${mapSrcsetAttr} alt="World map marking the cities of conferences where Benjamin Ampel presented and the institutions of his collaborators" class="viz-image" id="map-img" width="2291" height="1438" loading="lazy" decoding="async">
                 <p class="viz-caption">Conference presentations and collaborator institutions worldwide &mdash; derived automatically from the publication record</p>
               </div>
             </details>
@@ -640,10 +644,12 @@ function runEnhancements() {
     // Define images that have dark/light variants
     const themeImages = [
       { selector: 'img[src*="impact-dashboard"]', light: '/images/impact-dashboard.png', dark: '/images/impact-dashboard-dark.png' },
-      { selector: 'img[src*="research-map"], #map-img', light: '/images/research-map.png', dark: '/images/research-map-dark.png' }
+      { selector: 'img[src*="research-map"], #map-img', light: '/images/research-map.png', dark: '/images/research-map-dark.png', srcsets: 'research-map-srcsets' }
     ];
     
-    themeImages.forEach(({ selector, light, dark }) => {
+    themeImages.forEach(({ selector, light, dark, srcsets }) => {
+      const sets = srcsets && document.getElementById(srcsets);
+      const newSrcset = sets ? sets.getAttribute(isDark ? 'data-dark' : 'data-light') : '';
       const imgs = document.querySelectorAll(selector);
       imgs.forEach(img => {
         if (img) {
@@ -651,6 +657,7 @@ function runEnhancements() {
           if (!img.src.endsWith(newSrc)) {
             img.src = newSrc;
           }
+          if (newSrcset && img.getAttribute('srcset') !== newSrcset) img.setAttribute('srcset', newSrcset);
         }
       });
     });
