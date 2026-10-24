@@ -11,23 +11,23 @@ sections:
       text: |
         Explore the lab's live intelligence feeds, funding, and research analytics. Expand any section below.
 
-        {{< spoiler text="💼 Funding & Grants" open="true" >}}
+        {{< spoiler text="Funding & Grants" open="true" >}}
         {{< grant_experience >}}
         {{< /spoiler >}}
 
-        {{< spoiler text="📊 Research Dashboard" open="true" >}}
+        {{< spoiler text="Research Dashboard" open="true" >}}
         {{< research_dashboard >}}
         {{< /spoiler >}}
 
-        {{< spoiler text="📈 Publication Trajectory" >}}
+        {{< spoiler text="Publication Trajectory" >}}
         {{< pub_ladder >}}
         {{< /spoiler >}}
 
-        {{< spoiler text="🔬 Research Topic Evolution" >}}
+        {{< spoiler text="Research Topic Evolution" >}}
         {{< topic_drift >}}
         {{< /spoiler >}}
 
-        {{< spoiler text="🤝 Authorship & Collaboration" >}}
+        {{< spoiler text="Authorship & Collaboration" >}}
         {{< coauthor_evolution >}}
         {{< /spoiler >}}
     design:

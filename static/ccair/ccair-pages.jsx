@@ -390,7 +390,7 @@ function ResourcesPage() {
   const { resources } = useData();
   const [tab, setTab] = usePageState('datasets');
   const byCategory = (cat) => resources.filter((r) => r.category === cat.slice(0, -1));
-  const tabs = ['datasets', 'benchmarks', 'tools'].map((t) => ({ value: t, label: t[0].toUpperCase() + t.slice(1) + ' ' + byCategory(t).length }));
+  const tabs = ['datasets', 'benchmarks', 'tools'].filter((t) => byCategory(t).length > 0).map((t) => ({ value: t, label: t[0].toUpperCase() + t.slice(1) + ' ' + byCategory(t).length }));
 
   return (
     <div className="page">
@@ -412,7 +412,7 @@ function ResourcesPage() {
         </Reveal>
       </Section>
 
-      <Section id="assets" alt title="Research assets" intro="Persistent artifacts designed as shared infrastructure for the CyberAI community. Each shows its current status.">
+      <Section id="assets" alt title="Research assets" intro="Datasets and tools from CCAIR studies, shared with the CyberAI community. More resources are planned.">
         <div className="toolbar"><SegmentedControl label="Asset type" options={tabs} value={tab} onChange={setTab} /></div>
         <div className="grid grid-3">
           {byCategory(tab).map((r) => (

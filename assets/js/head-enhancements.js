@@ -356,7 +356,7 @@ function runEnhancements() {
         <div class="viz-grid" style="margin-top: 30px; grid-template-columns: 1fr;">
           <div class="viz-column">
             <details class="viz-details" id="home-footprint-details">
-              <summary>🌍 Research Footprint</summary>
+              <summary>Research Footprint</summary>
               <div class="viz-content">
                 <div id="home-footprint-map" style="display:none; height:440px; border-radius:8px; overflow:hidden;"></div>
                 <img src="/images/research-map.png" alt="World map marking the cities of conferences where Benjamin Ampel presented and the institutions of his collaborators" class="viz-image" id="map-img">
@@ -424,15 +424,15 @@ function runEnhancements() {
   
   // ===== COLLAPSIBLE PUBLICATION SECTIONS =====
   const publicationTitles = [
-    { text: 'Journal Publications', icon: '📄' },
-    { text: 'Conference Publications', icon: '📋' },
-    { text: 'Workshop Papers', icon: '📝' }
+    { text: 'Journal Publications' },
+    { text: 'Conference Publications' },
+    { text: 'Workshop Papers' }
   ];
   
   // Find headings and wrap their sections
   const allHeadings = document.querySelectorAll('h1, h2, h3');
   
-  publicationTitles.forEach(({ text, icon }) => {
+  publicationTitles.forEach(({ text }) => {
     allHeadings.forEach(heading => {
       if (heading.textContent.trim() === text) {
         // Get the parent section
@@ -475,7 +475,7 @@ function runEnhancements() {
         
         const summary = document.createElement('summary');
         summary.className = 'pub-summary';
-        summary.innerHTML = `${icon} ${text} <span class="pub-count">(${count})</span>`;
+        summary.innerHTML = `${text} <span class="pub-count">(${count})</span>`;
         
         details.appendChild(summary);
         
@@ -1024,7 +1024,7 @@ function runEnhancements() {
     }
     
     badgeContainer.innerHTML = `
-      <h4 style="margin: 0 0 15px 0; font-size: 1rem; font-weight: 600;">📊 Altmetric Attention Score</h4>
+      <h4 style="margin: 0 0 15px 0; font-size: 1rem; font-weight: 600;">Altmetric Attention Score</h4>
       <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
         <div data-badge-type="medium-donut" data-doi="${doi}" data-badge-popover="right" class="altmetric-embed"></div>
         <div style="flex: 1; min-width: 200px;">
@@ -1068,95 +1068,40 @@ window.addEventListener('load', function() {
 // Altmetric badges are now rendered via Hugo templates in layouts/*/single.html
 
 // =============================================================================
-// ===== VISITOR FORENSICS TERMINAL =====
+// ===== FOOTER TERMINAL (static build info, no visitor data, no network) =====
 // =============================================================================
 
 function initVisitorTerminal() {
   // Don't inject twice
   if (document.querySelector('.visitor-terminal')) return;
-  
-  // Define the HTML structure
-  const terminalHTML = `
-    <div class="visitor-terminal">
+
+  const meta = document.querySelector('meta[name="build-date"]');
+  const built = meta ? meta.content : '';
+
+  const terminal = document.createElement('div');
+  terminal.className = 'visitor-terminal';
+  terminal.innerHTML = `
       <div style="margin-bottom: 10px; border-bottom: 1px dashed #333; padding-bottom: 5px;">
-        <strong>/// VISITOR_FORENSICS ///</strong>
+        <strong>/// BAMPEL.COM ///</strong>
       </div>
       <div class="terminal-row">
-        <span class="terminal-label">> IP_ADDR:</span>
-        <span class="terminal-value" id="term-ip">TRACING...</span>
+        <span class="terminal-label">> SITE:</span>
+        <span class="terminal-value">Benjamin Ampel, Georgia State University</span>
       </div>
-      <div class="terminal-row">
-        <span class="terminal-label">> OS_SYSTEM:</span>
-        <span class="terminal-value" id="term-os">ANALYZING...</span>
-      </div>
-      <div class="terminal-row">
-        <span class="terminal-label">> BROWSER_AGENT:</span>
-        <span class="terminal-value" id="term-browser">DETECTING...</span>
-      </div>
-      <div class="terminal-row" style="margin-top: 10px; border: none;">
-        <span class="terminal-label">> STATUS:</span>
-        <span class="terminal-value">LOGGED <span class="terminal-cursor"></span></span>
-      </div>
-    </div>
+      ${built ? `<div class="terminal-row" style="margin-top: 10px; border: none;">
+        <span class="terminal-label">> BUILD:</span>
+        <span class="terminal-value">${built} <span class="terminal-cursor"></span></span>
+      </div>` : ''}
   `;
 
-  // Inject into the Footer - try multiple selectors for different Hugo themes
-  const footer = document.querySelector('footer') || 
+  // Inject at the top of the footer, trying selectors for different Hugo themes
+  const footer = document.querySelector('footer') ||
                  document.querySelector('.site-footer') ||
                  document.querySelector('.page-footer') ||
                  document.querySelector('[class*="footer"]');
-  
-  if (footer) {
-    const div = document.createElement('div');
-    div.innerHTML = terminalHTML;
-    // Insert at the top of the footer container
-    footer.insertBefore(div, footer.firstChild);
-    
-    // Run the forensics logic
-    fetchVisitorData();
-  } else {
-    console.log('Visitor Terminal: No footer found');
-  }
+  if (footer) footer.insertBefore(terminal, footer.firstChild);
 }
 
-function fetchVisitorData() {
-  const ua = navigator.userAgent;
-  
-  // A. Detect OS
-  let os = "UNKNOWN_DEVICE";
-  if (ua.indexOf("Win") != -1) os = "WINDOWS_NT_KERNEL";
-  if (ua.indexOf("Mac") != -1) os = "MACOS_X_DARWIN";
-  if (ua.indexOf("Linux") != -1) os = "LINUX_DISTRO";
-  if (ua.indexOf("Android") != -1) os = "ANDROID_OS";
-  if (ua.indexOf("iPhone") != -1) os = "IOS_MOBILE";
-  
-  const osEl = document.getElementById('term-os');
-  if (osEl) osEl.innerText = os;
-
-  // B. Detect Browser
-  let browser = "GENERIC_CLIENT";
-  if (ua.indexOf("Chrome") != -1) browser = "CHROME_ENGINE";
-  if (ua.indexOf("Firefox") != -1) browser = "FIREFOX_GECKO";
-  if (ua.indexOf("Safari") != -1 && ua.indexOf("Chrome") == -1) browser = "SAFARI_WEBKIT";
-  if (ua.indexOf("Edg") != -1) browser = "EDGE_CHROMIUM";
-  
-  const browserEl = document.getElementById('term-browser');
-  if (browserEl) browserEl.innerText = browser;
-
-  // C. Fetch IP (Using a free public API)
-  fetch('https://api.ipify.org?format=json')
-    .then(response => response.json())
-    .then(data => {
-      const ipEl = document.getElementById('term-ip');
-      if (ipEl) ipEl.innerText = data.ip;
-    })
-    .catch(err => {
-      const ipEl = document.getElementById('term-ip');
-      if (ipEl) ipEl.innerText = "HIDDEN_BEHIND_PROXY";
-    });
-}
-
-// Initialize visitor terminal after DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
   setTimeout(initVisitorTerminal, 500);
 });

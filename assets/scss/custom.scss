@@ -100,7 +100,6 @@ $bg-color: #0a0a0a;      // Must match page background
   font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
   font-weight: 700;
   color: #00ff41;
-  text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
   
   &::before, &::after {
     content: attr(data-text);
@@ -117,7 +116,6 @@ $bg-color: #0a0a0a;      // Must match page background
   // Layer 1: Cyan shift
   &::before {
     left: 2px;
-    text-shadow: -2px 0 #00ffea;
     color: #00ffea;
     animation: glitch-anim-1 $glitch-duration-1 infinite step-end alternate-reverse;
   }
@@ -125,7 +123,6 @@ $bg-color: #0a0a0a;      // Must match page background
   // Layer 2: Magenta shift
   &::after {
     left: -2px;
-    text-shadow: 2px 0 #ff0055;
     color: #ff0055;
     animation: glitch-anim-2 $glitch-duration-2 infinite step-end alternate-reverse;
   }
@@ -150,7 +147,6 @@ h1, h2, h3 {
   font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
   font-weight: 700;
   color: #00ff41 !important;
-  text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
   
   &::before, &::after {
     content: attr(data-text);
@@ -172,7 +168,6 @@ h1, h2, h3 {
     
     &::before {
       left: 2px;
-      text-shadow: -2px 0 #00ffea;
       color: #00ffea;
       animation: glitch-anim-1 $glitch-duration-1 infinite step-end alternate-reverse;
       opacity: 1;
@@ -180,7 +175,6 @@ h1, h2, h3 {
     
     &::after {
       left: -2px;
-      text-shadow: 2px 0 #ff0055;
       color: #ff0055;
       animation: glitch-anim-2 $glitch-duration-2 infinite step-end alternate-reverse;
       opacity: 1;
@@ -219,7 +213,6 @@ a {
   
   &:hover {
     color: #00ff41 !important;
-    text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
   }
 }
 
@@ -249,7 +242,6 @@ header {
     
     &:hover {
       color: #00ff41 !important;
-      text-shadow: 0 0 10px rgba(0, 255, 65, 0.6);
     }
     
     &.active {
@@ -263,11 +255,9 @@ header {
   font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
   color: #00ff41 !important;
   font-weight: bold;
-  text-shadow: 0 0 5px rgba(0, 255, 65, 0.3);
   
   &:hover {
     color: #00ff41 !important;
-    text-shadow: 2px 2px #ff00ff, -2px -2px #00ffff, 0 0 15px rgba(0, 255, 65, 0.8);
     transform: skewX(-3deg);
   }
 }
@@ -319,12 +309,10 @@ section .container,
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
   color: #00ff41 !important;
-  text-shadow: 0 0 5px rgba(0, 255, 65, 0.3);
   display: inline-block;
   position: relative;
   
   &:hover {
-    text-shadow: 0 0 15px rgba(0, 255, 65, 0.8), 0 0 25px rgba(0, 255, 255, 0.4);
   }
 }
 
@@ -388,7 +376,6 @@ ul:not(.navbar-nav):not(.social-icons):not(.network-icon) {
     
     &:hover {
       color: #00ff41;
-      text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
     }
   }
 }
@@ -410,7 +397,6 @@ input[type="submit"] {
   &:hover {
     background: linear-gradient(135deg, rgba(0, 255, 65, 0.2) 0%, rgba(0, 255, 65, 0.3) 100%) !important;
     border-color: #00ff41 !important;
-    box-shadow: 0 0 20px rgba(0, 255, 65, 0.4), 0 0 40px rgba(0, 255, 65, 0.2);
     transform: translateY(-2px);
   }
 }
@@ -431,7 +417,6 @@ article {
   
   &:hover {
     border-color: rgba(0, 255, 65, 0.5) !important;
-    box-shadow: 0 0 30px rgba(0, 255, 65, 0.15);
     transform: translateY(-3px);
   }
 }
@@ -458,7 +443,6 @@ details,
     
     &:hover {
       background: rgba(0, 255, 65, 0.15) !important;
-      text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
     }
     
     &::marker {
@@ -509,14 +493,12 @@ footer,
       height: 12px;
       border-radius: 50%;
       background: #00ff41;
-      box-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
     }
     
     &:hover {
       border-left-color: #00ff41 !important;
       
       &::before {
-        box-shadow: 0 0 20px rgba(0, 255, 65, 0.8);
       }
     }
   }
@@ -673,7 +655,6 @@ code {
 .terminal-prompt {
   color: #00ff41 !important;
   font-weight: 600;
-  text-shadow: 0 0 5px #00ff41;
   
   &::before {
     content: '';
@@ -684,7 +665,6 @@ code {
 .typed-text, .typed-cursor {
   font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
   color: #00ff41 !important;
-  text-shadow: 0 0 5px #00ff41;
 }
 
 .typed-cursor {
@@ -711,7 +691,6 @@ section#hero h1 {
   
   &:hover {
     color: #00ff00 !important;
-    text-shadow: 2px 2px #ff00ff, -2px -2px #00ffff;
     transform: skewX(-5deg);
   }
 }
@@ -720,7 +699,6 @@ section#hero h1 {
 section h1, section h2 {
   font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
   color: #00ff41 !important;
-  text-shadow: 0 0 5px rgba(0, 255, 65, 0.3);
   display: inline-block;
   position: relative;
   transition: text-shadow 0.3s ease;
@@ -728,14 +706,12 @@ section h1, section h2 {
   // Glitch effect applied via section header rules
   
   &:hover {
-    text-shadow: 0 0 15px rgba(0, 255, 65, 0.8), 0 0 25px rgba(0, 255, 255, 0.5);
   }
 }
 
 .dark section h1,
 .dark section h2 {
   &:hover {
-    text-shadow: 0 0 20px rgba(0, 255, 65, 0.9), 0 0 35px rgba(0, 255, 255, 0.6);
   }
 }
 
@@ -844,13 +820,11 @@ section#about h1,
 .hb-about h1 {
   font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
   color: #00ff41 !important;
-  text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
   display: inline-block;
   position: relative;
   
   
   &:hover {
-    text-shadow: 0 0 15px rgba(0, 255, 65, 0.8), 0 0 30px rgba(0, 255, 255, 0.4);
   }
 }
 
@@ -862,7 +836,8 @@ section#about .article-title,
 .hb-about .profile h1 {
   font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
   color: #00ff41 !important;
-  text-shadow: 0 0 15px rgba(0, 255, 65, 0.6), 0 0 30px rgba(0, 255, 65, 0.3);
+  // The one text glow left on the site: a single soft halo on the hero name (everything else is flat).
+  text-shadow: 0 0 12px rgba(0, 255, 65, 0.35);
   letter-spacing: 1px;
 }
 
@@ -874,13 +849,11 @@ section#about [class*="role"],
   font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
   color: #00ff41 !important;
   font-size: 1.1rem;
-  text-shadow: 0 0 5px rgba(0, 255, 65, 0.3);
   display: inline-block;
   position: relative;
   
   
   &:hover {
-    text-shadow: 0 0 10px rgba(0, 255, 65, 0.6), 0 0 20px rgba(0, 255, 255, 0.3);
   }
 }
 
@@ -894,7 +867,6 @@ section#about a[href*="gsu"],
   
   &:hover {
     color: #00ff41 !important;
-    text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
   }
 }
 
@@ -926,14 +898,12 @@ section#about .hb-about-content,
   // Highlight important text
   strong, b {
     color: #ffa657 !important;
-    text-shadow: 0 0 3px rgba(255, 166, 87, 0.3);
   }
   
   // Italic text (publications, etc.) - cyan accent
   em, i {
     color: #00ffff !important;
     font-style: italic;
-    text-shadow: 0 0 3px rgba(0, 255, 255, 0.3);
   }
   
   // Links
@@ -946,7 +916,6 @@ section#about .hb-about-content,
     &:hover {
       color: #00ff41 !important;
       border-bottom-color: #00ff41;
-      text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
     }
   }
 }
@@ -1157,7 +1126,6 @@ section#about .bio-explorer-tab[aria-selected="true"],
   background: rgba(0, 255, 65, 0.2);
   color: #00ff41;
   border-color: rgba(0, 255, 65, 0.6);
-  box-shadow: 0 0 12px rgba(0, 255, 65, 0.25);
 }
 
 // Focus rings (audit 2026-10-24): full-opacity cyan outline, 12.3:1 against #0d1117 (WCAG 1.4.11 asks for 3:1). The old
@@ -1310,7 +1278,6 @@ section#about .edu-step::after,
   height: 12px;
   border-radius: 50%;
   background: #00ff41;
-  box-shadow: 0 0 12px rgba(0, 255, 65, 0.6);
 }
 
 section#about .edu-year,
@@ -1654,7 +1621,6 @@ section#about .bio-story-btn.is-active,
   background: rgba(0, 255, 65, 0.18);
   color: #00ff41;
   border-color: rgba(0, 255, 65, 0.6);
-  box-shadow: 0 0 10px rgba(0, 255, 65, 0.25);
 }
 
 section#about .bio-story-tldr,
@@ -1694,7 +1660,6 @@ section#about .bio-chip:hover,
 .hb-about .bio-chip:hover {
   border-color: rgba(0, 255, 65, 0.6);
   color: #00ff41;
-  box-shadow: 0 0 10px rgba(0, 255, 65, 0.25);
 }
 
 section#about .bio-chip::after,
@@ -1891,7 +1856,6 @@ section#about ul:not(.network-icon):not(.social-icons) {
     
     &:hover {
       color: #00ff41 !important;
-      text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
       padding-left: 25px;
       transition: color 0.2s ease, text-shadow 0.2s ease, padding-left 0.2s ease;
     }
@@ -1950,7 +1914,6 @@ section#about .col-md-5,
   time {
     color: #7ee787 !important;
     font-size: 0.85rem;
-    text-shadow: 0 0 3px rgba(0, 255, 65, 0.3);
   }
 }
 
@@ -1967,11 +1930,9 @@ section#about [class*="title"]:not(.article-title) {
   margin-bottom: 15px;
   display: inline-block;
   position: relative;
-  text-shadow: 0 0 5px rgba(0, 255, 65, 0.4);
   
   
   &:hover {
-    text-shadow: 0 0 15px rgba(0, 255, 65, 0.8), 0 0 25px rgba(0, 255, 255, 0.4);
   }
 }
 
@@ -1999,7 +1960,6 @@ section#about .network-icon,
     &:hover {
       color: #00ff41 !important;
       transform: scale(1.2) rotate(5deg);
-      text-shadow: 0 0 10px rgba(0, 255, 65, 0.8);
     }
   }
   
@@ -2030,11 +1990,9 @@ section#about .hb-about-avatar,
 @keyframes avatar-pulse {
   0%, 100% {
     border-color: rgba(0, 255, 65, 0.3);
-    box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
   }
   50% {
     border-color: rgba(0, 255, 65, 0.6);
-    box-shadow: 0 0 20px rgba(0, 255, 65, 0.4);
   }
 }
 
@@ -2192,12 +2150,10 @@ section#about .section-subheading,
   letter-spacing: 2px;
   display: inline-block;
   position: relative;
-  text-shadow: 0 0 5px rgba(0, 255, 65, 0.4);
   
   // Glitch effect applied via section header rules
   
   &:hover {
-    text-shadow: 0 0 15px rgba(0, 255, 65, 0.8), 0 0 25px rgba(0, 255, 255, 0.4);
   }
 }
 
@@ -3307,7 +3263,6 @@ body.dark .theme-toggle-label {
   
   &:hover {
     background: rgba(0, 255, 65, 0.1);
-    box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
   }
 }
 
@@ -3360,7 +3315,6 @@ body:not(.dark) .theme-toggle-label {
 .dark .redacted {
   background-color: #00ff41;
   color: #00ff41 !important;
-  box-shadow: 0 0 5px rgba(0, 255, 65, 0.3);
   
   &::selection {
     background: #00ff41;
@@ -3371,7 +3325,6 @@ body:not(.dark) .theme-toggle-label {
     background-color: transparent;
     color: #00ff41 !important;
     text-decoration-color: #00ff41;
-    text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
   }
 }
 
@@ -3405,7 +3358,6 @@ body:not(.dark) .theme-toggle-label {
   .dark & {
     background-color: #ffa657;
     color: #ffa657 !important;
-    box-shadow: 0 0 5px rgba(255, 166, 87, 0.3);
     
     &:hover {
       color: #ffa657 !important;
@@ -3515,7 +3467,6 @@ body:not(.dark) .redacted:hover {
   padding: 1rem;
   margin: 2rem auto;
   max-width: 600px;
-  box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
   text-align: left;
   
   /* Fade-in animation on load */
@@ -3703,7 +3654,6 @@ body.dark .altmetric-embed {
 // Cyber mode map container
 body.dark #impact-map-container {
   border: 1px solid #00ff41;
-  box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
 }
 
 // Manuscript mode map container
@@ -3773,7 +3723,6 @@ body.dark .leaflet-popup-content-wrapper {
   color: #00ff41;
   border: 1px solid #00ff41;
   font-family: 'Fira Code', monospace;
-  box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
 }
 
 body.dark .leaflet-popup-tip {
@@ -3783,7 +3732,6 @@ body.dark .leaflet-popup-tip {
 
 body.dark .map-popup strong {
   color: #00ff41;
-  text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
 }
 
 body.dark .map-popup .location {
@@ -3837,7 +3785,6 @@ body.dark .leaflet-popup-close-button {
 // Cyber mode network container
 body.dark #research-network-container {
   border: 1px solid #00ff41;
-  box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
 }
 
 // Manuscript mode network container  
@@ -4084,13 +4031,11 @@ body:not(.dark) .pub-metric-card .value {
   height: 10px;
   border-radius: 50%;
   background: rgba(0, 229, 255, 0.5);
-  box-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
   transition: transform 0.2s ease, background 0.2s ease;
 }
 
 .awards-node.active::before {
   background: #00ff41;
-  box-shadow: 0 0 12px rgba(0, 255, 65, 0.8);
   transform: scale(1.2);
 }
 
@@ -4167,12 +4112,10 @@ body:not(.dark) .awards-track-line {
 
 body:not(.dark) .awards-node::before {
   background: rgba(11, 122, 62, 0.4);
-  box-shadow: 0 0 8px rgba(11, 122, 62, 0.3);
 }
 
 body:not(.dark) .awards-node.active::before {
   background: #0b7a3e;
-  box-shadow: 0 0 10px rgba(11, 122, 62, 0.6);
 }
 
 body:not(.dark) .awards-detail-year {
@@ -4252,7 +4195,6 @@ body:not(.dark) .awards-detail-year {
 .talks-year.active {
   border-color: rgba(0, 255, 65, 0.6);
   color: #00ff41;
-  box-shadow: 0 0 12px rgba(0, 255, 65, 0.2);
 }
 
 .talks-tags {
@@ -5222,7 +5164,6 @@ body:not(.dark) .pub-filter-reset {
 
 .impact-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 0 16px rgba(0, 255, 65, 0.15);
 }
 
 .impact-label {

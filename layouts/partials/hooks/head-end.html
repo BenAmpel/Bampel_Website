@@ -19,6 +19,8 @@
 <script src="/js/pub-loader.js"></script>
 
 
+<meta name="build-date" content="{{ now.UTC.Format "2006-01-02" }}">
+
 <!-- Custom Animations & Enhancements -->
 {{ $headCSS := resources.Get "css/head-inline.css" | minify | fingerprint }}
 <link rel="stylesheet" href="{{ $headCSS.RelPermalink }}" integrity="{{ $headCSS.Data.Integrity }}">

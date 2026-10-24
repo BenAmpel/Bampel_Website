@@ -54,7 +54,6 @@
 .selected-pubs-link:hover {
   color: #00ff41;
   border-color: #00ff41;
-  text-shadow: 0 0 14px rgba(0, 255, 65, 0.45);
 }
 body:not(.dark) .selected-pubs .pub-item {
   background: rgba(0, 0, 0, 0.03);
@@ -83,7 +82,7 @@ body:not(.dark) .selected-pubs-link { color: #0b6b2c; border-color: rgba(11, 107
       return '<span class="pub-badge pub-badge--' + b.toLowerCase() + '" title="' + title + '">' + b + '</span>';
     });
     if (pub.award) {
-      chips.push('<span class="pub-badge pub-badge--award" title="' + esc(pub.award) + '">🏆 ' + esc(pub.award) + '</span>');
+      chips.push('<span class="pub-badge pub-badge--award" title="' + esc(pub.award) + '"><i class="fas fa-trophy" aria-hidden="true"></i> ' + esc(pub.award) + '</span>');
     }
     return chips.length ? '<span class="pub-badges">' + chips.join('') + '</span>' : '';
   }
