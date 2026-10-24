@@ -1,5 +1,6 @@
-{{/* Shadowed from Wowchemy v5 for Hugo 0.168: site.LanguageCode -> site.Language.Locale */}}
-{{- /* Generate RSS v2 with full page content. */ -}}
+{{/* Shadowed from Wowchemy v5 for Hugo 0.168: site.LanguageCode -> site.Language.Locale; plain-text item descriptions */}}
+{{- /* Generate RSS v2. Each item carries the abstract (or the page summary) as plain text, not the rendered page with its
+   widgets, styles and scripts. The number of items is services.rss.limit in config.yaml. */ -}}
 {{- /* Upstream Hugo bug - RSS dates can be in future: https://github.com/gohugoio/hugo/issues/3918 */ -}}
 {{- $page_context := cond .IsHome site . -}}
 {{- $pages := $page_context.RegularPages -}}
@@ -33,7 +34,7 @@
       <link>{{ .Permalink }}</link>
       <pubDate>{{ .Date.Format "Mon, 02 Jan 2006 15:04:05 -0700" | safeHTML }}</pubDate>
       <guid>{{ .Permalink }}</guid>
-      <description>{{ .Content | html }}</description>
+      <description>{{ .Params.abstract | default .Summary | plainify | htmlUnescape }}</description>
     </item>
     {{ end }}
   </channel>

@@ -97,3 +97,6 @@ minify:
 services:
   googleAnalytics:
     id: ''
+  # Feeds carry each item's abstract or summary as plain text (layouts/_default/rss.xml); the 20 newest items.
+  rss:
+    limit: 20

@@ -1,7 +1,8 @@
 {{ $scr := .Scratch }}
 
-{{/* Request search engines not to index private pages. */}}
-{{ if .Params.private }}
+{{/* Request search engines not to index private pages, nor the taxonomy pages (/tags/, the /tag/ terms, /categories/,
+   /publication_types/ and its terms), which only repeat links found on /publications/. The sitemap leaves them out too. */}}
+{{ if or .Params.private (in (slice "taxonomy" "term") .Kind) }}
   <meta name="robots" content="noindex" />
 {{- end -}}
 
@@ -35,7 +36,38 @@
 {{ else }}
   {{ $desc = $superuser_role }}
 {{ end }}
-<meta name="description" content="{{ $desc }}" />
+{{/* List pages without a summary get a description of their own instead of the site-wide one. */}}
+{{ if and (not .IsPage) (not .IsHome) (not .Params.summary) }}
+  {{ $labels := dict "conference_publication" "Conference papers" "journal_publication" "Journal articles" "workshop_publication" "Workshop papers" "post" "Posts" }}
+  {{ if eq .Kind "term" }}
+    {{ if eq .Data.Plural "publication_types" }}
+      {{ $desc = printf "%s by %s." .Title site.Title }}
+    {{ else }}
+      {{ $desc = printf "Publications by %s tagged \"%s\"." site.Title .Title }}
+    {{ end }}
+  {{ else if eq .Kind "taxonomy" }}
+    {{ $desc = printf "%s used on publications by %s." .Title site.Title }}
+  {{ else if and (eq .Kind "section") (isset $labels .Section) }}
+    {{ $desc = printf "%s by %s." (index $labels .Section) site.Title }}
+  {{ end }}
+{{ end }}
+
+{{/* The meta, Open Graph and Twitter descriptions are kept to about 155 characters, the length search results show: the first
+   whole sentences of the summary or abstract that fit, or, when the first sentence alone is longer, its words up to that length.
+   JSON-LD below still gets the full text. */}}
+{{ $meta_desc := $desc | plainify | htmlUnescape | replaceRE `\s+` " " | strings.TrimSpace }}
+{{ if gt (strings.RuneCount $meta_desc) 160 }}
+  {{ $short := "" }}
+  {{ $full := false }}
+  {{ range findRE `\S.*?[.!?]["')\]]*(?:\s|$)` $meta_desc }}
+    {{ if not $full }}
+      {{ $next := strings.TrimSpace (printf "%s %s" $short .) }}
+      {{ if le (strings.RuneCount $next) 155 }}{{ $short = $next }}{{ else }}{{ $full = true }}{{ end }}
+    {{ end }}
+  {{ end }}
+  {{ $meta_desc = $short | default (truncate 154 $meta_desc | plainify | htmlUnescape) }}
+{{ end }}
+<meta name="description" content="{{ $meta_desc }}" />
 
 {{/* Get all URL variations for the page. */}}
 {{ range .Translations }}
@@ -63,6 +95,7 @@
 {{ $avatar_image := (.Resources.ByType "image").GetMatch "avatar*" }}
 {{ $has_logo := fileExists "assets/media/logo.png" | or (fileExists "assets/media/logo.svg") }}
 {{ $og_image := "" }}
+{{ $og_image_size := slice }}
 {{ $twitter_card := "summary_large_image" }}
 {{ if (and (eq .Kind "term") $avatar_image) }}
   {{/* Match image processing in About widget to prevent generating more images than necessary. */}}
@@ -72,6 +105,10 @@
   {{ $og_image = $featured_image.Permalink }}
 {{ else if $sharing_image }}
   {{ $og_image = $sharing_image.Permalink }}
+{{ else if fileExists "static/media/sharing-card.png" }}
+  {{/* The site's branded 1200x630 sharing card, for every page without a featured image of its own. */}}
+  {{ $og_image = "media/sharing-card.png" | absURL }}
+  {{ $og_image_size = slice 1200 630 }}
 {{ else if $has_logo }}
   {{ $og_image = (partial "functions/get_logo" (dict "constraint" "fit" "size" 300)).Permalink }}
   {{ $twitter_card = "summary" }}
@@ -83,23 +120,28 @@
 
 {{ $title := partial "functions/get_page_title" . }}
 
-{{/* Twitter metadata. */}}
-{{/* twitter:card is emitted once, by layouts/partials/hooks/head-start/seo-identity.html (summary_large_image with the sharing card). A second tag here made validators report a duplicate. */}}
+{{/* Twitter metadata. Each of twitter:card, twitter:image, og:image is emitted once, here (seo-identity.html used to add a
+   second set with the sharing card ahead of these). */}}
+<meta name="twitter:card" content="{{ $twitter_card }}" />
 {{ with site.Params.marketing.seo.twitter }}
   <meta property="twitter:site" content="@{{ . }}" />
   <meta property="twitter:creator" content="@{{ . }}" />
 {{ end }}
 {{- with $og_image -}}
-  <meta property="twitter:image" content="{{ . }}" />
+  <meta name="twitter:image" content="{{ . }}" />
 {{- end -}}
 
 {{/* Open Graph metadata. */}}
 <meta property="og:site_name" content="{{ site.Title }}" />
 <meta property="og:url" content="{{ .Permalink }}" />
 <meta property="og:title" content="{{ $title }}" />
-<meta property="og:description" content="{{ $desc }}" />
+<meta property="og:description" content="{{ $meta_desc }}" />
 {{- with $og_image -}}
   <meta property="og:image" content="{{ . }}" />
+{{- end -}}
+{{- with $og_image_size -}}
+  <meta property="og:image:width" content="{{ index . 0 }}" />
+  <meta property="og:image:height" content="{{ index . 1 }}" />
 {{- end -}}
 <meta property="og:locale" content="{{ site.Language.Locale | default "en-us" }}" />
 {{ if .IsPage }}
