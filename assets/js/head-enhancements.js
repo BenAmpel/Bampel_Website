@@ -345,7 +345,10 @@ function runEnhancements() {
         const s = document.createElement('script');
         s.src = '/vendor/leaflet/leaflet.js';
         s.onload = function () {
-          fetch('/data/dashboard_payload.json').then(r => r.json()).then(payload => {
+          // A small build-time extract of the footprint (data-footprint-url, about 10 KB) instead of the 463 KB dashboard payload.
+          const fpSrc = document.querySelector('[data-footprint-url]');
+          const fpUrl = fpSrc ? fpSrc.getAttribute('data-footprint-url') : '';
+          (fpUrl ? fetch(fpUrl).then(r => r.json()).then(footprint => ({ footprint })) : fetch('/data/dashboard_payload.json').then(r => r.json())).then(payload => {
             const el = document.getElementById('home-footprint-map');
             if (!el || !window.L) return;
             el.style.display = 'block';

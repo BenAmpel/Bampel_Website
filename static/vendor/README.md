@@ -10,4 +10,5 @@ assets/js/head-enhancements.js for tsParticles) were checked against these copie
 | mark.js (jQuery) | 8.11.1 | search result highlighting | MIT |
 | Academicons | 1.9.2 | academic profile icons (layouts/partials/site_head.html) | font: SIL OFL 1.1; CSS: MIT |
 | tsParticles | 2.12.0 | home page background (assets/js/head-enhancements.js) | MIT |
-| ECharts, Leaflet, Leaflet.markercluster | see folders | research dashboard and map | Apache-2.0, BSD-2-Clause, MIT |
+| ECharts (trimmed: bar, line, graph, radar) | 5.4.3 | research dashboard; built by scripts/build-echarts.mjs from the npm package | Apache-2.0 |
+| Leaflet, Leaflet.markercluster | see folders | research dashboard and home map | BSD-2-Clause, MIT |

@@ -98,7 +98,12 @@
     });
   });
 
-  safeFetch(`${base}data/dashboard_payload.json`).then((payload) => {
+  // The numbers are embedded in the page at build time (#impact-stats-data); the full dashboard payload is only a
+  // fallback for pages built without them.
+  const embedded = document.getElementById("impact-stats-data");
+  let embeddedStats = null;
+  try { embeddedStats = embedded ? JSON.parse(embedded.textContent) : null; } catch (e) { embeddedStats = null; }
+  (embeddedStats ? Promise.resolve({ impactStats: embeddedStats }) : safeFetch(`${base}data/dashboard_payload.json`)).then((payload) => {
     if (!payload || !payload.impactStats) return;
 
     const stats = payload.impactStats;

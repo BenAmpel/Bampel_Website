@@ -1,4 +1,10 @@
-<div class="impact-stats" data-impact-stats data-baseurl="{{ "/" | relURL }}">
+{{- /* The home page needs two small parts of data/dashboard_payload.json (463 KB): impactStats for this box, embedded
+     below, and the research footprint for the home map, written as its own small fingerprinted file. Both are read at
+     build time, so the monthly metrics update still flows through. */ -}}
+{{- $payload := os.ReadFile "static/data/dashboard_payload.json" | transform.Unmarshal -}}
+{{- $footprint := resources.FromString "data/home-footprint.json" ($payload.footprint | jsonify) | minify | fingerprint -}}
+<script type="application/json" id="impact-stats-data">{{ $payload.impactStats | jsonify | safeJS }}</script>
+<div class="impact-stats" data-impact-stats data-baseurl="{{ "/" | relURL }}" data-footprint-url="{{ $footprint.RelPermalink }}">
   <div class="impact-stats-header">
     <div class="impact-stats-title">Impact Snapshot</div>
     <div class="impact-stats-updated" data-impact-updated>Updated --</div>
