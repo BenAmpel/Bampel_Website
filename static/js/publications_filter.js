@@ -65,7 +65,7 @@
         (b) => `<span class="pub-badge pub-badge--${b.toLowerCase()}" title="${b === 'FT50' ? 'Financial Times Top 50 journal' : 'UT Dallas Top 24 journal'}">${b}</span>`
       );
       if (pub.award) {
-        chips.push(`<span class="pub-badge pub-badge--award" title="${esc(pub.award)}">\u{1F3C6} ${esc(pub.award)}</span>`);
+        chips.push(`<span class="pub-badge pub-badge--award" title="${esc(pub.award)}"><i class="fas fa-trophy" aria-hidden="true"></i> ${esc(pub.award)}</span>`);
       }
       return chips.length ? `<span class="pub-badges">${chips.join('')}</span>` : '';
     };

@@ -13,7 +13,7 @@ sections:
 
         {{< publications_filter open="true" >}}
 
-        {{< spoiler text="🧪 Paper Diff View" >}}
+        {{< spoiler text="Paper Diff View" >}}
         {{< paper_diff >}}
         {{< /spoiler >}}
     design:

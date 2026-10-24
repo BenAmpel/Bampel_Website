@@ -9,7 +9,7 @@ sections:
     content:
       title: Curriculum Vitae
       text: |
-        [📄 Download full CV (PDF) →](/uploads/cv.pdf)
+        [<i class="fas fa-file-pdf" aria-hidden="true"></i> Download full CV (PDF) →](/uploads/cv.pdf)
     design:
       columns: '1'
 
