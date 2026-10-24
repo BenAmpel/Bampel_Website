@@ -44,5 +44,7 @@ await tick();
 
 const intro = VISHING_STUDY2.content().items.find(i => i.id === 'practice-intro').body;
 for (const text of [intro, PRACTICE_ITEMS[0].body]) for (const control of ['Answer', 'Tap to talk', 'Hang up', 'Continue']) assert(text.includes(control), `the practice text names ${control}: ${text}`);
+const tour = VISHING_STUDY2.content().items.find(i => i.id === 'tour').body;
+assert(/Tap to talk/.test(tour) && !/You can also type/.test(tour), 'the tour does not promise typing the calls will not offer');
 assert(/out loud/.test(PRACTICE_ITEMS[1].body) && /Typing does not count/.test(PRACTICE_ITEMS[1].body), 'the retry says only speech counts');
 console.log('practice call: typing hidden when the gate needs speech; the texts name Answer, Tap to talk, Hang up and Continue');
