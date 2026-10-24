@@ -116,7 +116,7 @@ function HomePage() {
       <p className="lede">We study how intelligent systems can spot malicious behavior before it turns into an attack,
         and we help people and organizations act on what those systems find.</p>
       <div className="hero-cta">
-        <a className="btn btn-primary" href="#/research">Explore our research <Arrow /></a>
+        <a className="btn btn-primary" href="/ccair/research/">Explore our research <Arrow /></a>
         <a className="btn btn-secondary" href="/ccair/pathways/">Find your cyber career path</a>
       </div>
     </div>
@@ -164,14 +164,14 @@ function HomePage() {
             </Reveal>
           ))}
         </div>
-        <div className="section-foot"><a className="btn btn-plain" href="#/research">How the research agenda fits together <Arrow /></a></div>
+        <div className="section-foot"><a className="btn btn-plain" href="/ccair/research/">How the research agenda fits together <Arrow /></a></div>
       </Section>
 
       <Section id="recent" alt eyebrow="Recent work" title="Selected journal articles">
         <Reveal as="ul" className="pub-list card" style={{ paddingBlock: 4 }}>
           {recent.map((p) => <PublicationItem key={p.title} {...p} paperPages={paperPages} />)}
         </Reveal>
-        <div className="section-foot"><a className="btn btn-secondary" href="#/publications">All {publications.length} publications <Arrow /></a></div>
+        <div className="section-foot"><a className="btn btn-secondary" href="/ccair/publications/">All {publications.length} publications <Arrow /></a></div>
       </Section>
 
       <Section id="news" eyebrow="News" title="What's new at the center">
@@ -192,9 +192,9 @@ function HomePage() {
 
       <Section id="explore" eyebrow="Get to know us" title="Find your way around">
         <div className="grid grid-3">
-          <LinkCard href="#/people" title="People" more="Meet the team"><p>The director, graduate researchers, and faculty affiliates behind the center.</p></LinkCard>
-          <LinkCard href="#/resources" title="Resources" more="See resources"><p>Datasets, benchmarks, tools, and free career guides for students.</p></LinkCard>
-          <LinkCard href="#/contact" title="Work with us" more="Get in touch"><p>Prospective students, collaborators, and partners: here is how to reach us.</p></LinkCard>
+          <LinkCard href="/ccair/people/" title="People" more="Meet the team"><p>The director, graduate researchers, and faculty affiliates behind the center.</p></LinkCard>
+          <LinkCard href="/ccair/resources/" title="Resources" more="See resources"><p>Datasets, benchmarks, tools, and free career guides for students.</p></LinkCard>
+          <LinkCard href="/ccair/contact/" title="Work with us" more="Get in touch"><p>Prospective students, collaborators, and partners: here is how to reach us.</p></LinkCard>
         </div>
       </Section>
     </div>
@@ -256,7 +256,7 @@ function ResearchPage() {
             <Reveal key={o.title} className="card"><h3>{o.title}</h3><p>{o.desc}</p></Reveal>
           ))}
         </div>
-        <div className="section-foot"><a className="btn btn-secondary" href="#/publications">Read the {publications.length} publications <Arrow /></a></div>
+        <div className="section-foot"><a className="btn btn-secondary" href="/ccair/publications/">Read the {publications.length} publications <Arrow /></a></div>
       </Section>
     </div>
   );
@@ -264,15 +264,14 @@ function ResearchPage() {
 
 const PUB_TYPES = ['all', 'journal', 'conference', 'workshop'];
 function readPubFilter() {
-  const h = window.location.hash, i = h.indexOf('?');
-  const p = new URLSearchParams(i >= 0 ? h.slice(i + 1) : '');
+  const p = new URLSearchParams(window.location.search);
   const type = p.get('type');
   return { type: PUB_TYPES.includes(type) ? type : 'all', q: (p.get('q') || '').slice(0, 200) };
 }
 
 function PublicationsPage() {
   const { publications, paperPages } = useData();
-  // The filter lives in the address (#/publications?type=journal&q=phishing), so a filtered list can be shared and survives a reload.
+  // The filter lives in the address (/ccair/publications/?type=journal&q=phishing), so a filtered list can be shared and survives a reload.
   const initial = usePageMemo(readPubFilter, []);
   const [type, setType] = usePageState(initial.type);
   const [query, setQuery] = usePageState(initial.q);
@@ -282,8 +281,8 @@ function PublicationsPage() {
     if (type !== 'all') qs.set('type', type);
     if (query.trim()) qs.set('q', query.trim());
     const s = qs.toString();
-    // replaceState does not fire hashchange, so this never re-routes or adds history entries.
-    try { window.history.replaceState(null, '', '#/publications' + (s ? '?' + s : '')); } catch (e) { /* the filter still works without the address */ }
+    // replaceState does not fire popstate, so this never re-routes or adds history entries.
+    try { window.history.replaceState(null, '', '/ccair/publications/' + (s ? '?' + s : '')); } catch (e) { /* the filter still works without the address */ }
   }, [type, query]);
 
   const counts = usePageMemo(() => publications.reduce((acc, p) => { acc[p.type] = (acc[p.type] || 0) + 1; return acc; }, {}), [publications]);
@@ -402,7 +401,7 @@ function PeoplePage() {
             <h2 id="join-title">Want to do research with us?</h2>
             <p>CCAIR is recruiting motivated Ph.D. and M.S. students who are curious about the intersection of AI and cybersecurity.</p>
           </div>
-          <div className="actions"><a className="btn btn-primary" href="#/contact">How to join <Arrow /></a></div>
+          <div className="actions"><a className="btn btn-primary" href="/ccair/contact/">How to join <Arrow /></a></div>
         </Reveal>
       </Section>
     </div>
@@ -431,7 +430,7 @@ function ResourcesPage() {
             <h2 id="materials-title">Research materials hub</h2>
             <p>Datasets, tools, and other reusable materials from CCAIR studies, with a “how to cite” line and a DOI link where they exist.</p>
           </div>
-          <div className="actions"><a className="btn btn-primary" href="#/materials">Browse materials <Arrow /></a></div>
+          <div className="actions"><a className="btn btn-primary" href="/ccair/materials/">Browse materials <Arrow /></a></div>
         </Reveal>
       </Section>
 

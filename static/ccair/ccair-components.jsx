@@ -18,7 +18,7 @@ const NAV_PAGES = [
   { id: 'contact', label: 'Contact' },
 ];
 
-const hrefFor = (page) => (page === 'home' ? '#/' : '#/' + page);
+const hrefFor = (page) => (page === 'home' ? '/ccair/' : '/ccair/' + page + '/');
 
 /* Brand. GSU rules (commkit.gsu.edu): a center may not create its own logo; it uses the college sub-brand lockup with a
    unit wordmark, supplied by Public Relations & Marketing Communications. Until those files exist the site shows a
@@ -62,7 +62,7 @@ function Wordmark() {
 function Brand({ onDark }) {
   const cfg = useLockup();
   return (
-    <a className="brand" href="#/" aria-label={cfg ? cfg.alt + ', home' : undefined}>
+    <a className="brand" href="/ccair/" aria-label={cfg ? cfg.alt + ', home' : undefined}>
       {cfg ? <OfficialLockup cfg={cfg} onDark={onDark} /> : <Wordmark />}
     </a>
   );
@@ -256,7 +256,7 @@ function CCAIRNav({ currentPage }) {
       {open && (
         <div id="ccair-menu" className="sheet" ref={sheetRef} onClick={(e) => { if (e.target.closest('a')) setOpen(false); }}>
           <ul>
-            <li><a href="#/" aria-current={currentPage === 'home' ? 'page' : undefined}>Home</a></li>
+            <li><a href="/ccair/" aria-current={currentPage === 'home' ? 'page' : undefined}>Home</a></li>
             {NAV_PAGES.map((p) => (
               <li key={p.id}><a href={hrefFor(p.id)} aria-current={currentPage === p.id ? 'page' : undefined}>{p.label}</a></li>
             ))}

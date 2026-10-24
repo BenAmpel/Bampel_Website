@@ -190,7 +190,9 @@ ${scripts.map((s) => `<script src="${s}" defer></script>`).join('\n')}
 export const LASTMOD_STORE = path.join(CCAIR, 'data', 'guide-lastmod.json');
 export function writeSitemap() {
   const P = readJson('pathways.json');
-  const urls = [[`${SITE}/ccair/`, null], [`${SITE}/ccair/pathways/`, P.updated], ...P.roles.map((r) => [`${SITE}/ccair/pathways/${r.slug}/`, P.updated])];
+  // The CCAIR app's own pages (/ccair/<page>/, prerendered by scripts/build-ccair.js) have no lastmod either.
+  const appPages = ['research', 'publications', 'people', 'resources', 'materials', 'about', 'contact'].map((p) => [`${SITE}/ccair/${p}/`, null]);
+  const urls = [[`${SITE}/ccair/`, null], ...appPages, [`${SITE}/ccair/pathways/`, P.updated], ...P.roles.map((r) => [`${SITE}/ccair/pathways/${r.slug}/`, P.updated])];
   if (fs.existsSync(LASTMOD_STORE)) {
     const store = JSON.parse(fs.readFileSync(LASTMOD_STORE, 'utf8'));
     for (const [u, e] of Object.entries(store.pages)) if (e.sitemap) urls.push([`${SITE}${u}`, e.lastmod]);

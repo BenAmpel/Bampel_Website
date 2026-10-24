@@ -6,16 +6,16 @@ const DataCtx = createContext(null);
 const DataStatusCtx = createContext({ loading: true, error: null, partial: false });
 
 const DATA_FILES = {
-  publications: 'data/publications.json',
-  people: 'data/people.json',
-  resources: 'data/resources.json',
-  funding: 'data/funding.json',
-  courses: 'data/courses.json',
-  news: 'data/news.json',
-  materials: 'data/materials.json',
-  paperPages: 'data/paper-pages.json',
-  photos: 'data/photos.json',
-  friends: 'data/friends.json',
+  publications: '/ccair/data/publications.json',
+  people: '/ccair/data/people.json',
+  resources: '/ccair/data/resources.json',
+  funding: '/ccair/data/funding.json',
+  courses: '/ccair/data/courses.json',
+  news: '/ccair/data/news.json',
+  materials: '/ccair/data/materials.json',
+  paperPages: '/ccair/data/paper-pages.json',
+  photos: '/ccair/data/photos.json',
+  friends: '/ccair/data/friends.json',
 };
 // What a page gets when its file fails to load, so one failed fetch empties one section instead of the whole site.
 // paper-pages.json is generated at build time (scripts/build-ccair.js); the site still works if it is missing.

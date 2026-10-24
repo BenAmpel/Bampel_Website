@@ -1,4 +1,4 @@
-/* CCAIR App — shell with hash routing and page focus management */
+/* CCAIR App — shell with path routing (/ccair/<page>/) and page focus management */
 const { useState, useEffect, useLayoutEffect, useRef } = React;
 
 class ErrorBoundary extends React.Component {
@@ -25,9 +25,32 @@ const TITLES = {
   about: 'About — CCAIR', contact: 'Contact — CCAIR',
 };
 
-function pageFromHash() {
-  const h = window.location.hash.replace(/^#\/?/, '').split(/[/?]/)[0];
-  return VALID_PAGES.includes(h) ? h : 'home';
+// Each page has a real address, /ccair/<page>/, with its own prerendered HTML file (scripts/build-ccair.js) so it can be
+// found by search engines and shared. Old #/<page> links (the app used hash routes until 2026-10-24) are rewritten to
+// the path on load, keeping a #/publications?type=... query.
+function pageFromPath(pathname) {
+  const seg = (pathname || window.location.pathname).replace(/^\/ccair\/?/, '').split('/')[0];
+  return VALID_PAGES.includes(seg) ? seg : 'home';
+}
+const pathFor = (page) => (page === 'home' ? '/ccair/' : `/ccair/${page}/`);
+(function upgradeHashRoute() {
+  const m = /^#\/([a-z]*)(\?[^#]*)?/.exec(window.location.hash);
+  if (!m) return;
+  const page = VALID_PAGES.includes(m[1]) ? m[1] : 'home';
+  try { window.history.replaceState(null, '', pathFor(page) + (m[2] || '')); } catch (e) { /* stays on the hash address */ }
+})();
+// A same-site link to another CCAIR page is handled here (pushState) so the page changes without a reload, with the
+// route transition and focus move below. Modified clicks, new-tab links, downloads and links off the app pass through.
+function appLinkTarget(event) {
+  if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return null;
+  const a = event.target.closest && event.target.closest('a[href]');
+  if (!a || a.target && a.target !== '_self' || a.hasAttribute('download')) return null;
+  const url = new URL(a.href, window.location.href);
+  if (url.origin !== window.location.origin || !/^\/ccair\/([a-z]+\/)?$/.test(url.pathname)) return null;
+  const page = pageFromPath(url.pathname);
+  if (url.pathname !== pathFor(page)) return null;
+  if (url.pathname === window.location.pathname && url.search === window.location.search && url.hash) return null; // in-page anchor
+  return { page, url };
 }
 
 // Route transitions. The new page slides in from the side its nav link sits on (later pages from the right, earlier
@@ -57,16 +80,25 @@ function routeTo(next, apply) {
 }
 
 function CCAIRApp() {
-  const [page, setPage] = useState(pageFromHash);
+  const [page, setPage] = useState(() => pageFromPath());
   const mainRef = useRef(null);
   const firstRender = useRef(true);
 
-  // Pages are hash routes, so plain links work, the back button works, and nothing waits on a transition.
+  // Links to other CCAIR pages change the page in place (pushState); the back and forward buttons work (popstate); a
+  // link that is not a CCAIR page, or a modified click, behaves as a normal link.
   useEffect(() => {
-    document.documentElement.dataset.page = pageFromHash();
-    const onHash = () => { const next = pageFromHash(); routeTo(next, () => setPage(next)); };
-    window.addEventListener('hashchange', onHash);
-    return () => window.removeEventListener('hashchange', onHash);
+    document.documentElement.dataset.page = pageFromPath();
+    const onClick = (event) => {
+      const t = appLinkTarget(event);
+      if (!t) return;
+      event.preventDefault();
+      if (t.url.href !== window.location.href) window.history.pushState(null, '', t.url.pathname + t.url.search + t.url.hash);
+      routeTo(t.page, () => setPage(t.page));
+    };
+    const onPop = () => { const next = pageFromPath(); routeTo(next, () => setPage(next)); };
+    document.addEventListener('click', onClick);
+    window.addEventListener('popstate', onPop);
+    return () => { document.removeEventListener('click', onClick); window.removeEventListener('popstate', onPop); };
   }, []);
 
   // Layout effect: the scroll reset and focus happen in the same commit as the new page, inside the view transition.

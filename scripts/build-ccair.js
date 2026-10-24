@@ -131,12 +131,58 @@ function writeHeroPreload() {
 })();
 `;
   heroPreloadJs = js; // written into dist/ after the bundle step resets that folder
-  const script = !links.length ? '' : '\n  <script src="dist/hero-preload.js"></script>\n  ';
+  const script = !links.length ? '' : '\n  <script src="/ccair/dist/hero-preload.js"></script>\n  ';
   const next = html.slice(0, a + start.length) + script + html.slice(b);
   if (next !== html) fs.writeFileSync(file, next);
   return links.length;
 }
 console.log('CCAIR home hero: %d preload candidates written to dist/hero-preload.js', writeHeroPreload());
+
+// One HTML file per CCAIR page (2026-10-24): /ccair/<page>/index.html is the same app shell as index.html with that
+// page's title, description, canonical address and social tags, and a short static summary (its heading and lede, read
+// from the page's <PageHead> in ccair-pages.jsx, plus links to every page) in place of the home summary, so search engines
+// index each page and shared links show the right card. The app reads the page from the path (ccair-app.jsx).
+// The files are build output (.gitignore).
+function writeRoutePages() {
+  const shell = fs.readFileSync(path.join(ccairDir, 'index.html'), 'utf8');
+  const appSrc = fs.readFileSync(path.join(ccairDir, 'ccair-app.jsx'), 'utf8');
+  const pagesSrc = fs.readFileSync(path.join(ccairDir, 'ccair-pages.jsx'), 'utf8');
+  const titles = Object.fromEntries([...appSrc.matchAll(/\b([a-z]+): '([^']+)'/g)].map((m) => [m[1], m[2]]));
+  const esc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const describe = (t) => { if (t.length <= 155) return t; const cut = t.slice(0, 152); return cut.slice(0, cut.lastIndexOf(' ')).replace(/[,;:]$/, '') + '…'; };
+  const funcs = [...pagesSrc.matchAll(/^function (\w+)Page\(\)/gm)].map((m) => ({ name: m[1].toLowerCase(), at: m.index }));
+  const navStart = shell.indexOf('<nav aria-label="CCAIR pages"');
+  if (navStart < 0) throw new Error('index.html: the CCAIR pages <nav> is missing from the summary');
+  const nav = shell.slice(navStart, shell.indexOf('</nav>', navStart) + 6);
+  let written = 0;
+  funcs.forEach((f, i) => {
+    if (f.name === 'home') return;
+    const body = pagesSrc.slice(f.at, i + 1 < funcs.length ? funcs[i + 1].at : undefined);
+    const head = /<PageHead\s+eyebrow="([^"]*)"\s+title="([^"]*)"\s+lede="([^"]*)"/.exec(body);
+    if (!head || !titles[f.name]) throw new Error(`ccair-pages.jsx: no PageHead or title for "${f.name}"`);
+    const [, , heading, lede] = head;
+    const url = `https://bampel.com/ccair/${f.name}/`, title = titles[f.name], desc = describe(lede);
+    const swap = (html, re, value) => { if (!re.test(html)) throw new Error(`index.html: ${re} not found`); return html.replace(re, value); };
+    let html = shell;
+    html = swap(html, /<title>[^<]*<\/title>/, `<title>${esc(title)}</title>`);
+    html = swap(html, /(<meta name="description" content=")[^"]*/, `$1${esc(desc)}`);
+    html = swap(html, /(<link rel="canonical" href=")[^"]*/, `$1${url}`);
+    html = swap(html, /(<meta property="og:url" content=")[^"]*/, `$1${url}`);
+    html = swap(html, /(<meta property="og:title" content=")[^"]*/, `$1${esc(title)}`);
+    html = swap(html, /(<meta property="og:description" content=")[^"]*/, `$1${esc(desc)}`);
+    html = swap(html, /(<meta name="twitter:title" content=")[^"]*/, `$1${esc(title)}`);
+    html = swap(html, /(<meta name="twitter:description" content=")[^"]*/, `$1${esc(desc)}`);
+    // The home page's hero image preload is for the home route only.
+    html = html.replace(/\n  <script src="\/ccair\/dist\/hero-preload.js"><\/script>\n  /, '');
+    html = swap(html, /<div class="narrow" style="padding:64px 0">[\s\S]*?<\/nav>\n    <\/div>/,
+      `<div class="narrow" style="padding:64px 0">\n      <h1 style="font-size:40px;line-height:1.1;font-weight:300;margin-bottom:20px">${esc(heading)}</h1>\n      <p class="lede" style="margin-bottom:16px">${esc(lede)}</p>\n      <p style="margin-bottom:16px"><a href="/ccair/">Center for CyberAI Research (CCAIR), Georgia State University</a></p>\n      ${nav}\n    </div>`);
+    fs.mkdirSync(path.join(ccairDir, f.name), { recursive: true });
+    fs.writeFileSync(path.join(ccairDir, f.name, 'index.html'), html);
+    written++;
+  });
+  return written;
+}
+console.log('CCAIR pages: %d prerendered page shells written to /ccair/<page>/index.html', writeRoutePages());
 
 // One file for the whole app (was four requests). Each source file is still transpiled on its own and wrapped in its own
 // function, exactly as before (they share state only through window.CCAIR), then joined in load order.

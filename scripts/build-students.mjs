@@ -322,7 +322,7 @@ function outcomesSections() {
     ] }] };
   const source = { h: 'Where does the data come from?', id: 'source', toc: 'Data sources',
     answer: '**From Georgia State career office reports and from CCAIR\'s own students, as group totals.**',
-    blocks: [{ p: 'Every count records its source and year. Want your outcome counted, or have a correction? Use the [contact page](/ccair/#/contact).' }] };
+    blocks: [{ p: 'Every count records its source and year. Want your outcome counted, or have a correction? Use the [contact page](/ccair/contact/).' }] };
   if (!OUTCOMES_LIVE) {
     return [{ h: 'Is there data yet?', id: 'status', toc: 'Status',
       answer: '**Not yet. The data is being collected.** This page will show outcomes once enough students are counted to protect their privacy.',
@@ -488,7 +488,7 @@ function pageMain(p, idx) {
     ${next ? `<a class="next" href="${pageUrl(next)}"><span>Next</span>${esc(next.nav)}</a>` : `<a class="next" href="/ccair/"><span>Back to</span>CCAIR home</a>`}
   </nav>`}
   <nav class="guide-nav reveal" aria-label="Student guide contents"><p class="toc-h">Student guide contents</p><ol>${S.pages.map((x) => `<li><a href="${pageUrl(x)}"${x === p ? ' aria-current="page"' : ''}>${esc(x.nav)}</a></li>`).join('')}</ol></nav>
-  <p class="reviewed">Last verified: ${esc(standalone ? fmtDate(OC.updated) : S.verified)}. Written for students by the <a href="/ccair/">Center for CyberAI Research (CCAIR)</a> at Georgia State University. Found an outdated fact? Tell us through the <a href="/ccair/#/contact">contact page</a>.</p>
+  <p class="reviewed">Last verified: ${esc(standalone ? fmtDate(OC.updated) : S.verified)}. Written for students by the <a href="/ccair/">Center for CyberAI Research (CCAIR)</a> at Georgia State University. Found an outdated fact? Tell us through the <a href="/ccair/contact/">contact page</a>.</p>
 </div></main>`;
   return { main, order };
 }
