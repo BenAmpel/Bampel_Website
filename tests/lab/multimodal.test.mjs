@@ -33,7 +33,7 @@ import * as content from '../../netlify/lib/lab/content.mjs';
   assert.equal(bot.classify('the code is 482913').disclosed, true);
   assert.equal(bot.classify('I will call the bank back myself').intent, 'verify');
   assert.equal(bot.classify('No, I am not comfortable with that').intent, 'refuse');
-  assert.equal(bot.classify('Sure, what do you need?').intent, 'comply');
+  assert.equal(bot.classify('Sure, what do you need?').intent, 'question', 'asking what is needed agrees to nothing yet (and must not complete a legitimate request)');
   assert.equal(bot.classify('').intent, 'silence');
   assert.equal(bot.classify('Sure, no problem').intent, 'comply', '"no problem" is not a refusal');
   const last = bot.step({ ...bot.START, state: 'pressure1', lastPressure: 'pressure1', turns: 7 }, bot.classify('fine, it is 4 8 2 9 1 3'), { intent: 'attack', maxTurns: 8 });
@@ -54,6 +54,24 @@ import * as content from '../../netlify/lib/lab/content.mjs';
   assert.equal(b.outcome, 'disclosed');
   b = bot.step({ ...bot.START, state: 'ask', lastPressure: 'ask' }, bot.classify('yes it arrived'), { intent: 'benign' });
   assert.equal(b.outcome, 'completed');
+  // Agreement, refusal, hedges, verification and questions, typed and as a recognizer transcribes them (curly
+  // apostrophes, "O.K.", leading fillers). "not sure" contains "sure" and must never count as agreement.
+  const TABLE = {
+    comply: ['yes', 'Yes.', 'yeah sure', 'Sure.', 'sure, go ahead', 'okay', 'OK', 'O.K.', 'Okay, here it is', 'yes it arrived', 'got it', 'Go ahead.'],
+    refuse: ['no', 'No.', 'nope', 'I won\u2019t give that out', "I won't", 'I\u2019m not comfortable with that', 'no thanks', 'sure? no', "no, sure isn't",
+      "that's not okay", "I don't want to share that", 'this sounds like a scam', 'not interested', 'that sounds like fraud'],
+    hedge: ["I'm not sure I should give that out", 'Not sure, let me look', 'not sure.', 'Uh, I\u2019m not sure', 'I\u2019m not sure', 'unsure',
+      "I don't know", 'I do not know', 'no idea', 'maybe', "I'm not certain", 'not really sure', 'dunno'],
+    verify: ['who is this?', "who's calling", "I'll call you back", 'let me look that up', 'can I call you back?', 'what is your extension?'],
+    hold: ['hold on', 'one second', 'okay, hold on', 'wait'],
+    question: ['Is that okay?', 'are you sure?', 'sure?', 'what is this about?']
+  };
+  for (const [want, phrases] of Object.entries(TABLE)) for (const p of phrases) assert.equal(bot.classify(p).intent, want, `"${p}" should be ${want}`);
+  assert.notEqual(bot.classify('let me make sure').intent, 'comply', '"make sure" is not agreement');
+  // A hedge never ends a call or counts as agreement: an attacker presses on, a legitimate caller restates.
+  const hg = bot.step({ ...bot.START, state: 'ask', lastPressure: 'ask' }, bot.classify('not sure'), o);
+  assert.equal(hg.state, 'pressure1'); assert(!hg.done); assert.equal(hg.agreed || 0, 0);
+  assert(!bot.step({ ...bot.START, state: 'ask', lastPressure: 'ask' }, bot.classify("I'm not sure"), { intent: 'benign' }).done, 'a hedge does not complete a legitimate request');
   // Agreeing is not disclosing: "okay" makes an attacker wait for it, then press on; it never ends the call.
   let g = bot.step({ ...bot.START, state: 'ask', lastPressure: 'ask' }, bot.classify('okay, sure'), o);
   assert.equal(g.state, 'goAhead'); assert(!g.done); assert.equal(g.agreed, 1);
