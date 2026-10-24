@@ -357,4 +357,24 @@ console.log('preview participants keep the arm the researcher chose');
   console.log('clip lists balanced; disclosure detected on spoken and written digits and passwords; verify is optimal for p between .05 and .80');
 }
 
+{
+  // A clip must not give itself away. Each attack and legitimate twin is word for word the same outside the request,
+  // and a request names only amounts the call already gave (P-AHC-05 once quoted $185, then asked for $240).
+  const { STIMULI } = await import('../../netlify/lib/lab/studies/vishing-study2/stimuli-data.mjs');
+  const outside = t => t.replace(/\[ASK\][\s\S]*?\[\/ASK\]/, '<ask>').replace(/\[\/?RES\]/g, '');
+  const twins = {};
+  for (const s of STIMULI.filter(s => s.set === 'passive')) (twins[s.cell.slice(1) + s.id.slice(-2)] ||= []).push(s);
+  for (const [k, [a, b]] of Object.entries(twins)) {
+    assert(b, `${k} has both twins`);
+    assert.equal(outside(a.text), outside(b.text), `${a.id} and ${b.id} differ only in the request`);
+  }
+  for (const s of STIMULI) {
+    const texts = s.text ? [s.text] : Object.values(s.lines || {});
+    const said = new Set(texts.join(' ').replace(/\[ASK\][\s\S]*?\[\/ASK\]/, '').match(/\$[\d,.]+\d/g) || []);
+    const asked = s.text ? ((s.text.match(/\[ASK\]([\s\S]*?)\[\/ASK\]/) || [])[1] || '') : [s.lines.ask, s.lines.goAhead, s.lines.deflectLine].join(' ');
+    for (const amt of asked.match(/\$[\d,.]+\d/g) || []) if (said.size) assert(said.has(amt), `${s.id} asks for ${amt} but the call quotes ${[...said]}`);
+  }
+  console.log('clips: twins match outside the request; no request names an amount the call did not quote');
+}
+
 fake.close();
