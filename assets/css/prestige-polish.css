@@ -1,6 +1,13 @@
-/* ===== Cross-page view transitions (MPA, progressive enhancement) ===== */
-@view-transition { navigation: auto; }
+/* ===== Cross-page view transitions (MPA, progressive enhancement) =====
+   Opted in only when the visitor has not asked for reduced motion (with the opt-in outside this query, reduced-motion
+   visitors still got the browser's default crossfade). The navbar has its own transition name and no animation, so it
+   stays put while the page content changes beneath it (2026-10-24). */
 @media not (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: auto; }
+  #navbar-main { view-transition-name: site-navbar; }
+  ::view-transition-group(site-navbar),
+  ::view-transition-old(site-navbar),
+  ::view-transition-new(site-navbar) { animation: none; }
   ::view-transition-old(root) {
     animation: vt-fade-out 0.22s ease both;
   }
