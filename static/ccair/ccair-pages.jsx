@@ -338,7 +338,7 @@ function PeoplePage() {
 
       {d && <Section id="director" title="Director">
         <Reveal className="card director">
-          <div className="avatar avatar-lg" aria-hidden="true">{initialsOf(d.name)}</div>
+          <Avatar name={d.name} photo={d.photo} size="lg" />
           <div>
             <h3 style={{ fontSize: 'clamp(22px, 2.6vw, 28px)', lineHeight: 1.2, letterSpacing: '-0.02em', marginBottom: 0 }}>Dr. {d.name}</h3>
             <p className="role">{d.title}, {d.dept}</p>
@@ -357,18 +357,18 @@ function PeoplePage() {
       <Section id="students" alt title="Graduate researchers" intro="Ph.D. students advised and mentored by CCAIR faculty at Georgia State and partner institutions.">
         <h3 className="group-label">Georgia State University</h3>
         <div className="grid grid-3">
-          {(people.students || []).map((s) => <Reveal key={s.name}><PersonCard name={s.name} role={s.role} meta={[s.org, s.years].filter(Boolean).join(' · ')} /></Reveal>)}
+          {(people.students || []).map((s) => <Reveal key={s.name}><PersonCard name={s.name} role={s.role} meta={[s.org, s.years].filter(Boolean).join(' · ')} photo={s.photo} /></Reveal>)}
         </div>
         <h3 className="group-label">Mentees at partner universities</h3>
         <div className="grid grid-3">
-          {(people.mentees || []).map((s) => <Reveal key={s.name}><PersonCard name={s.name} role={s.role} meta={[s.org, s.years].filter(Boolean).join(' · ')} warm /></Reveal>)}
+          {(people.mentees || []).map((s) => <Reveal key={s.name}><PersonCard name={s.name} role={s.role} meta={[s.org, s.years].filter(Boolean).join(' · ')} photo={s.photo} warm /></Reveal>)}
         </div>
       </Section>
 
       <Section id="affiliates" title="Faculty affiliates" intro="Internal and external faculty contributing to shared CCAIR artifacts across research primitives.">
         <div className="grid grid-3">
           {(people.affiliates || []).map((a) => (
-            <Reveal key={a.name}><PersonCard name={a.name} role={a.role} meta={a.dept} note={a.synergy} /></Reveal>
+            <Reveal key={a.name}><PersonCard name={a.name} role={a.role} meta={a.dept} note={a.synergy} photo={a.photo} /></Reveal>
           ))}
         </div>
       </Section>
@@ -586,7 +586,11 @@ function AboutPage() {
         </div>
       </Section>
 
-      <Section id="governance" alt title="Governance">
+      <Section id="friends" alt title="Friends of CCAIR" intro="Labs and centers we collaborate with.">
+        <FriendsGrid />
+      </Section>
+
+      <Section id="governance" title="Governance">
         <div className="grid grid-4">
           {[
             { role: 'Center Director', desc: 'Sets research direction, primary liaison to funding agencies and university leadership.' },
@@ -599,7 +603,7 @@ function AboutPage() {
         </div>
       </Section>
 
-      <Section id="environment" title="Strategic environment" intro="CCAIR operates within Georgia State University's interdisciplinary R1 environment.">
+      <Section id="environment" alt title="Strategic environment" intro="CCAIR operates within Georgia State University's interdisciplinary R1 environment.">
         <div className="grid grid-4">
           {[
             { name: 'CHAI Center', desc: 'Collaborative Human-AI center with GSU and Duke University leadership.' },
@@ -612,9 +616,11 @@ function AboutPage() {
         </div>
       </Section>
 
-      <Section id="photo-credits" alt title="Photo credits"
-        intro="The photos on this site show Georgia State's downtown campus and the Atlanta skyline. Each is used under the license shown. Photos under CC BY-SA stay under CC BY-SA after our cropping and resizing.">
+      <Section id="photo-credits" title="Photo credits"
+        intro="The campus and skyline photos on this site show Georgia State's downtown campus and the Atlanta skyline. Each is used under the license shown. Photos under CC BY-SA stay under CC BY-SA after our cropping and resizing. The People page headshots are listed after them.">
         <Reveal><PhotoCredits /></Reveal>
+        <Reveal><PeoplePhotoCredits /></Reveal>
+        <Reveal><FriendsLogoCredits /></Reveal>
       </Section>
     </div>
   );

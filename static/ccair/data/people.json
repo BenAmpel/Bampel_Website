@@ -11,20 +11,30 @@
       "Hacker Communities"
     ],
     "email": "bampel@gsu.edu",
-    "photo": null
+    "photo": {
+      "slug": "benjamin-ampel",
+      "credit": "Benjamin M. Ampel",
+      "alt": "Benjamin M. Ampel"
+    }
   },
   "affiliates": [
     {
       "name": "Balasubramaniam Ramesh",
       "initials": "BR",
-      "role": "Department Chair, CIS",
+      "role": "Professor, Computer Information Systems",
       "dept": "Georgia State University",
       "areas": [
         "Design Science",
         "Agile Methods",
         "Knowledge Management"
       ],
-      "synergy": "Advocacy for CCAIR resources and institutional positioning"
+      "synergy": "Advocacy for CCAIR resources and institutional positioning",
+      "photo": {
+        "slug": "balasubramaniam-ramesh",
+        "source": "https://robinson.gsu.edu/profile/balasubramaniam-ramesh/",
+        "credit": "Georgia State University",
+        "alt": "Balasubramaniam Ramesh"
+      }
     },
     {
       "name": "Arun Rai",
@@ -36,7 +46,13 @@
         "AI Strategy",
         "Platform Economics"
       ],
-      "synergy": "Theory-driven collaboration on AI-enabled systems"
+      "synergy": "Theory-driven collaboration on AI-enabled systems",
+      "photo": {
+        "slug": "arun-rai",
+        "source": "https://robinson.gsu.edu/profile/arun-rai/",
+        "credit": "Georgia State University",
+        "alt": "Arun Rai"
+      }
     },
     {
       "name": "Anu Bourgeois",
@@ -48,7 +64,13 @@
         "Trustworthy AI",
         "Cybersecurity"
       ],
-      "synergy": "Human–AI collaboration and security teaming"
+      "synergy": "Human–AI collaboration and security teaming",
+      "photo": {
+        "slug": "anu-bourgeois",
+        "source": "https://cas.gsu.edu/profile/anu-bourgeois/",
+        "credit": "Georgia State University",
+        "alt": "Anu Bourgeois"
+      }
     }
   ],
   "students": [
@@ -56,13 +78,23 @@
       "name": "Kameron Clark",
       "role": "Ph.D. Student, CCAIR",
       "org": "Georgia State University",
-      "years": "2025–"
+      "years": "2025–",
+      "photo": {
+        "slug": "kameron-clark",
+        "credit": "Kameron Clark",
+        "alt": "Kameron Clark"
+      }
     },
     {
       "name": "Saba Aslanzadeh",
       "role": "Ph.D. Student, dissertation committee",
       "org": "Georgia State University",
-      "years": "Ph.D. expected 2026"
+      "years": "Ph.D. expected 2026",
+      "photo": {
+        "slug": "saba-aslanzadeh",
+        "credit": "Saba Aslanzadeh",
+        "alt": "Saba Aslanzadeh"
+      }
     }
   ],
   "mentees": [
@@ -70,61 +102,121 @@
       "name": "Noah Abdellatif",
       "role": "Ph.D. Mentee",
       "org": "University of Arizona",
-      "years": "2026–"
+      "years": "2026–",
+      "photo": {
+        "slug": "noah-abdellatif",
+        "source": "https://eller.arizona.edu/person/noah-abdellatif",
+        "credit": "University of Arizona",
+        "alt": "Noah Abdellatif"
+      }
     },
     {
       "name": "Mason Wagner",
       "role": "Ph.D. Mentee",
       "org": "University of Arizona",
-      "years": "2025–"
+      "years": "2025–",
+      "photo": {
+        "slug": "mason-wagner",
+        "source": "https://eller.arizona.edu/person/mason-wagner",
+        "credit": "University of Arizona",
+        "alt": "Mason Wagner"
+      }
     },
     {
       "name": "Raul Reyes",
       "role": "Ph.D. Mentee",
       "org": "University of Arizona",
-      "years": "2024–"
+      "years": "2024–",
+      "photo": {
+        "slug": "raul-reyes",
+        "source": "https://eller.arizona.edu/people/raul-reyes",
+        "credit": "University of Arizona",
+        "alt": "Raul Reyes"
+      }
     },
     {
       "name": "Sheng-Ya Chiu",
       "role": "Ph.D. Mentee",
       "org": "University of Arizona",
-      "years": "2024–"
+      "years": "2024–",
+      "photo": {
+        "slug": "sheng-ya-chiu",
+        "source": "https://eller.arizona.edu/person/sandra-sheng-ya-chiu",
+        "credit": "University of Arizona",
+        "alt": "Sheng-Ya Chiu"
+      }
     },
     {
       "name": "James Hu",
       "role": "Ph.D. Mentee",
       "org": "University of Arizona",
-      "years": "2023–"
+      "years": "2023–",
+      "photo": {
+        "slug": "james-hu",
+        "source": "https://eller.arizona.edu/people/james-hu",
+        "credit": "University of Arizona",
+        "alt": "James Hu"
+      }
     },
     {
       "name": "Chengjun Zhang",
       "role": "Ph.D. Mentee",
       "org": "Indiana University",
-      "years": "2024–"
+      "years": "2024–",
+      "photo": {
+        "slug": "chengjun-zhang",
+        "source": "https://kelley.iu.edu/faculty-research/faculty-directory/profile.html?id=CZ1",
+        "credit": "Indiana University",
+        "alt": "Chengjun Zhang"
+      }
     },
     {
       "name": "Yang Gao",
       "role": "Ph.D. Mentee",
       "org": "Indiana University",
-      "years": "2022–"
+      "years": "2022–",
+      "photo": {
+        "slug": "yang-gao",
+        "source": "https://kelley.iu.edu/faculty-research/faculty-directory/profile.html?id=GAOYANG",
+        "credit": "Indiana University",
+        "alt": "Yang Gao"
+      }
     },
     {
       "name": "Aijia Yuan",
-      "role": "Ph.D. Mentee",
-      "org": "Indiana University",
-      "years": "2025–2026"
+      "role": "Former Ph.D. Mentee (Indiana University)",
+      "org": "University of Texas at Dallas",
+      "years": "2025–2026",
+      "photo": {
+        "slug": "aijia-yuan",
+        "source": "https://kelley.iu.edu/faculty-research/faculty-directory/profile.html?id=YUANA",
+        "credit": "Indiana University",
+        "alt": "Aijia Yuan"
+      }
     },
     {
       "name": "Ben Lazarine",
-      "role": "Ph.D. Mentee",
-      "org": "Indiana University",
-      "years": "2025–2026"
+      "role": "Former Ph.D. Mentee (Indiana University)",
+      "org": "Auburn University",
+      "years": "2025–2026",
+      "photo": {
+        "slug": "ben-lazarine",
+        "source": "https://kelley.iu.edu/faculty-research/faculty-directory/profile.html?id=BELAZAR",
+        "credit": "Indiana University",
+        "alt": "Ben Lazarine"
+      }
     },
     {
       "name": "Chi-Heng Yang",
       "role": "Ph.D. Mentee",
       "org": "University of Arizona",
-      "years": "2023–2026"
+      "years": "2023–2026",
+      "photo": {
+        "slug": "chi-heng-yang",
+        "source": "https://web.archive.org/web/20260516233723/https://eller.arizona.edu/people/henry-chi-heng-yang",
+        "credit": "University of Arizona",
+        "alt": "Chi-Heng Yang"
+      }
     }
   ]
 }
