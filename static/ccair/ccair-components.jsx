@@ -244,6 +244,8 @@ function CCAIRNav({ currentPage }) {
           {NAV_PAGES.map((p) => (
             <li key={p.id}><a href={hrefFor(p.id)} aria-current={currentPage === p.id ? 'page' : undefined}>{p.label}</a></li>
           ))}
+          {/* The behavioral lab is its own site under /lab/, so this is a plain link, not an app route. */}
+          <li><a href="/lab/">Lab</a></li>
         </ul>
         <a className="btn btn-primary btn-sm nav-cta" href="/ccair/pathways/">Career Finder</a>
         <button ref={btnRef} type="button" className="menu-btn" onClick={() => setOpen(!open)}
@@ -260,6 +262,7 @@ function CCAIRNav({ currentPage }) {
             {NAV_PAGES.map((p) => (
               <li key={p.id}><a href={hrefFor(p.id)} aria-current={currentPage === p.id ? 'page' : undefined}>{p.label}</a></li>
             ))}
+            <li><a href="/lab/">Behavioral Lab</a></li>
             <li><a href="/ccair/students/">Student guide</a></li>
           </ul>
           <a className="btn btn-primary" href="/ccair/pathways/">Cyber Career Finder <Arrow /></a>
@@ -604,6 +607,7 @@ function CCAIRFooter() {
             <h2>Center</h2>
             <ul>
               {NAV_PAGES.map((p) => <li key={p.id}><a href={hrefFor(p.id)}>{p.label}</a></li>)}
+              <li><a href="/lab/">Behavioral Lab</a></li>
             </ul>
           </div>
           <div>
