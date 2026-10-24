@@ -22,7 +22,7 @@ body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px c
 .impact-inspector-body { line-height:1.4; margin-bottom:8px; opacity:0.9; }
 .impact-inspector-actions { display:flex; gap:6px; margin-bottom:8px; }
 .impact-action { flex:1; border-radius:999px; border:1px solid rgba(0,255,65,0.3); background:transparent; color:#c8f7c5; font-size:0.75rem; padding:4px 6px; text-transform:uppercase; letter-spacing:0.08em; cursor:pointer; }
-.impact-action:disabled { opacity:0.4; cursor:not-allowed; }
+.impact-action:disabled { opacity:0.65; cursor:not-allowed; } /* .4 left the label at 3:1 */
 .impact-inspector-pins { display:flex; flex-wrap:wrap; gap:6px; }
 .impact-pin { display:flex; align-items:center; gap:6px; padding:4px 6px; border-radius:999px; background:rgba(0,229,255,0.12); border:1px solid rgba(0,229,255,0.3); font-size:0.75rem; }
 .impact-pin button { border:none; background:transparent; color:#00e5ff; cursor:pointer; font-size:0.7rem; line-height:1; }
@@ -108,6 +108,7 @@ body:not(.dark) .impact-pin { background:rgba(0,119,182,0.12); border-color:rgba
 
 @keyframes footprintPulse { 0% { transform:scale(0.7); opacity:0.6; } 70% { transform:scale(1.6); opacity:0; } 100% { opacity:0; } }
 @keyframes arcDash { to { stroke-dashoffset: -32; } }
+@media (prefers-reduced-motion: reduce) { .footprint-arc, .footprint-marker .ring { animation: none; } }
 
 body:not(.dark) .footprint-group,
 body:not(.dark) .footprint-legend { background:rgba(255,255,255,0.9); color:#333; border-color:#e0e0e0; }

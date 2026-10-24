@@ -9,6 +9,7 @@
 <details class="spoiler">
   <summary>{{ $inst }} ({{ len $courses }} courses)</summary>
   <div class="spoiler-content">
+    <div class="table-responsive">
     <table>
       <thead><tr><th>Course</th><th>Title</th><th>Term</th><th>Evaluation</th></tr></thead>
       <tbody>
@@ -17,6 +18,7 @@
       {{- end }}
       </tbody>
     </table>
+    </div>
   </div>
 </details>
 {{- end -}}

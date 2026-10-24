@@ -50,6 +50,7 @@ url_pdf: https://www.tandfonline.com/doi/abs/10.1080/07421222.2023.2301178
 # To use, add an image named `featured.jpg/png` to your page's folder. 
 image:
   caption: 'ATT&CK-Link Research Design'
+  alt_text: 'Research design diagram: data collection from hacker forums, public exploit repositories and an exploit dark-net market; dataset construction and pre-processing; the ATT&CK-Link architecture, in which RoBERTa and CodeBERT teacher models distill into a student model with long short-range attention that outputs tactic probabilities; and three evaluation experiments.'
   focal_point: ""
   preview_only: false
 

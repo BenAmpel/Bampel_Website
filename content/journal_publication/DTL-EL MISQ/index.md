@@ -48,6 +48,7 @@ url_pdf: https://misq.umn.edu/creating-proactive-cyber-threat-intelligence-with-
 # To use, add an image named `featured.jpg/png` to your page's folder. 
 image:
   caption: 'DTL-EL Research Design'
+  alt_text: 'Research design diagram: data collected from hacker forums, exploit dark-net markets and public exploit repositories is pre-processed into a gold-standard dataset, labeled by the Deep Transfer Learning Exploit Labeler (convolutional, BiLSTM and self-attention layers transferred from a source to a target domain), then evaluated in four experiments with benchmark and attention comparisons.'
   focal_point: ""
   preview_only: false
 

@@ -50,6 +50,8 @@
     }
     if (linkEl && latest.url) {
       linkEl.href = latest.url;
+      // "Read more" alone does not say where it goes when read out of context (link lists, screen readers).
+      if (latest.title) linkEl.setAttribute('aria-label', `Read more: ${latest.title}`);
     }
     if (updatedEl) {
       const updated = new Date();

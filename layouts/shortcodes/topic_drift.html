@@ -25,8 +25,9 @@
 
 /* Phase header */
 .tdrift-phases-hdr { display:grid; grid-template-columns:120px repeat(3,1fr); gap:0 12px; margin-bottom:10px; }
-.tdrift-ph-lbl { font-size:0.68rem; text-transform:uppercase; letter-spacing:0.07em; opacity:0.55; text-align:center; }
-.tdrift-ph-lbl span { display:block; font-size:0.6rem; opacity:0.7; font-style:italic; margin-top:2px; }
+/* Opacity .7 keeps the phase names and years above 4.5:1 on the dark card (.55, and .55 x .7 for the years, were 4.4 and 2.8). */
+.tdrift-ph-lbl { font-size:0.75rem; text-transform:uppercase; letter-spacing:0.07em; opacity:0.7; text-align:center; }
+.tdrift-ph-lbl span { display:block; font-size:0.75rem; font-style:italic; margin-top:2px; }
 
 /* Table */
 .tdrift-table { display:flex; flex-direction:column; gap:6px; }
