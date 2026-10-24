@@ -538,14 +538,15 @@
     function answer() {
       clearTimeout(ringTimer); ring.stop(); st.answered = true; st.ringMs = Math.round(now() - st.ringT0); st.callT0 = now();
       // Speech goes to the lab's own recognizer when the study has one (audio never leaves the lab's machines);
-      // otherwise the browser's recognizer is used where it exists. Typing is always available.
+      // otherwise the browser's recognizer is used where it exists. Typing is offered unless the call needs speech
+      // (scored calls, and the practice call, whose gate passes only on a spoken reply) and the microphone works.
       st.serverAsr = plan.asr === 'server';
       var canSpeak = st.serverAsr ? !!(plan.recording && navigator.mediaDevices && !micBlocked) : !!SR && !micBlocked;
       ui.show(phone(
         '<p class="phone-status" id="ph-status" aria-live="off">0:00</p>' + (plan.recording ? '<p class="rec-note" id="ph-rec" hidden><span class="dot" aria-hidden="true"></span>' + ui.Th('call_recording') + '</p>' : '') + authHtml() +
         '<div class="captions" id="ph-captions" aria-live="polite" hidden></div>' +
         '<div class="phone-talk">' + (canSpeak ? '<button type="button" class="talk" id="ph-talk" disabled>' + ui.Th('call_talk') + '</button><p class="interim muted" id="ph-interim" aria-live="polite"></p>' : '') +
-        '<form id="ph-typeform" class="typeform"' + (call.scored && canSpeak ? ' hidden' : '') + '><label for="ph-type">' + ui.Th('call_type_label') + '</label><div class="row"><input type="text" id="ph-type" autocomplete="off" disabled><button type="submit" class="secondary" id="ph-send" disabled>' + ui.Th('call_send') + '</button></div></form></div>' +
+        '<form id="ph-typeform" class="typeform"' + ((call.scored || call.gate) && canSpeak ? ' hidden' : '') + '><label for="ph-type">' + ui.Th('call_type_label') + '</label><div class="row"><input type="text" id="ph-type" autocomplete="off" disabled><button type="submit" class="secondary" id="ph-send" disabled>' + ui.Th('call_send') + '</button></div></form></div>' +
         '<div class="phone-btns small"><label class="check" for="ph-cc"><input type="checkbox" id="ph-cc"> ' + ui.Th('call_captions') + '</label><button type="button" class="secondary" id="ph-hold">' + ui.Th('call_hold') + '</button>' +
         ((plan.directory || []).length ? '<button type="button" class="secondary" id="ph-dirlive">' + ui.Th('directory_open') + '</button>' : '') +
         '<button type="button" class="decline" id="ph-hang">' + ui.Th('call_hangup') + '</button></div><div id="ph-dirbox-live" hidden></div>', 'live'));
