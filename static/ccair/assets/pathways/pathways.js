@@ -214,7 +214,7 @@
   function intro() {
     mount.innerHTML = '';
     var w = el('div', { class: 'intro-card qcard' },
-      '<p class="part">About 5 minutes · ' + TOTAL + ' quick taps</p>' +
+      '<p class="part">About 5 minutes · ' + TOTAL + ' taps</p>' +
       '<h3 class="qtext" style="min-height:0" tabindex="-1">Tap how much each activity appeals to you. There are no wrong answers, and you don\'t need any cyber knowledge yet.</h3>' +
       '<p>You\'ll get your top 3 roles, why they fit, the realistic first job, which certifications to start with and free places to practise.</p>' +
       '<div class="hero-cta"><button class="btn btn-primary" id="pf-start">Start <span class="arrow" aria-hidden="true">&rarr;</span></button></div>' +
@@ -224,7 +224,7 @@
   }
 
   var PARTS = {
-    b: ['Part 2 of 3', 'This or that', 'Nice work. Now a few quick either-or choices that separate jobs that sound alike.'],
+    b: ['Part 2 of 3', 'This or that', 'Nice work. Now a few either-or choices that separate jobs that sound alike.'],
     c: ['Part 3 of 3', 'About you', 'Last stretch: five short questions about your background and what you want.']
   };
   var seenPart = {};
@@ -268,7 +268,7 @@
         }).join('') + '</div><div class="neither"><button class="linkbtn' + (cur === 2 ? ' picked' : '') + '" data-v="2" aria-pressed="' + (cur === 2) + '">Neither appeals to me</button></div>';
     } else {
       var opts = st.ctx.options;
-      html += '<p class="prompt">One of ' + C.length + ' quick questions about you</p><h3 class="qtext" tabindex="-1">' + esc(st.ctx.q) + '</h3>' +
+      html += '<p class="prompt">One of ' + C.length + ' questions about you</p><h3 class="qtext" tabindex="-1">' + esc(st.ctx.q) + '</h3>' +
         '<div class="answers' + (opts.length <= 3 ? ' three' : '') + '" role="group" aria-label="Your answer">' +
         opts.map(function (o, v) {
           return '<button class="ans' + (cur === v ? ' picked' : '') + '" data-v="' + v + '" aria-pressed="' + (cur === v) + '">' + (v < 9 ? '<kbd aria-hidden="true">' + (v + 1) + '</kbd>' : '') + esc(o.label) + '</button>';
