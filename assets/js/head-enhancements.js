@@ -677,73 +677,8 @@ function runEnhancements() {
   
   themeObserver.observe(document.body, { attributes: true });
   
-  // ===== PARTICLE BACKGROUND =====
-  const aboutSection = document.getElementById('about');
-  const startParticles = () => {
-    if (typeof tsParticles === 'undefined' || document.getElementById('tsparticles')) return;
-    // Create particle container
-    const particleContainer = document.createElement('div');
-    particleContainer.id = 'tsparticles';
-    aboutSection.insertBefore(particleContainer, aboutSection.firstChild);
-    
-    const isDarkMode = document.body.classList.contains('dark');
-    
-    tsParticles.load('tsparticles', {
-      particles: {
-        number: {
-          value: 50,
-          density: {
-            enable: true,
-            value_area: 800
-          }
-        },
-        color: {
-          value: isDarkMode ? '#64b5f6' : '#1565c0'
-        },
-        opacity: {
-          value: 0.3,
-          random: true,
-          animation: {
-            enable: true,
-            speed: 0.5,
-            minimumValue: 0.1
-          }
-        },
-        size: {
-          value: 3,
-          random: true
-        },
-        move: {
-          enable: true,
-          speed: 0.8,
-          direction: 'none',
-          random: true,
-          straight: false,
-          outModes: {
-            default: 'out'
-          }
-        },
-        links: {
-          enable: true,
-          distance: 150,
-          color: isDarkMode ? '#64b5f6' : '#1565c0',
-          opacity: 0.2,
-          width: 1
-        }
-      },
-      detectRetina: true
-    });
-  };
-  // The moving background is decoration that plays on its own, so it never starts under prefers-reduced-motion (WCAG 2.2.2),
-  // and its script is fetched only on the page that uses it.
-  if (aboutSection && !prefersReducedMotion) {
-    const particleScript = document.createElement('script');
-    particleScript.src = '/vendor/tsparticles/2.12.0/tsparticles.bundle.min.js';
-    particleScript.integrity = 'sha512-W/UhCgUnBrqWd6HtR1wS+twNkVYvwxB1Hqtm9d/0HOWynEcr7t1BOQn1x55ziHQJtn+tU0Fzih1SAawRr6YFmA==';
-    particleScript.onload = startParticles;
-    document.head.appendChild(particleScript);
-  }
-  
+  // (The tsParticles background was replaced by a CSS grid on #about::before, assets/css/head-inline.css, 2026-10-24.)
+
   // Map and dashboard are now static PNG images with theme switching
   
   // ===== CITATION COPY HELPERS =====

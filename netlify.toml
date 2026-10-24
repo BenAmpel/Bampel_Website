@@ -31,7 +31,7 @@
 #   script-src  no 'unsafe-inline' (2026-10-24): every script is a file. Shortcode and hook scripts live in assets/js and load
 #               fingerprinted with integrity; stylesheets that load late use data-swap + js/css-swap.js instead of onload=.
 #               JSON-LD blocks are data, not scripts, so the policy does not apply to them.
-#               www.googletagmanager.com (gtag; fonts, Fuse, mark.js, academicons and tsParticles are self-hosted under /fonts/
+#               www.googletagmanager.com (gtag; fonts, Fuse, mark.js and academicons are self-hosted under /fonts/
 #               and /vendor/ since 2026-10-24, and Netlify CMS at /admin/ was retired, so jsDelivr is no longer needed), d1bxh8uas1mnw7.cloudfront.net
 #               and embed.altmetric.com and api.altmetric.com (Altmetric badges, JSONP), badge.dimensions.ai (Dimensions badges),
 #               cdnjs.buymeacoffee.com (support widget).
@@ -201,11 +201,6 @@
 
 [[headers]]
   for = "/vendor/echarts/5.4.3/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/vendor/tsparticles/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 

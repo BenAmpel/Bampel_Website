@@ -200,7 +200,6 @@ body:not(.dark) section h2:hover {
 
 /* Hide cyber decorations in manuscript mode */
 body:not(.dark) .cyber-decoration,
-body:not(.dark) #tsparticles,
 body:not(.dark) .scroll-progress {
   display: none !important;
 }
@@ -442,15 +441,25 @@ body:not(.dark) section:hover h1::after {
   box-shadow: 0 0 10px rgba(66, 165, 245, 0.5);
 }
 
-/* ===== PARTICLE BACKGROUND ===== */
-#tsparticles {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  z-index: 0;
-  pointer-events: none;
+/* ===== HOME BACKGROUND (2026-10-24; replaces the tsParticles canvas) =====
+   The site-wide cyber grid (faint green 50 px lines on every section, in custom.scss) stays as it was on #about; on top
+   of it, light-blue nodes in the colour and strength the particles used drift by one 40 px cell per minute. The drift
+   moves in 240 steps (about 0.17 px each, too small to see as steps), so the browser repaints four times a second instead
+   of a script redrawing a canvas every frame. Dark mode only, as before; the nodes stand still under reduced motion. */
+.dark #about::before {
+  background-image:
+    radial-gradient(circle, rgba(100, 181, 246, 0.28) 1.3px, transparent 1.8px),
+    linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px, 50px 50px, 50px 50px;
+  background-position: 0 0, 0 0, 0 0;
+  animation: about-node-drift 60s steps(240) infinite;
+}
+@keyframes about-node-drift {
+  to { background-position: 40px 40px, 0 0, 0 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dark #about::before { animation: none; }
 }
 
 #about {
