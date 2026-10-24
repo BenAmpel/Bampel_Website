@@ -202,17 +202,6 @@
   {{/* Load SEO module */}}
   {{ partial "wowchemy_seo" . }}
 
-  {{/* Netlify Identity integration. */}}
-  {{ $use_cms := templates.Exists "wowchemycms/single.wowchemycms_config.yml" | default (site.Params.extensions.cms.enable | default false) }}
-  {{ if .IsHome | and $use_cms }}
-    {{/* Local override (audit 2026-10-24): the Identity widget (about 72 KB compressed) used to load, blocking, on every
-         home page view. It is only needed to finish an invite, recovery or confirmation link, which arrives as a
-         #invite_token=... style hash on the home page, so it now loads only then. wowchemy-init.js registers the
-         "send me to /admin/ after login" handler only if the widget already exists when it runs, so the same handler
-         is registered here once the widget has loaded. The CMS at /admin/ loads the widget itself. */}}
-    {{ with resources.Get "js/identity-invite.js" | minify | fingerprint }}<script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}"></script>{{ end }}
-  {{ end }}
-
   {{/* RSS Feed */}}
   {{ with .OutputFormats.Get "RSS" }}
     <link rel="alternate" href="{{ .RelPermalink }}" type="application/rss+xml" title="{{ site.Title }}" />

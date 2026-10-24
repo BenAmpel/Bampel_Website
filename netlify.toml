@@ -31,10 +31,10 @@
 #   script-src  no 'unsafe-inline' (2026-10-24): every script is a file. Shortcode and hook scripts live in assets/js and load
 #               fingerprinted with integrity; stylesheets that load late use data-swap + js/css-swap.js instead of onload=.
 #               JSON-LD blocks are data, not scripts, so the policy does not apply to them.
-#               www.googletagmanager.com (gtag), cdn.jsdelivr.net (only Netlify CMS on /admin/; fonts, Fuse, mark.js, academicons
-#               and tsParticles are self-hosted under /fonts/ and /vendor/ since 2026-10-24), d1bxh8uas1mnw7.cloudfront.net
+#               www.googletagmanager.com (gtag; fonts, Fuse, mark.js, academicons and tsParticles are self-hosted under /fonts/
+#               and /vendor/ since 2026-10-24, and Netlify CMS at /admin/ was retired, so jsDelivr is no longer needed), d1bxh8uas1mnw7.cloudfront.net
 #               and embed.altmetric.com and api.altmetric.com (Altmetric badges, JSONP), badge.dimensions.ai (Dimensions badges),
-#               cdnjs.buymeacoffee.com (support widget), identity.netlify.com (Netlify Identity widget the theme loads on the home page).
+#               cdnjs.buymeacoffee.com (support widget).
 #               (React for /ccair/ is served from /ccair/vendor/, so unpkg.com is no longer allowed.)
 #   style-src   'unsafe-inline': inline <style> blocks and style="" attributes in the same hooks and shortcodes.
 #               badge.dimensions.ai, embed.altmetric.com (badge CSS). Fonts and academicons are self-hosted.
@@ -50,7 +50,7 @@
   for = "/*"
   [headers.values]
     X-Frame-Options = "DENY"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://cdn.jsdelivr.net https://d1bxh8uas1mnw7.cloudfront.net https://embed.altmetric.com https://api.altmetric.com https://badge.dimensions.ai https://cdnjs.buymeacoffee.com https://identity.netlify.com; style-src 'self' 'unsafe-inline' https://badge.dimensions.ai https://embed.altmetric.com; font-src 'self' data:; img-src 'self' data: blob: https://badges.altmetric.com https://cdn.altmetric.com https://cdn.buymeacoffee.com https://server.arcgisonline.com https://www.googletagmanager.com https://www.google-analytics.com; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://api.altmetric.com https://metrics-api.dimensions.ai https://badge.dimensions.ai; frame-src https://www.buymeacoffee.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://d1bxh8uas1mnw7.cloudfront.net https://embed.altmetric.com https://api.altmetric.com https://badge.dimensions.ai https://cdnjs.buymeacoffee.com; style-src 'self' 'unsafe-inline' https://badge.dimensions.ai https://embed.altmetric.com; font-src 'self' data:; img-src 'self' data: blob: https://badges.altmetric.com https://cdn.altmetric.com https://cdn.buymeacoffee.com https://server.arcgisonline.com https://www.googletagmanager.com https://www.google-analytics.com; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://api.altmetric.com https://metrics-api.dimensions.ai https://badge.dimensions.ai; frame-src https://www.buymeacoffee.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
     Permissions-Policy = "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
 
 # Self-hosted Lato and React (audit 2026-10-24): these files were answered with "max-age=0, must-revalidate", so every visit
