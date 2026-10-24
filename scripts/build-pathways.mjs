@@ -4,7 +4,7 @@
 // Run by `npm run build:ccair` (netlify.toml build command), before Hugo copies static/ into public/.
 import fs from 'node:fs';
 import path from 'node:path';
-import { CCAIR as ccair, SITE, esc, ld, person as reviewer, org, head as baseHead, top as baseTop, foot as baseFoot, writeSitemap, readJson, HIRING, CODE_SHORT } from './ccair-static.mjs';
+import { CCAIR as ccair, SITE, esc, ld, person as reviewer, org, head as baseHead, top as baseTop, foot as baseFoot, writeSitemap, readJson, HIRING, CODE_SHORT, photoHtml } from './ccair-static.mjs';
 
 const out = path.join(ccair, 'pathways');
 const D = readJson('pathways.json');
@@ -30,7 +30,7 @@ const short = (r) => r.short || r.name;
 // 'an IT Auditor', 'an AI Security Specialist', 'a SOC Analyst'.
 const an = (name) => (/^[AEIOU]/.test(name) ? 'an ' : 'a ') + name;
 
-const head = (o) => baseHead({ ...o, css: [`/ccair/assets/pathways/pathways.css?v=${ASSET_V}-gsu1`] });
+const head = (o) => baseHead({ ...o, css: [`/ccair/assets/pathways/pathways.css?v=${ASSET_V}-gsu1-photos1`] });
 
 function top(current) {
   return baseTop([
@@ -42,7 +42,8 @@ function top(current) {
   ]);
 }
 
-const foot = () => baseFoot({ note: `Reviewed ${D.updated}`, scripts: [`/ccair/assets/pathways/pathways.js?v=${ASSET_V}-anon2`] });
+// The hub carries a photo, so its footer lists the photo credits; role pages have no photos.
+const foot = (photoCredits = false) => baseFoot({ note: `Reviewed ${D.updated}`, scripts: [`/ccair/assets/pathways/pathways.js?v=${ASSET_V}-anon2`], photoCredits });
 
 function faqHtml(faq) {
   return `<div class="faq">${faq.map((f, i) => `<details class="reveal" style="--d:${(i * 0.05).toFixed(2)}s"><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join('')}</div>`;
@@ -104,6 +105,7 @@ ${top('hub')}
       <div class="stat"><b data-count="5" data-pre="~" data-suf=" min">~5 min</b><span>${TAPS} quick taps</span></div>
       <div class="stat"><b>0</b><span>Answers stored</span></div>
     </div>
+    ${photoHtml('pathways-hero', { priority: true, className: 'photo-band photo-band-hero' })}
   </div></section>
 
   <section class="block" id="how"><div class="wrap">
@@ -151,7 +153,7 @@ ${top('hub')}
   </div></section>
 </main>
 <script type="application/json" id="pf-data">${JSON.stringify(quizData).replace(/</g, '\\u003c')}</script>
-${foot()}`;
+${foot(true)}`;
 }
 
 /* ---------- Citations ----------

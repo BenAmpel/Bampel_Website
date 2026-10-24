@@ -96,11 +96,61 @@ export function top(links) {
 </div></header>`;
 }
 
-// Footer and closing tags. scripts: list of script URLs (deferred).
-export function foot({ note, scripts = [] }) {
+/* ---------- Photos ----------
+   static/ccair/data/photos.json lists every photo and the slot it fills; files are /ccair/assets/photos/<base>-<w>.<ext>.
+   photoHtml writes the same <picture> markup as Picture/PhotoBand in static/ccair/ccair-components.jsx. Swapping a slot
+   for a GSU Digital Asset Library photo is an edit to photos.json (see static/ccair/assets/photos/README.md). */
+export const PHOTOS = (() => { try { return readJson('photos.json').photos || []; } catch { return []; } })();
+const PHOTO_DIR = '/ccair/assets/photos/';
+for (const p of PHOTOS) {
+  for (const set of [p, p.mobile].filter(Boolean)) for (const ext of ['avif', 'webp', 'jpg']) {
+    for (const w of ext === 'jpg' ? (set.fallbackWidths || set.widths) : set.widths) {
+      if (!fs.existsSync(path.join(CCAIR, 'assets', 'photos', `${set.base}-${w}.${ext}`))) throw new Error(`photos.json: missing file assets/photos/${set.base}-${w}.${ext} (photo "${p.id}")`);
+    }
+  }
+  if (!p.alt || !p.credit || !p.credit.author) throw new Error(`photos.json: photo "${p.id}" needs alt text and a credit with an author`);
+}
+export const photoFor = (slot) => PHOTOS.find((p) => p.slot === slot) || null;
+const srcset = (base, widths, ext) => widths.map((w) => `${PHOTO_DIR}${base}-${w}.${ext} ${w}w`).join(', ');
+// "Photo: Author / License", the author linking to the source page and the license to its deed.
+export function photoCredit(p) {
+  const c = p.credit;
+  const who = c.sourceUrl ? `<a href="${esc(c.sourceUrl)}">${esc(c.author)}</a>` : esc(c.author);
+  const lic = c.license ? ` / ${c.licenseUrl ? `<a href="${esc(c.licenseUrl)}" rel="license">${esc(c.license)}</a>` : esc(c.license)}` : '';
+  return `Photo: ${who}${lic}`;
+}
+// A <figure> with the photo in a rounded frame and its short credit underneath. priority: an above-the-fold hero image.
+export function photoHtml(slot, { sizes = '(min-width: 1200px) 1120px, calc(100vw - 32px)', priority = false, className = 'photo-band' } = {}) {
+  const p = photoFor(slot);
+  if (!p) return '';
+  const fb = p.fallbackWidths || p.widths;
+  return `<figure class="${className} reveal">
+    <div class="photo-frame"><picture>
+      <source type="image/avif" srcset="${srcset(p.base, p.widths, 'avif')}" sizes="${sizes}">
+      <source type="image/webp" srcset="${srcset(p.base, p.widths, 'webp')}" sizes="${sizes}">
+      <img src="${PHOTO_DIR}${p.base}-${fb[fb.length - 1]}.jpg" srcset="${srcset(p.base, fb, 'jpg')}" sizes="${sizes}" width="${p.width}" height="${p.height}" alt="${esc(p.alt)}" style="--focal: ${esc(p.focal || '50% 50%')}" decoding="async" ${priority ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'}>
+    </picture></div>
+    <figcaption class="photo-credit">${photoCredit(p)}</figcaption>
+  </figure>`;
+}
+// Full attribution (title, author, license, source, changes) for every photo, shown in the footer.
+function photoCreditsHtml() {
+  if (!PHOTOS.length) return '';
+  const item = (p) => {
+    const c = p.credit;
+    const title = c.sourceUrl ? `<a href="${esc(c.sourceUrl)}">${esc(c.title || p.id)}</a>` : esc(c.title || p.id);
+    const lic = c.license ? `, ${c.licenseUrl ? `<a href="${esc(c.licenseUrl)}" rel="license">${esc(c.license)}</a>` : esc(c.license)}` : '';
+    return `<li>${title} by ${esc(c.author)}${lic}${c.source ? `, via ${esc(c.source)}` : ''}.${c.changes ? ` Changes: ${esc(c.changes)}.` : ''}</li>`;
+  };
+  return `\n  <details class="photo-credits"><summary>Photo credits</summary><ul>${PHOTOS.map(item).join('')}</ul>
+    <p>Photos under CC BY-SA stay under CC BY-SA after our cropping and resizing.</p></details>`;
+}
+
+// Footer and closing tags. scripts: list of script URLs (deferred). photoCredits: list full attribution for every photo.
+export function foot({ note, scripts = [], photoCredits = false }) {
   return `<footer><div class="wrap">
   <span><b>Center for CyberAI Research (CCAIR)</b><br>Georgia State University · J. Mack Robinson College of Business<br>${esc(note)}</span>
-  <span><a href="/ccair/">CCAIR</a> · <a href="/ccair/pathways/">Pathway Finder</a> · <a href="/ccair/students/">Student guide</a> · <a href="/teaching/">Teaching</a></span>
+  <span><a href="/ccair/">CCAIR</a> · <a href="/ccair/pathways/">Pathway Finder</a> · <a href="/ccair/students/">Student guide</a> · <a href="/teaching/">Teaching</a></span>${photoCredits ? photoCreditsHtml() : ''}
 </div></footer>
 ${scripts.map((s) => `<script src="${s}" defer></script>`).join('\n')}
 </body>

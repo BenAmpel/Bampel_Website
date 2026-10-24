@@ -38,7 +38,7 @@ import crypto from 'node:crypto';
 import os from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { CCAIR, ROOT, SITE, esc, ld, person, org, head as baseHead, top as baseTop, foot as baseFoot, writeSitemap, readJson,
-  HIRING, CODE_SHORT, SHARE_IMAGE, LASTMOD_STORE } from './ccair-static.mjs';
+  HIRING, CODE_SHORT, SHARE_IMAGE, LASTMOD_STORE, photoHtml } from './ccair-static.mjs';
 
 const S = readJson('students.json');
 const DS = readJson('datasets.json');
@@ -463,7 +463,7 @@ function pageMain(p, idx) {
     <p class="guide-meta reveal" style="--d:.16s"><span class="verified">Last verified: ${esc(standalone ? fmtDate(OC.updated) : S.verified)}</span> · Reviewed by Dr. Benjamin M. Ampel, Director of CCAIR</p>
     ${p.disclaimer ? `<div class="warn reveal" role="note"><b>General information, not legal advice.</b> ${esc(p.disclaimer.replace(/^General information, not legal advice\.\s*/, ''))}</div>` : ''}
     ${standalone && !OUTCOMES_LIVE ? `<div class="note reveal" role="note"><b>Data is being collected.</b> This page has no outcomes yet. It explains what will appear and how student privacy is protected.</div>` : ''}
-    ${p.slug === 'data' ? downloadHtml() : ''}
+    ${p.slug === 'data' ? downloadHtml() : ''}${!p.slug ? '\n    ' + photoHtml('students-hero', { priority: true, sizes: '(min-width: 820px) 780px, calc(100vw - 32px)' }) : ''}
   </div>
   ${toc}
   ${sections}
@@ -506,14 +506,14 @@ function pageHtml(p, idx, main, order, modified, image, robots) {
   };
   const scripts = [`/ccair/assets/pathways/pathways.js?v=${ASSET_V}-anon2`, ...(p.slug === 'data' ? [`/ccair/assets/students/students.js?v=${ASSET_V}-2`] : [])];
   return `${baseHead({ title: p.metaTitle, ogTitle: p.title, desc: p.desc, url, ogType: 'article', image, robots, extra: feedLink,
-    css: [`/ccair/assets/pathways/pathways.css?v=${ASSET_V}-gsu1`, `/ccair/assets/students/students.css?v=${ASSET_V}-gsu1`] })}
+    css: [`/ccair/assets/pathways/pathways.css?v=${ASSET_V}-gsu1-photos1`, `/ccair/assets/students/students.css?v=${ASSET_V}-gsu1`] })}
 <meta property="article:modified_time" content="${modified}">
 ${ld(graph)}
 </head>
 <body>
 ${baseTop(navLinks(p))}
 ${main}
-${baseFoot({ note: `Last verified ${S.verified}`, scripts })}`;
+${baseFoot({ note: `Last verified ${S.verified}`, scripts, photoCredits: true })}`;
 }
 
 /* ---------- Printable one-pagers ---------- */

@@ -299,6 +299,33 @@ footer a { color: var(--footer-text); text-decoration: underline; text-decoratio
 footer a:hover { color: var(--footer-link-hover); }
 footer :focus-visible { outline-color: #97CAEB; }
 
+/* Photos (static/ccair/data/photos.json, written by photoHtml in scripts/ccair-static.mjs; README in assets/photos/).
+   A rounded frame with the photo and its short credit; full credits are in the footer. */
+.photo-band { margin: 40px 0 0; }
+.photo-band-hero { margin-top: clamp(40px, 6vw, 64px); }
+.guide-hero .photo-band { margin-top: 28px; }
+.photo-frame { position: relative; overflow: hidden; border-radius: var(--radius); aspect-ratio: 21 / 9; background: var(--surface); }
+.guide-hero .photo-frame { aspect-ratio: 16 / 9; }
+.photo-frame picture, .photo-frame img { display: block; width: 100%; height: 100%; }
+.photo-frame img { object-fit: cover; object-position: var(--focal, 50% 50%); }
+@media (max-width: 700px) { .photo-frame, .guide-hero .photo-frame { aspect-ratio: 4 / 3; border-radius: var(--radius-sm); } }
+@media (prefers-color-scheme: dark) { .photo-frame img { filter: brightness(0.92); } }
+.photo-credit { margin-top: 8px; font-size: 12.5px; line-height: 1.4; color: var(--muted); text-align: right; }
+.photo-credit a { color: inherit; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+.photo-credit a:hover { color: var(--accent); }
+footer .photo-credits { flex-basis: 100%; border-top: 1px solid rgba(255, 255, 255, 0.16); padding-top: 14px; }
+footer .photo-credits summary { cursor: pointer; color: var(--footer-text); font-weight: 700; }
+footer .photo-credits ul { list-style: none; margin-top: 8px; }
+footer .photo-credits li { padding: 4px 0; }
+footer .photo-credits p { margin-top: 6px; }
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .photo-frame img { scale: 1.08; animation: photoDrift linear both; animation-timeline: view(); }
+    @keyframes photoDrift { from { translate: 0 -3%; } to { translate: 0 3%; } }
+  }
+}
+@media print { .photo-band { display: none !important; } }
+
 /* Scroll reveal (only when JS runs and motion is allowed) */
 .js .reveal { opacity: 0; transform: translate3d(0, 20px, 0); transition: opacity 0.6s var(--ease), transform 0.7s var(--ease); transition-delay: var(--d, 0s); }
 .js .reveal.in { opacity: 1; transform: none; }
