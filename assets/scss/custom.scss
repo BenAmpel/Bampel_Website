@@ -539,7 +539,7 @@ input, textarea, select {
   }
   
   &::placeholder {
-    color: #6e7681 !important;
+    color: #8b949e !important;
   }
 }
 
@@ -5541,4 +5541,72 @@ body:not(.dark) .wg-about .bio-chip:focus-visible,
 body:not(.dark) .hb-about .bio-chip:focus-visible,
 body:not(.dark) .impact-card:focus-visible {
   outline-color: #0b3d91;
+}
+
+// ===== DARK COLOR SCHEME (audit 2026-10-24) =====
+// The site is dark only (params.yaml leaves theme_day empty). Without this the scrollbars and unstyled controls rendered light.
+:root {
+  color-scheme: dark;
+}
+
+// ===== EDUCATION TIMELINE ON PHONES (audit 2026-10-24) =====
+// A horizontal scroller put the second and third steps off-screen at 375px with only a "Scroll" hint. Below 700px the steps stack.
+@media (max-width: 700px) {
+  section#about .edu-path,
+  .wg-about .edu-path,
+  .hb-about .edu-path {
+    flex-direction: column;
+    overflow-x: visible;
+    scroll-snap-type: none;
+    padding-bottom: 8px;
+  }
+
+  section#about .edu-path::before,
+  .wg-about .edu-path::before,
+  .hb-about .edu-path::before,
+  section#about .edu-path::after,
+  .wg-about .edu-path::after,
+  .hb-about .edu-path::after,
+  section#about .edu-scroll-hint,
+  .wg-about .edu-scroll-hint,
+  .hb-about .edu-scroll-hint {
+    display: none;
+  }
+
+  section#about .edu-step,
+  .wg-about .edu-step,
+  .hb-about .edu-step {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+// ===== TOUCH TARGETS (audit 2026-10-24) =====
+// WCAG 2.5.8: a pointer target is at least 24 by 24 CSS px unless it sits inside a sentence. These were 17 to 23px high.
+.navbar-toggler {
+  min-width: 36px;
+  min-height: 36px;
+}
+
+a.nav-link.js-search {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.network-icon li a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+}
+
+section#about h3 > a,
+.selected-pubs-more > a,
+.wg-research-impact-overview p > a:only-child {
+  display: inline-block;
+  padding: 4px 0;
 }

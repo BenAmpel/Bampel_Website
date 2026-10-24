@@ -89,7 +89,7 @@
     A.markDirty(); A.err('');
     A.say('Loaded ' + c.survey.pre.length + ' items into the draft. Review them under Start-of-session survey, then click Save changes.');
     A.goto('pre');
-    var tab = document.querySelector('#subtabs button[aria-selected="true"]'); if (tab) tab.focus();
+    var tab = document.querySelector('#subtabs button[aria-current="true"]'); if (tab) tab.focus();
   }
 
   function renderDesign(A) {

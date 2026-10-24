@@ -243,6 +243,6 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
 }
 
 /* Leaflet controls: dark navy on the white control background (1.54:1 before, 10:1 now), larger hit area. */
-.leaflet-control-zoom a, .leaflet-control-zoom a:hover { color: #0b3d91 !important; font-weight: 700; }
+.leaflet-control-zoom a, .leaflet-control-zoom a:hover, .leaflet-control-zoom a span { color: #0b3d91 !important; font-weight: 700; }
 .leaflet-touch .leaflet-control-zoom a { width: 36px; height: 36px; line-height: 36px; font-size: 22px; }
 .leaflet-control-attribution a { color: #0b3d91 !important; }

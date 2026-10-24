@@ -229,7 +229,8 @@
   {{ partial "cookie_consent" . }}
 
   {{ $title := partial "functions/get_page_title" . }}
-  <title>{{$title}}</title>
+  {{/* Local override: the home title says what the site is, so search results and tabs do not show a bare name. */}}
+  <title>{{ if .IsHome }}{{ site.Title }} | AI-enabled cybersecurity research, Georgia State University{{ else }}{{$title}}{{ end }}</title>
 
   {{/* EXTENSIBILITY HOOK: HEAD-END */}}
   {{/* Deprecated custom_head hook */}}
