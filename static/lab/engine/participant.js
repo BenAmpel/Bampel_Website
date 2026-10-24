@@ -26,13 +26,15 @@
   }
   // Retries once after a second on a dropped connection or a server hiccup; the server treats repeats
   // as no-ops (a re-sent answer is acknowledged, never overwritten).
-  function api(route, body) {
+  function api(route, body) { return apiRaw(route, body).then(function (j) { return settle(route, j); }); }
+  function apiRaw(route, body) {
     return post(route, body)
-      .then(function (j) { return j.error === 'network' || j.error === 'server_error' || j.error === 'busy' ? new Promise(function (res) { setTimeout(res, 1000); }).then(function () { return post(route, body); }) : j; })
-      .then(function (j) {
-        if (j.error === 'expired' && route !== 'login') { store(tokenKey, null); S.token = null; showLogin(ERR.expired); return new Promise(function () {}); }
-        return j;
-      });
+      .then(function (j) { return j.error === 'network' || j.error === 'server_error' || j.error === 'busy' ? new Promise(function (res) { setTimeout(res, 1000); }).then(function () { return post(route, body); }) : j; });
+  }
+  // What api() does with an answer. Split out so a request can be sent early and its answer handled later (see "boot").
+  function settle(route, j) {
+    if (j.error === 'expired' && route !== 'login') { store(tokenKey, null); S.token = null; showLogin(ERR.expired); return new Promise(function () {}); }
+    return j;
   }
   // Every screen change moves keyboard and screen-reader focus to the new heading (WCAG 2.4.3).
   function show(html) {
@@ -410,8 +412,8 @@
     if (r.error === 'not_enrolled' && r.domains && r.domains.length) return 'That email can\'t be used for this study. Use an email address ending in @' + r.domains.join(' or @') + '.';
     return ERR[r.error] || ERR.server_error;
   }
-  function signIn(creds) {
-    api('login', creds).then(function (r) {
+  function signIn(creds, early) {
+    (early ? early.then(function (j) { return settle('login', j); }) : api('login', creds)).then(function (r) {
       if (r.error === 'confirm_new') return showConfirm(r.email || creds.email);
       if (r.error && creds.panelId != null) return show('<h1>' + Th('login_title') + '</h1>' + errorBox('This study link is not complete. Please go back to the study page where you found it and open it again.'));
       if (r.error) return showLogin(loginError(r), creds.email != null ? 'email' : 'code', creds.email);
@@ -421,8 +423,8 @@
       showStatus(r.status);
     });
   }
-  function refresh() {
-    api('resume', { token: S.token }).then(function (r) {
+  function refresh(early) {
+    (early ? early.then(function (j) { return settle('resume', j); }) : api('resume', { token: S.token })).then(function (r) {
       if (r.error) return showLogin(ERR[r.error] || ERR.server_error);
       if (r.status && r.status.screenedOut) return showScreenedOut();
       if (!r.consented) return showConsent();
@@ -981,39 +983,56 @@
 
   // ---------- boot ----------
   if (!studyId) { show('<h1>Study not found</h1><p>Check the link you were given.</p>'); return; }
+  // The page used to load one thing after another: this script, the content, display logic, the study type's script, then the
+  // sign-in or resume request. Now the display logic downloads while the content does (the page also asks for logic.js
+  // ahead of this script), the type script and the sign-in or resume request go out together once the content is in, and
+  // nothing runs before everything is there. The same decisions are made in the same order as before.
+  var logicReady = new Promise(function (res) {
+    if (window.LabLogic) { LL = window.LabLogic; return res(); }
+    var lg = document.createElement('script'); lg.src = '/lab/engine/logic.js';   // display logic; without it every question shows (the server still drops hidden answers)
+    lg.onload = function () { LL = window.LabLogic; res(); }; lg.onerror = function () { res(); };
+    document.head.appendChild(lg);
+  });
+  // The request this visit will make first (a sign-in from the link, or a resume), chosen the way the type script's callback below chooses.
+  function entryRequest() {
+    var tok = store(tokenKey), qs = null; try { qs = new URLSearchParams(location.search); } catch (e) {}
+    var linkCode = qs && qs.get('code'), panel = S.content.panel, panelId = panel && qs ? qs.get(panel.param) : null, creds = null, p;
+    if (linkCode) creds = { code: linkCode };
+    else if (panelId) creds = { panelId: panelId, panelStudy: panel.studyParam ? qs.get(panel.studyParam) || undefined : undefined, panelSession: panel.sessionParam ? qs.get(panel.sessionParam) || undefined : undefined };
+    if (creds) p = apiRaw('login', creds);
+    else if (tok) p = apiRaw('resume', { token: tok });
+    return p ? { creds: creds, token: creds ? null : tok, p: p } : null;
+  }
   fetch(API + 'content', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (c) {
     S.content = c;
     document.title = (c.text.login_title || c.name || 'Research study') + ' | CCAIR Behavioral Lab';   // the same pattern as the lab's other pages
     // The study's language: screen readers and the speech recognizer and voices of call items follow it.
     var lang = (c.environment && c.environment.language) || 'en-US';
     document.documentElement.setAttribute('lang', lang); document.documentElement.setAttribute('data-speech-lang', lang);
-    function loadType() {
-      var s = document.createElement('script'); s.src = '/lab/engine/types/' + c.type + '.js';
-      s.onload = function () {
-        S.type = types[c.type];
-        if (!S.type) return show('<h1>' + esc(c.name) + '</h1>' + errorBox(ERR.server_error));
-        S.token = store(tokenKey);
-        var qs = null; try { qs = new URLSearchParams(location.search); } catch (e) {}
-        var linkCode = qs && qs.get('code'), panel = S.content.panel, panelId = panel && qs ? qs.get(panel.param) : null;
-        // A researcher's "Preview as a participant" link (?code=XX-XXXX-XXXX&preview=1): sign in with that code. The
-        // code is then removed from the address bar so it is not bookmarked or shared by accident.
-        if (qs && qs.get('preview') === '1') previewRibbon();
-        // A code in the link always wins over a sign-in kept in this tab (a researcher previewing twice gets the new participant).
-        if (linkCode) { store(tokenKey, null); store(panelKey, null); S.token = null; try { history.replaceState(null, '', location.pathname + (qs.get('preview') === '1' ? '?preview=1' : '')); } catch (e) {} return signIn({ code: linkCode }); }
-        // Online panel (for example Prolific): the participant ID in the link signs them in, so there is no form to fill.
-        // Signing in again with the same ID returns the same participant, so the link is always used.
-        if (panelId) {
-          embeddedFromUrl();   // keep the link's embedded data (for example STUDY_ID) for this tab, then take the ID out of the address bar
-          try { history.replaceState(null, '', location.pathname); } catch (e) {}
-          return signIn({ panelId: panelId, panelStudy: panel.studyParam ? qs.get(panel.studyParam) || undefined : undefined, panelSession: panel.sessionParam ? qs.get(panel.sessionParam) || undefined : undefined });
-        }
-        if (S.token) refresh(); else showLogin();
-      };
-      s.onerror = function () { show('<h1>' + esc(c.name) + '</h1>' + errorBox(ERR.network)); };
-      document.head.appendChild(s);
+    var early = entryRequest();
+    function typeLoaded() {
+      S.type = types[c.type];
+      if (!S.type) return show('<h1>' + esc(c.name) + '</h1>' + errorBox(ERR.server_error));
+      S.token = store(tokenKey);
+      var qs = null; try { qs = new URLSearchParams(location.search); } catch (e) {}
+      var linkCode = qs && qs.get('code'), panel = S.content.panel, panelId = panel && qs ? qs.get(panel.param) : null;
+      // A researcher's "Preview as a participant" link (?code=XX-XXXX-XXXX&preview=1): sign in with that code. The
+      // code is then removed from the address bar so it is not bookmarked or shared by accident.
+      if (qs && qs.get('preview') === '1') previewRibbon();
+      // A code in the link always wins over a sign-in kept in this tab (a researcher previewing twice gets the new participant).
+      if (linkCode) { store(tokenKey, null); store(panelKey, null); S.token = null; try { history.replaceState(null, '', location.pathname + (qs.get('preview') === '1' ? '?preview=1' : '')); } catch (e) {} return signIn(early.creds, early.p); }
+      // Online panel (for example Prolific): the participant ID in the link signs them in, so there is no form to fill.
+      // Signing in again with the same ID returns the same participant, so the link is always used.
+      if (panelId) {
+        embeddedFromUrl();   // keep the link's embedded data (for example STUDY_ID) for this tab, then take the ID out of the address bar
+        try { history.replaceState(null, '', location.pathname); } catch (e) {}
+        return signIn(early.creds, early.p);
+      }
+      if (S.token) refresh(early && !early.creds && early.token === S.token ? early.p : null); else showLogin();
     }
-    var lg = document.createElement('script'); lg.src = '/lab/engine/logic.js';   // display logic; without it every question shows (the server still drops hidden answers)
-    lg.onload = function () { LL = window.LabLogic; loadType(); }; lg.onerror = loadType;
-    document.head.appendChild(lg);
+    var s = document.createElement('script'); s.src = '/lab/engine/types/' + c.type + '.js';
+    s.onload = function () { logicReady.then(typeLoaded); };
+    s.onerror = function () { show('<h1>' + esc(c.name) + '</h1>' + errorBox(ERR.network)); };
+    document.head.appendChild(s);
   }, function () { show('<h1>Study not found</h1><p>Check the link you were given, or try again in a minute.</p>'); });
 })();
