@@ -33,3 +33,20 @@ body:not(.dark) .cae-root { background:rgba(255,255,255,0.95); border-color:#ddd
 body:not(.dark) .cae-bar-track { background:rgba(0,0,0,0.04); border-color:rgba(0,0,0,0.1); }
 body:not(.dark) .cae-insight { border-top-color:rgba(0,0,0,0.1); }
 @media (max-width:700px) { .cae-panels { grid-template-columns:1fr; } }
+
+/* Draw-in (2026-10-24): the bars fill from the left when the section opens (see topic-drift.css). */
+@media (prefers-reduced-motion: no-preference) {
+  .cae-bar-fill { transform-origin: left center; animation: cae-fill 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  .cae-bar-row:nth-child(2) .cae-bar-fill { animation-delay: 50ms; }
+  .cae-bar-row:nth-child(3) .cae-bar-fill { animation-delay: 100ms; }
+  .cae-bar-row:nth-child(4) .cae-bar-fill { animation-delay: 150ms; }
+  .cae-bar-row:nth-child(5) .cae-bar-fill { animation-delay: 200ms; }
+  .cae-bar-row:nth-child(6) .cae-bar-fill { animation-delay: 250ms; }
+  .cae-bar-row:nth-child(7) .cae-bar-fill { animation-delay: 300ms; }
+  .cae-bar-row:nth-child(8) .cae-bar-fill { animation-delay: 350ms; }
+  .cae-bar-row:nth-child(9) .cae-bar-fill { animation-delay: 400ms; }
+  .cae-bar-row:nth-child(10) .cae-bar-fill { animation-delay: 450ms; }
+  .cae-bar-row:nth-child(11) .cae-bar-fill { animation-delay: 500ms; }
+  .cae-bar-row:nth-child(12) .cae-bar-fill { animation-delay: 550ms; }
+  @keyframes cae-fill { from { scale: 0 1; } to { scale: 1 1; } }
+}

@@ -40,3 +40,55 @@ body:not(.dark) .pll-tip { background:rgba(255,255,255,0.98); color:#222; border
   .pll-cell-head { font-size:0.7rem; text-transform:none; letter-spacing:0; }
   .pll-cell-yr { font-size:0.7rem; padding-right:4px; }
 }
+
+/* Draw-in (2026-10-24): the publication dots pop in, column by column, when the section opens. `scale` composes with the
+   dots' hover transform. */
+@media (prefers-reduced-motion: no-preference) {
+  .pll-dot { animation: pll-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+  /* Grid cells are in reading order (year headers, then dots per year and tier), so the delay follows the cell's place. */
+  .pll-cell-dots:nth-child(2) .pll-dot { animation-delay: 22ms; }
+  .pll-cell-dots:nth-child(3) .pll-dot { animation-delay: 44ms; }
+  .pll-cell-dots:nth-child(4) .pll-dot { animation-delay: 66ms; }
+  .pll-cell-dots:nth-child(5) .pll-dot { animation-delay: 88ms; }
+  .pll-cell-dots:nth-child(6) .pll-dot { animation-delay: 110ms; }
+  .pll-cell-dots:nth-child(7) .pll-dot { animation-delay: 132ms; }
+  .pll-cell-dots:nth-child(8) .pll-dot { animation-delay: 154ms; }
+  .pll-cell-dots:nth-child(9) .pll-dot { animation-delay: 176ms; }
+  .pll-cell-dots:nth-child(10) .pll-dot { animation-delay: 198ms; }
+  .pll-cell-dots:nth-child(11) .pll-dot { animation-delay: 220ms; }
+  .pll-cell-dots:nth-child(12) .pll-dot { animation-delay: 242ms; }
+  .pll-cell-dots:nth-child(13) .pll-dot { animation-delay: 264ms; }
+  .pll-cell-dots:nth-child(14) .pll-dot { animation-delay: 286ms; }
+  .pll-cell-dots:nth-child(15) .pll-dot { animation-delay: 308ms; }
+  .pll-cell-dots:nth-child(16) .pll-dot { animation-delay: 330ms; }
+  .pll-cell-dots:nth-child(17) .pll-dot { animation-delay: 352ms; }
+  .pll-cell-dots:nth-child(18) .pll-dot { animation-delay: 374ms; }
+  .pll-cell-dots:nth-child(19) .pll-dot { animation-delay: 396ms; }
+  .pll-cell-dots:nth-child(20) .pll-dot { animation-delay: 418ms; }
+  .pll-cell-dots:nth-child(21) .pll-dot { animation-delay: 440ms; }
+  .pll-cell-dots:nth-child(22) .pll-dot { animation-delay: 462ms; }
+  .pll-cell-dots:nth-child(23) .pll-dot { animation-delay: 484ms; }
+  .pll-cell-dots:nth-child(24) .pll-dot { animation-delay: 506ms; }
+  .pll-cell-dots:nth-child(25) .pll-dot { animation-delay: 528ms; }
+  .pll-cell-dots:nth-child(26) .pll-dot { animation-delay: 550ms; }
+  .pll-cell-dots:nth-child(27) .pll-dot { animation-delay: 572ms; }
+  .pll-cell-dots:nth-child(28) .pll-dot { animation-delay: 594ms; }
+  .pll-cell-dots:nth-child(29) .pll-dot { animation-delay: 616ms; }
+  .pll-cell-dots:nth-child(30) .pll-dot { animation-delay: 638ms; }
+  .pll-cell-dots:nth-child(31) .pll-dot { animation-delay: 660ms; }
+  .pll-cell-dots:nth-child(32) .pll-dot { animation-delay: 682ms; }
+  .pll-cell-dots:nth-child(33) .pll-dot { animation-delay: 704ms; }
+  .pll-cell-dots:nth-child(34) .pll-dot { animation-delay: 726ms; }
+  .pll-cell-dots:nth-child(35) .pll-dot { animation-delay: 748ms; }
+  .pll-cell-dots:nth-child(36) .pll-dot { animation-delay: 770ms; }
+  .pll-cell-dots:nth-child(37) .pll-dot { animation-delay: 792ms; }
+  .pll-cell-dots:nth-child(38) .pll-dot { animation-delay: 814ms; }
+  .pll-cell-dots:nth-child(39) .pll-dot { animation-delay: 836ms; }
+  .pll-cell-dots:nth-child(40) .pll-dot { animation-delay: 858ms; }
+  .pll-cell-dots:nth-child(41) .pll-dot { animation-delay: 880ms; }
+  .pll-cell-dots:nth-child(42) .pll-dot { animation-delay: 902ms; }
+  .pll-cell-dots:nth-child(43) .pll-dot { animation-delay: 924ms; }
+  .pll-cell-dots:nth-child(44) .pll-dot { animation-delay: 946ms; }
+  .pll-cell-dots:nth-child(45) .pll-dot { animation-delay: 968ms; }
+  @keyframes pll-pop { from { scale: 0; opacity: 0; } to { scale: 1; opacity: 1; } }
+}

@@ -140,3 +140,19 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
   outline-offset: 2px;
   border-radius: 2px;
 }
+
+/* ===== Neon title links (2026-10-24) =====
+   Title links (publication titles in the lists, list-page titles and links inside headings) glow green on hover and keyboard focus; with motion allowed,
+   the glow arrives through a two-frame chromatic glitch (magenta and cyan offsets), in keeping with the terminal theme.
+   Decoration only: the text colour, and so its contrast, does not change. */
+.dark :is(:is(h1, h2, h3, h4) a, a.pub-title, .article-title a, .section-subheading a):is(:hover, :focus-visible) {
+  text-shadow: 0 0 6px rgba(0, 255, 65, 0.55), 0 0 18px rgba(0, 255, 65, 0.25);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .dark :is(:is(h1, h2, h3, h4) a, a.pub-title, .article-title a, .section-subheading a):is(:hover, :focus-visible) { animation: heading-glitch 0.32s steps(1) both; }
+  @keyframes heading-glitch {
+    0% { text-shadow: -2px 0 #e040fb, 2px 0 #00e5ff; translate: 1px 0; }
+    34% { text-shadow: 2px 0 #e040fb, -2px 0 #00e5ff; translate: -1px 0; }
+    67%, 100% { text-shadow: 0 0 6px rgba(0, 255, 65, 0.55), 0 0 18px rgba(0, 255, 65, 0.25); translate: none; }
+  }
+}
