@@ -69,7 +69,7 @@
 
 # Hugo Pipes bundles (2026-10-24). The production build puts a content hash in each of these names (the theme's md5 or
 # sha256 fingerprint), so a changed file always gets a new name and the old one can be cached for a year. Only these
-# fingerprinted names are listed: /js/*.js also holds unhashed site scripts (bio_*.js, pub-loader.js, ...) that keep the
+# fingerprinted names are listed: /js/*.js used to hold unhashed site scripts (now in /js/site/, fingerprinted) that kept the
 # default revalidation, as do images, data and PDFs.
 [[headers]]
   for = "/css/wowchemy.*.css"
@@ -133,6 +133,60 @@
 
 [[headers]]
   for = "/en/js/wowchemy.min.*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Fingerprinted site scripts and widget styles (2026-10-24): everything under /js/site/, /js/widgets/ and /css/widgets/
+# is written by layouts/partials/functions/js_tag.html, css_tag.html or a fingerprinting resources.Get, so every name
+# there carries its content hash. The self-hosted Google Fonts files are named by hash (fonts.css itself is not, and is
+# not matched). Vendored libraries live in version-numbered folders, so an update changes the path.
+[[headers]]
+  for = "/js/site/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/js/widgets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/css/widgets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/js/ga-init.min.*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/js/css-swap.min.*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/fonts/google/*.woff2"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/vendor/fuse/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/vendor/mark/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/vendor/academicons/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/vendor/tsparticles/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 

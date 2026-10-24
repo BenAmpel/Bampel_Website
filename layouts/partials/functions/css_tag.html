@@ -1,0 +1,9 @@
+{{- /* A stylesheet from assets/, minified and fingerprinted (cacheable for a year; see netlify.toml) and loaded with
+     integrity. Used in place of the large inline <style> blocks the widget shortcodes used to repeat on every page.
+     Usage: {{ partial "functions/css_tag" "css/widgets/pub-ladder.css" }} */ -}}
+{{- with resources.Get . -}}
+  {{- $css := . | minify | fingerprint -}}
+  <link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}">
+{{- else -}}
+  {{- errorf "css_tag: assets/%s not found" . -}}
+{{- end -}}

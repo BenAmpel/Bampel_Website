@@ -1,0 +1,46 @@
+/* Moved out of layouts/shortcodes/topic_drift.html (2026-10-24) so it is cached once instead of repeated in every page. */
+.tdrift-root { margin:24px 0; padding:24px; border-radius:16px; border:1px solid var(--card-border,#2a2a2a); background:linear-gradient(135deg,rgba(0,0,0,0.55),rgba(0,0,0,0.15)); box-shadow:0 12px 30px rgba(0,0,0,0.25); }
+.tdrift-title { margin:0 0 6px; font-size:1.1rem; color:var(--clr-green); text-transform:uppercase; letter-spacing:0.08em; }
+.tdrift-sub { margin:0; font-size:0.82rem; opacity:0.7; line-height:1.4; }
+.tdrift-hdr { margin-bottom:18px; }
+.tdrift-loading { opacity:0.5; font-size:0.85rem; padding:20px 0; }
+
+/* Phase header */
+.tdrift-phases-hdr { display:grid; grid-template-columns:120px repeat(3,1fr); gap:0 12px; margin-bottom:10px; }
+/* Opacity .7 keeps the phase names and years above 4.5:1 on the dark card (.55, and .55 x .7 for the years, were 4.4 and 2.8). */
+.tdrift-ph-lbl { font-size:0.75rem; text-transform:uppercase; letter-spacing:0.07em; opacity:0.7; text-align:center; }
+.tdrift-ph-lbl span { display:block; font-size:0.75rem; font-style:italic; margin-top:2px; }
+
+/* Table */
+.tdrift-table { display:flex; flex-direction:column; gap:6px; }
+.tdrift-row { display:grid; grid-template-columns:120px repeat(3,1fr); gap:0 12px; align-items:center; }
+.tdrift-term { font-size:0.75rem; font-weight:600; opacity:0.85; text-align:right; padding-right:8px; letter-spacing:0.01em; }
+.tdrift-cell { height:22px; border-radius:4px; overflow:hidden; }
+.tdrift-bar { height:100%; border-radius:4px; display:flex; align-items:center; padding-left:6px; font-size:0.62rem; letter-spacing:0.04em; opacity:0.9; transition:width 0.5s ease; min-width:0; white-space:nowrap; overflow:hidden; }
+
+/* Colors by trend */
+.tdrift-rise { background:rgba(0,255,65,0.25); border:1px solid rgba(0,255,65,0.4); color:var(--clr-green); }
+.tdrift-fall { background:rgba(224,64,251,0.18); border:1px solid rgba(224,64,251,0.35); color:var(--clr-magenta); }
+.tdrift-stable { background:rgba(0,229,255,0.15); border:1px solid rgba(0,229,255,0.3); color:var(--clr-cyan); }
+.tdrift-empty  { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); }
+
+/* Legend */
+.tdrift-legend { display:flex; gap:14px; flex-wrap:wrap; margin-top:16px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.06); }
+.tdrift-li { display:flex; align-items:center; gap:5px; font-size:0.72rem; opacity:0.75; }
+.tdrift-sq { width:10px; height:10px; border-radius:2px; }
+.tdrift-sq-rise   { background:rgba(0,255,65,0.4); border:1px solid rgba(0,255,65,0.6); }
+.tdrift-sq-fall   { background:rgba(224,64,251,0.35); border:1px solid rgba(224,64,251,0.6); }
+.tdrift-sq-stable { background:rgba(0,229,255,0.3); border:1px solid rgba(0,229,255,0.5); }
+
+body:not(.dark) .tdrift-root { background:rgba(255,255,255,0.95); border-color:#ddd; }
+body:not(.dark) .tdrift-legend { border-top-color:rgba(0,0,0,0.1); }
+body:not(.dark) .tdrift-rise   { background:rgba(0,150,0,0.12); border-color:rgba(0,150,0,0.35); color:#2e7d32; }
+body:not(.dark) .tdrift-fall   { background:rgba(150,0,180,0.1); border-color:rgba(150,0,180,0.35); color:#7b1fa2; }
+body:not(.dark) .tdrift-stable { background:rgba(0,100,180,0.1); border-color:rgba(0,100,180,0.3); color:#0277bd; }
+body:not(.dark) .tdrift-empty  { background:rgba(0,0,0,0.03); }
+
+@media (max-width:600px) {
+  .tdrift-phases-hdr,.tdrift-row { grid-template-columns:90px repeat(3,1fr); gap:0 6px; }
+  .tdrift-term { font-size:0.65rem; padding-right:4px; }
+  .tdrift-bar { font-size:0; }
+}

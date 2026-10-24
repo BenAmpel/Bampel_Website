@@ -11,56 +11,6 @@
   </div>
 </div>
 
-<style>
-.selected-pubs-list {
-  display: grid;
-  gap: 12px;
-}
-.selected-pubs .pub-item {
-  padding: 14px 16px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(0, 0, 0, 0.2);
-}
-.selected-pubs .pub-title {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #00e5ff;
-  text-decoration: none;
-}
-.selected-pubs .pub-meta {
-  font-size: 0.75rem;
-  opacity: 0.75;
-  margin-top: 4px;
-}
-.selected-pubs .pub-authors {
-  font-size: 0.75rem;
-  opacity: 0.8;
-  margin-top: 6px;
-}
-.selected-pubs-more {
-  margin-top: 14px;
-  text-align: right;
-}
-.selected-pubs-link {
-  font-family: 'Fira Code', 'Roboto Mono', monospace;
-  font-size: 0.8rem;
-  letter-spacing: 0.04em;
-  color: #00ff41;
-  text-decoration: none;
-  border-bottom: 1px solid rgba(0, 255, 65, 0.35);
-  transition: border-color 0.2s ease, text-shadow 0.2s ease;
-}
-.selected-pubs-link:hover {
-  color: #00ff41;
-  border-color: #00ff41;
-}
-body:not(.dark) .selected-pubs .pub-item {
-  background: rgba(0, 0, 0, 0.03);
-  border-color: rgba(0, 0, 0, 0.1);
-}
-body:not(.dark) .selected-pubs .pub-title { color: #1a0dab; }
-body:not(.dark) .selected-pubs-link { color: #0b6b2c; border-color: rgba(11, 107, 44, 0.4); text-shadow: none; }
-</style>
+{{ partial "functions/css_tag" "css/widgets/selected-publications.css" }}
 
 {{ with resources.Get "js/widgets/selected-publications.js" | minify | fingerprint }}<script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}"></script>{{ end }}

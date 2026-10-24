@@ -7,7 +7,7 @@
 <!-- Altmetric and Dimensions badge scripts are loaded by their shortcodes, only on the pages that show a badge. -->
 
 <!-- Shared publications.json cache — single fetch for all shortcodes -->
-<script src="/js/pub-loader.js"></script>
+{{ partial "functions/js_tag" (dict "path" "js/site/pub-loader.js") }}
 
 
 <meta name="build-date" content="{{ now.UTC.Format "2006-01-02" }}">

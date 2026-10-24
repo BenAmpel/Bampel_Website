@@ -118,7 +118,7 @@
           </div>
           <script type="application/json" data-bio-modes>{{ $bio_modes | jsonify | safeHTML }}</script>
         </div>
-        <script src="/js/bio_explorer.js" defer></script>
+        {{ partial "functions/js_tag" (dict "path" "js/site/bio_explorer.js" "attrs" "defer") }}
         {{ end }}
 
         {{ with $person.bio_quicklinks }}
@@ -166,9 +166,9 @@
             </div>
           </div>
         </details>
-        <script src="/js/bio_story_mode.js" defer></script>
-        <script src="/js/bio_highlight_chips.js" defer></script>
-        <script src="/js/bio_reading_pulse.js" defer></script>
+        {{ partial "functions/js_tag" (dict "path" "js/site/bio_story_mode.js" "attrs" "defer") }}
+        {{ partial "functions/js_tag" (dict "path" "js/site/bio_highlight_chips.js" "attrs" "defer") }}
+        {{ partial "functions/js_tag" (dict "path" "js/site/bio_reading_pulse.js" "attrs" "defer") }}
         {{ end }}
       </div>
     </details>
