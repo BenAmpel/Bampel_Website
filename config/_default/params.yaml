@@ -109,7 +109,8 @@ extensions:
 # Security
 
 security:
-  # Allow frame for embedding speaker notes in slides
+  # netlify.toml already sends X-Frame-Options: DENY and frame-ancestors 'none' for every page; true here only stops the
+  # generated _headers (layouts/index.headers) from sending the same header a second time.
   allow_frame: true
   # Permissions-Policy line of the generated _headers (the Wowchemy Netlify plugin; its default turns the microphone off).
   # Set to the lab's policy (microphone, autoplay and full screen for this site only) so the generated line can never block
