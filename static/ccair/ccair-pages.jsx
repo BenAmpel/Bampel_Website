@@ -258,6 +258,14 @@ function ResearchPage() {
         </div>
         <div className="section-foot"><a className="btn btn-secondary" href="/ccair/publications/">Read the {publications.length} publications <Arrow /></a></div>
       </Section>
+
+      <Section id="lab" alt title="Behavioral Lab"
+        intro="Browser-based studies of security decisions such as spotting phishing, judging links, and responding to suspicious calls. Each study records the answer and how the person arrived at it (timing, hesitation, where attention went), so the center can study the decision process rather than only its outcome.">
+        <div className="actions">
+          <a className="btn btn-primary" href="/lab/">Visit the lab <Arrow /></a>
+          <a className="btn btn-secondary" href="/lab/guide/">Researcher guide</a>
+        </div>
+      </Section>
     </div>
   );
 }
