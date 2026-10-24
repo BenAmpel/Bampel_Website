@@ -190,6 +190,10 @@ let passer = null;
   assert(train.slice(2, 6).every(t => t.item.clips.length === 2) && train.every(t => t.item.minSeconds > 0), 'two examples on each part screen, a minimum time on each');
   assert.equal(train.filter(t => t.item.practiceDial && t.item.practiceDial.target).length, 1, 'every arm\'s exercise has one directory lookup');
   assert(train.every(t => !(t.item.practiceDial) || t.item.practiceDial.directory.every(d => d.media)), 'practice-directory greetings are rendered in the study voice');
+  // Both clip-block intros describe the locked clips too, in the same words for every arm (the panel found the second
+  // intro promised answering while every call plays).
+  const intros = s2.trials.filter(t => t.item.kind === 'text' && /recorded calls/.test(t.item.body || ''));
+  assert.equal(intros.length, 2); assert(intros.every(t => /open only when the call ends/.test(t.item.body) && !t.item.variants), 'clip intros match the locked trials');
   const calls = s2.trials.filter(t => t.item.kind === 'call');
   assert(calls.every(t => t.item.call.scored && !t.item.call.intent && !t.item.call.script), 'the browser never learns whether a call is an attack');
   assert(calls.every(t => t.item.call.caller === 'Incoming call' && t.item.call.number === ''), 'no caller ID: every call rings as "Incoming call" with no number');
