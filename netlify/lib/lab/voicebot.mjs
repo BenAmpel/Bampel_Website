@@ -16,7 +16,13 @@
 
 export const STATES = ['opener', 'pretext', 'ask', 'pressure1', 'pressure2', 'deflect', 'goAhead', 'closeComply', 'closeRefuse', 'close'];
 // Lines used when a script does not have one for a state.
-export const DEFAULT_LINES = { goAhead: 'Great. Go ahead whenever you are ready.' };
+export const DEFAULT_LINES = { goAhead: 'Great. Go ahead whenever you are ready.', waiting: 'Sure, take your time.' };
+// What the caller says after a reply: its line for the new state, except that a request to wait gets a waiting line
+// instead of the current line again (a caller repeating the same request word for word sounds like a loop).
+export function replyLine(script, cls, prev, after) {
+  if (cls && cls.intent === 'hold' && prev && after && prev.state === after.state && !after.done) return (script && script.waiting) || DEFAULT_LINES.waiting;
+  return (script && script[after.state]) || DEFAULT_LINES[after.state] || '';
+}
 export const ENDINGS = ['closeComply', 'closeRefuse', 'close'];
 const PRESSURE = ['ask', 'pressure1', 'pressure2'];
 
@@ -64,12 +70,13 @@ export function digitsIn(text) {
 const RE = {
   verify: /\b(call (you|them|the bank|it|your office|back)|call ?back|verify (you|this|who)|look (it |that )?up|official number|number on (the back of )?(my|the) card|hang up and call|let me (check|call)|i'?ll call|i will call|who is this|who'?s (this|calling)|who is calling|what'?s your (name|extension|number|department)|what is your (name|extension|number|department)|which (department|office|branch)|(can|could|may) i (call|ring) (you )?back|how do i know|prove)\b/i,
   // "fraud" alone is not a refusal ("is this fraud prevention?"); calling the call a scam or fraud is.
-  refuse: /\b(no|nope|not comfortable|won'?t|will not|don'?t (want|feel|think|give|share)|not going to|i refuse|stop calling|not interested|scam(mer)?|fraudster|(this|that|it) (is|sounds like|seems like) (a )?fraud|leave me alone|no thanks|(not|n't) (ok|okay))\b/i,
+  refuse: /\b(no|nope|not comfortable|won'?t|will not|don'?t (want|feel|think|give|share)|not going to|i refuse|stop calling|not interested|scam(mer)?|fraudster|(this|that|it) (is|sounds like|seems like) (a )?fraud|leave me alone|no thanks|(not|n't) (ok|okay)|can'?t|cannot|can not|unable to|not able to|(i'?d )?rather not|prefer not|not (allowed|authorized|permitted)|against (our |company )?policy|i decline|not over the phone|not giving (that|it|you)|not sharing|i'?ll pass|no way)\b/i,
   // Hedges are neither agreement nor refusal ("not sure" contains "sure", "no idea" contains "no"); checked first.
   hedge: /\b((not|n't|never) (really |quite |too |so |100% )?(sure|certain)|unsure|uncertain|no idea|(i )?(don'?t|do not) know|dunno|maybe|perhaps|i'?m not positive)\b/i,
   // "fine" and "it's" are not agreement on their own ("I'm fine", "it's not something I can share").
   comply: /\b(yes|yeah|yep|sure|okay|ok|go ahead|here it is|the code is|my (code|pin|password|number) is|it arrived|got it)\b/i,
-  hold: /\b(hold on|one (sec|second|moment)|wait)\b/i
+  // A request to wait, not any "wait" ("wait, why do you need that?" is a question).
+  hold: /\b(hold on|hang on|one (sec|second|moment|minute)|just a (sec|second|moment|minute)|give me a (sec|second|moment|minute)|wait a (sec|second|moment|minute)|please wait)\b|^\s*wait[.!]?\s*$/i
 };
 // One intent per utterance, in this order of precedence: giving digits counts as complying whatever else is said
 // (digitRule; a study that knows the participant's secrets turns it off and scores disclosure from the secrets).
@@ -78,7 +85,8 @@ export function classify(text, { digitRule = true } = {}) {
   const raw = String(text || '').replace(/[\u2018\u2019\u02bc]/g, "'").replace(/\bo\.\s?k\.?(?=\W|$)/gi, 'ok').trim(), digits = digitsIn(raw);
   // "oh no" is surprise and "no problem" is agreement, not a refusal; "make sure" and "are you sure" are not agreement.
   const t = raw.replace(/\b(oh|uh|ah),?\s+no\b[!.,]?/gi, '').replace(/\bno (problem|worries|rush|trouble)\b/gi, 'okay')
-    .replace(/\b(make|making|be|are you|you)\s+sure\b/gi, ' ').trim();
+    .replace(/\b(make|making|be|are you|you)\s+sure\b/gi, ' ')
+    .replace(/\b(can'?t|cannot|can not) (hear|understand|make out|see)\b/gi, ' ').trim();   // a line problem, not a refusal
   if (!raw) return { intent: 'silence', digits: 0 };
   // A long run of digits is a disclosure only when nothing better is known; studies with persona secrets decide
   // disclosure from the secrets themselves (multimodal.mjs callTurn), so a read-back employee ID is not a leak.

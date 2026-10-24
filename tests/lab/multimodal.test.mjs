@@ -59,15 +59,26 @@ import * as content from '../../netlify/lib/lab/content.mjs';
   const TABLE = {
     comply: ['yes', 'Yes.', 'yeah sure', 'Sure.', 'sure, go ahead', 'okay', 'OK', 'O.K.', 'Okay, here it is', 'yes it arrived', 'got it', 'Go ahead.'],
     refuse: ['no', 'No.', 'nope', 'I won\u2019t give that out', "I won't", 'I\u2019m not comfortable with that', 'no thanks', 'sure? no', "no, sure isn't",
-      "that's not okay", "I don't want to share that", 'this sounds like a scam', 'not interested', 'that sounds like fraud'],
+      "that's not okay", "I don't want to share that", 'this sounds like a scam', 'not interested', 'that sounds like fraud',
+      "I can't give that out over the phone", 'I cannot share that', "I'd rather not", 'not over the phone', 'that is against company policy', 'I\u2019m not able to do that'],
     hedge: ["I'm not sure I should give that out", 'Not sure, let me look', 'not sure.', 'Uh, I\u2019m not sure', 'I\u2019m not sure', 'unsure',
       "I don't know", 'I do not know', 'no idea', 'maybe', "I'm not certain", 'not really sure', 'dunno'],
     verify: ['who is this?', "who's calling", "I'll call you back", 'let me look that up', 'can I call you back?', 'what is your extension?'],
-    hold: ['hold on', 'one second', 'okay, hold on', 'wait'],
-    question: ['Is that okay?', 'are you sure?', 'sure?', 'what is this about?']
+    hold: ['hold on', 'one second', 'okay, hold on', 'wait', 'give me a minute', 'hang on'],
+    question: ['Is that okay?', 'are you sure?', 'sure?', 'what is this about?', 'Wait, why do you need that?']
   };
   for (const [want, phrases] of Object.entries(TABLE)) for (const p of phrases) assert.equal(bot.classify(p).intent, want, `"${p}" should be ${want}`);
   assert.notEqual(bot.classify('let me make sure').intent, 'comply', '"make sure" is not agreement');
+  assert.notEqual(bot.classify("sorry, I can't hear you").intent, 'refuse', 'a bad line is not a refusal');
+  // A clear refusal moves the caller on (pressure1), a second one ends the call; nothing repeats the request verbatim.
+  let rf = { ...bot.START, state: 'ask', lastPressure: 'ask' };
+  rf = bot.step(rf, bot.classify("I can't give that out over the phone"), o); assert.equal(rf.state, 'pressure1');
+  rf = bot.step(rf, bot.classify('I cannot share that'), o); assert.equal(rf.state, 'closeRefuse'); assert.equal(rf.outcome, 'refused');
+  const script = { ask: 'Read me the code, please.', pressure1: 'It only takes a second.' };
+  const prev = { ...bot.START, state: 'ask', lastPressure: 'ask' }, held = bot.step(prev, bot.classify('hold on'), o);
+  assert.equal(held.state, 'ask', 'a request to wait keeps the state');
+  assert.equal(bot.replyLine(script, bot.classify('hold on'), prev, held), 'Sure, take your time.', 'and the caller waits instead of repeating the request');
+  assert.equal(bot.replyLine(script, bot.classify('no'), prev, bot.step(prev, bot.classify('no'), o)), 'It only takes a second.');
   // A hedge never ends a call or counts as agreement: an attacker presses on, a legitimate caller restates.
   const hg = bot.step({ ...bot.START, state: 'ask', lastPressure: 'ask' }, bot.classify('not sure'), o);
   assert.equal(hg.state, 'pressure1'); assert(!hg.done); assert.equal(hg.agreed || 0, 0);
