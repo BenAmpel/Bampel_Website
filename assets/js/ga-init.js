@@ -6,10 +6,13 @@ function gtag(){dataLayer.push(arguments);}
 (function () {
   var id = document.currentScript && document.currentScript.getAttribute('data-ga-id');
   if (!id || !/(^|\.)bampel\.com$/.test(location.hostname)) return;
+  // Visitors whose browser asks not to be tracked (Global Privacy Control or Do Not Track) get no analytics at all.
+  if (navigator.globalPrivacyControl === true || navigator.doNotTrack === '1' || window.doNotTrack === '1') return;
   var gt = document.createElement('script');
   gt.async = true;
   gt.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(id);
   document.head.appendChild(gt);
   gtag('js', new Date());
-  gtag('config', id);
+  // Page views only: no Google signals (cross-device and demographics) and no ad personalization.
+  gtag('config', id, { allow_google_signals: false, allow_ad_personalization_signals: false });
 })();
