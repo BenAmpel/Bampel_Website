@@ -196,8 +196,8 @@ function ResearchPage() {
   return (
     <div className="page">
       <PageHead eyebrow="Research" title="Anticipating attacks, not just reacting to them"
-        lede="CCAIR investigates how intelligent systems can anticipate, interpret, and adapt to malicious behavior before exploitation. All center activities, proposals, and artifacts map to at least one of three research primitives." />
-      <PhotoBand slot="research-band" />
+        lede="CCAIR investigates how intelligent systems can anticipate, interpret, and adapt to malicious behavior before exploitation. All center activities, proposals, and artifacts map to at least one of three research primitives."
+        photo="research-band" />
 
       <Section id="primitives" title="Research primitives" intro="The foundational questions every project contributes to.">
         <div className="grid grid-3">
@@ -330,11 +330,14 @@ function PublicationsPage() {
 function PeoplePage() {
   const { people } = useData();
   const d = people.director;
+  // A mentee with "now" (where they landed) has finished; "mentoredAt" says where Dr. Ampel mentored them.
+  const current = (people.mentees || []).filter((s) => !s.now);
+  const former = (people.mentees || []).filter((s) => s.now);
   return (
     <div className="page">
       <PageHead eyebrow="People" title="The people behind CCAIR"
-        lede="A small, collaborative group of faculty and Ph.D. researchers working across Georgia State and partner universities." />
-      <PhotoBand slot="people-band" />
+        lede="A small, collaborative group of faculty and Ph.D. researchers working across Georgia State and partner universities."
+        photo="people-band" />
 
       {d && <Section id="director" title="Director">
         <Reveal className="card director">
@@ -361,8 +364,15 @@ function PeoplePage() {
         </div>
         <h3 className="group-label">Mentees at partner universities</h3>
         <div className="grid grid-3">
-          {(people.mentees || []).map((s) => <Reveal key={s.name}><PersonCard name={s.name} role={s.role} meta={[s.org, s.years].filter(Boolean).join(' · ')} photo={s.photo} warm /></Reveal>)}
+          {current.map((s) => <Reveal key={s.name}><PersonCard name={s.name} role={s.role} meta={[s.org, s.years].filter(Boolean).join(' · ')} photo={s.photo} warm /></Reveal>)}
         </div>
+        {former.length > 0 && <>
+          <h3 className="group-label">Former mentees</h3>
+          <div className="grid grid-3">
+            {former.map((s) => <Reveal key={s.name}><PersonCard name={s.name} role={s.role} photo={s.photo} warm
+              meta={[s.mentoredAt && `Mentored at ${s.mentoredAt}`, s.years].filter(Boolean).join(' · ')} note={`Now at ${s.now}`} /></Reveal>)}
+          </div>
+        </>}
       </Section>
 
       <Section id="affiliates" title="Faculty affiliates" intro="Internal and external faculty contributing to shared CCAIR artifacts across research primitives.">
@@ -395,8 +405,8 @@ function ResourcesPage() {
   return (
     <div className="page">
       <PageHead eyebrow="Resources" title="Shared tools for students and researchers"
-        lede="Free career guidance for students, and research assets designed to outlive individual grants and serve the CyberAI community." />
-      <PhotoBand slot="resources-band" />
+        lede="Free career guidance for students, and research assets designed to outlive individual grants and serve the CyberAI community."
+        photo="resources-band" />
 
       <Section id="students" title="For students" intro="Free guides for students deciding where they fit in cybersecurity.">
         <FinderFeature headingLevel={3} />

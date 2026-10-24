@@ -261,13 +261,26 @@ function CCAIRNav({ currentPage }) {
   );
 }
 
-function PageHead({ eyebrow, title, lede, children }) {
-  return (
-    <header className="page-head wrap">
+// photo: a slot in data/photos.json. When it holds a photo, the heading sits on it the way the home hero does (Georgia
+// State Blue scrim, white text, credit in the corner); an empty slot gives the plain heading.
+function PageHead({ eyebrow, title, lede, photo: slot, children }) {
+  const photo = usePhoto(slot);
+  const head = (
+    <>
       {eyebrow && <span className="eyebrow">{eyebrow}</span>}
       <h1>{title}</h1>
       {lede && <p className="lede">{lede}</p>}
       {children}
+    </>
+  );
+  if (!photo) return <header className="page-head wrap">{head}</header>;
+  return (
+    <header className="photo-hero page-hero">
+      <div className="hero-stage">
+        <div className="hero-photo"><Picture photo={photo} sizes="100vw" priority /></div>
+        <div className="page-head wrap">{head}</div>
+        <p className="photo-credit hero-credit"><PhotoCredit photo={photo} /></p>
+      </div>
     </header>
   );
 }
