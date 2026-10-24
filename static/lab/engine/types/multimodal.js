@@ -437,7 +437,8 @@
     }
     if (screenGate) {
       if (agentOn) screen.clipsEnded = nClips;   // the examples' words are shown open; only the minimum time still applies
-      if (!timeOk) setTimeout(function () { timeOk = true; screenReady(); }, it.minSeconds * 1000);
+      // An agent reads a screen at once and its dwell time means nothing, so its minimum time is at most 3 seconds.
+      if (!timeOk) setTimeout(function () { timeOk = true; screenReady(); }, (agentOn ? Math.min(3, it.minSeconds) : it.minSeconds) * 1000);
       root.querySelectorAll('audio[data-clip]').forEach(function (a) {
         a.addEventListener('play', function () { screen.clipsPlayed++; ctx.record('clip_play', Number(a.getAttribute('data-clip'))); root.querySelectorAll('audio[data-clip]').forEach(function (o) { if (o !== a) o.pause(); }); });
         a.addEventListener('ended', function () { var k = a.getAttribute('data-clip'); if (!ended[k]) { ended[k] = true; screen.clipsEnded++; screenReady(); } });
