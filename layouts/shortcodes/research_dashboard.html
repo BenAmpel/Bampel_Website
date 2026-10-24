@@ -107,7 +107,7 @@
 </div>
 
 
-{{- $dashboardCSS := resources.Get "scss/research_dashboard.scss" | toCSS (dict "targetPath" "css/research_dashboard.css") -}}
+{{- $dashboardCSS := resources.Get "scss/research_dashboard.scss" | css.Sass (dict "targetPath" "css/research_dashboard.css" "transpiler" "dartsass" "silenceDeprecations" (slice "import" "global-builtin" "color-functions" "if-function" "abs-percent")) -}}
 {{- if hugo.IsProduction -}}
   {{- $dashboardCSS = $dashboardCSS | minify | fingerprint "md5" -}}
 {{- end -}}

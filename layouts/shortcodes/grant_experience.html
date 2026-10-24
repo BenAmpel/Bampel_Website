@@ -1,4 +1,4 @@
-{{- $grants := sort site.Data.grants "year" "desc" -}}
+{{- $grants := sort hugo.Data.grants "year" "desc" -}}
 {{- $total := 0 -}}
 {{- range $grants -}}
   {{- $total = add $total (int .amount) -}}

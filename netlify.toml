@@ -4,9 +4,11 @@
   # "scheduled" build hook (~/.purplelink/bin/netlify-batch-build.sh); hook builds are never skipped by this line.
   ignore = "git log -1 --format=%B | grep -qF '[deploy now]' && exit 1 || exit 0"
   # scripts/lab/build-info.mjs writes the commit being built (COMMIT_REF) into the lab functions, which cannot read it at run time.
+  # Dart Sass (Hugo deprecated its built-in libsass in v0.153): the pinned release is downloaded, checked against
+  # DART_SASS_SHA256 and unpacked to /tmp, outside the published folder. Hugo finds the `sass` binary on PATH.
   # Two Hugo passes: the first only writes hugo_stats.json (every tag, class and id on the rendered pages) into a scratch folder;
   # the second removes unused rules from css/wowchemy.css with PostCSS and PurgeCSS (postcss.config.js) and writes the site.
-  command = "npm install && node scripts/lab/build-info.mjs && npm run build:ccair && hugo --gc --minify --destination \"$(mktemp -d)\" && WC_PURGE_CSS=true hugo --gc --minify --ignoreCache"
+  command = "curl -sSfL -o /tmp/dart-sass.tar.gz https://github.com/sass/dart-sass/releases/download/${DART_SASS_VERSION}/dart-sass-${DART_SASS_VERSION}-linux-x64.tar.gz && echo \"${DART_SASS_SHA256}  /tmp/dart-sass.tar.gz\" | sha256sum -c - && tar -xzf /tmp/dart-sass.tar.gz -C /tmp && export PATH=\"/tmp/dart-sass:$PATH\" && npm install && node scripts/lab/build-info.mjs && npm run build:ccair && hugo --gc --minify --destination \"$(mktemp -d)\" && WC_PURGE_CSS=true hugo --gc --minify --ignoreCache"
   publish = "public"
 
 # Site-wide security headers (added 2026-10-16). HSTS, nosniff and Referrer-Policy come from the _headers file that the
@@ -156,7 +158,11 @@
   status = 200
 
 [build.environment]
-  HUGO_VERSION = "0.148.2"
+  # Hugo 0.168 (Oct 2026). The theme (Wowchemy v5, Aug 2023) is frozen; layouts/ shadows the theme files that used
+  # functions newer Hugo removed or deprecated (each shadow starts with a "Shadowed from" note).
+  HUGO_VERSION = "0.168.0"
+  DART_SASS_VERSION = "1.106.1"
+  DART_SASS_SHA256 = "ad99cccb90de4ad2926e03e32d819c83baf32c3dbff56da92df0eed10e604d60"
   HUGO_ENV = "production"
   HUGO_ENABLEGITINFO = "true"
   NODE_VERSION = "22"

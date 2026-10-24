@@ -1,0 +1,60 @@
+{{/* Table Shortcode for Wowchemy. */}}
+{{/* Load a CSV table from page dir falling back back to remote URL */}}
+{{/* Defaults to expecting a comma-separated CSV with a header row. */}}
+
+{{/*
+    Docs: https://wowchemy.com/docs/content/writing-markdown-latex/#csv-table
+
+    Parameters
+    ----------
+    src :
+        Path or url to the csv table. Path is relative to the folder where the shortcode is called.
+    delimiter : default ","
+        Field delimiter.
+    header : default "true"
+        If "true", the first row is rendered as the header.
+    caption : optional
+        Caption for the table.
+*/}}
+
+{{ $src := .Get "path" }}
+{{ $delimiter := .Get "delimiter" | default "," }}
+{{ $useHeaderRow := (eq (lower (.Get "header")) "true") | default true }}
+{{ $caption := .Get "caption" }}
+
+{{/* Shadowed from Wowchemy v5 for Hugo 0.168: getCSV was removed, so the CSV is read as a page resource (or with
+     resources.GetRemote for a URL) and parsed with transform.Unmarshal. */}}
+{{ $rows := slice }}
+{{ $res := "" }}
+{{ if strings.HasPrefix $src "http" }}
+  {{ with try (resources.GetRemote $src) }}{{ with .Value }}{{ $res = . }}{{ end }}{{ end }}
+{{ else }}
+  {{ $res = $.Page.Resources.Get $src }}
+{{ end }}
+{{ with $res }}
+  {{ $rows = transform.Unmarshal (dict "delimiter" $delimiter) .Content }}
+{{ else }}
+  {{ errorf "table shortcode: cannot read %q on %s" $src $.Page.File.Path }}
+{{ end }}
+
+<table class="table">
+  {{ if $useHeaderRow }}
+    {{ $headerRow := index $rows 0 }}
+    {{ $rows = after 1 $rows }}
+    <tr> {{ range $headerRow }} <th>{{ . | markdownify | emojify }}</th> {{ end }} </tr>
+  {{ end }}
+  {{ range $rows }}
+    <tr>
+      {{ range . }}
+        {{ if (findRE "^\\d+$" .) }}
+          <td data-table-dtype="number">{{ . }}</td>
+        {{ else }}
+          <td data-table-dtype="text">{{ . | markdownify | emojify }}</td>
+        {{ end }}
+      {{ end }}
+    </tr>
+  {{ end }}
+  {{ if $caption }}
+    <caption>{{ $caption | markdownify | emojify }}</caption>
+  {{ end }}
+</table>

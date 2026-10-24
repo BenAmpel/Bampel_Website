@@ -48,7 +48,7 @@
   {{ if ne . "" }}{{ $doi = . }}{{ end }}
 {{ end }}
 
-{{ $pubData := .Site.Data.publications }}
+{{ $pubData := hugo.Data.publications }}
 {{ if isSet $pubData 0 }}
 {{ else if isSet $pubData "individualPublications" }}
   {{ $pubData = $pubData.individualPublications }}
