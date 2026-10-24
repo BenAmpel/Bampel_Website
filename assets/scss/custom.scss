@@ -1160,11 +1160,13 @@ section#about .bio-explorer-tab[aria-selected="true"],
   box-shadow: 0 0 12px rgba(0, 255, 65, 0.25);
 }
 
-section#about .bio-explorer-tab:focus,
-.wg-about .bio-explorer-tab:focus,
-.hb-about .bio-explorer-tab:focus {
-  outline: none;
-  box-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
+// Focus rings (audit 2026-10-24): full-opacity cyan outline, 12.3:1 against #0d1117 (WCAG 1.4.11 asks for 3:1). The old
+// glows were 40% alpha cyan (2.84:1) with outline: none, and the tab rule also wiped the selected tab's own glow.
+section#about .bio-explorer-tab:focus-visible,
+.wg-about .bio-explorer-tab:focus-visible,
+.hb-about .bio-explorer-tab:focus-visible {
+  outline: 2px solid #00e5ff;
+  outline-offset: 2px;
 }
 
 section#about .bio-explorer-panel,
@@ -1730,9 +1732,9 @@ section#about .bio-chip:focus-visible::after,
 section#about .bio-chip:focus-visible,
 .wg-about .bio-chip:focus-visible,
 .hb-about .bio-chip:focus-visible {
-  outline: none;
+  outline: 2px solid #00e5ff;
+  outline-offset: 2px;
   border-color: rgba(0, 229, 255, 0.7);
-  box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.4);
 }
 
 section#about .bio-highlight-flash,
@@ -5287,8 +5289,8 @@ body:not(.dark) .pub-filter-reset {
 }
 
 .impact-card:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.5);
+  outline: 2px solid #00e5ff;
+  outline-offset: 2px;
 }
 
 body:not(.dark) .impact-card {
@@ -5527,4 +5529,16 @@ section .container {
 // The skip link moves focus here; the region is not a control, so it shows no ring.
 main#main:focus {
   outline: none;
+}
+
+// ===== FOCUS RINGS ON THE LIGHT THEME (audit 2026-10-24) =====
+// Cyan is 1.54:1 on white; the navy ring is 10:1.
+body:not(.dark) section#about .bio-explorer-tab:focus-visible,
+body:not(.dark) .wg-about .bio-explorer-tab:focus-visible,
+body:not(.dark) .hb-about .bio-explorer-tab:focus-visible,
+body:not(.dark) section#about .bio-chip:focus-visible,
+body:not(.dark) .wg-about .bio-chip:focus-visible,
+body:not(.dark) .hb-about .bio-chip:focus-visible,
+body:not(.dark) .impact-card:focus-visible {
+  outline-color: #0b3d91;
 }

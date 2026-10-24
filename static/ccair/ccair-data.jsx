@@ -2,6 +2,8 @@
 const { createContext, useContext, useState: useDataState, useEffect: useDataEffect } = React;
 
 const DataCtx = createContext(null);
+// Load status for DataGate. The shell (nav, footer) renders at once; only the page area waits for the data.
+const DataStatusCtx = createContext({ loading: true, error: null });
 
 const DATA_FILES = {
   publications: 'data/publications.json',
@@ -45,7 +47,18 @@ function DataProvider({ children }) {
       });
   }, []);
 
-  if (state.loading) {
+  const status = React.useMemo(() => ({ loading: state.loading, error: state.error }), [state.loading, state.error]);
+  return (
+    <DataStatusCtx.Provider value={status}>
+      <DataCtx.Provider value={state.data}>{children}</DataCtx.Provider>
+    </DataStatusCtx.Provider>
+  );
+}
+
+// Wrap the page area in this. Anything outside it (nav, footer) renders before the data arrives.
+function DataGate({ children }) {
+  const { loading, error } = useContext(DataStatusCtx);
+  if (loading) {
     return (
       <div className="state" role="status">
         <div>
@@ -55,22 +68,20 @@ function DataProvider({ children }) {
       </div>
     );
   }
-
-  if (state.error) {
+  if (error) {
     return (
       <div className="state" role="alert">
         <div>
           <h2 style={{ marginBottom: 8 }}>We couldn't load this page</h2>
-          <p style={{ marginBottom: 16 }}>{state.error}</p>
-          <button type="button" className="btn btn-primary" onClick={() => { setState({ data: null, loading: true, error: null }); window.location.reload(); }}>
+          <p style={{ marginBottom: 16 }}>{error}</p>
+          <button type="button" className="btn btn-primary" onClick={() => window.location.reload()}>
             Try again
           </button>
         </div>
       </div>
     );
   }
-
-  return <DataCtx.Provider value={state.data}>{children}</DataCtx.Provider>;
+  return children;
 }
 
 function useData() {
@@ -80,5 +91,5 @@ function useData() {
 }
 
 window.CCAIR = window.CCAIR || {};
-Object.assign(window.CCAIR, { DataProvider, useData, DataCtx });
-Object.assign(window, { DataProvider, useData, DataCtx });
+Object.assign(window.CCAIR, { DataProvider, DataGate, useData, DataCtx });
+Object.assign(window, { DataProvider, DataGate, useData, DataCtx });
