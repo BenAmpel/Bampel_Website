@@ -1,0 +1,40 @@
+# Weekly check of the build tool versions pinned in netlify.toml (Hugo, Dart Sass), which Dependabot cannot read.
+# Opens one issue when a newer release exists (and does nothing if that issue is already open). Upgrading Hugo needs a
+# local build and diff first: the Wowchemy theme is frozen and patched through shadow files in layouts/.
+name: Build tool versions
+
+on:
+  schedule:
+    - cron: '17 13 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Compare pins with the latest releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          pinned_hugo=$(sed -nE 's/^ *HUGO_VERSION *= *"([^"]+)".*/\1/p' netlify.toml)
+          pinned_sass=$(sed -nE 's/^ *DART_SASS_VERSION *= *"([^"]+)".*/\1/p' netlify.toml)
+          latest_hugo=$(gh api repos/gohugoio/hugo/releases/latest --jq .tag_name | sed 's/^v//')
+          latest_sass=$(gh api repos/sass/dart-sass/releases/latest --jq .tag_name)
+          echo "Hugo pinned $pinned_hugo, latest $latest_hugo; Dart Sass pinned $pinned_sass, latest $latest_sass"
+          body=""
+          [ "$pinned_hugo" != "$latest_hugo" ] && body+="- Hugo: netlify.toml pins ${pinned_hugo}; latest is ${latest_hugo} (https://github.com/gohugoio/hugo/releases)"$'\n'
+          [ "$pinned_sass" != "$latest_sass" ] && body+="- Dart Sass: netlify.toml pins ${pinned_sass}; latest is ${latest_sass} (also update DART_SASS_SHA256)"$'\n'
+          [ -z "$body" ] && { echo "Pins are current."; exit 0; }
+          title="Build tools: newer Hugo or Dart Sass available"
+          if [ -n "$(gh issue list --state open --search "in:title \"$title\"" --json number --jq '.[].number')" ]; then
+            echo "Issue already open."; exit 0
+          fi
+          printf '%s\nBefore bumping: build locally with the new version and compare the output with the current build (see the Hugo upgrade notes in netlify.toml).\n' "$body" > issue.md
+          gh issue create --title "$title" --body-file issue.md
