@@ -68,11 +68,11 @@ export function digitsIn(text) {
   return Math.max(best, run);
 }
 const RE = {
-  verify: /\b(call (you|them|the bank|it|your office|back)|call ?back|verify (you|this|who)|look (it |that )?up|official number|number on (the back of )?(my|the) card|hang up and call|let me (check|call)|i'?ll call|i will call|who is this|who'?s (this|calling)|who is calling|what'?s your (name|extension|number|department)|what is your (name|extension|number|department)|which (department|office|branch)|(can|could|may) i (call|ring) (you )?back|how do i know|prove)\b/i,
+  verify: /\b(call (you|them|the bank|it|your office|back)|call ?back|verify (you|this|who)|look (it |that )?up|official number|number on (the back of )?(my|the) card|hang up and call|let me (check|call)|i'?ll call|i will call|i'?ll (check|look into (it|this|that)) and (call|ring|get back)|get back to you|(call|check with|go through) (the |our |my )?(company )?directory|who is this|who'?s (this|calling)|who is calling|what'?s your (name|extension|number|department)|what is your (name|extension|number|department)|which (department|office|branch)|(can|could|may) i (call|ring) (you )?back|how do i know|prove)\b/i,
   // "fraud" alone is not a refusal ("is this fraud prevention?"); calling the call a scam or fraud is.
   refuse: /\b(no|nope|not comfortable|won'?t|will not|don'?t (want|feel|think|give|share)|not going to|i refuse|stop calling|not interested|scam(mer)?|fraudster|(this|that|it) (is|sounds like|seems like) (a )?fraud|leave me alone|no thanks|(not|n't) (ok|okay)|can'?t|cannot|can not|unable to|not able to|(i'?d )?rather not|prefer not|not (allowed|authorized|permitted)|against (our |company )?policy|i decline|not over the phone|not giving (that|it|you)|not sharing|i'?ll pass|no way)\b/i,
   // Hedges are neither agreement nor refusal ("not sure" contains "sure", "no idea" contains "no"); checked first.
-  hedge: /\b((not|n't|never) (really |quite |too |so |100% )?(sure|certain)|unsure|uncertain|no idea|(i )?(don'?t|do not) know|dunno|maybe|perhaps|i'?m not positive)\b/i,
+  hedge: /\b((not|n't|never) (really |quite |too |so |100% )?(sure|certain)|unsure|uncertain|no idea|(i )?(don'?t|do not) know|dunno|maybe|perhaps|i'?m not positive|(don'?t|do not) have (it|that|this|the [a-z]+)( [a-z]+)? (in front of me|on hand|handy|here|with me))\b/i,
   // "fine" and "it's" are not agreement on their own ("I'm fine", "it's not something I can share").
   comply: /\b(yes|yeah|yep|sure|okay|ok|go ahead|here it is|the code is|my (code|pin|password|number) is|it arrived|got it)\b/i,
   // A request to wait, not any "wait" ("wait, why do you need that?" is a question).
@@ -92,7 +92,9 @@ export function classify(text, { digitRule = true } = {}) {
   // disclosure from the secrets themselves (multimodal.mjs callTurn), so a read-back employee ID is not a leak.
   if (digitRule && digits >= 4) return { intent: 'comply', digits, disclosed: true };
   if (!t) return { intent: 'other', digits };
-  if (RE.verify.test(t)) return { intent: 'verify', digits };
+  // "Sure, I'll call them from the directory" verifies and agrees at once; a caller who asked for exactly that callback
+  // hears the yes (step, completeOnCall false) instead of restating the request.
+  if (RE.verify.test(t)) return { intent: 'verify', digits, agreed: !RE.refuse.test(t) && (RE.comply.test(t) || /\b(i'?ll|i will|let me|going to) (call|ring)\b/i.test(t)) };
   if (RE.hedge.test(t)) return { intent: 'hedge', digits };     // before refuse: "no idea" is a hedge, not a "no"
   if (RE.refuse.test(t)) return { intent: 'refuse', digits };
   if (RE.hold.test(t)) return { intent: 'hold', digits };   // "okay, hold on" waits rather than agrees
@@ -132,6 +134,8 @@ export function step(st, cls, { intent = 'attack', maxTurns = 8, completeOnCall 
   }
   const live = PRESSURE.includes(cur) || cur === 'deflect' || cur === 'goAhead';
   if (cls.intent === 'hold' && live) return capped({ ...s });   // "hold on": the caller waits and repeats itself
+  // A legitimate caller whose request is the callback itself takes "I'll call you through the directory" as the answer.
+  if (live && intent === 'benign' && !completeOnCall && cls.intent === 'verify' && cls.agreed) return end('closeComply', 'agreed');
   if (live) {
     if (cls.intent === 'comply') {
       if (intent === 'benign') return end('closeComply', completeOnCall ? 'completed' : 'agreed');

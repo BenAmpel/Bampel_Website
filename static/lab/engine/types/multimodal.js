@@ -670,6 +670,14 @@
         '<fieldset class="mm-answers" id="mm-answers">' + decisionHtml(dec, ui) + ui.questionsHtml(qs) + '</fieldset>' +
         '<div id="trialmsg"></div><div class="actions"><button id="mm-submit">' + ui.Th('submit_button') + '</button></div>');
       var root = ui.stage, box = document.getElementById('mm-answers'), submit = document.getElementById('mm-submit'), msg = document.getElementById('trialmsg'), dirBtn = document.getElementById('ph-dir');
+      // When the caller ends the call just as the participant clicks Hang up, the click lands on this new screen (in the
+      // 2026-10-24 panel it ticked "1 Guessing"). Clicks in its first 400 ms are dropped, so nothing is chosen by accident.
+      var guardUntil = now() + 400;
+      function guard(e) { if (now() < guardUntil) { e.preventDefault(); e.stopPropagation(); } }
+      if (root && root.addEventListener) {
+        root.addEventListener('pointerdown', guard, true); root.addEventListener('click', guard, true);
+        setTimeout(function () { root.removeEventListener('pointerdown', guard, true); root.removeEventListener('click', guard, true); }, 500);
+      }
       if (dirBtn) dirBtn.addEventListener('click', function () {
         st.directoryOpened = true; logUi('directory_open_after');
         var b = document.getElementById('ph-dirbox'); b.hidden = false; dirBtn.hidden = true;

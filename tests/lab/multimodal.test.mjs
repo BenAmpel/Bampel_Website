@@ -62,12 +62,23 @@ import * as content from '../../netlify/lib/lab/content.mjs';
       "that's not okay", "I don't want to share that", 'this sounds like a scam', 'not interested', 'that sounds like fraud',
       "I can't give that out over the phone", 'I cannot share that', "I'd rather not", 'not over the phone', 'that is against company policy', 'I\u2019m not able to do that'],
     hedge: ["I'm not sure I should give that out", 'Not sure, let me look', 'not sure.', 'Uh, I\u2019m not sure', 'I\u2019m not sure', 'unsure',
-      "I don't know", 'I do not know', 'no idea', 'maybe', "I'm not certain", 'not really sure', 'dunno'],
-    verify: ['who is this?', "who's calling", "I'll call you back", 'let me look that up', 'can I call you back?', 'what is your extension?'],
+      "I don't know", 'I do not know', 'no idea', 'maybe', "I'm not certain", 'not really sure', 'dunno', "I don't have the notice in front of me"],
+    verify: ['who is this?', "who's calling", "I'll call you back", 'let me look that up', 'can I call you back?', 'what is your extension?',
+      // 2026-10-24 panel: a promise to check and call back is verification, not "other" (the caller then re-asked)
+      "I don't have the notice in front of me. I'll check and call the tax office.", "I'll check and get back to you", "Sure, I'll call them from the directory."],
     hold: ['hold on', 'one second', 'okay, hold on', 'wait', 'give me a minute', 'hang on'],
     question: ['Is that okay?', 'are you sure?', 'sure?', 'what is this about?', 'Wait, why do you need that?']
   };
   for (const [want, phrases] of Object.entries(TABLE)) for (const p of phrases) assert.equal(bot.classify(p).intent, want, `"${p}" should be ${want}`);
+  // A legitimate caller whose request is the callback hears "Sure, I'll call them from the directory" as the answer;
+  // anywhere else (an on-call request, an attacker, a plain "who is this?") it stays a deflection.
+  const ask = { ...bot.START, state: 'ask', lastPressure: 'ask' }, yesCall = bot.classify("Sure, I'll call them from the directory.");
+  assert.equal(yesCall.agreed, true);
+  assert.equal(bot.step(ask, yesCall, { intent: 'benign', completeOnCall: false }).outcome, 'agreed');
+  assert.equal(bot.step(ask, yesCall, { intent: 'benign', completeOnCall: true }).state, 'deflect');
+  assert.equal(bot.step(ask, yesCall, { intent: 'attack' }).state, 'deflect');
+  assert.equal(bot.step(ask, bot.classify('who is this?'), { intent: 'benign', completeOnCall: false }).state, 'deflect');
+  assert.equal(bot.classify("No, I'll call the bank myself").agreed, false, 'a refusal never agrees');
   assert.notEqual(bot.classify('let me make sure').intent, 'comply', '"make sure" is not agreement');
   assert.notEqual(bot.classify("sorry, I can't hear you").intent, 'refuse', 'a bad line is not a refusal');
   // A clear refusal moves the caller on (pressure1), a second one ends the call; nothing repeats the request verbatim.
