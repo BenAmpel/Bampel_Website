@@ -114,7 +114,7 @@ ${top('hub')}
     <div class="steps3">
       <div class="card reveal"><span class="num">01</span><h3>Tap what appeals</h3><p>Short, everyday statements like "Teaching people how to spot scam emails." Answer Not for me, Maybe or Yes.</p></div>
       <div class="card reveal" style="--d:.1s"><span class="num">02</span><h3>Settle the close calls</h3><p>A few this-or-that choices separate jobs that sound alike, like building a security plan versus checking one.</p></div>
-      <div class="card reveal" style="--d:.2s"><span class="num">03</span><h3>Get a real plan</h3><p>Your top 3 roles, why they fit, the realistic first job, which certifications to start with and free places to practise.</p></div>
+      <div class="card reveal" style="--d:.2s"><span class="num">03</span><h3>Get a real plan</h3><p>Your top 3 roles, why they fit, the realistic first job, which certifications to start with and free places to practice.</p></div>
     </div>
   </div></section>
 
@@ -263,7 +263,7 @@ ${top('role')}
     </div>
   </section>
 
-  <section><h2 class="reveal">Free places to practise and learn</h2>
+  <section><h2 class="reveal">Free places to practice and learn</h2>
     <div class="res">${r.resources.map((x, i) => `<a class="reveal" style="--d:${(i * 0.06).toFixed(2)}s" href="${esc(x.url)}" rel="noopener" target="_blank"><b>${esc(x.name)}</b><span>${esc(x.note)}</span></a>`).join('')}</div>
   </section>
 

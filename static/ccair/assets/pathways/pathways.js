@@ -162,7 +162,7 @@
   /* ---------- Scoring ---------- */
   function score() {
     var s = {}; ROLES.forEach(function (r) { s[r.slug] = 0; });
-    // Activity taps: each role's total, standardised within the person so a student who taps "Yes!" to
+    // Activity taps: each role's total, standardized within the person so a student who taps "Yes!" to
     // everything (or nothing) is compared with their own average. Simulation: removes answer-style bias.
     var sums = {}; ROLES.forEach(function (r) { sums[r.slug] = 0; });
     A.forEach(function (it, i) { sums[it.role] += ansA[i] || 0; });
@@ -216,7 +216,7 @@
     var w = el('div', { class: 'intro-card qcard' },
       '<p class="part">About 5 minutes · ' + TOTAL + ' taps</p>' +
       '<h3 class="qtext" style="min-height:0" tabindex="-1">Tap how much each activity appeals to you. There are no wrong answers, and you don\'t need any cyber knowledge yet.</h3>' +
-      '<p>You\'ll get your top 3 roles, why they fit, the realistic first job, which certifications to start with and free places to practise.</p>' +
+      '<p>You\'ll get your top 3 roles, why they fit, the realistic first job, which certifications to start with and free places to practice.</p>' +
       '<div class="hero-cta"><button class="btn btn-primary" id="pf-start">Start <span class="arrow" aria-hidden="true">&rarr;</span></button></div>' +
       '<p class="privacy-note">Nothing you answer is saved or sent anywhere. We only count, anonymously, how many people start and finish.</p>');
     mount.appendChild(w);
@@ -374,7 +374,7 @@
         '<p class="tag">' + esc(ro.tagline) + '</p><div class="why">' + whyFor(slug) + '</div><dl class="facts">' +
         '<div><dt>Getting in</dt><dd>' + esc(route) + '</dd></div>' +
         '<div><dt>Start with</dt><dd>' + esc(ro.certsStart.join(', ')) + '</dd></div>' +
-        '<div><dt>Practise free</dt><dd>' + ro.resources.slice(0, 2).map(function (x) { return '<a href="' + esc(x.url) + '" rel="noopener" target="_blank">' + esc(x.name) + '</a>'; }).join(', ') + '</dd></div>' +
+        '<div><dt>Practice free</dt><dd>' + ro.resources.slice(0, 2).map(function (x) { return '<a href="' + esc(x.url) + '" rel="noopener" target="_blank">' + esc(x.name) + '</a>'; }).join(', ') + '</dd></div>' +
         (pay ? '<div><dt>Median US pay</dt><dd>' + money(pay.median) + ' <span class="mono" style="color:var(--muted);font-size:12px">BLS, ' + esc(D.sources.blsDate) + '</span></dd></div>' : '') +
         '</dl><a class="go" href="' + slug + '/">Read the full ' + esc(ro.name) + ' guide &rarr;</a></div></article>';
     });
