@@ -34,9 +34,12 @@ function pageFromHash() {
 // from the left) while the old one fades the other way, so moving through the nav feels spatially consistent. Uses
 // same-document View Transitions where available (the nav keeps its own layer and stays put); elsewhere the new page
 // simply sweeps in (CSS .page). Never under reduced motion. Any click or key press during a transition finishes it at
-// once, and a new route mid-transition replaces it, so nothing waits on an animation.
-const CAN_VIEW_TRANSITION = typeof document !== 'undefined' && typeof document.startViewTransition === 'function' && !REDUCE_MOTION;
-if (CAN_VIEW_TRANSITION) document.documentElement.classList.add('has-vt');
+// once, and a new route mid-transition replaces it, so nothing waits on an animation. REDUCE_MOTION is read per route
+// change (it follows the OS setting live); has-vt is set only while view transitions are in use.
+const CAN_VIEW_TRANSITION = typeof document !== 'undefined' && typeof document.startViewTransition === 'function';
+const viewTransitionsOn = () => CAN_VIEW_TRANSITION && !window.REDUCE_MOTION;
+const syncVtClass = () => document.documentElement.classList.toggle('has-vt', viewTransitionsOn());
+if (CAN_VIEW_TRANSITION) syncVtClass();
 let activeTransition = null;
 const skipActive = () => { if (activeTransition) activeTransition.skipTransition(); };
 if (CAN_VIEW_TRANSITION) { window.addEventListener('pointerdown', skipActive, true); window.addEventListener('keydown', skipActive, true); }
@@ -45,7 +48,8 @@ function routeTo(next, apply) {
   const from = VALID_PAGES.indexOf(document.documentElement.dataset.page || 'home'), to = VALID_PAGES.indexOf(next);
   document.documentElement.dataset.navDir = to < from ? 'back' : 'forward';
   document.documentElement.dataset.page = next;
-  if (!CAN_VIEW_TRANSITION || document.visibilityState !== 'visible') { apply(); return; }
+  if (CAN_VIEW_TRANSITION) syncVtClass();
+  if (!viewTransitionsOn() || document.visibilityState !== 'visible') { apply(); return; }
   document.documentElement.dataset.vt = '';
   const vt = document.startViewTransition(() => ReactDOM.flushSync(apply));
   activeTransition = vt;

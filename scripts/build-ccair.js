@@ -83,6 +83,60 @@ function checkFriends() {
 }
 console.log('CCAIR friends: %d organizations checked', checkFriends());
 
+// People and publications: a missing field would print "undefined" on the page or throw (initialsOf needs a name).
+function checkPeopleAndPublications() {
+  const people = JSON.parse(fs.readFileSync(path.join(ccairDir, 'data', 'people.json'), 'utf8'));
+  if (people.director) for (const k of ['name', 'title', 'dept', 'email']) if (!people.director[k]) throw new Error(`people.json: director needs ${k}`);
+  for (const group of ['students', 'mentees', 'affiliates']) {
+    for (const p of people[group] || []) for (const k of ['name', 'role']) if (!p[k]) throw new Error(`people.json: ${group} entry "${p.name || '?'}" needs ${k}`);
+  }
+  const pubs = JSON.parse(fs.readFileSync(path.join(ccairDir, 'data', 'publications.json'), 'utf8'));
+  for (const p of pubs) {
+    for (const k of ['title', 'authors', 'venue', 'year', 'type']) if (!p[k]) throw new Error(`publications.json: "${p.title || '?'}" needs ${k}`);
+    if (!Number.isInteger(p.year)) throw new Error(`publications.json: "${p.title}" year must be a number`);
+    if (!['journal', 'conference', 'workshop'].includes(p.type)) throw new Error(`publications.json: "${p.title}" has unknown type "${p.type}"`);
+  }
+  return pubs.length;
+}
+console.log('CCAIR people and publications: %d publications checked', checkPeopleAndPublications());
+
+// Home hero preload. The hero <picture> is rendered only after the scripts and data/photos.json load, so the browser
+// would find the LCP image three round trips late. index.html carries a small inline script (between the markers below,
+// rewritten here from the "home-hero" slot) that preloads the same AVIF candidates the Picture component asks for, and
+// only when the address is the home route, so the inner pages (which have their own heroes or none) do not fetch it.
+function writeHeroPreload() {
+  const file = path.join(ccairDir, 'index.html');
+  const html = fs.readFileSync(file, 'utf8');
+  const start = '<!-- hero-preload:start (written by scripts/build-ccair.js) -->', end = '<!-- hero-preload:end -->';
+  const a = html.indexOf(start), b = html.indexOf(end);
+  if (a < 0 || b < a) throw new Error('index.html: hero-preload markers missing');
+  const photo = (JSON.parse(fs.readFileSync(path.join(ccairDir, 'data', 'photos.json'), 'utf8')).photos || []).find((p) => p.slot === 'home-hero');
+  const set = (base, widths) => widths.map((w) => `/ccair/assets/photos/${base}-${w}.avif ${w}w`).join(', ');
+  const links = [];
+  if (photo) {
+    // Same media split as the <source> elements: the portrait crop on phones, the landscape one everywhere else.
+    if (photo.mobile) links.push({ media: photo.mobile.media, srcset: set(photo.mobile.base, photo.mobile.widths) });
+    links.push({ media: photo.mobile ? `not all and ${photo.mobile.media}` : 'all', srcset: set(photo.base, photo.widths) });
+  }
+  const script = !links.length ? '' : `
+  <script>
+    (function () {
+      if (!/^(#\\/?)?$/.test(location.hash.split('?')[0])) return;
+      ${JSON.stringify(links)}.forEach(function (l) {
+        var el = document.createElement('link');
+        el.rel = 'preload'; el.as = 'image'; el.type = 'image/avif'; el.media = l.media;
+        el.setAttribute('imagesrcset', l.srcset); el.setAttribute('imagesizes', '100vw'); el.setAttribute('fetchpriority', 'high');
+        document.head.appendChild(el);
+      });
+    })();
+  </script>
+  `;
+  const next = html.slice(0, a + start.length) + script + html.slice(b);
+  if (next !== html) fs.writeFileSync(file, next);
+  return links.length;
+}
+console.log('CCAIR home hero: %d preload candidates written to index.html', writeHeroPreload());
+
 // One file for the whole app (was four requests). Each source file is still transpiled on its own and wrapped in its own
 // function, exactly as before (they share state only through window.CCAIR), then joined in load order.
 Promise.all(
