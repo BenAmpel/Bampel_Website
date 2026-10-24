@@ -4,7 +4,9 @@
   # "scheduled" build hook (~/.purplelink/bin/netlify-batch-build.sh); hook builds are never skipped by this line.
   ignore = "git log -1 --format=%B | grep -qF '[deploy now]' && exit 1 || exit 0"
   # scripts/lab/build-info.mjs writes the commit being built (COMMIT_REF) into the lab functions, which cannot read it at run time.
-  command = "npm install && node scripts/lab/build-info.mjs && npm run build:ccair && hugo --gc --minify"
+  # Two Hugo passes: the first only writes hugo_stats.json (every tag, class and id on the rendered pages) into a scratch folder;
+  # the second removes unused rules from css/wowchemy.css with PostCSS and PurgeCSS (postcss.config.js) and writes the site.
+  command = "npm install && node scripts/lab/build-info.mjs && npm run build:ccair && hugo --gc --minify --destination \"$(mktemp -d)\" && WC_PURGE_CSS=true hugo --gc --minify --ignoreCache"
   publish = "public"
 
 # Site-wide security headers (added 2026-10-16). HSTS, nosniff and Referrer-Policy come from the _headers file that the
