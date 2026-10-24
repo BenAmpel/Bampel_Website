@@ -35,6 +35,9 @@
         a.addEventListener('mouseenter', on); a.addEventListener('focus', on);
         a.addEventListener('mouseleave', off); a.addEventListener('blur', off);
         a.addEventListener('click', function (e) { e.preventDefault(); });   // recorded by TraceLab as a click on "link:<url>"
+        // Enter opens a link from the keyboard; a span with role="link" does not do that itself, so keyboard users
+        // could never produce a link click. Keyboard focus on a link is recorded by TraceLab as a visit (link_focus).
+        a.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); a.click(); } });
       });
 
       var submit = document.getElementById('submit'), msg = document.getElementById('trialmsg');

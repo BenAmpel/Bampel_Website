@@ -350,19 +350,37 @@ export async function saveTrial(S, code, session, index, data, now = Date.now())
   if (timing) clean.timing = timing;
   const fsc = cleanFullscreen(data && data.fullscreen);   // full screen at onset, and each exit during the item
   if (fsc) clean.fullscreen = fsc;
+  // TraceLab's per-item measures, for every type: a type that does not keep them itself (reaction, game) used to
+  // drop them, which left trial_ms and the other trace columns empty.
+  if (!clean.traces && data?.traces && typeof data.traces === 'object' && jsonSize(data.traces) <= 50000) clean.traces = data.traces;
   if (kind === 'trial') {
-    const raw = Array.isArray(data?.rawEvents) ? data.rawEvents.slice(0, 20000) : [];
+    const sent = Array.isArray(data?.rawEvents) ? data.rawEvents : [], raw = keepRaw(sent);
+    if (sent.length) clean.raw = { sent: sent.length, kept: raw.length };   // how much of the raw event log was stored
     // The type's record fields include a copy of the item and answer key as scored, so later content
     // edits never change this record.
     const rec = { code: p.code, condition: p.condition, session, index, ...S.type.recordFields(t, plan), contentVersion: plan.contentVersion, receivedAt: now, data: clean,
       ...(plan.order?.questions ? { shown: plan.order.questions } : {}), ...(plan.latin ? { latin: plan.latin } : {}) };
     if (!(await setNew(store, key, rec))) return { ok: true, repeat: true };
-    if (raw.length && jsonSize(raw) <= 3e6) await store.set(`raw/${p.code}/s${session}/t${index}`, { code: p.code, session, index, events: raw });
+    if (raw.length) await store.set(`raw/${p.code}/s${session}/t${index}`, { code: p.code, session, index, events: raw });
     // A gate item (for example an equipment check) can end the study for this participant.
     const why = S.type.screenOutReason ? S.type.screenOutReason(rec, t) : null;
     if (why) { await screenOut(S, p.code, why, now); return { ok: true, screenedOut: true }; }
   } else if (!(await setNew(store, key, { code: p.code, session, contentVersion: plan.contentVersion, receivedAt: now, data: clean }))) return { ok: true, repeat: true };
   return { ok: true };
+}
+
+// The raw event log is stored when it fits (20,000 events, about 3 MB). A longer log keeps every event except
+// pointer moves, which are thinned to every second, fourth, ... sample until it fits; only if it still does not fit
+// is it left out. Before this, an oversized log was dropped without a trace.
+const RAW_MAX_EVENTS = 20000, RAW_MAX_BYTES = 3e6;
+export function keepRaw(events) {
+  let ev = events.filter(e => e && typeof e === 'object');
+  for (let pass = 0; pass < 6 && (ev.length > RAW_MAX_EVENTS || jsonSize(ev) > RAW_MAX_BYTES); pass++) {
+    let n = 0;
+    ev = ev.filter(e => e.type !== 'move' || n++ % 2 === 0);
+  }
+  if (ev.length > RAW_MAX_EVENTS) ev = ev.slice(0, RAW_MAX_EVENTS);
+  return jsonSize(ev) <= RAW_MAX_BYTES ? ev : [];
 }
 
 export async function saveSurvey(S, code, session, kind, data, now = Date.now()) {
@@ -551,6 +569,7 @@ export function trialRow(S, r, p) {
     session: r.session, trial_index: r.index,
     ...S.type.trialRow(r),
     trial_ms: d.traces?.durationMs ?? '', mouse_path_px: d.traces?.mousePathPx ?? '', idle_ms: d.traces?.idleMs ?? '', hidden_ms: d.traces?.hiddenMs ?? '',
+    ...traceColumns(d.traces, d.raw),
     onset_ms: d.timing?.onsetMs ?? '', onset_delay_ms: d.timing?.onsetDelayMs ?? '', frame_ms: d.timing?.frameMs ?? '', preloaded: d.timing?.preloaded == null ? '' : d.timing.preloaded ? 1 : 0,
     fullscreen: d.fullscreen ? (d.fullscreen.atOnset ? 1 : 0) : '', fullscreen_exits: d.fullscreen ? d.fullscreen.exitsMs.length : '', fullscreen_exit_ms: d.fullscreen ? d.fullscreen.exitsMs.join('|') : '',
     views: s.views?.[r.index] ?? '', viewport_w: d.viewport?.w ?? '', viewport_h: d.viewport?.h ?? '',
@@ -560,6 +579,18 @@ export function trialRow(S, r, p) {
     content_version: r.contentVersion ?? 0,
     ...orderColumns(r.shown),   // the order the item's questions and options were shown in, when shuffled
     ...latinColumns(r.latin)   // the Latin-square row and block order of this session
+  };
+}
+
+// TraceLab's per-item behavior measures (static/lab/tracelab/tracelab.js). Columns a TraceLab version did not
+// measure are left blank, never 0, so records from before 0.2.0 do not read as "no keys pressed".
+function traceColumns(tr, raw) {
+  const t = tr || {}, v = k => t[k] ?? '';
+  return {
+    first_interaction_ms: v('firstInteractionMs'), no_input_ms: v('noInputMs'), longest_no_input_ms: v('longestNoInputMs'),
+    clicks: v('clicks'), pointer_type: v('pointerType'), scroll_px: v('scrollPx'), window_blurs: t.traceVersion ? v('windowBlurs') : '',
+    keystrokes: v('keystrokes'), deletions: v('deletions'), paste_count: v('pastes'), key_interval_ms: v('keyIntervalMedianMs'), key_hold_ms: v('keyHoldMedianMs'), typing_pauses: v('typingPauses'),
+    trace_version: t.traceVersion || (tr ? '0.1.0' : ''), raw_events: raw ? raw.kept : '', raw_events_sent: raw ? raw.sent : ''
   };
 }
 

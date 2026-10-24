@@ -67,6 +67,15 @@ Trials CSV: one row per item (alert, scenario) answered. Surveys CSV: one row pe
 | `trial_ms` | Trial duration from TraceLab |
 | `mouse_path_px`, `idle_ms` | Pointer path length; time with the pointer still for >500 ms (pointer stillness only, not reading time) |
 | `hidden_ms` | Time the tab was hidden during the trial |
+| `first_interaction_ms` | Time from the item appearing to the first input of any kind |
+| `no_input_ms`, `longest_no_input_ms` | Total and longest stretch of 2 s or more with no input at all (pointer, key, scroll, typing), counting the start and end of the item. Unlike `idle_ms`, a participant who types without moving the pointer is not idle |
+| `clicks`, `pointer_type` | Clicks or taps; the pointer used for most presses (`mouse`, `touch`, `pen`) |
+| `scroll_px` | Distance scrolled on the page and in scrollable panels together (TraceLab 0.1.0 counted the page only) |
+| `window_blurs` | Times the browser window lost focus. Blank for TraceLab 0.1.0 records, which also counted every time the participant left a form field |
+| `keystrokes`, `deletions`, `paste_count` | Keys pressed, Backspace/Delete presses, paste actions. Which keys were pressed is never recorded |
+| `key_interval_ms`, `key_hold_ms`, `typing_pauses` | Median time between typing keys (pauses of 2 s or more left out), median time a key was held, and the number of such pauses |
+| `trace_version` | TraceLab version that recorded the measures; `0.1.0` = before the October 2026 revision |
+| `raw_events`, `raw_events_sent` | Raw events stored and sent. A very long log keeps every event but thins pointer moves; 0 stored means the log was too large to keep |
 | `views` | Times the trial screen was shown (more than 1 means the page was reloaded mid-trial) |
 | `viewport_w`, `viewport_h` | Browser window size at submission |
 | `received_at` | Server time the answer arrived |
@@ -96,7 +105,8 @@ Trials CSV columns after `trial_index` (the generic identifier, behavior, and co
 | `item_variant` | Condition whose wording was shown; blank = the base wording |
 | `rt_ms` | Time from the item appearing to submitting |
 | `first_answer_ms`, `answer_changes` | Time to the first answer; number of answer changes (from TraceLab) |
-| `link_hovers`, `link_hover_ms`, `link_clicks` | Pointer hovers over links in the item, total hover time, and clicks (links do not open) |
+| `link_hovers`, `link_hover_ms`, `link_clicks` | Pointer hovers over links in the item, total hover time, and clicks or Enter presses (links do not open). On touch screens a tap also counts as a hover |
+| `link_focus` | Keyboard visits to links, the keyboard user's hover (blank before TraceLab 0.2.0) |
 | `a_{question}` | Answer to each item question (scale point, option value, 0–100 confidence, or text) |
 
 Per-link detail (`link:<url>` targets) is in the full JSON export under `records[].data.traces.hovers` and `clickTargets`.
@@ -117,6 +127,9 @@ Trials CSV columns after `trial_index` (the generic identifier, behavior, and co
 | `mt_mad`, `mt_auc` | Mouse tracking: maximum deviation from the straight start-to-answer line, and the area between the path and that line, both scaled by the line's length (positive = pulled toward the other answers) |
 | `mt_xflips`, `mt_init_ms`, `mt_move_ms` | Horizontal direction changes; time from Start to the first movement; time from that movement to the answer |
 | `media_plays`, `media_heard_pct`, `media_first_play_ms`, `media_transcript` | Clip plays, furthest point heard (%), time to the first play, and whether the transcript was opened (1/0) |
+| `mt_input` | How the mouse-tracked answer was given: `mouse`, `pen`, `touch` or `keyboard`. The `mt_` measures are blank for keyboard and touch answers, which have no pointer path (before October 2026 they read as perfectly straight paths) |
+| `media_pauses`, `media_ended_ms`, `media_error` | Pauses before the clip's end; time from the item appearing to the clip ending; 1 if the clip could not load or play (the participant could still answer) |
+| `call_ring_ms` | Time the phone rang before it was answered or declined |
 | `call_answered`, `call_outcome`, `call_final_state` | Whether the call was answered; how it ended (`disclosed` digits to an attacker, `complied`, `completed` a legitimate request, `verified` by insisting on calling back, `refused`, `resisted`, `not_completed`, `declined`, `missed`, `hung_up`, `max_turns`); the caller's last step |
 | `call_turns`, `call_digits_disclosed`, `call_verifies`, `call_refusals` | Participant turns; the longest run of digits said; requests to verify or call back; refusals |
 | `call_callbacks`, `call_callback_resolved` | Calls made from the directory after the call; whether one reached the organization's real number (1/0) |
@@ -130,6 +143,19 @@ The full mouse path (`[x, y, ms]` points) is in the full JSON export under `reco
 **Call transcripts CSV** (Recordings & calls tab): one row per turn: `code`, `session`, `trial_index`, `turn`, `event` (`answer`, `say`, `hold`, `resume`, `hangup`, `decline`, `timeout`), `participant_said` (numbers, emails, and street addresses replaced before saving), `participant_intent` (`comply`, `verify`, `refuse`, `question`, `hold`, `other`, `silence`), `digits_said`, `caller_state`, `caller_said`, `caller_source` (`script`, `llm`, or `recorded`), `llm_error`, `server_ms`, `latency_ms`, `asr` (1 = spoken, 0 = typed), `call_done`, `call_outcome`, `at`.
 
 **Recordings** (managers and owners): one audio file per call or spoken answer, named `<code>_s<session>_<item>_<call|voice>`. Recorded only with the participant's recording consent; never copied to the backup store.
+
+## Reaction-time studies (Stroop, flanker)
+
+| Column | Meaning |
+|---|---|
+| `paradigm`, `practice`, `target`, `distractor`, `congruent` | The task and the trial's stimulus |
+| `response`, `response_key`, `response_via` | The answer, the key pressed (blank for a tap), and `key` or `tap` |
+| `correct`, `rt_ms`, `timed_out` | Scored answer; time from the stimulus's first display frame to the key press or the finger landing on the button. Do not subtract `onset_delay_ms`: `rt_ms` already starts at the stimulus frame |
+| `early_presses` | Answer keys pressed or buttons touched during the fixation cross (anticipations) |
+| `other_keys` | Keys pressed after the stimulus that are not answer keys |
+| `hidden_at_stimulus` | 1 if the tab was hidden when the stimulus was due. A hidden tab draws no frames, so the trial times out; exclude these rather than treating them as slow answers |
+
+Taps were timed on release (`click`) before October 2026 and on touch-down since, so tap times from before then run longer by the time the finger stayed down; `trace_version` 0.1.0 marks those records.
 
 ## Question types and survey pages (all studies)
 

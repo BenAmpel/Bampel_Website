@@ -43,7 +43,14 @@ const css = readFileSync(here('../../static/lab/engine/participant.css'), 'utf8'
 assert(/\.hp-field \{ position: absolute; left: -10000px/.test(css), 'off screen, not display:none (which bots skip)');
 I.S.token = 'tok'; I.dqFlush(1); I.dqFlush(1);
 assert.equal(posted.length, 1, 'unchanged totals are not sent twice');
-assert.deepEqual(posted[0][1].data, { honeypot: false, webdriver: true, pastes: 1, pasteChars: 12, injectedChars: 41, keys: 21, fastKeys: 9 });
+const { load, ...counts } = posted[0][1].data;
+assert.deepEqual(counts, { honeypot: false, webdriver: true, pastes: 1, pasteChars: 12, injectedChars: 41, keys: 21, fastKeys: 9 });
+assert.match(load, /^[a-z0-9]{6,32}$/, 'each page load names itself, so the server can add a reload\'s counts');
+// the next session in the same page (a one-sitting study) reports only its own counts
+I.dqStart(2);
+handlers.paste({ target: box, clipboardData: { getData: () => 'abc' } });
+I.dqFlush(2);
+assert.deepEqual([posted[1][1].session, posted[1][1].data.pastes, posted[1][1].data.pasteChars, posted[1][1].data.keys, posted[1][1].data.load], [2, 1, 3, 0, load], 'session 2 does not repeat session 1');
 assert(!JSON.stringify(posted[0][1]).includes('hello'), 'never the text itself');
 console.log('browser: key timing, pastes, injected text, hidden box, webdriver; totals sent once');
 
@@ -64,12 +71,19 @@ const human = (await call(P + 'login', { body: { panelId: 'HUMAN001', panelSessi
 assert.deepEqual((await call(P + 'dq', { body: { token: bot, session: 1, data: { honeypot: true, pastes: 2, pasteChars: 80, keys: 40, fastKeys: 30 } } })).json, { ok: true });
 await call(P + 'dq', { body: { token: bot, session: 1, data: { honeypot: false, pastes: 1, keys: 41, fastKeys: 31, injectedChars: 5 } } });   // after a reload the browser's counts restart
 await call(P + 'dq', { body: { token: human, session: 1, data: { keys: 300, fastKeys: 12 } } });
+// with load ids: a reload's counts add to the session; a repeat of one load's totals does not
+const reloader = (await call(P + 'login', { body: { panelId: 'RELOAD01', panelSession: 'S4' } })).json.token;
+await call(P + 'dq', { body: { token: reloader, session: 1, data: { pastes: 2, pasteChars: 20, keys: 50, load: 'loadaaa1' } } });
+await call(P + 'dq', { body: { token: reloader, session: 1, data: { pastes: 3, pasteChars: 30, keys: 60, load: 'loadaaa1' } } });   // the same page, later totals
+await call(P + 'dq', { body: { token: reloader, session: 1, data: { pastes: 1, pasteChars: 5, keys: 10, load: 'loadbbb2' } } });   // after a reload
 assert.equal((await call(P + 'dq', { body: { token: bot, session: 0, data: {} } })).status, 400);
 assert.equal((await call(P + 'dq', { body: { token: 'nope', session: 1, data: {} } })).status, 401);
 const wide = (await call(A + 'export-wide.csv', { key: OWNER })).status === 200 && (await call(A + 'rows?kind=wide&codes=' + [bot, human].map(t => t.split('.')[0]).join(','), { key: OWNER })).json;
 const wb = wide.find(w => w.code === bot.split('.')[0]), wh = wide.find(w => w.code === human.split('.')[0]);
 assert.deepEqual([wb.dq_honeypot, wb.dq_paste_count, wb.dq_paste_chars, wb.dq_injected_chars, wb.dq_fast_typing, wb.dq_duplicate_panel], [1, 2, 80, 5, 1, 1], 'merged: true stays true, counts keep their highest');
 assert.equal(wb.dq_fast_keys_share, 0.76);
+const wr = (await call(A + 'rows?kind=wide&codes=' + reloader.split('.')[0], { key: OWNER })).json[0];
+assert.deepEqual([wr.dq_paste_count, wr.dq_paste_chars], [4, 35], 'two page loads: 3 + 1 pastes, 30 + 5 characters');
 assert.equal(wb.dq_flags, 5, 'honeypot, fast typing, duplicate panel, pastes, injected text');
 assert.deepEqual([wh.dq_flags, wh.dq_fast_typing, wh.dq_duplicate_panel], [0, 0, 0], 'the careful human raises nothing');
 // fast completion: a session done in under a quarter of the promised minutes

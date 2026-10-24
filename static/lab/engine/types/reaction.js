@@ -25,7 +25,7 @@
       return what + keys + practice;
     },
     runTrial: function (ctx, ui) {
-      var t = ctx.plan.task, s = ctx.trial.stim, onset = null, done = false, timer = null;
+      var t = ctx.plan.task, s = ctx.trial.stim, onset = null, done = false, timer = null, early = 0, otherKeys = 0, hiddenAtStim = false;
       ui.show('<div class="rt-stage" aria-hidden="true"><span class="rt-fix">+</span></div>' + keysHtml(t, ui) + '<div id="rtmsg"></div>');
       var stageEl = document.querySelector('.rt-stage'), byKey = {};
       values(t).forEach(function (v) { byKey[t.keys[v]] = v; });
@@ -38,25 +38,34 @@
         setTimeout(function () {
           stageEl.innerHTML = '';
           setTimeout(function () {
-            ctx.submit({ response: response, key: key, rtMs: rt, timedOut: !!timedOut, via: via }, function (msg) { document.getElementById('rtmsg').innerHTML = ui.errorBox(msg); });
+            ctx.submit({ response: response, key: key, rtMs: rt, timedOut: !!timedOut, via: via, earlyPresses: early, otherKeys: otherKeys, hiddenAtStimulus: hiddenAtStim }, function (msg) { document.getElementById('rtmsg').innerHTML = ui.errorBox(msg); });
           }, t.itiMs);
         }, fb ? 700 : 0);
       }
       function onKey(e) {
-        if (onset == null || e.repeat) return;
-        var k = String(e.key || '').toLowerCase();
-        if (!Object.prototype.hasOwnProperty.call(byKey, k)) return;
+        if (e.repeat) return;
+        var k = String(e.key || '').toLowerCase(), mapped = Object.prototype.hasOwnProperty.call(byKey, k);
+        if (onset == null) { if (mapped) early++; return; }   // an answer key during the fixation cross: an anticipation
+        if (!mapped) { if (k.length === 1) otherKeys++; return; }
         e.preventDefault();
         finish(byKey[k], k, 'key', e.timeStamp || performance.now(), false);
       }
+      // A tap is timed when the finger lands (pointerdown), as a key is timed on keydown; timing on click would add
+      // the time the finger stays down. click remains for a button pressed from the keyboard (Enter or Space).
       document.querySelectorAll('.rt-key').forEach(function (b) {
-        b.addEventListener('click', function (e) { if (onset != null) finish(b.getAttribute('data-v'), '', 'tap', e.timeStamp || performance.now(), false); });
+        b.addEventListener('pointerdown', function (e) {
+          if (onset == null) { early++; return; }
+          finish(b.getAttribute('data-v'), '', 'tap', e.timeStamp || performance.now(), false);
+        });
+        b.addEventListener('click', function (e) { if (onset != null && e.detail === 0) finish(b.getAttribute('data-v'), '', 'tap', e.timeStamp || performance.now(), false); });
       });
       document.addEventListener('keydown', onKey, true);
       setTimeout(function () {
         stageEl.innerHTML = t.paradigm === 'flanker'
           ? '<span class="rt-arrows">' + [s.flank, s.flank, s.target, s.flank, s.flank].map(function (d) { return ARROW[d]; }).join(' ') + '</span>'
           : '<span class="rt-word" style="color:' + COLORS[s.target] + '">' + ui.esc(String(s.word).toUpperCase()) + '</span>';
+        // A hidden tab draws no frames, so onset never arrives and the trial times out; the flag tells that apart from a slow answer.
+        hiddenAtStim = !!document.hidden;
         requestAnimationFrame(function (ts) { onset = ts; });   // the first frame that shows the stimulus
         ctx.markOnset();
         timer = setTimeout(function () { finish(null, '', 'key', performance.now(), true); }, t.responseMs);

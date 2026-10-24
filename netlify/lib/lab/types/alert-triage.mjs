@@ -244,7 +244,7 @@ export default {
       value: Array.isArray(a?.value) ? a.value.slice(0, 20).map(x => String(x).slice(0, 40)) : typeof a?.value === 'number' ? a.value : String(a?.value ?? '').slice(0, 200) })) : [];
     const small = (v, max) => v && typeof v === 'object' && jsonSize(v) <= max ? v : null;
     return {
-      mode: oneOf(d.mode, ['ai_first', 'evidence_first', 'none']), aiShownAtMs: num(d.aiShownAtMs, 0, 864e5),
+      mode: oneOf(d.mode, ['ai_first', 'evidence_first', 'none']), aiShownAtMs: d.aiShownAtMs == null ? null : num(d.aiShownAtMs, 0, 864e5),   // Number(null) is 0: a trial with no AI is not "AI at 0 ms"
       initial: step(d.initial), final: fin, evidence: { opens, unique: [...new Set(opens.map(o => o.panel))] },
       answerLog, traces: small(d.traces, 50000),
       viewport: d.viewport ? { w: num(d.viewport.w, 0, 20000), h: num(d.viewport.h, 0, 20000) } : null,

@@ -107,14 +107,18 @@ export default {
     d = d && typeof d === 'object' ? d : {};
     const num = (v, lo, hi) => (typeof v === 'number' && Number.isFinite(v) && v >= lo && v <= hi ? Math.round(v * 100) / 100 : null);
     return { response: typeof d.response === 'string' && /^[a-z_]{1,20}$/.test(d.response) ? d.response : null, key: typeof d.key === 'string' && d.key.length <= 12 ? d.key : null,
-      rtMs: num(d.rtMs, 0, 600000), timedOut: d.timedOut === true, via: d.via === 'tap' ? 'tap' : 'key', selfTest: d.selfTest === true || undefined };
+      rtMs: num(d.rtMs, 0, 600000), timedOut: d.timedOut === true, via: d.via === 'tap' ? 'tap' : 'key', selfTest: d.selfTest === true || undefined,
+      earlyPresses: Number.isInteger(d.earlyPresses) && d.earlyPresses >= 0 ? Math.min(d.earlyPresses, 1000) : null,
+      otherKeys: Number.isInteger(d.otherKeys) && d.otherKeys >= 0 ? Math.min(d.otherKeys, 1000) : null,
+      hiddenAtStimulus: typeof d.hiddenAtStimulus === 'boolean' ? d.hiddenAtStimulus : null };
   },
   recordFields: (t, plan) => ({ stim: t.stim, paradigm: plan.task.paradigm }),
 
   trialRow(r) {
     const d = r.data || {}, s = r.stim || {}, correct = d.response != null && !d.timedOut ? (d.response === s.target ? 1 : 0) : '';
     return { paradigm: r.paradigm || '', practice: s.practice ? 1 : 0, target: s.target || '', distractor: s.word || s.flank || '', congruent: s.congruent ? 1 : 0,
-      response: d.response || '', response_key: d.key || '', response_via: d.via || '', correct, rt_ms: d.rtMs ?? '', timed_out: d.timedOut ? 1 : 0 };
+      response: d.response || '', response_key: d.key || '', response_via: d.via || '', correct, rt_ms: d.rtMs ?? '', timed_out: d.timedOut ? 1 : 0,
+      early_presses: d.earlyPresses ?? '', other_keys: d.otherKeys ?? '', hidden_at_stimulus: d.hiddenAtStimulus == null ? '' : d.hiddenAtStimulus ? 1 : 0 };
   },
 
   simulate(trial) {

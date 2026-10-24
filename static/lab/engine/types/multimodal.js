@@ -162,7 +162,9 @@
       });
       return;
     }
-    var area = root.querySelector('#mt-area'), start = root.querySelector('#mt-start'), opts = area.querySelectorAll('.mt-opt'), t0 = 0, path = [], tracking = false;
+    var area = root.querySelector('#mt-area'), start = root.querySelector('#mt-start'), opts = area.querySelectorAll('.mt-opt'), t0 = 0, path = [], tracking = false, ptype = null;
+    // How the answer was given: a keyboard or touch answer has no pointer path, so its curvature measures mean nothing.
+    area.addEventListener('pointerdown', function (e) { ptype = e.pointerType || null; });
     function pt(e, el) {
       if (e && e.detail && e.clientX != null) return [Math.round(e.clientX), Math.round(e.clientY), Math.round(now() - t0)];
       var r = el.getBoundingClientRect(); return [Math.round(r.left + r.width / 2), Math.round(r.top + r.height / 2), Math.round(now() - t0)];   // keyboard: the button's centre
@@ -181,7 +183,7 @@
         if (!tracking) return;
         tracking = false; document.removeEventListener('pointermove', move);
         path.push(pt(e, o));
-        state.decision = o.getAttribute('data-value'); state.decisionMs = Math.round(now() - state.t0); state.trajectory = path;
+        state.decision = o.getAttribute('data-value'); state.decisionMs = Math.round(now() - state.t0); state.trajectory = path; state.mtInput = !e.detail ? 'keyboard' : ptype || 'mouse';
         ctx.record('decision', state.decision);
         opts.forEach(function (x) { x.disabled = true; x.classList.toggle('chosen', x === o); x.setAttribute('aria-pressed', x === o ? 'true' : 'false'); });
         area.classList.remove('live'); area.classList.add('done');
@@ -347,7 +349,13 @@
       '<div id="trialmsg"></div><div class="actions"><button id="mm-submit" disabled>' + ui.Th('submit_button') + '</button></div>');
     var el = document.getElementById('mm-el'), start = document.getElementById('mt-start'), area = document.getElementById('mt-area'), opts = area.querySelectorAll('.mt-opt');
     var fill = document.getElementById('mm-fill'), ls = document.getElementById('mm-livestate'), box = document.getElementById('mm-answers'), submit = document.getElementById('mm-submit'), msg = document.getElementById('trialmsg');
-    var path = [], tracking = false, ended = false, t0 = 0, sl = document.getElementById('mm-sl'), slTimer = null;
+    var path = [], tracking = false, ended = false, t0 = 0, sl = document.getElementById('mm-sl'), slTimer = null, ptype = null;
+    area.addEventListener('pointerdown', function (e) { ptype = e.pointerType || null; });
+    // A point of the answer path: where the pointer was, or for a keyboard press (no pointer position) the button's centre.
+    function livePt(e, node) {
+      if (e && e.detail && e.clientX != null) return [Math.round(e.clientX), Math.round(e.clientY), Math.round(now() - t0)];
+      var r = node.getBoundingClientRect(); return [Math.round(r.left + r.width / 2), Math.round(r.top + r.height / 2), Math.round(now() - t0)];
+    }
     var m = state.media = { plays: 0, pauses: 0, firstPlayMs: null, endedMs: null, heardPct: 0, durationMs: null, transcriptOpened: false };
     function clipMs() { return Math.round((el.currentTime || 0) * 1000); }
     // In agent mode the clip is not played: its words are on screen, and it "ends" a moment after Start.
@@ -360,20 +368,20 @@
       if (it.locked && !ended) {
         live.startMs = Math.round(now() - state.t0); start.hidden = true; document.getElementById('mt-hint').hidden = true;
         if (sl) { sl.disabled = false; slTimer = setInterval(function () { slider.push([clipMs(), Number(sl.value)]); }, 250); }
-        play().catch(function () { ls.textContent = 'The clip could not play.'; });
+        play().catch(function () { over(true); });
         return;
       }
       if (it.locked && ended) {
-        t0 = now(); path = [[Math.round(e.clientX || 0), Math.round(e.clientY || 0), 0]]; tracking = true;
+        t0 = now(); path = [livePt(e, start)]; tracking = true;
         start.hidden = true; area.classList.add('live'); opts.forEach(function (o) { o.disabled = false; }); document.addEventListener('pointermove', move);
         ls.textContent = '';
         return;
       }
-      t0 = now(); live.startMs = Math.round(t0 - state.t0); path = [[Math.round(e.clientX || 0), Math.round(e.clientY || 0), 0]]; tracking = true;
+      t0 = now(); live.startMs = Math.round(t0 - state.t0); path = [livePt(e, start)]; tracking = true;
       start.hidden = true; document.getElementById('mt-hint').hidden = true; area.classList.add('live');
       opts.forEach(function (o) { o.disabled = false; }); document.addEventListener('pointermove', move);
       if (sl) { sl.disabled = false; slTimer = setInterval(function () { slider.push([clipMs(), Number(sl.value)]); }, 250); }
-      play().catch(function () { ls.textContent = 'The clip could not play. Click an answer to continue.'; });
+      play().catch(function () { over(true); });
     });
     el.addEventListener('loadedmetadata', function () { m.durationMs = Math.round(el.duration * 1000); });
     el.addEventListener('play', function () { m.plays++; if (m.firstPlayMs == null) m.firstPlayMs = Math.round(now() - state.t0); });
@@ -382,7 +390,7 @@
       o.addEventListener('click', function (e) {
         if (start.hidden === false) return;
         var v = o.getAttribute('data-value');
-        if (tracking) { tracking = false; document.removeEventListener('pointermove', move); path.push([Math.round(e.clientX || 0), Math.round(e.clientY || 0), Math.round(now() - t0)]); state.trajectory = path; state.decisionMs = Math.round(now() - state.t0); }
+        if (tracking) { tracking = false; document.removeEventListener('pointermove', move); path.push(livePt(e, o)); state.trajectory = path; state.decisionMs = Math.round(now() - state.t0); state.mtInput = !e.detail ? 'keyboard' : ptype || 'mouse'; }
         if (ended && live.final) return;
         live.changes.push({ ms: Math.round(now() - state.t0), clipMs: clipMs(), value: v }); ctx.record('decision', v);
         state.decision = live.final = v; if (ended && !it.locked) live.late = true;
@@ -394,19 +402,26 @@
       opts.forEach(function (x) { x.disabled = true; }); area.classList.remove('live'); area.classList.add('done');
       box.disabled = false; submit.disabled = false; ls.textContent = '';
     }
-    el.addEventListener('ended', function () {
-      ended = true; m.endedMs = Math.round(now() - state.t0); m.heardPct = agentOn ? 0 : 100; live.clipMs = isFinite(el.duration) ? Math.round(el.duration * 1000) : null;
+    el.addEventListener('ended', function () { over(false); });
+    // A clip that cannot load or play ends the listening part the same way, so the participant can still answer
+    // (before, nothing unlocked the answers and the trial could not be finished). media.error marks the trial.
+    el.addEventListener('error', function () { if (live.startMs != null) over(true); });
+    function over(failed) {
+      if (ended) return;
+      ended = true;
+      if (failed) { m.error = true; live.clipMs = null; } else { m.endedMs = Math.round(now() - state.t0); m.heardPct = agentOn ? 0 : 100; live.clipMs = isFinite(el.duration) ? Math.round(el.duration * 1000) : null; }
       if (slTimer) { clearInterval(slTimer); slTimer = null; if (sl) sl.disabled = true; }
       document.removeEventListener('keydown', key);
-      if (it.locked) { start.textContent = 'Answer'; start.hidden = false; ls.textContent = 'The call has ended. Click Answer, then choose.'; return; }
-      if (live.final) lock(); else ls.textContent = 'The call has ended. Choose an answer now.';
-    });
+      var why = failed ? 'The clip could not play.' : 'The call has ended.';
+      if (it.locked) { start.textContent = 'Answer'; start.hidden = false; ls.textContent = why + ' Click Answer, then choose.'; return; }
+      if (live.final) lock(); else ls.textContent = why + ' Choose an answer now.';
+    }
     var set = ui.questionSet(box, qs, msg, submit, function (n, v) { ctx.record(n, v); });
     submit.addEventListener('click', function () {
       if (!state.decision) return missingDecision(dec, msg, ui, ui.stage);
       if (!set.check()) return;
       submit.disabled = true; msg.innerHTML = '';
-      ctx.submit({ answers: set.answers, decision: state.decision, decisionMs: state.decisionMs, trajectory: state.trajectory, media: m, live: live, slider: slider, rtMs: Math.round(now() - state.t0) },
+      ctx.submit({ answers: set.answers, decision: state.decision, decisionMs: state.decisionMs, trajectory: state.trajectory, mtInput: state.mtInput, media: m, live: live, slider: slider, rtMs: Math.round(now() - state.t0) },
         function (err) { submit.disabled = false; msg.innerHTML = ui.errorBox(err); });
     });
   }
@@ -471,7 +486,7 @@
       (state.voiceRec ? upload(ui, ctx, 'voice', state.voiceRec) : Promise.resolve(false)).then(function (ok) {
         if (state.voice && state.voiceRec && !ok) state.voice.recorded = false;
         if (screenGate) screen.dwellMs = Math.round(now() - state.t0);
-        ctx.submit({ answers: set.answers, decision: state.decision, decisionMs: state.decisionMs, trajectory: state.trajectory, media: state.media || null, voice: it.recordVoice ? state.voice : null, rtMs: Math.round(now() - state.t0),
+        ctx.submit({ answers: set.answers, decision: state.decision, decisionMs: state.decisionMs, trajectory: state.trajectory, mtInput: state.mtInput, media: state.media || null, voice: it.recordVoice ? state.voice : null, rtMs: Math.round(now() - state.t0),
           screen: screenGate ? screen : null, uiEvents: takeUiLog() },
           function (err) { submit.disabled = false; msg.innerHTML = ui.errorBox(err); });
       });
@@ -677,7 +692,7 @@
         submit.disabled = true; msg.innerHTML = '<p class="muted">Saving…</p>';
         if (window.speechSynthesis) speechSynthesis.cancel();
         (st.recording || Promise.resolve(false)).then(function () {
-          ctx.submit({ answers: set.answers, decision: state.decision, decisionMs: state.decisionMs, trajectory: state.trajectory, rtMs: Math.round(now() - st.t0),
+          ctx.submit({ answers: set.answers, decision: state.decision, decisionMs: state.decisionMs, trajectory: state.trajectory, mtInput: state.mtInput, rtMs: Math.round(now() - st.t0),
             call: { answered: st.answered, ringMs: st.ringMs, durationMs: st.durationMs || 0, holdMs: Math.round(st.holdMs), typedTurns: st.typed, spokenTurns: st.spoken, interruptions: st.interruptions || 0, captions: st.captions, directoryOpened: st.directoryOpened, endedBy: st.endedBy, latencies: st.latencies },
             uiEvents: takeUiLog() },
             function (err) { submit.disabled = false; msg.innerHTML = ui.errorBox(err); });

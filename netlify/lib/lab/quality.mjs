@@ -18,17 +18,26 @@ export function cleanDq(d) {
     keys: int(d.keys, 1e7), fastKeys: int(d.fastKeys, 1e7) };
 }
 
-// Running totals from the browser: true stays true and counts only go up, so a reload (which restarts the browser's
-// counts) never erases what was seen.
+// Running totals from the browser, per page load: true stays true, each load's counts only go up, and the session's
+// counts are the sum over its loads. A reload restarts the browser's counts under a new load id, so its counts add
+// to what was seen before it instead of being hidden by a maximum. Reports from before load ids (and records saved
+// before them) count as one load, "page".
+const DQ_COUNTS = ['pastes', 'pasteChars', 'injectedChars', 'keys', 'fastKeys'], MAX_LOADS = 50;
 export async function saveDq(S, E, code, session, data, now = Date.now()) {
   const p = await E.loadParticipant(S, code);
   if (!p) return { error: 'invalid_code', status: 401 };
   if (!(Number.isInteger(session) && session > 0 && session < 100)) return { error: 'bad_session', status: 400 };
   const got = cleanDq(data), key = `data/${p.code}/s${session}/dq`;
+  const load = typeof data?.load === 'string' && /^[a-z0-9]{6,32}$/.test(data.load) ? data.load : 'page';
   const merge = d => {
     if (!d.data) Object.assign(d, { code: p.code, condition: p.condition, session, data: cleanDq({}) });
+    if (!d.loads) d.loads = { page: Object.fromEntries(DQ_COUNTS.map(k => [k, d.data[k] || 0])) };
     for (const k of ['honeypot', 'webdriver']) d.data[k] = d.data[k] || got[k];
-    for (const k of ['pastes', 'pasteChars', 'injectedChars', 'keys', 'fastKeys']) d.data[k] = Math.max(d.data[k] || 0, got[k]);
+    if (d.loads[load] || Object.keys(d.loads).length < MAX_LOADS) {
+      const was = d.loads[load] || {};
+      d.loads[load] = Object.fromEntries(DQ_COUNTS.map(k => [k, Math.max(was[k] || 0, got[k])]));
+    }
+    for (const k of DQ_COUNTS) d.data[k] = Object.values(d.loads).reduce((n, l) => n + (l[k] || 0), 0);
     d.receivedAt = now;
   };
   const first = {}; merge(first);
