@@ -5499,3 +5499,31 @@ section .container {
     padding-bottom: 1.1rem !important;
   }
 }
+
+// ===== SKIP LINK AND MAIN LANDMARK (audit 2026-10-24) =====
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 100000;
+  padding: 10px 16px;
+  background: #0a0a0a;
+  color: #00ff41 !important;
+  border: 2px solid #00ff41;
+  border-radius: 4px;
+  font-family: 'Fira Code', 'Roboto Mono', monospace;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+  outline: 2px solid #00e5ff;
+  outline-offset: 2px;
+}
+
+// The skip link moves focus here; the region is not a control, so it shows no ring.
+main#main:focus {
+  outline: none;
+}
