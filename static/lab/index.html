@@ -21,7 +21,7 @@
   header.site { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--card) 92%, transparent); -webkit-backdrop-filter: blur(18px) saturate(170%); backdrop-filter: blur(18px) saturate(170%); border-top: 4px solid var(--gsu-blue); border-bottom: 1px solid var(--line); }
   header.site .wrap { display: flex; justify-content: space-between; align-items: center; gap: 12px 20px; padding-top: 10px; padding-bottom: 10px; flex-wrap: wrap; }
   .brandrow { display: flex; align-items: center; gap: 16px; }
-  nav a { color: var(--link); text-decoration: none; margin-left: 18px; font-size: .9375rem; font-weight: 700; }
+  nav a { color: var(--link); text-decoration: none; margin-left: 12px; padding: 12px 6px; display: inline-block; white-space: nowrap; font-size: .9375rem; font-weight: 700; }
   nav a:first-child { margin-left: 0; }
   nav a:hover { text-decoration: underline; text-underline-offset: .3em; text-decoration-thickness: 2px; }
   .hero-band { background: var(--hero-bg, #0039a6); color: #ffffff; }
@@ -47,7 +47,9 @@
   ul.plain { padding-left: 18px; color: var(--muted); margin: 0; }
   ul.plain li { margin: 6px 0; }
   footer { border-top: 1px solid var(--line); padding: 24px 0 40px; color: var(--muted); font-size: .8125rem; }
-  @media (max-width: 760px) { nav a { margin-left: 12px; } }
+  footer a { display: inline-block; padding: 4px 2px; }
+  /* Phones: the header scrolls away instead of taking 143px of every screen, and the links stay one line each. */
+  @media (max-width: 760px) { header.site { position: static; } nav { display: flex; flex-wrap: wrap; } nav a { margin-left: 0; padding: 12px 8px; } }
 </style>
 </head>
 <body>

@@ -280,9 +280,39 @@
     root.querySelectorAll('textarea').forEach(function (t) { t.addEventListener('input', function () { onAnswer(t.name, t.value); }); });
     root.querySelectorAll('input.num, input.line').forEach(function (t) { t.addEventListener('input', function () { onAnswer(t.name, t.value); }); });
   }
-  function flag(root, names, scroll) {
-    root.querySelectorAll('.q-group').forEach(function (g) { g.classList.toggle('missing', names.indexOf(g.getAttribute('data-name')) >= 0); });
+  // Marks the groups in `names` as needing attention. Every call re-syncs, so a group that is answered loses its marks.
+  // opts (optional, used by questionSet): { message: text shown inside each flagged group, invalid: true to set
+  // aria-invalid on its first control (a required or malformed answer, not a gentle reminder), focus: true to move
+  // focus to the first flagged group }. The amber bar is only a second cue; the inline text and aria-invalid carry the
+  // meaning (WCAG 1.4.1, 3.3.1). Without opts only the .missing class changes, which is what game.js and alert-triage.js use.
+  function groupControl(g) { return g.querySelector('input:not([type=hidden]), select, textarea, button, [tabindex]:not([tabindex="-1"])'); }
+  function ownError(g) { return Array.prototype.filter.call(g.children, function (c) { return c.classList.contains('q-error'); })[0]; }
+  function dropToken(el, attr, tok) {
+    var rest = (el.getAttribute(attr) || '').split(/\s+/).filter(function (t) { return t && t !== tok; }).join(' ');
+    if (rest) el.setAttribute(attr, rest); else el.removeAttribute(attr);
+  }
+  function flag(root, names, scroll, opts) {
+    root.querySelectorAll('.q-group').forEach(function (g) {
+      var miss = names.indexOf(g.getAttribute('data-name')) >= 0, err = ownError(g), ctl = groupControl(g);
+      g.classList.toggle('missing', miss);
+      if (!miss) {
+        if (err) { if (ctl) { dropToken(ctl, 'aria-describedby', err.id); ctl.removeAttribute('aria-invalid'); } err.remove(); }
+        return;
+      }
+      if (!opts || !opts.message) return;
+      if (!err) {
+        err = document.createElement('p'); err.className = 'q-error';
+        err.id = 'qe-' + String(g.getAttribute('data-name')).replace(/[^A-Za-z0-9_-]/g, '_');
+        g.appendChild(err);
+      }
+      err.textContent = opts.message; err.className = 'q-error' + (opts.invalid ? '' : ' note');
+      if (ctl) {
+        if ((' ' + (ctl.getAttribute('aria-describedby') || '') + ' ').indexOf(' ' + err.id + ' ') < 0) ctl.setAttribute('aria-describedby', ((ctl.getAttribute('aria-describedby') || '') + ' ' + err.id).trim());
+        if (opts.invalid) ctl.setAttribute('aria-invalid', 'true'); else ctl.removeAttribute('aria-invalid');
+      }
+    });
     var first = root.querySelector('.q-group.missing');
+    if (first && opts && opts.focus) { var c = groupControl(first); if (c) c.focus({ preventScroll: true }); }
     if (first && scroll) first.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
   }
   function blank(answers, ids) { return ids.filter(function (k) { var v = answers[k]; return v == null || String(v).trim() === '' || (Array.isArray(v) && !v.length); }); }
@@ -332,10 +362,10 @@
         var hard = blank(answers, ids(act.filter(function (i) { return i.required; })));
         var soft = blank(answers, ids(act.filter(function (i) { return !i.required; })));
         var badNum = act.filter(function (i) { var v = answers[i.id]; return i.type === 'number' && v != null && String(v).trim() !== '' && !isFinite(Number(String(v).replace(/,/g, ''))); }).map(function (i) { return i.id; });
-        if (badNum.length) { flag(root, badNum, true); msgEl.innerHTML = errorBox(T('number_invalid')); return false; }
-        if (hard.length) { flag(root, hard, true); msgEl.innerHTML = errorBox(hard.length === 1 && items.filter(function (i) { return i.id === hard[0]; })[0].type === 'confidence' ? T('conf_needed') : T('required_prompt')); return false; }
+        if (badNum.length) { flag(root, badNum, true, { message: 'Enter a number, using digits only.', invalid: true, focus: true }); msgEl.innerHTML = errorBox(T('number_invalid')); return false; }
+        if (hard.length) { flag(root, hard, true, { message: 'This question needs an answer.', invalid: true, focus: true }); msgEl.innerHTML = errorBox(hard.length === 1 && items.filter(function (i) { return i.id === hard[0]; })[0].type === 'confidence' ? T('conf_needed') : T('required_prompt')); return false; }
         if (soft.length && !prompted) {
-          prompted = true; flag(root, soft, true);
+          prompted = true; flag(root, soft, true, { message: 'You skipped this question. You can leave it blank.' });
           msgEl.innerHTML = '<div class="soft" role="alert"><p>' + Th('skip_prompt', { n: soft.length }) + '</p></div>';
           if (button) button.textContent = T('skip_continue');
           return false;

@@ -9,9 +9,19 @@ import { fileURLToPath } from 'node:url';
 const here = p => fileURLToPath(new URL(p, import.meta.url));
 const LabLogic = createRequire(import.meta.url)(here('../../static/lab/engine/logic.js'));
 
+// A node with just enough of the DOM for flag(): attributes, children, a class list, focus and remove().
+function makeNode() {
+  const attrs = {}, classes = new Set();
+  const n = { children: [], attrs, className: '', textContent: '', id: '', parent: null, focused: false,
+    setAttribute(k, v) { attrs[k] = String(v); }, getAttribute(k) { return k in attrs ? attrs[k] : null; }, removeAttribute(k) { delete attrs[k]; },
+    appendChild(c) { c.parent = n; n.children.push(c); return c; }, remove() { if (n.parent) n.parent.children = n.parent.children.filter(x => x !== n); },
+    focus() { n.focused = true; }, scrollIntoView() {} };
+  Object.defineProperty(n, 'classList', { value: { add: c => classes.add(c), remove: c => classes.delete(c), toggle: (c, on) => (on ? classes.add(c) : classes.delete(c)), contains: c => classes.has(c) || n.className.split(/\s+/).includes(c) } });
+  return n;
+}
 const stage = { innerHTML: '', querySelector: () => null };
 const win = { matchMedia: () => ({ matches: false }), scrollTo() {}, addEventListener() {} };
-const sandbox = { window: win, document: { documentElement: { getAttribute: () => null }, getElementById: id => (id === 'stage' ? stage : id === 'progress' ? { textContent: '' } : null), createElement: () => ({}), head: { appendChild() {} } },
+const sandbox = { window: win, document: { documentElement: { getAttribute: () => null }, getElementById: id => (id === 'stage' ? stage : id === 'progress' ? { textContent: '' } : null), createElement: () => makeNode(), head: { appendChild() {} } },
   location: { pathname: '/nowhere', search: '', origin: 'https://x.test' }, sessionStorage: { getItem: () => null, setItem() {}, removeItem() {} }, performance: { now: () => 0 },
   fetch: () => Promise.reject(new Error('offline')), setTimeout, URLSearchParams, Blob, URL, console };
 sandbox.window.window = win;
@@ -51,7 +61,7 @@ assert(html.includes('<span data-tpl="Two for {{q:name}}">Two for &lt;img src=x 
 }
 
 // ---------- live logic with a stand-in DOM ----------
-function el(name) { const classes = new Set(); return { name, hidden: false, checked: false, value: '', handlers: {}, classList: { add: c => classes.add(c), remove: c => classes.delete(c), toggle: (c, on) => (on ? classes.add(c) : classes.delete(c)), contains: c => classes.has(c) }, addEventListener(e, f) { this.handlers[e] = f; }, getAttribute: a => (a === 'data-name' ? name : null) }; }
+function el(name) { const n = makeNode(); n.name = name; n.hidden = false; n.checked = false; n.value = ''; n.handlers = {}; n.addEventListener = function (e, f) { this.handlers[e] = f; }; const get = n.getAttribute; n.getAttribute = a => (a === 'data-name' ? name : get(a)); return n; }
 function makeRoot(list) {
   const groups = {}, radios = [], texts = [], nums = [], tpl = [];
   for (const it of list) {
@@ -59,10 +69,11 @@ function makeRoot(list) {
     if (it.type === 'choice' || it.type === 'scale') for (const v of (it.options || [{ value: '1' }, { value: '2' }, { value: '3' }])) { const r = el(it.id); r.type = 'radio'; r.name = it.id; r.value = v.value; g.radios.push(r); radios.push(r); }
     if (it.type === 'text' || it.type === 'number') { const t = el(it.id); t.name = it.id; g.texts.push(t); (it.type === 'number' ? nums : texts).push(t); }
     g.querySelectorAll = sel => (/radio/.test(sel) ? g.radios : /textarea|text/.test(sel) ? g.texts : []);
+    g.querySelector = () => g.radios[0] || g.texts[0] || null;
   }
   const t = { textContent: '', getAttribute: () => 'Packs for {{q:name}}?' }; tpl.push(t);
   const root = { groups, radios, texts, nums, tpl,
-    querySelector: sel => { const m = sel.match(/data-name="(\w+)"/); if (m) return groups[m[1]] || null; if (sel === '.missing') return Object.values(groups).find(g => g.classList.contains('missing')) || null; return null; },
+    querySelector: sel => { const m = sel.match(/data-name="(\w+)"/); if (m) return groups[m[1]] || null; if (sel === '.missing' || sel === '.q-group.missing') return Object.values(groups).find(g => g.classList.contains('missing')) || null; return null; },
     querySelectorAll: sel => (sel === 'input[type=radio]' ? radios : sel === 'input[type=checkbox]' ? [] : sel === 'textarea' ? texts.filter(x => x.tag !== 'line') : sel === 'input.num, input.line' ? nums : sel === '[data-tpl]' ? tpl : sel === '.q-group' ? Object.values(groups) : []) };
   return root;
 }
@@ -88,6 +99,17 @@ root2.radios.find(r => r.value === 'n').checked = true; root2.radios.find(r => r
 assert.equal(qs2.check(), true, '"must" is hidden, so it is not required');
 root2.radios.find(r => r.value === 'y').checked = true; root2.radios.find(r => r.value === 'y').handlers.change();
 assert.equal(qs2.check(), false, 'visible and required: blocks'); assert(/role="alert"/.test(msg2.innerHTML), 'the reminder is announced'); assert(root2.groups.must.classList.contains('missing'), 'and the question is flagged');
+{
+  // The flagged question names its own error: inline text, aria-describedby and aria-invalid on its control, focus there.
+  const g = root2.groups.must, ctl = g.texts[0], err = g.children.find(c => c.className.includes('q-error'));
+  assert(err && /needs an answer/.test(err.textContent), 'an inline error sits inside the missing question');
+  assert.equal(ctl.getAttribute('aria-invalid'), 'true'); assert(ctl.getAttribute('aria-describedby').split(' ').includes(err.id), 'the control is described by the error');
+  assert.equal(ctl.focused, true, 'focus moves to the first missing question');
+  // answering clears it
+  ctl.value = 'x'; ctl.handlers.input();
+  assert.equal(g.children.some(c => c.className.includes('q-error')), false, 'the error goes away once answered');
+  assert.equal(ctl.getAttribute('aria-invalid'), null); assert.equal(ctl.getAttribute('aria-describedby'), null);
+}
 // answers from earlier pages count (prior)
 const root3 = makeRoot([reqSet[1]]), qs3 = ui.questionSet(root3, [reqSet[1]], { innerHTML: '' }, null, null, { prior: { gate: 'n' } });
 assert.equal(root3.groups.must.hidden, true, 'hidden because of an answer on an earlier page');
