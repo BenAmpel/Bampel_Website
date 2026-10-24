@@ -52,11 +52,20 @@
     X-Frame-Options = "DENY"
     # Pages opened from this site in a new tab, or that open it, cannot reach back into its window object.
     Cross-Origin-Opener-Policy = "same-origin"
+    # Speculation rules (static/speculation-rules.json): Chrome and Edge prefetch a same-site page when the pointer rests on a
+    # link to it, so the next page opens almost at once. Prefetch only (no prerender, so no page script runs early); the
+    # lab and file downloads are excluded. Sent as a header so the CSP needs no inline script.
+    Speculation-Rules = "\"/speculation-rules.json\""
     Content-Security-Policy = "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://d1bxh8uas1mnw7.cloudfront.net https://embed.altmetric.com https://api.altmetric.com https://badge.dimensions.ai https://cdnjs.buymeacoffee.com; style-src 'self' 'unsafe-inline' https://badge.dimensions.ai https://embed.altmetric.com; font-src 'self' data:; img-src 'self' data: blob: https://badges.altmetric.com https://cdn.altmetric.com https://cdn.buymeacoffee.com https://server.arcgisonline.com https://www.googletagmanager.com https://www.google-analytics.com; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://api.altmetric.com https://metrics-api.dimensions.ai https://badge.dimensions.ai; frame-src https://www.buymeacoffee.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
     Permissions-Policy = "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
 
 # Self-hosted Lato and React (audit 2026-10-24): these files were answered with "max-age=0, must-revalidate", so every visit
 # re-checked them. The Lato files never change under the same name. React is a pinned version; the path would change with it.
+[[headers]]
+  for = "/speculation-rules.json"
+  [headers.values]
+    Content-Type = "application/speculationrules+json"
+
 [[headers]]
   for = "/ccair/assets/fonts/*"
   [headers.values]
