@@ -1,7 +1,7 @@
 // Study 2 of the vishing training paper (ISR plan and build spec, 2026-10-22): content for a multimodal study.
 // Built step by step with Ben; the decision log is in the vishing-study-decisions.md note. So far: step 1.
 //
-// Shape: two sessions run as one sitting (design.continuous); about 50 minutes.
+// Shape: two sessions run as one sitting (design.continuous); about 54 minutes (estimate updated 2026-10-23).
 //   Session 1, screening and onboarding (no arm yet): consent with required audio recording; eligibility (18+, not
 //     IL/TX/WA, headphones and microphone, a quiet place); the equipment check (Woods antiphase headphone test, 3 rounds,
 //     pass at 2; then hear a word and say it back, scored by the lab's Whisper server; two attempts each); the persona
@@ -104,7 +104,7 @@ export const VISHING_STUDY2 = {
   name: 'Vishing Study 2 (ISR, five arms)', icon: 'shield', type: 'multimodal', minutes: 50,
   blurb: 'Ben Ampel\'s Study 2: screening (eligibility, headphone and spoken-word checks), then five randomized training arms, passive clips before and after, and a softphone shift with AI callers. Built step by step.',
   content: () => ({
-    minutesPerSession: 50,
+    minutesPerSession: 54,
     consent: {
       approved: false, paragraphs: CONSENT, agreeLabel: 'I am 18 or older, I have read this form, and I agree to take part.',
       recording: { enabled: true, required: true, label: 'I agree to have my voice recorded and transcribed as described above.' }
