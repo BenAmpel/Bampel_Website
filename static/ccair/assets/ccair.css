@@ -20,6 +20,9 @@
   --cool: #005EB0; --cool-soft: rgba(0, 113, 206, 0.08);
   --error: #C60C30;
   --line: rgba(0, 0, 0, 0.10); --line-strong: rgba(0, 0, 0, 0.18);
+  /* Border of a control whose outline is its only boundary (search box, secondary button): 3:1 or more against white
+     (4.0:1) and Light Gray (3.4:1), WCAG 1.4.11. */
+  --control-line: rgba(0, 0, 0, 0.50);
   --nav-bg: rgba(255, 255, 255, 0.78);
   --selection: rgba(0, 113, 206, 0.22); --scrim: rgba(12, 18, 36, 0.28);
   --shadow-sm: 0 1px 2px rgba(10, 20, 45, 0.06);
@@ -51,6 +54,7 @@
     --cool: #7FD3F7; --cool-soft: rgba(0, 174, 239, 0.14);
     --error: #FF8A9C;
     --line: rgba(255, 255, 255, 0.10); --line-strong: rgba(255, 255, 255, 0.18);
+    --control-line: rgba(255, 255, 255, 0.40);   /* 3.6:1 or more on the dark surfaces */
     --nav-bg: rgba(17, 23, 42, 0.78);
     --selection: rgba(151, 202, 235, 0.30); --scrim: rgba(0, 0, 0, 0.50);
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -161,7 +165,7 @@ h1[tabindex="-1"]:focus { outline: none; }
 .btn:active { transform: scale(0.97); }
 .btn-primary { background: var(--accent); color: var(--accent-ink); box-shadow: var(--shadow-sm); }
 .btn-primary:hover { background: var(--accent-strong); }
-.btn-secondary { background: var(--surface); color: var(--text); border-color: var(--line-strong); }
+.btn-secondary { background: var(--surface); color: var(--text); border-color: var(--control-line); }
 .btn-secondary:hover { border-color: var(--accent-line); background: var(--surface); }
 .btn-plain { background: transparent; color: var(--accent); padding-inline: 4px; }
 .btn-plain:hover { text-decoration: underline !important; }
@@ -228,7 +232,7 @@ html[data-vt] .nav { view-transition-name: ccair-nav; }
 
 /* ---------- Cards ---------- */
 .card { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: clamp(20px, 2.4vw, 28px); box-shadow: var(--shadow-sm); }
-.card h3 { font-size: 19px; line-height: 1.3; letter-spacing: -0.012em; margin-bottom: 8px; }
+.card h3, .person h4 { font-size: 19px; line-height: 1.3; letter-spacing: -0.012em; margin-bottom: 8px; }
 .card p { color: var(--text-2); font-size: 15.5px; line-height: 1.6; }
 .card-link { display: block; color: inherit; transition: box-shadow 0.3s var(--ease), border-color 0.25s, transform 0.3s var(--ease); }
 .card-link:hover { text-decoration: none; box-shadow: var(--shadow-lg); border-color: var(--line-strong); }
@@ -319,7 +323,7 @@ a.chip:active { transform: scale(0.97); }
 @media (prefers-color-scheme: dark) {
   .hero-photo::after { background: linear-gradient(180deg, rgba(4, 14, 40, 0.80) 0%, rgba(0, 32, 96, 0.72) 45%, rgba(17, 23, 42, 0.92) 100%); }
 }
-.photo-hero .hero-affil { color: #E6EBF5; }
+.photo-hero .hero-affil { color: #FFFFFF; }
 .photo-hero h1, .photo-hero h1 em { color: #FFFFFF; }
 .photo-hero .hero-inner > .lede { color: #F2F4F8; }
 .photo-hero .hero-stage .btn-primary { background: #FFFFFF; color: #0039A6; }
@@ -328,11 +332,12 @@ a.chip:active { transform: scale(0.97); }
 .photo-hero .hero-stage .btn-secondary:hover { background: rgba(255, 255, 255, 0.18); border-color: #FFFFFF; }
 .photo-hero .hero-stage :focus-visible { outline-color: #FFFFFF; }
 .photo-hero .stats { margin-top: clamp(28px, 4vw, 44px); }
-.photo-hero .hero-credit { position: absolute; right: var(--gutter); bottom: 12px; left: var(--gutter); margin: 0; text-align: right; color: #E6EBF5; }
+.photo-hero .hero-credit { position: absolute; right: var(--gutter); bottom: 12px; left: var(--gutter); margin: 0; text-align: right; color: #FFFFFF; }
 .photo-hero .hero-credit a { color: #FFFFFF; }
 @media (max-width: 700px) { .hero-photo img { object-position: var(--focal-m, var(--focal, 50% 50%)); } }
 /* Page heroes: PageHead with a photo slot. Same scrim and white type as the home hero, in a shorter stage. The scrim's
-   lightest stop (0.70) keeps white text at about 5.4:1 even over a pure white pixel, so any campus photo clears AA. */
+   lightest stop (0.70) keeps white text at about 5.3:1 even over a pure white pixel, so any campus photo clears AA
+   (which is why the affiliation line and credit are pure white too: #E6EBF5 would fall to 4.4:1). */
 .page-hero { margin-bottom: clamp(24px, 4vw, 48px); padding: 0; }
 .page-hero .hero-stage { padding: clamp(64px, 10vw, 128px) 0 clamp(56px, 8vw, 96px); }
 .page-hero .page-head { padding: 0; }
@@ -340,13 +345,6 @@ a.chip:active { transform: scale(0.97); }
 .page-hero .page-head .lede { color: #F2F4F8; }
 .page-hero .page-head :focus-visible { outline-color: #FFFFFF; }
 
-/* Photo bands: a wide photo between a page's heading and its first section, with its credit underneath. */
-.photo-band { margin-top: clamp(20px, 3.5vw, 36px); margin-bottom: clamp(32px, 5vw, 56px); }
-.photo-frame { position: relative; overflow: hidden; border-radius: var(--radius); aspect-ratio: 21 / 9; background: var(--surface-2); }
-.photo-frame picture, .photo-frame img { display: block; width: 100%; height: 100%; }
-.photo-frame img { object-fit: cover; object-position: var(--focal, 50% 50%); }
-@media (max-width: 700px) { .photo-frame { aspect-ratio: 4 / 3; border-radius: var(--radius-sm); } }
-@media (prefers-color-scheme: dark) { .photo-frame img { filter: brightness(0.92); } }
 .photo-credit { margin-top: 8px; font-size: 12.5px; line-height: 1.4; color: var(--muted); text-align: right; }
 .photo-credit a { color: inherit; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
 .photo-credit a:hover { color: var(--accent); }
@@ -355,12 +353,10 @@ a.chip:active { transform: scale(0.97); }
 .photo-credits li { padding: 12px 0; border-bottom: 1px solid var(--line); color: var(--text-2); font-size: 15px; line-height: 1.55; }
 .photo-credits li:first-child { border-top: 1px solid var(--line); }
 .photo-credits a { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
-/* Depth: the photo drifts a few percent inside its frame as it scrolls past (compositor-driven; none when motion is
+/* Depth: the hero photo drifts and grows a little as the hero scrolls away (compositor-driven; none when motion is
    reduced or scroll-driven animations are unsupported). */
 @media (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: view()) {
-    .photo-frame img { scale: 1.08; animation: photoDrift linear both; animation-timeline: view(); }
-    @keyframes photoDrift { from { translate: 0 -3%; } to { translate: 0 3%; } }
     .hero-photo img { animation: heroPhotoDrift linear both; animation-timeline: --hero; animation-range: exit 0% exit 100%; }
     @keyframes heroPhotoDrift { from { transform: scale(1.04); } to { transform: translate3d(0, 6%, 0) scale(1.12); } }
   }
@@ -385,7 +381,7 @@ a.chip:active { transform: scale(0.97); }
 /* ---------- Publications ---------- */
 .toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 24px; }
 .search { position: relative; flex: 1 1 280px; max-width: 420px; }
-.search input { width: 100%; font: 400 16px/1 var(--sans); color: var(--text); background: var(--surface); border: 1px solid var(--line-strong);
+.search input { width: 100%; font: 400 16px/1 var(--sans); color: var(--text); background: var(--surface); border: 1px solid var(--control-line);
   border-radius: 12px; padding: 12px 14px 12px 40px; transition: border-color 0.2s, box-shadow 0.2s; }
 .search input:focus { outline: none; border-color: var(--accent); }
 .search input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
@@ -395,6 +391,12 @@ a.chip:active { transform: scale(0.97); }
 .segmented button[aria-pressed="true"], .segmented button[aria-selected="true"] { background: var(--surface); color: var(--text); font-weight: 600; box-shadow: var(--shadow-sm); }
 .segmented button:active { transform: scale(0.97); }
 .pub-year { font: 700 15px/1 var(--display); color: var(--muted); letter-spacing: 0.02em; padding: 28px 0 10px; border-bottom: 1px solid var(--line); position: sticky; top: var(--nav-h); background: var(--bg); z-index: 2; }
+/* Phones: the type buttons drop their counts so they fit on one row, and the year headings scroll with the list
+   instead of stacking a second sticky bar under the nav. */
+@media (max-width: 600px) {
+  .pub-types .seg-count { display: none; }
+  .pub-year { position: static; }
+}
 .pub-list { list-style: none; }
 .pub-list.card .pub:last-child { border-bottom: 0; }
 .pub { padding: 18px 0; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 1fr auto; gap: 6px 16px; }
@@ -467,7 +469,7 @@ a.chip:active { transform: scale(0.97); }
 .director .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
 @media (max-width: 560px) { .director { grid-template-columns: 1fr; } }
 .person { display: flex; gap: 14px; align-items: flex-start; }
-.person h3 { font-size: 16.5px; margin-bottom: 2px; }
+.person h3, .person h4 { font-size: 16.5px; margin-bottom: 2px; }
 .person .role { color: var(--text-2); font-size: 14.5px; }
 .person .meta { color: var(--muted); font-size: 14px; margin-top: 2px; }
 .person p { margin-top: 8px; font-size: 14.5px; }
@@ -499,6 +501,9 @@ a.chip:active { transform: scale(0.97); }
 .rows .t { font-weight: 600; }
 .rows .r { color: var(--muted); font-size: 14.5px; white-space: nowrap; }
 .contact-lines { font-style: normal; color: var(--text-2); line-height: 1.75; }
+/* A standalone link in an address block: inline-block takes the full line height (25px or more), the 24px minimum
+   target (WCAG 2.5.8). */
+.contact-lines a { display: inline-block; }
 
 /* ---------- Footer ---------- */
 /* Blue Steel band (GSU secondary palette) with white text; deep navy in the dark scheme. */
@@ -518,6 +523,8 @@ a.chip:active { transform: scale(0.97); }
 @media (max-width: 700px) { .footer-inner { grid-template-columns: 1fr 1fr; } .footer-inner > :first-child { grid-column: 1 / -1; } }
 
 /* Loading and errors */
+.data-notice { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-block: 16px; padding: 12px 16px;
+  border: 1px solid var(--line-strong); border-radius: var(--radius-xs); background: var(--surface-2); color: var(--text); }
 .state { min-height: 70vh; display: grid; place-items: center; text-align: center; gap: 12px; padding: 40px; color: var(--muted); }
 .state-dot { display: block; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); margin: 0 auto 16px; animation: breathe 2.4s ease-in-out infinite; }
 @keyframes breathe { 50% { opacity: 0.55; } }
@@ -557,14 +564,14 @@ a.chip:active { transform: scale(0.97); }
     --accent-soft: rgba(0, 57, 166, 0.08); --accent-line: rgba(0, 57, 166, 0.30);
     --steel: #374057; --steel-soft: rgba(55, 64, 87, 0.09);
     --cool: #005EB0; --cool-soft: rgba(0, 113, 206, 0.08);
-    --line: #BBBBBB; --line-strong: #999999; }
+    --line: #BBBBBB; --line-strong: #999999; --control-line: #777777; }
   body { background: #FFFFFF; color: var(--text); }
   .nav, .footer, .menu-btn, .sheet, .sheet-scrim, .skip { display: none !important; }
   .card, .stats, .feature { box-shadow: none; }
   .reveal, .motion-ok .reveal:not(.is-in) { opacity: 1; transform: none; }
   .hero-glow, .scroll-progress { display: none !important; }
   /* Photos are left off paper; the photo hero prints as plain black text. */
-  .hero-photo, .photo-band, .hero-credit { display: none !important; }
+  .hero-photo, .hero-credit { display: none !important; }
   .hero-stage { background: none; padding: 24px 0; }
   .photo-hero .hero-affil, .photo-hero h1, .photo-hero h1 em, .photo-hero .hero-inner > .lede { color: #000000; }
 }
