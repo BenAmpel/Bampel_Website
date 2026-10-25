@@ -1,3 +1,13 @@
+{{/* The list is rendered at build time from static/data/publications.json, with the entries, order and markup that
+   js/site/publications_filter.js draws, so the page's HTML links every publication for crawlers and readers
+   without JavaScript. The script fetches the same file, builds the filter options and redraws the list on load
+   (its first, unfiltered render matches this one). */}}
+{{ $pubs := os.ReadFile "static/data/publications.json" | transform.Unmarshal }}
+{{ if reflect.IsMap $pubs }}{{ $pubs = index $pubs "publications" | default slice }}{{ end }}
+{{ $typeLabels := dict "journal" "Journal" "conference" "Conference" "workshop" "Workshop" }}
+{{ $prestige := dict "MIS Quarterly" (slice "FT50" "UTD24") "Journal of Management Information Systems" (slice "FT50") }}
+{{ $years := slice }}{{ range $pubs }}{{ $years = $years | append .year }}{{ end }}
+{{ $years = sort (uniq $years) "value" "desc" }}
 <details class="spoiler pub-filter-spoiler"{{ if in (slice "true" "1" "yes" "open") (lower (.Get "open" | default "")) }} open{{ end }}>
   <summary>Publications (Search &amp; Filter)</summary>
   <div class="spoiler-content">
@@ -6,7 +16,7 @@
         <div class="pub-filter-title">Filter Publications</div>
         <div class="pub-filter-actions">
           <button class="pub-filter-reset" type="button">Clear Filters</button>
-          <div class="pub-filter-count" id="pub-filter-count" role="status" aria-live="polite"></div>
+          <div class="pub-filter-count" id="pub-filter-count" role="status" aria-live="polite">{{ len $pubs }} of {{ len $pubs }}</div>
         </div>
       </div>
 
@@ -34,8 +44,22 @@
         </div>
 
         <div class="pub-filter-results">
-          <div class="pub-filter-summary" id="pub-filter-summary"></div>
-          <div class="pub-filter-list" id="pub-filter-list"></div>
+          <div class="pub-filter-summary" id="pub-filter-summary"><span class="pub-filter-empty">No filters applied</span></div>
+          <div class="pub-filter-list" id="pub-filter-list">
+            {{- range $y := $years }}{{ range sort (where $pubs "year" $y) "title" }}
+            <div class="pub-item">
+              {{ if .url }}<a href="{{ .url }}" class="pub-title">{{ .title }}</a>{{ else }}<span class="pub-title">{{ .title }}</span>{{ end }}
+              {{- $chips := index $prestige (.venue | default "") | default slice }}
+              {{- if or $chips .award }}<span class="pub-badges">
+                {{- range $chips }}<span class="pub-badge pub-badge--{{ lower . }}" title="{{ cond (eq . "FT50") "Financial Times Top 50 journal" "UT Dallas Top 24 journal" }}">{{ . }}</span>{{ end }}
+                {{- with .award }}<span class="pub-badge pub-badge--award" title="{{ . }}"><i class="fas fa-trophy" aria-hidden="true"></i> {{ . }}</span>{{ end -}}
+              </span>{{ end }}
+              {{- $meta := slice }}{{ with .year }}{{ $meta = $meta | append (string .) }}{{ end }}{{ with .venue }}{{ $meta = $meta | append . }}{{ end }}{{ with index $typeLabels (.type | default "") }}{{ $meta = $meta | append . }}{{ end }}
+              <div class="pub-meta">{{ delimit $meta " · " }}</div>
+              <div class="pub-authors">{{ delimit (.authors | default slice) ", " }}</div>
+            </div>
+            {{- end }}{{ end }}
+          </div>
         </div>
       </div>
     </div>

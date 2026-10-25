@@ -166,6 +166,14 @@ social:
     label: "Google Scholar"
     icon_pack: ai
     link: https://scholar.google.com/citations?user=XDdwaZUAAAAJ&hl=en
+  - icon: orcid
+    label: "ORCID"
+    icon_pack: ai
+    link: https://orcid.org/0000-0003-0603-0270
+  - icon: semantic-scholar
+    label: "Semantic Scholar"
+    icon_pack: ai
+    link: https://www.semanticscholar.org/author/1394805819
   - icon: linkedin
     label: "LinkedIn"
     icon_pack: fab
