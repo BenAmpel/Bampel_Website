@@ -26,6 +26,11 @@
   {{/* ...and trailing volume/issue/pages (", 41:1, 236-265", ", 5:1, Article 7"). */}}
   {{ $venuePlain = trim (replaceRE ",\\s*\\d.*$" "" $venuePlain) " " }}
   {{ $doi := "" }}{{ with $page.Params.doi }}{{ if ne . "" }}{{ $doi = . }}{{ end }}{{ end }}
+  {{/* doi_pending: a DOI the publisher assigned but has not registered, so doi.org cannot resolve it yet. It is still
+     the paper's identifier (citation_doi, JSON-LD identifier), but nothing links to doi.org for it: the article's
+     landing page (url_source) is the sameAs instead. */}}
+  {{ $doiPending := false }}
+  {{ if not $doi }}{{ with $page.Params.doi_pending }}{{ if ne . "" }}{{ $doi = . }}{{ $doiPending = true }}{{ end }}{{ end }}{{ end }}
   {{ $abstract := trim (replaceRE "\\s+" " " (plainify ($page.Params.abstract | default ""))) " " }}
 
   {{/* citation_pdf_url only for real PDFs: many url_pdf values are publisher landing pages. Besides *.pdf,
@@ -53,7 +58,9 @@
   {{/* ---------- schema.org ScholarlyArticle JSON-LD ---------- */}}
   {{ $authorObjs := slice }}
   {{ range $authors }}{{ $authorObjs = $authorObjs | append (dict "@type" "Person" "name" .) }}{{ end }}
-  {{ $sameAs := slice }}{{ with $doi }}{{ $sameAs = slice (printf "https://doi.org/%s" .) }}{{ end }}
+  {{ $sameAs := slice }}
+  {{ if $doiPending }}{{ with $page.Params.url_source }}{{ $sameAs = slice . }}{{ end }}
+  {{ else }}{{ with $doi }}{{ $sameAs = slice (printf "https://doi.org/%s" .) }}{{ end }}{{ end }}
   {{ $ld := dict
       "@context" "https://schema.org"
       "@type" "ScholarlyArticle"
@@ -67,6 +74,7 @@
   {{ with $abstract }}{{ $ld = merge $ld (dict "abstract" . "description" .) }}{{ end }}
   {{/* isPartOf ranges over CreativeWork: Periodical for journals, Book for proceedings volumes. */}}
   {{ with $venuePlain }}{{ $ld = merge $ld (dict "isPartOf" (dict "@type" (cond $isJournal "Periodical" (cond (hasPrefix . "Proceedings") "Book" "CreativeWork")) "name" .)) }}{{ end }}
-  {{ with $doi }}{{ $ld = merge $ld (dict "sameAs" $sameAs "identifier" (dict "@type" "PropertyValue" "propertyID" "doi" "value" .)) }}{{ end }}
+  {{ with $doi }}{{ $ld = merge $ld (dict "identifier" (dict "@type" "PropertyValue" "propertyID" "doi" "value" .)) }}{{ end }}
+  {{ with $sameAs }}{{ $ld = merge $ld (dict "sameAs" .) }}{{ end }}
   <script type="application/ld+json">{{ $ld | jsonify (dict "indent" "  ") | safeJS }}</script>
 {{ end }}

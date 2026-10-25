@@ -108,7 +108,8 @@
   (typeof loadPublications === 'function' ? loadPublications() : safeFetch('/data/publications.json')).then((raw) => {
     const items = Array.isArray(raw) ? raw : (raw && raw.publications) || [];
     if (!items.length) {
-      listEl.textContent = 'No publications available.';
+      // Keep the list rendered at build time if the catalog could not be fetched.
+      if (!listEl.querySelector('.pub-item')) listEl.textContent = 'No publications available.';
       return;
     }
 
