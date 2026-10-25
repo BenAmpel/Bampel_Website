@@ -12,6 +12,7 @@ import { validateContent } from '../../netlify/lib/lab/content.mjs';
 import { TYPES } from '../../netlify/lib/lab/types/index.mjs';
 import { cleanAnswers } from '../../netlify/lib/lab/engine.mjs';
 import { makeXlsx, makeZip } from './import-helpers.mjs';
+import { fastEnough } from './timing-helpers.mjs';
 const fx = n => readFileSync(fileURLToPath(new URL('./fixtures/import/' + n, import.meta.url)), 'utf8');
 const template = readFileSync(fileURLToPath(new URL('../../static/lab/templates/survey-template.csv', import.meta.url)), 'utf8');
 const type = TYPES.vignettes;
@@ -203,7 +204,7 @@ bad(() => run('big.csv', 'variable,type,text\n' + 'a'.repeat(LIMITS.bytes + 10))
 assert.equal(htmlToText('<p>A &lt;b&gt; &amp; &#65;&#x42;</p><script>evil()</script><p>Line<br/>two</p><style>x{}</style>'), 'A <b> & AB\nLine\ntwo');
 assert(!/<script/i.test(htmlToText('<scr<script>ipt>alert(1)</script>ok')), 'nested tag tricks leave no script tag (the text is never used as HTML anyway)');
 assert.equal(htmlToText('a < b and c > d, 1<2'), 'a < b and c > d, 1<2');
-{ const t0 = Date.now(); htmlToText('<script'.repeat(200000)); htmlToText('<p>'.repeat(100000) + '&amp;'.repeat(100000)); assert(Date.now() - t0 < 1500, 'hostile HTML is processed in linear time'); }
+await fastEnough('hostile HTML is processed in linear time', 1500, () => { htmlToText('<script'.repeat(200000)); htmlToText('<p>'.repeat(100000) + '&amp;'.repeat(100000)); });
 assert.equal(htmlToText('<img src=x onerror=alert(1)>hi<iframe src=//e></iframe>'), 'hi');
 assert.throws(() => parseXml('<a><b></a>'), ImportError);
 assert.deepEqual(parseXml('<a x="1 &amp; 2"><b><![CDATA[<raw>]]></b><c/>t &#65;</a>').attrs, { x: '1 & 2' });
@@ -229,13 +230,14 @@ assert.deepEqual(parseXml('<a x="1 &amp; 2"><b><![CDATA[<raw>]]></b><c/>t &#65;<
 }
 // ---------- hostile input stays fast and readable ----------
 {
-  const t0 = Date.now(), spaces = ' '.repeat(1_000_000);
-  bad(() => run('x.csv', `variable,type,text,show_if\na,text,A,\nb,text,B,"a${spaces}answered${spaces}x"\n`), /longer than 4000/);
-  bad(() => run('d.csv', `Variable / Field Name,Form Name,Field Type,Field Label,"Choices, Calculations, OR Slider Labels"\nf,x,radio,L,"1,${spaces}${' '.repeat(100000)}"\n`), /too long/);
-  const wide = run('x.csv', `variable,type,text,show_if\na,text,A,\nb,text,B,"a${' '.repeat(3000)}answered"\n`);
-  assert.deepEqual(byId(wide, 'b').displayIf, { q: 'a', op: 'answered' });
-  assert(Date.now() - t0 < 200 + 1500, 'long cells are handled quickly');
-  const t1 = Date.now(); try { run('x.csv', `variable,type,text,show_if\nb,text,B,"${'a answered and '.repeat(50000)}"\n`); } catch {} assert(Date.now() - t1 < 200, 'many clauses in 1 cell: ' + (Date.now() - t1));
+  const spaces = ' '.repeat(1_000_000);
+  await fastEnough('long cells are handled quickly', 200 + 1500, () => {
+    bad(() => run('x.csv', `variable,type,text,show_if\na,text,A,\nb,text,B,"a${spaces}answered${spaces}x"\n`), /longer than 4000/);
+    bad(() => run('d.csv', `Variable / Field Name,Form Name,Field Type,Field Label,"Choices, Calculations, OR Slider Labels"\nf,x,radio,L,"1,${spaces}${' '.repeat(100000)}"\n`), /too long/);
+    const wide = run('x.csv', `variable,type,text,show_if\na,text,A,\nb,text,B,"a${' '.repeat(3000)}answered"\n`);
+    assert.deepEqual(byId(wide, 'b').displayIf, { q: 'a', op: 'answered' });
+  });
+  await fastEnough('many clauses in 1 cell', 200, () => { try { run('x.csv', `variable,type,text,show_if\nb,text,B,"${'a answered and '.repeat(50000)}"\n`); } catch {} });
 }
 {   // a large QSF: over the limit it is refused before the slow pass; near the limit it is quick
   const mk = (n) => {
@@ -244,8 +246,8 @@ assert.deepEqual(parseXml('<a x="1 &amp; 2"><b><![CDATA[<raw>]]></b><c/>t &#65;<
     els.push({ Element: 'BL', Payload: { 0: { Type: 'Standard', ID: 'BL1', BlockElements: list } } }, { Element: 'FL', Payload: { Flow: [{ Type: 'Standard', ID: 'BL1' }] } });
     return JSON.stringify({ SurveyElements: els });
   };
-  let t = Date.now(); bad(() => run('big.qsf', mk(15000)), /15000 questions/); assert(Date.now() - t < 1500, 'refused early');
-  t = Date.now(); run('big.qsf', mk(500)); assert(Date.now() - t < 2500, 'a 500-question survey with skip logic on every question: ' + (Date.now() - t) + ' ms');
+  await fastEnough('refused early', 1500, () => bad(() => run('big.qsf', mk(15000)), /15000 questions/));
+  await fastEnough('a 500-question survey with skip logic on every question', 2500, () => run('big.qsf', mk(500)));
 }
 // ---------- inherited property names ----------
 {

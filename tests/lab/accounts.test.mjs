@@ -44,8 +44,10 @@ const signup = async (c, link, name, pw) => { const r = ok(await c(L + 'auth/acc
 {
   const t = Date.now();
   const h = await acc.hashPassword(PW), took = Date.now() - t;
-  assert(took < 1000, `one scrypt hash took ${took} ms`);
-  assert.equal(h.pwParams.alg, 'scrypt'); assert(h.pwParams.N >= 32768 && h.pwParams.r === 8);
+  // Cost is set by the parameters, so check those rather than the wall clock (a busy machine stretched one hash past 2 s):
+  // strong enough (N of 32,768 or more) and cheap enough for a sign-in (128 MiB of memory at most, one pass).
+  assert.equal(h.pwParams.alg, 'scrypt'); assert(h.pwParams.N >= 32768 && h.pwParams.r === 8 && h.pwParams.p === 1);
+  assert(128 * h.pwParams.N * h.pwParams.r <= 128 * 1024 * 1024, `scrypt needs ${128 * h.pwParams.N * h.pwParams.r / 1048576} MiB`);
   assert(await acc.verifyPassword(PW, h)); assert(!(await acc.verifyPassword(PW + 'x', h))); assert(!(await acc.verifyPassword('', h)));
   const h2 = await acc.hashPassword(PW);
   assert.notEqual(h.pwSalt, h2.pwSalt); assert.notEqual(h.pwHash, h2.pwHash, 'a fresh salt per account');
@@ -147,9 +149,16 @@ const wrongPw = await call(L + 'auth/signin', { body: { email: 'ann.lee@example.
 const unknown = await call(L + 'auth/signin', { body: { email: 'nobody@example.edu', password: 'definitely not it' } });
 assert.equal(wrongPw.status, 401); assert.equal(unknown.status, 401);
 assert.equal(wrongPw.text, unknown.text, 'unknown email and wrong password give the same response');
-const t1 = Date.now(); await call(L + 'auth/signin', { body: { email: 'nobody2@example.edu', password: 'x'.repeat(14) } }); const unknownMs = Date.now() - t1;
-const t2 = Date.now(); await call(L + 'auth/signin', { body: { email: 'ann.lee@example.edu', password: 'y'.repeat(14) } }); const wrongMs = Date.now() - t2;
-assert(unknownMs > 5 && Math.abs(unknownMs - wrongMs) < Math.max(80, wrongMs), `unknown email does the same hashing work (${unknownMs} ms vs ${wrongMs} ms)`);
+// An unknown email must cost the same password hash as a wrong password, or its fast reply tells an attacker which
+// emails have accounts. Timed three times each, alternating, and compared by the middle value, one way only: the
+// leak would make the unknown email several times faster (no hash at all); being slower is not a leak. (A single
+// pair compared both ways failed on a busy machine: 535 ms vs 256 ms.) Three more wrong passwords stay well under
+// the lockout of 10.
+const timeSignin = async email => { const t = performance.now(); await call(L + 'auth/signin', { body: { email, password: 'y'.repeat(14) } }); return performance.now() - t; };
+const unknownTimes = [], wrongTimes = [];
+for (let i = 0; i < 3; i++) { unknownTimes.push(await timeSignin(`nobody${i + 2}@example.edu`)); wrongTimes.push(await timeSignin('ann.lee@example.edu')); }
+const mid = a => a.slice().sort((x, y) => x - y)[1], unknownMs = mid(unknownTimes), wrongMs = mid(wrongTimes);
+assert(unknownMs > wrongMs * 0.4, `unknown email does the same hashing work (${Math.round(unknownMs)} ms vs ${Math.round(wrongMs)} ms for a wrong password)`);
 assert.equal((await call(L + 'auth/signin', { body: { email: '', password: '' } })).text, wrongPw.text);
 const si = ok(await call(L + 'auth/signin', { body: { email: 'ANN.LEE@example.edu', password: PW } }));
 let ann = si.token;

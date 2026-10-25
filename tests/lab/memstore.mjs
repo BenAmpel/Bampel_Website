@@ -3,9 +3,16 @@
 let storeCount = 0;
 export function memStore({ latency = 0, lossyCas = false, name } = {}) {
   const m = new Map(); let n = 0;
-  const lat = () => latency ? new Promise(r => setTimeout(r, latency)) : Promise.resolve();
+  // calls: storage calls so far. rounds: waits in a row, counting calls made in parallel (Promise.all) once: a call
+  // that starts while none is in flight begins a new round. rounds x latency is the time a request spends waiting on
+  // storage, whatever the machine's load.
+  let inFlight = 0;
+  const lat = () => {
+    s.calls++; if (!inFlight) s.rounds++; inFlight++;
+    return (latency ? new Promise(r => setTimeout(r, latency)) : Promise.resolve()).finally(() => { inFlight--; });
+  };
   const s = {
-    m, name: name || `mem-${++storeCount}`,
+    m, name: name || `mem-${++storeCount}`, calls: 0, rounds: 0,
     get: async k => { await lat(); return m.has(k) ? structuredClone(m.get(k).v) : null; },
     set: async (k, v) => { await lat(); m.set(k, { v: structuredClone(v), e: String(++n) }); },
     delete: async k => { await lat(); m.delete(k); },
