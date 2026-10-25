@@ -22,12 +22,13 @@ removePathAccents: true
 ## MODULES
 ############################
 
+# The site owns its theme: the Wowchemy v5 templates, styles and scripts it uses were copied into layouts/, assets/,
+# data/ and static/ in October 2026 (from Wowchemy v5 commit 59b6487, MIT; see docs/superpowers/plans/
+# 2026-10-25-theme-migration.md), so the build fetches no theme module.
 module:
-  imports:
-    - path: github.com/wowchemy/wowchemy-hugo-themes/modules/wowchemy-plugin-netlify
-    - path: github.com/wowchemy/wowchemy-hugo-themes/modules/wowchemy/v5
   # The project's own folders (Hugo's defaults, which a mounts list replaces), plus static/images mounted into assets/ as
-  # well, so templates can make WebP versions of the map PNGs that scripts/generate_map.py rewrites each month.
+  # well, so templates can make WebP versions of the map PNGs that scripts/generate_map.py rewrites each month, and the
+  # site's SEO templates (modules/wowchemy-seo), mounted after layouts/ so the site's own files win.
   mounts:
     - { source: content, target: content }
     - { source: data, target: data }
@@ -38,6 +39,8 @@ module:
     # The coauthor-network and impact-dashboard PNGs (about 1.2 MB) are written by the metrics scripts but shown nowhere.
     - { source: static, target: static, files: ["! images/coauthor-network*.png", "! images/impact-dashboard*.png"] }
     - { source: static/images, target: assets/images }
+    - { source: modules/wowchemy-seo/layouts, target: layouts }
+    - { source: modules/wowchemy-seo/assets, target: assets }
 
 ############################
 ## ADVANCED
@@ -84,10 +87,23 @@ taxonomies:
   publication_type: publication_types
   author: authors
 markup:
+  defaultMarkdownHandler: goldmark
   goldmark:
     renderer:
       unsafe: true
-  _merge: deep
+    parser:
+      attribute:
+        block: true
+        title: true
+  highlight:
+    codeFences: true
+    noHl: false
+    lineNumbersInTable: false
+    noClasses: false
+    guessSyntax: true
+  tableOfContents:
+    startLevel: 2
+    endLevel: 3
 related:
   threshold: 80
   includeNewer: true
@@ -97,12 +113,34 @@ related:
       weight: 100
     - name: categories
       weight: 70
+# Templates may read HUGO_* and WC_* environment variables (WC_PURGE_CSS switches on the unused-CSS pass).
 security:
-  _merge: deep
+  funcs:
+    getenv:
+      - ^HUGO_
+      - ^WC_
 sitemap:
-  _merge: deep
+  changefreq: weekly
 minify:
-  _merge: deep
+  tdewolff:
+    html:
+      keepComments: true
+# The Netlify _headers and _redirects files (layouts/index.headers, layouts/index.redirects), output for the home page.
+mediaTypes:
+  text/netlify:
+    delimiter: ''
+    suffixes: ['']
+outputFormats:
+  headers:
+    baseName: _headers
+    isPlainText: true
+    mediatype: text/netlify
+    notAlternative: true
+  redirects:
+    baseName: _redirects
+    isPlainText: true
+    mediatype: text/netlify
+    notAlternative: true
 
 # Services (Hugo 0.120+)
 services:

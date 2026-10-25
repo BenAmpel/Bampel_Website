@@ -13,7 +13,7 @@
   publish = "public"
 
 # Site-wide security headers (added 2026-10-16). HSTS, nosniff and Referrer-Policy come from the _headers file that the
-# Wowchemy Netlify plugin generates at build time (its template: modules/wowchemy-plugin-netlify/src/layouts/index.headers,
+# build writes from layouts/index.headers (once the Wowchemy Netlify plugin's template; the site owns it since October 2026;
 # one "/*" rule); this block adds the Content-Security-Policy and X-Frame-Options it does not set, and the Permissions-Policy.
 #
 # How Netlify combines these (checked on bampel.com, 2026-10-22; the Netlify docs do not say): every rule that matches a path

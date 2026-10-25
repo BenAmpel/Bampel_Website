@@ -1,6 +1,6 @@
 # Weekly check of the build tool versions pinned in netlify.toml (Hugo, Dart Sass), which Dependabot cannot read.
 # Opens one issue when a newer release exists (and does nothing if that issue is already open). Upgrading Hugo needs a
-# local build and diff first: the Wowchemy theme is frozen and patched through shadow files in layouts/.
+# local build and diff first: the templates (Wowchemy v5 in origin, now in layouts/) are not maintained upstream.
 name: Build tool versions
 
 on:

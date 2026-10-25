@@ -20,7 +20,12 @@ module.exports = {
       content: [
         './hugo_stats.json',
         './static/js/**/*.js',
-        './assets/js/**/*.js',
+        // The site's own scripts only. The Wowchemy scripts copied into assets/js in October 2026 (wowchemy-*.js,
+        // _vendor/) are left out so the purge keeps exactly what it kept when they lived in the theme module; the
+        // safelist below still covers the classes they toggle. Stage 2 of the theme plan replaces those scripts.
+        './assets/js/{body-end,css-swap,ga-init,head-enhancements,research_dashboard,wowchemy-search}.js',
+        './assets/js/site/**/*.js',
+        './assets/js/widgets/**/*.js',
         './layouts/**/*.html',
         './content/**/*.md',
       ],
