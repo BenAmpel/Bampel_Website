@@ -280,6 +280,7 @@
     if (fresh(run, key)) {
       run.t0 = performance.now(); run.hidden = 0;
       if (run.hiddenAt != null) run.hiddenAt = run.t0;   // drawn while the tab was hidden: count hidden time from now, not from before the screen existed
+      run.drawnHidden = !!document.hidden;   // the screen appeared while the participant was in another tab
       var form = decisionForm(ctx, s.entries), head = s.entries.length === 1 ? s.entries[0].label : g.stages[0].label;
       ui.show('<h1>' + esc(head) + '</h1>' + (s.practice ? '<p class="soft">' + ui.Th('game_practice_note') + '</p>' : '') + noticeBlock(ctx, s.notices) + roleBlock(ctx, s.role, s.roleLabel) + shownBlock(ctx, s.shown) + timerHtml(ui) +
         '<div id="gm-form">' + form.html + '</div><div id="gm-msg" role="alert"></div><div class="actions"><button id="gm-go">' + ui.Th('game_submit') + '</button></div><p class="muted" id="gm-progress" aria-live="polite"></p>');
@@ -289,7 +290,7 @@
         var r = form.read(ui.stage);
         if (r.missing) { ui.flag(ui.stage, r.missing, true); document.getElementById('gm-msg').innerHTML = ui.errorBox('Please give a valid answer for each highlighted decision.'); return; }
         go.disabled = true; ui.stage.querySelectorAll('input').forEach(function (i) { i.disabled = true; });
-        ui.call('game/move', { cid: s.cid, round: s.round, step: s.step, values: r.values, rtMs: Math.round(performance.now() - run.t0), hiddenMs: Math.round(run.hidden) }).then(function (m) {
+        ui.call('game/move', { cid: s.cid, round: s.round, step: s.step, values: r.values, rtMs: Math.round(performance.now() - run.t0), hiddenMs: Math.round(run.hidden), drawnHidden: run.drawnHidden }).then(function (m) {
           if (!alive(run)) return;
           if (m.error && m.error !== 'late') { go.disabled = false; ui.stage.querySelectorAll('input').forEach(function (i) { i.disabled = false; }); document.getElementById('gm-msg').innerHTML = ui.errorBox(m.message || 'That decision could not be saved. Check it and try again.'); return; }
           run.key = null; poll(run);
@@ -405,6 +406,7 @@
     }
     var form = decisionForm(ctx, s.entries), t0 = performance.now(); run.hidden = 0;
     if (run.hiddenAt != null) run.hiddenAt = t0;   // as above: hidden time starts with this screen
+    var drawnHidden = !!document.hidden;
     ui.show('<h1>' + esc(s.entries.length === 1 ? s.entries[0].label : title) + '</h1>' + (s.practice ? '<p class="soft">' + ui.Th('game_practice_note') + '</p>' : '') + roleBlock(ctx, s.role, s.roleLabel) + '<div id="gm-form">' + form.html + '</div>' +
       '<div id="gm-msg" role="alert"></div><div class="actions"><button id="gm-go">' + ui.Th('game_submit') + '</button></div>');
     var go = document.getElementById('gm-go');
@@ -412,7 +414,7 @@
       var r = form.read(ui.stage);
       if (r.missing) { ui.flag(ui.stage, r.missing, true); document.getElementById('gm-msg').innerHTML = ui.errorBox('Please give a valid answer for each highlighted decision.'); return; }
       go.disabled = true;
-      finish(run, { values: r.values, rtMs: Math.round(performance.now() - t0), hiddenMs: Math.round(run.hidden) }, function (err) { go.disabled = false; document.getElementById('gm-msg').innerHTML = ui.errorBox(err); });
+      finish(run, { values: r.values, rtMs: Math.round(performance.now() - t0), hiddenMs: Math.round(run.hidden), drawnHidden: drawnHidden }, function (err) { go.disabled = false; document.getElementById('gm-msg').innerHTML = ui.errorBox(err); });
     });
   }
 

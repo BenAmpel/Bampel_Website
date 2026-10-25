@@ -28,7 +28,7 @@
 (function (global) {
   'use strict';
 
-  var VERSION = '0.3.0';
+  var VERSION = '0.3.1';
   var IDLE_GAP_MS = 500;        // pointer still this long counts toward idleMs
   var NO_INPUT_MS = 2000;       // no input of any kind this long counts toward noInputMs
   var TYPING_PAUSE_MS = 2000;   // a gap between keys this long is a pause, not a between-key time
@@ -445,6 +445,7 @@
         keyIntervalCv: cv(c.keyIntervals),
         untrustedInputs: c.untrustedInputs,
         unpressedClicks: c.unpressedClicks,
+        saveRetries: c.reopens || 0,
         fields: c.fields,
         pastes: c.pastes,
         pasteChars: c.pasteChars,
@@ -475,6 +476,7 @@
       for (var i = rawEvents.length - 1; i >= 0; i--) if (rawEvents[i].type === 'item_end') { rawEvents = rawEvents.slice(0, i); break; }
       Array.prototype.push.apply(this.events, rawEvents.concat(since));
     }
+    c.reopens = (c.reopens || 0) + 1;
     this._log('item_reopen', { id: c.id });
     return true;
   };

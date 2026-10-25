@@ -57,7 +57,7 @@ export async function asyncSave(S, ctx, pid, index, data, now) {
   const stages = spec.stages.map((st, si) => {
     const acting = R.stageActs(st, role), values = {}, strat = {};
     if (acting) for (const d of st.decisions) { if (st.strategyMethod) strat[d.id] = v.values[d.id]; else values[d.id] = v.values[d.id]; }
-    return { stage: st.id, step: steps.findIndex(x => x.stages.includes(si)), acting, values, strategy: st.strategyMethod && acting ? strat : undefined, auto: false, rtMs: acting ? num(data.rtMs) : null, hiddenMs: acting ? num(data.hiddenMs) : null, others: [] };
+    return { stage: st.id, step: steps.findIndex(x => x.stages.includes(si)), acting, values, strategy: st.strategyMethod && acting ? strat : undefined, auto: false, rtMs: acting ? num(data.rtMs) : null, hiddenMs: acting ? num(data.hiddenMs) : null, drawnHidden: acting && typeof data.drawnHidden === 'boolean' ? data.drawnHidden : undefined, others: [] };
   });
   const rec = { code: pid, condition: ctx.condition, session: SESSION, index, role, practice, cohort: null, group: null, contentVersion: ctx.version, receivedAt: now,
     data: { played: true, mode: 'async', role, practice, roundNo, raw: v.values, stages, payoff: null } };

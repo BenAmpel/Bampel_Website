@@ -33,7 +33,7 @@ win.document = doc;
 vm.createContext(sandbox);
 vm.runInContext(readFileSync(here('../../static/lab/tracelab/tracelab.js'), 'utf8'), sandbox);
 const TraceLab = sandbox.window.TraceLab;
-assert.equal(TraceLab.VERSION, '0.3.0');
+assert.equal(TraceLab.VERSION, '0.3.1');
 
 const lab = TraceLab.create({ study: 't', mouseSampleMs: 50 }).start();
 const field = el('INPUT', 'name'), panel = el('DIV', 'panel', 'evidence'), clip = { tagName: 'AUDIO', id: 'clip', currentTime: 0, duration: 10, muted: false, volume: 1,
@@ -69,7 +69,7 @@ clip.played = ranges([[0, 2], [8, 10]]); clip.currentTime = 10; at(10000, doc, '
 clock = 14000;
 const f = lab.endItem({}).features;
 
-assert.equal(f.traceVersion, '0.3.0');
+assert.equal(f.traceVersion, '0.3.1');
 assert.equal(f.windowBlurs, 1, 'only the window itself losing focus counts');
 assert.equal(f.firstInteractionMs, 3000);
 // inputs at 3000, 3280 and 6000 (key presses), 9001-9100 (scrolling), 9200-9700 (pointer); the item ends at 14000
@@ -101,6 +101,7 @@ at(22000, doc, 'click', { target: panel, clientX: 1, clientY: 1 });
 clock = 23000;
 const again = lab.endItem({});
 assert.equal(again.features.clicks, 2, 'clicks before the failed save are kept');
+assert.equal(again.features.saveRetries, 1, 'the failed save is counted');
 assert.equal(again.features.durationMs, 3000, 'the item clock runs from its first start');
 assert.equal(lab.items.filter(i => i.id === 't1').length, 1);
 const ev = lab.events.filter(e => e.item === 't1').map(e => e.type);
@@ -146,14 +147,32 @@ assert.equal(kept.filter(e => e.type === 'click').length, 3000, 'every non-move 
 assert.deepEqual(keepRaw([{ t: 1, type: 'click' }, null, 3]), [{ t: 1, type: 'click' }]);
 const S = { type: { trialRow: () => ({}) } };
 const row = trialRow(S, { code: 'X', session: 1, index: 0, data: { traces: f, raw: { sent: 10, kept: 9 } } }, null);
-assert.equal(row.trace_version, '0.3.0'); assert.equal(row.window_blurs, 1); assert.equal(row.key_interval_ms, 280); assert.equal(row.no_input_ms, f.noInputMs);
+assert.equal(row.trace_version, '0.3.1'); assert.equal(row.window_blurs, 1); assert.equal(row.key_interval_ms, 280); assert.equal(row.no_input_ms, f.noInputMs);
 assert.equal(row.raw_events, 9); assert.equal(row.raw_events_sent, 10); assert.equal(row.pointer_type, 'touch');
+assert.equal(row.save_retries, 0); assert.equal(trialRow(S, { code: 'X', session: 1, index: 0, data: { traces: { ...f, saveRetries: 2 } } }, null).save_retries, 2);
 const old = trialRow(S, { code: 'X', session: 1, index: 0, data: { traces: { durationMs: 5, windowBlurs: 4 } } }, null);
-assert.equal(old.trace_version, '0.1.0'); assert.equal(old.window_blurs, '', '0.1.0 counted field blurs: left blank'); assert.equal(old.key_interval_ms, '');
+assert.equal(old.save_retries, '', 'not counted before 0.3.1: blank'); assert.equal(old.trace_version, '0.1.0'); assert.equal(old.window_blurs, '', '0.1.0 counted field blurs: left blank'); assert.equal(old.key_interval_ms, '');
 console.log('server: long logs thinned not dropped; CSV trace columns, blank where 0.1.0 did not measure');
 // alert triage: a trial with no AI stores no AI time (Number(null) is 0, which read as "AI shown at 0 ms")
 const at1 = { alertId: 'a1', alert: { panels: [{ key: 'logs' }] } };
 assert.equal(triage.cleanTrialData({ mode: 'none', aiShownAtMs: null }, at1, {}).aiShownAtMs, null);
 assert.equal(triage.cleanTrialData({ mode: 'ai_first', aiShownAtMs: 0 }, at1, {}).aiShownAtMs, 0, 'AI first is shown at 0 ms');
 console.log('alert triage: no AI is blank, not 0 ms');
+// alert triage: seen time (in view, tab visible) next to open time; blank where it was not measured
+{
+  const t = { alertId: 'a1', alert: { panels: [{ key: 'logs' }, { key: 'email' }] } };
+  const d = triage.cleanTrialData({ mode: 'none', evidence: { seenTracked: true, opens: [{ panel: 'logs', atMs: 100, dwellMs: 9000, seenMs: 2500 }, { panel: 'email', atMs: 9200, dwellMs: 400, seenMs: 400 }, { panel: 'logs', atMs: 9700, dwellMs: 300, seenMs: 300 }] } }, t, {});
+  const r = { alert: { ...t.alert, misleadingPanels: [], truth: 'benign' }, data: d, ai: null, answerOrder: ['malicious', 'benign'] };
+  const row = triage.trialRow(r);
+  assert.deepEqual([row.dwell_logs_ms, row.seen_logs_ms, row.dwell_email_ms, row.seen_email_ms], [9300, 2800, 400, 400], 'open 9.3 s, in view 2.8 s');
+  const old = triage.trialRow({ ...r, data: triage.cleanTrialData({ mode: 'none', evidence: { opens: [{ panel: 'logs', atMs: 1, dwellMs: 50 }] } }, t, {}) });
+  assert.deepEqual([old.dwell_logs_ms, old.seen_logs_ms], [50, ''], 'not measured: blank');
+}
+// multimodal live clips: the final answer's time next to the first's
+{
+  const mm = (await import('../../netlify/lib/lab/types/multimodal.mjs')).default;
+  const row = mm.trialRow({ itemId: 'c1', item: { kind: 'audio' }, data: { live: { changes: [{ ms: 4000, clipMs: 3000, value: 'scam' }, { ms: 9000, clipMs: 8000, value: 'legit' }], final: 'legit' } } });
+  assert.deepEqual([row.live_first_ms, row.live_final_ms, row.live_final_clip_ms, row.live_changes], [4000, 9000, 8000, 1]);
+}
+console.log('audit follow-ups: seen time per panel, final live answer time');
 console.log('ALL TRACELAB TESTS PASSED');

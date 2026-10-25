@@ -27,6 +27,7 @@ One row per participant x round x stage. Practice rounds are included (`practice
 | `auto_why` | `timeout`, `dropped` (the participant had already been marked as having left), or `admin` |
 | `limit_fallback` | 1 = a decision limit formula could not be evaluated for this decision, so the static bounds and default applied (should not happen for saved studies) |
 | `rt_ms`, `hidden_ms` | Time from the decision screen appearing to sending, and the time the tab was hidden in between. Blank for automatic decisions |
+| `drawn_hidden` | 1 = the decision screen appeared while the participant was in another tab (a partner moved while they were away), so `rt_ms` includes the time it took them to come back. Blank for automatic decisions and for records from before October 2026 |
 | `payoff` | The participant's points for the round (same on every stage row of the round). Asynchronous play: blank until the participant has been matched |
 | `group_total` | The group's points for the round |
 | `in_payment` | 1 = the round counts toward payment: the drawn round with `randomRound`, every non-practice round with `sum` or `mean`; 0 otherwise |

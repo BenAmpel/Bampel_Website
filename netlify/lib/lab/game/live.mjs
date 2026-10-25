@@ -230,7 +230,7 @@ async function finishRound(S, ctx, cohort, r, j, members, now) {
     const values = {}, strat = {};
     if (acting && res) for (const d of st.decisions) { values[d.id] = res.concrete[m.pid][d.id]; if (st.strategyMethod) strat[d.id] = raw[m.pid][d.id]; }
     return { stage: st.id, step, acting, values, strategy: st.strategyMethod && acting ? strat : undefined, auto: acting ? !!mv.auto : false, why: acting && mv.auto ? mv.why : undefined,
-      rtMs: acting ? (mv.rtMs ?? null) : null, hiddenMs: acting ? (mv.hiddenMs ?? null) : null, limitFallback: acting && mv.limitFallback ? true : undefined };
+      rtMs: acting ? (mv.rtMs ?? null) : null, hiddenMs: acting ? (mv.hiddenMs ?? null) : null, drawnHidden: acting && typeof mv.drawnHidden === 'boolean' ? mv.drawnHidden : undefined, limitFallback: acting && mv.limitFallback ? true : undefined };
   };
   const total_ = res ? Object.values(res.payoffs).reduce((a, b) => a + b, 0) : null;
   const all = members.map(m => ({ m, stages: spec.stages.map((st, si) => stageRow(m, st, si)) }));
@@ -390,7 +390,7 @@ export async function submitMove(S, ctx, pid, body, now) {
   const v = R.validateStepValues(spec, params, me.role, steps[s], r, seen, body.values);
   if (v.error) return { error: 'bad_values', status: 400, message: v.error };
   const num = (x, hi) => { x = Number(x); return Number.isFinite(x) ? Math.min(hi, Math.max(0, Math.round(x))) : null; };
-  const w = await writeOnce(S.store, K.move(cohort.id, r, s, pid), { values: v.values, auto: false, at: now, rtMs: num(body.rtMs, 864e5), hiddenMs: num(body.hiddenMs, 864e5), ...(R.stepFellBack(spec, params, me.role, steps[s], r, seen) ? { limitFallback: true } : {}) }, { verify: true });
+  const w = await writeOnce(S.store, K.move(cohort.id, r, s, pid), { values: v.values, auto: false, at: now, rtMs: num(body.rtMs, 864e5), hiddenMs: num(body.hiddenMs, 864e5), drawnHidden: body.drawnHidden === true, ...(R.stepFellBack(spec, params, me.role, steps[s], r, seen) ? { limitFallback: true } : {}) }, { verify: true });
   return { ok: true, repeat: !w.created, late: !w.created && !!w.value.auto };
 }
 

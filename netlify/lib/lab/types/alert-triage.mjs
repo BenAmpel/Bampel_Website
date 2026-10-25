@@ -239,13 +239,14 @@ export default {
     const fin = step(d.final) || {};
     fin.influential = Array.isArray(d.final?.influential) ? d.final.influential.filter(k => keys.includes(k) || k === 'summary' || k === 'ai').slice(0, 20) : [];
     const opens = Array.isArray(d.evidence?.opens) ? d.evidence.opens.slice(0, 1000).filter(o => o && keys.includes(o.panel))
-      .map(o => ({ panel: o.panel, atMs: num(o.atMs, 0, 864e5), dwellMs: num(o.dwellMs, 0, 864e5), hiddenMs: num(o.hiddenMs, 0, 864e5) || 0, afterAI: !!o.afterAI })) : [];
+      .map(o => ({ panel: o.panel, atMs: num(o.atMs, 0, 864e5), dwellMs: num(o.dwellMs, 0, 864e5), hiddenMs: num(o.hiddenMs, 0, 864e5) || 0, afterAI: !!o.afterAI,
+        ...(o.seenMs != null ? { seenMs: num(o.seenMs, 0, 864e5) } : {}) })) : [];
     const answerLog = Array.isArray(d.answerLog) ? d.answerLog.slice(0, 1000).map(a => ({ atMs: num(a?.atMs, 0, 864e5), name: typeof a?.name === 'string' ? a.name.slice(0, 40) : null,
       value: Array.isArray(a?.value) ? a.value.slice(0, 20).map(x => String(x).slice(0, 40)) : typeof a?.value === 'number' ? a.value : String(a?.value ?? '').slice(0, 200) })) : [];
     const small = (v, max) => v && typeof v === 'object' && jsonSize(v) <= max ? v : null;
     return {
       mode: oneOf(d.mode, ['ai_first', 'evidence_first', 'none']), aiShownAtMs: d.aiShownAtMs == null ? null : num(d.aiShownAtMs, 0, 864e5),   // Number(null) is 0: a trial with no AI is not "AI at 0 ms"
-      initial: step(d.initial), final: fin, evidence: { opens, unique: [...new Set(opens.map(o => o.panel))] },
+      initial: step(d.initial), final: fin, evidence: { opens, unique: [...new Set(opens.map(o => o.panel))], ...(d.evidence?.seenTracked === true ? { seenTracked: true } : {}) },
       answerLog, traces: small(d.traces, 50000),
       viewport: d.viewport ? { w: num(d.viewport.w, 0, 20000), h: num(d.viewport.h, 0, 20000) } : null,
       device: small(d.device, 4000), selfTest: d.selfTest === true || undefined
@@ -283,6 +284,8 @@ export default {
       influential_panels: (Array.isArray(fin.influential) ? fin.influential : []).join('|')
     };
     for (const k of a.panels.map(x => x.key)) row[`dwell_${k}_ms`] = Math.round(opens.filter(o => o.panel === k).reduce((n, o) => n + (o.dwellMs || 0), 0));
+    // Time each panel was actually in view (blank for trials recorded before this was measured, or without IntersectionObserver).
+    for (const k of a.panels.map(x => x.key)) row[`seen_${k}_ms`] = d.evidence?.seenTracked ? Math.round(opens.filter(o => o.panel === k).reduce((n, o) => n + (o.seenMs || 0), 0)) : '';
     return row;
   },
 

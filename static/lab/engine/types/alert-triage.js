@@ -35,13 +35,31 @@
           '<div class="actions"><button id="lock">' + Th('lock_button') + '</button></div></div><div id="step2" hidden></div>' : '<div class="step" id="step2"></div>'));
 
       var pbody = document.getElementById('pbody'), tabs = Array.prototype.slice.call(stage.querySelectorAll('[role=tab]'));
+      // Seen time: an open panel counts as seen while it is in view (half of it, or half the window's height of it)
+      // and the tab is visible. dwellMs runs from opening to closing, including time it sat scrolled off screen while
+      // the participant answered; seenMs leaves that out. Without IntersectionObserver only dwellMs is recorded.
+      var inView = true, io = null;
+      function seenTick() {
+        if (!openNow || !io) return;
+        var on = inView && !document.hidden, t = ctx.ms();
+        if (on && openNow.seenAt == null) openNow.seenAt = t;
+        else if (!on && openNow.seenAt != null) { openNow.seenMs += t - openNow.seenAt; openNow.seenAt = null; }
+      }
+      if (window.IntersectionObserver) {
+        io = new IntersectionObserver(function (es) {
+          es.forEach(function (e) { inView = e.isIntersecting && (e.intersectionRatio >= 0.5 || e.intersectionRect.height >= window.innerHeight * 0.5); });
+          seenTick();
+        }, { threshold: [0, 0.25, 0.5, 0.75, 1] });
+        io.observe(pbody);
+      }
       function closePanel() {
         if (!openNow) return;
         if (openNow.hiddenAt != null) { openNow.hiddenMs += ctx.ms() - openNow.hiddenAt; openNow.hiddenAt = null; }
+        if (io) { if (openNow.seenAt != null) openNow.seenMs += ctx.ms() - openNow.seenAt; openNow.seenMs = Math.round(openNow.seenMs); delete openNow.seenAt; }
         openNow.dwellMs = Math.max(0, ctx.ms() - openNow.atMs - openNow.hiddenMs);   // time on screen, excluding a hidden tab
         openNow.afterAI = aiShownAtMs != null && openNow.atMs >= aiShownAtMs; delete openNow.hiddenAt; openNow = null;
       }
-      function onVis() { if (!openNow) return; if (document.hidden) openNow.hiddenAt = ctx.ms(); else if (openNow.hiddenAt != null) { openNow.hiddenMs += ctx.ms() - openNow.hiddenAt; openNow.hiddenAt = null; } }
+      function onVis() { if (!openNow) return; if (document.hidden) openNow.hiddenAt = ctx.ms(); else if (openNow.hiddenAt != null) { openNow.hiddenMs += ctx.ms() - openNow.hiddenAt; openNow.hiddenAt = null; } seenTick(); }
       document.addEventListener('visibilitychange', onVis);
       function openTab(b) {
         var key = b.getAttribute('data-panel');
@@ -52,6 +70,7 @@
         pbody.setAttribute('aria-labelledby', b.id);
         pbody.innerHTML = '<p>' + esc(panel.text) + '</p>';
         openNow = { panel: key, atMs: ctx.ms(), hiddenMs: 0, hiddenAt: null }; opens.push(openNow);
+        if (io) { openNow.seenMs = 0; openNow.seenAt = null; seenTick(); }
       }
       tabs.forEach(function (b, i) {
         b.addEventListener('click', function () { openTab(b); });
@@ -87,12 +106,12 @@
         submit.addEventListener('click', function () {
           var miss = ui.blank(answers, need);
           if (miss.length) { ui.flag(step2, miss, true); msg.innerHTML = ui.errorBox(miss.length === 1 && miss[0] === 'final_confidence' ? T('conf_needed') : T('required_prompt')); return; }
-          msg.innerHTML = ''; submit.disabled = true; closePanel(); document.removeEventListener('visibilitychange', onVis);
+          msg.innerHTML = ''; submit.disabled = true; closePanel(); document.removeEventListener('visibilitychange', onVis); if (io) io.disconnect();
           ctx.submit({
             mode: mode, aiShownAtMs: aiShownAtMs, initial: initial,
             final: { judgment: answers.final_judgment, confidence: answers.final_confidence, influential: answers.influential, rtMs: ctx.ms() },
-            evidence: { opens: opens }
-          }, function (err) { submit.disabled = false; document.addEventListener('visibilitychange', onVis); msg.innerHTML = ui.errorBox(err); });
+            evidence: { opens: opens, seenTracked: !!io }
+          }, function (err) { submit.disabled = false; document.addEventListener('visibilitychange', onVis); if (io) io.observe(pbody); msg.innerHTML = ui.errorBox(err); });
         });
       }
 

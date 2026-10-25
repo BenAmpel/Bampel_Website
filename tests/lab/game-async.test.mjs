@@ -11,7 +11,7 @@ import { setup, participants, clients, instance, drive, rng, type } from './game
 import { SimClient } from '../../netlify/lib/lab/game/sim.mjs';
 
 const T0 = Date.UTC(2027, 0, 5, 15);
-const save = (S, code, round, values, now = T0) => E.saveTrial(S, code, 1, round, { values, rtMs: 900 }, now);
+const save = (S, code, round, values, now = T0, extra = {}) => E.saveTrial(S, code, 1, round, { values, rtMs: 900, ...extra }, now);
 const asRole = async (S, code, role) => { await S.store.set(K.role(code), { role, at: T0 }); await S.store.set(`g/arole/main/${role}/${code}`, { at: T0 }); };
 const rowOf = async (S, code) => paymentRowFor(S, await S.store.get(`participants/${code}`));
 
@@ -25,12 +25,12 @@ const rowOf = async (S, code) => paymentRowFor(S, await S.store.get(`participant
   const ps = await poll(s1, 0); assert.equal(ps.phase, 'async'); assert.equal(ps.role, 'sender'); assert.equal(ps.entries.length, 1); assert.equal(ps.entries[0].decisions[0].max, 10);
   const pr = await poll(r1, 0); assert.equal(pr.entries[0].strategy.rows.length, 11); assert.equal(pr.entries[0].strategy.rows[4].spec.max, 12);
   // the sender decides first: nobody to be matched with yet, so pending
-  assert.equal((await save(S, s1, 0, { send: 6 })).ok, true);
+  assert.equal((await save(S, s1, 0, { send: 6 }, T0, { drawnHidden: true })).ok, true);   // the screen appeared while they were in another tab
   assert(await base.get(K.apend(s1)), 'pending'); assert.equal(await base.get(K.amatch(s1)), null);
   let row = await rowOf(S, s1); assert.equal(row.match_status, 'pending'); assert.equal(row.bonus, ''); assert.equal(row.points, '');
   // a receiver states a response for each possible amount, then finishes: matched at once with an earlier sender
   const table = {}; for (let v = 0; v <= 10; v++) table[String(v)] = Math.floor(v * 3 / 2);
-  assert.equal((await save(S, r1, 0, { return: { table } })).ok, true);
+  assert.equal((await save(S, r1, 0, { return: { table } }, T0, { drawnHidden: false })).ok, true);
   const mr = await base.get(K.amatch(r1)); assert(mr, 'the receiver is matched when they finish'); assert.equal(mr.rounds[0].partners.length, 1); assert.equal(mr.rounds[0].partners[0].pid, s1); assert.deepEqual(mr.rounds[0].partners[0].raw, { send: 6 }, 'a copy of the decision used');
   let rrow = await rowOf(S, r1); assert.equal(rrow.match_status, 'matched'); assert.equal(Number(rrow.points), 18 - 9, 'receiver: 3 x 6 - 9');
   // the sender is pending until resolved; resolving matches them with the receiver's stored strategy
@@ -52,6 +52,7 @@ const rowOf = async (S, code) => paymentRowFor(S, await S.store.get(`participant
   assert.equal(sRows.find(x => x.stage === 'return').acting, 0);
   const rr = rRows.find(x => x.stage === 'return'); assert.equal(rr.acting, 1); assert.equal(Number(rr.d_return), 9, 'the strategy resolved to a concrete decision'); assert.match(rr.strategy, /0:0\|1:1\|2:3/); assert.equal(String(rr.o_send), '6'); assert.equal(rr.payoff, 9);
   assert.equal(rows.every(x => x.mode === 'async'), true);
+  assert.deepEqual([sRows.find(x => x.stage === 'send').drawn_hidden, rr.drawn_hidden, sRows.find(x => x.stage === 'return').drawn_hidden], [1, 0, ''], 'drawn while hidden: 1, 0, blank where the role does not decide');
   console.log('trust game (async): strategy table, pending until a partner exists, matched with a copy of the stored decision, hand-computed payoffs 13 and 9');
 }
 // ===== ultimatum with a threshold =====
