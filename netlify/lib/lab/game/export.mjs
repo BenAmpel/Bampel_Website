@@ -75,7 +75,7 @@ export async function exportTrials(S, records, byCode, codes) {
         row['o_' + dec.id] = others.join('|');
       }
       row.auto = sr.acting ? (sr.auto ? 1 : 0) : ''; row.auto_why = sr.auto ? sr.why || '' : '';
-      row.limit_fallback = sr.limitFallback ? 1 : 0; row.rt_ms = sr.rtMs ?? ''; row.hidden_ms = sr.hiddenMs ?? '';
+      row.limit_fallback = sr.limitFallback ? 1 : 0; row.rt_ms = sr.rtMs ?? ''; row.hidden_ms = sr.hiddenMs ?? ''; row.drawn_hidden = sr.drawnHidden == null ? '' : sr.drawnHidden ? 1 : 0;
       row.payoff = payoff ?? ''; row.group_total = gtotal ?? '';
       const paidIdx = x.pay ? x.pay.round : null, method = x.ctx && x.ctx.g.payment.method;
       row.in_payment = d.practice ? 0 : method === 'randomRound' ? (paidIdx === rho ? 1 : 0) : 1;

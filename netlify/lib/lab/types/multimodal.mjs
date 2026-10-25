@@ -812,6 +812,7 @@ export default {
       pilot_scripted: f.scripted ? 1 : f.scripted === false ? 0 : '',
       live_first: lv && lv.changes[0] ? lv.changes[0].value : '', live_first_ms: lv && lv.changes[0] ? lv.changes[0].ms : '', live_first_clip_ms: lv && lv.changes[0] ? lv.changes[0].clipMs : '',
       live_changes: lv ? Math.max(0, lv.changes.length - 1) : '', live_final: lv ? lv.final || '' : '', live_decided_ms: lv ? lv.decidedMs ?? '' : '', live_decided_clip_ms: lv ? lv.decidedClipMs ?? '' : '',
+      live_final_ms: lv && lv.changes.length ? lv.changes[lv.changes.length - 1].ms : '', live_final_clip_ms: lv && lv.changes.length ? lv.changes[lv.changes.length - 1].clipMs : '',
       live_late: lv ? (lv.late ? 1 : 0) : '', live_clip_ms: lv ? lv.clipMs ?? '' : '',
       slider_samples: sl ? sl.length : '', slider_mean: sl && sl.length ? Math.round(sl.reduce((a, x) => a + (x[1] || 0), 0) / sl.length) : '', slider_last: sl && sl.length ? sl[sl.length - 1][1] : '',
       call_disclosed: d.callServer ? (cs.disclosed || []).join('|') : '', call_disclosure: d.callServer ? ((cs.disclosed || []).length ? 1 : 0) : '', call_code_sent: d.callServer ? (cs.codeSent ? 1 : 0) : '',

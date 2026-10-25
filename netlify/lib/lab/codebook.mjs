@@ -37,9 +37,10 @@ const SHARED_TRIAL_TAIL = [
   ['typing_pauses', 'integer', 'Gaps of 2 s or more between typing keys.'],
   ['key_interval_cv', 'number', 'Variation of between-key times (standard deviation / mean; 5 or more intervals). Near 0 = machine-even typing.'],
   ['scripted_events', 'integer', 'Input events made by a script during the trial (untrusted pointer, key or typing events, and clicks with no real press before them). Blank before TraceLab 0.3.0.'],
-  ['trace_version', 'text', 'TraceLab version that recorded the measures (0.1.0 = before the October 2026 revision; 0.3.0 added scripted-input and typing-variation measures).'],
+  ['trace_version', 'text', 'TraceLab version that recorded the measures (0.1.0 = before the October 2026 revision; 0.3.0 added scripted-input and typing-variation measures; 0.3.1 save_retries).'],
   ['raw_events', 'integer', 'Raw events stored for the trial (pointer moves are thinned when the log is very long; 0 = log too large to store).'],
   ['raw_events_sent', 'integer', 'Raw events the browser sent.'],
+  ['save_retries', 'integer', 'Times saving the trial failed and was tried again (the trial went on with everything recorded). Blank before TraceLab 0.3.1.'],
   ['onset_ms', 'ms', 'Stimulus onset: the first animation frame after the item was drawn, on the browser\'s performance.now() clock (or when the type marked a later onset).'],
   ['onset_delay_ms', 'ms', 'Onset minus the moment the item screen started; subtract it from rt_ms for a response time from onset (not for reaction-time tasks, whose rt_ms already starts at the stimulus frame).'],
   ['frame_ms', 'number', 'The display\'s frame interval for this session (median of 60 frames; 16.67 = 60 Hz).'],
@@ -104,7 +105,7 @@ const TYPE_COLUMNS = {
     ['slider_flag', 'binary', 'Participant had the real-time suspicion slider.', '0 = no; 1 = yes'], ['pilot_scripted', 'binary', 'Participant heard scripted caller lines only (pilot equivalence check).', '0 = no; 1 = yes'],
     // Live passive decisions (answer while the clip plays).
     ['live_first', 'category', 'First answer chosen while the clip played.'], ['live_first_ms', 'ms', 'Time of the first answer from the item start.'], ['live_first_clip_ms', 'ms', 'Clip position at the first answer.'],
-    ['live_changes', 'integer', 'Answer changes after the first.'], ['live_final', 'category', 'Final answer.'], ['live_decided_ms', 'ms', 'Time of the "decided" key press.'],
+    ['live_changes', 'integer', 'Answer changes after the first.'], ['live_final', 'category', 'Final answer.'], ['live_final_ms', 'ms', 'Time of the final answer (the last change) from the item start. decision_ms on live clips is the first answer.'], ['live_final_clip_ms', 'ms', 'Clip position at the final answer.'], ['live_decided_ms', 'ms', 'Time of the "decided" key press.'],
     ['live_decided_clip_ms', 'ms', 'Clip position at the "decided" key press.'], ['live_late', 'binary', 'First answered after the clip ended.', '0 = no; 1 = yes'], ['live_clip_ms', 'ms', 'Clip length.'],
     ['slider_samples', 'integer', 'Suspicion slider samples (every 250 ms).'], ['slider_mean', 'number', 'Mean slider value (0 to 100).'], ['slider_last', 'number', 'Last slider value (0 to 100).'],
     // Scored calls (computed on the server; the browser never learns the outcome).
@@ -199,7 +200,8 @@ export function buildCodebook(S, c) {
   add('trials', SHARED_ID.map(r => (r[0] === 'condition' ? [r[0], r[1], r[2], condValues] : r)), 'engine');
   add('trials', [['trial_index', 'integer', 'Position of the trial within the session (0 = first shown).']], 'engine');
   add('trials', TYPE_COLUMNS[typeId] || [], typeId);
-  if (typeId === 'alert-triage') for (const k of [...new Set((c.alerts || []).flatMap(a => (a.panels || []).map(p => p.key)))]) out.push({ file: 'trials', column: `dwell_${k}_ms`, kind: 'ms', values: '', label: `Time the "${k}" panel was on screen.`, applies_to: 'alerts with that panel', source: typeId });
+  if (typeId === 'alert-triage') for (const k of [...new Set((c.alerts || []).flatMap(a => (a.panels || []).map(p => p.key)))]) out.push({ file: 'trials', column: `dwell_${k}_ms`, kind: 'ms', values: '', label: `Time the "${k}" panel was open (from opening to closing, including time scrolled out of view).`, applies_to: 'alerts with that panel', source: typeId },
+    { file: 'trials', column: `seen_${k}_ms`, kind: 'ms', values: '', label: `Time the "${k}" panel was open and in view (half of it, or half the window, on screen, with the tab visible). Blank for trials recorded before this was measured.`, applies_to: 'alerts with that panel', source: typeId });
   if (typeId === 'multimodal' && c.decision && Array.isArray(c.decision.options)) { const d = out.find(x => x.column === 'decision' && x.file === 'trials'); if (d) { d.values = c.decision.options.map(o => `${o.value} = ${o.label}`).join('; '); d.label = c.decision.prompt || d.label; } }
   for (const q of c.questions || []) if (q.type !== 'info') out.push(questionEntry('trials', `a_${q.id}`, q, typeId === 'multimodal' ? 'items that ask it' : 'every item', 'item question'));
   add('trials', SHARED_TRIAL_TAIL, 'engine');

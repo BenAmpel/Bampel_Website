@@ -58,7 +58,8 @@ Trials CSV: one row per item (alert, scenario) answered. Surveys CSV: one row pe
 | `misleading_inspected` | 1 if any panel marked misleading was opened |
 | `contradicts_ai_inspected` | 1 if any panel pointing against the AI's verdict was opened (any time) |
 | `contradicts_ai_inspected_after_ai` | 1 if such a panel was on screen at any point after the AI appeared (opened after, or still open when it appeared) |
-| `dwell_{panel}_ms` | Total time that panel was on screen, excluding time the browser tab was hidden |
+| `dwell_{panel}_ms` | Total time that panel was open, excluding time the browser tab was hidden. It includes time the open panel sat scrolled out of view, for example while the participant answered below |
+| `seen_{panel}_ms` | Total time that panel was open and in view: half of it, or half the window's height of it, on screen, with the tab visible. Blank for trials recorded before October 2026 |
 
 ## Behavior and context
 
@@ -76,7 +77,8 @@ Trials CSV: one row per item (alert, scenario) answered. Surveys CSV: one row pe
 | `key_interval_cv` | Variation of between-key times (standard deviation / mean). People type unevenly; near 0 means software typing at a fixed rate |
 | `scripted_events` | Input events made by a script during the trial: pointer, key or typing events the browser marks untrusted, and clicks with no real press or key in the second before. The lab's own pages never create these. Blank before TraceLab 0.3.0 |
 | `key_interval_ms`, `key_hold_ms`, `typing_pauses` | Median time between typing keys (pauses of 2 s or more left out), median time a key was held, and the number of such pauses |
-| `trace_version` | TraceLab version that recorded the measures; `0.1.0` = before the October 2026 revision; `0.3.0` added `scripted_events` and `key_interval_cv` |
+| `trace_version` | TraceLab version that recorded the measures; `0.1.0` = before the October 2026 revision; `0.3.0` added `scripted_events` and `key_interval_cv`; `0.3.1` added `save_retries` |
+| `save_retries` | Times saving the trial failed and was tried again; the trial went on with everything recorded. Blank before TraceLab 0.3.1 |
 | `raw_events`, `raw_events_sent` | Raw events stored and sent. A very long log keeps every event but thins pointer moves; 0 stored means the log was too large to keep |
 | `views` | Times the trial screen was shown (more than 1 means the page was reloaded mid-trial) |
 | `viewport_w`, `viewport_h` | Browser window size at submission |
@@ -132,6 +134,7 @@ Trials CSV columns after `trial_index` (the generic identifier, behavior, and co
 | `mt_input` | How the mouse-tracked answer was given: `mouse`, `pen`, `touch` or `keyboard`. The `mt_` measures are blank for keyboard and touch answers, which have no pointer path (before October 2026 they read as perfectly straight paths) |
 | `media_pauses`, `media_ended_ms`, `media_error` | Pauses before the clip's end; time from the item appearing to the clip ending; 1 if the clip could not load or play (the participant could still answer) |
 | `call_ring_ms` | Time the phone rang before it was answered or declined |
+| `live_final_ms`, `live_final_clip_ms` | Live clips: time of the final answer (the last change) from the item start, and the clip position then. On live clips `decision_ms` is the first answer; the other `live_*` columns are in the study's codebook |
 | `call_answered`, `call_outcome`, `call_final_state` | Whether the call was answered; how it ended (`disclosed` digits to an attacker, `complied`, `completed` a legitimate request, `verified` by insisting on calling back, `refused`, `resisted`, `not_completed`, `declined`, `missed`, `hung_up`, `max_turns`); the caller's last step |
 | `call_turns`, `call_digits_disclosed`, `call_verifies`, `call_refusals` | Participant turns; the longest run of digits said; requests to verify or call back; refusals |
 | `call_callbacks`, `call_callback_resolved` | Calls made from the directory after the call; whether one reached the organization's real number (1/0) |
