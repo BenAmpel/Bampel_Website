@@ -1,7 +1,7 @@
 # Weekly update pull requests for the build's npm packages and for the GitHub Actions the workflows use (pinned by
 # commit). Hugo and Dart Sass are pinned in netlify.toml, which Dependabot cannot read; .github/workflows/version-watch.yml
-# covers them. The Wowchemy theme (go.mod) is left out on purpose: it is frozen at an Aug 2023 commit and patched through
-# shadow files in layouts/, so a theme update needs a manual port, not a version bump.
+# covers them. There is no theme to update: the Wowchemy v5 files the site uses were copied into the repository in
+# October 2026 (docs/superpowers/plans/2026-10-25-theme-migration.md).
 version: 2
 updates:
   - package-ecosystem: npm

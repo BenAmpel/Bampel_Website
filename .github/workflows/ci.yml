@@ -28,12 +28,6 @@ jobs:
           node-version: '22'
           cache: npm
 
-      # Hugo modules (the Wowchemy theme) are fetched with the Go toolchain.
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
-        with:
-          go-version: stable
-          cache: false
-
       - name: Install Hugo and Dart Sass (versions from netlify.toml, checksums verified)
         run: |
           set -euo pipefail
