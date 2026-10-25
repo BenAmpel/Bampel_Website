@@ -211,6 +211,8 @@ The participant ID comes from `?pid=`, `?PROLIFIC_PID=`, or `?participant=` in t
 
 Each event has `t` (ms since start), `type`, and `item`. Types: `move`, `down`, `click`, `hover_in`, `hover_out`, `scroll`, `wheel`, `key_down`, `key_up` (with `hold`, ms), `input`, `focus_in`, `focus_out` (with `ms`), `paste`, `copy`, `cut`, `hidden`, `visible`, `window_blur`, `window_focus`, `resize`, `media_*` (with `heard`, seconds played so far), `answer`, `item_begin`, `item_end`, `item_reopen` (a failed save resumed the item), `start`, `finish`. Key events carry a category (`char`, `space`, `backspace`, `delete`, `enter`, `arrow`, `modifier`, `tab`, `other`), never the key. `scroll` events name the scroller (`page` or the panel) and, like `wheel`, are written at most once per sampling interval; the distance features still count every event.
 
+**Replay in the study admin.** Participants → Replay on any row opens that participant's trials (`static/lab/engine/replay.js`, loaded on first use): the pointer path drawn to their window size with clicks numbered, a timeline with lanes for pointer, clicks, keys, scrolling, form fields, hovers, hidden tab or window away, media, answers and scripted input, playback at 1× to 8×, and the full event log. It reads the stored raw events (`raw/{id}/s{n}/t{i}`) and the trial rows; it changes nothing. Viewers can use it.
+
 ## Before running a live study
 
 - IRB approval, with the consent text describing passive trace capture.
