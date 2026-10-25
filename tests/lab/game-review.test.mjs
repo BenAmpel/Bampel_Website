@@ -102,8 +102,10 @@ const poll = (S, code, body = { round: 0 }, now = T0) => type.routes['game/poll'
   assert(!sawPayEarly, 'no pay record exists before the last round is recorded'); assert(!sawSummaryRound, 'the summary does not reveal a paid round mid-game');
   const pepper = (await base.get('meta/pepper')).value;
   for (const cc of codes) { const pay = await base.get(K.pay(cc)); assert.equal(pay.round, R.drawPaidRound(pepper, cc, 'game-test-v1', 6)); }
-  const fromPublic = codes.concat(Array.from({ length: 30 }, (_, i) => 'P-' + i)).map(id => R.drawPaidRound('', id, 'game-test-v1', 1000) === R.drawPaidRound(pepper, id, 'game-test-v1', 1000));
-  assert(!fromPublic.some(Boolean), 'the draw differs from one computed from the ID and study alone');
+  // The draw must depend on the secret: computed without it, it should match only by chance (1 in 1,000 per ID). A draw
+  // that ignored the secret would match for all 200. (Requiring no match at all failed about 1 run in 30 by chance.)
+  const fromPublic = codes.concat(Array.from({ length: 198 }, (_, i) => 'P-' + i)).filter(id => R.drawPaidRound('', id, 'game-test-v1', 1000) === R.drawPaidRound(pepper, id, 'game-test-v1', 1000));
+  assert(fromPublic.length <= 4, `the draw differs from one computed from the ID and study alone (${fromPublic.length} of 200 matched)`);
   console.log('paid round: drawn at completion, seeded by the study pepper, not derivable from public information');
 }
 
