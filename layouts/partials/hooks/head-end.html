@@ -8,6 +8,9 @@
 <!-- Shared publications.json cache — single fetch for all shortcodes -->
 {{ partial "functions/js_tag" (dict "path" "js/site/pub-loader.js") }}
 
+<!-- The phone menu's open and close (Bootstrap's collapse plugin replaced; theme plan stage 2) -->
+{{ partial "functions/js_tag" (dict "path" "js/site/collapse.js" "attrs" "defer") }}
+
 
 <meta name="build-date" content="{{ now.UTC.Format "2006-01-02" }}">
 

@@ -95,7 +95,7 @@ $(document).on('click', '.navbar-collapse.show', function (e) {
   let targetElement = $(e.target).is('a') ? $(e.target) : $(e.target).parent();
 
   if (targetElement.is('a') && targetElement.attr('class') != 'dropdown-toggle') {
-    $(this).collapse('hide');
+    if (window.siteCollapse) window.siteCollapse.hide(this);   // assets/js/site/collapse.js, not Bootstrap's plugin
   }
 });
 
