@@ -213,6 +213,8 @@ Each event has `t` (ms since start), `type`, and `item`. Types: `move`, `down`, 
 
 **Replay in the study admin.** Participants → Replay on any row opens that participant's trials (`static/lab/engine/replay.js`, loaded on first use): the pointer path drawn to their window size with clicks numbered, a timeline with lanes for pointer, clicks, keys, scrolling, form fields, hovers, hidden tab or window away, media, answers and scripted input, playback at 1× to 8×, and the full event log. It reads the stored raw events (`raw/{id}/s{n}/t{i}`) and the trial rows; it changes nothing. Viewers can use it.
 
+**Analysis-ready downloads.** Participants → **Raw events as CSV** gives every TraceLab event as one row (`code`, `session`, `trial_index`, `t_ms` from the trial's start, `type`, `target`, `x`, `y`, `pointer`, `key` category, `field`, `value`, `ms`, `details`; built per participant by `rows?kind=events`, `engine.rawEventRows`). `/lab/analysis/` has R and Python starters (`starter.R`, `starter.py`) that read the trials and wide CSVs, leave out test participants and those over a data-quality flag limit, report `trace_version`, and fit log response time by condition with random intercepts for participant and item (R also fits a logistic model for a 0/1 outcome). `tests/lab/analysis.test.mjs` runs each starter on a simulated study with a known effect when R/lme4 or Python with pandas, statsmodels and scipy (`LAB_PYTHON`) is installed.
+
 ## Before running a live study
 
 - IRB approval, with the consent text describing passive trace capture.

@@ -561,6 +561,29 @@ export async function exportRaw(S, code) {
   return (await getMany(S.store, await S.store.list(`raw/${code}/`))).filter(([, v]) => v).map(([, v]) => v);
 }
 
+// The raw TraceLab events as one row per event, for analysis software that wants a table rather than JSON lines.
+// t_ms counts from the trial's start (its item_begin event). Columns every event can have come first; anything else
+// an event carries goes into details as JSON. Definitions: static/lab/CODEBOOK.md ("Raw events CSV").
+export const EVENT_COLUMNS = ['code', 'session', 'trial_index', 't_ms', 'type', 'target', 'x', 'y', 'pointer', 'key', 'field', 'value', 'ms', 'details'];
+const EVENT_OWN = new Set(['t', 'type', 'item', 'target', 'x', 'y', 'pt', 'k', 'field', 'value', 'dwell', 'hold', 'ms']);
+export async function rawEventRows(S, code) {
+  const recs = (await exportRaw(S, code)).sort((a, b) => (a.session - b.session) || (a.index - b.index));
+  const rows = [];
+  for (const r of recs) {
+    const ev = Array.isArray(r.events) ? r.events.filter(e => e && typeof e.t === 'number') : [];
+    const begin = ev.find(e => e.type === 'item_begin'), t0 = begin ? begin.t : ev.length ? ev[0].t : 0;
+    for (const e of ev) {
+      const rest = Object.fromEntries(Object.entries(e).filter(([k]) => !EVENT_OWN.has(k)));
+      const ms = e.dwell ?? e.hold ?? e.ms;
+      rows.push({ code: r.code, session: r.session, trial_index: r.index, t_ms: Math.round((e.t - t0) * 10) / 10, type: String(e.type || ''),
+        target: e.target ?? '', x: e.x ?? '', y: e.y ?? '', pointer: e.pt ?? '', key: e.k ?? '', field: e.field ?? '',
+        value: e.value == null ? '' : typeof e.value === 'object' ? JSON.stringify(e.value) : e.value, ms: ms ?? '',
+        details: Object.keys(rest).length ? JSON.stringify(rest) : '' });
+    }
+  }
+  return rows;
+}
+
 // One analysis row per trial: shared columns, then the type's measures. Definitions: static/lab/CODEBOOK.md.
 export function trialRow(S, r, p) {
   const d = r.data || {}, s = p?.sessions?.[r.session] || {}, prev = (p?.completed || []).find(x => x.session === r.session - 1);

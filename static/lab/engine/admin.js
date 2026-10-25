@@ -88,10 +88,11 @@
       '<button type="button" class="secondary" id="refresh">Refresh</button>' +
       '<button type="button" class="secondary" data-export="trials">Download trials CSV</button><button type="button" class="secondary" data-export="surveys">Download surveys CSV</button>' +
       '<button type="button" class="secondary" data-export="wide">Download wide CSV (one row per participant)</button>' +
-      '<button type="button" class="secondary" data-export="json">Download full JSON</button><button type="button" class="secondary" data-export="raw">Download raw behavior traces (JSONL)</button>' +
+      '<button type="button" class="secondary" data-export="json">Download full JSON</button><button type="button" class="secondary" data-export="raw">Download raw behavior traces (JSONL)</button><button type="button" class="secondary" data-export="events">Raw events as CSV (one row per event)</button>' +
       '<label class="check" style="font-size:13px"><input type="checkbox" id="exreal"> Real participants only</label>' +
       '<button type="button" class="danger secondary" data-role="owner" id="deltest">Delete all test participants</button></div>' +
       '<p class="muted" id="exprog"></p><div class="row"><button type="button" class="secondary" data-codebook="csv">Download this study\'s codebook (CSV)</button><button type="button" class="secondary" data-codebook="md">Codebook as a document (Markdown)</button></div>' +
+      '<p class="muted">Analysis starters that read the trials and wide CSVs, leave out test participants, apply a data-quality rule you choose, and fit a mixed model by participant and item: <a href="/lab/analysis/starter.R" download>R</a> · <a href="/lab/analysis/starter.py" download>Python</a> (<a href="/lab/analysis/">how to use them</a>).</p>' +
       '<p class="muted">The study\'s codebook lists every column of the downloads: its name, kind, allowed values and their labels, the question text, and the conditions and sessions it applies to. It is made from the current study content, so download it again after you change the questions. General definitions: <a href="/lab/CODEBOOK.md" target="_blank" rel="noopener">lab codebook</a>. Test participants are included and marked in the <code>test</code> column unless "Real participants only" is ticked.</p>' +
       '<p class="muted" id="summary"></p><div class="table-wrap"><table id="tbl"></table></div><div class="section rp" id="replaybox" hidden></div>' +
       '<div class="section" data-role="owner"><h2>Backups</h2><p class="muted">Every hour the study data is copied to a separate backup store on Netlify (answers once, changing records every time). That protects against mistakes and bugs. For a copy outside Netlify, download a complete backup (every record, raw traces, emails, study content, team, and activity log) and save it to GSU-approved storage, for example weekly. It contains emails, so treat it as identifiable data. Deleting a participant also removes them from the backup store.</p>' +
@@ -234,7 +235,10 @@
       var prog = function (f) { $('exprog').textContent = 'Exporting… ' + Math.round(f * 100) + '%'; };
       getJSON('participants').then(function (list) {
         var codes = list.filter(function (p) { return !$('exreal').checked || !p.test; }).map(function (p) { return p.code; });
-        var work = kind === 'raw' ? batched(codes, 1, function (c) { return getJSON('raw?codes=' + c[0]); }, prog).then(function (parts) {
+        var work = kind === 'events' ? batched(codes, 1, function (c) { return getJSON('rows?kind=events&codes=' + c[0]); }, prog).then(function (parts) {
+            saveFile(toCsv([].concat.apply([], parts), ['code', 'session', 'trial_index', 't_ms', 'type']), studyId + '_events_' + day() + '.csv', 'text/csv');
+          })
+          : kind === 'raw' ? batched(codes, 1, function (c) { return getJSON('raw?codes=' + c[0]); }, prog).then(function (parts) {
             saveFile([].concat.apply([], parts).map(function (x) { return JSON.stringify(x); }).join('\n') + '\n', studyId + '_raw_' + day() + '.jsonl', 'application/x-ndjson');
           })
           : kind === 'json' ? batched(codes, 2, function (c) { return getJSON('records?codes=' + c.join(',')); }, prog).then(function (parts) {

@@ -146,6 +146,23 @@ The full mouse path (`[x, y, ms]` points) is in the full JSON export under `reco
 
 **Recordings** (managers and owners): one audio file per call or spoken answer, named `<code>_s<session>_<item>_<call|voice>`. Recorded only with the participant's recording consent; never copied to the backup store.
 
+## Raw events CSV (one row per event)
+
+From the admin's **Raw events as CSV**. Every TraceLab event of every trial, in order.
+
+| Column | Meaning |
+|---|---|
+| `code`, `session`, `trial_index` | Participant and trial |
+| `t_ms` | Time from the start of the trial (its `item_begin` event), in ms |
+| `type` | The event: `move`, `down`, `click`, `hover_in`, `hover_out`, `scroll`, `wheel`, `key_down`, `key_up`, `input`, `focus_in`, `focus_out`, `paste`, `copy`, `cut`, `hidden`, `visible`, `window_blur`, `window_focus`, `resize`, `media_*`, `answer`, `scripted`, `item_begin`, `item_end`, `item_reopen` |
+| `target` | What the event was on: a `data-trace` name (`link:<url>`, a panel, a question) or an element id |
+| `x`, `y` | Pointer position in the participant's window (CSS pixels) |
+| `pointer` | `mouse`, `touch` or `pen` |
+| `key` | Key category only (`char`, `space`, `backspace`, `delete`, `enter`, `arrow`, `modifier`, `tab`, `other`); never the key |
+| `field`, `value` | For `answer` events: the answer and its value at that moment |
+| `ms` | A duration the event carries: hover dwell, key hold, or time in a form field |
+| `details` | Anything else the event carries, as JSON (for example the scroll position, the media position, the device at `start`) |
+
 ## Reaction-time studies (Stroop, flanker)
 
 | Column | Meaning |

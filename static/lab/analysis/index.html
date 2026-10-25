@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Analysis starters | CCAIR Behavioral Lab</title>
+<link rel="icon" href="/lab/assets/brand/favicon.svg" type="image/svg+xml">
+<link rel="icon" type="image/png" sizes="32x32" href="/lab/assets/brand/favicon-32.png">
+<link rel="apple-touch-icon" href="/lab/assets/brand/touch-icon-180.png">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b1630" media="(prefers-color-scheme: dark)">
+<meta name="description" content="R and Python scripts that read the CCAIR Behavioral Lab's trial and participant downloads, apply exclusions, and fit a mixed model by participant and item.">
+<link rel="canonical" href="https://bampel.com/lab/analysis/">
+<link rel="stylesheet" href="/lab/assets/study.css">
+<link rel="stylesheet" href="/lab/engine/admin.css">
+<link rel="stylesheet" href="/lab/assets/pages.css">
+</head>
+<body>
+<header class="labbar"><div class="inner"><a class="brand wordmark" href="/lab/"><b>CCAIR Behavioral Lab</b><small>Georgia State University · J. Mack Robinson College of Business</small></a><span class="lockup-slot" data-official-lockup></span><nav aria-label="Lab pages"><a href="/lab/guide/">Researcher guide</a><a href="/lab/support/">Support</a><a href="/lab/signin/">Sign in</a></nav></div></header>
+<main class="wrap page">
+<div class="card">
+<h1>Analysis starters</h1>
+<p>Two short scripts, one in R and one in Python, that take a study's downloads to a first mixed model. They are a starting point, not an analysis plan: decide your exclusions, outcome, and model before you look at the results, and preregister them.</p>
+<div class="cta"><a class="btn" href="/lab/analysis/starter.R" download>Download the R starter</a><a class="btn secondary" href="/lab/analysis/starter.py" download>Download the Python starter</a></div>
+
+<h2>What they need</h2>
+<p>From the study's admin page, Participants tab: <strong>Download trials CSV</strong> (one row per trial) and <strong>Download wide CSV</strong> (one row per participant). Then run</p>
+<pre class="mono">Rscript starter.R my-study_trials_2026-10-24.csv my-study_wide_2026-10-24.csv
+python starter.py my-study_trials_2026-10-24.csv my-study_wide_2026-10-24.csv</pre>
+<p>R needs the <code>lme4</code> package. Python needs <code>pandas</code>, <code>statsmodels</code> and <code>scipy</code>.</p>
+
+<h2>What they do</h2>
+<ol>
+<li><strong>Who is in.</strong> Test and pilot participants (<code>test</code> = 1) are left out. So is anyone with more data-quality flags than you allow (<code>dq_flags</code> in the wide CSV; one by default). Flags are reasons to look, not proof: open the participant's <strong>Replay</strong> in the admin before you exclude them. To try the scripts on pilot data, set <code>include_test</code> to true.</li>
+<li><strong>TraceLab version.</strong> The scripts count trials by <code>trace_version</code>. Records from before October 2026 (<code>0.1.0</code>) counted some behavior measures differently, and those columns are blank for them.</li>
+<li><strong>Outcome and item.</strong> The response time is <code>rt_ms</code>, <code>final_rt_ms</code> (alert triage) or the time on the trial screen; the item is <code>item_id</code>, <code>alert_id</code> or the reaction-time <code>target</code>.</li>
+<li><strong>Model.</strong> Log response time by condition, with random intercepts for participant and item, and a likelihood-ratio test for condition. Effects are reported as ratios of response time. The R script also fits a logistic mixed model when there is a 0/1 outcome such as <code>correct</code>.</li>
+</ol>
+
+<h2>Checked</h2>
+<p>Both scripts were run on simulated data with a known 20% slower condition and recover it (a ratio near 1.2). The column definitions they rely on are in the study's codebook and in the <a href="/lab/CODEBOOK.md">general codebook</a>.</p>
+
+<h2>Every event</h2>
+<p>For analyses of the behavior traces themselves, the admin's <strong>Raw events as CSV</strong> gives one row per event (pointer moves, clicks, keys by category, scrolling, focus, hidden tab, media, answers), with <code>t_ms</code> counted from the start of each trial.</p>
+</div>
+</main>
+<footer class="labfoot"><p>CCAIR Behavioral Lab, Georgia State University. <a href="/lab/">Back to the lab page</a>.</p></footer>
+</body>
+</html>

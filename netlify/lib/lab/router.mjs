@@ -152,6 +152,7 @@ export async function handle(req, { getStore, env, now }) {
         case 'rows': {
           const kind = url.searchParams.get('kind');
           if (kind === 'wide') return json(wideRows(S, await E.exportRecords(S, codes.length ? codes : ['none']), c));   // one row per participant
+          if (kind === 'events') return json(codes.length === 1 ? await E.rawEventRows(S, codes[0]) : { error: 'one_code' });   // raw events, one row each (one participant per request: logs are large)
           return json(await E.exportRows(S, kind === 'surveys' ? 'surveys' : 'trials', codes.length ? codes : ['none']));
         }
         case 'records': return json(await E.exportRecords(S, codes.length ? codes : ['none']));
