@@ -7,8 +7,9 @@
 {{ partial "site_head" . }}
 
 {{ $show_navbar := ((site.Params.header.navbar.enable | default true) | and (ne .Params.header.navbar.enable false)) | or .Params.header.navbar.enable }}
-{{- $highlight_active_link := site.Params.header.navbar.highlight_active_link | default true -}}
-<body id="top" data-spy="scroll" {{ if $show_navbar }}data-offset="70"{{end}} data-target="{{ if or .IsHome (eq .Type "widget_page") | and $highlight_active_link }}#navbar-main{{else}}#TableOfContents{{end}}" class="page-wrapper {{with .Params.design.css_class}}{{.}}{{end}} {{ if not (.Scratch.Get "light") }}dark{{end}} {{ if not $show_navbar }}no-navbar{{end}}" {{with .File}}data-wc-page-id="{{.UniqueID}}"{{end}} {{with .Params.design.css_style}}style="{{. | safeCSS}}"{{end}}>
+{{- /* No Bootstrap scrollspy (theme plan stage 2): it had nothing to watch, since no page has a table of contents and
+     every menu link points to another page; the active menu link is set when the page is built. */ -}}
+<body id="top" class="page-wrapper {{with .Params.design.css_class}}{{.}}{{end}} {{ if not (.Scratch.Get "light") }}dark{{end}} {{ if not $show_navbar }}no-navbar{{end}}" {{with .File}}data-wc-page-id="{{.UniqueID}}"{{end}} {{with .Params.design.css_style}}style="{{. | safeCSS}}"{{end}}>
 
   {{/* Initialise Wowchemy. */}}
   {{ $js_license := printf "/*! Wowchemy v%s | https://wowchemy.com/ */\n" hugo.Data.wowchemy.version }}
