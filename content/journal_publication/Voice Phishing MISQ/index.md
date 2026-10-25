@@ -6,7 +6,10 @@ authors:
   - "Hsinchun Chen"
 date: 2026-06-01
 publication_types: ["2"]
-doi: "10.25300/MISQ/2025/19532"
+# MISQ assigned this DOI (it is printed on the typeset article), but doi.org did not resolve it as of 2026-10-25.
+# As doi_pending it stays in the citation metadata, the theme shows no DOI button, and the site's templates link
+# the MISQ and AIS eLibrary pages instead. Rename it back to `doi:` once https://doi.org/10.25300/MISQ/2025/19532 resolves.
+doi_pending: "10.25300/MISQ/2025/19532"
 draft: false
 volume: 50
 issue: 2
@@ -31,6 +34,9 @@ featured: true
 url_pdf: ''
 # MISQ's article page. The DOI is correct but MISQ had not registered it with Crossref as of 2026-10-22 (doi.org returned 404).
 url_source: 'https://misq.umn.edu/misq/article/50/2/527/3280/Automatically-Detecting-Voice-Phishing-A-Large'
+links:
+  - name: AIS eLibrary
+    url: https://aisel.aisnet.org/misq/vol50/iss2/9
 plain_summary: "Voice phishing (\"vishing\") scams trick people over phone or audio channels and are hard to catch in real time. The authors built VishGPT, an AI system that listens to calls and flags vishing attempts as they happen, trained partly on synthetic data to overcome the shortage of real examples. It detected scams more accurately than existing methods (about 86% accuracy), offering a practical defense for users and security teams."
 ---
 {{< altmetric doi="10.25300/MISQ/2025/19532" >}}

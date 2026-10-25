@@ -34,6 +34,13 @@
 {{ with $page.Params.doi }}
   {{ if ne . "" }}{{ $doi = . }}{{ end }}
 {{ end }}
+{{/* doi_pending: assigned by the publisher but not yet registered, so https://doi.org/ cannot resolve it. The APA and
+   Chicago citations and the artifact chip use the article's landing page (url_source) instead; BibTeX keeps the DOI,
+   which is the paper's identifier either way. */}}
+{{ $doiPending := "" }}
+{{ if not $doi }}{{ with $page.Params.doi_pending }}{{ if ne . "" }}{{ $doiPending = . }}{{ end }}{{ end }}{{ end }}
+{{ $landing := "" }}
+{{ with $page.Params.url_source }}{{ if hasPrefix . "http" }}{{ $landing = . }}{{ end }}{{ end }}
 
 {{/* static/data/publications.json is the catalog the Scholar workflow keeps current (the browser scripts fetch it too). */}}
 {{ $pubData := os.ReadFile "static/data/publications.json" | transform.Unmarshal }}
@@ -176,11 +183,11 @@
 {{ if findRE `[.?!]$` $citeTitle }}{{ $titleEnd = "" }}{{ end }}
 {{ $citationApa := printf "%s (%s). %s%s" $authorsApa $year $citeTitle $titleEnd }}
 {{ if $apaSource }}{{ $citationApa = printf "%s %s" $citationApa $apaSource }}{{ end }}
-{{ if $doi }}{{ $citationApa = printf "%s https://doi.org/%s" $citationApa $doi }}{{ end }}
+{{ if $doi }}{{ $citationApa = printf "%s https://doi.org/%s" $citationApa $doi }}{{ else if and $doiPending $landing }}{{ $citationApa = printf "%s %s" $citationApa $landing }}{{ end }}
 {{ $chiAuthorsEnd := cond (strings.HasSuffix $authorsChicago ".") "" "." }}
 {{ $citationChicago := printf "%s%s %s. \"%s%s\"" $authorsChicago $chiAuthorsEnd $year $citeTitle $titleEnd }}
 {{ if $chiSource }}{{ $citationChicago = printf "%s %s" $citationChicago $chiSource }}{{ end }}
-{{ if $doi }}{{ $citationChicago = printf "%s https://doi.org/%s." $citationChicago $doi }}{{ end }}
+{{ if $doi }}{{ $citationChicago = printf "%s https://doi.org/%s." $citationChicago $doi }}{{ else if and $doiPending $landing }}{{ $citationChicago = printf "%s %s." $citationChicago $landing }}{{ end }}
 
 {{ $citationKey := "ampel" }}
 {{ if gt (len $authors) 0 }}
@@ -204,8 +211,8 @@
   {{ $venueLine = printf "  %s={%s},\n" $bibVenueField $currentVenue }}
 {{ end }}
 {{ $doiLine := "" }}
-{{ if $doi }}
-  {{ $doiLine = printf ",\n  doi={%s}" $doi }}
+{{ with $doi | default $doiPending }}
+  {{ $doiLine = printf ",\n  doi={%s}" . }}
 {{ end }}
 {{ $bibtex := printf "@%s{%s,\n  title={%s},\n  author={%s},\n%s  year={%s}%s\n}" $bibEntryType $citationKey $page.Title (delimit $authors " and ") $venueLine $year $doiLine }}
 
@@ -267,7 +274,7 @@
       {{ with $page.Params.url_slides }}{{ if ne . "" }}{{ $artifacts = $artifacts | append (dict "label" "Slides" "url" .) }}{{ end }}{{ end }}
       {{ with $page.Params.url_video }}{{ if ne . "" }}{{ $artifacts = $artifacts | append (dict "label" "Video" "url" .) }}{{ end }}{{ end }}
       {{/* Always offer the version of record; it is the only full-text link when no preprint PDF is listed. */}}
-      {{ with $doi }}{{ $artifacts = $artifacts | append (dict "label" "DOI" "url" (printf "https://doi.org/%s" .)) }}{{ end }}
+      {{ with $doi }}{{ $artifacts = $artifacts | append (dict "label" "DOI" "url" (printf "https://doi.org/%s" .)) }}{{ else }}{{ if and $doiPending $landing }}{{ $artifacts = $artifacts | append (dict "label" "Article" "url" $landing) }}{{ end }}{{ end }}
 
       {{ if gt (len $artifacts) 0 }}
         <div class="pub-artifacts">
