@@ -3,7 +3,7 @@
 {{ if $doi }}
 {{/* Hidden until the badge reports a citation count: for a DOI Dimensions does not know, it shows "?". */}}
 <div class="dimensions-badge-section" hidden>
-  <h4 style="margin: 0 0 15px 0; font-size: 1rem; font-weight: 600;">Dimensions Citation Metrics</h4>
+  <h2 class="metric-box-heading" style="margin: 0 0 15px 0; font-size: 1rem; font-weight: 600;">Dimensions Citation Metrics</h2>
   <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
     <span class="__dimensions_badge_embed__" data-doi="{{ $doi }}" data-style="large_rectangle" data-legend="hover-right"></span>
     <div style="flex: 1; min-width: 200px;">

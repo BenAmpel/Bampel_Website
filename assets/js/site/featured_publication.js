@@ -50,8 +50,14 @@
     }
     if (linkEl && latest.url) {
       linkEl.href = latest.url;
-      // "Read more" alone does not say where it goes when read out of context (link lists, screen readers).
-      if (latest.title) linkEl.setAttribute('aria-label', `Read more: ${latest.title}`);
+      // "Read more" alone does not say where it goes when read out of context (link lists, screen readers). The title goes
+      // in as screen-reader-only text rather than aria-label, so the link's own text is descriptive too (Lighthouse link-text).
+      if (latest.title) {
+        const hidden = document.createElement('span');
+        hidden.className = 'sr-only';
+        hidden.textContent = `: ${latest.title}`;
+        linkEl.replaceChildren('Read more', hidden);
+      }
     }
     if (updatedEl) {
       const updated = new Date();

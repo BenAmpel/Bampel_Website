@@ -124,7 +124,8 @@
       }).join('');
     };
 
-    yearsEl.innerHTML = years.map((year) => {
+    // The shortcode renders the year and topic buttons; draw them here only if it did not (keeps the layout still).
+    if (!yearsEl.querySelector('.talks-year')) yearsEl.innerHTML = years.map((year) => {
       const count = yearCounts.get(year) || 0;
       return `
         <button class="talks-year" type="button" data-year="${year}" aria-pressed="false">
@@ -139,7 +140,7 @@
     });
 
     const tagButtons = ['All', ...tags];
-    tagsEl.innerHTML = tagButtons.map((tag) => (
+    if (!tagsEl.querySelector('.talks-tag')) tagsEl.innerHTML = tagButtons.map((tag) => (
       `<button class="talks-tag" type="button" data-tag="${tag}" aria-pressed="false">${tag}</button>`
     )).join('');
 

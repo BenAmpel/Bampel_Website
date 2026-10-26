@@ -1,5 +1,7 @@
 ---
 title: "Benjamin M. Ampel"
+# Search and social description for the home page (the site-wide one is two sentences, too long to show whole).
+summary: "Benjamin M. Ampel, Assistant Professor at Georgia State and director of CCAIR, builds LLM and threat-intelligence systems for proactive cyber defense."
 date: 2022-10-24
 type: landing
 

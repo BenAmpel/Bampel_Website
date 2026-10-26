@@ -182,6 +182,13 @@ h1, h2, h3 {
   }
 }
 
+// Small labels that are h2 only for a correct heading outline (research dashboard, Altmetric and Dimensions boxes):
+// they keep the look they had as h4, without the hover glitch.
+.dash-label, .metric-box-heading {
+  &::before, &::after { content: none; }
+  &:hover { animation: none; }
+}
+
 // ===== LEGACY CYBER-GLITCH CLASS =====
 .cyber-glitch {
   @extend .glitch-dynamic;

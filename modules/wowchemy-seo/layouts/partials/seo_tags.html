@@ -103,6 +103,10 @@
   {{ $twitter_card = "summary" }}
 {{ else if $featured_image }}
   {{ $og_image = $featured_image.Permalink }}
+{{ else if and .IsPage (fileExists (printf "static/media/papers/%s.png" (path.Base (strings.TrimSuffix "/" .RelPermalink)))) }}
+  {{/* A paper without a featured image: its own sharing card (scripts/build-paper-cards.mjs). */}}
+  {{ $og_image = printf "media/papers/%s.png" (path.Base (strings.TrimSuffix "/" .RelPermalink)) | absURL }}
+  {{ $og_image_size = slice 1200 630 }}
 {{ else if $sharing_image }}
   {{ $og_image = $sharing_image.Permalink }}
 {{ else if fileExists "static/media/sharing-card.png" }}
