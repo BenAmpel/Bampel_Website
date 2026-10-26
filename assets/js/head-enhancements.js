@@ -143,27 +143,6 @@ function runEnhancements() {
       headerName.setAttribute('data-text', headerName.textContent.trim());
     }
 
-    const supportHref = 'https://buymeacoffee.com/BAmpel';
-    const attachSupportButton = (brand, mobile = false) => {
-      if (!brand || brand.parentElement?.querySelector('.navbar-support-link')) return;
-
-      const wrapper = document.createElement('div');
-      wrapper.className = 'navbar-brand-group';
-      brand.parentNode.insertBefore(wrapper, brand);
-      wrapper.appendChild(brand);
-
-      const button = document.createElement('a');
-      button.className = `navbar-support-link${mobile ? ' navbar-support-link--mobile' : ''}`;
-      button.href = supportHref;
-      button.target = '_blank';
-      button.rel = 'noopener';
-      button.textContent = 'Support';
-      button.setAttribute('aria-label', 'Support Benjamin Ampel on Buy Me a Coffee');
-      wrapper.appendChild(button);
-    };
-
-    attachSupportButton(document.querySelector('.d-none.d-lg-inline-flex .navbar-brand'));
-    attachSupportButton(document.querySelector('.navbar-brand-mobile-wrapper .navbar-brand'), true);
   }
   
   // Initialize glitch effect

@@ -38,7 +38,7 @@ module.exports = {
       safelist: {
         standard: ['html', 'body', ...scriptClasses, /^(show|showing|collapse|collapsing|collapsed|fade|in|active|open|dark|light|disabled|is-[a-z-]+|has-[a-z-]+|js-[a-z-]+)$/],
         greedy: [
-          /^(dropdown|navbar|nav|search|sticky|searching|hljs|chroma|fa|fas|far|fab|ai|academicons|leaflet|marker|echarts|typed|tsparticles|particles|bmc|altmetric|__dimensions|mfp|reveal|view-transition|katex|mjx|MathJax|highlight|copy|article-|pub-|bio-|hb-|wg-|home-|section|terminal|visitor|headroom|header--|talks-|invited|media-|cae-|pll-|tdrift|pub-|service-|awards-|footprint|impact-)/,
+          /^(dropdown|navbar|nav|search|sticky|searching|hljs|chroma|fa|fas|far|fab|ai|academicons|leaflet|marker|echarts|typed|tsparticles|particles|altmetric|__dimensions|mfp|reveal|view-transition|katex|mjx|MathJax|highlight|copy|article-|pub-|bio-|hb-|wg-|home-|section|terminal|visitor|headroom|header--|talks-|invited|media-|cae-|pll-|tdrift|pub-|service-|awards-|footprint|impact-)/,
         ],
         deep: [/^(dropdown|navbar|search|show|dark)$/],
       },

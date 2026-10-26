@@ -12,66 +12,6 @@ html {
   scroll-behavior: smooth;
 }
 
-.navbar-brand-group {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.7rem;
-}
-
-.navbar-support-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.34rem 0.8rem;
-  border-radius: 999px;
-  border: 1px solid rgba(0, 255, 65, 0.35);
-  background: rgba(0, 0, 0, 0.82);
-  color: #00ff41 !important;
-  font-family: 'Roboto Mono', monospace;
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  line-height: 1;
-  text-transform: uppercase;
-  text-decoration: none !important;
-  box-shadow: 0 0 0 1px rgba(0, 255, 65, 0.08), 0 0 18px rgba(0, 255, 65, 0.14);
-  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease;
-}
-
-.navbar-support-link:hover,
-.navbar-support-link:focus {
-  color: #03140a !important;
-  background: #00ff41;
-  border-color: #00ff41;
-  box-shadow: 0 0 0 1px rgba(0, 255, 65, 0.12), 0 0 24px rgba(0, 255, 65, 0.32);
-  transform: translateY(-1px);
-}
-
-.navbar-support-link:focus-visible {
-  outline: 2px solid rgba(0, 255, 65, 0.55);
-  outline-offset: 2px;
-}
-
-.navbar-support-link--mobile {
-  padding: 0.28rem 0.62rem;
-  font-size: 0.65rem;
-  margin-left: 0.55rem;
-}
-
-body:not(.dark) .navbar-support-link {
-  background: rgba(255, 255, 255, 0.96);
-  color: #0b6b2c !important;
-  border-color: rgba(11, 107, 44, 0.18);
-  box-shadow: 0 8px 20px rgba(8, 40, 18, 0.08);
-}
-
-body:not(.dark) .navbar-support-link:hover,
-body:not(.dark) .navbar-support-link:focus {
-  background: #0b6b2c;
-  color: #f5fff8 !important;
-  border-color: #0b6b2c;
-  box-shadow: 0 10px 24px rgba(11, 107, 44, 0.2);
-}
-
 /* ===== GLITCH EFFECT ===== */
 .glitch-text {
   position: relative;
