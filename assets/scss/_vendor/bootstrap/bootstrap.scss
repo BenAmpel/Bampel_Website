@@ -5,6 +5,8 @@
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
  */
 
+// Theme plan stage 2 (October 2026): only the Bootstrap components the site uses are built. Not imported, because no
+// page or script uses them: button-group, input-group, custom-forms, breadcrumb, jumbotron, progress, list-group, toasts, modal, tooltip, popover, carousel, spinners.
 @import "functions";
 @import "variables";
 @import "mixins";
@@ -19,26 +21,13 @@
 @import "buttons";
 @import "transitions";
 @import "dropdown";
-@import "button-group";
-@import "input-group";
-@import "custom-forms";
 @import "nav";
 @import "navbar";
 @import "card";
-@import "breadcrumb";
 @import "pagination";
 @import "badge";
-@import "jumbotron";
 @import "alert";
-@import "progress";
 @import "media";
-@import "list-group";
 @import "close";
-@import "toasts";
-@import "modal";
-@import "tooltip";
-@import "popover";
-@import "carousel";
-@import "spinners";
 @import "utilities";
 @import "print";

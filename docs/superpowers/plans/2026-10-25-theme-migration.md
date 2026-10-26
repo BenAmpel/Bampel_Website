@@ -87,6 +87,14 @@ Effort: one working session. Risk: low; the comparison shows any page that chang
 
 Goal: no Bootstrap or jQuery on the page; the same look.
 
+Status (October 26, 2026): done in five branches. Stage 1 (own the theme) and the phone menu (own collapse script),
+scrollspy (removed: it had nothing to watch), search (no jQuery or jquery.mark), the theme script (no jQuery), and a
+final step that stops loading jQuery and Bootstrap's JavaScript (vendor bundle 175,745 to 4,112 bytes) and builds only
+the 24 Bootstrap SCSS components the site uses (stylesheet 183.8 to 173.2 KB). Rather than copying Bootstrap rules
+into custom.scss, which would ship the same rules, the unused components are no longer built and the purge
+safelist no longer keeps Bootstrap-JavaScript classes. Each step was checked against main page by page and in
+headless Chrome. Maps and Algolia search still use jQuery: the build stops with a message if either is enabled.
+
 1. **Inventory.** List every Bootstrap class and data attribute the built pages use (`hugo_stats.json`, which the
    PurgeCSS pass already writes, lists the classes in the built HTML) and every place `wowchemy.js` is relied on
    (navbar collapse, dropdowns, the publication filter, search).

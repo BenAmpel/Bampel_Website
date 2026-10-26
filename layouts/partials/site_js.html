@@ -3,7 +3,9 @@
 
 {{/* Rename _vendor dir as GitHub Pages doesn't automatically publish folders with underscores. */}}
 {{ $libs := slice }}
-{{- $lib_names := slice "jquery.min" "bootstrap.bundle.min" "instantpage" -}}
+{{- /* No jQuery and no Bootstrap JavaScript (theme plan stage 2): the phone menu (assets/js/site/collapse.js), search and
+     the theme script work without them, and no page uses Bootstrap's modals, tooltips, popovers or carousels. */ -}}
+{{- $lib_names := slice "instantpage" -}}
 {{- range $lib_names -}}
     {{- $libs = $libs | append (resources.Get (printf "js/_vendor/%s.js" .) ) -}}
 {{- end -}}
@@ -119,6 +121,7 @@
 {{ end }}
 
 {{ if eq $search_provider "algolia" }}
+{{ errorf "Algolia search needs jQuery (assets/js/algolia-search.js), which the site no longer loads: make that script jQuery-free before choosing the Algolia provider." }}
 {{ $js_algolia_search := resources.Get "js/algolia-search.js" | js.Build (dict "format" "esm" "targetPath" (printf "%s/js/algolia-search-built.js" .Lang) "params" $js_search_params) }}
 {{- if hugo.IsProduction -}}
   {{- $js_algolia_search = $js_algolia_search | minify | fingerprint "md5" -}}
@@ -223,6 +226,7 @@
 
 {{/* Maps */}}
 {{ if site.Params.features.map.provider }}
+  {{ errorf "Maps need jQuery (assets/js/wowchemy-map.js), which the site no longer loads: make that script jQuery-free before setting features.map.provider." }}
   {{ $js := resources.Get "js/wowchemy-map.js" | js.Build (dict "format" "esm" "minify" true) }}
   {{- if hugo.IsProduction -}}
     {{- $js = $js | fingerprint "md5" -}}
