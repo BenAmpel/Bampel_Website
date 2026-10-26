@@ -33,14 +33,14 @@ module.exports = {
         { extractor: hugoStats, extensions: ['json'] },
         { extractor: words, extensions: ['js', 'html', 'md'] },
       ],
-      // The theme's own scripts (search, navbar, theme toggle, Bootstrap collapse/dropdown/modal) are not in this repo, so
-      // the state and component classes they toggle stay whole.
+      // State classes the theme's scripts toggle at run time stay whole. Bootstrap's JavaScript is no longer loaded (theme
+      // plan stage 2), so its modal, tooltip, popover, carousel, toast, spinner and offcanvas classes are no longer kept.
       safelist: {
         standard: ['html', 'body', ...scriptClasses, /^(show|showing|collapse|collapsing|collapsed|fade|in|active|open|dark|light|disabled|is-[a-z-]+|has-[a-z-]+|js-[a-z-]+)$/],
         greedy: [
-          /^(modal|dropdown|navbar|nav|tooltip|popover|carousel|search|toast|spinner|offcanvas|sticky|searching|hljs|chroma|fa|fas|far|fab|ai|academicons|leaflet|marker|echarts|typed|tsparticles|particles|bmc|altmetric|__dimensions|mfp|reveal|view-transition|katex|mjx|MathJax|highlight|copy|article-|pub-|bio-|hb-|wg-|home-|section|terminal|visitor|headroom|header--|talks-|invited|media-|cae-|pll-|tdrift|pub-|service-|awards-|footprint|impact-)/,
+          /^(dropdown|navbar|nav|search|sticky|searching|hljs|chroma|fa|fas|far|fab|ai|academicons|leaflet|marker|echarts|typed|tsparticles|particles|bmc|altmetric|__dimensions|mfp|reveal|view-transition|katex|mjx|MathJax|highlight|copy|article-|pub-|bio-|hb-|wg-|home-|section|terminal|visitor|headroom|header--|talks-|invited|media-|cae-|pll-|tdrift|pub-|service-|awards-|footprint|impact-)/,
         ],
-        deep: [/^(modal|dropdown|navbar|search|show|dark)$/],
+        deep: [/^(dropdown|navbar|search|show|dark)$/],
       },
       keyframes: false,
       fontFace: false,
