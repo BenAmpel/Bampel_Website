@@ -8,6 +8,7 @@
 {{ $prestige := dict "MIS Quarterly" (slice "FT50" "UTD24") "Journal of Management Information Systems" (slice "FT50") }}
 {{ $years := slice }}{{ range $pubs }}{{ $years = $years | append .year }}{{ end }}
 {{ $years = sort (uniq $years) "value" "desc" }}
+{{ $types := slice }}{{ range $pubs }}{{ with .type }}{{ if not (in $types .) }}{{ $types = $types | append . }}{{ end }}{{ end }}{{ end }}
 <details class="spoiler pub-filter-spoiler"{{ if in (slice "true" "1" "yes" "open") (lower (.Get "open" | default "")) }} open{{ end }}>
   <summary>Publications (Search &amp; Filter)</summary>
   <div class="spoiler-content">
@@ -24,12 +25,24 @@
         <div class="pub-filter-panel">
           <details class="pub-filter-group" open>
             <summary>Type</summary>
-            <div class="pub-filter-options" id="pub-filter-type"></div>
+            {{/* Type and Year start open, so their options are rendered here (as the script draws them) to keep the layout from
+               shifting when the script fills them in. */}}
+            <div class="pub-filter-options" id="pub-filter-type">{{ range $types }}
+              <label for="pub-filter-type-{{ replaceRE `[^a-zA-Z0-9]+` "-" (string .) }}" class="pub-filter-option">
+                <input type="checkbox" id="pub-filter-type-{{ replaceRE `[^a-zA-Z0-9]+` "-" (string .) }}" data-group="type" data-value="{{ . }}">
+                <span>{{ index $typeLabels . | default . }}</span>
+              </label>
+            {{- end }}</div>
           </details>
 
           <details class="pub-filter-group" open>
             <summary>Year</summary>
-            <div class="pub-filter-options" id="pub-filter-year"></div>
+            <div class="pub-filter-options" id="pub-filter-year">{{ range $years }}
+              <label for="pub-filter-year-{{ replaceRE `[^a-zA-Z0-9]+` "-" (string .) }}" class="pub-filter-option">
+                <input type="checkbox" id="pub-filter-year-{{ replaceRE `[^a-zA-Z0-9]+` "-" (string .) }}" data-group="year" data-value="{{ . }}">
+                <span>{{ . }}</span>
+              </label>
+            {{- end }}</div>
           </details>
 
           <details class="pub-filter-group">
