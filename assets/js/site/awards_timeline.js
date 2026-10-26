@@ -58,6 +58,7 @@
     const setActive = (year) => {
       nodesEl.querySelectorAll('.awards-node').forEach((node) => {
         node.classList.toggle('active', Number(node.dataset.year) === year);
+        node.setAttribute('aria-pressed', Number(node.dataset.year) === year ? 'true' : 'false');
       });
       renderDetail(year);
     };

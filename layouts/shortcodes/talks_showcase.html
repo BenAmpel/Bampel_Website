@@ -1,14 +1,29 @@
+{{/* The summary line and the year and topic buttons are rendered here, from the same static/data/talks.json and in the
+   same order as js/site/talks_showcase.js draws them (years ascending with counts; topics by count, ties in order of
+   first appearance, newest talk first), so the controls do not grow after load. The script binds them and fills the cards. */}}
+{{ $talks := os.ReadFile "static/data/talks.json" | transform.Unmarshal }}
+{{ $items := slice }}{{ range $talks }}{{ $y := .year | default 0 }}{{ with .date }}{{ $y = int (substr (string .) 0 4) }}{{ end }}{{ if $y }}{{ $items = $items | append (dict "y" $y "d" (string (.date | default $y)) "t" (.tags | default slice) "e" (.event | default "")) }}{{ end }}{{ end }}
+{{ $items = sort $items "d" "desc" }}
+{{ $years := slice }}{{ $venues := slice }}{{ range $items }}{{ $years = $years | append .y }}{{ with .e }}{{ $venues = $venues | append . }}{{ end }}{{ end }}
+{{ $years = sort (uniq $years) }}{{ $venues = uniq $venues }}
+{{ $order := slice }}{{ range $items }}{{ range .t }}{{ if not (in $order .) }}{{ $order = $order | append . }}{{ end }}{{ end }}{{ end }}
+{{ $ranked := slice }}{{ range $i, $tag := $order }}{{ $n := 0 }}{{ range $items }}{{ if in .t $tag }}{{ $n = add $n 1 }}{{ end }}{{ end }}{{ $ranked = $ranked | append (dict "tag" $tag "key" (sub (mul $n 1000) $i)) }}{{ end }}
+{{ $ranked = sort $ranked "key" "desc" }}
 <div class="talks-showcase" id="talks-showcase">
   <div class="talks-header">
     <div>
       <div class="talks-title">Talks Timeline</div>
       <div class="talks-subtitle">Invited talks, workshops, and conference presentations</div>
     </div>
-    <div class="talks-summary" id="talks-summary"></div>
+    <div class="talks-summary" id="talks-summary">{{ if $items }}{{ len $items }} talks • {{ len $venues }} venues{{ if $years }} • {{ index $years 0 }}–{{ index $years (sub (len $years) 1) }}{{ end }}{{ end }}</div>
   </div>
   <div class="talks-controls">
-    <div class="talks-years" id="talks-years" role="tablist" aria-label="Talk years"></div>
-    <div class="talks-tags" id="talks-tags" role="tablist" aria-label="Talk topic filters"></div>
+    <div class="talks-years" id="talks-years" role="group" aria-label="Talk years">{{ range $y := $years }}{{ $n := 0 }}{{ range $items }}{{ if eq .y $y }}{{ $n = add $n 1 }}{{ end }}{{ end }}
+        <button class="talks-year" type="button" data-year="{{ $y }}" aria-pressed="false">
+          <span>{{ $y }}</span>
+          <span class="count">{{ $n }}</span>
+        </button>{{ end }}</div>
+    <div class="talks-tags" id="talks-tags" role="group" aria-label="Talk topic filters">{{ if $items }}<button class="talks-tag" type="button" data-tag="All" aria-pressed="false">All</button>{{ range $ranked }}<button class="talks-tag" type="button" data-tag="{{ .tag }}" aria-pressed="false">{{ .tag }}</button>{{ end }}{{ end }}</div>
   </div>
   <div class="talks-cards" id="talks-cards"></div>
 </div>
