@@ -16,13 +16,17 @@ import { BarChart, LineChart, GraphChart, RadarChart } from 'echarts/charts';
 import { GridComponent, TooltipComponent, TitleComponent, RadarComponent, AriaComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 echarts.use([BarChart, LineChart, GraphChart, RadarChart, GridComponent, TooltipComponent, TitleComponent, RadarComponent, AriaComponent, CanvasRenderer]);
+// ECharts 6 changed the default colors and component placement; the dashboard passes 'v5' to echarts.init to keep its look.
+import 'echarts/theme/v5.js';
 window.echarts = echarts;
 `;
 const out = path.join(root, 'static', 'vendor', 'echarts', version, 'echarts.custom.min.js');
 fs.mkdirSync(path.dirname(out), { recursive: true });
 await build({
   stdin: { contents: entry, resolveDir: root, loader: 'js' },
+  // theme/v5.js is a UMD file that requires the full 'echarts/lib/echarts'; point it at the trimmed core instead.
+  alias: { 'echarts/lib/echarts': 'echarts/core' },
   bundle: true, minify: true, format: 'iife', target: 'es2018', outfile: out, legalComments: 'none',
-  banner: { js: `/*! ECharts ${version} (bar, line, graph, radar; grid, tooltip, title, radar, aria; canvas), Apache License 2.0, https://echarts.apache.org. Built by scripts/build-echarts.mjs. */` },
+  banner: { js: `/*! ECharts ${version} (bar, line, graph, radar; grid, tooltip, title, radar, aria; canvas; v5 theme), Apache License 2.0, https://echarts.apache.org. Built by scripts/build-echarts.mjs. */` },
 });
 console.log(`echarts ${version}: ${fs.statSync(out).size} bytes -> ${path.relative(root, out)}`);
