@@ -11,7 +11,7 @@ body:not(.dark) .pub-plain p { color:#1a2a33; }
 .pub-plain-video summary::-webkit-details-marker { display:none; }
 .pub-plain-video summary::before { content:'\25B6'; font-size:0.7rem; }
 .pub-plain-video[open] summary::before { content:'\25BC'; }
-.pub-plain-video video { display:block; margin-top:10px; width:100%; max-width:440px; height:auto; aspect-ratio:1; border-radius:10px; border:1px solid rgba(0,229,255,0.25); background:#0a1628; }
+.pub-plain-video video { display:block; margin-top:10px; width:100%; max-width:400px; height:auto; max-height:none; aspect-ratio:1; border-radius:10px; border:1px solid rgba(0,229,255,0.25); background:#0a1628; }
 .pub-extras-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:16px; }
 .pub-extras-card { min-width:0; border:1px solid var(--card-border, #333); border-radius:14px; padding:16px; background:var(--card-bg, rgba(0,0,0,0.25)); box-shadow:0 8px 20px rgba(0,0,0,0.12); }
 .pub-extras-card h3 { margin:0 0 10px; font-size:0.9rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--clr-green); }
