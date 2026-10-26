@@ -196,6 +196,21 @@
     updateText(IDS.HINDEX, String((payload.scholar.metrics && payload.scholar.metrics.hIndex) || 0));
   }
 
+  // Screen-reader descriptions for the two network charts (ECharts writes them to the chart's aria-label): what the
+  // graph holds and its largest groups, from the same data the chart draws.
+  function describeImpact(nodes, links) {
+    const topics = new Map();
+    nodes.forEach((n) => topics.set(n.topic || "Other", (topics.get(n.topic || "Other") || 0) + 1));
+    const top = [...topics].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([t, c]) => `${t} (${c})`).join(", ");
+    return `Impact map of ${nodes.length} publications with ${links.length} connections by shared topic, venue or co-author. Most common topics: ${top}.`;
+  }
+
+  function describeCollab(nodes, self) {
+    const others = nodes.filter((n) => n.id !== self).sort((a, b) => (b.value || 0) - (a.value || 0));
+    const top = others.slice(0, 3).map((n) => `${n.name || n.id} (${n.value} papers)`).join(", ");
+    return `Co-authorship network with ${others.length} co-authors. Most frequent: ${top}.`;
+  }
+
   function renderLine(history) {
     const dom = document.getElementById(IDS.LINE);
     if (!dom || !history || !history.length) return;
@@ -206,7 +221,8 @@
     chart.setOption(
       withReducedMotion({
         tooltip: { trigger: "axis", formatter: "{b}: {c} Citations" },
-        aria: { enabled: true, description: "Citation velocity by year." },
+        // The description carries the numbers, since a screen reader cannot see the bars.
+        aria: { enabled: true, description: `Citations by year: ${history.map((item) => `${item.year}, ${item.citations}`).join("; ")}.` },
         grid: { top: 10, right: 10, bottom: 20, left: 30, containLabel: true },
         xAxis: {
           type: "category",
@@ -399,7 +415,7 @@
               </div>`;
             },
           },
-          aria: { enabled: true, description: "Impact map linking publications by topic, venue, and co-authorship." },
+          aria: { enabled: true, description: describeImpact(baseNodes, activeLinks) },
           series: [
             {
               type: "graph",
@@ -504,9 +520,11 @@
     const rangeData = collaboration.ranges[dashboardState.collab.range] || collaboration.ranges.all || { nodes: [], links: [], authorMeta: {} };
     const nodeCounts = new Map((rangeData.nodes || []).map((node) => [node.id, node.count || 0]));
     const metaMap = rangeData.authorMeta || {};
-    const maxCount = Math.max(...(rangeData.nodes || []).filter((node) => node.id !== "Benjamin Ampel").map((node) => node.count || 0), 1);
+    // Ben's node, whichever form of the name the data uses ("Benjamin M. Ampel" in the payload). A fixed "Benjamin Ampel"
+    // never matched, so his node was not centered or drawn in white, and the color scale ran up to his own paper count.
+    const myName = ((rangeData.nodes || []).find((node) => /^Benjamin (M\. )?Ampel$/.test(node.id)) || {}).id || "Benjamin M. Ampel";
+    const maxCount = Math.max(...(rangeData.nodes || []).filter((node) => node.id !== myName).map((node) => node.count || 0), 1);
 
-    const myName = "Benjamin Ampel";
     const nameMap = {
       "B Ampel": myName,
       "BM Ampel": myName,
@@ -626,7 +644,7 @@
                 ? `${escapeHtml(params.data.source)} & ${escapeHtml(params.data.target)}<br>${params.value} Papers`
                 : `${escapeHtml(params.name)}: ${params.value} Papers`,
           },
-          aria: { enabled: true, description: "Collaboration network showing co-authorship connections." },
+          aria: { enabled: true, description: describeCollab(nodes, myName) },
           series: [
             {
               type: "graph",
