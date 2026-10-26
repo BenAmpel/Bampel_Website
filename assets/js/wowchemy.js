@@ -42,23 +42,28 @@ function toggleSearchDialog() {
     removeQueryParamsFromUrl();
 
     // Prevent fixed positioned elements (e.g. navbar) moving due to scrollbars.
-    $('#fancybox-style-noscroll').remove();
+    const noscroll = document.getElementById('fancybox-style-noscroll');
+    if (noscroll) noscroll.remove();
   } else {
     // Prevent fixed positioned elements (e.g. navbar) moving due to scrollbars.
-    if (!$('#fancybox-style-noscroll').length && document.body.scrollHeight > window.innerHeight) {
-      $('head').append(
-        '<style id="fancybox-style-noscroll">.compensate-for-scrollbar{margin-right:' +
-          (window.innerWidth - document.documentElement.clientWidth) +
-          'px;}</style>',
-      );
+    if (!document.getElementById('fancybox-style-noscroll') && document.body.scrollHeight > window.innerHeight) {
+      const style = document.createElement('style');
+      style.id = 'fancybox-style-noscroll';
+      style.textContent =
+        '.compensate-for-scrollbar{margin-right:' + (window.innerWidth - document.documentElement.clientWidth) + 'px;}';
+      document.head.appendChild(style);
       body.classList.add('compensate-for-scrollbar');
     }
 
     // Show search modal.
     body.classList.add('searching');
 
-    // I assume that is broken
-    $('.search-results').css({opacity: 0, visibility: 'visible'}).animate({opacity: 1}, 200);
+    // Fade the results in over 200 ms (no jQuery; theme plan stage 2).
+    document.querySelectorAll('.search-results').forEach(function (el) {
+      el.style.visibility = 'visible';
+      el.style.opacity = 1;
+      if (el.animate) el.animate([{opacity: 0}, {opacity: 1}], {duration: 200});
+    });
 
     let algoliaSearchBox = document.querySelector('.ais-SearchBox-input');
     if (algoliaSearchBox) {
@@ -130,8 +135,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Print latest version of GitHub projects.
   let githubReleaseSelector = '.js-github-release';
-  if ($(githubReleaseSelector).length > 0) {
-    printLatestRelease(githubReleaseSelector, $(githubReleaseSelector).data('repo'));
+  const githubRelease = document.querySelector(githubReleaseSelector);
+  if (githubRelease) {
+    printLatestRelease(githubReleaseSelector, githubRelease.dataset.repo);
   }
 });
 
@@ -284,8 +290,8 @@ window.addEventListener('load', function () {
     })
   }
 
-  // Init. author notes (tooltips).
-  $('[data-toggle="tooltip"]').tooltip();
+  // Bootstrap tooltips (author notes) are no longer initialised: no page has a data-toggle="tooltip" element, and the
+  // theme plan removes Bootstrap's JavaScript (stage 2).
 });
 
 // Theme chooser events.
