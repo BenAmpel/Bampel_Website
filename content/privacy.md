@@ -8,7 +8,7 @@ editable: false
 summary: What bampel.com and its CCAIR pages collect, which outside services they load, and how to opt out.
 ---
 
-*Last updated October 24, 2026.*
+*Last updated October 25, 2026.*
 
 This site is my academic home page (Benjamin M. Ampel, Georgia State University). It also hosts the Center for CyberAI
 Research pages under [/ccair/](/ccair/), including the Cyber Career Pathway Finder and the Student Guide. It has no
@@ -33,7 +33,6 @@ them after the `#`, which is left out of what analytics records.
 
 | Service | Where | What it receives |
 |---|---|---|
-| [Buy Me a Coffee](https://buymeacoffee.com/privacy-policy) | the support button on every page | your IP address and the page, when its script and button load |
 | [Altmetric](https://www.altmetric.com/privacy-policy/) and [Dimensions](https://www.dimensions.ai/privacy/) | publication pages with attention or citation badges | your IP address and the paper's DOI |
 | Esri ArcGIS map tiles | the research map on the home and research pages | your IP address and the map area shown |
 
