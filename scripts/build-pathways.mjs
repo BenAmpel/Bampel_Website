@@ -5,7 +5,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { CCAIR as ccair, SITE, esc, ld, person as reviewer, org, head as baseHead, top as baseTop, foot as baseFoot, writeSitemap, readJson, HIRING, CODE_SHORT, photoHtml,
-  fmtDate, NEW_TAB, assertNoInternalNotes } from './ccair-static.mjs';
+  fmtDate, ogImages, NEW_TAB, assertNoInternalNotes } from './ccair-static.mjs';
 
 const out = path.join(ccair, 'pathways');
 const D = readJson('pathways.json');
@@ -96,7 +96,7 @@ function hub() {
   };
   const quizData = { roles: D.roles.map(({ slug, name, tagline, hiring, code, bls, feeder, certsStart, certsNote, resources, items, close }) => ({ slug, name, tagline, hiring, code, bls, feeder, certsStart, certsNote, resources, items, close })), pairs: D.pairs, context: D.context, bls: D.bls, sources: { blsDate: D.sources.blsDate } };
 
-  return `${head({ title: 'Cybersecurity Career Quiz: Find Your Entry-Level Cyber Role', ogTitle: 'Find where you fit in cybersecurity', url: HUB,
+  return `${head({ title: 'Cybersecurity Career Quiz: Find Your Entry-Level Cyber Role', ogTitle: 'Find where you fit in cybersecurity', url: HUB, image: OG_IMAGES.index,
     desc: `Free 5-minute quiz for beginner cybersecurity students. Ranks ${NR} cyber roles by your interests, with the first job, starter certs and free practice.` })}
 ${ld(graph)}
 </head>
@@ -250,7 +250,7 @@ function rolePage(r) {
   // the title past 70 characters (long names such as Network and Systems Security Administrator).
   const titleBase = `How to Become ${an(r.name)}`;
   const title = titleBase.length + 21 <= 70 ? `${titleBase}: First Job and Certs` : titleBase;
-  return `${head({ title, ogTitle: `How to become ${an(r.name)}`, url, desc })}
+  return `${head({ title, ogTitle: `How to become ${an(r.name)}`, url, desc, image: OG_IMAGES[r.slug] })}
 ${ld(graph)}
 </head>
 <body>
@@ -313,6 +313,12 @@ ${foot()}`;
 /* ---------- Write ---------- */
 fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(out, { recursive: true });
+// Sharing cards: committed PNGs in assets/pathways/og/ (see ogImages in ccair-static.mjs).
+const OG_IMAGES = ogImages([
+  { key: 'index', title: 'Find where you fit in cybersecurity', eyebrow: 'CCAIR Pathway Finder', url: HUB },
+  ...D.roles.map((r) => ({ key: r.slug, title: `How to become ${an(r.name)}`, eyebrow: 'CCAIR Pathway Finder · Role guide', url: `${HUB}${r.slug}/`, label: HUB }))
+].map((p) => ({ ...p, alt: `${p.title}. CCAIR Pathway Finder, Center for CyberAI Research, Georgia State University.` })),
+{ pngDir: path.join(ccair, 'assets', 'pathways', 'og'), svgDir: path.join(out, 'og'), script: 'scripts/build-pathways.mjs' });
 fs.writeFileSync(path.join(out, 'index.html'), hub());
 for (const r of D.roles) {
   fs.mkdirSync(path.join(out, r.slug), { recursive: true });
