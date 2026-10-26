@@ -153,7 +153,7 @@
       loadStyleOnce(buildUrl("vendor/leaflet-markercluster/MarkerCluster.Default.css")),
     ]).then(() =>
       Promise.all([
-        loadScriptOnce(buildUrl("vendor/echarts/5.4.3/echarts.custom.min.js"), () => window.echarts), // trimmed build: scripts/build-echarts.mjs
+        loadScriptOnce(buildUrl("vendor/echarts/6.1.0/echarts.custom.min.js"), () => window.echarts), // trimmed build: scripts/build-echarts.mjs
         loadScriptOnce(buildUrl("vendor/leaflet/leaflet.js"), () => window.L),
       ]).then(() =>
         loadScriptOnce(
@@ -244,7 +244,7 @@
     const dom = document.getElementById(IDS.LINE);
     if (!dom || !history || !history.length) return;
     if (dashboardState.charts.line) dashboardState.charts.line.dispose();
-    const chart = window.echarts.init(dom);
+    const chart = window.echarts.init(dom, 'v5');
     dashboardState.charts.line = chart;
     const isDark = document.body.classList.contains("dark");
     chart.setOption(
@@ -282,7 +282,7 @@
     const dom = document.getElementById(IDS.MAP);
     if (!dom || !graphData || !Array.isArray(graphData.nodes)) return;
     if (dashboardState.charts.impact) dashboardState.charts.impact.dispose();
-    const chart = window.echarts.init(dom);
+    const chart = window.echarts.init(dom, 'v5');
     dashboardState.charts.impact = chart;
 
     const baseNodes = graphData.nodes.map((node) => ({
@@ -579,7 +579,7 @@
     const renderRadar = (paper) => {
       if (!paper || !radarEl) return;
       if (!dashboardState.charts.centralityRadar) {
-        dashboardState.charts.centralityRadar = window.echarts.init(radarEl);
+        dashboardState.charts.centralityRadar = window.echarts.init(radarEl, 'v5');
       }
       const chart = dashboardState.charts.centralityRadar;
       const maxTopic = (centrality.maxLinks && centrality.maxLinks.topic) || 1;
@@ -657,7 +657,7 @@
     const dom = document.getElementById(IDS.COLLAB);
     if (!dom || !collaboration || !collaboration.ranges) return;
     if (dashboardState.charts.collab) dashboardState.charts.collab.dispose();
-    const chart = window.echarts.init(dom);
+    const chart = window.echarts.init(dom, 'v5');
     dashboardState.charts.collab = chart;
 
     const rangeData = collaboration.ranges[dashboardState.collab.range] || collaboration.ranges.all || { nodes: [], links: [], authorMeta: {} };
@@ -1016,7 +1016,7 @@
     const domTrend = document.getElementById(IDS.VISIT_TREND);
     if (domTrend && Array.isArray(visitor.monthlyTrend) && visitor.monthlyTrend.length) {
       if (dashboardState.charts.visitTrend) dashboardState.charts.visitTrend.dispose();
-      const chart = window.echarts.init(domTrend);
+      const chart = window.echarts.init(domTrend, 'v5');
       dashboardState.charts.visitTrend = chart;
       const months = visitor.monthlyTrend.map((item) => item.month);
       const visitors = visitor.monthlyTrend.map((item) => item.visitors);

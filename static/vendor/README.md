@@ -9,5 +9,5 @@ checked against these copies on 2026-10-24.
 | Fuse.js | 3.2.1 | site search (layouts/partials/site_js.html) | Apache-2.0 |
 | mark.js (jQuery) | 8.11.1 | search result highlighting | MIT |
 | Academicons | 1.9.2 | academic profile icons (layouts/partials/site_head.html) | font: SIL OFL 1.1; CSS: MIT |
-| ECharts (trimmed: bar, line, graph, radar) | 5.4.3 | research dashboard; built by scripts/build-echarts.mjs from the npm package | Apache-2.0 |
+| ECharts (trimmed: bar, line, graph, radar) | 6.1.0 (v5 theme) | research dashboard; built by scripts/build-echarts.mjs from the npm package | Apache-2.0 |
 | Leaflet, Leaflet.markercluster | see folders | research dashboard and home map | BSD-2-Clause, MIT |
