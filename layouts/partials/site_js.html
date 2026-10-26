@@ -71,7 +71,6 @@
   </script>
   {{ if ($scr.Get "use_cdn") }}
     {{ printf "<script src=\"%s\" integrity=\"%s\" crossorigin=\"anonymous\"></script>" (printf "/vendor/fuse/%s/fuse.min.js" $js.fuse.version) $js.fuse.sri | safeHTML }}
-    {{ printf "<script src=\"%s\" integrity=\"%s\" crossorigin=\"anonymous\"></script>" (printf "/vendor/mark/%s/jquery.mark.min.js" $js.mark.version) $js.mark.sri | safeHTML }}
   {{ end }}
 {{ else if eq $search_provider "algolia" }}
   {{/* Algolia search result template. */}}

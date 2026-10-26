@@ -38,6 +38,53 @@ let summaryLength = 60;
  * Functions.
  * --------------------------------------------------------------------------- */
 
+// No jQuery (theme plan stage 2): DOM calls replace $(), and highlight() replaces the jquery.mark plugin.
+const $id = (id) => document.getElementById(id);
+
+// Wrap each word of `query` in <mark data-markjs="true"> inside el's text, as jquery.mark's defaults did: words
+// separately, longest first, case-insensitive, ignoring accents, anywhere in a word.
+function highlight(el, query) {
+  if (!el) return;
+  const fold = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  const words = [...new Set(query.split(/\s+/).map(fold).filter(Boolean))].sort((a, b) => b.length - a.length);
+  if (!words.length) return;
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  for (let n = walker.nextNode(); n; n = walker.nextNode()) if (!n.parentNode.closest('mark[data-markjs]')) nodes.push(n);
+  for (const node of nodes) {
+    // Fold the text one character at a time, keeping where each folded character came from.
+    const text = node.nodeValue;
+    let folded = '';
+    const from = [];
+    for (let i = 0; i < text.length; i++) {
+      const f = fold(text[i]);
+      for (let k = 0; k < f.length; k++) from.push(i);
+      folded += f;
+    }
+    const hits = [];
+    for (const w of words) {
+      for (let at = folded.indexOf(w); at !== -1; at = folded.indexOf(w, at + w.length)) {
+        const s = from[at], e = from[at + w.length - 1] + 1;
+        if (!hits.some((h) => s < h[1] && e > h[0])) hits.push([s, e]);
+      }
+    }
+    if (!hits.length) continue;
+    hits.sort((a, b) => a[0] - b[0]);
+    const frag = document.createDocumentFragment();
+    let last = 0;
+    for (const [s, e] of hits) {
+      if (s > last) frag.appendChild(document.createTextNode(text.slice(last, s)));
+      const m = document.createElement('mark');
+      m.setAttribute('data-markjs', 'true');
+      m.textContent = text.slice(s, e);
+      frag.appendChild(m);
+      last = e;
+    }
+    if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
+    node.parentNode.replaceChild(frag, node);
+  }
+}
+
 // Get query from URI.
 function getSearchQuery(name) {
   return decodeURIComponent((location.search.split(name + '=')[1] || '').split('&')[0]).replace(/\+/g, ' ');
@@ -52,20 +99,21 @@ function updateURL(url) {
 
 // Pre-process new search query.
 function initSearch(force, fuse) {
-  let query = $('#search-query').val();
+  let query = $id('search-query').value;
+  const hits = $id('search-hits'), common = $id('search-common-queries');
 
   // If query deleted, clear results.
   if (query.length < 1) {
-    $('#search-hits').empty();
-    $('#search-common-queries').show();
+    hits.replaceChildren();
+    if (common) common.style.display = '';
   }
 
   // Check for timer event (enter key not pressed) and query less than minimum length required.
   if (!force && query.length < fuseOptions.minMatchCharLength) return;
 
   // Do search.
-  $('#search-hits').empty();
-  $('#search-common-queries').hide();
+  hits.replaceChildren();
+  if (common) common.style.display = 'none';
   searchAcademic(query, fuse);
   let newURL =
     window.location.protocol +
@@ -84,16 +132,16 @@ function searchAcademic(query, fuse) {
   // console.log({"results": results});
 
   if (results.length > 0) {
-    $('#search-hits').append('<h3 class="mt-0">' + results.length + ' ' + i18n.results + '</h3>');
+    $id('search-hits').insertAdjacentHTML('beforeend', '<h3 class="mt-0">' + results.length + ' ' + i18n.results + '</h3>');
     parseResults(query, results);
   } else {
-    $('#search-hits').append('<div class="search-no-results">' + i18n.no_results + '</div>');
+    $id('search-hits').insertAdjacentHTML('beforeend', '<div class="search-no-results">' + i18n.no_results + '</div>');
   }
 }
 
 // Parse search results.
 function parseResults(query, results) {
-  $.each(results, function (key, value) {
+  results.forEach(function (value, key) {
     let content_key = value.item.section;
     let content = '';
     let snippet = '';
@@ -109,7 +157,7 @@ function parseResults(query, results) {
     if (fuseOptions.tokenize) {
       snippetHighlights.push(query);
     } else {
-      $.each(value.matches, function (matchKey, matchValue) {
+      value.matches.forEach(function (matchValue) {
         if (matchValue.key == 'content') {
           let start = matchValue.indices[0][0] - summaryLength > 0 ? matchValue.indices[0][0] - summaryLength : 0;
           let end =
@@ -132,7 +180,7 @@ function parseResults(query, results) {
     }
 
     // Load template.
-    let template = $('#search-hit-fuse-template').html();
+    let template = $id('search-hit-fuse-template').innerHTML;
 
     // Localize content types.
     if (content_key in content_type) {
@@ -148,11 +196,11 @@ function parseResults(query, results) {
       snippet: snippet,
     };
     let output = render(template, templateData);
-    $('#search-hits').append(output);
+    $id('search-hits').insertAdjacentHTML('beforeend', output);
 
     // Highlight search terms in result.
-    $.each(snippetHighlights, function (hlKey, hlValue) {
-      $('#summary-' + key).mark(hlValue);
+    snippetHighlights.forEach(function (hlValue) {
+      highlight($id('summary-' + key), hlValue);
     });
   });
 }
@@ -189,22 +237,34 @@ if (typeof Fuse === 'function') {
   function loadIndex() {
     if (loading) return;
     loading = true;
-    $.getJSON(search_config.indexURI, function (search_index) {
-      fuse = new Fuse(search_index, fuseOptions);
-      if (pending !== null) {
-        initSearch(pending, fuse);
-        pending = null;
-      }
-    });
+    fetch(search_config.indexURI)
+      .then((r) => r.json())
+      .then(function (search_index) {
+        fuse = new Fuse(search_index, fuseOptions);
+        if (pending !== null) {
+          initSearch(pending, fuse);
+          pending = null;
+        }
+      })
+      .catch(function () {
+        loading = false; // try again on the next keystroke
+      });
   }
 
   // On page load, check for search query in URL.
   let query = getSearchQuery('q');
   if (query) {
     document.querySelector('body').classList.add('searching');
-    $('.search-results').css({opacity: 0, visibility: 'visible'}).animate({opacity: 1}, 200);
-    $('#search-query').val(query);
-    $('#search-query').focus();
+    document.querySelectorAll('.search-results').forEach(function (el) {
+      el.style.visibility = 'visible';
+      el.style.opacity = 1;
+      if (el.animate) el.animate([{opacity: 0}, {opacity: 1}], {duration: 200});
+    });
+    const box = $id('search-query');
+    if (box) {
+      box.value = query;
+      box.focus();
+    }
     loadIndex();
     run(true);
   }
@@ -213,21 +273,22 @@ if (typeof Fuse === 'function') {
   new MutationObserver(function () {
     if (body.classList.contains('searching')) loadIndex();
   }).observe(body, {attributes: true, attributeFilter: ['class']});
-  $('#search-query').on('focus', loadIndex);
+  const box = $id('search-query');
+  if (box) {
+    box.addEventListener('focus', loadIndex);
 
-  // On search box key up, process query.
-  $('#search-query').keyup(function (e) {
-    loadIndex();
-    clearTimeout($.data(this, 'searchTimer')); // Ensure only one timer runs!
-    if (e.keyCode == 13) {
-      run(true);
-    } else {
-      $(this).data(
-        'searchTimer',
-        setTimeout(function () {
+    // On search box key up, process query.
+    let searchTimer;
+    box.addEventListener('keyup', function (e) {
+      loadIndex();
+      clearTimeout(searchTimer); // Ensure only one timer runs!
+      if (e.key === 'Enter' || e.keyCode == 13) {
+        run(true);
+      } else {
+        searchTimer = setTimeout(function () {
           run(false);
-        }, 250),
-      );
-    }
-  });
+        }, 250);
+      }
+    });
+  }
 }
