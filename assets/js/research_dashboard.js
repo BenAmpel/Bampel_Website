@@ -753,12 +753,12 @@
       rangeEl.min = String(footprint.minYear || state.year);
       rangeEl.max = String(footprint.maxYear || state.year);
       rangeEl.value = String(state.year);
-      labelEl.textContent = `Up to ${state.year}`;
+      labelEl.textContent = String(state.year); // the label already reads "Through …"
       if (!rangeEl.dataset.bound) {
         rangeEl.dataset.bound = "true";
         rangeEl.addEventListener("input", () => {
           state.year = Number(rangeEl.value);
-          labelEl.textContent = `Up to ${state.year}`;
+          labelEl.textContent = String(state.year); // the label already reads "Through …"
           window.requestAnimationFrame(applyFilters);
         });
       }
