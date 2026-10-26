@@ -261,7 +261,7 @@
     {{ $slug := path.Base (strings.TrimSuffix "/" $page.RelPermalink) }}
     {{ if fileExists (printf "static/media/papers/%s.mp4" $slug) }}
     <details class="pub-plain-video">
-      <summary>Watch the 25-second video summary</summary>
+      <summary>Watch a short video summary</summary>
       <video controls preload="none" playsinline width="1080" height="1080"{{ if fileExists (printf "static/media/papers/%s-poster.jpg" $slug) }} poster="/media/papers/{{ $slug }}-poster.jpg"{{ end }}>
         <source src="/media/papers/{{ $slug }}.mp4" type="video/mp4">
       </video>
