@@ -35,10 +35,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import os from 'node:os';
-import { spawnSync } from 'node:child_process';
 import { CCAIR, ROOT, SITE, esc, ld, person, org, head as baseHead, top as baseTop, foot as baseFoot, writeSitemap, readJson,
-  HIRING, CODE_SHORT, SHARE_IMAGE, LASTMOD_STORE, photoHtml, fmtDate, NEW_TAB, assertNoInternalNotes } from './ccair-static.mjs';
+  HIRING, CODE_SHORT, LASTMOD_STORE, ogImages, photoHtml, fmtDate, NEW_TAB, assertNoInternalNotes } from './ccair-static.mjs';
 
 const S = readJson('students.json');
 const DS = readJson('datasets.json');
@@ -342,80 +340,6 @@ function outcomesSections() {
   return [results, what, privacy, source];
 }
 
-/* ---------- Sharing images ---------- */
-const OG_VERSION = 'og-2-gsu';
-// No logo on the cards: GSU does not allow a center to make its own (commkit.gsu.edu); the text names the center instead.
-// Lato comes from the self-hosted files by a relative URL (the SVG sits in static/ccair/students/og/), so the SVG and its
-// hash are the same on every machine.
-function wrap(text, max) {
-  const lines = []; let line = '';
-  for (const w of text.split(/\s+/)) {
-    if ((line + ' ' + w).trim().length > max && line) { lines.push(line); line = w; } else line = (line + ' ' + w).trim();
-  }
-  if (line) lines.push(line);
-  return lines;
-}
-function ogSvg(title, eyebrow, pathLabel) {
-  let size = 66, lines = wrap(title, 28);
-  if (lines.length > 3) { size = 54; lines = wrap(title, 34); }
-  const lh = Math.round(size * 1.18), y0 = 296 - ((lines.length - 1) * lh) / 2;
-  const F = "'Lato', 'Helvetica Neue', Arial, sans-serif";
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-<style>
-@font-face { font-family: 'Lato'; font-weight: 400; src: url('../../assets/fonts/lato-400.woff2') format('woff2'); }
-@font-face { font-family: 'Lato'; font-weight: 700; src: url('../../assets/fonts/lato-700.woff2') format('woff2'); }
-</style>
-<rect width="1200" height="630" fill="#FFFFFF"/>
-<rect x="0" y="0" width="1200" height="14" fill="#0039A6"/>
-<rect x="0" y="470" width="1200" height="160" fill="#EEEEEE"/>
-<text x="80" y="122" font-family="${F}" font-weight="700" font-size="24" letter-spacing="3" fill="#0039A6">${esc(eyebrow.toUpperCase())}</text>
-${lines.map((l, i) => `<text x="80" y="${Math.round(y0 + i * lh + size * 0.35)}" font-family="${F}" font-weight="700" font-size="${size}" fill="#000000">${esc(l)}</text>`).join('\n')}
-<text x="80" y="530" font-family="${F}" font-weight="700" font-size="28" fill="#000000">Center for CyberAI Research (CCAIR)</text>
-<text x="80" y="568" font-family="${F}" font-weight="400" font-size="22" fill="#374057">Georgia State University · J. Mack Robinson College of Business</text>
-<text x="1120" y="122" text-anchor="end" font-family="${F}" font-weight="400" font-size="20" fill="#5A5D66">${esc(pathLabel)}</text>
-</svg>
-`;
-}
-
-function findChrome() {
-  if (process.env.NETLIFY === 'true' || process.env.GUIDE_OG === '0') return '';
-  const c = [process.env.CHROME_PATH, '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', '/usr/bin/google-chrome', '/usr/bin/chromium'].filter(Boolean);
-  return c.find((p) => fs.existsSync(p)) || '';
-}
-
-function ogImages(pages) {
-  fs.mkdirSync(OG_DIR, { recursive: true });
-  const mPath = path.join(OG_DIR, 'manifest.json');
-  const manifest = fs.existsSync(mPath) ? JSON.parse(fs.readFileSync(mPath, 'utf8')) : { note: '', images: {} };
-  manifest.note = 'Written by scripts/build-students.mjs. hash is the SHA-256 of the SVG card the PNG was rendered from; a page whose hash differs uses the site sharing card until the PNG is rendered again.';
-  const chrome = findChrome();
-  const svgDir = path.join(out, 'og');
-  fs.mkdirSync(svgDir, { recursive: true });
-  const images = {};
-  let rendered = 0;
-  for (const { key, title, eyebrow, url } of pages) {
-    const svg = ogSvg(title, eyebrow, url.replace(SITE + '/', 'bampel.com/'));
-    const hash = sha(OG_VERSION + svg);
-    const svgFile = path.join(svgDir, `${key}.svg`), png = path.join(OG_DIR, `${key}.png`);
-    fs.writeFileSync(svgFile, svg);
-    const fresh = fs.existsSync(png) && manifest.images[key]?.hash === hash;
-    if (!fresh && chrome) {
-      const r = spawnSync(chrome, ['--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check', `--user-data-dir=${path.join(os.tmpdir(), 'ccair-og-chrome')}`, '--hide-scrollbars', '--force-device-scale-factor=1', '--default-background-color=FFFFFFFF',
-        '--window-size=1200,630', `--screenshot=${png}`, `file://${svgFile}`], { stdio: 'ignore', timeout: 30000 });
-      if (r.status === 0 && fs.existsSync(png)) { manifest.images[key] = { hash, title }; rendered++; }
-    }
-    const ok = fs.existsSync(png) && manifest.images[key]?.hash === hash;
-    if (!ok) console.warn(`Sharing image for ${url} is missing or out of date; using the site sharing card. Run npm run build:ccair on a machine with Google Chrome and commit static/ccair/assets/students/og/.`);
-    images[key] = ok ? { url: `${SITE}/ccair/assets/students/og/${key}.png?v=${hash.slice(0, 8)}`, width: 1200, height: 630,
-      alt: `${title}. CCAIR Student Guide, Center for CyberAI Research, Georgia State University.` } : SHARE_IMAGE;
-  }
-  if (rendered) {
-    fs.writeFileSync(mPath, JSON.stringify(manifest, null, 2) + '\n');
-    console.log('Rendered %d sharing image(s) with headless Chrome; commit static/ccair/assets/students/og/.', rendered);
-  }
-  return images;
-}
-
 /* ---------- Page ---------- */
 const navLinks = (p) => [
   { href: '/ccair/', label: 'Center home', hideSm: true },
@@ -626,7 +550,8 @@ fs.mkdirSync(out, { recursive: true });
 const ogPages = [...S.pages.map((p, i) => ({ key: p.slug || 'index', title: p.title, url: `${BASE}${p.slug ? p.slug + '/' : ''}`,
   eyebrow: p.slug ? `CCAIR Student Guide · Part ${i + 1} of ${S.pages.length}` : 'CCAIR Student Guide' })),
   { key: 'outcomes', title: OUTCOMES.title, url: `${BASE}outcomes/`, eyebrow: 'CCAIR Student Guide' }];
-const OG_IMAGES = ogImages(ogPages);
+const OG_IMAGES = ogImages(ogPages.map((p) => ({ ...p, alt: `${p.title}. CCAIR Student Guide, Center for CyberAI Research, Georgia State University.` })),
+  { pngDir: OG_DIR, svgDir: path.join(out, 'og'), script: 'scripts/build-students.mjs' });
 
 const built = [...S.pages.map((p, i) => ({ p, i })), { p: OUTCOMES, i: -1 }].map(({ p, i }) => ({ p, i, ...pageMain(p, i) }));
 

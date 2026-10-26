@@ -50,6 +50,9 @@ function buildMaterials() {
       }
       return out;
     });
+  // The dataset catalog's citation names its version; take it from datasets.json so a re-import cannot leave it stale.
+  const catalogVersion = JSON.parse(fs.readFileSync(path.join(ccairDir, 'data', 'datasets.json'), 'utf8')).updated;
+  for (const m of clean) if (m.title === 'CCAIR Cybersecurity Dataset Catalog' && m.cite) m.cite = m.cite.replace(/\(Version [^)]*\)/, `(Version ${catalogVersion})`).replace(/\(\d{4}\)/, `(${catalogVersion.slice(0, 4)})`);
   const json = JSON.stringify(clean, null, 2) + '\n';
   if (INTERNAL_NOTE.test(json)) throw new Error('materials.json still contains an internal note after cleaning');
   fs.writeFileSync(path.join(ccairDir, 'data', 'materials.json'), json);

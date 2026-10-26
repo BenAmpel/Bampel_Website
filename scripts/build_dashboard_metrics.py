@@ -42,6 +42,8 @@ NAME_MAP = {
 }
 
 MAIN_AUTHOR = 'Benjamin Ampel'
+# The publication data names Ben "Benjamin M. Ampel"; NAME_MAP does not fold that into MAIN_AUTHOR, so compare with this.
+MAIN_AUTHOR_RE = re.compile(r'^Benjamin (M\. )?Ampel$')
 
 
 def warn_name_variants(names):
@@ -267,7 +269,7 @@ def build_collaboration_range(publications, current_year, years_back=None):
 
         for author in authors:
             node_counts[author] += 1
-            if author != MAIN_AUTHOR and node_counts[author] > max_count:
+            if not MAIN_AUTHOR_RE.match(author) and node_counts[author] > max_count:
                 max_count = node_counts[author]
 
             meta = author_meta.setdefault(author, {

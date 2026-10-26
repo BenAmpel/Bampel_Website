@@ -5,6 +5,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import crypto from 'node:crypto';
+import os from 'node:os';
+import { spawnSync } from 'node:child_process';
 
 export const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const CCAIR = path.join(ROOT, 'static', 'ccair');
@@ -50,6 +53,84 @@ export const CODE_SHORT = { little: 'Little or none', some: 'Some scripting', lo
 
 // The site-wide sharing card (1200 x 630), used when a page has no image of its own.
 export const SHARE_IMAGE = { url: `${SITE}/media/sharing-card.png`, width: 1200, height: 630, alt: 'Benjamin M. Ampel, Assistant Professor of Computer Information Systems, Georgia State University. bampel.com' };
+
+// Sharing cards (1200 x 630): the page title in the CCAIR palette, one per page. Moved here from build-students.mjs
+// (2026-10-26) so the Pathway Finder and the CCAIR app pages have them too. When a card changes and Google Chrome is
+// installed, ogImages renders the PNG and records the SVG's hash in the PNG folder's manifest.json. Netlify builds have no
+// Chrome, so they use the committed PNGs, and a page whose PNG is missing or out of date uses SHARE_IMAGE.
+const OG_VERSION = 'og-2-gsu';
+// No logo on the cards: GSU does not allow a center to make its own (commkit.gsu.edu); the text names the center instead.
+// Lato comes from the self-hosted files by a relative URL, so the SVG and its hash are the same on every machine. The SVG
+// folder must therefore sit two folders below static/ccair/ (for example static/ccair/students/og/).
+function wrap(text, max) {
+  const lines = []; let line = '';
+  for (const w of text.split(/\s+/)) {
+    if ((line + ' ' + w).trim().length > max && line) { lines.push(line); line = w; } else line = (line + ' ' + w).trim();
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+export function ogSvg(title, eyebrow, pathLabel) {
+  let size = 66, lines = wrap(title, 28);
+  if (lines.length > 3) { size = 54; lines = wrap(title, 34); }
+  const lh = Math.round(size * 1.18), y0 = 296 - ((lines.length - 1) * lh) / 2;
+  const F = "'Lato', 'Helvetica Neue', Arial, sans-serif";
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+<style>
+@font-face { font-family: 'Lato'; font-weight: 400; src: url('../../assets/fonts/lato-400.woff2') format('woff2'); }
+@font-face { font-family: 'Lato'; font-weight: 700; src: url('../../assets/fonts/lato-700.woff2') format('woff2'); }
+</style>
+<rect width="1200" height="630" fill="#FFFFFF"/>
+<rect x="0" y="0" width="1200" height="14" fill="#0039A6"/>
+<rect x="0" y="470" width="1200" height="160" fill="#EEEEEE"/>
+<text x="80" y="122" font-family="${F}" font-weight="700" font-size="24" letter-spacing="3" fill="#0039A6">${esc(eyebrow.toUpperCase())}</text>
+${lines.map((l, i) => `<text x="80" y="${Math.round(y0 + i * lh + size * 0.35)}" font-family="${F}" font-weight="700" font-size="${size}" fill="#000000">${esc(l)}</text>`).join('\n')}
+<text x="80" y="530" font-family="${F}" font-weight="700" font-size="28" fill="#000000">Center for CyberAI Research (CCAIR)</text>
+<text x="80" y="568" font-family="${F}" font-weight="400" font-size="22" fill="#374057">Georgia State University · J. Mack Robinson College of Business</text>
+<text x="1120" y="122" text-anchor="end" font-family="${F}" font-weight="400" font-size="20" fill="#5A5D66">${esc(pathLabel)}</text>
+</svg>
+`;
+}
+
+function findChrome() {
+  if (process.env.NETLIFY === 'true' || process.env.GUIDE_OG === '0') return '';
+  const c = [process.env.CHROME_PATH, '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', '/usr/bin/google-chrome', '/usr/bin/chromium'].filter(Boolean);
+  return c.find((p) => fs.existsSync(p)) || '';
+}
+
+// pages: [{ key, title, eyebrow, url, alt, label }]; label (default: the url) is the address printed top right. pngDir holds the committed PNGs and manifest.json; svgDir is build output.
+// script names the generator in the manifest note. Returns { key: image } for head().
+export function ogImages(pages, { pngDir, svgDir, script }) {
+  const sha = (s) => crypto.createHash('sha256').update(s).digest('hex');
+  fs.mkdirSync(pngDir, { recursive: true });
+  const mPath = path.join(pngDir, 'manifest.json'), rel = path.relative(ROOT, pngDir);
+  const manifest = fs.existsSync(mPath) ? JSON.parse(fs.readFileSync(mPath, 'utf8')) : { note: '', images: {} };
+  manifest.note = `Written by ${script}. hash is the SHA-256 of the SVG card the PNG was rendered from; a page whose hash differs uses the site sharing card until the PNG is rendered again.`;
+  const chrome = findChrome();
+  fs.mkdirSync(svgDir, { recursive: true });
+  const images = {};
+  let rendered = 0;
+  for (const { key, title, eyebrow, url, alt, label = url } of pages) {
+    const svg = ogSvg(title, eyebrow, label.replace(SITE + '/', 'bampel.com/'));
+    const hash = sha(OG_VERSION + svg);
+    const svgFile = path.join(svgDir, `${key}.svg`), png = path.join(pngDir, `${key}.png`);
+    fs.writeFileSync(svgFile, svg);
+    const fresh = fs.existsSync(png) && manifest.images[key]?.hash === hash;
+    if (!fresh && chrome) {
+      const r = spawnSync(chrome, ['--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check', `--user-data-dir=${path.join(os.tmpdir(), 'ccair-og-chrome')}`, '--hide-scrollbars', '--force-device-scale-factor=1', '--default-background-color=FFFFFFFF',
+        '--window-size=1200,630', `--screenshot=${png}`, `file://${svgFile}`], { stdio: 'ignore', timeout: 30000 });
+      if (r.status === 0 && fs.existsSync(png)) { manifest.images[key] = { hash, title }; rendered++; }
+    }
+    const ok = fs.existsSync(png) && manifest.images[key]?.hash === hash;
+    if (!ok) console.warn(`Sharing image for ${url} is missing or out of date; using the site sharing card. Run npm run build:ccair on a machine with Google Chrome and commit ${rel}/.`);
+    images[key] = ok ? { url: `${SITE}/${path.relative(path.join(ROOT, 'static'), png)}?v=${hash.slice(0, 8)}`, width: 1200, height: 630, alt } : SHARE_IMAGE;
+  }
+  if (rendered) {
+    fs.writeFileSync(mPath, JSON.stringify(manifest, null, 2) + '\n');
+    console.log('Rendered %d sharing image(s) with headless Chrome; commit %s/.', rendered, rel);
+  }
+  return images;
+}
 
 // <head> through the analytics tag. The caller adds its JSON-LD and closes </head>.
 // Analytics is the plain gtag page view (the site-wide Google Analytics property); no custom events carry user data.

@@ -221,10 +221,10 @@ function render(template, data) {
  * --------------------------------------------------------------------------- */
 
 // Shadowed from Wowchemy v5 (2026-10-24): the search index (/index.json, about 170 KB) used to load on every page view.
-// It now loads the first time it is needed: when the search dialog opens (wowchemy.js adds "searching" to <body>), when
+// It now loads the first time it is needed (and, since 2026-10-26, the Fuse library with it): when the search dialog opens (wowchemy.js adds "searching" to <body>), when
 // the search box gets focus, or at once when the page was opened from a search link (?q=...). A query typed before the
 // index arrives runs as soon as it does.
-if (typeof Fuse === 'function') {
+{
   let fuse = null;
   let loading = false;
   let pending = null; // force flag of a query typed before the index arrived
@@ -234,12 +234,26 @@ if (typeof Fuse === 'function') {
     else pending = pending || force;
   }
 
+  // Fuse itself also loads on first use (2026-10-26), in parallel with the index, with the integrity hash the old
+  // <script> tag carried.
+  function loadFuse() {
+    if (typeof Fuse === 'function') return Promise.resolve();
+    return new Promise(function (resolve, reject) {
+      const s = document.createElement('script');
+      s.src = search_config.fuseURI;
+      s.integrity = search_config.fuseSRI;
+      s.crossOrigin = 'anonymous';
+      s.onload = resolve;
+      s.onerror = function () { s.remove(); reject(new Error('Fuse did not load')); };
+      document.head.appendChild(s);
+    });
+  }
+
   function loadIndex() {
     if (loading) return;
     loading = true;
-    fetch(search_config.indexURI)
-      .then((r) => r.json())
-      .then(function (search_index) {
+    Promise.all([loadFuse(), fetch(search_config.indexURI).then((r) => r.json())])
+      .then(function ([, search_index]) {
         fuse = new Fuse(search_index, fuseOptions);
         if (pending !== null) {
           initSearch(pending, fuse);

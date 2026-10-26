@@ -9,6 +9,10 @@
    redirects to /). The @id is shared with the CCAIR site's Organization JSON-LD (static/ccair/index.html),
    which names this person as its director. */}}
 {{ if .IsHome }}
+{{/* Person image: the profile photo (a 600 x 600 crop), since search engines expect a picture of the person; the
+   text sharing card only if the photo is missing. */}}
+{{ $personImage := printf "%smedia/sharing-card.png" site.BaseURL }}
+{{ with site.GetPage "/authors/admin" }}{{ with .Resources.GetMatch "avatar*" }}{{ $personImage = (.Fill "600x600 Center jpg q85").Permalink }}{{ end }}{{ end }}
 {{ $ld := dict
     "@context" "https://schema.org"
     "@type" "Person"
@@ -23,7 +27,7 @@
     "alumniOf" (dict "@type" "CollegeOrUniversity" "name" "University of Arizona" "sameAs" "https://www.arizona.edu/")
     "award" (slice "ACM SIGMIS Doctoral Dissertation Award (2024)" "IEEE ISI Best Paper Award (2023)" "IEEE ISI Best Paper Award (2020)")
     "url" site.BaseURL
-    "image" (printf "%smedia/sharing-card.png" site.BaseURL)
+    "image" $personImage
     "email" "bampel@gsu.edu"
     "description" "Assistant Professor of Computer Information Systems at Georgia State University. Research on AI-enabled cybersecurity, phishing detection, hacker community analytics, and large language models."
     "knowsAbout" (slice "AI for Cybersecurity" "Phishing Detection" "Cyber Threat Intelligence" "Large Language Models" "Hacker Community Analytics" "Design Science Research")
