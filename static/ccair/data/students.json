@@ -3,6 +3,7 @@
   "verified": "October 2026",
   "markup": "Text fields use a small markup that scripts/build-students.mjs renders: [text](url) for links, **text** for bold lead-ins, {{refId}} for a numbered citation to refs.refId, [[role:slug]] for a link to a Pathway Finder role guide. Blocks: p, ul, ol, note, warn, h3, table {caption, head, rows}, cards (the guide's own page list), audiences (the hub's starting-point cards), roleTable (the 14 Pathway Finder roles compared, from pathways.json), catalog (the dataset catalog). Section fields: h (the heading, usually a question), id (the anchor; keep it stable once published, because other pages link to it), toc (short label for On this page), answer (one or two sentences shown under the heading, bold lead first). [[count:datasets]] renders the number of datasets.",
   "changes": [
+    {"date": "2026-10-26", "title": "New: is AI changing entry-level cybersecurity jobs?", "url": "/ccair/students/get-hired/#ai-and-entry-level-jobs", "text": "Get hired now answers how AI is changing entry-level hiring, with CyberSeek's count of employers asking for AI skills and ISC2's 2025 workforce study, and what students can do about it."},
     {"date": "2026-10-25", "title": "New: how to get into AI security", "url": "/ccair/students/skills/#ai-security", "text": "Build skills now answers how students get into AI security: the shared references most teams start from (OWASP Top 10 for LLM Applications, MITRE ATLAS, NIST's adversarial machine learning taxonomy and AI Risk Management Framework) and two open-source tools for practicing on systems you own."},
     { "date": "2026-10-23", "title": "Question headings, comparison tables, printable pages and a catalog download", "url": "/ccair/students/", "text": "Each section now opens with the question it answers and a short answer. New: a table comparing the 14 Pathway Finder roles, a certification comparison, a printable year-by-year checklist and certification map, a CSV and JSON download of the dataset catalog, starting points for five kinds of students, and this update feed." },
     { "date": "2026-10-22", "title": "Guide refocused on industry careers", "url": "/ccair/students/", "text": "The guide now centers security jobs in industry: company security teams, managed security providers, consulting, product security, cloud providers and startups. Government and defense work moved to its own optional page." },
@@ -331,6 +332,16 @@
             "**Ask your own questions.** Ask about on-call duties, team size, mentoring and the training budget."
           ] }
         ] },
+        {"h": "Is AI changing entry-level cybersecurity jobs?", "toc": "AI and entry-level jobs", "id": "ai-and-entry-level-jobs", "answer": "**Some employers now ask for AI skills, but security fundamentals still come first.** About 1 in 10 employers hiring for cybersecurity roles named AI as a requirement in 2024 to 2025.", "blocks": [
+          {"p": "CyberSeek found that about 10% of employers recruiting for cybersecurity positions cited AI as a requirement from May 2024 through April 2025, and notes that other employers may expect AI skills without saying so in the listing{{cyberseek-release}}."},
+          {"p": "In ISC2's 2025 workforce study of 16,029 cybersecurity professionals, 41% named AI as a top skill need, ahead of cloud security at 36%. 28% said their organizations had already integrated AI tools into operations, and ISC2 reports that respondents see AI as less of a threat to the workforce than expected{{isc2-workforce-2025}}."},
+          {"h3": "What to do about it"},
+          { "ul": [
+            "**Build the fundamentals first.** Employers who want AI skills still hire for the security work itself: networking, operating systems, logs and how attacks work.",
+            "**Show AI use you can explain.** In a portfolio project, say what an AI tool did, what you checked by hand and what it got wrong.",
+            "**Learn how AI systems are attacked.** See [How do I get into AI security?](/ccair/students/skills/#ai-security) for the shared references and practice tools."
+          ] }
+        ] },
         { "h": "How much do cybersecurity jobs pay?", "toc": "Research pay", "id": "research-pay", "answer": "**The median for information security analysts was $129,180 in May 2025.** That figure covers all experience levels, so expect less in your first job.", "blocks": [
           { "ul": [
             "**Bureau of Labor Statistics (BLS).** The median annual pay for information security analysts was $129,180 in May 2025. BLS projects 21% employment growth from 2025 to 2035{{bls-ooh}}.",
@@ -557,6 +568,7 @@
     "roles": ["soc-analyst", "grc-analyst", "cloud-security-engineer", "application-security-engineer"]
   },
   "refs": {
+    "isc2-workforce-2025": {"publisher": "ISC2", "title": "ISC2 Publishes 2025 Cybersecurity Workforce Study (December 4, 2025)", "url": "https://www.isc2.org/Insights/2025/12/ISC2-Publishes-2025-Cybersecurity-Workforce-Study"},
     "owasp-llm-top10": {"publisher": "OWASP Gen AI Security Project", "title": "OWASP Top 10 for LLM Applications 2025", "url": "https://genai.owasp.org/llm-top-10/"},
     "mitre-atlas": {"publisher": "MITRE", "title": "ATLAS (Adversarial Threat Landscape for Artificial-Intelligence Systems)", "url": "https://atlas.mitre.org/"},
     "nist-aml": {"publisher": "NIST", "title": "NIST AI 100-2 E2025, Adversarial Machine Learning: A Taxonomy and Terminology of Attacks and Mitigations", "url": "https://csrc.nist.gov/news/2025/nist-ai-100-2-adversarial-machine-learning-taxonom"},
