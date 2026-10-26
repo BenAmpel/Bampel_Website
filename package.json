@@ -6,7 +6,8 @@
     "test:lab": "node tests/lab/run.mjs",
     "lab:dev": "node tests/lab/devserver.mjs",
     "lab:samples": "bash scripts/lab-samples.sh",
-    "guide:freshness": "node scripts/check-guide-freshness.mjs"
+    "guide:freshness": "node scripts/check-guide-freshness.mjs",
+    "build:cards": "node scripts/build-paper-cards.mjs"
   },
   "devDependencies": {
     "@fullhuman/postcss-purgecss": "8.0.0",
