@@ -40,3 +40,6 @@
 .statusline { min-height: 1.4em; }
 input[type=password], input[type=email] { font: inherit; padding: 8px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--card); color: var(--text); }
 input[type=text] { border-color: var(--line-strong); }
+
+/* Command lines in <pre class="mono"> scroll inside their card on phones instead of widening the page (as .keybox does). */
+pre.mono { max-width: 100%; overflow-x: auto; }
