@@ -5,26 +5,10 @@
     MAP: "dashboard-impact-map",
     COLLAB: "dashboard-collab-network",
     FOOTPRINT: "dashboard-footprint-map",
-    TOPICS: "dashboard-topics",
-    CENTRALITY_LIST: "centrality-list",
-    CENTRALITY_DENSITY: "centrality-density",
-    CENTRALITY_PATH: "centrality-path",
-    CENTRALITY_CLUSTER: "centrality-cluster",
-    CENTRALITY_RADAR: "centrality-radar",
-    CENTRALITY_NOTE: "centrality-note",
     FOCUS: "dash-metric-focus",
     TREND: "dash-metric-trend",
     CITES: "dash-metric-cites",
     HINDEX: "dash-metric-hindex",
-    VISIT_TOTAL: "dash-visit-total",
-    VISIT_MONTH: "dash-visit-month",
-    VISIT_TREND: "dash-visit-trend",
-    VISIT_MOMENTUM: "dash-visit-momentum",
-    VISIT_GEO: "dash-visit-geo",
-    VISIT_MINIMAP: "dash-visit-minimap",
-    VISIT_REGION: "dash-visit-region",
-    VISIT_LOCATIONS: "dash-visit-locations",
-    VISIT_SPARK: "dash-geo-spark",
     FOOTPRINT_YEAR: "footprint-year-range",
     FOOTPRINT_YEAR_LABEL: "footprint-year-label",
   };
@@ -63,12 +47,9 @@
       line: null,
       impact: null,
       collab: null,
-      visitTrend: null,
-      centralityRadar: null,
     },
     maps: {
       footprint: null,
-      mini: null,
       footprintObserver: null,
     },
     impact: {
@@ -206,31 +187,6 @@
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#39;");
-  }
-
-  function renderTopics(topics) {
-    const el = document.getElementById(IDS.TOPICS);
-    if (!el) return;
-    if (!Array.isArray(topics) || !topics.length) {
-      el.innerHTML = '<div style="opacity:0.6; font-size:0.7rem;">Topic model unavailable.</div>';
-      return;
-    }
-    const top = topics.slice(0, 6);
-    const maxWeight = Math.max(...top.map((topic) => topic.weight || 0), 1);
-    el.innerHTML = top
-      .map((topic) => {
-        const pct = Math.max(8, Math.round(((topic.weight || 0) / maxWeight) * 100));
-        const keywords = Array.isArray(topic.keywords) ? topic.keywords.slice(0, 5).join(", ") : "";
-        return `<div class="profile-topic-card">
-          <div class="profile-topic-header">
-            <div class="profile-topic-title">${escapeHtml(topic.label || "Topic")}</div>
-            <div class="profile-topic-weight">${Math.round((topic.weight || 0) * 100)}%</div>
-          </div>
-          <div class="profile-topic-bar"><span style="width:${pct}%"></span></div>
-          <div class="profile-topic-terms">${escapeHtml(keywords)}</div>
-        </div>`;
-      })
-      .join("");
   }
 
   function renderMetricSummary(payload) {
@@ -525,121 +481,6 @@
     renderPins();
     setInspector(null);
     updateImpactGraph();
-  }
-
-  function renderCentrality(centrality) {
-    if (!centrality || !Array.isArray(centrality.papers)) return;
-    updateText(IDS.CENTRALITY_DENSITY, (centrality.metrics && centrality.metrics.density) || "--");
-    updateText(IDS.CENTRALITY_PATH, (centrality.metrics && centrality.metrics.avgPath) || "--");
-    updateText(IDS.CENTRALITY_CLUSTER, (centrality.metrics && centrality.metrics.clustering) || "--");
-
-    const listEl = document.getElementById(IDS.CENTRALITY_LIST);
-    if (!listEl) return;
-
-    const metricKey = dashboardState.centrality.metric;
-    const labelMap = { eigen: "Influence", between: "Bridge", degree: "Hub" };
-    const sorted = centrality.papers
-      .slice()
-      .sort((left, right) => (right[metricKey] || 0) - (left[metricKey] || 0))
-      .slice(0, 8);
-    const maxValue = Math.max(...sorted.map((item) => item[metricKey] || 0), 1);
-
-    listEl.innerHTML = sorted
-      .map((item, index) => {
-        const pct = Math.max(8, Math.round(((item[metricKey] || 0) / maxValue) * 100));
-        const pills = [];
-        if ((item.citations || 0) >= (centrality.thresholds && centrality.thresholds.citation || 0)) pills.push("High impact");
-        if ((item.topicLinks || 0) >= (centrality.thresholds && centrality.thresholds.topic || 0)) pills.push("Topic dense");
-        if ((item.authorLinks || 0) >= (centrality.thresholds && centrality.thresholds.author || 0)) pills.push("Coauthor bridge");
-        return `<div class="centrality-item" tabindex="0" data-centrality-index="${item.index}">
-          <div class="centrality-bar" style="width:${pct}%"></div>
-          <div class="centrality-item-header">
-            <div class="centrality-rank">${index + 1}</div>
-            <div class="centrality-main">
-              <div class="centrality-title">${escapeHtml(item.title || "Untitled")}</div>
-              <div class="centrality-meta">
-                <span>${escapeHtml(item.year || "—")}</span>
-                <span>${escapeHtml(item.venue || "—")}</span>
-                <span>${labelMap[metricKey]} ${Number(item[metricKey] || 0).toFixed(2)}</span>
-              </div>
-              <div class="centrality-pills">${pills.map((pill) => `<span class="centrality-pill">${escapeHtml(pill)}</span>`).join("")}</div>
-            </div>
-          </div>
-        </div>`;
-      })
-      .join("");
-
-    const radarEl = document.getElementById(IDS.CENTRALITY_RADAR);
-    if (radarEl && dashboardState.charts.centralityRadar) {
-      dashboardState.charts.centralityRadar.dispose();
-      dashboardState.charts.centralityRadar = null;
-    }
-
-    const noteEl = document.getElementById(IDS.CENTRALITY_NOTE);
-    const renderRadar = (paper) => {
-      if (!paper || !radarEl) return;
-      if (!dashboardState.charts.centralityRadar) {
-        dashboardState.charts.centralityRadar = window.echarts.init(radarEl, 'v5');
-      }
-      const chart = dashboardState.charts.centralityRadar;
-      const maxTopic = (centrality.maxLinks && centrality.maxLinks.topic) || 1;
-      const maxVenue = (centrality.maxLinks && centrality.maxLinks.venue) || 1;
-      const maxAuthor = (centrality.maxLinks && centrality.maxLinks.author) || 1;
-      chart.setOption(
-        withReducedMotion({
-          radar: {
-            indicator: [
-              { name: "Topics", max: maxTopic },
-              { name: "Venues", max: maxVenue },
-              { name: "Authors", max: maxAuthor },
-            ],
-            splitLine: { lineStyle: { color: "rgba(255,255,255,0.1)" } },
-            axisLine: { lineStyle: { color: "rgba(255,255,255,0.2)" } },
-            axisName: { color: "#bde8ff", fontSize: 10 },
-          },
-          series: [
-            {
-              type: "radar",
-              data: [
-                {
-                  value: [paper.topicLinks || 0, paper.venueLinks || 0, paper.authorLinks || 0],
-                  areaStyle: { color: "rgba(0,229,255,0.18)" },
-                  lineStyle: { color: "#00e5ff" },
-                  itemStyle: { color: "#00e5ff" },
-                },
-              ],
-            },
-          ],
-        })
-      );
-      if (noteEl) {
-        noteEl.textContent = `${paper.title} | topic links ${paper.topicLinks || 0}, venue links ${paper.venueLinks || 0}, author links ${paper.authorLinks || 0}`;
-      }
-    };
-
-    listEl.querySelectorAll(".centrality-item").forEach((itemEl) => {
-      const targetIndex = Number(itemEl.getAttribute("data-centrality-index"));
-      const paper = centrality.papers.find((entry) => entry.index === targetIndex);
-      const activate = () => renderRadar(paper);
-      itemEl.addEventListener("mouseenter", activate);
-      itemEl.addEventListener("focusin", activate);
-    });
-
-    renderRadar(sorted[0]);
-
-    document.querySelectorAll(".centrality-tab").forEach((tab) => {
-      if (tab.dataset.bound) return;
-      tab.dataset.bound = "true";
-      tab.addEventListener("click", () => {
-        dashboardState.centrality.metric = tab.getAttribute("data-centrality-tab");
-        document.querySelectorAll(".centrality-tab").forEach((other) => {
-          const active = other === tab;
-          other.classList.toggle("is-active", active);
-          other.setAttribute("aria-selected", active ? "true" : "false");
-        });
-        renderCentrality(centrality);
-      });
-    });
   }
 
   function normalizeAuthor(nameMap, name) {
@@ -1008,219 +849,12 @@
     setTimeout(() => map.invalidateSize(), 200);
   }
 
-  function renderVisitorStats(visitor) {
-    if (!visitor) return;
-    updateText(IDS.VISIT_TOTAL, String(visitor.lifetimeTotal || 0));
-    updateText(IDS.VISIT_MONTH, String(visitor.totalLast30Days || 0));
-
-    const domTrend = document.getElementById(IDS.VISIT_TREND);
-    if (domTrend && Array.isArray(visitor.monthlyTrend) && visitor.monthlyTrend.length) {
-      if (dashboardState.charts.visitTrend) dashboardState.charts.visitTrend.dispose();
-      const chart = window.echarts.init(domTrend, 'v5');
-      dashboardState.charts.visitTrend = chart;
-      const months = visitor.monthlyTrend.map((item) => item.month);
-      const visitors = visitor.monthlyTrend.map((item) => item.visitors);
-      const maxVal = Math.max(...visitors, 0);
-
-      const formatMonth = (value) => {
-        const str = String(value || "");
-        if (str.length === 6) {
-          const year = Number(str.slice(0, 4));
-          const month = Number(str.slice(4)) - 1;
-          return new Date(year, month, 1).toLocaleString("en-US", { month: "short", year: "2-digit" });
-        }
-        return str;
-      };
-
-      chart.setOption(
-        withReducedMotion({
-          tooltip: {
-            trigger: "axis",
-            formatter: (params) => {
-              const point = params.find((item) => item.seriesType === "bar") || params[0];
-              const value = point.data && point.data.value !== undefined ? point.data.value : point.data;
-              return `${point.axisValueLabel}: ${value} visitors`;
-            },
-          },
-          aria: { enabled: true, description: "Traffic trend showing visitors per month." },
-          grid: { top: 10, right: 10, bottom: 20, left: 10, containLabel: false },
-          xAxis: { show: false, data: months.map(formatMonth) },
-          yAxis: { show: false, type: "value" },
-          series: [
-            {
-              type: "bar",
-              data: visitors.map((value) => ({
-                value,
-                itemStyle: { color: value === maxVal ? "#00ff41" : "#00c853" },
-              })),
-              itemStyle: { borderRadius: [2, 2, 0, 0] },
-              barWidth: "60%",
-            },
-            {
-              type: "line",
-              data: visitors,
-              smooth: true,
-              symbol: "circle",
-              symbolSize: 4,
-              lineStyle: { color: "#00e5ff", width: 2 },
-              itemStyle: { color: "#00e5ff" },
-              areaStyle: { color: "rgba(0,229,255,0.15)" },
-            },
-          ],
-        })
-      );
-
-      const momentumEl = document.getElementById(IDS.VISIT_MOMENTUM);
-      if (momentumEl) {
-        const sorted = visitor.monthlyTrend.slice().sort((left, right) => String(left.month).localeCompare(String(right.month)));
-        let valueText = "—";
-        let className = "dash-momentum is-flat";
-        if (sorted.length >= 2) {
-          const last = sorted[sorted.length - 1].visitors || 0;
-          const previous = sorted[sorted.length - 2].visitors || 0;
-          if (previous === 0 && last > 0) {
-            valueText = "+100%";
-            className = "dash-momentum is-up";
-          } else if (previous > 0) {
-            const change = ((last - previous) / previous) * 100;
-            valueText = `${change > 0 ? "+" : ""}${change.toFixed(0)}%`;
-            className = change > 1 ? "dash-momentum is-up" : change < -1 ? "dash-momentum is-down" : "dash-momentum is-flat";
-          } else {
-            valueText = "0%";
-          }
-        }
-        momentumEl.className = className;
-        momentumEl.innerHTML = `<span>${valueText}</span><span>vs last month</span>`;
-      }
-    }
-
-    const geoEl = document.getElementById(IDS.VISIT_GEO);
-    const regionEl = document.getElementById(IDS.VISIT_REGION);
-    const locsEl = document.getElementById(IDS.VISIT_LOCATIONS);
-    const sparkEl = document.getElementById(IDS.VISIT_SPARK);
-    const miniMapEl = document.getElementById(IDS.VISIT_MINIMAP);
-    const geoTabs = document.querySelectorAll(".dash-geo-tab");
-
-    const buildSparkline = (values, highlightCount) => {
-      if (!sparkEl || !values.length) return;
-      const width = 180;
-      const height = 28;
-      const maxValue = Math.max(...values, 1);
-      const points = values.map((value, index) => {
-        const x = (index / (values.length - 1 || 1)) * (width - 8) + 4;
-        const y = height - 4 - (value / maxValue) * (height - 8);
-        return `${x},${y}`;
-      });
-      const highlightPoints = points.slice(Math.max(0, values.length - highlightCount)).join(" ");
-      sparkEl.innerHTML = `<svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">
-        <polyline points="${points.join(" ")}" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"></polyline>
-        <polyline points="${highlightPoints}" fill="none" stroke="#00e5ff" stroke-width="2.5"></polyline>
-      </svg>`;
-    };
-
-    function updateMiniMap(items) {
-      if (!miniMapEl || !window.L) return;
-      const top3 = items.slice(0, 3).filter((item) => typeof item.lat === "number" && typeof item.lng === "number");
-      if (!top3.length) {
-        miniMapEl.classList.remove("is-ready");
-        return;
-      }
-
-      const mapInner = miniMapEl.querySelector(".dash-mini-map-inner") || miniMapEl;
-      if (!dashboardState.maps.mini) {
-        dashboardState.maps.mini = window.L.map(mapInner, {
-          zoomControl: false,
-          attributionControl: false,
-          dragging: false,
-          scrollWheelZoom: false,
-          doubleClickZoom: false,
-          boxZoom: false,
-          keyboard: false,
-          tap: false,
-        });
-        const tiles = document.body.classList.contains("dark")
-          ? window.L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", { maxZoom: 16 })
-          : window.L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", { maxZoom: 16 });
-        tiles.addTo(dashboardState.maps.mini);
-      }
-
-      if (miniMapEl._markers) {
-        dashboardState.maps.mini.removeLayer(miniMapEl._markers);
-      }
-      const group = window.L.featureGroup();
-      top3.forEach((item) => {
-        window.L.circleMarker([item.lat, item.lng], {
-          radius: 5,
-          color: "#e040fb",
-          fillColor: "#e040fb",
-          fillOpacity: 0.85,
-          weight: 0,
-        }).addTo(group);
-      });
-      group.addTo(dashboardState.maps.mini);
-      miniMapEl._markers = group;
-      dashboardState.maps.mini.fitBounds(group.getBounds().pad(0.4));
-      miniMapEl.classList.add("is-ready");
-    }
-
-    function updateGeo(rangeKey) {
-      const data = (visitor.ranges && visitor.ranges[rangeKey]) || { locations: [], usPct: 0, intlPct: 0, topRegion: "—" };
-      const topList = (data.locations || []).slice(0, 6);
-
-      if (locsEl) {
-        locsEl.innerHTML = topList.length
-          ? topList
-              .map((item) => `<div class="dash-location-chip">${escapeHtml(item.display)} <span>${item.visitors}</span></div>`)
-              .join("")
-          : '<span style="opacity:0.5">No location data</span>';
-      }
-
-      if (geoEl) {
-        geoEl.innerHTML = `
-          <div class="dash-geo-labels"><span>US ${data.usPct || 0}%</span><span>International ${data.intlPct || 0}%</span></div>
-          <div class="dash-geo-bar">
-            <span class="dash-geo-us" style="width:${data.usPct || 0}%"></span>
-            <span class="dash-geo-intl" style="width:${data.intlPct || 0}%"></span>
-          </div>
-        `;
-      }
-
-      if (regionEl) {
-        regionEl.textContent = `Top Region: ${data.topRegion || "—"}`;
-      }
-
-      if (Array.isArray(visitor.monthlyTrend) && visitor.monthlyTrend.length) {
-        const values = visitor.monthlyTrend.slice(-12).map((item) => item.visitors || 0);
-        const highlightCount = rangeKey === "30" ? 1 : rangeKey === "90" ? 3 : values.length;
-        buildSparkline(values, Math.min(values.length, highlightCount));
-      }
-
-      updateMiniMap(data.topThreeWithCoords || []);
-    }
-
-    geoTabs.forEach((tab) => {
-      if (tab.dataset.bound) return;
-      tab.dataset.bound = "true";
-      tab.addEventListener("click", () => {
-        geoTabs.forEach((other) => {
-          const active = other === tab;
-          other.classList.toggle("is-active", active);
-          other.setAttribute("aria-selected", active ? "true" : "false");
-        });
-        updateGeo(tab.getAttribute("data-geo-range"));
-      });
-    });
-
-    updateGeo("30");
-  }
-
   function refreshLayout() {
     const charts = dashboardState.charts;
     Object.values(charts).forEach((chart) => {
       if (chart && typeof chart.resize === "function") chart.resize();
     });
     if (dashboardState.maps.footprint) dashboardState.maps.footprint.invalidateSize();
-    if (dashboardState.maps.mini) dashboardState.maps.mini.invalidateSize();
   }
 
   let resizeFrame = null;
@@ -1252,12 +886,9 @@
         renderMetricSummary(payload);
         scheduleWork(() => {
           renderLine((payload.scholar && payload.scholar.citationsByYear) || []);
-          renderTopics(payload.topics || []);
           renderImpactMap(payload.impactGraph || {});
-          renderCentrality(payload.network && payload.network.centrality);
           renderCollabNetwork(payload.network && payload.network.collaboration);
           renderFootprintMap(payload.footprint || {});
-          renderVisitorStats(payload.visitor || {});
           refreshLayout();
         });
       })
