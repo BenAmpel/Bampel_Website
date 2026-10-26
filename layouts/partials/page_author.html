@@ -1,3 +1,6 @@
+{{/* Heading level for the author card: on paper pages it follows the h3 sections (Cite this, Related Papers), elsewhere
+   (posts) it follows the page h1. The tags stay h4/h5 for the theme styles; aria-level gives the outline level. */}}
+{{ $level := cond (in (slice "conference_publication" "journal_publication" "workshop_publication") .Section) 4 2 }}
 {{/* Author profile box */}}
 
 {{/* Don't show author box on normal pages or if author box disabled. */}}
@@ -8,11 +11,11 @@
 
 {{ if and (not .Params.authors) (.Scratch.Get "superuser_username") }}
   {{ $author_page := site.GetPage (printf "/%s/%s" "authors" (.Scratch.Get "superuser_username")) }}
-  {{ partial "page_author_card" (dict "author_page" $author_page) }}
+  {{ partial "page_author_card" (dict "author_page" $author_page "level" $level) }}
 {{ else if .Params.authors }}
   {{ $taxonomy := "authors" }}
   {{ range $author_obj := (.GetTerms $taxonomy) }}
-    {{ partial "page_author_card" (dict "author_page" $author_obj.Page) }}
+    {{ partial "page_author_card" (dict "author_page" $author_obj.Page "level" $level) }}
   {{ end }}
 {{ end }}
 
