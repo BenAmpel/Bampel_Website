@@ -562,7 +562,7 @@ function AboutPage() {
   return (
     <div className="page">
       <PageHead eyebrow="About" title="A home for AI-enabled cybersecurity at Georgia State"
-        lede="CCAIR advances AI-enabled cybersecurity through three research pillars: detecting social engineering at machine speed (phishing, vishing, and deepfake fraud), understanding hacker communities and the vulnerability lifecycle through large-scale analytics, and building trustworthy AI systems for security operations." />
+        lede="CCAIR advances AI-enabled cybersecurity through three pillars: adversarial signal emergence, ambiguity-aware intelligence, and human–AI collaboration. We study how malicious intent surfaces across data sources before exploitation, build AI that reasons under deception and partial information, and design how analysts and AI act on adversarial signals together." />
 
       <Section id="pipeline" title="Talent pipeline" intro="A multi-stage pipeline spanning K–12 through doctoral research, building technically sophisticated and theoretically grounded CyberAI professionals.">
         <ol className="steps">
