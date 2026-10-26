@@ -4,6 +4,12 @@
 */}}
 
 {{ $page := .Page }}
+
+{{/* Every publication with a DOI gets the Altmetric box (it stays hidden until Altmetric has a score), unless the page
+   already places it with the altmetric shortcode. */}}
+{{ with $page.Params.doi }}{{ if not ($page.HasShortcode "altmetric") }}
+{{ partial "media/altmetric_badge.html" (dict "doi" . "page" $page) }}
+{{ end }}{{ end }}
 {{ $currentUrl := $page.RelPermalink }}
 {{ if not (hasSuffix $currentUrl "/") }}{{ $currentUrl = printf "%s/" $currentUrl }}{{ end }}
 
