@@ -1,0 +1,15 @@
+{{- /* BibTeX key base for a publication page: first author's surname + year + first title word, e.g. ampel2024creating.
+     Same rules publication_extras.html used inline; shared so the shortcode can tell when two papers would get the same key. */ -}}
+{{- $page := . -}}
+{{- $surname := "ampel" -}}
+{{- with index ($page.Params.authors | default slice) 0 -}}
+  {{- $name := . -}}
+  {{- with site.GetPage (printf "/authors/%s" .) }}{{ $name = .Title }}{{ end -}}
+  {{- $parts := split $name " " -}}
+  {{- if gt (len $parts) 0 }}{{ $surname = replaceRE "[^a-z]" "" (lower (index $parts (sub (len $parts) 1))) }}{{ end -}}
+{{- end -}}
+{{- $year := $page.Date.Format "2006" -}}
+{{- with $page.Params.year }}{{ $year = printf "%v" . }}{{ end -}}
+{{- $word := "" -}}
+{{- with $page.Title }}{{ $word = replaceRE "[^a-z0-9]" "" (index (split (lower .) " ") 0) }}{{ end -}}
+{{- return printf "%s%s%s" $surname $year $word -}}

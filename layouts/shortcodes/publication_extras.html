@@ -211,6 +211,17 @@
   {{ end }}
 {{ end }}
 {{ $citationKey = printf "%s%s%s" $citationKey $year $titleKey }}
+{{/* Two papers can share a key (same first author, year and first title word, as the two 2025 multi-agent papers do).
+   BibTeX convention: keep the key and add a, b, ... in date order (then title) to each colliding paper. */}}
+{{ $base := partial "functions/bibkey_base.html" $page }}
+{{ $same := slice }}
+{{ range where site.RegularPages "Section" "in" (slice "conference_publication" "journal_publication" "workshop_publication") }}
+  {{ if eq (partial "functions/bibkey_base.html" .) $base }}{{ $same = $same | append . }}{{ end }}
+{{ end }}
+{{ if gt (len $same) 1 }}
+  {{ $ordered := sort (sort $same "Title") "Date" }}
+  {{ range $i, $p := $ordered }}{{ if eq $p.Permalink $page.Permalink }}{{ $citationKey = printf "%s%s" $citationKey (index (slice "a" "b" "c" "d" "e" "f") $i) }}{{ end }}{{ end }}
+{{ end }}
 
 {{ $venueLine := "" }}
 {{ if $currentVenue }}
