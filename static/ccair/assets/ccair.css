@@ -181,7 +181,9 @@ h1[tabindex="-1"]:focus { outline: none; }
 }
 
 /* ---------- Page and section rhythm ---------- */
-main { flex: 1; }
+/* min-height: the footer starts below the fold, so page content arriving after the first render cannot push it down
+   (mobile layout shift 0.18 on the home page). */
+main { flex: 1; min-height: 100vh; }
 /* Route change without View Transitions: the new page sweeps in from the side of its nav link (see ccair-app.jsx). */
 .page { animation: pageIn 0.45s var(--spring) backwards; }
 @keyframes pageIn { from { opacity: 0; transform: translate3d(var(--page-x, 0), 0, 0); } }
