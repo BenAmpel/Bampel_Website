@@ -72,6 +72,18 @@
       "mainEntityOfPage" $page.Permalink
   }}
   {{ with $abstract }}{{ $ld = merge $ld (dict "abstract" . "description" .) }}{{ end }}
+  {{/* Google reads at most 110 characters of an article headline; longer titles keep their full text in "name". */}}
+  {{ if gt (strings.RuneCount $page.Title) 110 }}
+    {{ $cut := substr $page.Title 0 109 }}
+    {{ $ld = merge $ld (dict "headline" (printf "%s…" (replaceRE `\s+\S*$` "" $cut))) }}
+  {{ end }}
+  {{/* Image: the page's featured image, or its sharing card (scripts/build-paper-cards.mjs). */}}
+  {{ $slug := path.Base (strings.TrimSuffix "/" $page.RelPermalink) }}
+  {{ with partial "functions/get_featured_image.html" $page }}
+    {{ $ld = merge $ld (dict "image" .Permalink) }}
+  {{ else }}
+    {{ if fileExists (printf "static/media/papers/%s.png" $slug) }}{{ $ld = merge $ld (dict "image" (printf "media/papers/%s.png" $slug | absURL)) }}{{ end }}
+  {{ end }}
   {{/* isPartOf ranges over CreativeWork: Periodical for journals, Book for proceedings volumes. */}}
   {{ with $venuePlain }}{{ $ld = merge $ld (dict "isPartOf" (dict "@type" (cond $isJournal "Periodical" (cond (hasPrefix . "Proceedings") "Book" "CreativeWork")) "name" .)) }}{{ end }}
   {{ with $doi }}{{ $ld = merge $ld (dict "identifier" (dict "@type" "PropertyValue" "propertyID" "doi" "value" .)) }}{{ end }}
