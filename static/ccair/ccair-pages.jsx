@@ -201,6 +201,53 @@ function HomePage() {
   );
 }
 
+// How the three primitives connect, drawn as one flow: signals emerge, AI reasons over them under ambiguity, analysts and
+// AI decide together. The motion is decoration only (CSS, off under prefers-reduced-motion); the caption says the same.
+const PFLOW_DOTS = [[14, 20], [36, 10], [58, 26], [22, 44], [46, 50], [72, 14], [82, 40], [30, 68], [62, 70], [10, 60], [86, 68], [52, 36]];
+function PillarFlow() {
+  return (
+    <figure className="pflow">
+      <div className="pflow-steps">
+        <div className="pflow-step">
+          <svg className="pflow-art" viewBox="0 0 96 84" aria-hidden="true">
+            {PFLOW_DOTS.map(([x, y], i) => <circle key={i} cx={x} cy={y} r="3.2" className="pflow-dot" style={{ animationDelay: `${((i * 0.37) % 2.4).toFixed(2)}s` }} />)}
+          </svg>
+          <span className="pflow-num">P1</span>
+          <b>{PILLARS[0].title}</b>
+          <span className="pflow-text">Intent and capability surface across forums, exploits, and code before an attack.</span>
+        </div>
+        <div className="pflow-link" aria-hidden="true"><svg viewBox="0 0 64 16"><path d="M2 8 H54" /><path className="pflow-head" d="M50 3 L58 8 L50 13" /></svg></div>
+        <div className="pflow-step">
+          <svg className="pflow-art" viewBox="0 0 96 84" aria-hidden="true">
+            <path className="pflow-edge" d="M16 16 L48 28 M16 16 L48 52 M16 40 L48 28 M16 40 L48 52 M16 64 L48 28 M16 64 L48 52 M48 28 L80 40 M48 52 L80 40" />
+            {[[16, 16], [16, 40], [16, 64], [48, 28], [48, 52]].map(([x, y], i) => <circle key={i} className="pflow-node" cx={x} cy={y} r="5" style={{ animationDelay: `${(i * 0.18).toFixed(2)}s` }} />)}
+            <circle className="pflow-core" cx="80" cy="40" r="6.5" />
+            <rect className="pflow-track" x="20" y="78" width="56" height="5" rx="2.5" />
+            <rect className="pflow-band" x="20" y="78" width="56" height="5" rx="2.5" />
+          </svg>
+          <span className="pflow-num">P2</span>
+          <b>{PILLARS[1].title}</b>
+          <span className="pflow-text">Models weigh deception and partial information, and say how sure they are.</span>
+        </div>
+        <div className="pflow-link" aria-hidden="true"><svg viewBox="0 0 64 16"><path d="M2 8 H54" /><path className="pflow-head" d="M50 3 L58 8 L50 13" /></svg></div>
+        <div className="pflow-step">
+          <svg className="pflow-art" viewBox="0 0 96 84" aria-hidden="true">
+            <circle className="pflow-person" cx="30" cy="30" r="10" />
+            <path className="pflow-person" d="M12 70 C 12 54, 48 54, 48 70" />
+            <rect className="pflow-box" x="56" y="22" width="30" height="30" rx="7" />
+            <path className="pflow-chip" d="M71 28 C 72 34, 74 36, 80 37 C 74 38, 72 40, 71 46 C 70 40, 68 38, 62 37 C 68 36, 70 34, 71 28 Z" />
+            <path className="pflow-check" d="M58 66 L66 73 L84 56" />
+          </svg>
+          <span className="pflow-num">P3</span>
+          <b>{PILLARS[2].title}</b>
+          <span className="pflow-text">Analysts and AI interpret the result together and act on it in real workflows.</span>
+        </div>
+      </div>
+      <figcaption>Each CCAIR project advances at least one step: finding threats early, reasoning about them under uncertainty, and turning them into decisions people trust.</figcaption>
+    </figure>
+  );
+}
+
 function ResearchPage() {
   const { publications } = useData();
   return (
@@ -210,6 +257,7 @@ function ResearchPage() {
         photo="research-band" />
 
       <Section id="primitives" title="Research primitives" intro="The foundational questions every project contributes to.">
+        <PillarFlow />
         <div className="grid grid-3">
           {PILLARS.map((p, i) => (
             <Reveal key={p.n} className="card">
@@ -562,7 +610,7 @@ function AboutPage() {
   return (
     <div className="page">
       <PageHead eyebrow="About" title="A home for AI-enabled cybersecurity at Georgia State"
-        lede="CCAIR advances AI-enabled cybersecurity through three research pillars: detecting social engineering at machine speed (phishing, vishing, and deepfake fraud), understanding hacker communities and the vulnerability lifecycle through large-scale analytics, and building trustworthy AI systems for security operations." />
+        lede="CCAIR advances AI-enabled cybersecurity through three pillars: adversarial signal emergence, ambiguity-aware intelligence, and human–AI collaboration. We study how malicious intent surfaces across data sources before exploitation, build AI that reasons under deception and partial information, and design how analysts and AI act on adversarial signals together." />
 
       <Section id="pipeline" title="Talent pipeline" intro="A multi-stage pipeline spanning K–12 through doctoral research, building technically sophisticated and theoretically grounded CyberAI professionals.">
         <ol className="steps">

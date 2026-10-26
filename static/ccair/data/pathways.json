@@ -703,12 +703,12 @@
       "resources": [
         {
           "name": "OWASP Top 10",
-          "url": "https://owasp.org/www-project-top-ten/",
+          "url": "https://owasp.org/projects/top-ten",
           "note": "The most common web app risks"
         },
         {
           "name": "OWASP Juice Shop",
-          "url": "https://owasp.org/www-project-juice-shop/",
+          "url": "https://owasp.org/projects/juice-shop",
           "note": "A deliberately insecure app to practice on"
         },
         {
@@ -1325,7 +1325,7 @@
         },
         {
           "name": "SANS Security Awareness resources",
-          "url": "https://www.sans.org/security-awareness-training/",
+          "url": "https://www.sans.org/for-organizations/workforce/security-awareness-training",
           "note": "Free reports and planning materials"
         }
       ],
@@ -1656,7 +1656,7 @@
       ],
       "certsStart": [],
       "certsNote": "No widely recognized entry certification yet; focus on projects",
-      "certsLater": [],
+      "certsLater": ["CompTIA SecAI+ (launched February 2026; CompTIA recommends 3 to 4 years in IT and 2+ in security)"],
       "resources": [
         {
           "name": "OWASP Top 10 for LLM Applications",
@@ -1674,9 +1674,9 @@
           "note": "How organizations manage AI risk"
         },
         {
-          "name": "Gandalf by Lakera",
-          "url": "https://gandalf.lakera.ai/",
-          "note": "A free game: trick an AI into revealing a password"
+          "name": "Lakera Agent Breaker",
+          "url": "https://play.lakera.ai/agent-breaker",
+          "note": "A free browser game: hack AI apps with prompt attacks, level by level"
         }
       ],
       "items": [

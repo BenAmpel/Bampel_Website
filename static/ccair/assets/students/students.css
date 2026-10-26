@@ -8,7 +8,7 @@
 .muted { color: var(--muted); font-weight: 500; }
 
 /* Paragraph links are underlined so they do not rely on colour alone. */
-.students p.body a, .students ul.list a, .students ol.list a, .students td a, .students th a, .students .note a, .students .warn a, .students .lede a, .students .reviewed a {
+.students p.body a, .students ul.list a, .students ol.list a, .students td a, .students th a, .students .note a, .students .warn a, .students .lede a, .students .reviewed a, .students ol.refs a {
   text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
 .students sup.cite a { text-decoration: none; }
 

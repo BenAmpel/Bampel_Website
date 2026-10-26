@@ -149,7 +149,13 @@ function writeRoutePages() {
   const pagesSrc = fs.readFileSync(path.join(ccairDir, 'ccair-pages.jsx'), 'utf8');
   const titles = Object.fromEntries([...appSrc.matchAll(/\b([a-z]+): '([^']+)'/g)].map((m) => [m[1], m[2]]));
   const esc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  const describe = (t) => { if (t.length <= 155) return t; const cut = t.slice(0, 152); return cut.slice(0, cut.lastIndexOf(' ')).replace(/[,;:]$/, '') + '…'; };
+  // Search descriptions: the whole lede when it fits, else its first sentence when that fits, else a cut at a word.
+  const describe = (t) => {
+    if (t.length <= 155) return t;
+    const first = /^.*?[.!?](?=\s|$)/.exec(t);
+    if (first && first[0].length >= 70 && first[0].length <= 155) return first[0];
+    const cut = t.slice(0, 152); return cut.slice(0, cut.lastIndexOf(' ')).replace(/[,;:]$/, '') + '…';
+  };
   const funcs = [...pagesSrc.matchAll(/^function (\w+)Page\(\)/gm)].map((m) => ({ name: m[1].toLowerCase(), at: m.index }));
   const navStart = shell.indexOf('<nav aria-label="CCAIR pages"');
   if (navStart < 0) throw new Error('index.html: the CCAIR pages <nav> is missing from the summary');

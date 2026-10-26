@@ -3,6 +3,8 @@
   "verified": "October 2026",
   "markup": "Text fields use a small markup that scripts/build-students.mjs renders: [text](url) for links, **text** for bold lead-ins, {{refId}} for a numbered citation to refs.refId, [[role:slug]] for a link to a Pathway Finder role guide. Blocks: p, ul, ol, note, warn, h3, table {caption, head, rows}, cards (the guide's own page list), audiences (the hub's starting-point cards), roleTable (the 14 Pathway Finder roles compared, from pathways.json), catalog (the dataset catalog). Section fields: h (the heading, usually a question), id (the anchor; keep it stable once published, because other pages link to it), toc (short label for On this page), answer (one or two sentences shown under the heading, bold lead first). [[count:datasets]] renders the number of datasets.",
   "changes": [
+    {"date": "2026-10-26", "title": "New: is AI changing entry-level cybersecurity jobs?", "url": "/ccair/students/get-hired/#ai-and-entry-level-jobs", "text": "Get hired now answers how AI is changing entry-level hiring, with CyberSeek's count of employers asking for AI skills and ISC2's 2025 workforce study, and what students can do about it."},
+    {"date": "2026-10-25", "title": "New: how to get into AI security", "url": "/ccair/students/skills/#ai-security", "text": "Build skills now answers how students get into AI security: the shared references most teams start from (OWASP Top 10 for LLM Applications, MITRE ATLAS, NIST's adversarial machine learning taxonomy and AI Risk Management Framework) and two open-source tools for practicing on systems you own."},
     { "date": "2026-10-23", "title": "Question headings, comparison tables, printable pages and a catalog download", "url": "/ccair/students/", "text": "Each section now opens with the question it answers and a short answer. New: a table comparing the 14 Pathway Finder roles, a certification comparison, a printable year-by-year checklist and certification map, a CSV and JSON download of the dataset catalog, starting points for five kinds of students, and this update feed." },
     { "date": "2026-10-22", "title": "Guide refocused on industry careers", "url": "/ccair/students/", "text": "The guide now centers security jobs in industry: company security teams, managed security providers, consulting, product security, cloud providers and startups. Government and defense work moved to its own optional page." },
     { "date": "2026-10-22", "title": "Dataset catalog: 246 datasets in 13 categories", "url": "/ccair/students/data/", "text": "The full CCAIR dataset catalog is now on Find data, with search, a category filter and each dataset's known weaknesses." },
@@ -152,6 +154,24 @@
             "**Hack The Box Academy.** A discounted student subscription is available once you verify an academic email address{{htb}}.",
             "**After graduation: SANS Cyber Academy.** Free, intensive training for career changers. Full-time students are not eligible, and it requires U.S. citizenship or permanent residence{{sans}}."
           ] }
+        ] },
+        {"h": "How do I get into AI security?", "toc": "AI security", "id": "ai-security", "answer": "**Learn how attacks on AI systems work from the field's shared references, then practice on systems you own.** Most teams start from the OWASP Top 10 for LLM Applications, MITRE ATLAS and NIST's AI guidance.", "blocks": [
+          {"p": "AI security covers two kinds of work: protecting AI systems from attack, and using AI to defend other systems. Both build on security fundamentals plus enough machine learning to know how a model is trained, deployed and called. The [[role:ai-security-specialist]] guide lists the skills employers ask for."},
+          {"h3": "Read the shared references"},
+          { "ul": [
+            "**OWASP Top 10 for LLM Applications (2025).** The ten most common risks in applications built on large language models, from prompt injection and sensitive information disclosure to excessive agency, each with mitigations{{owasp-llm-top10}}.",
+            "**MITRE ATLAS.** A public, continually updated knowledge base of attacker tactics and techniques involving AI, built from real-world attacks and red-team demonstrations and laid out as a matrix like ATT&CK, with case studies{{mitre-atlas}}.",
+            "**NIST AI 100-2 E2025, Adversarial Machine Learning.** NIST's shared terms and taxonomy for attacks on predictive and generative AI, such as evasion, poisoning, privacy attacks and prompt injection, and for the defenses against them{{nist-aml}}.",
+            "**NIST AI Risk Management Framework.** Voluntary guidance (NIST AI 100-1, January 2023) for managing AI risk through four functions: Govern, Map, Measure and Manage. A Generative AI Profile (NIST AI 600-1) followed in July 2024{{nist-ai-rmf}}."
+          ] },
+          {"h3": "Practice with open-source tools"},
+          { "ul": [
+            "**PyRIT.** Microsoft's open-source Python Risk Identification Tool, a framework for finding risks in generative AI systems before they cause harm{{pyrit}}.",
+            "**garak.** NVIDIA's open-source scanner that probes language models and LLM apps for failures such as prompt injection, jailbreaks and data leakage{{garak}}.",
+            "**Microsoft Learn AI security fundamentals.** The free beginner path listed under [free training](#free-training) ends with an introduction to AI security testing{{ms-ai-sec}}."
+          ] },
+          {"warn": "Run these tools only against models and applications you own or have written permission to test. The rules in [Is it legal to practice hacking?](#practice-legally) apply to AI systems too."},
+          {"note": "CCAIR studies attacks on AI and AI-enabled defense. To work on these problems, see [How do I join CCAIR research?](/ccair/students/research/#research-with-ccair)."}
         ] },
         { "h": "Do I need to do cybersecurity competitions?", "toc": "Competitions help, but are optional", "id": "competitions-help-but-are-optional", "answer": "**No. Competitions help, but a portfolio of labs and write-ups shows the same skills.** The National Cyber League and CCDC are the two main college options.", "blocks": [
           { "ul": [
@@ -310,6 +330,16 @@
             "**Take-home labs.** Some employers send a short exercise, such as a set of logs or a vulnerable app. Finish within the time limit, document your steps and say what you would do next.",
             "**Behavioral questions with STAR.** STAR stands for Situation, Task, Action and Result. Spend most of the answer (about 60%) on the actions you personally took, and quantify the result where you can{{uw-star}}. Prepare six to eight STAR stories.",
             "**Ask your own questions.** Ask about on-call duties, team size, mentoring and the training budget."
+          ] }
+        ] },
+        {"h": "Is AI changing entry-level cybersecurity jobs?", "toc": "AI and entry-level jobs", "id": "ai-and-entry-level-jobs", "answer": "**Some employers now ask for AI skills, but security fundamentals still come first.** About 1 in 10 employers hiring for cybersecurity roles named AI as a requirement in 2024 to 2025.", "blocks": [
+          {"p": "CyberSeek found that about 10% of employers recruiting for cybersecurity positions cited AI as a requirement from May 2024 through April 2025, and notes that other employers may expect AI skills without saying so in the listing{{cyberseek-release}}."},
+          {"p": "In ISC2's 2025 workforce study of 16,029 cybersecurity professionals, 41% named AI as a top skill need, ahead of cloud security at 36%. 28% said their organizations had already integrated AI tools into operations, and ISC2 reports that respondents see AI as less of a threat to the workforce than expected{{isc2-workforce-2025}}."},
+          {"h3": "What to do about it"},
+          { "ul": [
+            "**Build the fundamentals first.** Employers who want AI skills still hire for the security work itself: networking, operating systems, logs and how attacks work.",
+            "**Show AI use you can explain.** In a portfolio project, say what an AI tool did, what you checked by hand and what it got wrong.",
+            "**Learn how AI systems are attacked.** See [How do I get into AI security?](/ccair/students/skills/#ai-security) for the shared references and practice tools."
           ] }
         ] },
         { "h": "How much do cybersecurity jobs pay?", "toc": "Research pay", "id": "research-pay", "answer": "**The median for information security analysts was $129,180 in May 2025.** That figure covers all experience levels, so expect less in your first job.", "blocks": [
@@ -538,6 +568,13 @@
     "roles": ["soc-analyst", "grc-analyst", "cloud-security-engineer", "application-security-engineer"]
   },
   "refs": {
+    "isc2-workforce-2025": {"publisher": "ISC2", "title": "ISC2 Publishes 2025 Cybersecurity Workforce Study (December 4, 2025)", "url": "https://www.isc2.org/Insights/2025/12/ISC2-Publishes-2025-Cybersecurity-Workforce-Study"},
+    "owasp-llm-top10": {"publisher": "OWASP Gen AI Security Project", "title": "OWASP Top 10 for LLM Applications 2025", "url": "https://genai.owasp.org/llm-top-10/"},
+    "mitre-atlas": {"publisher": "MITRE", "title": "ATLAS (Adversarial Threat Landscape for Artificial-Intelligence Systems)", "url": "https://atlas.mitre.org/"},
+    "nist-aml": {"publisher": "NIST", "title": "NIST AI 100-2 E2025, Adversarial Machine Learning: A Taxonomy and Terminology of Attacks and Mitigations", "url": "https://csrc.nist.gov/news/2025/nist-ai-100-2-adversarial-machine-learning-taxonom"},
+    "nist-ai-rmf": {"publisher": "NIST", "title": "AI Risk Management Framework", "url": "https://www.nist.gov/itl/ai-risk-management-framework"},
+    "pyrit": {"publisher": "Microsoft", "title": "PyRIT (Python Risk Identification Tool)", "url": "https://github.com/microsoft/PyRIT"},
+    "garak": {"publisher": "NVIDIA", "title": "garak, the LLM vulnerability scanner", "url": "https://github.com/NVIDIA/garak"},
     "cyberseek-pathway": { "publisher": "CyberSeek", "title": "Cybersecurity career pathway", "url": "https://www.cyberseek.org/pathway.html" },
     "sits-work": { "publisher": "Study in the States (DHS)", "title": "Working in the United States", "url": "https://studyinthestates.dhs.gov/students/work/working-in-the-united-states" },
     "sits-practical": { "publisher": "Study in the States (DHS)", "title": "Applying for practical training", "url": "https://studyinthestates.dhs.gov/students/work/applying-for-practical-training" },
@@ -545,8 +582,8 @@
     "uscis-opt": { "publisher": "USCIS", "title": "Optional Practical Training (OPT) for F-1 students", "url": "https://www.uscis.gov/working-in-the-united-states/students-and-exchange-visitors/optional-practical-training-opt-for-f-1-students" },
     "ice-stem": { "publisher": "U.S. Immigration and Customs Enforcement (SEVP)", "title": "DHS STEM Designated Degree Program List (updated July 22, 2024)", "url": "https://www.ice.gov/doclib/sevis/pdf/stemList2024.pdf" },
     "niccs-nice": { "publisher": "CISA NICCS", "title": "NICE Framework work roles (v2.2.0 data)", "url": "https://niccs.cisa.gov/tools/nice-framework" },
-    "cisa-learning": { "publisher": "CISA NICCS", "title": "CISA Learning", "url": "https://niccs.cisa.gov/education-training/cisa-learning" },
-    "niccs-catalog": { "publisher": "CISA NICCS", "title": "Education and Training Catalog", "url": "https://niccs.cisa.gov/education-training/catalog" },
+    "cisa-learning": { "publisher": "CISA NICCS", "title": "CISA Learning", "url": "https://niccs.cisa.gov/training/cisa-learning" },
+    "niccs-catalog": { "publisher": "CISA NICCS", "title": "Education and Training Catalog", "url": "https://niccs.cisa.gov/training/catalog" },
     "attack-training": { "publisher": "MITRE", "title": "ATT&CK training", "url": "https://attack.mitre.org/resources/learn-more-about-attack/training/" },
     "ms-ai-sec": { "publisher": "Microsoft Learn", "title": "AI security fundamentals learning path", "url": "https://learn.microsoft.com/en-us/training/paths/ai-security-fundamentals/" },
     "otw": { "publisher": "OverTheWire", "title": "Wargames", "url": "https://overthewire.org/wargames/" },
@@ -555,7 +592,7 @@
     "htb": { "publisher": "Hack The Box", "title": "Getting the student subscription", "url": "https://help.hackthebox.com/en/articles/13465244-getting-the-student-subscription" },
     "sans": { "publisher": "SANS Institute", "title": "SANS Cyber Academy", "url": "https://www.sans.org/cyber-academy/" },
     "ncl": { "publisher": "National Cyber League", "title": "National Cyber League", "url": "https://nationalcyberleague.org/" },
-    "ccdc": { "publisher": "National Collegiate Cyber Defense Competition", "title": "NCCDC", "url": "https://ccdc.io/" },
+    "ccdc": { "publisher": "National Collegiate Cyber Defense Competition", "title": "NCCDC", "url": "https://www.ccdc.io/" },
     "secplus-v7": { "publisher": "CompTIA", "title": "Security+ V7 (SY0-701)", "url": "https://www.comptia.org/en-us/certifications/security/v7/" },
     "secplus-v8": { "publisher": "CompTIA", "title": "Security+ V8 (SY0-801)", "url": "https://www.comptia.org/en-us/certifications/security/v8/" },
     "cysa": { "publisher": "CompTIA", "title": "CySA+", "url": "https://www.comptia.org/en-us/certifications/cybersecurity-analyst/" },
@@ -583,7 +620,7 @@
     "opm-mhp": { "publisher": "OPM", "title": "Merit Hiring Plan (May 29, 2025)", "url": "https://www.opm.gov/chcoc/latest-memos/merit-hiring-plan.pdf" },
     "opm-pathways": { "publisher": "OPM", "title": "Students and recent graduates (Pathways Programs)", "url": "https://www.opm.gov/policy-data-oversight/hiring-information/students-recent-graduates/" },
     "ic-careers": { "publisher": "Office of the Director of National Intelligence", "title": "IntelligenceCareers.gov", "url": "https://www.intelligencecareers.gov/" },
-    "dhs-cs": { "publisher": "Department of Homeland Security", "title": "DHS Cybersecurity Service", "url": "https://www.dhs.gov/homeland-security-careers/dhs-cybersecurity-service" },
+    "dhs-cs": { "publisher": "Department of Homeland Security", "title": "DHS Cybersecurity Service", "url": "https://www.dhs.gov/homeland-security-careers/cybersecurityservice" },
     "cisa-careers": { "publisher": "CISA", "title": "Careers", "url": "https://www.cisa.gov/careers" },
     "cyberseek": { "publisher": "CyberSeek", "title": "Cybersecurity supply and demand heat map", "url": "https://www.cyberseek.org/heatmap.html" },
     "isl-eapp": { "publisher": "Defense Counterintelligence and Security Agency", "title": "Industrial Security Letter 2024-02: e-QIP to NBIS eApp", "url": "https://www.dcsa.mil/Portals/128/Documents/CTP/tools/ISL_2024_02_eQIP_to_e_APP.pdf" },
@@ -604,16 +641,16 @@
     "nvd": { "publisher": "NIST", "title": "National Vulnerability Database", "url": "https://nvd.nist.gov/" },
     "opm-sfs": { "publisher": "OPM", "title": "CyberCorps Scholarship for Service", "url": "https://sfs.opm.gov/" },
     "opm-sfs-overview": { "publisher": "OPM", "title": "SFS student overview", "url": "https://sfs.opm.gov/Student/Overview" },
-    "nsf-sfs": { "publisher": "NSF", "title": "CyberAI SFS (CyberAICorps Scholarship for Service), NSF 26-503", "url": "https://www.nsf.gov/funding/opportunities/cyberai-sfs-cyberaicorps-scholarship-service/nsf26-503" },
+    "nsf-sfs": { "publisher": "NSF", "title": "CyberAI SFS (CyberAICorps Scholarship for Service), NSF 26-503", "url": "https://www.nsf.gov/funding/opportunities/cyberai-sfs-cyberaicorps-scholarship-service" },
     "nsf-sfs-sol": { "publisher": "NSF", "title": "NSF 26-503 solicitation", "url": "https://www.nsf.gov/funding/opportunities/cyberai-sfs-cyberaicorps-scholarship-service/nsf26-503/solicitation" },
     "cae-gsu": { "publisher": "NCAE-C Community", "title": "CAE map: Georgia State University", "url": "https://maps.caecommunity.org/node/12240" },
     "cae-map": { "publisher": "NCAE-C Community", "title": "About the NCAE-C program", "url": "https://www.caecommunity.org/about-the-ncae-c-program" },
     "dod-csa": { "publisher": "DoD Emerging Technologies Talent Marketplace", "title": "How do students apply for a DoD CSA scholarship?", "url": "https://www.dodemergingtech.com/dod-programs/cyber-service-academy-csa/how-do-students-apply-for-a-dod-csa-scholarship/" },
     "smart": { "publisher": "SMART Scholarship Program", "title": "Eligibility", "url": "https://www.smartscholarship.org/smart/en?id=smart_eligibility" },
-    "wicys-join": { "publisher": "WiCyS", "title": "Join WiCyS", "url": "https://www.wicys.org/join" },
+    "wicys-join": { "publisher": "WiCyS", "title": "Join WiCyS", "url": "https://www.wicys.org/benefits/" },
     "wicys-schol": { "publisher": "WiCyS", "title": "WiCyS 2027 scholarships", "url": "https://www.wicys.org/events/wicys-2027/wicys-2027-scholarships/" },
     "cfcse": { "publisher": "ISC2 Center for Cyber Safety and Education", "title": "Academic scholarships", "url": "https://www.iamcybersafe.org/s/academic-scholarships" },
-    "cisa-pathways": { "publisher": "CISA", "title": "Pathways interns", "url": "https://www.cisa.gov/pathways-interns" },
+    "cisa-pathways": { "publisher": "CISA", "title": "Pathways interns", "url": "https://www.cisa.gov/careers/work-rolespathways-interns" },
     "gh-pages": { "publisher": "GitHub Docs", "title": "What is GitHub Pages?", "url": "https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages" },
     "gh-contribute": { "publisher": "GitHub Docs", "title": "Finding ways to contribute to open source on GitHub", "url": "https://docs.github.com/en/get-started/exploring-projects-on-github/finding-ways-to-contribute-to-open-source-on-github" },
     "wicys-chapters": { "publisher": "WiCyS", "title": "Student chapters", "url": "https://www.wicys.org/initiatives/student-chapters/" },
@@ -626,11 +663,11 @@
     "cornell-timeline": { "publisher": "Cornell University Career Services", "title": "Recruiting timeline by career pathways", "url": "https://career.cornell.edu/resources/recruiting-timeline-by-career-pathways/" },
     "uw-internships": { "publisher": "University of Washington Career & Internship Center", "title": "Internships: recruiting candidates", "url": "https://careers.uw.edu/resources/internships-recruiting-candidates/" },
     "handshake": { "publisher": "Handshake", "title": "Handshake for career centers", "url": "https://joinhandshake.com/career-centers/" },
-    "nace-conversion": { "publisher": "National Association of Colleges and Employers", "title": "Intern conversion rate hits highest mark in five years (April 3, 2026)", "url": "https://naceweb.org/talent-acquisition/internships/intern-conversion-rate-hits-highest-mark-in-five-years" },
+    "nace-conversion": { "publisher": "National Association of Colleges and Employers", "title": "Intern conversion rate hits highest mark in five years (April 3, 2026)", "url": "https://www.naceweb.org/talent-acquisition/internships/intern-conversion-rate-hits-highest-mark-in-five-years" },
     "ctftime": { "publisher": "CTFtime", "title": "CTFtime.org: all about CTF (capture the flag)", "url": "https://ctftime.org/" },
     "usc-1030": { "publisher": "Legal Information Institute", "title": "18 U.S. Code 1030 (Computer Fraud and Abuse Act)", "url": "https://www.law.cornell.edu/uscode/text/18/1030" },
-    "juice-shop": { "publisher": "OWASP Foundation", "title": "OWASP Juice Shop", "url": "https://owasp.org/www-project-juice-shop/" },
-    "h1-disclosure": { "publisher": "HackerOne", "title": "Vulnerability disclosure guidelines", "url": "https://www.hackerone.com/disclosure-guidelines" },
+    "juice-shop": { "publisher": "OWASP Foundation", "title": "OWASP Juice Shop", "url": "https://owasp.org/projects/juice-shop" },
+    "h1-disclosure": { "publisher": "HackerOne", "title": "Vulnerability disclosure guidelines", "url": "https://www.hackerone.com/terms/disclosure-guidelines" },
     "h1-safe-harbor": { "publisher": "HackerOne", "title": "Safe harbor overview and FAQ", "url": "https://docs.hackerone.com/en/articles/8494502-safe-harbor-overview-faq" },
     "h1-coc": { "publisher": "HackerOne", "title": "Code of conduct", "url": "https://www.hackerone.com/policies/code-of-conduct" },
     "h1-terms": { "publisher": "HackerOne", "title": "Community member terms and conditions", "url": "https://www.hackerone.com/terms/community" },
@@ -651,10 +688,10 @@
     "udel-resume": { "publisher": "University of Delaware Lerner College", "title": "Undergraduate resume guide", "url": "https://my.lerner.udel.edu/wp-content/uploads/NEW_Undergrad_Resume_Guide.pdf" },
     "mit-resume": { "publisher": "MIT Career Advising & Professional Development", "title": "Career toolkit: crafting an effective resume", "url": "https://capd.mit.edu/resources/career-toolkit-crafting-an-effective-resume/" },
     "vt-ats": { "publisher": "Virginia Tech Career and Professional Development", "title": "What is an applicant tracking system? Your questions answered", "url": "https://career.vt.edu/blog/2026/07/29/what-is-an-applicant-tracking-system-your-questions-answered/" },
-    "linkedin-otw": { "publisher": "LinkedIn Help", "title": "Let recruiters know you're open to work", "url": "https://www.linkedin.com/help/linkedin/answer/67405" },
+    "linkedin-otw": { "publisher": "LinkedIn Help", "title": "Let recruiters know you're open to work", "url": "https://www.linkedin.com/help/linkedin/answer/a507508/" },
     "uw-star": { "publisher": "University of Washington Career & Internship Center", "title": "STAR method of interviewing", "url": "https://careers.uw.edu/resources/star-method-of-interviewing/" },
     "bls-ooh": { "publisher": "U.S. Bureau of Labor Statistics", "title": "Occupational Outlook Handbook: Information security analysts", "url": "https://www.bls.gov/ooh/computer-and-information-technology/information-security-analysts.htm" },
-    "nace-salary": { "publisher": "National Association of Colleges and Employers", "title": "Salaries expected to climb for Class of 2026 grads despite flat hiring (February 12, 2026)", "url": "https://naceweb.org/about-us/press/2026/salaries-expected-to-climb-for-class-of-2026-grads-despite-flat-hiring" },
+    "nace-salary": { "publisher": "National Association of Colleges and Employers", "title": "Salaries expected to climb for Class of 2026 grads despite flat hiring (February 12, 2026)", "url": "https://www.naceweb.org/about-us/press/2026/salaries-expected-to-climb-for-class-of-2026-grads-despite-flat-hiring" },
     "cyberseek-release": { "publisher": "CompTIA", "title": "CyberSeek expands cybersecurity workforce data coverage (June 2, 2025)", "url": "https://www.comptia.org/en/about-us/news/press-releases/cyberseek-expands-cybersecurity-workforce-data-coverage-and-enhances-user-experience/" },
     "nace-deadlines": { "publisher": "National Association of Colleges and Employers", "title": "Advisory opinion: setting reasonable deadlines for job offers", "url": "https://www.naceweb.org/career-development/organizational-structure/advisory-opinion-setting-reasonable-deadlines-for-job-offers" },
     "washu-negotiate": { "publisher": "Washington University in St. Louis Center for Career Engagement", "title": "Negotiating job offers", "url": "https://careers.washu.edu/negotiating-job-offers/" },
