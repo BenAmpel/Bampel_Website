@@ -114,14 +114,17 @@ function CCAIRApp() {
   const pages = { home: HomePage, research: ResearchPage, publications: PublicationsPage, people: PeoplePage, resources: ResourcesPage, materials: MaterialsPage, about: AboutPage, contact: ContactPage };
   const Page = pages[page] || HomePage;
 
+  // The nav and footer sit outside DataProvider: they use no data, so they paint at once and never wait on a fetch.
   return (
-    <DataProvider>
+    <>
       <CCAIRNav currentPage={page} />
-      <main id="main-content" ref={mainRef}>
-        <DataGate><ErrorBoundary key={page}><Page /></ErrorBoundary></DataGate>
-      </main>
+      <DataProvider>
+        <main id="main-content" ref={mainRef}>
+          <DataGate><ErrorBoundary key={page}><Page /></ErrorBoundary></DataGate>
+        </main>
+      </DataProvider>
       <CCAIRFooter />
-    </DataProvider>
+    </>
   );
 }
 
