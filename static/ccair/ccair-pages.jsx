@@ -108,6 +108,7 @@ function HomePage() {
   const recent = publications.filter((p) => p.type === 'journal').slice().sort(byYearDesc).slice(0, 3);
   const heroRef = React.useRef(null), innerRef = React.useRef(null);
   const photo = usePhoto('home-hero');
+  const photoPending = useDataStatus('photos') === 'loading';
 
   const heroText = (
     <div className="hero-inner" ref={innerRef}>
@@ -122,24 +123,24 @@ function HomePage() {
     </div>
   );
   const stats = (
-    <dl className="stats">
+    <DataSection needs={['publications', 'people', 'courses']} what="the center's numbers"><dl className="stats">
       {[[publications.length, 'Publications'], [phdCount, 'Ph.D. students mentored'], [bestPapers, 'Best paper awards'], [courses.length, 'Courses taught']].map(([n, label]) => (
         // dt before dd for assistive tech; column-reverse keeps the number on top.
         <div key={label} className="stat" style={STAT_STYLE}><dt><span>{label}</span></dt><dd><b><CountUp value={n} /></b></dd></div>
       ))}
-    </dl>
+    </dl></DataSection>
   );
 
   return (
     <div className="page">
-      {photo ? (
+      {photo || photoPending ? (
         // Photo hero: the headline sits on the photo under a Georgia State Blue scrim (white text, AA over the darkest
         // and lightest parts of the image); the stats follow on the page background.
         <section className="hero photo-hero" aria-labelledby="hero-title" ref={heroRef}>
           <div className="hero-stage">
-            <div className="hero-photo"><Picture photo={photo} sizes="100vw" priority decorative /></div>
+            <div className="hero-photo">{photo && <Picture photo={photo} sizes="100vw" priority decorative />}</div>
             <div className="wrap">{heroText}</div>
-            <p className="photo-credit hero-credit"><PhotoCredit photo={photo} /></p>
+            {photo && <p className="photo-credit hero-credit"><PhotoCredit photo={photo} /></p>}
           </div>
           <div className="wrap">{stats}</div>
         </section>
@@ -168,14 +169,16 @@ function HomePage() {
       </Section>
 
       <Section id="recent" alt eyebrow="Recent work" title="Selected journal articles">
-        <Reveal as="ul" className="pub-list card" style={{ paddingBlock: 4 }}>
-          {recent.map((p) => <PublicationItem key={p.title} {...p} paperPages={paperPages} />)}
-        </Reveal>
-        <div className="section-foot"><a className="btn btn-secondary" href="/ccair/publications/">All {publications.length} publications <Arrow /></a></div>
+        <DataSection needs={['publications']} what="recent articles">
+          <Reveal as="ul" className="pub-list card" style={{ paddingBlock: 4 }}>
+            {recent.map((p) => <PublicationItem key={p.title} {...p} paperPages={paperPages} />)}
+          </Reveal>
+          <div className="section-foot"><a className="btn btn-secondary" href="/ccair/publications/">All {publications.length} publications <Arrow /></a></div>
+        </DataSection>
       </Section>
 
       <Section id="news" eyebrow="News" title="What's new at the center">
-        <ul className="news">
+        <DataSection needs={['news']} what="news"><ul className="news">
           {news.map((n) => (
             <Reveal as="li" key={n.date + n.title}>
               <time dateTime={newsDatetime(n.date)}>{n.date}</time>
@@ -183,7 +186,7 @@ function HomePage() {
               <span className="tag">{n.tag}</span>
             </Reveal>
           ))}
-        </ul>
+        </ul></DataSection>
       </Section>
 
       <Section id="students" labelledBy="students-title">
@@ -250,6 +253,7 @@ function PillarFlow() {
 
 function ResearchPage() {
   const { publications } = useData();
+  const pubsReady = useDataStatus('publications') === 'ready';
   return (
     <div className="page">
       <PageHead eyebrow="Research" title="Anticipating attacks, not just reacting to them"
@@ -304,7 +308,7 @@ function ResearchPage() {
             <Reveal key={o.title} className="card"><h3>{o.title}</h3><p>{o.desc}</p></Reveal>
           ))}
         </div>
-        <div className="section-foot"><a className="btn btn-secondary" href="/ccair/publications/">Read the {publications.length} publications <Arrow /></a></div>
+        <div className="section-foot"><a className="btn btn-secondary" href="/ccair/publications/">{pubsReady ? `Read the ${publications.length} publications` : 'Read the publications'} <Arrow /></a></div>
       </Section>
 
       <Section id="lab" alt title="Behavioral Lab"
@@ -371,7 +375,7 @@ function PublicationsPage() {
       <PageHead eyebrow="Publications" title="Center publications"
         lede="Peer-reviewed cybersecurity research from CCAIR faculty, students, and collaborators. The complete list, including work outside security, is on bampel.com." />
       <section className="section" aria-label="Publication list">
-        <div className="wrap">
+        <div className="wrap"><DataSection needs={['publications']} what="publications">
           <div className="toolbar">
             <label className="search">
               <span className="sr-only">Search publications</span>
@@ -389,7 +393,7 @@ function PublicationsPage() {
             </div>
           ))}
           <p className="pub-count">Showing {filtered.length} of {publications.length}. <a href="https://bampel.com/publications/">Full list on bampel.com</a></p>
-        </div>
+        </DataSection></div>
       </section>
     </div>
   );
@@ -407,6 +411,7 @@ function PeoplePage() {
         lede="A small, collaborative group of faculty and Ph.D. researchers working across Georgia State and partner universities."
         photo="people-band" />
 
+      <DataSection needs={['people']} what="the people list" wrap>
       {d && <Section id="director" title="Director">
         <Reveal className="card director">
           <Avatar name={d.name} photo={d.photo} size="lg" />
@@ -450,6 +455,7 @@ function PeoplePage() {
           ))}
         </div>
       </Section>
+      </DataSection>
 
       <Section id="join" labelledBy="join-title">
         <Reveal className="feature">
@@ -491,6 +497,7 @@ function ResourcesPage() {
       </Section>
 
       <Section id="assets" alt title="Research assets" intro="Datasets and tools from CCAIR studies, shared with the CyberAI community. More resources are planned.">
+        <DataSection needs={['resources']} what="research assets">
         <div className="toolbar"><SegmentedControl label="Asset type" options={tabs} value={tab} onChange={setTab} /></div>
         <div className="grid grid-3">
           {byCategory(tab).map((r) => (
@@ -502,6 +509,7 @@ function ResourcesPage() {
             </Reveal>
           ))}
         </div>
+        </DataSection>
       </Section>
 
       <Section id="governance" title="Data governance" intro="CCAIR adopts a conservative governance posture for all data activities.">
@@ -571,6 +579,7 @@ function MaterialsPage() {
       <section className="section" aria-labelledby="materials-list-title">
         <div className="wrap">
           <h2 id="materials-list-title" className="sr-only">Materials list</h2>
+          <DataSection needs={['materials']} what="research materials">
           <div className="toolbar"><SegmentedControl label="Material type" options={options} value={kind} onChange={setKind} /></div>
           {shown.length === 0 && <p className="empty">Nothing of this type is listed yet.</p>}
           <div className="grid grid-2">
@@ -598,6 +607,7 @@ function MaterialsPage() {
               </Reveal>
             ))}
           </div>
+          </DataSection>
           <p className="pub-count">Using CCAIR materials in your work? We'd like to hear about it: <a href="mailto:bampel@gsu.edu">bampel@gsu.edu</a>.</p>
         </div>
       </section>
@@ -627,17 +637,18 @@ function AboutPage() {
       </Section>
 
       <Section id="courses" alt title="Courses" intro="Security and AI courses taught by the center director at Georgia State, with student evaluation scores.">
-        <ul className="rows">
+        <DataSection needs={['courses']} what="courses"><ul className="rows">
           {courses.map((c) => (
             <Reveal as="li" key={c.code}>
               <span><span className="code">{c.code}</span><span className="t">{c.title}</span></span>
               <span className="r">{c.level} · {c.rating}</span>
             </Reveal>
           ))}
-        </ul>
+        </ul></DataSection>
       </Section>
 
       <Section id="support" title="Research support" intro="Grants led by center faculty at Georgia State, plus earlier support for Dr. Ampel's research.">
+        <DataSection needs={['funding']} what="research support">
         {(funding.grants || []).length > 0 && <>
           <h3 className="group-label">Grants led by center faculty</h3>
           <div className="grid grid-2" style={{ marginBottom: 8 }}>
@@ -662,10 +673,11 @@ function AboutPage() {
             <Reveal key={p.name} className="card"><h3>{p.name}</h3><p>{p.focus}</p></Reveal>
           ))}
         </div>
+        </DataSection>
       </Section>
 
       <Section id="friends" alt title="Friends of CCAIR" intro="Labs and centers we collaborate with.">
-        <FriendsGrid />
+        <DataSection needs={['friends']} what="the list of friends"><FriendsGrid /></DataSection>
       </Section>
 
       <Section id="governance" title="Governance">
@@ -696,9 +708,11 @@ function AboutPage() {
 
       <Section id="photo-credits" title="Photo credits"
         intro="The campus and skyline photos on this site show Georgia State's downtown campus and the Atlanta skyline. Each is used under the license shown. Photos under CC BY-SA stay under CC BY-SA after our cropping and resizing. The People page headshots are listed after them.">
-        <Reveal><PhotoCredits /></Reveal>
-        <Reveal><PeoplePhotoCredits /></Reveal>
-        <Reveal><FriendsLogoCredits /></Reveal>
+        <DataSection needs={['photos', 'people', 'friends']} what="the credits">
+          <Reveal><PhotoCredits /></Reveal>
+          <Reveal><PeoplePhotoCredits /></Reveal>
+          <Reveal><FriendsLogoCredits /></Reveal>
+        </DataSection>
       </Section>
     </div>
   );
