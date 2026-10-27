@@ -39,6 +39,11 @@ const pathFor = (page) => (page === 'home' ? '/ccair/' : `/ccair/${page}/`);
   const page = VALID_PAGES.includes(m[1]) ? m[1] : 'home';
   try { window.history.replaceState(null, '', pathFor(page) + (m[2] || '')); } catch (e) { /* stays on the hash address */ }
 })();
+// The app puts every new page at the top itself (CCAIRApp's layout effect, with focus on the h1). Left on 'auto', the
+// browser's own restore ran after that on the back and forward buttons whenever the page changed without a view
+// transition (reduced motion, older browsers), leaving the window mid-page with focus on the h1 above it; on a reload
+// it landed at an arbitrary point, since the page renders after load.
+if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual';
 // A same-site link to another CCAIR page is handled here (pushState) so the page changes without a reload, with the
 // route transition and focus move below. Modified clicks, new-tab links, downloads and links off the app pass through.
 function appLinkTarget(event) {
