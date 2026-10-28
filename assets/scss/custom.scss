@@ -5575,6 +5575,29 @@ a.nav-link.js-search {
   min-height: 32px;
 }
 
+// Hit areas toward 44px (2026-10-28) without moving or resizing anything drawn: a transparent ::after extends each target
+// past its box, so taps just outside the glyph still land. Toggler 36 to 44, search 32 to 44, profile icons 32 to 42 (they sit
+// 10px apart, so 5px a side is as far as they go before two targets overlap).
+.navbar-toggler,
+a.nav-link.js-search,
+.network-icon li a {
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+  }
+}
+
+a.nav-link.js-search::after {
+  inset: -6px;
+}
+
+.network-icon li a::after {
+  inset: -5px;
+}
+
 section#about h3 > a,
 .selected-pubs-more > a,
 .wg-research-impact-overview p > a:only-child {
