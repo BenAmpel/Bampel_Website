@@ -272,7 +272,7 @@
   <div class="pub-extras-grid">
     {{ with $contribs }}
     <div class="pub-extras-card">
-      <h3>Key Contributions</h3>
+      <h2 class="pub-extras-heading">Key Contributions</h2>
       <ul>
         {{ range . }}
           <li>{{ . }}</li>
@@ -282,7 +282,7 @@
     {{ end }}
 
     <div class="pub-extras-card">
-      <h3>Artifacts</h3>
+      <h2 class="pub-extras-heading">Artifacts</h2>
       {{ $artifacts := slice }}
       {{ with $page.Params.url_pdf }}{{ if ne . "" }}{{ $artifacts = $artifacts | append (dict "label" "PDF" "url" .) }}{{ end }}{{ end }}
       {{ with $page.Params.url_code }}{{ if ne . "" }}{{ $artifacts = $artifacts | append (dict "label" "Code" "url" .) }}{{ end }}{{ end }}
@@ -308,7 +308,7 @@
 
     {{ if gt (len $related) 0 }}
     <div class="pub-extras-card">
-      <h3>Related Papers</h3>
+      <h2 class="pub-extras-heading">Related Papers</h2>
       <ul class="pub-related">
         {{ range first 3 $related }}
           {{ $item := .item }}
@@ -322,7 +322,7 @@
     {{ end }}
 
     <div class="pub-extras-card">
-      <h3>Cite this</h3>
+      <h2 class="pub-extras-heading">Cite this</h2>
       <div class="pub-citation">
         <div class="pub-citation-text"><span class="pub-cite-label">APA</span> {{ $citationApa }}</div>
         <details class="pub-bibtex">

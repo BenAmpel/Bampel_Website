@@ -30,10 +30,12 @@
       {{ if site.Params.features.avatar.gravatar }}
       <img class="avatar {{if eq $avatar_shape "square"}}avatar-square{{else}}avatar-circle{{end}}" src="https://s.gravatar.com/avatar/{{ md5 $person.email }}?s=270')" alt="">
       {{ else if $avatar }}
-      {{ $avatar_image := $avatar.Fill "270x270 Center" }}
+      {{/* The avatar is the home page's largest image (its LCP): WebP at 1x and 2x, fetched at high priority. */}}
+      {{ $avatar_image := $avatar.Fill "270x270 Center webp q85" }}
+      {{ $avatar_2x := $avatar.Fill "540x540 Center webp q80" }}
       <img class="avatar {{if eq $avatar_shape "square"}}avatar-square{{else}}avatar-circle{{end}}"
-           width="{{ $avatar_image.Width }}" height="{{ $avatar_image.Height }}"
-           src="{{ $avatar_image.RelPermalink }}" alt="{{ $person_page.Title }}">
+           width="{{ $avatar_image.Width }}" height="{{ $avatar_image.Height }}" fetchpriority="high"
+           src="{{ $avatar_image.RelPermalink }}" srcset="{{ $avatar_image.RelPermalink }} 1x, {{ $avatar_2x.RelPermalink }} 2x" alt="{{ $person_page.Title }}">
       {{ end }}
 
       <div class="portrait-title">
