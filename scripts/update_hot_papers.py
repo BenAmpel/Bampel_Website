@@ -23,6 +23,8 @@ OUTPUT_FILE = SCRIPT_DIR.parent / "static" / "data" / "hot_papers.json"
 TOP_N = 3
 # Rolling window: citations in the prior 8 weeks (latest snapshot minus 8 weeks ago)
 ROLLING_WEEKS = 8
+# Weekly snapshots kept per paper for the sparkline on the home page
+SERIES_WEEKS = 26
 
 # Date column pattern (YYYY-MM-DD, optional trailing space)
 DATE_COL_RE = re.compile(r"^\s*(\d{4}-\d{2}-\d{2})\s*$")
@@ -91,8 +93,28 @@ def fetch_hot_papers():
         if not prior_date_key and len(date_columns) >= 2:
             prior_date_key = date_columns[-2][0]
 
-        # Build list of (title, monthly_citations)
+        # The window before the rolling window, for the trend (accelerating, steady or cooling)
+        prev_dt = latest_dt - timedelta(weeks=2 * ROLLING_WEEKS)
+        prev_date_key = None
+        for k, d in date_columns:
+            if d <= prev_dt:
+                prev_date_key = k
+            else:
+                break
+
+        def series_for(row):
+            """Last SERIES_WEEKS weekly totals, blanks filled from the week before (None before the first count)."""
+            out, last = [], None
+            for k, _ in date_columns:
+                v = (row.get(k) or "").strip()
+                if v:
+                    last = safe_float(v)
+                out.append(None if last is None else int(last))
+            return out[-SERIES_WEEKS:]
+
+        # Build list of (title, monthly_citations, extra)
         paper_metrics = []
+        total_new = 0
         for row in rows:
             title_raw = (row.get(title_key) or "").strip()
             if not title_raw:
@@ -100,7 +122,20 @@ def fetch_hot_papers():
             latest_val = safe_float(row.get(latest_date_key))
             prior_val = safe_float(row.get(prior_date_key, 0)) if prior_date_key else 0.0
             monthly = max(0.0, latest_val - prior_val)
-            paper_metrics.append((title_raw, monthly))
+            total_new += int(monthly)
+            prev_val = safe_float(row.get(prev_date_key, 0)) if prev_date_key else 0.0
+            previous = max(0.0, prior_val - prev_val) if prev_date_key and prior_val else None
+            if previous is None or not latest_val:
+                trend = "stable"
+            elif monthly > previous:
+                trend = "rising"
+            elif monthly < previous:
+                trend = "cooling"
+            else:
+                trend = "stable"
+            extra = {"trend": trend, "previous": None if previous is None else int(previous),
+                     "total": int(latest_val), "series": series_for(row)}
+            paper_metrics.append((title_raw, monthly, extra))
 
         # Sort by monthly citations descending, take top N
         paper_metrics.sort(key=lambda x: x[1], reverse=True)
@@ -136,13 +171,16 @@ def fetch_hot_papers():
         return None
 
     final_data = []
-    for title_raw, monthly_citations in top_papers:
+    for title_raw, monthly_citations, extra in top_papers:
         entry = {
             "title": title_raw,
             "metrics": {
                 "monthly": int(monthly_citations),
-                "trend": "stable",
+                "trend": extra["trend"],
+                "previous": extra["previous"],
+                "total": extra["total"],
             },
+            "series": extra["series"],
         }
         match = find_pub(title_raw)
         if match:
@@ -161,6 +199,9 @@ def fetch_hot_papers():
 
     output = {
         "lastUpdated": datetime.now().strftime("%B %d, %Y"),
+        "asOf": latest_dt.isoformat(),
+        "windowWeeks": ROLLING_WEEKS,
+        "totalNew": total_new,
         "papers": final_data,
     }
 

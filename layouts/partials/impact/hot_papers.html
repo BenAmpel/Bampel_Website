@@ -1,26 +1,91 @@
+{{- /* Trending Research (home page, inside the "Trending Research" panel of research_impact_overview).
+     Data: static/data/hot_papers.json, written weekly by scripts/update_hot_papers.py from the citation sheet: the top
+     papers by citations gained in the last windowWeeks weeks, with the gain in the window before it (trend), the total,
+     and up to 26 weekly totals (series) drawn here as a sparkline at build time. Older files without series still render,
+     without the chart. Styles: assets/css/widgets/trending-research.css. */ -}}
 {{- $data := dict "lastUpdated" "" "papers" (slice) -}}
 {{- if fileExists "static/data/hot_papers.json" -}}
   {{- $data = readFile "static/data/hot_papers.json" | transform.Unmarshal -}}
 {{- end -}}
+{{- $weeks := $data.windowWeeks | default 8 -}}
+{{- $totalNew := $data.totalNew | default 0 -}}
 
-<div class="hot-papers-section" style="margin: 2rem 0;">
-  <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 1rem; border-bottom: 2px solid var(--primary-color); padding-bottom: 0.5rem;">
-    <h3 style="margin: 0; font-size: 1.25rem;">Trending Research (Last Two Months)</h3>
-    <span style="font-size: 0.8rem; color: var(--text-muted);">Updated: {{ $data.lastUpdated }}</span>
+<div class="trend-wrap">
+  <div class="trend-top">
+    <h3 class="trend-heading">Citation momentum</h3>
+    <div class="trend-sub">
+      {{- if $totalNew }}<span class="trend-num">+{{ $totalNew }}</span> citations across all papers in the last {{ $weeks }} weeks. {{ end -}}
+      {{- with $data.lastUpdated }}Updated {{ . }}.{{ end -}}
+    </div>
   </div>
 
-  <div class="grid-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
-    {{ range $data.papers }}
-    <a href="{{ .url }}" class="card-simple" style="display: block; text-decoration: none; color: inherit; padding: 1.5rem; border: 1px solid var(--border-color); border-radius: 8px; transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-      <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--primary-color); margin-bottom: 0.5rem;">
-        {{ .venue }} {{ if .year }}• {{ .year }}{{ end }}
-      </div>
-      <h4 style="margin: 0 0 0.75rem 0; font-size: 1.1rem; line-height: 1.4;">{{ .title }}</h4>
-      <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--text-muted); background: var(--light-gray); padding: 0.25rem 0.5rem; border-radius: 4px; width: fit-content;">
-        <span style="font-weight: bold; color: #28a745;">▲ {{ .metrics.monthly }}</span>
-        <span>citations</span>
-      </div>
-    </a>
+  <ol class="trend-list">
+    {{ range $i, $p := $data.papers }}
+    {{- $m := $p.metrics -}}
+    <li class="trend-item">
+      <a class="trend-link" href="{{ $p.url | default "#" }}">
+        <span class="trend-rank" aria-hidden="true">{{ add $i 1 }}</span>
+        <span class="trend-venue">{{ $p.venue }}{{ with $p.year }} · {{ . }}{{ end }}</span>
+        <h4 class="trend-name">{{ $p.title }}</h4>
+
+        {{- /* Sparkline: weekly totals, scaled to the paper's own range; the shaded band is the trending window. */ -}}
+        {{- $vals := slice -}}
+        {{- range $p.series }}{{ if ne . nil }}{{ $vals = $vals | append (float .) }}{{ end }}{{ end -}}
+        {{- if ge (len $vals) 2 -}}
+          {{- $lo := index $vals 0 -}}{{- $hi := index $vals 0 -}}
+          {{- range $vals }}{{ if lt . $lo }}{{ $lo = . }}{{ end }}{{ if gt . $hi }}{{ $hi = . }}{{ end }}{{ end -}}
+          {{- $W := 300.0 -}}{{- $H := 64.0 -}}{{- $pad := 5.0 -}}
+          {{- $n := len $vals -}}{{- $step := div (sub $W (mul 2 $pad)) (float (sub $n 1)) -}}
+          {{- $span := cond (gt $hi $lo) (sub $hi $lo) 1.0 -}}
+          {{- $pts := slice -}}
+          {{- range $j, $v := $vals -}}
+            {{- $x := add $pad (mul $step (float $j)) -}}
+            {{- $y := cond (gt $hi $lo) (sub (sub $H $pad) (mul (div (sub $v $lo) $span) (sub $H (mul 2 $pad)))) (div $H 2) -}}
+            {{- $pts = $pts | append (printf "%.1f,%.1f" $x $y) -}}
+          {{- end -}}
+          {{- $line := delimit $pts " L" -}}
+          {{- $lastX := add $pad (mul $step (float (sub $n 1))) -}}
+          {{- $lastY := cond (gt $hi $lo) $pad (div $H 2) -}}
+          {{- with index $pts (sub $n 1) }}{{ $xy := split . "," }}{{ $lastY = float (index $xy 1) }}{{ end -}}
+          {{- $bandX := add $pad (mul $step (float (math.Max 0 (sub (sub $n 1) $weeks)))) -}}
+          <span class="trend-chart">
+          <svg class="trend-spark" viewBox="0 0 300 64" preserveAspectRatio="none" role="img"
+               aria-label="Total citations by week over the last {{ $n }} weeks: {{ index $vals 0 }} to {{ index $vals (sub $n 1) }}.">
+            <defs>
+              <linearGradient id="trend-fill-{{ $i }}" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#4ade80" stop-opacity="0.28"/>
+                <stop offset="1" stop-color="#4ade80" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <rect class="trend-band" x="{{ printf "%.1f" $bandX }}" y="0" width="{{ printf "%.1f" (sub $W $bandX) }}" height="64"/>
+            <path class="trend-area" d="M{{ $line }} L{{ printf "%.1f" $lastX }},64 L{{ printf "%.1f" $pad }},64 Z" fill="url(#trend-fill-{{ $i }})"/>
+            <path class="trend-line" d="M{{ $line }}" pathLength="1" vector-effect="non-scaling-stroke"/>
+          </svg>
+          <span class="trend-dot" style="left: {{ printf "%.2f" (mul (div $lastX $W) 100) }}%; top: {{ printf "%.2f" (mul (div $lastY $H) 100) }}%;" aria-hidden="true"></span>
+          </span>
+        {{- end }}
+
+        <span class="trend-stats">
+          <span class="trend-gain"><span class="trend-num">+{{ $m.monthly }}</span> in {{ $weeks }} weeks</span>
+          {{ with $m.total }}<span class="trend-total"><span class="trend-mono">{{ . }}</span> total</span>{{ end }}
+        </span>
+        {{- if eq $m.trend "rising" }}
+        <span class="trend-dir trend-dir-up">↑ Accelerating{{ if ne $m.previous nil }} · +{{ $m.previous }} the {{ $weeks }} weeks before{{ end }}</span>
+        {{- else if eq $m.trend "cooling" }}
+        <span class="trend-dir">↓ Slowing{{ if ne $m.previous nil }} · +{{ $m.previous }} the {{ $weeks }} weeks before{{ end }}</span>
+        {{- else }}
+        <span class="trend-dir">→ Steady</span>
+        {{- end }}
+        {{- if and $totalNew (gt $m.monthly 0) }}
+        {{- $share := math.Round (mul (div (float $m.monthly) (float $totalNew)) 100) }}
+        <span class="trend-share">
+          <span class="trend-share-track"><span class="trend-share-fill" style="width: {{ $share }}%"></span></span>
+          <span class="trend-share-label">{{ $share }}% of all new citations</span>
+        </span>
+        {{- end }}
+      </a>
+    </li>
     {{ end }}
-  </div>
+  </ol>
 </div>
+{{ partial "functions/css_tag" "css/widgets/trending-research.css" }}
