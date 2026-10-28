@@ -7,7 +7,9 @@
   </details>
 
   <details class="spoiler">
-    <summary>Trending Research</summary>
+    {{- $hot := dict -}}
+    {{- if fileExists "static/data/hot_papers.json" }}{{ $hot = readFile "static/data/hot_papers.json" | transform.Unmarshal }}{{ end }}
+    <summary>Trending Research{{ with $hot.totalNew }} <span class="trend-summary-count">+{{ . }} citations · last {{ $hot.windowWeeks | default 8 }} weeks</span>{{ end }}</summary>
     <div class="spoiler-content">
       {{ partial "impact/hot_papers.html" . }}
     </div>
