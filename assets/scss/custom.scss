@@ -1,139 +1,28 @@
 // Custom SCSS for Hugo Blox / Wowchemy site
 // This file overrides theme styles
 
-// ===== FONT IMPORTS =====
-// Fira Code for Cyber/Terminal mode, Merriweather + Playfair Display for Manuscript mode
-// Fira Code, Merriweather and Playfair Display load from <head> (data/fonts/minimal.toml). An @import here was dropped by
-// browsers because Sass puts a byte-order mark in front of it.
+// ===== TYPE AND COLOUR TOKENS =====
+// Design direction (2026-10-28, pending Ben's review): dark background, green and cyan as accents only, a proportional
+// face (Lato) for text, nav, headings and the site title, and a monospace face only for small labels (dates, venue
+// tags, metric numbers, code). No text glow, no glitch, no uppercase running text.
+//
+// Lato is the self-hosted copy CCAIR already ships (static/ccair/assets/fonts/, SIL OFL), so the site makes no
+// third-party font request. The regular and bold faces are preloaded in layouts/partials/hooks/head-end.html.
+// Fira Code (for labels) and the manuscript-mode serifs still load from <head> (data/fonts/minimal.toml).
+@font-face { font-family: "Lato"; font-style: normal; font-weight: 300; font-display: swap; src: url("/ccair/assets/fonts/lato-300.woff2") format("woff2"); }
+@font-face { font-family: "Lato"; font-style: normal; font-weight: 400; font-display: swap; src: url("/ccair/assets/fonts/lato-400.woff2") format("woff2"); }
+@font-face { font-family: "Lato"; font-style: italic; font-weight: 400; font-display: swap; src: url("/ccair/assets/fonts/lato-400-italic.woff2") format("woff2"); }
+@font-face { font-family: "Lato"; font-style: normal; font-weight: 700; font-display: swap; src: url("/ccair/assets/fonts/lato-700.woff2") format("woff2"); }
 
-// ===== HIGH-SEVERITY CYBERPUNK GLITCH SYSTEM =====
-// Violent, jerky, instant digital glitches with RGB splitting (chromatic aberration)
-// Uses SCSS loops to generate random noise patterns - no smooth transitions!
+$font-sans: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+$font-mono: 'Fira Code', 'Roboto Mono', ui-monospace, 'Courier New', monospace;
+$heading-color: #e6edf3;   // 16.0:1 on #0d1117, 14.6:1 on #161b22
+$text-color: #c9d1d9;      // 12.3:1 on #0d1117, 11.2:1 on #161b22
+$accent-green: #00ff41;
+$accent-cyan: #00e5ff;
 
-// Configuration
-$glitch-duration-1: 4s;  // Layer 1 animation duration
-$glitch-duration-2: 3s;  // Layer 2 animation duration (different = asymmetry)
-$bg-color: #0a0a0a;      // Must match page background
-
-// Keyframe Generator Layer 1: Cyan/Green Shift
-// Pre-generated "random" slices for chaotic, non-repeating feel
-@keyframes glitch-anim-1 {
-  0% { clip-path: inset(42px 0 58px 0); transform: translate(0, 0); }
-  5% { clip-path: inset(12px 0 73px 0); transform: translate(-5px, 0); }
-  10% { clip-path: inset(85px 0 7px 0); transform: translate(3px, 0); }
-  15% { clip-path: inset(23px 0 64px 0); transform: translate(0, 0); }
-  20% { clip-path: inset(91px 0 2px 0); transform: translate(4px, 0); }
-  25% { clip-path: inset(7px 0 82px 0); transform: translate(-3px, 0); }
-  30% { clip-path: inset(54px 0 31px 0); transform: translate(0, 0); }
-  35% { clip-path: inset(3px 0 89px 0); transform: translate(5px, 0); }
-  40% { clip-path: inset(67px 0 18px 0); transform: translate(-4px, 0); }
-  45% { clip-path: inset(38px 0 47px 0); transform: translate(0, 0); }
-  50% { clip-path: inset(95px 0 1px 0); transform: translate(-5px, 0); }
-  55% { clip-path: inset(19px 0 71px 0); transform: translate(3px, 0); }
-  60% { clip-path: inset(76px 0 12px 0); transform: translate(0, 0); }
-  65% { clip-path: inset(8px 0 84px 0); transform: translate(4px, 0); }
-  70% { clip-path: inset(49px 0 39px 0); transform: translate(-3px, 0); }
-  75% { clip-path: inset(88px 0 5px 0); transform: translate(0, 0); }
-  80% { clip-path: inset(27px 0 61px 0); transform: translate(-5px, 0); }
-  85% { clip-path: inset(63px 0 24px 0); transform: translate(4px, 0); }
-  90% { clip-path: inset(14px 0 78px 0); transform: translate(0, 0); }
-  95% { clip-path: inset(81px 0 9px 0); transform: translate(-4px, 0); }
-  100% { clip-path: inset(35px 0 52px 0); transform: translate(3px, 0); }
-}
-
-// Keyframe Generator Layer 2: Magenta/Red Shift
-// Different pattern from layer 1 for asymmetric chaos
-@keyframes glitch-anim-2 {
-  0% { clip-path: inset(67px 0 21px 0); transform: translate(0, 0); }
-  5% { clip-path: inset(4px 0 88px 0); transform: translate(4px, 0); }
-  10% { clip-path: inset(93px 0 3px 0); transform: translate(-3px, 0); }
-  15% { clip-path: inset(31px 0 56px 0); transform: translate(0, 0); }
-  20% { clip-path: inset(78px 0 14px 0); transform: translate(-5px, 0); }
-  25% { clip-path: inset(16px 0 72px 0); transform: translate(3px, 0); }
-  30% { clip-path: inset(59px 0 28px 0); transform: translate(0, 0); }
-  35% { clip-path: inset(9px 0 83px 0); transform: translate(-4px, 0); }
-  40% { clip-path: inset(86px 0 6px 0); transform: translate(5px, 0); }
-  45% { clip-path: inset(44px 0 43px 0); transform: translate(0, 0); }
-  50% { clip-path: inset(2px 0 91px 0); transform: translate(4px, 0); }
-  55% { clip-path: inset(71px 0 17px 0); transform: translate(-5px, 0); }
-  60% { clip-path: inset(25px 0 63px 0); transform: translate(0, 0); }
-  65% { clip-path: inset(82px 0 10px 0); transform: translate(3px, 0); }
-  70% { clip-path: inset(52px 0 36px 0); transform: translate(-3px, 0); }
-  75% { clip-path: inset(11px 0 79px 0); transform: translate(0, 0); }
-  80% { clip-path: inset(96px 0 1px 0); transform: translate(-4px, 0); }
-  85% { clip-path: inset(39px 0 49px 0); transform: translate(5px, 0); }
-  90% { clip-path: inset(74px 0 15px 0); transform: translate(0, 0); }
-  95% { clip-path: inset(18px 0 69px 0); transform: translate(-5px, 0); }
-  100% { clip-path: inset(57px 0 32px 0); transform: translate(4px, 0); }
-}
-
-// Violent skew animation - instant snaps, no easing
-@keyframes glitch-skew {
-  0% { transform: skew(0deg); }
-  5% { transform: skew(3deg); }
-  10% { transform: skew(-2deg); }
-  15% { transform: skew(0deg); }
-  20% { transform: skew(-3deg); }
-  25% { transform: skew(2deg); }
-  30% { transform: skew(0deg); }
-  35% { transform: skew(4deg); }
-  40% { transform: skew(-1deg); }
-  45% { transform: skew(0deg); }
-  50% { transform: skew(-4deg); }
-  55% { transform: skew(1deg); }
-  60% { transform: skew(0deg); }
-  65% { transform: skew(2deg); }
-  70% { transform: skew(-3deg); }
-  75% { transform: skew(0deg); }
-  80% { transform: skew(-2deg); }
-  85% { transform: skew(3deg); }
-  90% { transform: skew(0deg); }
-  95% { transform: skew(1deg); }
-  100% { transform: skew(-1deg); }
-}
-
-// ===== DYNAMIC GLITCH CLASS =====
-// Uses data-text attribute for Hugo dynamic content
-.glitch-dynamic {
-  position: relative;
-  display: inline-block;
-  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
-  font-weight: 700;
-  color: #00ff41;
-  
-  &::before, &::after {
-    content: attr(data-text);
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: $bg-color;
-    overflow: hidden;
-    clip-path: inset(0 0 0 0);
-  }
-  
-  // Layer 1: Cyan shift
-  &::before {
-    left: 2px;
-    color: #00ffea;
-    animation: glitch-anim-1 $glitch-duration-1 infinite step-end alternate-reverse;
-  }
-  
-  // Layer 2: Magenta shift
-  &::after {
-    left: -2px;
-    color: #ff0055;
-    animation: glitch-anim-2 $glitch-duration-2 infinite step-end alternate-reverse;
-  }
-  
-  // Add skew on hover for extra intensity
-  &:hover {
-    animation: glitch-skew 0.3s infinite step-end;
-  }
-}
-
-// ===== APPLY HIGH-SEVERITY GLITCH TO ALL SECTION HEADERS =====
+// ===== HEADINGS =====
+// Plain text: the hover glitch (data-text layers, skew) was removed with the rest of the glitch system.
 section h1,
 section h2,
 section h3,
@@ -144,54 +33,10 @@ section h3,
 h1, h2, h3 {
   position: relative;
   display: inline-block;
-  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  font-family: $font-sans !important;
   font-weight: 700;
-  color: #00ff41 !important;
-  
-  &::before, &::after {
-    content: attr(data-text);
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: $bg-color;
-    overflow: hidden;
-    clip-path: inset(0 0 0 0);
-    opacity: 0;
-    pointer-events: none;
-  }
-  
-  // Activate glitch on hover
-  &:hover {
-    animation: glitch-skew 0.3s infinite step-end;
-    
-    &::before {
-      left: 2px;
-      color: #00ffea;
-      animation: glitch-anim-1 $glitch-duration-1 infinite step-end alternate-reverse;
-      opacity: 1;
-    }
-    
-    &::after {
-      left: -2px;
-      color: #ff0055;
-      animation: glitch-anim-2 $glitch-duration-2 infinite step-end alternate-reverse;
-      opacity: 1;
-    }
-  }
-}
-
-// Small labels that are h2 only for a correct heading outline (research dashboard, Altmetric and Dimensions boxes):
-// they keep the look they had as h4, without the hover glitch.
-.dash-label, .metric-box-heading {
-  &::before, &::after { content: none; }
-  &:hover { animation: none; }
-}
-
-// ===== LEGACY CYBER-GLITCH CLASS =====
-.cyber-glitch {
-  @extend .glitch-dynamic;
+  color: $heading-color !important;
+  letter-spacing: normal;
 }
 
 // ===== GLOBAL CYBER TERMINAL THEME =====
@@ -201,7 +46,7 @@ html, body {
 }
 
 body {
-  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  font-family: $font-sans !important;
   background: linear-gradient(180deg, #0a0a0a 0%, #0d1117 50%, #161b22 100%) !important;
   color: #c9d1d9 !important;
   min-height: 100vh;
@@ -223,14 +68,18 @@ a {
   }
 }
 
-// Strong/bold text - orange accent
+// Strong/bold text: brighter neutral, not a colour accent
 strong, b {
-  color: #ffa657 !important;
+  color: $heading-color !important;
 }
 
-// Italic text - cyan
-em, i {
+// Italic text keeps the text colour; <i> icons keep the cyan accent
+i {
   color: #00ffff !important;
+}
+
+em, i:not([class]) {
+  color: inherit !important;
 }
 
 // ===== NAVBAR CYBER THEME =====
@@ -243,7 +92,7 @@ header {
   
   // Navbar links
   a {
-    font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+    font-family: $font-sans !important;
     color: #c9d1d9 !important;
     transition: color 0.2s ease, text-shadow 0.2s ease;
     
@@ -257,15 +106,14 @@ header {
   }
 }
 
-// Navbar brand with glitch
+// Navbar brand (site title)
 .navbar-brand {
-  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
-  color: #00ff41 !important;
+  font-family: $font-sans !important;
+  color: $heading-color !important;
   font-weight: bold;
   
   &:hover {
     color: #00ff41 !important;
-    transform: skewX(-3deg);
   }
 }
 
@@ -312,10 +160,9 @@ section .container,
 }
 
 // ===== ALL HEADINGS CYBER STYLE =====
-// Note: Glitch effect is applied via the section header rules above
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
-  color: #00ff41 !important;
+  font-family: $font-sans !important;
+  color: $heading-color !important;
   display: inline-block;
   position: relative;
   
@@ -325,17 +172,15 @@ h1, h2, h3, h4, h5, h6 {
 
 // ===== TABLES CYBER STYLE =====
 table {
-  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  font-family: $font-sans !important;
   border-collapse: collapse;
   width: 100%;
   
   th {
     background: rgba(0, 255, 65, 0.1) !important;
-    color: #00ff41 !important;
+    color: $heading-color !important;
     border: 1px solid rgba(0, 255, 65, 0.3) !important;
     padding: 12px !important;
-    text-transform: uppercase;
-    letter-spacing: 1px;
     font-size: 0.85rem;
   }
   
@@ -355,7 +200,7 @@ table {
 // ===== LISTS CYBER STYLE =====
 ul, ol {
   li {
-    font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+    font-family: $font-sans !important;
     color: #c9d1d9;
     padding: 5px 0;
     
@@ -391,7 +236,7 @@ ul:not(.navbar-nav):not(.social-icons):not(.network-icon) {
 .btn,
 button,
 input[type="submit"] {
-  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  font-family: $font-sans !important;
   background: linear-gradient(135deg, rgba(0, 255, 65, 0.1) 0%, rgba(0, 255, 65, 0.2) 100%) !important;
   border: 1px solid rgba(0, 255, 65, 0.5) !important;
   color: #00ff41 !important;
@@ -440,9 +285,9 @@ details,
   overflow: hidden;
   
   summary {
-    font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+    font-family: $font-sans !important;
     background: linear-gradient(135deg, rgba(0, 255, 65, 0.05) 0%, rgba(0, 255, 65, 0.1) 100%) !important;
-    color: #00ff41 !important;
+    color: $heading-color !important;
     padding: 15px 20px;
     cursor: pointer;
     border-bottom: 1px solid rgba(0, 255, 65, 0.2);
@@ -467,7 +312,7 @@ footer,
 .site-footer {
   background: linear-gradient(180deg, #0d1117 0%, #0a0a0a 100%) !important;
   border-top: 1px solid rgba(0, 255, 65, 0.2) !important;
-  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  font-family: $font-sans !important;
   
   * {
     color: #8b949e !important;
@@ -513,7 +358,7 @@ footer,
 
 // ===== FORM INPUTS CYBER STYLE =====
 input, textarea, select {
-  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  font-family: $font-sans !important;
   background: rgba(13, 17, 23, 0.9) !important;
   border: 1px solid rgba(0, 255, 65, 0.3) !important;
   color: #c9d1d9 !important;
@@ -523,7 +368,6 @@ input, textarea, select {
   
   &:focus {
     border-color: #00ff41 !important;
-    box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
     outline: none;
   }
   
@@ -563,7 +407,7 @@ blockquote {
 
 // ===== CODE BLOCKS CYBER STYLE =====
 code, pre {
-  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  font-family: $font-mono !important;
   background: rgba(0, 0, 0, 0.4) !important;
   border: 1px solid rgba(0, 255, 65, 0.2) !important;
   border-radius: 4px;
@@ -583,8 +427,8 @@ code {
 .badge,
 .tag,
 [class*="badge"],
-[class*="tag"] {
-  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+[class*="tag"]:not([class*="tagline"]) {
+  font-family: $font-mono !important;
   background: rgba(0, 255, 65, 0.1) !important;
   border: 1px solid rgba(0, 255, 65, 0.3) !important;
   color: #00ff41 !important;
@@ -607,14 +451,13 @@ code {
   
   &:focus {
     border-color: #00ff41 !important;
-    box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
   }
 }
 
 // ===== PAGINATION CYBER STYLE =====
 .pagination {
   a, span {
-    font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+    font-family: $font-sans !important;
     background: rgba(13, 17, 23, 0.8) !important;
     border: 1px solid rgba(0, 255, 65, 0.2) !important;
     color: #c9d1d9 !important;
@@ -629,7 +472,7 @@ code {
 
 // ===== TERMINAL HERO STYLING =====
 .terminal-hero {
-  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  font-family: $font-mono !important;
   background: linear-gradient(135deg, rgba(10, 10, 10, 0.95) 0%, rgba(20, 20, 30, 0.95) 100%);
   border: 1px solid rgba(0, 255, 65, 0.3);
   border-radius: 8px;
@@ -637,7 +480,7 @@ code {
   margin: 20px auto;
   max-width: 600px;
   position: relative;
-  box-shadow: 0 0 20px rgba(0, 255, 65, 0.1), inset 0 0 60px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.3);
   
   // Scanlines effect
   &::after {
@@ -670,7 +513,7 @@ code {
 
 // ===== TYPED TEXT STYLING =====
 .typed-text, .typed-cursor {
-  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  font-family: $font-mono !important;
   color: #00ff41 !important;
 }
 
@@ -689,28 +532,18 @@ code {
 .hb-hero h1, 
 .wg-hero h1,
 section#hero h1 {
-  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  font-family: $font-sans !important;
 }
 
-// ===== NAVBAR GLITCH HOVER =====
-.navbar-brand {
-  transition: color 0.1s ease, text-shadow 0.1s ease, transform 0.1s ease;
-  
-  &:hover {
-    color: #00ff00 !important;
-    transform: skewX(-5deg);
-  }
-}
 
-// ===== SECTION HEADER GLITCH EFFECT =====
+// ===== SECTION HEADERS =====
 section h1, section h2 {
-  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
-  color: #00ff41 !important;
+  font-family: $font-sans !important;
+  color: $heading-color !important;
   display: inline-block;
   position: relative;
   transition: text-shadow 0.3s ease;
   
-  // Glitch effect applied via section header rules
   
   &:hover {
   }
@@ -821,12 +654,12 @@ section#about,
   }
 }
 
-// Biography section title (Biography heading) - with glitch effect
+// Biography section title (Biography heading)
 section#about h1,
 .wg-about h1,
 .hb-about h1 {
-  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
-  color: #00ff41 !important;
+  font-family: $font-sans !important;
+  color: $heading-color !important;
   display: inline-block;
   position: relative;
   
@@ -841,20 +674,17 @@ section#about .hb-about-name,
 section#about .article-title,
 .wg-about .profile-header h1,
 .hb-about .profile h1 {
-  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
-  color: #00ff41 !important;
-  // The one text glow left on the site: a single soft halo on the hero name (everything else is flat).
-  text-shadow: 0 0 12px rgba(0, 255, 65, 0.35);
-  letter-spacing: 1px;
+  font-family: $font-sans !important;
+  color: $heading-color !important;
 }
 
-// Role/Position styling - Matrix green with subtle glitch
+// Role/Position styling
 section#about .hb-about-role,
 section#about .role,
 section#about [class*="role"],
 .wg-about .role {
-  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
-  color: #00ff41 !important;
+  font-family: $font-sans !important;
+  color: $text-color !important;
   font-size: 1.1rem;
   display: inline-block;
   position: relative;
@@ -869,7 +699,7 @@ section#about .hb-about-organization,
 section#about .organization,
 section#about a[href*="gsu"],
 .wg-about .organization {
-  color: #ffa657 !important;
+  color: $text-color !important;
   text-decoration: none;
   
   &:hover {
@@ -884,7 +714,7 @@ section#about .article-style,
 section#about .hb-about-content,
 .wg-about .prose,
 .wg-about .biography {
-  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  font-family: $font-sans !important;
   color: #c9d1d9 !important;
   line-height: 1.8;
   font-size: 0.95rem;
@@ -902,14 +732,14 @@ section#about .hb-about-content,
     }
   }
   
-  // Highlight important text
+  // Important text: bold in the heading colour
   strong, b {
-    color: #ffa657 !important;
+    color: $heading-color !important;
   }
   
-  // Italic text (publications, etc.) - cyan accent
-  em, i {
-    color: #00ffff !important;
+  // Italic text (publications, etc.) keeps the text colour
+  em, i:not([class]) {
+    color: inherit !important;
     font-style: italic;
   }
   
@@ -936,7 +766,7 @@ section#about .bio-tagline,
   padding: 12px 16px;
   border-left: 3px solid rgba(0, 255, 65, 0.7);
   background: rgba(0, 255, 65, 0.06);
-  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  font-family: $font-sans !important;
   color: #c9d1d9;
   font-size: 0.9rem;
 }
@@ -966,9 +796,7 @@ section#about .bio-snapshot-title,
 .wg-about .bio-snapshot-title,
 .hb-about .bio-snapshot-title {
   font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  color: #00ff41;
+  color: $heading-color;
   font-weight: 700;
 }
 
@@ -1012,7 +840,7 @@ section#about .bio-snapshot-card .value,
   font-size: 1.3rem;
   font-weight: 800;
   color: #00ff41;
-  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace;
+  font-family: $font-mono;
 }
 
 section#about .bio-snapshot-card .meta,
@@ -1844,10 +1672,10 @@ section#about .hb-about-interests,
 section#about ul:not(.network-icon):not(.social-icons) {
   list-style: none !important;
   padding-left: 0 !important;
-  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  font-family: $font-sans !important;
   
   li {
-    font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+    font-family: $font-sans !important;
     color: #7ee787 !important;
     padding: 8px 0;
     position: relative;
@@ -1877,7 +1705,7 @@ section#about .col-md-5,
 .wg-about .education,
 .hb-about .education,
 .hb-about-education {
-  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  font-family: $font-sans !important;
   
   // Education items container
   ul {
@@ -1885,7 +1713,7 @@ section#about .col-md-5,
     padding-left: 0 !important;
     
     li {
-      font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+      font-family: $font-sans !important;
       color: #c9d1d9 !important;
       padding: 10px 0;
       border-left: 2px solid rgba(0, 255, 65, 0.3);
@@ -1903,8 +1731,8 @@ section#about .col-md-5,
   .degree,
   strong,
   b {
-    font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
-    color: #ffa657 !important;
+    font-family: $font-sans !important;
+    color: $heading-color !important;
     display: block;
   }
   
@@ -1924,16 +1752,14 @@ section#about .col-md-5,
   }
 }
 
-// Style the section titles "Interests" and "Education" - glitch effect
+// Style the section titles "Interests" and "Education"
 section#about h3,
 section#about .hb-about-interests-title,
 section#about .hb-about-education-title,
 section#about [class*="title"]:not(.article-title) {
-  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
-  color: #00ff41 !important;
+  font-family: $font-sans !important;
+  color: $heading-color !important;
   font-size: 0.9rem !important;
-  text-transform: uppercase;
-  letter-spacing: 2px;
   margin-bottom: 15px;
   display: inline-block;
   position: relative;
@@ -1952,7 +1778,7 @@ section#about div:not(.terminal-dots):not(.terminal-hero) {
 
 // Ensure all list items in about get cyber styling
 section#about li {
-  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
+  font-family: $font-sans !important;
 }
 
 // Social icons styling
@@ -2144,21 +1970,18 @@ body:not(.dark) section#about [class*="avatar"]:hover {
   }
 }
 
-// Section labels/headers within about - glitch effect
+// Section labels/headers within about
 section#about h2,
 section#about h3,
 section#about .section-subheading,
 .wg-about h2,
 .wg-about h3 {
-  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace !important;
-  color: #00ff41 !important;
+  font-family: $font-sans !important;
+  color: $heading-color !important;
   font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 2px;
   display: inline-block;
   position: relative;
   
-  // Glitch effect applied via section header rules
   
   &:hover {
   }
@@ -3729,7 +3552,7 @@ body.dark .leaflet-popup-content-wrapper {
   background: #0a0a0a;
   color: #00ff41;
   border: 1px solid #00ff41;
-  font-family: 'Fira Code', monospace;
+  font-family: $font-sans;
 }
 
 body.dark .leaflet-popup-tip {
@@ -3857,9 +3680,7 @@ body:not(.dark) .network-legend-dot.student { background: #34a853; }
 
 .pub-metrics-title {
   font-size: 0.95rem;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  color: #00ff41;
+  color: $heading-color;
   font-weight: 700;
 }
 
@@ -3893,7 +3714,7 @@ body:not(.dark) .network-legend-dot.student { background: #34a853; }
   margin-top: 6px;
   font-size: 1.6rem;
   font-weight: 800;
-  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace;
+  font-family: $font-mono;
   color: #00ff41;
 }
 
@@ -3984,10 +3805,8 @@ body:not(.dark) .pub-metric-card .value {
 }
 
 .awards-timeline-title {
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  color: #00ff41;
+  font-size: 1.05rem;
+  color: $heading-color;
   font-weight: 700;
 }
 
@@ -4147,10 +3966,8 @@ body:not(.dark) .awards-detail-year {
 }
 
 .talks-title {
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  color: #00ff41;
+  font-size: 1.05rem;
+  color: $heading-color;
   font-weight: 700;
 }
 
@@ -4358,10 +4175,8 @@ body:not(.dark) .talks-tag.active {
 }
 
 .service-title {
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  color: #00ff41;
+  font-size: 1.05rem;
+  color: $heading-color;
   font-weight: 700;
 }
 
@@ -4402,7 +4217,7 @@ body:not(.dark) .talks-tag.active {
   margin-top: 6px;
   font-size: 1.5rem;
   font-weight: 800;
-  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace;
+  font-family: $font-mono;
   color: #00ff41;
 }
 
@@ -4578,10 +4393,8 @@ body:not(.dark) .service-toggle.active {
 }
 
 .media-title {
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  color: #00ff41;
+  font-size: 1.05rem;
+  color: $heading-color;
   font-weight: 700;
 }
 
@@ -4771,10 +4584,8 @@ body:not(.dark) .media-featured::before {
 }
 
 .teach-title {
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  color: #00ff41;
+  font-size: 1.05rem;
+  color: $heading-color;
   font-weight: 700;
 }
 
@@ -4807,7 +4618,7 @@ body:not(.dark) .media-featured::before {
   margin-top: 6px;
   font-size: 1.5rem;
   font-weight: 800;
-  font-family: 'Fira Code', 'Roboto Mono', 'Courier New', monospace;
+  font-family: $font-mono;
   color: #00ff41;
 }
 
@@ -4908,10 +4719,8 @@ body:not(.dark) .teach-bar .bar-track {
 }
 
 .pub-filter-title {
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  color: #00ff41;
+  font-size: 1.05rem;
+  color: $heading-color;
   font-weight: 700;
 }
 
@@ -5485,7 +5294,7 @@ section .container {
   color: #00ff41 !important;
   border: 2px solid #00ff41;
   border-radius: 4px;
-  font-family: 'Fira Code', 'Roboto Mono', monospace;
+  font-family: $font-sans;
   font-size: 0.9rem;
   text-decoration: none;
   transform: translateY(-200%);
@@ -5654,4 +5463,122 @@ section#about h3 > a,
 .collab-spotlight-title,
 .cae-chip {
   font-size: max(12px, 0.75rem) !important;
+}
+
+// =============================================================================
+// ===== RESTYLE 2026-10-28 (pending Ben's review) =====
+// =============================================================================
+// Dark background with green and cyan as accents only. These rules come last so they settle the colour of links and
+// the face of small labels after the section rules above.
+
+// Links: the green accent; hover and keyboard focus add an underline so the cue does not rely on colour alone.
+// #00ff41 on #0d1117 is 13.9:1 (12.7:1 on #161b22); the cyan hover #00e5ff is 12.3:1.
+a {
+  color: $accent-green !important;
+
+  &:hover,
+  &:focus-visible {
+    color: $accent-cyan !important;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}
+
+// Bio prose links: a quiet solid rule instead of the dashed blue one.
+section#about .prose a,
+section#about .biography a,
+section#about .article-style a,
+.wg-about .prose a,
+.wg-about .biography a {
+  color: $accent-green !important;
+  border-bottom: 1px solid rgba(0, 255, 65, 0.35);
+
+  &:hover {
+    color: $accent-cyan !important;
+    border-bottom-color: $accent-cyan;
+  }
+}
+
+// The bio paragraphs lose the terminal-prompt ">" prefix.
+section#about .prose p::before,
+section#about .biography p::before,
+section#about .article-style p::before,
+section#about .hb-about-content p::before,
+.wg-about .prose p::before,
+.wg-about .biography p::before {
+  content: none !important;
+}
+
+// Navigation and the site title are plain text; the active item carries the green accent.
+.navbar .navbar-brand,
+.navbar-brand {
+  color: $heading-color !important;
+  font-weight: 700;
+  letter-spacing: normal;
+}
+.navbar a.nav-link {
+  color: $text-color !important;
+}
+.navbar a.nav-link:hover,
+.navbar a.nav-link.active {
+  color: $accent-green !important;
+}
+
+// Publication titles read as titles (neutral), with the accent on hover and focus.
+a.pub-title,
+.selected-pubs a.pub-title {
+  color: $heading-color !important;
+
+  &:hover,
+  &:focus-visible {
+    color: $accent-green !important;
+  }
+}
+
+// Bio tagline: plain sentence-case text with a green rule on the left.
+section#about .bio-tagline,
+.wg-about .bio-tagline,
+.hb-about .bio-tagline {
+  color: $heading-color !important;
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+// Proportional running text: body copy, lists, tables, form controls.
+body,
+p, li, td, th, dd, dt, label, input, select, textarea, button, summary {
+  font-family: $font-sans !important;
+}
+body {
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+// Monospace stays only for small labels: dates, venue tags, metric numbers and code.
+code, pre, kbd, samp,
+time,
+.article-date,
+.edu-year,
+.hb-about .edu-year,
+.timeline-date,
+.talks-year,
+.media-year,
+.awards-detail-year,
+.pub-meta,
+.pub-badge,
+.pub-plain-tag,
+.pub-filter-count,
+.impact-value,
+.count,
+.value {
+  font-family: $font-mono !important;
+}
+
+// Job title and affiliation under the portrait: regular weight (the theme sets 300), text colour, the name above in bold.
+section#about .portrait-title h3,
+.portrait-title h3 {
+  font-weight: 400;
+  color: $text-color !important;
 }
