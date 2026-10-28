@@ -18,7 +18,7 @@ $font-sans: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Ne
 $font-mono: 'Fira Code', 'Roboto Mono', ui-monospace, 'Courier New', monospace;
 $heading-color: #e6edf3;   // 16.0:1 on #0d1117, 14.6:1 on #161b22
 $text-color: #c9d1d9;      // 12.3:1 on #0d1117, 11.2:1 on #161b22
-$accent-green: #00ff41;
+$accent-green: #4ade80;
 $accent-cyan: #00e5ff;
 
 // ===== HEADINGS =====
@@ -64,7 +64,7 @@ a {
   transition: color 0.2s ease, text-shadow 0.2s ease;
   
   &:hover {
-    color: #00ff41 !important;
+    color: #4ade80 !important;
   }
 }
 
@@ -87,7 +87,7 @@ em, i:not([class]) {
 nav,
 header {
   background: linear-gradient(180deg, rgba(10, 10, 10, 0.95) 0%, rgba(13, 17, 23, 0.9) 100%) !important;
-  border-bottom: 1px solid rgba(0, 255, 65, 0.2) !important;
+  border-bottom: 1px solid rgba(74, 222, 128, 0.2) !important;
   backdrop-filter: blur(10px);
   
   // Navbar links
@@ -97,11 +97,11 @@ header {
     transition: color 0.2s ease, text-shadow 0.2s ease;
     
     &:hover {
-      color: #00ff41 !important;
+      color: #4ade80 !important;
     }
     
     &.active {
-      color: #00ff41 !important;
+      color: #4ade80 !important;
     }
   }
 }
@@ -113,7 +113,7 @@ header {
   font-weight: bold;
   
   &:hover {
-    color: #00ff41 !important;
+    color: #4ade80 !important;
   }
 }
 
@@ -134,8 +134,8 @@ section,
     right: 0;
     bottom: 0;
     background-image: 
-      linear-gradient(rgba(0, 255, 65, 0.02) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0, 255, 65, 0.02) 1px, transparent 1px);
+      linear-gradient(rgba(74, 222, 128, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(74, 222, 128, 0.02) 1px, transparent 1px);
     background-size: 50px 50px;
     pointer-events: none;
     z-index: 0;
@@ -151,12 +151,12 @@ section,
 section .container,
 .home-section .container {
   background: rgba(13, 17, 23, 0.6);
-  border: 1px solid rgba(0, 255, 65, 0.15);
+  border: 1px solid rgba(74, 222, 128, 0.15);
   border-radius: 12px;
   padding: 30px !important;
   margin-top: 20px;
   margin-bottom: 20px;
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.4), 0 0 60px rgba(0, 255, 65, 0.05);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.4), 0 0 60px rgba(74, 222, 128, 0.05);
 }
 
 // ===== ALL HEADINGS CYBER STYLE =====
@@ -176,10 +176,11 @@ table {
   border-collapse: collapse;
   width: 100%;
   
+  // Header cells are neutral like other headings (no green tint); green stays on links and small details.
   th {
-    background: rgba(0, 255, 65, 0.1) !important;
+    background: #161b22 !important;
     color: $heading-color !important;
-    border: 1px solid rgba(0, 255, 65, 0.3) !important;
+    border: 1px solid #30363d !important;
     padding: 12px !important;
     font-size: 0.85rem;
   }
@@ -187,13 +188,12 @@ table {
   td {
     background: rgba(13, 17, 23, 0.6) !important;
     color: #c9d1d9 !important;
-    border: 1px solid rgba(0, 255, 65, 0.15) !important;
+    border: 1px solid #30363d !important;
     padding: 10px !important;
   }
   
   tr:hover td {
-    background: rgba(0, 255, 65, 0.05) !important;
-    border-color: rgba(0, 255, 65, 0.3) !important;
+    background: rgba(255, 255, 255, 0.03) !important;
   }
 }
 
@@ -205,7 +205,7 @@ ul, ol {
     padding: 5px 0;
     
     &::marker {
-      color: #00ff41;
+      color: #4ade80;
     }
   }
 }
@@ -222,12 +222,12 @@ ul:not(.navbar-nav):not(.social-icons):not(.network-icon) {
       content: '\25B8';
       position: absolute;
       left: 0;
-      color: #00ff41;
+      color: #4ade80;
       font-weight: bold;
     }
     
     &:hover {
-      color: #00ff41;
+      color: #4ade80;
     }
   }
 }
@@ -237,9 +237,9 @@ ul:not(.navbar-nav):not(.social-icons):not(.network-icon) {
 button,
 input[type="submit"] {
   font-family: $font-sans !important;
-  background: linear-gradient(135deg, rgba(0, 255, 65, 0.1) 0%, rgba(0, 255, 65, 0.2) 100%) !important;
-  border: 1px solid rgba(0, 255, 65, 0.5) !important;
-  color: #00ff41 !important;
+  background: linear-gradient(135deg, rgba(74, 222, 128, 0.1) 0%, rgba(74, 222, 128, 0.2) 100%) !important;
+  border: 1px solid rgba(74, 222, 128, 0.5) !important;
+  color: #4ade80 !important;
   border-radius: 6px;
   padding: 10px 20px;
   transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease, color 0.3s ease;
@@ -247,15 +247,15 @@ input[type="submit"] {
   letter-spacing: 1px;
   
   &:hover {
-    background: linear-gradient(135deg, rgba(0, 255, 65, 0.2) 0%, rgba(0, 255, 65, 0.3) 100%) !important;
-    border-color: #00ff41 !important;
+    background: linear-gradient(135deg, rgba(74, 222, 128, 0.2) 0%, rgba(74, 222, 128, 0.3) 100%) !important;
+    border-color: #4ade80 !important;
     transform: translateY(-2px);
   }
 }
 
 // Primary buttons - more prominent
 .btn-primary {
-  background: linear-gradient(135deg, rgba(0, 255, 65, 0.3) 0%, rgba(0, 255, 65, 0.4) 100%) !important;
+  background: linear-gradient(135deg, rgba(74, 222, 128, 0.3) 0%, rgba(74, 222, 128, 0.4) 100%) !important;
 }
 
 // ===== CARDS CYBER STYLE =====
@@ -263,12 +263,12 @@ input[type="submit"] {
 .publication-card,
 article {
   background: linear-gradient(135deg, rgba(13, 17, 23, 0.8) 0%, rgba(22, 27, 34, 0.9) 100%) !important;
-  border: 1px solid rgba(0, 255, 65, 0.2) !important;
+  border: 1px solid rgba(74, 222, 128, 0.2) !important;
   border-radius: 12px;
   transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
   
   &:hover {
-    border-color: rgba(0, 255, 65, 0.5) !important;
+    border-color: rgba(74, 222, 128, 0.5) !important;
     transform: translateY(-3px);
   }
 }
@@ -279,31 +279,33 @@ details,
 [class*="spoiler"],
 [class*="collapsible"] {
   background: rgba(13, 17, 23, 0.8) !important;
-  border: 1px solid rgba(0, 255, 65, 0.2) !important;
+  border: 1px solid rgba(74, 222, 128, 0.2) !important;
   border-radius: 8px;
   margin: 15px 0;
   overflow: hidden;
   
+  // Section headers (Biography, Funding & Grants, ...): neutral surface and the off-white heading colour; only the
+  // disclosure marker carries the green accent.
   summary {
     font-family: $font-sans !important;
-    background: linear-gradient(135deg, rgba(0, 255, 65, 0.05) 0%, rgba(0, 255, 65, 0.1) 100%) !important;
+    background: rgba(255, 255, 255, 0.03) !important;
     color: $heading-color !important;
     padding: 15px 20px;
     cursor: pointer;
-    border-bottom: 1px solid rgba(0, 255, 65, 0.2);
-    transition: background 0.3s ease, text-shadow 0.3s ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    transition: background 0.2s ease;
     
     &:hover {
-      background: rgba(0, 255, 65, 0.15) !important;
+      background: rgba(255, 255, 255, 0.06) !important;
     }
     
     &::marker {
-      color: #00ff41;
+      color: #4ade80;
     }
   }
   
   &[open] summary {
-    border-bottom-color: rgba(0, 255, 65, 0.4);
+    border-bottom-color: rgba(255, 255, 255, 0.12);
   }
 }
 
@@ -311,7 +313,7 @@ details,
 footer,
 .site-footer {
   background: linear-gradient(180deg, #0d1117 0%, #0a0a0a 100%) !important;
-  border-top: 1px solid rgba(0, 255, 65, 0.2) !important;
+  border-top: 1px solid rgba(74, 222, 128, 0.2) !important;
   font-family: $font-sans !important;
   
   * {
@@ -319,8 +321,13 @@ footer,
   }
   
   a:hover {
-    color: #00ff41 !important;
+    color: #4ade80 !important;
   }
+}
+
+// The footer's first line (name, affiliation, last build date): plain Lato, the muted footer colour.
+.site-footer .footer-site-line {
+  margin: 1.5rem 0 0.75rem;
 }
 
 // ===== EXPERIENCE/TIMELINE CYBER STYLE =====
@@ -331,7 +338,7 @@ footer,
   .experience-item,
   .timeline-item,
   li {
-    border-left: 2px solid rgba(0, 255, 65, 0.3) !important;
+    border-left: 2px solid rgba(74, 222, 128, 0.3) !important;
     padding-left: 20px;
     margin-bottom: 20px;
     position: relative;
@@ -344,11 +351,11 @@ footer,
       width: 12px;
       height: 12px;
       border-radius: 50%;
-      background: #00ff41;
+      background: #4ade80;
     }
     
     &:hover {
-      border-left-color: #00ff41 !important;
+      border-left-color: #4ade80 !important;
       
       &::before {
       }
@@ -360,14 +367,14 @@ footer,
 input, textarea, select {
   font-family: $font-sans !important;
   background: rgba(13, 17, 23, 0.9) !important;
-  border: 1px solid rgba(0, 255, 65, 0.3) !important;
+  border: 1px solid rgba(74, 222, 128, 0.3) !important;
   color: #c9d1d9 !important;
   border-radius: 6px;
   padding: 10px 15px;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
   
   &:focus {
-    border-color: #00ff41 !important;
+    border-color: #4ade80 !important;
     outline: none;
   }
   
@@ -387,18 +394,18 @@ input, textarea, select {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgba(0, 255, 65, 0.3) 0%, rgba(0, 255, 65, 0.5) 100%);
+  background: linear-gradient(180deg, rgba(74, 222, 128, 0.3) 0%, rgba(74, 222, 128, 0.5) 100%);
   border-radius: 5px;
   
   &:hover {
-    background: linear-gradient(180deg, rgba(0, 255, 65, 0.5) 0%, rgba(0, 255, 65, 0.7) 100%);
+    background: linear-gradient(180deg, rgba(74, 222, 128, 0.5) 0%, rgba(74, 222, 128, 0.7) 100%);
   }
 }
 
 // ===== BLOCKQUOTE CYBER STYLE =====
 blockquote {
-  border-left: 3px solid #00ff41 !important;
-  background: rgba(0, 255, 65, 0.05) !important;
+  border-left: 3px solid #4ade80 !important;
+  background: rgba(74, 222, 128, 0.05) !important;
   padding: 15px 20px;
   margin: 20px 0;
   font-style: italic;
@@ -409,7 +416,7 @@ blockquote {
 code, pre {
   font-family: $font-mono !important;
   background: rgba(0, 0, 0, 0.4) !important;
-  border: 1px solid rgba(0, 255, 65, 0.2) !important;
+  border: 1px solid rgba(74, 222, 128, 0.2) !important;
   border-radius: 4px;
   color: #7ee787 !important;
 }
@@ -429,17 +436,17 @@ code {
 [class*="badge"],
 [class*="tag"]:not([class*="tagline"]) {
   font-family: $font-mono !important;
-  background: rgba(0, 255, 65, 0.1) !important;
-  border: 1px solid rgba(0, 255, 65, 0.3) !important;
-  color: #00ff41 !important;
+  background: rgba(74, 222, 128, 0.1) !important;
+  border: 1px solid rgba(74, 222, 128, 0.3) !important;
+  color: #4ade80 !important;
   border-radius: 4px;
   padding: 4px 10px;
   font-size: 0.8rem;
   text-transform: uppercase;
   
   &:hover {
-    background: rgba(0, 255, 65, 0.2) !important;
-    border-color: #00ff41 !important;
+    background: rgba(74, 222, 128, 0.2) !important;
+    border-color: #4ade80 !important;
   }
 }
 
@@ -447,10 +454,10 @@ code {
 .search-box,
 [class*="search"] input {
   background: rgba(13, 17, 23, 0.9) !important;
-  border: 1px solid rgba(0, 255, 65, 0.3) !important;
+  border: 1px solid rgba(74, 222, 128, 0.3) !important;
   
   &:focus {
-    border-color: #00ff41 !important;
+    border-color: #4ade80 !important;
   }
 }
 
@@ -459,13 +466,13 @@ code {
   a, span {
     font-family: $font-sans !important;
     background: rgba(13, 17, 23, 0.8) !important;
-    border: 1px solid rgba(0, 255, 65, 0.2) !important;
+    border: 1px solid rgba(74, 222, 128, 0.2) !important;
     color: #c9d1d9 !important;
     
     &:hover, &.active {
-      background: rgba(0, 255, 65, 0.1) !important;
-      border-color: #00ff41 !important;
-      color: #00ff41 !important;
+      background: rgba(74, 222, 128, 0.1) !important;
+      border-color: #4ade80 !important;
+      color: #4ade80 !important;
     }
   }
 }
@@ -474,7 +481,7 @@ code {
 .terminal-hero {
   font-family: $font-mono !important;
   background: linear-gradient(135deg, rgba(10, 10, 10, 0.95) 0%, rgba(20, 20, 30, 0.95) 100%);
-  border: 1px solid rgba(0, 255, 65, 0.3);
+  border: 1px solid rgba(74, 222, 128, 0.3);
   border-radius: 8px;
   padding: 20px 25px;
   margin: 20px auto;
@@ -503,7 +510,7 @@ code {
 }
 
 .terminal-prompt {
-  color: #00ff41 !important;
+  color: #4ade80 !important;
   font-weight: 600;
   
   &::before {
@@ -514,7 +521,7 @@ code {
 // ===== TYPED TEXT STYLING =====
 .typed-text, .typed-cursor {
   font-family: $font-mono !important;
-  color: #00ff41 !important;
+  color: #4ade80 !important;
 }
 
 .typed-cursor {
@@ -572,8 +579,8 @@ section#hero,
     right: 0;
     bottom: 0;
     background-image: 
-      linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
+      linear-gradient(rgba(74, 222, 128, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(74, 222, 128, 0.03) 1px, transparent 1px);
     background-size: 50px 50px;
     pointer-events: none;
   }
@@ -593,7 +600,7 @@ section#hero,
   }
   
   a:hover {
-    color: #00ff41 !important;
+    color: #4ade80 !important;
   }
 }
 
@@ -616,8 +623,8 @@ section#about,
     right: 0;
     bottom: 0;
     background-image: 
-      linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
+      linear-gradient(rgba(74, 222, 128, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(74, 222, 128, 0.03) 1px, transparent 1px);
     background-size: 50px 50px;
     pointer-events: none;
     z-index: 0;
@@ -703,7 +710,7 @@ section#about a[href*="gsu"],
   text-decoration: none;
   
   &:hover {
-    color: #00ff41 !important;
+    color: #4ade80 !important;
   }
 }
 
@@ -751,8 +758,8 @@ section#about .hb-about-content,
     transition: color 0.2s ease, border-bottom-color 0.2s ease, text-shadow 0.2s ease;
     
     &:hover {
-      color: #00ff41 !important;
-      border-bottom-color: #00ff41;
+      color: #4ade80 !important;
+      border-bottom-color: #4ade80;
     }
   }
 }
@@ -764,8 +771,8 @@ section#about .bio-tagline,
 .hb-about .bio-tagline {
   margin: 12px 0 18px;
   padding: 12px 16px;
-  border-left: 3px solid rgba(0, 255, 65, 0.7);
-  background: rgba(0, 255, 65, 0.06);
+  border-left: 3px solid rgba(74, 222, 128, 0.7);
+  background: rgba(74, 222, 128, 0.06);
   font-family: $font-sans !important;
   color: #c9d1d9;
   font-size: 0.9rem;
@@ -777,7 +784,7 @@ section#about .bio-snapshot,
   margin: 10px 0 20px;
   padding: 14px;
   border-radius: 12px;
-  border: 1px solid rgba(0, 255, 65, 0.2);
+  border: 1px solid rgba(74, 222, 128, 0.2);
   background: rgba(0, 0, 0, 0.35);
 }
 
@@ -839,7 +846,7 @@ section#about .bio-snapshot-card .value,
   margin-top: 4px;
   font-size: 1.3rem;
   font-weight: 800;
-  color: #00ff41;
+  color: #4ade80;
   font-family: $font-mono;
 }
 
@@ -880,8 +887,8 @@ section#about .bio-explorer,
   margin: 16px 0 18px;
   padding: 16px;
   border-radius: 14px;
-  border: 1px solid rgba(0, 255, 65, 0.22);
-  background: linear-gradient(135deg, rgba(0, 255, 65, 0.08) 0%, rgba(0, 229, 255, 0.05) 100%);
+  border: 1px solid rgba(74, 222, 128, 0.22);
+  background: linear-gradient(135deg, rgba(74, 222, 128, 0.08) 0%, rgba(0, 229, 255, 0.05) 100%);
   position: relative;
   overflow: hidden;
 }
@@ -892,7 +899,7 @@ section#about .bio-explorer::after,
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at top left, rgba(0, 255, 65, 0.12), transparent 55%);
+  background: radial-gradient(circle at top left, rgba(74, 222, 128, 0.12), transparent 55%);
   pointer-events: none;
   opacity: 0.6;
 }
@@ -940,7 +947,7 @@ section#about .bio-explorer-controls,
 section#about .bio-explorer-tab,
 .wg-about .bio-explorer-tab,
 .hb-about .bio-explorer-tab {
-  border: 1px solid rgba(0, 255, 65, 0.25);
+  border: 1px solid rgba(74, 222, 128, 0.25);
   background: rgba(0, 0, 0, 0.35);
   color: #c9d1d9;
   padding: 6px 12px;
@@ -958,9 +965,9 @@ section#about .bio-explorer-tab.is-active,
 section#about .bio-explorer-tab[aria-selected="true"],
 .wg-about .bio-explorer-tab[aria-selected="true"],
 .hb-about .bio-explorer-tab[aria-selected="true"] {
-  background: rgba(0, 255, 65, 0.2);
-  color: #00ff41;
-  border-color: rgba(0, 255, 65, 0.6);
+  background: rgba(74, 222, 128, 0.2);
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.6);
 }
 
 // Focus rings (audit 2026-10-24): full-opacity cyan outline, 12.3:1 against #0d1117 (WCAG 1.4.11 asks for 3:1). The old
@@ -1007,7 +1014,7 @@ section#about .bio-explorer-highlights li,
   padding: 6px 8px;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.02);
-  border-left: 2px solid rgba(0, 255, 65, 0.6);
+  border-left: 2px solid rgba(74, 222, 128, 0.6);
 }
 
 section#about .bio-explorer-cta,
@@ -1022,9 +1029,9 @@ section#about .bio-explorer-cta,
   letter-spacing: 1px;
   padding: 6px 12px;
   border-radius: 999px;
-  border: 1px solid rgba(0, 255, 65, 0.5);
-  color: #00ff41 !important;
-  background: rgba(0, 255, 65, 0.08);
+  border: 1px solid rgba(74, 222, 128, 0.5);
+  color: #4ade80 !important;
+  background: rgba(74, 222, 128, 0.08);
 }
 
 section#about .bio-quicklinks,
@@ -1052,9 +1059,9 @@ section#about .bio-quicklink,
 section#about .bio-quicklink:hover,
 .wg-about .bio-quicklink:hover,
 .hb-about .bio-quicklink:hover {
-  border-color: rgba(0, 255, 65, 0.6);
-  background: rgba(0, 255, 65, 0.12);
-  color: #00ff41 !important;
+  border-color: rgba(74, 222, 128, 0.6);
+  background: rgba(74, 222, 128, 0.12);
+  color: #4ade80 !important;
 }
 
 // Education progression path
@@ -1094,7 +1101,7 @@ section#about .edu-step,
   gap: 8px;
   padding: 18px 16px 16px;
   border-radius: 12px;
-  border: 1px solid rgba(0, 255, 65, 0.18);
+  border: 1px solid rgba(74, 222, 128, 0.18);
   background: rgba(0, 0, 0, 0.35);
   overflow: hidden;
   min-width: 220px;
@@ -1112,7 +1119,7 @@ section#about .edu-step::after,
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #00ff41;
+  background: #4ade80;
 }
 
 section#about .edu-year,
@@ -1154,7 +1161,7 @@ section#about .edu-logo img,
 .hb-about .edu-logo img {
   width: 70%;
   height: auto;
-  filter: drop-shadow(0 0 6px rgba(0, 255, 65, 0.25));
+  filter: drop-shadow(0 0 6px rgba(74, 222, 128, 0.25));
 }
 
 body:not(.dark) section#about .edu-logo,
@@ -1402,7 +1409,7 @@ section#about .bio-story-progress-bar,
   display: block;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, rgba(0, 255, 65, 0.8), rgba(0, 229, 255, 0.8));
+  background: linear-gradient(90deg, rgba(74, 222, 128, 0.8), rgba(0, 229, 255, 0.8));
   transform-origin: left;
   transform: scaleX(0);
   transition: transform 0.2s ease;
@@ -1439,7 +1446,7 @@ section#about .bio-story-toggle,
 section#about .bio-story-btn,
 .wg-about .bio-story-btn,
 .hb-about .bio-story-btn {
-  border: 1px solid rgba(0, 255, 65, 0.3);
+  border: 1px solid rgba(74, 222, 128, 0.3);
   background: rgba(0, 0, 0, 0.4);
   color: #c9d1d9;
   padding: 4px 10px;
@@ -1453,9 +1460,9 @@ section#about .bio-story-btn,
 section#about .bio-story-btn.is-active,
 .wg-about .bio-story-btn.is-active,
 .hb-about .bio-story-btn.is-active {
-  background: rgba(0, 255, 65, 0.18);
-  color: #00ff41;
-  border-color: rgba(0, 255, 65, 0.6);
+  background: rgba(74, 222, 128, 0.18);
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.6);
 }
 
 section#about .bio-story-tldr,
@@ -1493,8 +1500,8 @@ section#about .bio-chip,
 section#about .bio-chip:hover,
 .wg-about .bio-chip:hover,
 .hb-about .bio-chip:hover {
-  border-color: rgba(0, 255, 65, 0.6);
-  color: #00ff41;
+  border-color: rgba(74, 222, 128, 0.6);
+  color: #4ade80;
 }
 
 section#about .bio-chip::after,
@@ -1541,14 +1548,14 @@ section#about .bio-highlight-flash,
 .wg-about .bio-highlight-flash,
 .hb-about .bio-highlight-flash {
   animation: bio-highlight-pulse 1.2s ease-out;
-  border-left: 2px solid rgba(0, 255, 65, 0.8);
+  border-left: 2px solid rgba(74, 222, 128, 0.8);
   padding-left: 10px;
 }
 
 @keyframes bio-highlight-pulse {
   0% {
-    background: rgba(0, 255, 65, 0.18);
-    box-shadow: 0 0 12px rgba(0, 255, 65, 0.35);
+    background: rgba(74, 222, 128, 0.18);
+    box-shadow: 0 0 12px rgba(74, 222, 128, 0.35);
   }
   100% {
     background: transparent;
@@ -1683,14 +1690,14 @@ section#about ul:not(.network-icon):not(.social-icons) {
     
     &::before {
       content: '\25B8';
-      color: #00ff41;
+      color: #4ade80;
       position: absolute;
       left: 0;
       font-weight: bold;
     }
     
     &:hover {
-      color: #00ff41 !important;
+      color: #4ade80 !important;
       padding-left: 25px;
       transition: color 0.2s ease, text-shadow 0.2s ease, padding-left 0.2s ease;
     }
@@ -1716,13 +1723,13 @@ section#about .col-md-5,
       font-family: $font-sans !important;
       color: #c9d1d9 !important;
       padding: 10px 0;
-      border-left: 2px solid rgba(0, 255, 65, 0.3);
+      border-left: 2px solid rgba(74, 222, 128, 0.3);
       padding-left: 15px;
       margin-bottom: 10px;
       
       &:hover {
-        border-left-color: #00ff41;
-        background: rgba(0, 255, 65, 0.05);
+        border-left-color: #4ade80;
+        background: rgba(74, 222, 128, 0.05);
       }
     }
   }
@@ -1791,7 +1798,7 @@ section#about .network-icon,
     transition: color 0.3s ease, transform 0.3s ease, text-shadow 0.3s ease;
     
     &:hover {
-      color: #00ff41 !important;
+      color: #4ade80 !important;
       transform: scale(1.2) rotate(5deg);
     }
   }
@@ -1814,7 +1821,7 @@ section#about .hb-about-avatar,
     left: -4px;
     right: -4px;
     bottom: -4px;
-    border: 2px solid rgba(0, 255, 65, 0.3);
+    border: 2px solid rgba(74, 222, 128, 0.3);
     border-radius: 50%;
     animation: avatar-pulse 2s ease-in-out infinite;
   }
@@ -1822,10 +1829,10 @@ section#about .hb-about-avatar,
 
 @keyframes avatar-pulse {
   0%, 100% {
-    border-color: rgba(0, 255, 65, 0.3);
+    border-color: rgba(74, 222, 128, 0.3);
   }
   50% {
-    border-color: rgba(0, 255, 65, 0.6);
+    border-color: rgba(74, 222, 128, 0.6);
   }
 }
 
@@ -1939,7 +1946,7 @@ section#about [class*="avatar"] {
   .adversarial-color-overlay {
     background: linear-gradient(
       135deg,
-      rgba(0, 255, 65, 0.25) 0%,
+      rgba(74, 222, 128, 0.25) 0%,
       rgba(0, 255, 255, 0.2) 50%,
       rgba(255, 0, 255, 0.2) 100%
     );
@@ -1992,12 +1999,12 @@ section#about .hb-section-container,
 section#about .container,
 .wg-about .container {
   background: linear-gradient(135deg, rgba(13, 17, 23, 0.8) 0%, rgba(22, 27, 34, 0.9) 100%);
-  border: 1px solid rgba(0, 255, 65, 0.2);
+  border: 1px solid rgba(74, 222, 128, 0.2);
   border-radius: 12px;
   padding: 40px !important;
   box-shadow: 
     0 0 30px rgba(0, 0, 0, 0.5),
-    0 0 60px rgba(0, 255, 65, 0.1),
+    0 0 60px rgba(74, 222, 128, 0.1),
     inset 0 0 100px rgba(0, 0, 0, 0.3);
   position: relative;
   
@@ -2008,7 +2015,7 @@ section#about::after {
   content: '\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500';
   display: block;
   text-align: center;
-  color: rgba(0, 255, 65, 0.2);
+  color: rgba(74, 222, 128, 0.2);
   font-family: 'Fira Code', monospace;
   font-size: 10px;
   letter-spacing: 2px;
@@ -3088,11 +3095,11 @@ body:not(.dark) {
 
 // In dark mode, the toggle is green
 body.dark .theme-toggle-label {
-  color: #00ff41 !important;
-  border-color: #00ff41 !important;
+  color: #4ade80 !important;
+  border-color: #4ade80 !important;
   
   &:hover {
-    background: rgba(0, 255, 65, 0.1);
+    background: rgba(74, 222, 128, 0.1);
   }
 }
 
@@ -3143,18 +3150,18 @@ body:not(.dark) .theme-toggle-label {
 
 // Dark mode (cyber theme) - green reveal
 .dark .redacted {
-  background-color: #00ff41;
-  color: #00ff41 !important;
+  background-color: #4ade80;
+  color: #4ade80 !important;
   
   &::selection {
-    background: #00ff41;
-    color: #00ff41;
+    background: #4ade80;
+    color: #4ade80;
   }
   
   &:hover {
     background-color: transparent;
-    color: #00ff41 !important;
-    text-decoration-color: #00ff41;
+    color: #4ade80 !important;
+    text-decoration-color: #4ade80;
   }
 }
 
@@ -3239,21 +3246,21 @@ body:not(.dark) .theme-toggle-label {
   }
   
   .dark & {
-    background-color: #00ff41;
+    background-color: #4ade80;
     background-image: repeating-linear-gradient(
       0deg,
-      rgba(0, 255, 65, 0.9),
-      rgba(0, 255, 65, 0.9) 3px,
-      rgba(0, 255, 65, 0.7) 3px,
-      rgba(0, 255, 65, 0.7) 6px
+      rgba(74, 222, 128, 0.9),
+      rgba(74, 222, 128, 0.9) 3px,
+      rgba(74, 222, 128, 0.7) 3px,
+      rgba(74, 222, 128, 0.7) 6px
     );
     
     &:hover {
-      background: rgba(0, 255, 65, 0.1);
+      background: rgba(74, 222, 128, 0.1);
       background-image: none;
       
       * {
-        color: #00ff41 !important;
+        color: #4ade80 !important;
       }
     }
   }
@@ -3281,88 +3288,6 @@ body:not(.dark) .theme-toggle-label {
 body:not(.dark) .redacted:hover {
   color: #333 !important;
   text-decoration-color: #666;
-}
-
-// =============================================================================
-// ===== VISITOR TERMINAL WIDGET =====
-// =============================================================================
-
-.visitor-terminal {
-  background-color: #000;
-  border: 1px solid #333;
-  border-top: 3px solid #00ff41; /* Hacker Green Header */
-  color: #00ff41;
-  font-family: 'Fira Code', 'Courier New', monospace;
-  font-size: 0.75rem;
-  padding: 1rem;
-  margin: 2rem auto;
-  max-width: 600px;
-  text-align: left;
-  
-  /* Fade-in animation on load */
-  animation: terminal-fade-in 0.5s ease-out;
-}
-
-.terminal-row {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 4px;
-  border-bottom: 1px solid #111;
-  padding-bottom: 4px;
-}
-
-.terminal-label {
-  color: #fff;
-  font-weight: bold;
-  margin-right: 10px;
-}
-
-.terminal-value {
-  color: #00ff41;
-}
-
-.terminal-cursor {
-  display: inline-block;
-  width: 8px;
-  height: 12px;
-  background: #00ff41;
-  animation: blink 1s infinite;
-}
-
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
-
-@keyframes terminal-fade-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-// Light mode - manuscript style terminal
-body:not(.dark) .visitor-terminal {
-  background-color: #f9f9f9;
-  border: 1px solid #ccc;
-  border-top: 3px solid #333;
-  color: #333;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  font-family: 'Merriweather', serif;
-  
-  .terminal-label {
-    color: #000;
-  }
-  
-  .terminal-value {
-    color: #333;
-  }
-  
-  .terminal-cursor {
-    background: #333;
-  }
-  
-  .terminal-row {
-    border-bottom: 1px solid #ddd;
-  }
 }
 
 // =============================================================================
@@ -3395,7 +3320,7 @@ body:not(.dark) .visitor-terminal {
   h4 {
     font-weight: 600;
     margin-bottom: 15px;
-    color: #00ff41;
+    color: #4ade80;
   }
   
   p {
@@ -3483,7 +3408,7 @@ body.dark .altmetric-embed {
 
 // Cyber mode map container
 body.dark #impact-map-container {
-  border: 1px solid #00ff41;
+  border: 1px solid #4ade80;
 }
 
 // Manuscript mode map container
@@ -3526,7 +3451,7 @@ body:not(.dark) #impact-map-container {
 }
 
 .map-popup.conference .category {
-  background: #00ff41;
+  background: #4ade80;
   color: #000;
 }
 
@@ -3550,18 +3475,18 @@ body:not(.dark) #impact-map-container {
 // Cyber mode popup styling
 body.dark .leaflet-popup-content-wrapper {
   background: #0a0a0a;
-  color: #00ff41;
-  border: 1px solid #00ff41;
+  color: #4ade80;
+  border: 1px solid #4ade80;
   font-family: $font-sans;
 }
 
 body.dark .leaflet-popup-tip {
   background: #0a0a0a;
-  border: 1px solid #00ff41;
+  border: 1px solid #4ade80;
 }
 
 body.dark .map-popup strong {
-  color: #00ff41;
+  color: #4ade80;
 }
 
 body.dark .map-popup .location {
@@ -3573,7 +3498,7 @@ body.dark .map-popup .description {
 }
 
 body.dark .leaflet-popup-close-button {
-  color: #00ff41 !important;
+  color: #4ade80 !important;
 }
 
 // Map legend styling
@@ -3598,7 +3523,7 @@ body.dark .leaflet-popup-close-button {
   border: 2px solid #fff;
 }
 
-.map-legend-dot.conference { background: #00ff41; }
+.map-legend-dot.conference { background: #4ade80; }
 .map-legend-dot.collaboration { background: #00bfff; }
 .map-legend-dot.institution { background: #ff6b35; }
 
@@ -3614,7 +3539,7 @@ body.dark .leaflet-popup-close-button {
 
 // Cyber mode network container
 body.dark #research-network-container {
-  border: 1px solid #00ff41;
+  border: 1px solid #4ade80;
 }
 
 // Manuscript mode network container  
@@ -3647,7 +3572,7 @@ body:not(.dark) #research-network-container {
 }
 
 // Legend colors matching ECharts
-body.dark .network-legend-dot.self { background: #00ff41; }
+body.dark .network-legend-dot.self { background: #4ade80; }
 body.dark .network-legend-dot.advisor { background: #ff00ff; }
 body.dark .network-legend-dot.professor { background: #00ffff; }
 body.dark .network-legend-dot.collaborator { background: #ffff00; }
@@ -3663,7 +3588,7 @@ body:not(.dark) .network-legend-dot.student { background: #34a853; }
 .pub-metrics-panel {
   margin: 20px 0 10px;
   padding: 18px;
-  border: 1px solid rgba(0, 255, 65, 0.25);
+  border: 1px solid rgba(74, 222, 128, 0.25);
   border-radius: 12px;
   background: rgba(0, 0, 0, 0.35);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
@@ -3715,7 +3640,7 @@ body:not(.dark) .network-legend-dot.student { background: #34a853; }
   font-size: 1.6rem;
   font-weight: 800;
   font-family: $font-mono;
-  color: #00ff41;
+  color: #4ade80;
 }
 
 .pub-metrics-chart {
@@ -3792,7 +3717,7 @@ body:not(.dark) .pub-metric-card .value {
   margin: 18px 0 6px;
   padding: 16px;
   border-radius: 14px;
-  border: 1px solid rgba(0, 255, 65, 0.2);
+  border: 1px solid rgba(74, 222, 128, 0.2);
   background: rgba(0, 0, 0, 0.35);
 }
 
@@ -3826,7 +3751,7 @@ body:not(.dark) .pub-metric-card .value {
   left: 6px;
   right: 6px;
   height: 2px;
-  background: rgba(0, 255, 65, 0.35);
+  background: rgba(74, 222, 128, 0.35);
 }
 
 .awards-nodes {
@@ -3861,7 +3786,7 @@ body:not(.dark) .pub-metric-card .value {
 }
 
 .awards-node.active::before {
-  background: #00ff41;
+  background: #4ade80;
   transform: scale(1.2);
 }
 
@@ -3953,7 +3878,7 @@ body:not(.dark) .awards-detail-year {
   margin: 18px 0 6px;
   padding: 16px;
   border-radius: 14px;
-  border: 1px solid rgba(0, 255, 65, 0.2);
+  border: 1px solid rgba(74, 222, 128, 0.2);
   background: rgba(0, 0, 0, 0.35);
 }
 
@@ -4017,8 +3942,8 @@ body:not(.dark) .awards-detail-year {
 }
 
 .talks-year.active {
-  border-color: rgba(0, 255, 65, 0.6);
-  color: #00ff41;
+  border-color: rgba(74, 222, 128, 0.6);
+  color: #4ade80;
 }
 
 .talks-tags {
@@ -4066,7 +3991,7 @@ body:not(.dark) .awards-detail-year {
   left: 0;
   width: 3px;
   border-radius: 999px;
-  background: linear-gradient(180deg, #00e5ff, #00ff41);
+  background: linear-gradient(180deg, #00e5ff, #4ade80);
   opacity: 0.7;
 }
 
@@ -4162,7 +4087,7 @@ body:not(.dark) .talks-tag.active {
   margin: 18px 0 6px;
   padding: 16px;
   border-radius: 14px;
-  border: 1px solid rgba(0, 255, 65, 0.2);
+  border: 1px solid rgba(74, 222, 128, 0.2);
   background: rgba(0, 0, 0, 0.35);
 }
 
@@ -4218,7 +4143,7 @@ body:not(.dark) .talks-tag.active {
   font-size: 1.5rem;
   font-weight: 800;
   font-family: $font-mono;
-  color: #00ff41;
+  color: #4ade80;
 }
 
 .service-card .meta {
@@ -4279,8 +4204,8 @@ body:not(.dark) .talks-tag.active {
 }
 
 .service-toggle.active {
-  border-color: rgba(0, 255, 65, 0.6);
-  color: #00ff41;
+  border-color: rgba(74, 222, 128, 0.6);
+  color: #4ade80;
 }
 
 .service-grid {
@@ -4331,8 +4256,8 @@ body:not(.dark) .talks-tag.active {
 }
 
 .service-pill.active {
-  color: #00ff41;
-  border-color: rgba(0, 255, 65, 0.5);
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.5);
 }
 
 .service-empty {
@@ -4380,7 +4305,7 @@ body:not(.dark) .service-toggle.active {
   margin: 18px 0 6px;
   padding: 16px;
   border-radius: 14px;
-  border: 1px solid rgba(0, 255, 65, 0.2);
+  border: 1px solid rgba(74, 222, 128, 0.2);
   background: rgba(0, 0, 0, 0.35);
 }
 
@@ -4461,7 +4386,7 @@ body:not(.dark) .service-toggle.active {
   left: 0;
   width: 100%;
   height: 3px;
-  background: linear-gradient(90deg, #00e5ff, #00ff41);
+  background: linear-gradient(90deg, #00e5ff, #4ade80);
 }
 
 .media-featured-label {
@@ -4570,7 +4495,7 @@ body:not(.dark) .media-featured::before {
   margin: 16px 0 10px;
   padding: 18px;
   border-radius: 14px;
-  border: 1px solid rgba(0, 255, 65, 0.2);
+  border: 1px solid rgba(74, 222, 128, 0.2);
   background: rgba(0, 0, 0, 0.35);
 }
 
@@ -4619,7 +4544,7 @@ body:not(.dark) .media-featured::before {
   font-size: 1.5rem;
   font-weight: 800;
   font-family: $font-mono;
-  color: #00ff41;
+  color: #4ade80;
 }
 
 .teach-card .meta {
@@ -4667,7 +4592,7 @@ body:not(.dark) .media-featured::before {
 .teach-bar .bar-fill {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #00e5ff, #00ff41);
+  background: linear-gradient(90deg, #00e5ff, #4ade80);
 }
 
 .teach-bar .count {
@@ -4706,7 +4631,7 @@ body:not(.dark) .teach-bar .bar-track {
   margin: 18px 0 10px;
   padding: 18px;
   border-radius: 14px;
-  border: 1px solid rgba(0, 255, 65, 0.2);
+  border: 1px solid rgba(74, 222, 128, 0.2);
   background: rgba(0, 0, 0, 0.35);
 }
 
@@ -4745,8 +4670,8 @@ body:not(.dark) .teach-bar .bar-track {
 }
 
 .pub-filter-reset:hover {
-  border-color: rgba(0, 255, 65, 0.6);
-  color: #00ff41;
+  border-color: rgba(74, 222, 128, 0.6);
+  color: #4ade80;
 }
 
 .pub-filter-body {
@@ -4794,7 +4719,7 @@ body:not(.dark) .teach-bar .bar-track {
 }
 
 .pub-filter-option input {
-  accent-color: #00ff41;
+  accent-color: #4ade80;
 }
 
 .pub-filter-scroll {
@@ -4849,9 +4774,12 @@ body:not(.dark) .teach-bar .bar-track {
   text-decoration: none;
 }
 
+// Venue line under a paper ("2026 · MIS Quarterly"): Lato, muted, normal case. #8b949e is 6.2:1 on #0d1117.
 .pub-meta {
-  font-size: 0.75rem;
-  opacity: 0.75;
+  font-size: 0.8125rem;
+  color: #8b949e !important;
+  text-transform: none;
+  letter-spacing: normal;
   margin-top: 4px;
 }
 
@@ -4940,9 +4868,9 @@ body:not(.dark) .pub-filter-reset {
 }
 
 .impact-tag-count {
-  border-color: rgba(0, 255, 65, 0.35);
-  background: rgba(0, 255, 65, 0.12);
-  color: #00ff41;
+  border-color: rgba(74, 222, 128, 0.35);
+  background: rgba(74, 222, 128, 0.12);
+  color: #4ade80;
 }
 
 .impact-stats-title {
@@ -4968,7 +4896,7 @@ body:not(.dark) .pub-filter-reset {
   position: relative;
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(0, 255, 65, 0.22);
+  border: 1px solid rgba(74, 222, 128, 0.22);
   background: rgba(0, 0, 0, 0.35);
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -4992,7 +4920,7 @@ body:not(.dark) .pub-filter-reset {
 .impact-value {
   font-size: 1.6rem;
   font-weight: 800;
-  color: #00ff41;
+  color: #4ade80;
   margin-top: 4px;
 }
 
@@ -5004,7 +4932,7 @@ body:not(.dark) .pub-filter-reset {
 
 .impact-progress {
   height: 4px;
-  background: rgba(0, 255, 65, 0.1);
+  background: rgba(74, 222, 128, 0.1);
   border-radius: 999px;
   margin-top: 10px;
   overflow: hidden;
@@ -5016,7 +4944,7 @@ body:not(.dark) .pub-filter-reset {
   height: 100%;
   transform-origin: left;
   transform: scaleX(0);
-  background: linear-gradient(90deg, rgba(0, 255, 65, 0.8), rgba(0, 229, 255, 0.8));
+  background: linear-gradient(90deg, rgba(74, 222, 128, 0.8), rgba(0, 229, 255, 0.8));
   transition: transform 0.4s ease;
 }
 
@@ -5169,7 +5097,7 @@ body:not(.dark) .impact-tag {
   padding: 14px 16px;
   border-radius: 14px;
   border: 1px solid rgba(0, 229, 255, 0.28);
-  background: linear-gradient(135deg, rgba(0, 255, 65, 0.08) 0%, rgba(0, 229, 255, 0.06) 100%);
+  background: linear-gradient(135deg, rgba(74, 222, 128, 0.08) 0%, rgba(0, 229, 255, 0.06) 100%);
   display: grid;
   gap: 10px;
 }
@@ -5224,9 +5152,9 @@ body:not(.dark) .impact-tag {
   letter-spacing: 1px;
   padding: 6px 12px;
   border-radius: 999px;
-  border: 1px solid rgba(0, 255, 65, 0.5);
-  color: #00ff41 !important;
-  background: rgba(0, 255, 65, 0.08);
+  border: 1px solid rgba(74, 222, 128, 0.5);
+  color: #4ade80 !important;
+  background: rgba(74, 222, 128, 0.08);
   width: fit-content;
 }
 
@@ -5291,8 +5219,8 @@ section .container {
   z-index: 100000;
   padding: 10px 16px;
   background: #0a0a0a;
-  color: #00ff41 !important;
-  border: 2px solid #00ff41;
+  color: #4ade80 !important;
+  border: 2px solid #4ade80;
   border-radius: 4px;
   font-family: $font-sans;
   font-size: 0.9rem;
@@ -5472,7 +5400,8 @@ section#about h3 > a,
 // the face of small labels after the section rules above.
 
 // Links: the green accent; hover and keyboard focus add an underline so the cue does not rely on colour alone.
-// #00ff41 on #0d1117 is 13.9:1 (12.7:1 on #161b22); the cyan hover #00e5ff is 12.3:1.
+// #4ade80 on #0d1117 is 10.9:1 (9.9:1 on #161b22); the cyan hover #00e5ff is 12.3:1. Its luminance is close to the body
+// text, so links in prose also keep a faint underline (WCAG 1.4.1, not colour alone).
 a {
   color: $accent-green !important;
 
@@ -5484,18 +5413,26 @@ a {
   }
 }
 
-// Bio prose links: a quiet solid rule instead of the dashed blue one.
+// Links inside running prose (bio, page bodies, publication abstracts) keep a faint underline, so they are not marked by
+// colour alone; hover and focus turn it cyan.
 section#about .prose a,
 section#about .biography a,
 section#about .article-style a,
 .wg-about .prose a,
-.wg-about .biography a {
+.wg-about .biography a,
+.article-style :is(p, li, dd, blockquote) a:not(.btn):not([class*="btn"]),
+.prose :is(p, li, dd, blockquote) a:not(.btn):not([class*="btn"]) {
   color: $accent-green !important;
-  border-bottom: 1px solid rgba(0, 255, 65, 0.35);
+  border-bottom: 0;
+  text-decoration: underline;
+  text-decoration-color: rgba(74, 222, 128, 0.45);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
 
-  &:hover {
+  &:hover,
+  &:focus-visible {
     color: $accent-cyan !important;
-    border-bottom-color: $accent-cyan;
+    text-decoration-color: $accent-cyan;
   }
 }
 
@@ -5519,9 +5456,17 @@ section#about .hb-about-content p::before,
 .navbar a.nav-link {
   color: $text-color !important;
 }
+// The theme's `.dark .navbar .navbar-nav .nav-link.active` (white, !important) outranked a plain `.navbar a.nav-link.active`;
+// these selectors are one class more specific.
 .navbar a.nav-link:hover,
-.navbar a.nav-link.active {
+.navbar a.nav-link.active,
+body.dark .navbar .navbar-nav a.nav-link:hover,
+body.dark .navbar .navbar-nav a.nav-link.active {
   color: $accent-green !important;
+}
+// The label sits in a <span>, which the global text rule colours directly; let it take the link's colour.
+.navbar a.nav-link > span {
+  color: inherit !important;
 }
 
 // Publication titles read as titles (neutral), with the accent on hover and focus.
@@ -5556,7 +5501,7 @@ body {
   line-height: 1.65;
 }
 
-// Monospace stays only for small labels: dates, venue tags, metric numbers and code.
+// Monospace stays only for small labels: dates, badges, metric numbers and code (not the venue line under a paper).
 code, pre, kbd, samp,
 time,
 .article-date,
@@ -5566,7 +5511,6 @@ time,
 .talks-year,
 .media-year,
 .awards-detail-year,
-.pub-meta,
 .pub-badge,
 .pub-plain-tag,
 .pub-filter-count,

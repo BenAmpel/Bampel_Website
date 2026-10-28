@@ -75,9 +75,9 @@
 }
 .pub-item:hover {
   transform: translateY(-3px) translateX(2px);
-  border-left-color: var(--clr-green, #00ff41);
+  border-left-color: var(--clr-green, #4ade80);
   box-shadow: 0 10px 32px rgba(0, 0, 0, 0.45);
-  background: rgba(0, 255, 65, 0.03);
+  background: rgba(74, 222, 128, 0.03);
 }
 /* Sheen sweep on hover */
 .pub-item::after {
@@ -134,7 +134,7 @@ body:not(.dark) .pub-badge--utd24 { color: #006d7a; border-color: #0097a7; backg
 body:not(.dark) .pub-badge--award { color: #7b1fa2; border-color: #ab47bc; background: rgba(224, 64, 251, 0.10); }
 
 /* ===== Global link + focus polish ===== */
-::selection { background: rgba(0, 255, 65, 0.25); color: #fff; }
+::selection { background: rgba(74, 222, 128, 0.25); color: #fff; }
 a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
   outline: 2px solid rgba(0, 229, 255, 0.7);
   outline-offset: 2px;

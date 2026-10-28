@@ -265,7 +265,7 @@ function runEnhancements() {
             const dark = document.body.classList.contains('dark');
             L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_' + (dark ? 'Dark' : 'Light') + '_Gray_Base/MapServer/tile/{z}/{y}/{x}',
               { attribution: 'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors', maxZoom: 16 }).addTo(map);
-            const colors = { Conference: '#00ff41', Collaboration: '#00bfff', Institution: '#ff6b35' };
+            const colors = { Conference: '#4ade80', Collaboration: '#00bfff', Institution: '#ff6b35' };
             ((payload.footprint || {}).points || []).forEach(pt => {
               if (pt.lat == null || pt.lng == null) return;
               const c = colors[pt.cat] || '#888';
@@ -766,46 +766,4 @@ function runEnhancements() {
 
 // The script is deferred, so the DOM is parsed when it runs; DOMContentLoaded has not fired yet.
 document.addEventListener('DOMContentLoaded', runEnhancements);
-
-// =============================================================================
-// ===== FOOTER TERMINAL (static build info, no visitor data, no network) =====
-// =============================================================================
-
-function initVisitorTerminal() {
-  // Don't inject twice
-  if (document.querySelector('.visitor-terminal')) return;
-
-  const meta = document.querySelector('meta[name="build-date"]');
-  const built = meta ? meta.content : '';
-
-  const terminal = document.createElement('div');
-  terminal.className = 'visitor-terminal';
-  terminal.innerHTML = `
-      <div style="margin-bottom: 10px; border-bottom: 1px dashed #333; padding-bottom: 5px;">
-        <strong>/// BAMPEL.COM ///</strong>
-      </div>
-      <div class="terminal-row">
-        <span class="terminal-label">> SITE:</span>
-        <span class="terminal-value">Benjamin Ampel, Georgia State University</span>
-      </div>
-      ${built ? `<div class="terminal-row" style="margin-top: 10px; border: none;">
-        <span class="terminal-label">> BUILD:</span>
-        <span class="terminal-value">${built} <span class="terminal-cursor"></span></span>
-      </div>` : ''}
-  `;
-
-  // Inject at the top of the footer, trying selectors for different Hugo themes
-  const footer = document.querySelector('footer') ||
-                 document.querySelector('.site-footer') ||
-                 document.querySelector('.page-footer') ||
-                 document.querySelector('[class*="footer"]');
-  if (footer) footer.insertBefore(terminal, footer.firstChild);
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-  setTimeout(initVisitorTerminal, 500);
-});
-window.addEventListener('load', function() {
-  setTimeout(initVisitorTerminal, 1000);
-});
 
