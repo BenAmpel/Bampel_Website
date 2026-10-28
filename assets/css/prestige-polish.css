@@ -76,7 +76,7 @@
 .pub-item:hover {
   transform: translateY(-3px) translateX(2px);
   border-left-color: var(--clr-green, #00ff41);
-  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.45), 0 0 22px rgba(0, 255, 65, 0.10);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.45);
   background: rgba(0, 255, 65, 0.03);
 }
 /* Sheen sweep on hover */
@@ -141,18 +141,10 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
   border-radius: 2px;
 }
 
-/* ===== Neon title links (2026-10-24) =====
-   Title links (publication titles in the lists, list-page titles and links inside headings) glow green on hover and keyboard focus; with motion allowed,
-   the glow arrives through a two-frame chromatic glitch (magenta and cyan offsets), in keeping with the terminal theme.
-   Decoration only: the text colour, and so its contrast, does not change. */
+/* Title links (publication titles, list-page titles, links inside headings): no glow and no glitch since the
+   2026-10-28 restyle; hover and keyboard focus show an underline instead, so the cue does not depend on colour alone. */
 .dark :is(:is(h1, h2, h3, h4) a, a.pub-title, .article-title a, .section-subheading a):is(:hover, :focus-visible) {
-  text-shadow: 0 0 6px rgba(0, 255, 65, 0.55), 0 0 18px rgba(0, 255, 65, 0.25);
-}
-@media (prefers-reduced-motion: no-preference) {
-  .dark :is(:is(h1, h2, h3, h4) a, a.pub-title, .article-title a, .section-subheading a):is(:hover, :focus-visible) { animation: heading-glitch 0.32s steps(1) both; }
-  @keyframes heading-glitch {
-    0% { text-shadow: -2px 0 #e040fb, 2px 0 #00e5ff; translate: 1px 0; }
-    34% { text-shadow: 2px 0 #e040fb, -2px 0 #00e5ff; translate: -1px 0; }
-    67%, 100% { text-shadow: 0 0 6px rgba(0, 255, 65, 0.55), 0 0 18px rgba(0, 255, 65, 0.25); translate: none; }
-  }
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
 }
