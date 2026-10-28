@@ -223,9 +223,13 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
 /* Phones (audit 2026-10-24): the impact map, collaboration graph and footprint map overflowed a 309px column, the
    overlay controls were clipped, and the Leaflet zoom glyphs were light grey on white. Below 700px each map card stacks:
    title, map, then its controls as ordinary blocks under the map instead of floating over it. */
+/* Collaboration network: graph beside a 260px spotlight panel (moved out of an inline style 2026-10-28). */
+.rd-collab { position:relative; border-top:1px solid var(--card-border, #333); padding:25px; display:grid; grid-template-columns:minmax(0, 1fr) 260px; gap:20px; }
+.rd-collab-aside { border:1px solid var(--card-border, #333); border-radius:10px; padding:14px; align-self:start; position:sticky; top:20px; }
+
 @media (max-width: 700px) {
-    .rd-collab { grid-template-columns: minmax(0, 1fr) !important; padding: 16px !important; }
-    .rd-collab aside { position: static !important; }
+    .rd-collab { grid-template-columns:minmax(0, 1fr); padding:16px; }
+    .rd-collab-aside { position:static; }
     .rd-collab .collab-chip-row { flex-wrap: wrap; }
 
     .rd-impact, .rd-footprint { height: auto !important; display: flex; flex-direction: column; }

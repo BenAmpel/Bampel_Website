@@ -18,7 +18,7 @@
 .pll-d4 { background:var(--clr-green); color:var(--clr-green); box-shadow:0 0 5px rgba(74,222,128,0.4); }
 .pll-h1 { color:var(--clr-magenta); }
 .pll-h2 { color:var(--clr-cyan); }
-.pll-h3 { color:rgba(74,222,128,0.75); }
+.pll-h3 { color:#3aa962; } /* solid: the 75% green blended on the dark card, so the header text is not translucent */
 .pll-h4 { color:var(--clr-green); }
 .pll-footer { margin-top:16px; display:flex; align-items:center; flex-wrap:wrap; gap:12px; justify-content:space-between; }
 .pll-legend { display:flex; gap:12px; flex-wrap:wrap; }
