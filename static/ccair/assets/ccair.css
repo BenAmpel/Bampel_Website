@@ -413,6 +413,7 @@ a.chip:active { transform: scale(0.97); }
 .pub-title-link { color: inherit; }
 .pub-title-link:hover { color: var(--accent); }
 .pub-count { margin-top: 18px; color: var(--muted); font-size: 14px; }
+.pub-count a, .material-cite p a { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
 .empty { padding: 40px 0; text-align: center; color: var(--muted); }
 @media (max-width: 600px) { .pub { grid-template-columns: 1fr; } .pub .side { grid-row: auto; grid-column: 1; flex-direction: row; flex-wrap: wrap; align-items: center; } .pub .links { justify-content: flex-start; max-width: none; } }
 

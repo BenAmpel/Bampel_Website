@@ -293,6 +293,7 @@ ol.refs { list-style: none; margin-top: 16px; display: grid; gap: 10px; font-siz
 ol.refs li { padding-left: 38px; position: relative; scroll-margin-top: 90px; overflow-wrap: anywhere; }
 ol.refs li .mono { position: absolute; left: 0; color: var(--accent); }
 ol.refs li:target { color: var(--text); }
+ol.refs a, .reviewed a { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
 
 /* Footer */
 /* Blue Steel band with white text (GSU secondary palette); deep navy in the dark scheme. */
