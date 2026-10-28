@@ -103,6 +103,65 @@
     });
     updateSummary();
     renderList(filtered, items.length);
+    writeUrl();
+  };
+
+  // Filter state lives in the query string (?type=journal&year=2024&year=2023&venue=...&author=...) so a filtered list
+  // can be reloaded or shared. Only these keys are touched; other parameters and the hash are kept.
+  const GROUPS = ['type', 'year', 'venue', 'author'];
+
+  const writeUrl = () => {
+    if (!window.history || typeof window.history.replaceState !== 'function') return;
+    let url;
+    try {
+      url = new URL(window.location.href);
+    } catch (e) {
+      return;
+    }
+    GROUPS.forEach((group) => url.searchParams.delete(group));
+    // Checked boxes in page order, so the same selection always gives the same URL.
+    root.querySelectorAll('input[type="checkbox"][data-group]:checked').forEach((input) => {
+      if (GROUPS.includes(input.dataset.group)) url.searchParams.append(input.dataset.group, input.dataset.value);
+    });
+    const query = url.searchParams.toString();
+    const next = url.pathname + (query ? `?${query}` : '') + url.hash;
+    const current = window.location.pathname + window.location.search + window.location.hash;
+    if (next !== current) {
+      try {
+        window.history.replaceState(window.history.state, '', next);
+      } catch (e) {
+        /* ignore: some embedded or sandboxed contexts refuse history updates */
+      }
+    }
+  };
+
+  // Check the boxes named in the query string. Values that match no option are ignored.
+  const readUrl = () => {
+    let params;
+    try {
+      params = new URLSearchParams(window.location.search);
+    } catch (e) {
+      return false;
+    }
+    let restored = false;
+    GROUPS.forEach((group) => {
+      const wanted = new Set(params.getAll(group).map((v) => v.trim()).filter(Boolean));
+      if (!wanted.size) return;
+      root.querySelectorAll(`input[type="checkbox"][data-group="${group}"]`).forEach((input) => {
+        if (!wanted.has(input.dataset.value)) return;
+        input.checked = true;
+        state[group].add(group === 'year' ? Number(input.dataset.value) : input.dataset.value);
+        restored = true;
+        // Show the option in a collapsed group (Venue, Co-author) so the restored choice is visible.
+        const groupDetails = input.closest('details.pub-filter-group');
+        if (groupDetails) groupDetails.open = true;
+      });
+    });
+    if (restored) {
+      const details = root.closest('details');
+      if (details) details.open = true;
+    }
+    return restored;
   };
 
   (typeof loadPublications === 'function' ? loadPublications() : safeFetch('/data/publications.json')).then((raw) => {
@@ -142,22 +201,19 @@
       applyFilters(items);
     });
 
-    if (resetButton) {
-      resetButton.addEventListener('click', () => {
-        root.querySelectorAll('input[type="checkbox"]').forEach((input) => {
-          input.checked = false;
-        });
-        Object.keys(state).forEach((key) => state[key].clear());
-        applyFilters(items);
-      });
-    }
-
     const clearState = () => {
       root.querySelectorAll('input[type="checkbox"]').forEach((input) => {
         input.checked = false;
       });
       Object.keys(state).forEach((key) => state[key].clear());
     };
+
+    if (resetButton) {
+      resetButton.addEventListener('click', () => {
+        clearState();
+        applyFilters(items);
+      });
+    }
 
     const applyExternalFilters = (detail) => {
       const payload = detail || {};
@@ -193,6 +249,9 @@
       applyExternalFilters(event.detail || {});
     });
 
+    // Box states can survive a reload through the browser's form restore; start from the URL alone.
+    clearState();
+    readUrl();
     applyFilters(items);
   });
 })();
