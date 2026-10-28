@@ -8,7 +8,7 @@ body:not(.dark) .pub-plain-tag { color:#0b6b80; }
 body:not(.dark) .pub-plain p { color:#1a2a33; }
 .pub-extras-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:16px; }
 .pub-extras-card { min-width:0; border:1px solid var(--card-border, #333); border-radius:14px; padding:16px; background:var(--card-bg, rgba(0,0,0,0.25)); box-shadow:0 8px 20px rgba(0,0,0,0.12); }
-.pub-extras-card h3 { margin:0 0 10px; font-size:0.9rem; color:#e6edf3; }
+.pub-extras-card .pub-extras-heading { margin:0 0 10px; font-size:0.9rem; color:#e6edf3; }
 .pub-extras-card ul { margin:0; padding-left:18px; }
 .pub-extras-card li { margin-bottom:6px; font-size:0.82rem; line-height:1.4; }
 .pub-muted { font-size:0.8rem; opacity:0.7; }
@@ -30,5 +30,5 @@ body:not(.dark) .pub-bibtex pre { background:rgba(255,255,255,0.9); }
 .pub-copy.copied { color:#111; background:var(--clr-green); }
 
 body:not(.dark) .pub-extras-card { background:rgba(255,255,255,0.92); }
-body:not(.dark) .pub-extras-card h3 { color:#0b7a2f; }
+body:not(.dark) .pub-extras-card .pub-extras-heading { color:#0b7a2f; }
 body:not(.dark) .pub-citation-text { background:rgba(255,255,255,0.9); }
