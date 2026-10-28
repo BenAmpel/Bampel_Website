@@ -8,13 +8,19 @@ See `.impeccable.md` for the full design specification. Summary:
 A senior security researcher's site, not a hacker terminal: the dark background stays, and green and cyan are accents
 only. This replaces the earlier note that called the cyberpunk neon look deliberate.
 
-- **Colour:** background `#0a0a0a` to `#161b22`; text `#c9d1d9`; headings and the site title `#e6edf3`.
-  Green `#00ff41` marks links, the active nav item, the thin rule under the header and small details (tags, metric
-  numbers, disclosure markers). Cyan `#00e5ff` is the link hover colour, icon colour and the focus ring
-  (`2px solid #00e5ff`).
+- **Colour:** background `#0a0a0a` to `#161b22`; text `#c9d1d9`; headings, section headers (the `<summary>` panels
+  such as Biography and Funding & Grants), table headers and the site title `#e6edf3` on neutral surfaces, never a
+  green tint. Green `#4ade80` (10.9:1 on `#0d1117`, 9.9:1 on `#161b22`; replaced the brighter `#00ff41` on 2026-10-28)
+  is the one accent: links, the active nav item, the thin rule under the header and small details (tags, metric
+  numbers, disclosure markers, the faint background grid). Links in prose keep a faint underline, since the green is
+  close to the body text in lightness (WCAG 1.4.1). Cyan `#00e5ff` is the link hover colour, icon colour and the focus
+  ring (`2px solid #00e5ff`).
 - **Type:** Lato (CCAIR's self-hosted copy in `static/ccair/assets/fonts/`, preloaded in `hooks/head-end.html`) for
-  body text, nav, headings and the site title. A monospace face (Fira Code) only for small labels: dates, venue tags,
-  metric numbers and code.
+  body text, nav, headings (bold; no serif) and the site title. The venue line under a paper ("2026 · MIS Quarterly",
+  `.pub-meta`) is Lato in muted `#8b949e`. A monospace face (Fira Code) only for genuinely label-like bits: timeline
+  dates, badges, metric numbers and code.
+- **Footer:** one plain Lato line (name, affiliation, last build date) above the copyright notice; the terminal-style
+  "/// BAMPEL.COM ///" box is gone. The faint page grid stays as texture.
 - **No** text glow, glitch effects, uppercase or wide tracking on running text, taglines, job titles, bio or headings.
   Uppercase is fine on small labels and chips. At most one or two subtle decorative glows on non-text elements.
 - **No emoji** in UI copy or CTAs; use Font Awesome icons or plain words.

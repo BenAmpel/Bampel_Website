@@ -2,6 +2,9 @@
 
   {{ partial "functions/get_hook" (dict "hook" "footer-start" "context" .) }}
 
+  {{/* A plain line in place of the old terminal-style box: who the site belongs to and when it was last built. */}}
+  <p class="powered-by footer-site-line">Benjamin Ampel, Georgia State University · Updated {{ now.UTC.Format "January 2, 2006" }}</p>
+
   {{/* Load footer block */}}
   {{ $footer_section_name := site.Params.footer.block | default "minimal" }}
   {{ $footer_section_path := printf "components/footers/%s.html" $footer_section_name }}

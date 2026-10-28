@@ -80,7 +80,7 @@
     },
   };
 
-  const topicPalette = ["#00ff41", "#00e5ff", "#e040fb", "#ffd166", "#ff6b35", "#7c4dff", "#4dd0e1", "#80cbc4"];
+  const topicPalette = ["#4ade80", "#00e5ff", "#e040fb", "#ffd166", "#ff6b35", "#7c4dff", "#4dd0e1", "#80cbc4"];
   const topicColors = {};
   [
     "AI / Deep Learning",
@@ -155,7 +155,7 @@
     const value = Number(year || 0);
     if (value <= 2019) return "#4dd0e1";
     if (value <= 2022) return "#00e5ff";
-    return "#00ff41";
+    return "#4ade80";
   }
 
   function buildCitationButtons(meta) {
@@ -767,7 +767,7 @@
     const legendEl = document.getElementById("footprint-legend");
     if (legendEl) {
       legendEl.innerHTML = [
-        `<div class="legend-row"><span class="footprint-legend-dot" style="--legend-color:#00ff41;"></span><span>Conference</span></div>`,
+        `<div class="legend-row"><span class="footprint-legend-dot" style="--legend-color:#4ade80;"></span><span>Conference</span></div>`,
         `<div class="legend-row"><span class="footprint-legend-dot" style="--legend-color:#00bfff;"></span><span>Collaboration</span></div>`,
         `<div class="legend-row"><span class="footprint-legend-dot" style="--legend-color:#ff6b35;"></span><span>Institution</span></div>`,
       ].join("");
@@ -775,7 +775,7 @@
 
     function createIcon(category) {
       const lower = String(category || "Collaboration").toLowerCase();
-      const color = category === "Conference" ? "#00ff41" : category === "Institution" ? "#ff6b35" : "#00bfff";
+      const color = category === "Conference" ? "#4ade80" : category === "Institution" ? "#ff6b35" : "#00bfff";
       return window.L.divIcon({
         className: "",
         html: `<div class="footprint-marker ${lower}" style="color:${color}"><span class="ring"></span><span class="dot"></span></div>`,

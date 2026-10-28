@@ -1,5 +1,5 @@
 :root {
-  --clr-green: #00ff41;
+  --clr-green: #4ade80;
   --clr-cyan: #00e5ff;
   --clr-magenta: #e040fb;
   --clr-bg: #0a0a0a;
@@ -226,8 +226,8 @@ section h1 {
 .dark #about::before {
   background-image:
     radial-gradient(circle, rgba(100, 181, 246, 0.28) 1.3px, transparent 1.8px),
-    linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
+    linear-gradient(rgba(74, 222, 128, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(74, 222, 128, 0.03) 1px, transparent 1px);
   background-size: 40px 40px, 50px 50px, 50px 50px;
   background-position: 0 0, 0 0, 0 0;
   animation: about-node-drift 60s steps(240) infinite;
@@ -476,9 +476,9 @@ section h1 {
 
 .cite-tooltip-btn {
   border-radius: 999px;
-  border: 1px solid rgba(0, 255, 65, 0.35);
-  color: #00ff41;
-  background: rgba(0, 255, 65, 0.12);
+  border: 1px solid rgba(74, 222, 128, 0.35);
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.12);
   padding: 4px 8px;
   font-size: 0.65rem;
   text-transform: uppercase;
@@ -488,7 +488,7 @@ section h1 {
 
 .cite-tooltip-btn.copied {
   color: #111;
-  background: #00ff41;
+  background: #4ade80;
 }
 
 /* ===== COLLAPSIBLE PUBLICATION SECTIONS ===== */

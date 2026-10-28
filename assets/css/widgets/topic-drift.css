@@ -19,7 +19,7 @@
 .tdrift-bar { height:100%; border-radius:4px; display:flex; align-items:center; padding-left:6px; font-size:0.62rem; letter-spacing:0.04em; opacity:0.9; transition:width 0.5s ease; min-width:0; white-space:nowrap; overflow:hidden; }
 
 /* Colors by trend */
-.tdrift-rise { background:rgba(0,255,65,0.25); border:1px solid rgba(0,255,65,0.4); color:var(--clr-green); }
+.tdrift-rise { background:rgba(74,222,128,0.25); border:1px solid rgba(74,222,128,0.4); color:var(--clr-green); }
 .tdrift-fall { background:rgba(224,64,251,0.18); border:1px solid rgba(224,64,251,0.35); color:var(--clr-magenta); }
 .tdrift-stable { background:rgba(0,229,255,0.15); border:1px solid rgba(0,229,255,0.3); color:var(--clr-cyan); }
 .tdrift-empty  { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); }
@@ -28,7 +28,7 @@
 .tdrift-legend { display:flex; gap:14px; flex-wrap:wrap; margin-top:16px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.06); }
 .tdrift-li { display:flex; align-items:center; gap:5px; font-size:0.72rem; opacity:0.75; }
 .tdrift-sq { width:10px; height:10px; border-radius:2px; }
-.tdrift-sq-rise   { background:rgba(0,255,65,0.4); border:1px solid rgba(0,255,65,0.6); }
+.tdrift-sq-rise   { background:rgba(74,222,128,0.4); border:1px solid rgba(74,222,128,0.6); }
 .tdrift-sq-fall   { background:rgba(224,64,251,0.35); border:1px solid rgba(224,64,251,0.6); }
 .tdrift-sq-stable { background:rgba(0,229,255,0.3); border:1px solid rgba(0,229,255,0.5); }
 
