@@ -4,10 +4,9 @@
 
 See `.impeccable.md` for the full design specification. Summary:
 
-### Design direction (pending Ben's review, branch design/restyle-b, 2026-10-28)
+### Design direction (approved by Ben 2026-10-28, PR 39)
 A senior security researcher's site, not a hacker terminal: the dark background stays, and green and cyan are accents
-only. This replaces the earlier note that called the cyberpunk neon look deliberate; until Ben approves the branch,
-`main` still has the old look.
+only. This replaces the earlier note that called the cyberpunk neon look deliberate.
 
 - **Colour:** background `#0a0a0a` to `#161b22`; text `#c9d1d9`; headings and the site title `#e6edf3`.
   Green `#00ff41` marks links, the active nav item, the thin rule under the header and small details (tags, metric
