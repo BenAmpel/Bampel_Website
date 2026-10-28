@@ -1,6 +1,6 @@
-<div class="visitor-stats" style="text-align: center; margin: 40px auto; font-size: 0.8rem; opacity: 0.7; max-width: 600px; line-height: 1.6;">
+<aside class="visitor-stats" aria-label="Visitor statistics" style="text-align: center; margin: 40px auto; font-size: 0.8rem; opacity: 0.7; max-width: 600px; line-height: 1.6;">
   <div id="visitor-details"></div>
-</div>
+</aside>
 
 {{ $beJS := resources.Get "js/body-end.js" | minify | fingerprint }}
 <script defer src="{{ $beJS.RelPermalink }}" integrity="{{ $beJS.Data.Integrity }}"></script>

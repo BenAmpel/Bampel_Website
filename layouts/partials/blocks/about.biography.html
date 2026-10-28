@@ -180,7 +180,7 @@
       {{ with $person.education }}
       <div class="col-md-12">
         <div class="section-subheading">{{ i18n "education" | markdownify }}</div>
-        <div class="edu-path">
+        <div class="edu-path" tabindex="0" role="region" aria-label="Education, scrolls sideways">
           <div class="edu-scroll-hint" aria-hidden="true">Scroll →</div>
           {{ range sort .courses "start_year" "desc" }}
           <div class="edu-step">
