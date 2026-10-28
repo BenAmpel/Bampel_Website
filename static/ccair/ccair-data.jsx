@@ -61,13 +61,14 @@ function useDataStatus(...keys) {
 }
 
 // One data section: a short loading line until its files arrive, its content once they have, or a one-line message if
-// one failed. The line sits in a polite live region that stays mounted, so the change is announced.
-function DataSection({ needs, what, wrap, children }) {
+// one failed. The line sits in a polite live region that stays mounted, so the change is announced. `reserve` (a CSS
+// height) holds that much room while loading, for a section tall enough that content below it would jump.
+function DataSection({ needs, what, wrap, reserve, children }) {
   const status = useDataStatus(...needs);
   const line = status === 'loading' ? `Loading ${what}…` : status === 'failed' ? `Could not load ${what}. Reload the page to try again.` : '';
   return (
     <>
-      <p className={'data-state' + (wrap ? ' wrap' : '')} aria-live="polite">{line}</p>
+      <p className={'data-state' + (wrap ? ' wrap' : '')} aria-live="polite" style={status === 'loading' && reserve ? { minHeight: reserve } : undefined}>{line}</p>
       {status === 'ready' && children}
     </>
   );
