@@ -47,6 +47,17 @@ const parseCsv = text => text.trim().split('\n').map(line => { const out = []; l
   }
     { const src = (await import('node:fs')).readFileSync(new URL('../../static/lab/engine/types/smishing.js', import.meta.url), 'utf8');
     assert(!/type="password"|'password'\]/.test(src), 'no password-type decoy field (browsers autofill those)'); }
+  // Pilot review, 2026-10-29 (24 participants): bank and wording regressions.
+  const all = [...c.bank.items, ...c.bank.practice];
+  assert(all.every(x => x.brand !== 'nan' && x.brand != null), 'no missing-value brand ("nan") on a landing page');
+  assert(!all.some(x => /^[a-z]/.test(x.text) && !x.text.startsWith('hxxps')) && !all.some(x => /(?::|\.\.\.|…)\s*$/.test(x.text)), 'no message cut off at either end');
+  assert(!all.some(x => x.brand === 'Account Services'), 'the landing-page brand comes from the message, not a generic stand-in');
+  assert(c.bank.practice.every(x => x.page !== 'verify' || !x.text.includes('[link-neutralized]')), 'no practice link opens the account-ID form');
+  assert(c.bank.items.filter(x => /\$1,400/.test(x.text) && x.text.includes('[link-neutralized]')).every(x => x.page === 'reward'), '"$1,400 coming to you" opens the claim page, not a card form');
+  assert(!/every scam message showed a warning:/.test(c.debrief.body) && /one message in six/.test(c.debrief.body), 'the debrief says some messages (scams too) showed no warning');
+  assert.equal((c.debrief.body.match(/bampel@gsu\.edu/g) || []).length, 1, 'the debrief gives the contact address once');
+  assert(!/button/i.test(c.text.screenout_body), 'the screen-out text promises no button the study does not have');
+  assert(/phone on your computer/.test(smishing.textFields.find(f => f.key === 'instr_intro').def), 'the instructions say the phone is a picture on a computer');
   console.log('design: bank valid, Latin square complete, warnings per condition, order rules hold over 200 seeds');
 }
 
@@ -100,7 +111,7 @@ console.log('plans: 76 trials, 12 per condition, 8 smishing each, false-alarm do
 // ---------- trial records ----------
 const save = (t, index, data) => call(P + 'trial', { body: { token: t, session: 1, index, data } });
 const ev = list => list.map(([e, ms, extra]) => ({ e, ms, ...(extra || {}) }));
-r = await save(tok, 0, { events: ev([['render', 0], ['ignore', 900], ['probe', 1500], ['next', 2000]]), probe: 20, readback: 'No warning shown', comprehension: { attempts: 1, passed: true, wrong: 0 } });
+r = await save(tok, 0, { events: ev([['render', 0], ['ignore', 900], ['probe', 1500], ['next', 2000]]), probe: 20, comprehension: { attempts: 1, passed: true, wrong: 0 } });
 assert(r.json.ok && !r.json.screenedOut, r.text);
 for (let i = 1; i < 76; i++) {   // the messages; the comprehension screens follow
   const engaged = i === 5, att = plan.trials[i].att1Before;
@@ -134,6 +145,12 @@ assert.equal(r5[col('suspicion_prob')], '0.50'); assert.equal(r5[col('rt_ms')], 
 assert(rows.slice(1).filter(x => x[col('row_kind')] === 'message').length === 76);
 assert(rows.slice(1).some(x => x[col('att1_pass')] === '1'), 'attention check 26 passes (25 +/- 2)');
 assert(rows.slice(1).every(x => x[col('provisional_bank')] === '1'), 'every row says the bank is provisional');
+{ // Read-back: asked (and exported) only where a tier was shown; the old 'Low' option is gone.
+  const wk = col('warning_kind'), rb = col('tier_readback'), msg = rows.slice(1).filter(x => x[col('row_kind')] === 'message');
+  assert(msg.filter(x => x[wk] !== 'tier').every(x => x[rb] === ''), 'no read-back on banner, badge or no-warning messages');
+  const tierRows = msg.filter(x => x[wk] === 'tier' && x[col('is_practice')] === '0');
+  assert(tierRows.length > 0 && tierRows.every(x => x[rb] === 'Medium'), 'read-back kept where a tier was shown');
+  assert.equal(smishing.cleanTrialData({ readback: 'Low' }, {}).readback, null, "'Low' is not a read-back answer"); }
 console.log('records and export: funnel, suspicion, read-back, attention check; stray fields and events dropped');
 
 r = await call(P + 'survey', { body: { token: tok, session: 1, kind: 'post', data: { imc_choice: 'none', fpr_tolerance_pct: 10, dem_age: '18-44', dem_sms: 'yes' } } });

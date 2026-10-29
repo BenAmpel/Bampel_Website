@@ -180,7 +180,7 @@ One row per message (4 practice + 72 main) and per warning-comprehension screen 
 | `certainty_shown` | category | Certainty shown (C4, C5, C5p). Values: High; Moderate; Low. |
 | `cue_family` | category | Coded deception cue (alerted messages). |
 | `fp_alert` | binary | 1 = a legitimate message shown with a warning (designed false alarm). |
-| `mock_page` | category | Landing page the link opens. Values: signin; payment; delivery; reward; verify. |
+| `mock_page` | category | Landing page the link opens. Values: signin; payment; delivery; track; reward; verify. |
 | `visited` | binary | Funnel stage 1: tapped the link. |
 | `engaged` | binary | Funnel stage 2: focused or typed in a field, or pressed the page button (PRIMARY outcome on smishing messages). |
 | `disclosed` | binary | Funnel stage 3: pressed the page button. |
@@ -194,7 +194,7 @@ One row per message (4 practice + 72 main) and per warning-comprehension screen 
 | `back_to_message` | binary | Went back from the page to the message. |
 | `field_input_count` | integer | Input events in the decoy fields (counts only; the text is never read). |
 | `suspicion_prob` | number | Scam-likelihood rating after the decision, 0-1. |
-| `tier_readback` | category | Read-back answer. Values: Low; Medium; Severe; No warning shown. |
+| `tier_readback` | category | Read-back answer, asked only when a tier warning was shown (C4, C5, C5'). Severe = the participant chose "Likely scam"; Medium = "Review recommended". Values: Severe; Medium; Not sure. |
 | `tier_readback_correct` | binary | Read-back matched what was shown (blank where not asked or not applicable). |
 | `timeout` | binary | No action within the time limit. |
 | `browser_back` | integer | Browser back presses during the message (trapped). |

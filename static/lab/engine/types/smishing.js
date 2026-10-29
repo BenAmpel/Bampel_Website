@@ -8,19 +8,34 @@
   'use strict';
   var css = document.createElement('link'); css.rel = 'stylesheet'; css.href = '/lab/engine/types/smishing.css'; document.head.appendChild(css);
 
-  var comp = null, att1 = null, backCount = 0;
+  var comp = null, att1 = null, backCount = 0, shown = {};
   var PAGES = {
     // No password-type input: browsers autofill saved passwords into password fields whatever autocomplete says, which would
     // put a participant's real password on the page and fire input events nobody typed. The field is masked with CSS.
     signin: { title: 'Sign in to continue', fields: [['Username', 'text'], ['Password', 'masked']], button: 'Sign in' },
     payment: { title: 'Complete your payment', fields: [['Name on card', 'text'], ['Card number', 'text'], ['Expiry (MM/YY)', 'text']], button: 'Pay now' },
     delivery: { title: 'Update delivery details', fields: [['Full name', 'text'], ['ZIP code', 'text']], button: 'Reschedule delivery' },
+    track: { title: 'Track your package', fields: [['ZIP code', 'text']], button: 'Track' },
     reward: { title: 'Claim your reward', fields: [['Email', 'text'], ['Phone number', 'text']], button: 'Claim' },
     verify: { title: 'Verify your account', fields: [['Account ID', 'text'], ['Verification code', 'text']], button: 'Verify' }
   };
-  var READBACK = ['Low', 'Medium', 'Severe', 'No warning shown'];
+  // Tier read-back: the headings as displayed; the stored value is the tier (or 'Not sure').
+  var READBACK = [['Severe', 'readback_severe'], ['Medium', 'readback_medium'], ['Not sure', 'readback_unsure']];
   function cfg(content) { return (content && content.smishing) || { trialSeconds: 90, reminderSeconds: 60, comprehension: [] }; }
   function bigEnough() { return window.innerWidth >= 1024 && window.innerHeight >= 700; }
+
+  // The plan mixes 4 practice messages, 72 messages and 5 warning-question screens; each kind is counted on its own,
+  // so the attention check and the follow-up screens never share a message number.
+  function parts(plan) {
+    var ts = plan.trials || [];
+    return { practice: ts.filter(function (x) { return x.practice; }), main: ts.filter(function (x) { return !x.practice && x.kind !== 'comp'; }), comp: ts.filter(function (x) { return x.kind === 'comp'; }) };
+  }
+  function progressText(trial, plan, ui) {
+    var pp = parts(plan), pos = function (list) { for (var i = 0; i < list.length; i++) if (list[i].index === trial.index) return i + 1; return 0; };
+    if (trial.kind === 'comp') return ui.T('sm_progress_comp', { i: pos(pp.comp), n: pp.comp.length });
+    if (trial.practice) return ui.T('sm_progress_practice', { i: pos(pp.practice), n: pp.practice.length });
+    return ui.T('sm_progress_main', { i: pos(pp.main), n: pp.main.length });
+  }
 
   // Warnings (AGENT_BUILD_SPEC s6.2, s6.5): icon plus text, never color alone; the slot keeps one height in every condition.
   function warningHtml(w, ui) {
@@ -53,8 +68,17 @@
         return document.getElementById('sm-recheck').addEventListener('click', step);
       }
       if (info.index === 0 && !comp && (c.comprehension || []).length) return quiz(1);
+      var pp = parts(info.plan);
+      if (pp.main.length && info.index === pp.main[0].index && pp.practice.length && !shown.practice) return interstitial('practice', 'sm_practice_done_title', 'practice_done_body');
+      if (pp.comp.length && info.index === pp.comp[0].index && !shown.comp) return interstitial('comp', 'sm_comp_intro_title', 'sm_comp_intro_body');
       if (info.trial.att1Before && att1 == null) return attention();
+      ui.setProgress(progressText(info.trial, info.plan, ui));
       go();
+    }
+    function interstitial(key, title, body) {
+      ui.setProgress('');
+      ui.show('<h1>' + Th(title) + '</h1>' + Tp(body) + '<div class="actions"><button id="sm-inter-go">' + Th('continue_button') + '</button></div>');
+      document.getElementById('sm-inter-go').addEventListener('click', function () { shown[key] = true; step(); });
     }
     function quiz(attempt) {
       var qs = c.comprehension;
@@ -78,13 +102,14 @@
       });
     }
     function attention() {
+      ui.setProgress(T('sm_progress_check'));
       ui.show('<h1>Quick check</h1>' + ui.vas('sm_att1', Th('att1_text')) +
         '<div id="sm-attmsg"></div><div class="actions"><button id="sm-att-go">' + Th('next_button') + '</button></div>');
       var val = null;
       ui.wire(ui.stage, function (n, v) { if (n === 'sm_att1') val = v; });
       document.getElementById('sm-att-go').addEventListener('click', function () {
         if (val == null) { document.getElementById('sm-attmsg').innerHTML = ui.errorBox(T('probe_needed')); return; }
-        att1 = val; go();
+        att1 = val; step();   // step() restores the message's progress line, then starts it
       });
     }
     step();
@@ -138,7 +163,7 @@
     function messageView() {
       screen.innerHTML = '<div class="sm-sender">' + Th('sender') + '</div><div class="sm-slot" aria-live="polite">' + warningHtml(t.warning, ui) + '</div>' +
         '<div class="sm-bubble" data-trace="message">' + bubbleHtml(t, ui) + '</div>' +
-        (sealed ? '' : '<div class="sm-actions"><button type="button" class="secondary" id="sm-ignore" data-trace="ignore">' + Th('ignore_button') + '</button></div>');
+        (sealed ? '' : '<div class="sm-actions"><button type="button" class="secondary" id="sm-ignore" data-trace="ignore">' + Th(t.link ? 'ignore_button' : 'done_button') + '</button></div>');
       var link = screen.querySelector('.sm-link');
       if (link && !sealed) {
         var open = function () { log('link_tap'); pageView(); };
@@ -176,11 +201,11 @@
       sealed = true; timers.forEach(clearTimeout);
       document.getElementById('sm-reminder').hidden = true;
       clearFields(); messageView();
-      var askReadback = t.warning && t.warning.kind !== 'none';
+      var askReadback = !!(t.warning && t.warning.kind === 'tier');
       side.insertAdjacentHTML('beforeend', '<div class="sm-qs">' + ui.vas('sm_probe', Th('probe_q')) +
         '<div class="sm-ends"><span>' + Th('probe_lo') + '</span><span>' + Th('probe_hi') + '</span></div>' +
         (askReadback ? '<fieldset class="q-group"><legend class="q">' + Th('readback_q') + '</legend>' + READBACK.map(function (o, j) {
-          return '<label class="option" for="sm-rb' + j + '"><input type="radio" name="sm_readback" id="sm-rb' + j + '" value="' + esc(o) + '"><span>' + esc(o) + '</span></label>';
+          return '<label class="option" for="sm-rb' + j + '"><input type="radio" name="sm_readback" id="sm-rb' + j + '" value="' + esc(o[0]) + '"><span>' + Th(o[1]) + '</span></label>';
         }).join('') + '</fieldset>' : '') + '<div id="sm-qmsg"></div><div class="actions"><button id="sm-next">' + Th('next_button') + '</button></div></div>');
       ui.wire(side, function (n, v) { if (n === 'sm_probe') { probe = v; log('probe'); } });
       side.querySelectorAll('input[name="sm_readback"]').forEach(function (r) { r.addEventListener('change', function () { readback = r.value; log('readback'); }); });
@@ -191,7 +216,7 @@
         if (askReadback && readback == null) { msg.innerHTML = ui.errorBox(T('required_prompt')); return; }
         log('next'); next.disabled = true;
         window.removeEventListener('popstate', onPop);
-        var fields = { events: ev, probe: probe, readback: askReadback ? readback : 'No warning shown', timedOut: timedOut, fieldInputs: fieldInputs, browserBack: backCount };
+        var fields = { events: ev, probe: probe, readback: askReadback ? readback : null, timedOut: timedOut, fieldInputs: fieldInputs, browserBack: backCount };
         Object.keys(extra).forEach(function (k) { if (extra[k] != null) fields[k] = extra[k]; });
         backCount = 0;
         ctx.submit(fields, function (err) { next.disabled = false; window.addEventListener('popstate', onPop); msg.innerHTML = ui.errorBox(err); });
@@ -207,8 +232,9 @@
     // The engine shows instr_intro above these.
     instructions: function (p, ui) { return ui.Tp('instr_task') + ui.Tp('instr_safe') + ui.Tp('instr_practice'); },
     beforeTrial: beforeTrial,
+    progressText: progressText,
     runTrial: runTrial,
     // For tests (tests/lab/smishing.test.mjs).
-    _internals: { warningHtml: warningHtml, PAGES: PAGES, reset: function () { comp = null; att1 = null; backCount = 0; } }
+    _internals: { warningHtml: warningHtml, PAGES: PAGES, reset: function () { comp = null; att1 = null; backCount = 0; shown = {}; } }
   });
 })();

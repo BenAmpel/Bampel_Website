@@ -18,8 +18,10 @@ export const parseCell = id => { const m = /^([yo])-([AB])([1-6])$/.exec(id || '
 export const conditionFor = (group, arm) => CONDS[(group - 1 + arm - 1) % 6];
 const TOKEN = 'hxxps://[link-neutralized].example';
 const EVENTS = ['render', 'link_tap', 'mock_view', 'field_focus', 'field_input', 'submit', 'ignore', 'back_to_message', 'probe', 'readback', 'next', 'timeout', 'browser_back'];
-const READBACK = ['Low', 'Medium', 'Severe', 'No warning shown'];
-const PAGES = ['signin', 'payment', 'delivery', 'reward', 'verify'];
+// Tier read-back (07_measures (b)): asked only when a tier warning was shown, offering the headings as displayed
+// (stored as the tier: 'Severe' = "Likely scam", 'Medium' = "Review recommended") or 'Not sure'.
+const READBACK = ['Severe', 'Medium', 'Not sure'];
+const PAGES = ['signin', 'payment', 'delivery', 'track', 'reward', 'verify'];
 export const PRACTICE_N = 4;
 // Warning-comprehension battery (07_measures_instrument.md (c)): after the 72 messages, one screen per warning-bearing
 // condition (C2-C5p, seeded order), each re-showing that condition's warning; 7-point agreement; COMP4 reverse-scored.
@@ -74,8 +76,8 @@ export function warningFor(cond, item) {
 const F = (group, key, label, def) => ({ group, key, label, def });
 const textFields = [
   F('Sign-in', 'login_title', 'Page title', 'Text message study'),
-  F('Instructions', 'instr_intro', 'Opening', 'You will see about 72 text messages, one at a time, on a phone screen like the one you use every day. Some may come with a short on-screen safety warning.'),
-  F('Instructions', 'instr_task', 'What to do', 'For each message, do what you would really do if it arrived on your own phone: tap the link if you would open it, or press "Ignore this message". If you open a link, you will see the page it leads to; use it as you normally would, or go back. Then rate how likely the message is a scam.'),
+  F('Instructions', 'instr_intro', 'Opening', 'You will see 72 text messages, one at a time, in a picture of a phone on your computer screen. Some may come with a short on-screen safety warning.'),
+  F('Instructions', 'instr_task', 'What to do', 'For each message, do what you would really do if it arrived on your own phone: tap the link if you would open it, or press "Ignore this message" ("Done with this message" when there is no link). If you open a link, you will see the page it leads to; use it as you normally would, or go back. Then rate how likely the message is a scam.'),
   F('Instructions', 'instr_safe', 'Safety note', 'Nothing here is real: links open practice pages inside this study, and nothing you type is saved or sent anywhere.'),
   F('Instructions', 'instr_practice', 'Practice notice', 'You will start with 4 practice messages that do not count.'),
   F('Comprehension', 'comp_title', 'Title', 'Before you start'),
@@ -95,14 +97,24 @@ const textFields = [
   F('Questions', 'probe_lo', 'Left end', 'Definitely not a scam (0)'),
   F('Questions', 'probe_hi', 'Right end', 'Definitely a scam (100)'),
   F('Questions', 'probe_needed', 'Reminder', 'Move the slider to give your answer.'),
-  F('Questions', 'readback_q', 'Tier read-back question', 'What risk level did the warning on this message show?'),
+  F('Questions', 'readback_q', 'Tier read-back question', 'Which heading did the warning on this message show?'),
+  F('Questions', 'readback_severe', 'Read-back option, Severe tier', 'Likely scam'),
+  F('Questions', 'readback_medium', 'Read-back option, Medium tier', 'Review recommended'),
+  F('Questions', 'readback_unsure', 'Read-back option, not sure', 'Not sure'),
+  F('Phone', 'done_button', 'Button on a message with no link', 'Done with this message'),
   F('Questions', 'next_button', 'Next button', 'Next'),
   F('Timing', 'timeout_reminder', 'Reminder before the time limit', 'Please choose what you would do with this message.'),
   F('Attention', 'att1_text', 'Attention check after message 36', 'To show you are reading carefully, please move the slider to exactly 25.'),
-  F('Item screen', 'progress_trial', 'Progress line ({i}, {n})', 'Message {i} of {n}'),
-  F('Item screen', 'progress_practice', 'Progress line, practice', 'Practice message'),
+  F('Item screen', 'sm_progress_main', 'Progress line, messages ({i}, {n})', 'Message {i} of {n}'),
+  F('Item screen', 'sm_progress_practice', 'Progress line, practice ({i}, {n})', 'Practice message {i} of {n}'),
+  F('Item screen', 'sm_progress_comp', 'Progress line, warning questions ({i}, {n})', 'Warning questions {i} of {n}'),
+  F('Item screen', 'sm_progress_check', 'Progress line, attention check', 'Quick check'),
+  F('Practice', 'sm_practice_done_title', 'After practice: title', 'Practice finished'),
   F('Practice', 'practice_done_body', 'After practice', 'The real messages start now. They work the same way as the practice messages.'),
-  F('Device', 'small_window', 'Shown when the window is too small', 'This study needs a desktop or laptop window at least 1024 by 700 pixels. Please make the window larger to continue.')
+  F('Practice', 'sm_comp_intro_title', 'Before the warning questions: title', 'Questions about the warnings'),
+  F('Practice', 'sm_comp_intro_body', 'Before the warning questions', 'That was the last message. Next are 5 short screens, each showing a different style of warning you may have seen, with a few questions about it.'),
+  F('Device', 'small_window', 'Shown when the window is too small', 'This study needs a desktop or laptop window at least 1024 by 700 pixels. Please make the window larger to continue.'),
+  F('Consent', 'consent_draft_banner', 'Banner while the consent is not marked IRB-approved', 'Research-team pilot. This consent text is a draft awaiting IRB approval of an amendment; answers given now are test data and are not analyzed.')
 ];
 
 // The approved consent (H26762, main study v1.3, approved 09/01/2026), word for word. It names Prolific and QuestionPro:
@@ -125,8 +137,8 @@ const CONSENT = [
 const DEBRIEF = 'Thank you for taking part. Now that you are finished, we want to explain a few details we held back earlier, and why.\n\n' +
   'What we held back, and why. Some of the text messages you saw were realistic examples of "smishing": scam text messages designed to trick people. If you chose to tap a link or respond, any page you saw was a simulated, fake landing page made only for this study. We did not tell you this at the start on purpose. If we had told you which messages were scams, or that we were measuring how people respond to scams, it would have changed how you answered. This is a common and approved practice in research, called incomplete disclosure.\n\n' +
   'Please know: nothing was at risk. The scam messages were simulated for research and could not harm you. No real website links were ever opened. We never collected real passwords, account numbers, or personal information: anything typed into a fake page was not transmitted, logged, or saved anywhere. There is nothing you need to do, and your responses say nothing about you as a person.\n\n' +
-  'What we were really studying. We are testing whether different kinds of on-screen safety warnings help people notice and avoid scam texts. Some warnings were plain ("this might be a scam"). Others gave more detail, such as a risk level, how certain the warning was, or the scam "trick" the message used. The warnings were set up by the research team, not produced by a tool checking the messages as you saw them: every scam message showed a warning, and about one in three of the legitimate messages also showed a warning on purpose, so that we could study false alarms. The risk levels, certainty levels and scam "tricks" shown were chosen by the researchers in advance.\n\n' +
-  'You can withdraw your data. Contact Benjamin M. Ampel at bampel@gsu.edu with your Prolific ID; there is no penalty and no effect on your payment.\n\n' +
+  'What we were really studying. We are testing whether different kinds of on-screen safety warnings help people notice and avoid scam texts. Some warnings were plain ("this might be a scam"). Others gave more detail, such as a risk level, how certain the warning was, or the scam "trick" the message used. The warnings were set up by the research team, not produced by a tool checking the messages as you saw them. About one message in six, scam or not, showed no warning at all, so that we could compare. Among the others, every scam message showed a warning, and some legitimate messages also showed a warning on purpose, so that we could study false alarms. The risk levels, certainty levels and scam "tricks" shown were chosen by the researchers in advance.\n\n' +
+  'You can withdraw your data. Write to the study contact below with your Prolific ID; there is no penalty and no effect on your payment.\n\n' +
   'Tips for spotting real smishing. Be cautious with unexpected texts that create urgency. Do not tap links in texts from unknown senders; go to the company\'s official app or website instead. Never share passwords, codes, or account numbers by text. Watch for misspellings, strange web addresses, or numbers you do not recognize. Real warning tools also make mistakes: a warning, or the lack of one, is a prompt to check, not a final answer. In the US you can forward scam texts to 7726 (SPAM) and report them at reportfraud.ftc.gov.\n\n' +
   'Questions: Benjamin M. Ampel, bampel@gsu.edu. Your rights as a participant: Georgia State University IRB, 404-413-3500 or irb@gsu.edu.';
 
@@ -189,7 +201,7 @@ export default {
       bank: BANK,
       survey: { pre: [], post: POST },
       debrief: { title: 'About this study', body: DEBRIEF },
-      text: { screenout_body: 'Thank you for your time. Please return to Prolific using the button below.' }
+      text: { screenout_body: 'Thank you for your time. This study has ended for you.' }
     };
   },
 
@@ -319,7 +331,7 @@ export default {
     const d = r.data || {}, ev = Array.isArray(d.events) ? d.events : [], at = name => { const x = ev.find(e => e.e === name); return x ? x.ms : ''; };
     const visit = ev.some(e => e.e === 'link_tap'), engage = ev.some(e => e.e === 'field_focus' || e.e === 'field_input' || e.e === 'submit'), disclose = ev.some(e => e.e === 'submit');
     const first = ev.find(e => e.e === 'link_tap' || e.e === 'ignore'), tierShown = r.warningKind === 'tier';
-    const want = tierShown ? r.tier : r.warningKind === 'none' ? 'No warning shown' : null;
+    const want = tierShown ? r.tier : null;
     return {
       row_kind: 'message', ...blanks,
       stimulus_id: r.stimulusId, true_label: r.trueLabel === 'smishing' ? 1 : 0, condition: r.cond, is_practice: r.practice ? 1 : 0,
@@ -331,7 +343,7 @@ export default {
       decision: first ? (first.e === 'link_tap' ? 'visit' : 'ignore') : (d.timedOut ? 'no_action' : ''), rt_ms: first ? first.ms : '',
       link_tap_ms: at('link_tap'), field_focus_ms: at('field_focus'), submit_ms: at('submit'), back_to_message: Number(ev.some(e => e.e === 'back_to_message')),
       field_input_count: d.fieldInputs ?? 0, suspicion_prob: d.probe == null ? '' : (d.probe / 100).toFixed(2),
-      tier_readback: d.readback || '', tier_readback_correct: want && d.readback ? Number(d.readback === want) : '',
+      tier_readback: tierShown ? (d.readback || '') : '', tier_readback_correct: want && d.readback ? Number(d.readback === want) : '',
       timeout: d.timedOut ? 1 : 0, browser_back: d.browserBack || 0, fp_exposure_count: r.fpExposure ?? '',
       att1_value: d.att1 ?? '', att1_pass: d.att1 == null ? '' : Number(Math.abs(d.att1 - 25) <= 2),
       comprehension_attempts: d.comprehension ? d.comprehension.attempts : '', comprehension_passed: d.comprehension ? Number(d.comprehension.passed) : '',
@@ -345,7 +357,7 @@ export default {
     const tap = rand() < 0.4, ev = [{ e: 'render', ms: 0 }];
     if (tap) { ev.push({ e: 'link_tap', ms: 1500 }, { e: 'mock_view', ms: 1520 }); if (rand() < 0.5) ev.push({ e: 'field_focus', ms: 2500 }, { e: 'field_input', ms: 2600, count: 3 }); ev.push({ e: 'back_to_message', ms: 3000 }); }
     ev.push({ e: 'ignore', ms: tap ? 3200 : 1800 }, { e: 'probe', ms: 4000 }, { e: 'next', ms: 5000 });
-    return { events: ev, probe: Math.round(rand() * 100), readback: trial.warning && trial.warning.kind === 'tier' ? trial.warning.tier : 'No warning shown',
+    return { events: ev, probe: Math.round(rand() * 100), ...(trial.warning && trial.warning.kind === 'tier' ? { readback: trial.warning.tier } : {}),
       fieldInputs: ev.filter(e => e.e === 'field_input').length * 3, selfTest: true, ...(trial.att1Before ? { att1: 25 } : {}),
       ...(trial.index === 0 ? { comprehension: { attempts: 1, passed: true, wrong: 0 } } : {}) };
   },

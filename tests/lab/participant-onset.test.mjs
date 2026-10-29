@@ -149,7 +149,11 @@ const frame = ts => { const f = frames.shift(); assert(f, 'a frame was requested
   assert(!/id="out"/.test(stage.innerHTML), 'no Sign out for someone who never signed in');
   replies.handoff = { outcome: 'complete', code: 'C0DE1234', url: 'https://app.prolific.com/submissions/complete?cc=C0DE1234', panel: 'Prolific' };
   I.showFinished({ finished: true, total: 1 });
-  assert(/click the button below to return to Prolific/i.test(stage.innerHTML) && !/You can close this page/.test(stage.innerHTML), 'told to use the button, not to close the page');
+  // Until the hand-off arrives, the page promises neither a button nor a code (pilot 2026-10-29: a participant whose
+  // hand-off never came was told to click a button that did not exist).
+  assert(!/button below|copy the code|copy the one/i.test(stage.innerHTML) && !/You can close this page/.test(stage.innerHTML), 'no button or code promised before the hand-off');
+  for (let i = 0; i < 5; i++) await tick();
+  assert(/click the button below to return to Prolific/i.test(els.finbody.innerHTML) && !/You can close this page/.test(stage.innerHTML), 'told to use the button, not to close the page');
   assert(!/id="out"/.test(stage.innerHTML));
   for (let i = 0; i < 5; i++) await tick();
   assert(/C0DE1234/.test(els.handoff.innerHTML) && /Return to Prolific/.test(els.handoff.innerHTML), 'the code stays on the page above the button');
@@ -157,6 +161,10 @@ const frame = ts => { const f = frames.shift(); assert(f, 'a frame was requested
   I.showFinished({ finished: true, total: 1 });
   for (let i = 0; i < 5; i++) await tick();
   assert(/Copy the code below and enter it in Amazon MTurk/.test(els.finbody.innerHTML), 'a panel without a return address: copy the code');
+  replies.handoff = { outcome: 'complete', code: '', url: '', panel: 'Prolific' };
+  I.showFinished({ finished: true, total: 1 });
+  for (let i = 0; i < 5; i++) await tick();
+  assert(/no code to enter/.test(els.finbody.innerHTML) && !/button below/i.test(els.finbody.innerHTML), 'neither a return address nor a code: no button or code promised');
   // someone who signed in with an email or code keeps the usual text and Sign out
   kept.delete('lab_panel_xyz');
   I.showStatus({ available: true, nextSession: 1, total: 1, completed: 0 });

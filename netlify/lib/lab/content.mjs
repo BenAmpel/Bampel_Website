@@ -98,7 +98,10 @@ export const ENGINE_TEXT = [
   ['Online panel', 'returned_body', 'After stopping: text', 'Thank you for your time. You can close this page.'],
   ['Online panel', 'start_body_panel', 'Before starting, panel participants ({minutes}, {panel})', 'This session takes about {minutes} minutes. Please complete it in one sitting, somewhere you will not be interrupted.\n\nIf you get disconnected, open the study link in {panel} again and you will pick up where you left off.'],
   ['Online panel', 'finished_body_panel', 'Last session, panel with a return link ({panel})', 'You have completed all sessions of the study. Click the button below to return to {panel}, so your participation is recorded. If {panel} asks for a code, copy the one shown here.'],
-  ['Online panel', 'finished_body_panel_code', 'Last session, panel without a return link ({panel})', 'You have completed all sessions of the study. Copy the code below and enter it in {panel}, so your participation is recorded.']
+  ['Online panel', 'finished_body_panel_code', 'Last session, panel without a return link ({panel})', 'You have completed all sessions of the study. Copy the code below and enter it in {panel}, so your participation is recorded.'],
+  ['Online panel', 'finished_body_panel_wait', 'Last session, panel, until the return link or code arrives ({panel})', 'You have completed all sessions of the study. How to record your participation in {panel} appears below in a moment.'],
+  ['Online panel', 'finished_body_panel_none', 'Last session, panel with neither a return link nor a code ({panel})', 'You have completed all sessions of the study. Thank you. There is no code to enter: the research team records your participation.'],
+  ['Consent', 'consent_draft_banner', 'Banner while the consent is not marked IRB-approved', 'Draft consent text, pending IRB approval. Do not enroll participants with this version.']
 ].map(([group, key, label, def]) => ({ group, key, label, def }));
 
 export function textFieldsFor(type) {

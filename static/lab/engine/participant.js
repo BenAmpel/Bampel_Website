@@ -68,7 +68,10 @@
   var TEXT_DEFAULTS = {
     start_body_panel: 'This session takes about {minutes} minutes. Please complete it in one sitting, somewhere you will not be interrupted.\n\nIf you get disconnected, open the study link in {panel} again and you will pick up where you left off.',
     finished_body_panel: 'You have completed all sessions of the study. Click the button below to return to {panel}, so your participation is recorded. If {panel} asks for a code, copy the one shown here.',
-    finished_body_panel_code: 'You have completed all sessions of the study. Copy the code below and enter it in {panel}, so your participation is recorded.'
+    finished_body_panel_code: 'You have completed all sessions of the study. Copy the code below and enter it in {panel}, so your participation is recorded.',
+    finished_body_panel_wait: 'You have completed all sessions of the study. How to record your participation in {panel} appears below in a moment.',
+    finished_body_panel_none: 'You have completed all sessions of the study. Thank you. There is no code to enter: the research team records your participation.',
+    consent_draft_banner: 'Draft consent text, pending IRB approval. Do not enroll participants with this version.'
   };
   function T(key, vars) {
     var t = (S.content && S.content.text && S.content.text[key]) || TEXT_DEFAULTS[key] || '';
@@ -437,7 +440,7 @@
   function showConsent() {
     progress.textContent = '';
     var c = S.content.consent, rec = c.recording && c.recording.enabled ? c.recording : null;
-    show((c.approved ? '' : '<div class="banner" role="note">Draft consent text, pending IRB approval. Do not enroll participants with this version.</div>') +
+    show((c.approved ? '' : '<div class="banner" role="note">' + Th('consent_draft_banner') + '</div>') +
       '<h1>' + Th('consent_title') + '</h1>' + c.paragraphs.map(function (x) { return '<p>' + para(x) + '</p>'; }).join('') +
       '<label class="option agree" for="agree"><input type="checkbox" id="agree"><span>' + esc(c.agreeLabel) + '</span></label>' +
       // Studies that record voice ask separately, so saying no to recording still lets people take part (they type instead).
@@ -504,13 +507,13 @@
     var db = S.content.debrief;   // a study's debrief text, and (for types that have one) the participant's own record
     var mi = document.getElementById('mm-myinfo'); if (mi && mi.parentNode) mi.parentNode.removeChild(mi);
     show('<h1>' + Th('finished_title') + '</h1>' + (st && st.total && !S.content.continuous ? tracker(st.total, st.total, 0) : '') +
-      '<div id="finbody">' + (panel ? Tp('finished_body_panel', { panel: panelName() }) : Tp('finished_body')) + '</div><div id="handoff" aria-live="polite"></div>' +
+      '<div id="finbody">' + (panel ? Tp('finished_body_panel_wait', { panel: panelName() }) : Tp('finished_body')) + '</div><div id="handoff" aria-live="polite"></div>' +
       (db ? '<section class="debrief"><h2>' + esc(db.title) + '</h2>' + String(db.body).split(/\n\s*\n/).map(function (x) { return '<p>' + linkify(esc(x.trim())) + '</p>'; }).join('') + '</section><div id="debrief-own"></div>' : '') +
       (out ? '<div class="actions">' + out + '</div>' : ''));
     wireSignOut();
     handoff(null, panel ? function (r) {
       var body = document.getElementById('finbody'), name = r.panel || panelName();
-      if (body) body.innerHTML = r.url ? Tp('finished_body_panel', { panel: name }) : r.code ? Tp('finished_body_panel_code', { panel: name }) : Tp('finished_body');
+      if (body) body.innerHTML = r.url ? Tp('finished_body_panel', { panel: name }) : r.code ? Tp('finished_body_panel_code', { panel: name }) : Tp('finished_body_panel_none', { panel: name });
     } : null);
     if (db && S.type && S.type.debrief && S.token) S.type.debrief(ui, document.getElementById('debrief-own'));
   }
@@ -522,7 +525,13 @@
     var box = document.getElementById('handoff');
     if (!box || !S.token) return;
     (got ? Promise.resolve(got) : api('handoff', { token: S.token })).then(function (r) {
-      if (onReady && r && !r.error) onReady(r);
+      // A failed request must not leave the page promising a button or code that never comes: say so and offer a retry.
+      if (!r || r.error) {
+        box.innerHTML = errorBox(ERR[(r && r.error)] || ERR.server_error) + '<div class="actions"><button type="button" class="secondary" id="hretry">Try again</button></div>';
+        document.getElementById('hretry').addEventListener('click', function () { handoff(null, onReady); });
+        return;
+      }
+      if (onReady) onReady(r);
       if (!r || r.error || !r.outcome || (!r.code && !r.url)) return;
       var where = r.panel || 'the study site';
       box.innerHTML = (r.code ? '<p>' + Th('handoff_code') + '</p><p class="handoff-code"><code id="hcode">' + esc(r.code) + '</code> <button type="button" class="secondary small" id="hcopy">Copy code</button></p>' : '') +
@@ -828,7 +837,9 @@
   function runTrial(trial, index) {
     var p = S.plan, isPractice = index === 'practice';
     var doneCount = p.trials.filter(function (x) { return x.done; }).length;
-    progress.textContent = isPractice ? T('progress_practice') : T('progress_trial', { session: p.session, i: doneCount + 1, n: p.total });
+    // A type whose trial list mixes kinds (practice, main, follow-up screens) words its own progress line.
+    var own = S.type.progressText ? S.type.progressText(trial, p, ui) : null;
+    progress.textContent = own != null ? own : isPractice ? T('progress_practice') : T('progress_trial', { session: p.session, i: doneCount + 1, n: p.total });
     if (S.type.beforeTrial) {
       var checks = (S.soundChecks && S.soundChecks[p.session]) || {};
       return S.type.beforeTrial({ trial: trial, index: index, isPractice: isPractice, plan: p, content: S.content, heard: !!checks.heard, micHeard: !!checks.mic }, ui, function () { startTrial(trial, index); });
@@ -986,7 +997,7 @@
   }
 
   // ---------- what study types get ----------
-  var ui = { esc: esc, T: T, Th: Th, Tp: Tp, show: show, errorBox: errorBox, choiceGroup: choiceGroup, scaleGroup: scaleGroup, vas: vas, questionHtml: questionHtml, questionsHtml: questionsHtml, fillPipes: fillPipes,
+  var ui = { esc: esc, T: T, Th: Th, Tp: Tp, show: show, setProgress: function (text) { progress.textContent = text || ''; }, errorBox: errorBox, choiceGroup: choiceGroup, scaleGroup: scaleGroup, vas: vas, questionHtml: questionHtml, questionsHtml: questionsHtml, fillPipes: fillPipes,
     wire: wire, flag: flag, blank: blank, questionSet: questionSet, nextId: nextId, reduceMotion: reduceMotion, stage: stage,
     // Study types with their own server routes (for example the economic game's polling) call them with the sign-in token.
     call: function (route, body) { return api(route, Object.assign({ token: S.token }, body)); } };
