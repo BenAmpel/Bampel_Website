@@ -41,7 +41,7 @@ const word = (n) => WORDS[n] || String(n);
 const NR = D.roles.length;
 const REVIEWED = fmtDate(D.updated);
 
-const head = (o) => baseHead({ ...o, css: [`/ccair/assets/pathways/pathways.css?v=${ASSET_V}-gsu1-photos2`] });
+const head = (o) => baseHead({ ...o, css: [`/ccair/assets/pathways/pathways.css?v=${ASSET_V}-gsu1-tap1`] });
 
 function top(current) {
   return baseTop([
