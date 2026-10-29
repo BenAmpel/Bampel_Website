@@ -149,6 +149,11 @@
   }
   reset();
 
+  // The quiz's only live region: a persistent, visually hidden role="status" line outside #quiz. #quiz itself is rebuilt
+  // with innerHTML on every screen and is deliberately not live; questions are read by moving focus to their .qtext.
+  var statusEl = document.getElementById('pf-status');
+  function setStatus(t) { if (statusEl) statusEl.textContent = t; }
+
   function track(name, params) { try { if (typeof window.gtag === 'function') window.gtag('event', name, params || {}); } catch (e) {} }
 
   /* Share code: v2-<42 digits A><14 digits B><5 digits C> */
@@ -319,7 +324,10 @@
     try { history.replaceState(null, '', '#r=' + encode()); } catch (e) {}
     if (reduce) return results(r, true);
     // A short "matching" moment: role names flick past while the scan line sweeps. Not a live region: the names change
-    // every 110 ms, and #pf-status announces the result once it is on screen.
+    // every 110 ms. The screen is silent to a screen reader (the flick and bar are aria-hidden, and focus left with the
+    // last answer), so #pf-status, which sits outside #quiz and is never rebuilt, says once what is happening; results()
+    // then replaces that text with the result.
+    setStatus('Matching your answers to ' + ROLES.length + ' roles.');
     mount.innerHTML = '<div class="matching"><div class="scan" aria-hidden="true"></div><p class="part">Matching you to ' + ROLES.length + ' roles</p>' +
       '<p class="qtext flick" aria-hidden="true">&nbsp;</p><div class="interlude-bar" aria-hidden="true"><i></i></div></div>';
     var f = mount.querySelector('.flick'), names = ROLES.map(function (x) { return x.name; }), n = 0;
@@ -405,8 +413,7 @@
       // Move focus to the results heading (the questions' DOM was replaced, so focus would fall to <body>) and say what
       // is there. Only the status line is a live region; the results themselves are not.
       if (rh) rh.focus({ preventScroll: true });
-      var live = document.getElementById('pf-status');
-      if (live) live.textContent = 'Your results are ready. Top match: ' + BY[top[0]].name + '. Then ' + BY[top[1]].name + ' and ' + BY[top[2]].name + '.';
+      setStatus('Your results are ready. Top match: ' + BY[top[0]].name + '. Then ' + BY[top[1]].name + ' and ' + BY[top[2]].name + '.');
     }
     document.getElementById('pf-copy').addEventListener('click', function () {
       var url = location.origin + location.pathname + '#r=' + encode();
@@ -417,7 +424,8 @@
     document.getElementById('pf-print').addEventListener('click', function () { window.print(); });
     document.getElementById('pf-again').addEventListener('click', function () {
       try { history.replaceState(null, '', location.pathname); } catch (e) {}
-      reset(); seenPart = {}; show(0, 1);
+      // Empty the status line so the next result is announced even if it matches this one word for word.
+      reset(); seenPart = {}; setStatus(''); show(0, 1);
     });
   }
   function toast(msg) {
