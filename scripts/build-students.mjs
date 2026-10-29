@@ -439,7 +439,7 @@ function pageHtml(p, idx, main, order, modified, image, robots) {
   };
   const scripts = [`/ccair/assets/pathways/pathways.js?v=${ASSET_V}-anon3`, ...(p.slug === 'data' ? [`/ccair/assets/students/students.js?v=${ASSET_V}-2`] : [])];
   return `${baseHead({ title: p.metaTitle, ogTitle: p.title, desc: p.desc, url, ogType: 'article', image, robots, extra: feedLink,
-    css: [`/ccair/assets/pathways/pathways.css?v=${ASSET_V}-gsu1-photos2`, `/ccair/assets/students/students.css?v=${ASSET_V}-gsu1-refs`] })}
+    css: [`/ccair/assets/pathways/pathways.css?v=${ASSET_V}-gsu1-tap1`, `/ccair/assets/students/students.css?v=${ASSET_V}-gsu1-refs`] })}
 <meta property="article:modified_time" content="${modified}">
 ${ld(graph)}
 </head>

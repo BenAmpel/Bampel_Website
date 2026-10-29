@@ -47,7 +47,7 @@
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
-body { font-family: var(--sans); background: var(--bg); color: var(--text); line-height: 1.65; overflow-x: hidden; font-size: 17px; }
+body { font-family: var(--sans); background: var(--bg); color: var(--text); line-height: 1.65; font-size: 17px; }
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; text-underline-offset: 3px; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
@@ -220,6 +220,8 @@ h3 { font-size: 20px; line-height: 1.3; font-weight: 700; }
 .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px 22px; margin-top: 16px; font-size: 15px; }
 .facts dt { font: 700 11px var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
 .facts dd { color: var(--text); margin-top: 3px; }
+/* Practice links sit in a comma list, not a sentence: as inline blocks each is a full line (about 25px) tall, a 24px tap target (WCAG 2.5.8). */
+.facts dd a { display: inline-block; max-width: 100%; }
 .match .go { display: inline-block; margin-top: 16px; font-weight: 700; }
 .note { margin-top: 18px; padding: 16px 18px; border: 1px dashed var(--border); border-radius: 14px; color: var(--text2); font-size: 15px; }
 .note b { color: var(--text); }
