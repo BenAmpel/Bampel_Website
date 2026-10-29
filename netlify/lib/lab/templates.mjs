@@ -7,6 +7,7 @@
 // The sample clips and images live in static/lab/media/samples/ (made with scripts/lab-samples.sh).
 
 import { VISHING_STUDY2 } from './studies/vishing-study2.mjs';
+import { ARGOS_SMISHING } from './studies/argos-smishing.mjs';
 
 const S = '/lab/media/samples/';
 const AGREE7 = ['Strongly disagree', 'Disagree', 'Somewhat disagree', 'Neither agree nor disagree', 'Somewhat agree', 'Agree', 'Strongly agree'];
@@ -225,7 +226,8 @@ export const TEMPLATES = {
     })
   },
 
-  'vishing-study2': VISHING_STUDY2
+  'vishing-study2': VISHING_STUDY2,
+  'argos-smishing': ARGOS_SMISHING
 };
 
 // A classic interference effect to replicate (the BRM platform paper's validation study): Stroop by default; switch

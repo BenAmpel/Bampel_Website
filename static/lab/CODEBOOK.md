@@ -149,6 +149,62 @@ The full mouse path (`[x, y, ms]` points) is in the full JSON export under `reco
 
 **Recordings** (managers and owners): one audio file per call or spoken answer, named `<code>_s<session>_<item>_<call|voice>`. Recorded only with the participant's recording consent; never copied to the backup store.
 
+## Smishing warning studies (study type `smishing`)
+
+One row per message (4 practice + 72 main) and per warning-comprehension screen (5, `row_kind = comprehension`). The post-task items (`imc_choice`, `fpr_tolerance_pct`, `dem_age`, `dem_sms`) are in the surveys CSV; IMC passes when `imc_choice` is `none`. Exclusion rule (07 (f)): `attn_fail_count` = failures among ATT1, ATT2 and the IMC; exclude at 2 or more. Funnel and outcome definitions follow the study's measures instrument (07_measures_instrument.md); `engaged` on smishing messages is the primary outcome. Warnings, tiers and certainty are assigned by design (Option A), never by a live detector.
+
+| Column | Type | Meaning |
+|---|---|---|
+| `row_kind` | category | Row type: a message trial or a warning-comprehension screen. Values: message; comprehension. |
+| `comp1` | integer | Comprehension screen: "I understood what the warning was telling me" (1-7 agreement). |
+| `comp2` | integer | Comprehension screen: the warning made clear how risky the message was (1-7). |
+| `comp3` | integer | Comprehension screen: could tell why the system flagged the message (1-7). |
+| `comp4` | integer | Comprehension screen: unsure what action the warning wanted (1-7; reverse-scored in comprehension_score). |
+| `comp5` | integer | Comprehension screen: clear sense of the chance the message was a scam (1-7). |
+| `comprehension_score` | number | Mean of comp1-comp5 with comp4 reversed (8 - value); 1-7, higher = better comprehension. |
+| `att2_value` | integer | ATT2 answer, on the one comprehension screen that carries it (1-7). |
+| `att2_pass` | binary | ATT2 answered Disagree (2). |
+| `stimulus_id` | category | Message shown (bank ID). |
+| `true_label` | binary | 1 = smishing, 0 = legitimate (set by the researcher, never shown). |
+| `condition` | category | Warning condition for this message. Values: C1; C2; C3; C4; C5; C5p. |
+| `is_practice` | binary | 1 = one of the 4 practice messages (exclude from analysis). |
+| `trial_index` | integer | Position among the 72 main messages (1-72); blank for practice. |
+| `age_stratum` | category | Age stratum from the Prolific listing. Values: 18-44; 45+. |
+| `stim_block` | category | Stimulus block (72 messages). Values: A; B. |
+| `arm` | integer | Latin-square arm (1-6). |
+| `stim_group` | integer | Stimulus group within the block (1-6). |
+| `alert` | binary | 1 = the bank assigns a warning to this message (Option A: every smishing message and one third of legitimate ones). |
+| `warning_shown` | binary | 1 = a warning was drawn (alert and condition not C1). |
+| `warning_kind` | category | What was drawn. Values: none; banner; badge; tier. |
+| `tier_shown` | category | Risk level shown (C4, C5, C5p). Values: Medium; Severe. |
+| `certainty_shown` | category | Certainty shown (C4, C5, C5p). Values: High; Moderate; Low. |
+| `cue_family` | category | Coded deception cue (alerted messages). |
+| `fp_alert` | binary | 1 = a legitimate message shown with a warning (designed false alarm). |
+| `mock_page` | category | Landing page the link opens. Values: signin; payment; delivery; reward; verify. |
+| `visited` | binary | Funnel stage 1: tapped the link. |
+| `engaged` | binary | Funnel stage 2: focused or typed in a field, or pressed the page button (PRIMARY outcome on smishing messages). |
+| `disclosed` | binary | Funnel stage 3: pressed the page button. |
+| `funnel_stage` | integer | Highest funnel stage reached (0-3). |
+| `ignored` | binary | Pressed Ignore this message. |
+| `decision` | category | First action. Values: visit; ignore; no_action. |
+| `rt_ms` | ms | Time from the message appearing to the first action. |
+| `link_tap_ms` | ms | Time to the first link tap. |
+| `field_focus_ms` | ms | Time to the first field focus. |
+| `submit_ms` | ms | Time to the page button. |
+| `back_to_message` | binary | Went back from the page to the message. |
+| `field_input_count` | integer | Input events in the decoy fields (counts only; the text is never read). |
+| `suspicion_prob` | number | Scam-likelihood rating after the decision, 0-1. |
+| `tier_readback` | category | Read-back answer. Values: Low; Medium; Severe; No warning shown. |
+| `tier_readback_correct` | binary | Read-back matched what was shown (blank where not asked or not applicable). |
+| `timeout` | binary | No action within the time limit. |
+| `browser_back` | integer | Browser back presses during the message (trapped). |
+| `fp_exposure_count` | integer | This participant's designed false alarms shown (6 or 7). |
+| `att1_value` | number | Attention-check slider (only on main message 37). |
+| `att1_pass` | binary | Attention check within 25 +/- 2. |
+| `comprehension_attempts` | integer | Comprehension-check attempts (first practice message). |
+| `comprehension_passed` | binary | Comprehension check passed. |
+| `provisional_bank` | binary | 1 = recorded with the provisional stimulus bank (not for analysis). |
+
 ## Raw events CSV (one row per event)
 
 From the admin's **Raw events as CSV**. Every TraceLab event of every trial, in order.

@@ -953,7 +953,7 @@
   // the next session of a one-sitting study does not repeat the counts of the one before.
   var DQ_COUNTS = ['pastes', 'pasteChars', 'injectedChars', 'keys', 'fastKeys'], dqBase = {}, dqLoad = Math.random().toString(36).slice(2, 12) + Date.now().toString(36);
   function dqStart(session) { if (dqBase.session !== session) { dqBase = { session: session }; DQ_COUNTS.forEach(function (k) { dqBase[k] = DQ[k]; }); } }
-  function isTextBox(t) { return t && (t.tagName === 'TEXTAREA' || (t.tagName === 'INPUT' && /^(text|search|email|number|tel|url)?$/.test(t.type || ''))) && !t.classList.contains('hp-input'); }
+  function isTextBox(t) { return t && !(t.closest && t.closest('[data-no-capture]')) && (t.tagName === 'TEXTAREA' || (t.tagName === 'INPUT' && /^(text|search|email|number|tel|url)?$/.test(t.type || ''))) && !t.classList.contains('hp-input'); }
   if (document.addEventListener) {
     document.addEventListener('keydown', function (e) {
       if (!isTextBox(e.target) || e.key == null || (e.key.length !== 1 && e.key !== 'Backspace')) return;

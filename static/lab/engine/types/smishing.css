@@ -1,0 +1,52 @@
+/* Study type "smishing": phone frame, warning slot, mock page, questions (AGENT_BUILD_SPEC s6.1).
+   Fixed stimulus colors (not the site theme), system fonts, contrast at least 4.5:1, warnings never by color alone. */
+/* The neutral gray sits behind the phone only; the questions beside it use the site theme. */
+.sm-wrap { display: flex; gap: 32px; align-items: flex-start; justify-content: center; }
+.sm-phone { box-shadow: 0 0 0 24px #e9eaec; margin: 24px; }
+.sm-phone { width: 375px; height: 720px; flex: 0 0 375px; background: #fff; color: #111; border: 10px solid #1f2328; border-radius: 36px; overflow: hidden; display: flex; flex-direction: column;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 16px; }
+.sm-head { padding: 14px 16px 10px; font-weight: 600; text-align: center; border-bottom: 1px solid #d0d4d9; }
+.sm-screen { flex: 1; overflow-y: auto; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.sm-sender { color: #4a5059; font-size: 14px; }
+/* One fixed height in every condition (AGENT_BUILD_SPEC s6.1 says 96 px, but the full C5/C5p warning with a
+   not-High certainty needs about 130 px; 96 px clipped the cue line). */
+.sm-slot { height: 132px; flex: 0 0 132px; overflow: hidden; }
+.sm-warn { height: 100%; box-sizing: border-box; border-radius: 10px; padding: 8px 10px; font-size: 15px; line-height: 1.3; border: 2px solid #8a5a00; background: #fff6e0; color: #3d2a00; }
+.sm-banner, .sm-badge { display: flex; align-items: center; font-weight: 600; }
+.sm-severe { border-color: #a1110a; background: #fdecea; color: #4d0a06; }
+.sm-tierline { font-weight: 700; }
+.sm-cert { display: flex; align-items: center; gap: 6px; font-size: 13px; margin-top: 2px; }
+.sm-meter { display: inline-flex; gap: 2px; }
+.sm-meter .seg { width: 14px; height: 8px; border: 1px solid #3d2a00; border-radius: 2px; background: transparent; }
+.sm-meter .seg.on { background: #3d2a00; }
+.sm-severe .sm-meter .seg { border-color: #4d0a06; } .sm-severe .sm-meter .seg.on { background: #4d0a06; }
+.sm-caption { font-size: 12px; margin-top: 2px; }
+.sm-line { font-size: 13px; margin-top: 3px; }
+.sm-bubble { align-self: flex-start; max-width: 85%; background: #e5e5ea; color: #111; border-radius: 18px; padding: 10px 12px; white-space: pre-wrap; word-break: break-word; }
+.sm-link { color: #0645ad; text-decoration: underline; cursor: pointer; }
+.sm-link:focus-visible, .sm-phone button:focus-visible, .sm-field input:focus-visible { outline: 3px solid #1a5fb4; outline-offset: 2px; }
+.sm-actions { margin-top: auto; display: flex; justify-content: center; }
+.sm-addr { font-size: 12px; color: #4a5059; background: #f1f2f4; border-radius: 8px; padding: 6px 8px; word-break: break-all; }
+.sm-page { display: flex; flex-direction: column; gap: 10px; }
+.sm-page h2 { font-size: 18px; margin: 0; color: #111; }
+/* The phone keeps its own light colors whatever the site theme (dark mode would otherwise leak into fields and text). */
+.sm-phone, .sm-phone h2, .sm-phone label { color: #111; }
+.sm-phone input { background: #fff; color: #111; }
+.sm-phone button { background: #1f4f99; color: #fff; border: 0; border-radius: 999px; padding: 10px 18px; font-size: 15px; cursor: pointer; }
+.sm-phone button.secondary { background: #1f2328; }
+.sm-brand { font-weight: 700; color: #1f2328; }
+.sm-field { display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+.sm-field input { font-size: 16px; padding: 8px; border: 1px solid #8c939c; border-radius: 6px; }
+.sm-side { width: 380px; }
+.sm-qs .sm-ends { display: flex; justify-content: space-between; font-size: 13px; color: #4a5059; margin-top: -6px; }
+.sm-reminder, .sm-backnote { background: #fff6e0; border: 1px solid #8a5a00; color: #3d2a00; border-radius: 8px; padding: 8px 10px; }
+.sm-retry { font-weight: 600; }
+@media (prefers-reduced-motion: reduce) { .sm-phone * { transition: none !important; } }
+/* Comprehension screens: a short phone showing only the warning. */
+.sm-phone-short { height: auto; }
+.sm-phone-short .sm-screen { flex: 0 0 auto; }
+.sm-comp-title { margin-top: 0; }
+/* Comprehension screens: the warning on top, the 7-point items at full width below (labels need the room). */
+.sm-comp-wrap { flex-direction: column; align-items: stretch; }
+.sm-comp-wrap .sm-phone { align-self: center; }
+.sm-comp-wrap .sm-side { width: auto; }

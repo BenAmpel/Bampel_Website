@@ -6,5 +6,6 @@ import vignettes from './vignettes.mjs';
 import game from './game.mjs';
 import multimodal from './multimodal.mjs';
 import reaction from './reaction.mjs';
+import smishing from './smishing.mjs';
 
-export const TYPES = { [alertTriage.id]: alertTriage, [vignettes.id]: vignettes, [game.id]: game, [multimodal.id]: multimodal, [reaction.id]: reaction };
+export const TYPES = { [alertTriage.id]: alertTriage, [vignettes.id]: vignettes, [game.id]: game, [multimodal.id]: multimodal, [reaction.id]: reaction, [smishing.id]: smishing };

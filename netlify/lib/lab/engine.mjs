@@ -213,7 +213,9 @@ export async function login(S, creds = {}, now = Date.now()) {
     const pepper = await getPepper(store, true), pid = 'P-' + hmac(pepper, 'panel|' + id).toString('hex').slice(0, 16);
     p = await store.get(pKey(pid));
     if (!p) [p] = await enroll(S, [pid], { gapDays: en.gapDays, label: panel.label || 'panel', selfSignup: true }, now, Math.random);
-    await setNew(store, contactKey(p.code), { panelId: id, firstSeenAt: now });
+    // keepId: false (a study whose consent promises the panel ID is stored only hashed) skips the raw copy; the
+    // record is still found again from the same ID, but bonus lists and {pid} completion links cannot name it.
+    if (panel.keepId !== false) await setNew(store, contactKey(p.code), { panelId: id, firstSeenAt: now });
     await recordPanelMeta(S, p.code, creds.panelMeta, now);   // the panel's study and session IDs (not identifying)
   } else {
     p = await loadParticipant(S, creds.code);
@@ -419,7 +421,7 @@ async function pickCondition(S, test, rand, capped = false) {
 
 export async function enroll(S, ids, opts, now, rand) {
   const made = [];
-  const c = await getContent(S.store, S.type), conds = S.type.conditionsOf(c), defer = assignAt(S, c) > 1;
+  const c = await getContent(S.store, S.type), conds = S.type.conditionsOf(c), defer = deferred(S, c);
   for (const id of ids) {
     // A fixed condition is only for test participants (previewing one arm); real ones are always balanced.
     // Deferred assignment (assignAtSession > 1) leaves the arm, and the quota check, to the session that assigns it.
@@ -455,6 +457,8 @@ export async function sessionGate(S, c, n, now = Date.now(), health = { asr: asr
 // Deferred assignment: a study whose type says so (assignAtSession > 1) picks the arm when the participant starts
 // that session, so people screened out in earlier sessions never hold an arm or count toward one.
 const assignAt = (S, c) => (S.type.assignAtSession ? S.type.assignAtSession(c) : 1);
+// deferAssignment: the arm is chosen when session 1 starts (after login has recorded the panel's study ID), not at enrollment.
+const deferred = (S, c) => assignAt(S, c) > 1 || !!S.type.deferAssignment;
 async function assignNow(S, p, now, rand = Math.random) {
   // A type can allocate from its own list (for example permuted blocks fixed in advance); otherwise minimization.
   const condition = (S.type.allocate && await S.type.allocate(S, p, await getContent(S.store, S.type))) || await pickCondition(S, !!p.test, rand, !!p.selfSignup);

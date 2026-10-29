@@ -256,6 +256,7 @@
     });
     this._on(d, 'focusout', function () { this._closeFocus(); });
     this._on(d, 'input', function (e) {
+      if (e.target && e.target.closest && e.target.closest('[data-no-capture]')) { this._log('input', { target: targetId(e.target), inputType: e.inputType || null, len: null }); return; }
       var v = e.target && typeof e.target.value === 'string' ? e.target.value.length : null;
       this._log('input', { target: targetId(e.target), inputType: e.inputType || null, len: v });
     });
