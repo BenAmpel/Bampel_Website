@@ -50,3 +50,8 @@
 .sm-comp-wrap { flex-direction: column; align-items: stretch; }
 .sm-comp-wrap .sm-phone { align-self: center; }
 .sm-comp-wrap .sm-side { width: auto; }
+/* Masked decoy field (see PAGES.signin): looks like a password box without being one. */
+.sm-masked { -webkit-text-security: disc; text-security: disc; }
+/* Slider end labels: one at each end, never run together. */
+.sm-qs .sm-ends { gap: 24px; }
+.sm-qs .sm-ends span:last-child { text-align: right; }

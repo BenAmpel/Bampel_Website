@@ -10,7 +10,9 @@
 
   var comp = null, att1 = null, backCount = 0;
   var PAGES = {
-    signin: { title: 'Sign in to continue', fields: [['Username', 'text'], ['Password', 'password']], button: 'Sign in' },
+    // No password-type input: browsers autofill saved passwords into password fields whatever autocomplete says, which would
+    // put a participant's real password on the page and fire input events nobody typed. The field is masked with CSS.
+    signin: { title: 'Sign in to continue', fields: [['Username', 'text'], ['Password', 'masked']], button: 'Sign in' },
     payment: { title: 'Complete your payment', fields: [['Name on card', 'text'], ['Card number', 'text'], ['Expiry (MM/YY)', 'text']], button: 'Pay now' },
     delivery: { title: 'Update delivery details', fields: [['Full name', 'text'], ['ZIP code', 'text']], button: 'Reschedule delivery' },
     reward: { title: 'Claim your reward', fields: [['Email', 'text'], ['Phone number', 'text']], button: 'Claim' },
@@ -153,7 +155,7 @@
         '<div class="sm-brand">' + esc(t.brand || '') + '</div><h2>' + esc(pg.title) + '</h2>' +
         pg.fields.map(function (f, i) {
           var id = 'sm-f' + i;
-          return '<label class="sm-field" for="' + id + '">' + esc(f[0]) + '<input id="' + id + '" type="' + f[1] + '" autocomplete="off" autocapitalize="off" spellcheck="false" data-trace="field"></label>';
+          return '<label class="sm-field" for="' + id + '">' + esc(f[0]) + '<input id="' + id + '" type="text"' + (f[1] === 'masked' ? ' class="sm-masked"' : '') + ' autocomplete="off" data-lpignore="true" data-1p-ignore autocapitalize="off" spellcheck="false" data-trace="field"></label>';
         }).join('') +
         '<button type="button" id="sm-submit" data-trace="page_submit">' + esc(pg.button) + '</button></div>' +
         '<div class="sm-actions"><button type="button" class="secondary" id="sm-back" data-trace="back">' + Th('back_button') + '</button></div>';

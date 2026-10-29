@@ -45,6 +45,8 @@ const parseCsv = text => text.trim().split('\n').map(line => { const out = []; l
     }
     assert(o.slice(-6).some(x => x.item.label === 'smishing'), `seed ${s}: a smishing trial among the last 6`);
   }
+    { const src = (await import('node:fs')).readFileSync(new URL('../../static/lab/engine/types/smishing.js', import.meta.url), 'utf8');
+    assert(!/type="password"|'password'\]/.test(src), 'no password-type decoy field (browsers autofill those)'); }
   console.log('design: bank valid, Latin square complete, warnings per condition, order rules hold over 200 seeds');
 }
 
