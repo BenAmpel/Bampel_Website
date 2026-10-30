@@ -83,7 +83,7 @@
     '<p class="muted links" id="links"></p>' +
     '<div class="preview-bar" id="previewbar" hidden><div><strong>See it as a participant</strong><span class="muted">Opens the study in a new tab as a test participant (left out of real counts), with no wait between sessions.</span></div>' +
       '<div class="row"><label id="pvcondwrap">Arm <select id="pvcond"></select></label><button type="button" class="primary" id="preview">Preview as a participant</button></div><p class="muted" id="pvout" role="status"></p></div>' +
-    '<nav class="tabs" id="tabs"></nav>' +
+    '<nav class="tabs" id="tabs" aria-label="Study admin sections"></nav>' +
     '<section data-tab="participants"><div class="row">' +
       '<button type="button" class="secondary" id="refresh">Refresh</button>' +
       '<button type="button" class="secondary" data-export="trials">Download trials CSV</button><button type="button" class="secondary" data-export="surveys">Download surveys CSV</button>' +
@@ -114,7 +114,7 @@
       '<div class="section"><h2>Create pilot access codes</h2><p class="muted">For pilots and team testing without a roster. Mark them as test so they are excluded from the counts and can be deleted in one step. Gap days sets the minimum wait between sessions (0 for piloting).</p>' +
       '<form class="row" id="createform"><label>How many <input type="number" id="count" min="1" max="300" value="3" style="width:90px"></label><label>Label (optional) <input type="text" id="label" placeholder="pilot-oct" style="width:160px"></label>' +
       '<label>Gap days <input type="number" id="gap" min="0" max="60" placeholder="default" style="width:90px"></label><label class="check"><input type="checkbox" id="test" checked> Test codes</label><button type="submit">Create</button></form><div id="created" class="keybox" hidden></div></div></section>' +
-    '<section data-tab="content" hidden><p class="muted" id="contentinfo"></p><div id="contentwarn"></div><p class="ok" id="say" role="status"></p><nav class="tabs sub" id="subtabs"></nav><fieldset id="editor" style="border:0;padding:0;margin:0;min-width:0"></fieldset>' +
+    '<section data-tab="content" hidden><p class="muted" id="contentinfo"></p><div id="contentwarn"></div><p class="ok" id="say" role="status"></p><nav class="tabs sub" id="subtabs" aria-label="Study content sections"></nav><fieldset id="editor" style="border:0;padding:0;margin:0;min-width:0"></fieldset>' +
       '<div class="savebar" id="savebar" data-role="editor"><span id="dirty" class="muted">No unsaved changes.</span><input type="text" id="note" class="grow" placeholder="What changed? (optional, shown in the activity log)">' +
       '<button type="button" class="secondary" id="discard" disabled>Discard changes</button><button type="button" id="save" disabled>Save changes</button></div>' +
       '<div class="section"><h2>Versions</h2><p class="muted">Every save makes a new version. Restoring an old version saves it again as the newest version, so nothing is lost. Each answer records the version it was collected under.</p><div class="table-wrap"><table id="vtbl"></table></div></div>' +
@@ -133,7 +133,8 @@
   var tabKey = 'lab_admin_tab_' + studyId;
   function showTab(name) {
     document.querySelectorAll('section[data-tab]').forEach(function (s) { s.hidden = s.getAttribute('data-tab') !== name; });
-    // aria-current, not aria-selected: aria-selected is only valid on role=tab, and these are plain buttons.
+    // aria-current="true", not aria-selected: these buttons are section navigation, not role=tab, and aria-selected is ignored
+    // without that role. Keep this attribute: admin.css styles it and types/vignettes-admin.js finds the current subtab by it.
     $('tabs').querySelectorAll('button').forEach(function (b) { if (b.getAttribute('data-tab') === name) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); });
     try { sessionStorage.setItem(tabKey, name); } catch (e) {}
     err();
@@ -721,7 +722,8 @@
     $('editor').disabled = !can('editor');
     if (plugin.afterRender) plugin.afterRender(sub, A);
   }
-  $('subtabs').addEventListener('click', function (e) { var s = e.target.getAttribute && e.target.getAttribute('data-sub'); if (s) { sub = s; renderEditor(); } });
+  // renderEditor rebuilds the subtab buttons, so focus goes back to the (new) current one instead of being lost to the page.
+  $('subtabs').addEventListener('click', function (e) { var s = e.target.getAttribute && e.target.getAttribute('data-sub'); if (s) { sub = s; renderEditor(); var cur = $('subtabs').querySelector('button[aria-current="true"]'); if (cur) cur.focus(); } });
 
   // Applies one field edit to the draft. Returns true when the screen should be redrawn.
   function applyEdit(t) {
