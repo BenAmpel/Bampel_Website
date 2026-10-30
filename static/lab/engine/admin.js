@@ -156,6 +156,9 @@
       '<div class="row"><button type="button" id="sealnew">Make a new key</button></div><div id="sealconfirm" hidden><div class="warn">Saved the file? Choose it now to turn encryption on.</div><label>Saved key file <input type="file" id="sealcheck" accept=".json,application/json"></label></div>' +
       '<details><summary>Use a key made with the command line</summary><p class="muted"><code>node scripts/lab/seal.mjs keygen ' + esc(studyId) + '</code> prints a public key. Paste it here.</p>' +
       '<form class="row" id="sealpubform"><input type="text" id="sealpub" style="flex:1" placeholder="Public key (43 characters)" autocomplete="off"><button type="submit" class="secondary">Use this key</button></form></details>' +
+      '<div id="sealbrowser" hidden><h3>Encrypt in the participant\'s browser</h3><p class="muted">Free-text answers and identifying link data are encrypted in the participant\'s browser before they are sent, so the server never receives them readable. ' +
+      'A browser too old to encrypt (before Chrome or Edge 133, Firefox 130, Safari 17) sends them over the encrypted connection and the server encrypts them on arrival. Tick this to refuse that instead: such browsers are turned away before consent. ' +
+      'Each saved record notes how many values the browser encrypted and how many the server did.</p><label class="f check"><input type="checkbox" id="sealreq"> Accept free text and link data only when encrypted in the participant\'s browser</label></div>' +
       '<p><button type="button" class="danger secondary small" id="sealoff" hidden>Stop encrypting new values</button></p></div></section>' +
     '<section data-tab="activity" hidden><p class="muted">Who added students, changed content, ran self-tests, deleted data, or changed the team.</p><div class="table-wrap"><table id="acttbl"></table></div></section></div>';
   $('keyhelp').innerHTML = 'Sign in with your researcher account, or use the lab owner key (the <code>LAB_ADMIN_KEY</code> or <code>VC_ADMIN_KEY</code> Netlify variable) or the team key the owner gave you. Keys and sign-ins are kept in this tab only. New here? Read the <a href="/lab/guide/">researcher guide</a>.';
@@ -910,8 +913,14 @@
         : '<div class="warn">Off. Emails, panel IDs and free-text answers are stored in readable form. An owner can turn encryption on below.</div>';
       if (prev.length) $('sealstatus').innerHTML += '<p class="muted">Older keys (values saved while they were in use need their file): ' + prev.map(function (k) { return '<code>' + esc(k) + '</code>'; }).join(', ') + '</p>';
       $('sealoff').hidden = !s.enabled;
+      $('sealbrowser').hidden = !s.enabled; $('sealreq').checked = !!s.requireBrowser;
     }).catch(function (e) { err(e.message); });
   }
+  $('sealreq').addEventListener('change', function () {
+    var on = this.checked; err();
+    if (on && !confirm('Refuse answers from browsers that cannot encrypt? Participants on older browsers will be asked to switch browsers before they start.')) { this.checked = false; return; }
+    postJSON('seal-set', { requireBrowser: on }).then(loadSeal).catch(function (e) { err(e.message); loadSeal(); });
+  });
   function sealUnsupported() { err('This browser cannot do X25519 encryption (needs Chrome or Edge 133+, Firefox 130+, or Safari 17+). Use the command line instead: node scripts/lab/seal.mjs.'); }
   function readFile(input) { var f = input.files && input.files[0]; input.value = ''; return f ? f.text() : Promise.reject(new Error('Choose a file.')); }
   $('sealfile').addEventListener('change', function () {

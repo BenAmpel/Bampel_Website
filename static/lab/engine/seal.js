@@ -1,6 +1,7 @@
-// CCAIR Behavioral Lab: sealed fields in the browser (the admin page). Makes a study's key pair and opens sealed values in
-// downloads, with WebCrypto only. The private key stays in this tab's memory: it is never sent to the server and never
-// written to storage; closing or reloading the tab forgets it. Same scheme as netlify/lib/lab/seal.mjs (read that header).
+// CCAIR Behavioral Lab: sealed fields in the browser, with WebCrypto only. Same scheme as netlify/lib/lab/seal.mjs (read that header).
+// The participant page seals free text and identifying link data with the study's public key before sending them (seal), so the
+// server never receives them readable. The admin page makes a study's key pair and opens sealed values in downloads; the private
+// key stays in that tab's memory: it is never sent to the server and never written to storage, and a reload forgets it.
 // Needs WebCrypto X25519: Chrome 133+, Edge 133+, Firefox 130+, Safari 17+. Without it, use `node scripts/lab/seal.mjs`.
 (function () {
   'use strict';
@@ -12,6 +13,29 @@
   function hex(buf) { return Array.prototype.map.call(new Uint8Array(buf), function (x) { return ('0' + x.toString(16)).slice(-2); }).join(''); }
   function kidOf(x) { return subtle.digest('SHA-256', b64d(x)).then(function (h) { return hex(h).slice(0, 16); }); }
   function cat(a, b) { var u = new Uint8Array(a.length + b.length); u.set(a); u.set(b, a.length); return u; }
+  function b64e(u) { var s = ''; for (var i = 0; i < u.length; i++) s += String.fromCharCode(u[i]); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+
+  // Seals one value with a study's public key: a fresh X25519 key pair, HKDF-SHA256, AES-256-GCM. Empty and already
+  // sealed values are returned as they are.
+  function seal(publicKey, kid, value) {
+    if (value == null || value === '' || (typeof value === 'string' && value.indexOf('sealed:v1:') === 0)) return Promise.resolve(value);
+    var rpk = b64d(publicKey), head = 'sealed:v1:' + kid, iv = window.crypto.getRandomValues(new Uint8Array(12)), eph, epk;
+    return subtle.generateKey({ name: 'X25519' }, true, ['deriveBits']).then(function (kp) {
+      eph = kp;
+      return subtle.exportKey('raw', kp.publicKey);
+    }).then(function (e) {
+      epk = new Uint8Array(e);
+      return subtle.importKey('raw', rpk, { name: 'X25519' }, false, []);
+    }).then(function (rk) {
+      return subtle.deriveBits({ name: 'X25519', public: rk }, eph.privateKey, 256);
+    }).then(function (shared) {
+      return subtle.importKey('raw', shared, 'HKDF', false, ['deriveKey']);
+    }).then(function (ikm) {
+      return subtle.deriveKey({ name: 'HKDF', hash: 'SHA-256', salt: cat(epk, rpk), info: INFO }, ikm, { name: 'AES-GCM', length: 256 }, false, ['encrypt']);
+    }).then(function (k) {
+      return subtle.encrypt({ name: 'AES-GCM', iv: iv, additionalData: enc.encode(head), tagLength: 128 }, k, enc.encode(JSON.stringify(value)));
+    }).then(function (ct) { return head + ':' + b64e(cat(cat(epk, iv), new Uint8Array(ct))); });
+  }
 
   function supported() {
     if (!subtle) return Promise.resolve(false);
@@ -72,5 +96,6 @@
     });
   }
 
-  window.LabSeal = { supported: supported, generate: generate, load: load, forget: forget, loaded: loaded, open: open, openText: openText, RE: RE };
+  var support = null;   // asked once per page
+  window.LabSeal = { supported: function () { return support || (support = supported()); }, generate: generate, load: load, forget: forget, loaded: loaded, open: open, openText: openText, seal: seal, RE: RE };
 })();

@@ -28,7 +28,7 @@ import { quotaState } from './quota.mjs';
 import { cleanFullscreen } from './envcheck.mjs';
 import { chooseRow, applyRow, markerKey, latinColumns } from './latin.mjs';
 import { EXTRA_TYPES, cleanExtra } from './questiontypes.mjs';
-import { sealerFor, sensitiveEmbedded } from './seal.mjs';
+import { sealerFor, sensitiveEmbedded, isSealed } from './seal.mjs';
 
 export const TOKEN_HOURS = 12;
 const DEFAULT_GAP = 6;
@@ -169,10 +169,15 @@ export function cleanAnswers(d, items, ctx = {}) {
     // An open number is kept exactly as entered (no range check): an impossible age or a count of 5,000 surveys is data.
     else if (it.type === 'number') { const t = String(v).trim().replace(/,/g, ''), n = Number(t); if (t !== '' && Number.isFinite(n) && Math.abs(n) < 1e12) out[it.id] = t; }
     else if (it.type === 'multi') { const vals = (Array.isArray(v) ? v : [v]).filter(x => it.options.some(o => o.value === x)); if (vals.length) out[it.id] = [...new Set(vals)]; }
+    else if (isSealed(v)) { if (ctx.seal && ctx.seal.accepts(v)) out[it.id] = v; }   // sealed in the browser: kept whole, if it is this study's
     else out[it.id] = String(v).slice(0, 4000);
   }
   if (items.some(it => it.displayIf)) out = resolveLogic(items, out, { ed: ctx.embedded, condition: ctx.condition }).answers;
-  if (ctx.seal) for (const it of items) if (it.type === 'text' && typeof out[it.id] === 'string') out[it.id] = ctx.seal(out[it.id]);   // free text (seal.mjs)
+  // Free text the browser did not seal is sealed here (seal.mjs), and counted, so a study that requires browser sealing can refuse it.
+  if (ctx.seal) for (const it of items) if (it.type === 'text' && typeof out[it.id] === 'string' && out[it.id] !== '') {
+    if (!isSealed(out[it.id])) ctx.seal.plainText = (ctx.seal.plainText || 0) + 1;
+    out[it.id] = ctx.seal(out[it.id]);
+  }
   return out;
 }
 
@@ -183,7 +188,8 @@ export function resolveEmbedded(defs, sent, { seal = null, panelParam = '' } = {
   const out = {}, src = sent && typeof sent === 'object' ? sent : {};
   for (const d of defs || []) {
     if (d.source === 'value') out[d.name] = String(d.value ?? '').slice(0, 300);
-    else { const v = src[d.name]; out[d.name] = typeof v === 'string' ? v.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 200) : ''; }
+    else if (seal && sensitiveEmbedded(d, panelParam) && isSealed(src[d.name])) out[d.name] = seal.accepts(src[d.name], 2000) ? src[d.name] : '';   // sealed in the browser
+    else { const v = src[d.name]; out[d.name] = typeof v === 'string' && !isSealed(v) ? v.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 200) : ''; }
     if (seal && sensitiveEmbedded(d, panelParam)) out[d.name] = seal(out[d.name]);
   }
   return out;
@@ -365,6 +371,8 @@ export async function saveTrial(S, code, session, index, data, now = Date.now())
   const seal = await sealerFor(S);   // the type passes plan.seal to cleanAnswers and seals its own free text (seal.mjs)
   if (seal) Object.defineProperty(plan, 'seal', { value: seal, enumerable: false });
   const clean = S.type.cleanTrialData(data, t, plan);
+  if (seal && seal.requireBrowser && seal.plainText) return SEAL_REQUIRED;
+  if (seal && (seal.fromBrowser || seal.sealedHere)) clean.sealed = seal.counts();   // how many values the browser sealed, and how many the server had to
   const timing = cleanTiming(data && data.timing);   // engine-level, for every type: stimulus onset and the display's frame interval
   if (timing) clean.timing = timing;
   const fsc = cleanFullscreen(data && data.fullscreen);   // full screen at onset, and each exit during the item
@@ -402,6 +410,9 @@ export function keepRaw(events) {
   return jsonSize(ev) <= RAW_MAX_BYTES ? ev : [];
 }
 
+// A study that requires browser sealing (seal.mjs, requireBrowser) refuses free text that arrives readable.
+const SEAL_REQUIRED = { error: 'seal_required', status: 400, hint: 'This study accepts answers only when they are encrypted in your browser. Please use a current version of Chrome, Edge, Firefox, or Safari.' };
+
 export async function saveSurvey(S, code, session, kind, data, now = Date.now()) {
   const store = S.store, p = await loadParticipant(S, code);
   if (!p) return { error: 'invalid_code', status: 401 };
@@ -412,9 +423,12 @@ export async function saveSurvey(S, code, session, kind, data, now = Date.now())
   const plan = await getPlan(S, p, session);
   if (st.finished || session !== st.nextSession || !plan) return { error: 'wrong_session', status: 409 };
   if (kind === 'post' && (prog.sessions[session]?.trialsDone.length || 0) < plan.trials.length) return { error: 'trials_incomplete', status: 409 };
-  const items = (kind === 'pre' ? plan.preItems : plan.postItems) || [];
+  const items = (kind === 'pre' ? plan.preItems : plan.postItems) || [], seal = await sealerFor(S);
+  const answers = cleanAnswers(data, items, { condition: p.condition, embedded: plan.embedded, seal });
+  if (seal && seal.requireBrowser && seal.plainText) return SEAL_REQUIRED;
+  const sealed = seal && (seal.fromBrowser || seal.sealedHere) ? { sealed: seal.counts() } : {};
   const created = await setNew(store, key, { code: p.code, condition: p.condition, session, kind, contentVersion: plan.contentVersion, receivedAt: now, ...(plan.order?.[kind] ? { shown: plan.order[kind] } : {}),
-    ...(plan.embedded && Object.keys(plan.embedded).length ? { embedded: plan.embedded } : {}), data: cleanAnswers(data, items, { condition: p.condition, embedded: plan.embedded, seal: await sealerFor(S) }) });
+    ...(plan.embedded && Object.keys(plan.embedded).length ? { embedded: plan.embedded } : {}), ...sealed, data: answers });
   if (created && kind === 'post') await store.set(`done/${p.code}/s${session}-${now}`, { at: now });
   // Screening questions (for example eligibility): the type's rules decide whether these answers end the study.
   const why = created && S.type.screenSurvey ? S.type.screenSurvey(c, kind, session, (await store.get(key))?.data || {}) : null;

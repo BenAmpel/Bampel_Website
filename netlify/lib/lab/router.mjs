@@ -25,7 +25,7 @@ import { wideRows, WIDE_FIRST } from './wide.mjs';
 import { saveChecks, LANGUAGES } from './envcheck.mjs';
 import { saveDq } from './quality.mjs';
 import { buildBundle } from './bundle.mjs';
-import { sealInfo, setSealKey } from './seal.mjs';
+import { sealInfo, setSealKey, setRequireBrowser, publicSeal } from './seal.mjs';
 
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
 const csv = (text, name) => new Response(text, { headers: { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': `attachment; filename="${name}"`, 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
@@ -70,7 +70,7 @@ export async function handle(req, { getStore, env, now }) {
     const S = { store: blobsStore(getStore, study.storeName), type, study };
     const backupStore = () => blobsStore(getStore, study.backupName);
 
-    if (route === 'content') return json(content.publicContent(await content.getContent(S.store, type), type, study));
+    if (route === 'content') { const c = await content.getContent(S.store, type); return json({ ...content.publicContent(c, type, study), seal: await publicSeal(S.store, c) }); }   // seal: the public key, for sealing in the browser
     // Stimulus files a researcher uploaded (audio, video, images), public like any page asset. Random names, so
     // a file name never hints at a condition or an answer. Range requests let browsers seek (Safari needs them).
     const fm = route.match(/^file\/(f-[0-9a-f]{12}\.[a-z0-9]{2,4})$/);
@@ -266,7 +266,12 @@ export async function handle(req, { getStore, env, now }) {
           if (r.ok) await admin.audit(S.store, who, 'team.account', `${r.member.email}: ${r.member.role || 'removed'}`, clock());
           return reply(r);
         }
-        case 'seal-set': {   // body.publicKey: base64url X25519 key, or null to stop sealing new values
+        case 'seal-set': {   // body.publicKey: base64url X25519 key, or null to stop sealing new values; or body.requireBrowser alone
+          if (body.publicKey === undefined && typeof body.requireBrowser === 'boolean') {
+            const r = await setRequireBrowser(S.store, body.requireBrowser);
+            if (r.ok) await admin.audit(S.store, who, 'seal.require_browser', r.requireBrowser ? 'free text and link data accepted only when sealed in the participant\'s browser' : 'the server may seal what a browser could not', clock());
+            return reply(r);
+          }
           const r = await setSealKey(S.store, body.publicKey == null ? null : String(body.publicKey), who, clock());
           if (r.ok) await admin.audit(S.store, who, 'seal.set', r.enabled ? `sealing new values with key ${r.kid}` : 'sealing turned off', clock());
           return reply(r);

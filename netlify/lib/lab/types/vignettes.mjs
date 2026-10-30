@@ -6,7 +6,7 @@
 // non-navigating links whose hovers and clicks are recorded. Sessions with no items make a survey-only
 // study. Participant renderer: static/lab/engine/types/vignettes.js.
 import { cleanAnswers } from '../engine.mjs';
-import { sealLog } from '../seal.mjs';
+import { sealLog, logValue } from '../seal.mjs';
 import { validateQuestions } from '../content.mjs';
 import { publicQuestions, evalDisplay, orderItems } from '../logic.mjs';
 
@@ -134,7 +134,7 @@ export default {
     d = d && typeof d === 'object' ? d : {};
     const small = (v, max) => v && typeof v === 'object' && jsonSize(v) <= max ? v : null;
     const answerLog = Array.isArray(d.answerLog) ? d.answerLog.slice(0, 1000).map(a => ({ atMs: num(a?.atMs, 0, 864e5), name: typeof a?.name === 'string' ? a.name.slice(0, 40) : null,
-      value: typeof a?.value === 'number' ? a.value : String(a?.value ?? '').slice(0, 300) })) : [];
+      value: logValue(a?.value, plan.seal) })) : [];
     sealLog(answerLog, plan.questions || [], plan.seal);
     return { answers: cleanAnswers(d.answers, plan.questions || [], { condition: plan.condition, embedded: plan.embedded, seal: plan.seal }), rtMs: num(d.rtMs, 0, 864e5), answerLog, traces: small(d.traces, 50000),
       viewport: d.viewport ? { w: num(d.viewport.w, 0, 20000), h: num(d.viewport.h, 0, 20000) } : null, device: small(d.device, 4000), selfTest: d.selfTest === true || undefined };

@@ -22,7 +22,7 @@
 // Participant renderer: static/lab/engine/types/multimodal.js. Editor: multimodal-admin.js.
 import { randomBytes } from 'node:crypto';
 import { cleanAnswers, loadParticipant, toCsv } from '../engine.mjs';
-import { sealLog } from '../seal.mjs';
+import { sealLog, logValue } from '../seal.mjs';
 import { validateQuestions, getContent } from '../content.mjs';
 import { publicQuestions, evalDisplay, orderItems } from '../logic.mjs';
 import { getMany, setNew, deleteKeys } from '../store.mjs';
@@ -760,7 +760,7 @@ export default {
     d = d && typeof d === 'object' ? d : {};
     const small = (v, max) => v && typeof v === 'object' && jsonSize(v) <= max ? v : null;
     const answerLog = Array.isArray(d.answerLog) ? d.answerLog.slice(0, 1000).map(a => ({ atMs: num(a?.atMs, 0, 864e5), name: typeof a?.name === 'string' ? a.name.slice(0, 40) : null,
-      value: typeof a?.value === 'number' ? a.value : String(a?.value ?? '').slice(0, 300) })) : [];
+      value: logValue(a?.value, plan.seal) })) : [];
     sealLog(answerLog, questionsFor(plan, t), plan.seal);
     const dec = t.decision, decision = dec && dec.options.some(o => o.value === d.decision) ? d.decision : null;
     const points = dec && dec.mouseTracking ? cleanPoints(d.trajectory) : [];

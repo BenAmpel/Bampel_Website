@@ -34,7 +34,7 @@ console.log('scheme: round trip, wrong key, tampering, CSV and JSON opening');
 
 // ---------- the browser copy agrees ----------
 {
-  const ctx = { window: { crypto: globalThis.crypto }, TextEncoder, TextDecoder, atob };
+  const ctx = { window: { crypto: globalThis.crypto }, TextEncoder, TextDecoder, atob, btoa };
   vm.runInNewContext(readFileSync(new URL('../../static/lab/engine/seal.js', import.meta.url), 'utf8'), ctx);
   const B = ctx.window.LabSeal;
   if (await B.supported()) {
@@ -46,7 +46,13 @@ console.log('scheme: round trip, wrong key, tampering, CSV and JSON opening');
     assert.equal(await B.open(tok), 'typed in a text box', 'the browser opens what the server sealed');
     const r = await B.openText(`a\n${tok}\n${S.sealer(publicKey)('x')}\n`, 'csv');
     assert.equal(r.opened, 1); assert.equal(r.other, 1);
-    console.log('browser copy: same key IDs, opens server tokens');
+    const fromBrowser = await B.seal(publicKey, privateKey.kid, 'written in the browser, "quoted"');
+    assert.equal(S.unseal(fromBrowser, privateKey), 'written in the browser, "quoted"', 'the server key file opens what the browser sealed');
+    assert(S.sealer(publicKey).accepts(fromBrowser), 'and the server accepts it as this study\'s');
+    assert(!S.sealer(S.generateKeys().publicKey).accepts(fromBrowser), 'another study does not');
+    assert.equal(await B.seal(publicKey, privateKey.kid, ''), '');
+    globalThis.browserSeal = v => B.seal(publicKey, privateKey.kid, v);
+    console.log('browser copy: same key IDs, opens server tokens, seals for the server');
   } else console.log('browser copy: skipped (this Node has no WebCrypto X25519)');
 }
 
@@ -82,6 +88,7 @@ const call = async (path, { body, key } = {}) => {
   const text = await res.text(); let json = null; try { json = JSON.parse(text); } catch {}
   return { status: res.status, json, text };
 };
+const ok2 = (r, status) => { if (status) { assert.equal(r.status, status); return null; } assert(r.status >= 200 && r.status < 300, r.text); return r.json; };
 const editable = c => { for (const k of Object.keys(c)) if (k[0] === '_') delete c[k]; return c; };
 assert((await call('/api/lab/_lab/create', { key: OWNER, body: { id: 'seal-test', name: 'Seal test', template: 'survey' } })).json.ok);
 const P = '/api/lab/seal-test/', A = P + 'admin/';
@@ -120,3 +127,61 @@ const off = (await call(A + 'seal', { key: OWNER })).json;
 assert.equal(off.enabled, false); assert.equal(off.previous[0].kid, privateKey.kid, 'a replaced key is remembered');
 assert((await call(A + 'activity', { key: OWNER })).json.some(x => x.action === 'seal.set'), 'key changes are in the activity log');
 console.log('routes: key set by owners only; email, panel ID and link data sealed; credit list opens with the key');
+
+// ---------- end to end: free text sealed in the browser ----------
+if (globalThis.browserSeal) {
+  ok2(await call(A + 'seal-set', { key: OWNER, body: { publicKey } }));
+  const c2 = editable((await call(A + 'content', { key: OWNER })).json);
+  for (const q of c2.survey.pre) delete q.displayIf;
+  c2.enrollment.panel = { ...c2.enrollment.panel, enabled: false };
+  assert.equal((await call(A + 'content-save', { key: OWNER, body: { content: c2, baseVersion: c2.version } })).status, 200);
+  const pub2 = (await call(P + 'content')).json.seal;
+  assert.equal(pub2.publicKey, publicKey); assert.equal(pub2.kid, privateKey.kid);
+  assert(pub2.text.includes('mfa_why') && !pub2.text.includes('age'), 'the page learns which questions are free text');
+  assert(!JSON.stringify(pub2).includes(privateKey.d), 'and never the private key');
+
+  const start = async email => {
+    const t = (await call(P + 'login', { body: { email, confirm: true } })).json.token;
+    await call(P + 'consent', { body: { token: t, agree: true } });
+    assert.equal((await call(P + 'session', { body: { token: t, session: 1 } })).status, 200);
+    return t;
+  };
+  const records = async () => (await call(A + 'export.json', { key: OWNER })).json.records || [];
+  const answers = { sec_important: '3', sec_confident: '3', mfa: c2.survey.pre.find(q => q.id === 'mfa').options[0].value, age: '30', gender: c2.survey.pre.find(q => q.id === 'gender').options[0].value,
+    vish_before: c2.survey.pre.find(q => q.id === 'vish_before').options[0].value };
+
+  // Browser sealing on: the token arrives and is stored exactly as sent; the record says the browser sealed it.
+  const tA = await start('bea@gsu.edu'), tok = await globalThis.browserSeal('my own words');
+  const sv = await call(P + 'survey', { body: { token: tA, session: 1, kind: 'pre', data: { ...answers, mfa_why: tok } } });
+  assert.equal(sv.status, 200, sv.text);
+  let rec = (await records()).find(r => r.data && r.data.mfa_why === tok);
+  assert(rec, 'the browser\'s token is stored as it came: the server never saw the words');
+  assert.deepEqual(rec.sealed, { browser: 1, server: 0 });
+  assert.equal(S.unseal(rec.data.mfa_why, privateKey), 'my own words');
+
+  // A token for another key is dropped, not stored unreadable.
+  const tB = await start('cy@gsu.edu');
+  await call(P + 'survey', { body: { token: tB, session: 1, kind: 'pre', data: { ...answers, age: '41', mfa_why: S.sealer(S.generateKeys().publicKey)('x') } } });
+  rec = (await records()).find(r => r.data && r.data.age === '41');
+  assert(rec && rec.data.mfa_why === undefined, 'a token sealed with another key is dropped');
+
+  // An old browser (plain text): sealed by the server and counted as such, unless browser sealing is required.
+  const tC = await start('dee@gsu.edu');
+  await call(P + 'survey', { body: { token: tC, session: 1, kind: 'pre', data: { ...answers, age: '52', mfa_why: 'typed in an old browser' } } });
+  rec = (await records()).find(r => r.data && r.data.age === '52');
+  assert(S.isSealed(rec.data.mfa_why) && rec.sealed.server === 1, 'the server seals what the browser could not, and says so');
+  assert.equal(ok2(await call(A + 'seal-set', { key: viewerKey, body: { requireBrowser: true } }) , 403), null);
+  assert.equal((await call(A + 'seal-set', { key: OWNER, body: { requireBrowser: true } })).json.requireBrowser, true);
+  assert.equal((await call(P + 'content')).json.seal.requireBrowser, true, 'the participant page is told, so it can turn old browsers away');
+  const tD = await start('eli@gsu.edu');
+  const refused = await call(P + 'survey', { body: { token: tD, session: 1, kind: 'pre', data: { ...answers, age: '63', mfa_why: 'plain' } } });
+  assert.equal(refused.status, 400); assert.equal(refused.json.error, 'seal_required', 'required: readable free text is refused');
+  assert(!(await records()).some(r => r.data && r.data.age === '63'), 'and nothing is written');
+  assert.equal((await call(P + 'survey', { body: { token: tD, session: 1, kind: 'pre', data: { ...answers, age: '63', mfa_why: await globalThis.browserSeal('sealed') } } })).status, 200, 'a sealed answer is accepted');
+  assert.equal((await call(P + 'survey', { body: { token: (await start('fay@gsu.edu')), session: 1, kind: 'pre', data: { ...answers, age: '64' } } })).status, 200, 'no free text at all is fine');
+  assert((await call(A + 'activity', { key: OWNER })).json.some(x => x.action === 'seal.require_browser'));
+  const edTok = await globalThis.browserSeal('5f00aa');
+  assert.equal(resolveEmbedded([{ name: 'prolific_pid', source: 'url', param: 'PROLIFIC_PID' }], { prolific_pid: edTok }, { seal: S.sealer(publicKey) }).prolific_pid, edTok, 'link data sealed in the browser is kept as sent');
+  assert.equal(resolveEmbedded([{ name: 'prolific_pid', source: 'url', param: 'PROLIFIC_PID' }], { prolific_pid: S.sealer(S.generateKeys().publicKey)('x') }, { seal: S.sealer(publicKey) }).prolific_pid, '', 'and another study\'s token is dropped');
+  console.log('end to end: browser tokens stored as sent; other keys dropped; old browsers sealed on the server or refused when required');
+}

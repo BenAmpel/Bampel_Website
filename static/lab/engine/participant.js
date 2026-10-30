@@ -24,11 +24,42 @@
       .then(function (r) { return r.json().then(function (j) { j._status = r.status; return j; }, function () { return { error: 'server_error', _status: r.status }; }); },
             function () { return { error: 'network' }; });
   }
+  // End-to-end sealing (seal.js; netlify/lib/lab/seal.mjs): with a study key, free-text answers, their answer-log entries,
+  // and identifying link data (such as PROLIFIC_PID) are encrypted here, in the participant's browser, before they are sent,
+  // so the server receives them only as sealed tokens. The page keeps its own readable copy (piped text, a retry). A browser
+  // without X25519 sends them readable and the server seals them on arrival, unless the study requires browser sealing; then
+  // such a browser is turned away before consent (checkSealing).
+  function sealsOn(route) { return !!(S.content && S.content.seal && window.LabSeal) && ['trial', 'survey', 'session'].indexOf(route) >= 0; }
+  function sealOut(route, body) {
+    var sc = S.content.seal;
+    return LabSeal.supported().then(function (ok) {
+      if (!ok) return body;
+      var out = JSON.parse(JSON.stringify(body)), jobs = [], text = sc.text || [], fields = sc.fields || [];
+      var put = function (obj, k, max) { if (typeof obj[k] === 'string' && obj[k] !== '') jobs.push(LabSeal.seal(sc.publicKey, sc.kid, obj[k].slice(0, max)).then(function (t) { obj[k] = t; })); };
+      if (route === 'session') Object.keys(out.embedded || {}).forEach(function (k) { if (fields.indexOf(k) >= 0) put(out.embedded, k, 200); });
+      if (route === 'survey') Object.keys(out.data || {}).forEach(function (k) { if (text.indexOf(k) >= 0) put(out.data, k, 4000); });
+      if (route === 'trial' && out.data) {
+        var a = out.data.answers || {};
+        Object.keys(a).forEach(function (k) { if (text.indexOf(k) >= 0) put(a, k, 4000); });
+        (out.data.answerLog || []).forEach(function (e) { if (e && text.indexOf(e.name) >= 0) put(e, 'value', 300); });
+      }
+      return Promise.all(jobs).then(function () { return out; });
+    });
+  }
+  function checkSealing() {
+    var sc = S.content && S.content.seal;
+    if (!sc || !sc.requireBrowser) return Promise.resolve(true);
+    return (window.LabSeal ? LabSeal.supported() : Promise.resolve(false)).then(function (ok) {
+      if (!ok) show('<h1>Please use a newer browser</h1><p>This study encrypts your answers in your browser before they are sent, and this browser cannot do that. Please open the same link in a current version of Chrome, Edge, Firefox, or Safari.</p>');
+      return ok;
+    });
+  }
   // Retries once after a second on a dropped connection or a server hiccup; the server treats repeats
   // as no-ops (a re-sent answer is acknowledged, never overwritten).
   function api(route, body) { return apiRaw(route, body).then(function (j) { return settle(route, j); }); }
   function apiRaw(route, body) {
-    return post(route, body)
+    // Without a study key the request goes out at once, as before; with one, after sealing.
+    return (sealsOn(route) ? sealOut(route, body).then(function (b) { body = b; return post(route, body); }) : post(route, body))
       .then(function (j) { return j.error === 'network' || j.error === 'server_error' || j.error === 'busy' ? new Promise(function (res) { setTimeout(res, 1000); }).then(function () { return post(route, body); }) : j; });
   }
   // What api() does with an answer. Split out so a request can be sent early and its answer handled later (see "boot").
@@ -59,6 +90,7 @@
     not_enrolled: 'That email can\'t be used for this study. Contact the research team if you think this is a mistake.',
     expired: 'Your sign-in expired. Sign in again to pick up where you left off.',
     network: 'Could not reach the study server. Check your connection and try again.',
+    seal_required: 'This study accepts answers only when they are encrypted in your browser, and this browser could not do that. Please use a current version of Chrome, Edge, Firefox, or Safari.',
     server_error: 'Something went wrong on our end. Please try again in a minute.',
     busy: 'The server is busy. Please try again in a moment.',
     wrong_session: 'This session is no longer active. Reload the page to continue.'
@@ -1037,6 +1069,8 @@
     function typeLoaded() {
       S.type = types[c.type];
       if (!S.type) return show('<h1>' + esc(c.name) + '</h1>' + errorBox(ERR.server_error));
+      // A study that requires browser sealing turns away a browser that cannot seal, before consent.
+      if (c.seal && c.seal.requireBrowser && !S.sealChecked) return checkSealing().then(function (ok) { if (ok) { S.sealChecked = true; typeLoaded(); } });
       S.token = store(tokenKey);
       var qs = null; try { qs = new URLSearchParams(location.search); } catch (e) {}
       var linkCode = qs && qs.get('code'), panel = S.content.panel, panelId = panel && qs ? qs.get(panel.param) : null;

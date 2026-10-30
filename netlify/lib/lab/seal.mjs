@@ -9,7 +9,13 @@
 //   sealed:v1:<kid>:<base64url(ephemeral public key 32 | iv 12 | ciphertext | tag 16)>
 // kid = the first 16 hex digits of SHA-256(raw public key), so a token names the key that opens it.
 // The plaintext is JSON, so a token decrypts back to the exact value (a string, usually). The browser copy of the
-// decryption is in static/lab/engine/seal.js; both are tested against each other's output.
+// scheme is in static/lab/engine/seal.js; both are tested against each other's output.
+//
+// End to end: the participant page gets the study's public key with the study content (publicSeal) and seals free-text
+// answers, their answer-log entries, and identifying link data in the participant's browser, so the server only ever
+// receives those as tokens. The server checks a token's form and key ID (accepts) and stores it as it came. What the
+// browser could not seal (an old browser) is sealed here on arrival, unless the study requires browser sealing
+// (requireBrowser), in which case it is refused and the participant page turns such browsers away at the start.
 import { createCipheriv, createDecipheriv, createHash, createPrivateKey, createPublicKey, diffieHellman, generateKeyPairSync, hkdfSync, randomBytes } from 'node:crypto';
 
 export const SEAL_RE = /sealed:v1:[0-9a-f]{16}:[A-Za-z0-9_-]{80,}/g;
@@ -33,13 +39,21 @@ export function generateKeys(study = '') {
   return { publicKey: x, privateKey: { kty: 'OKP', crv: 'X25519', x, d: jwk.d, kid: kidOf(x), study, createdAt: new Date().toISOString(), use: 'CCAIR Behavioral Lab sealed fields' } };
 }
 
+// Longest token accepted from a browser: 4,000 characters of free text, up to 4 bytes each in UTF-8, plus the overhead.
+export const MAX_TOKEN = 24000;
+const TOKEN_RE = /^sealed:v1:([0-9a-f]{16}):[A-Za-z0-9_-]{80,}$/;
+
 // A sealer for one public key: value -> token. Empty values stay empty (nothing to protect, and "" stays "answered nothing").
-export function sealer(pub) {
+// It also counts, for the record being saved, how many values arrived sealed from the browser and how many it had to seal
+// itself (fromBrowser, sealedHere), and checks tokens sent by a browser (accepts: right form, this study's current key).
+export function sealer(pub, { requireBrowser = false } = {}) {
   const k = checkPublicKey(pub);
   if (!k) return null;
   const recipient = createPublicKey({ key: { kty: 'OKP', crv: 'X25519', x: k.publicKey }, format: 'jwk' }), rpk = raw(k.publicKey);
-  return value => {
-    if (value == null || value === '' || isSealed(value)) return value;
+  const fn = value => {
+    if (value == null || value === '') return value;
+    if (isSealed(value)) { fn.fromBrowser++; return value; }
+    fn.sealedHere++;
     const eph = generateKeyPairSync('x25519'), epk = raw(eph.publicKey.export({ format: 'jwk' }).x);
     const shared = diffieHellman({ privateKey: eph.privateKey, publicKey: recipient });
     const key = Buffer.from(hkdfSync('sha256', shared, Buffer.concat([epk, rpk]), INFO, 32)), iv = randomBytes(12), head = `sealed:v1:${k.kid}`;
@@ -47,6 +61,10 @@ export function sealer(pub) {
     const ct = Buffer.concat([c.update(JSON.stringify(value), 'utf8'), c.final(), c.getAuthTag()]);
     return `${head}:${Buffer.concat([epk, iv, ct]).toString('base64url')}`;
   };
+  Object.assign(fn, { kid: k.kid, publicKey: k.publicKey, requireBrowser: !!requireBrowser, fromBrowser: 0, sealedHere: 0,
+    accepts: (tok, max = MAX_TOKEN) => typeof tok === 'string' && tok.length <= max && (tok.match(TOKEN_RE) || [])[1] === k.kid,
+    counts: () => ({ browser: fn.fromBrowser, server: fn.sealedHere }) });
+  return fn;
 }
 
 // Opens one token with a private key file ({ x, d } as made above). Throws on a wrong key or a changed token.
@@ -81,7 +99,7 @@ export function unsealText(text, priv, { format = 'csv' } = {}) {
 // ---------- the study's key (meta/seal in the study store) ----------
 export async function sealInfo(store) {
   const m = await store.get('meta/seal');
-  return m && m.publicKey ? { enabled: true, kid: m.kid, publicKey: m.publicKey, setAt: m.setAt, setBy: m.setBy, previous: m.previous || [] } : { enabled: false, previous: (m && m.previous) || [] };
+  return m && m.publicKey ? { enabled: true, kid: m.kid, publicKey: m.publicKey, requireBrowser: !!m.requireBrowser, setAt: m.setAt, setBy: m.setBy, previous: m.previous || [] } : { enabled: false, previous: (m && m.previous) || [] };
 }
 
 // Set or turn off the study's key. A replaced key is kept in `previous`, so the admin page can say which key file opens
@@ -96,25 +114,64 @@ export async function setSealKey(store, publicKey, who, now = Date.now()) {
   }
   const k = checkPublicKey(publicKey);
   if (!k) return { error: 'bad_key', status: 400, hint: 'That is not an X25519 public key (32 bytes, base64url).' };
-  if (k.kid === cur.kid) return { ok: true, enabled: true, kid: k.kid };
+  if (k.kid === cur.kid) return { ok: true, enabled: true, kid: k.kid, requireBrowser: !!cur.requireBrowser };
   if (cur.publicKey) previous.push({ kid: cur.kid, publicKey: cur.publicKey, setAt: cur.setAt, replacedAt: now });
-  await store.set('meta/seal', { publicKey: k.publicKey, kid: k.kid, setAt: now, setBy: who.name, previous });
-  return { ok: true, enabled: true, kid: k.kid };
+  await store.set('meta/seal', { publicKey: k.publicKey, kid: k.kid, setAt: now, setBy: who.name, requireBrowser: !!cur.requireBrowser, previous });
+  return { ok: true, enabled: true, kid: k.kid, requireBrowser: !!cur.requireBrowser };
+}
+
+// Whether the study accepts only values sealed in the participant's browser (and turns away browsers that cannot seal).
+export async function setRequireBrowser(store, on) {
+  const cur = await store.get('meta/seal');
+  if (!cur || !cur.publicKey) return { error: 'no_key', status: 400, hint: 'Set a study key first.' };
+  await store.set('meta/seal', { ...cur, requireBrowser: on === true });
+  return { ok: true, enabled: true, kid: cur.kid, requireBrowser: on === true };
+}
+
+// What the participant page needs to seal in the browser: the public key and which fields to seal (the IDs of every free-text
+// question anywhere in the content, and the identifying link-data names). Null when the study has no key.
+export function textQuestionIds(c) {
+  const ids = new Set(), walk = x => {
+    if (Array.isArray(x)) return x.forEach(walk);
+    if (!x || typeof x !== 'object') return;
+    if (x.type === 'text' && typeof x.id === 'string') ids.add(x.id);
+    for (const v of Object.values(x)) if (v && typeof v === 'object') walk(v);
+  };
+  walk(c);
+  return [...ids];
+}
+export async function publicSeal(store, c) {
+  const m = await store.get('meta/seal');
+  if (!m || !m.publicKey) return null;
+  const pn = c.enrollment && c.enrollment.panel && c.enrollment.panel.enabled ? c.enrollment.panel.param : '';
+  return { publicKey: m.publicKey, kid: m.kid, requireBrowser: !!m.requireBrowser, text: textQuestionIds(c), fields: (c.embedded || []).filter(d => sensitiveEmbedded(d, pn)).map(d => d.name) };
 }
 
 // A type's answer log (every change to an answer, with its value): entries for free-text questions are sealed like the answer.
 export function sealLog(log, questions, seal) {
   if (!seal || !Array.isArray(log)) return log;
   const text = new Set((questions || []).filter(q => q && q.type === 'text').map(q => q.id));
-  for (const a of log) if (a && text.has(a.name) && typeof a.value === 'string') a.value = seal(a.value);
+  for (const a of log) if (a && text.has(a.name) && typeof a.value === 'string' && a.value !== '') {
+    if (!isSealed(a.value)) seal.plainText = (seal.plainText || 0) + 1;
+    a.value = seal(a.value);
+  }
   return log;
+}
+
+// An answer-log value as a type cleans it: a token from the browser is kept whole (cutting it would make it unreadable) if
+// it is this study's; plain text is cut to max characters as before. A token that is not this study's is dropped.
+const LOG_TOKEN_MAX = 1400;   // 300 characters of text, sealed
+export function logValue(v, seal, max = 300) {
+  if (typeof v === 'number') return v;
+  if (isSealed(v)) return seal && seal.accepts(v, LOG_TOKEN_MAX) ? v : '';
+  return String(v ?? '').slice(0, max);
 }
 
 // One sealer per request, cached on S.
 export async function sealerFor(S) {
   if (S._sealer !== undefined) return S._sealer;
   const m = await S.store.get('meta/seal');
-  S._sealer = m && m.publicKey ? sealer(m.publicKey) : null;
+  S._sealer = m && m.publicKey ? sealer(m.publicKey, { requireBrowser: m.requireBrowser }) : null;
   return S._sealer;
 }
 
