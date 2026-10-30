@@ -267,6 +267,17 @@
   <div class="pub-plain" role="note" aria-label="Plain-language summary">
     <span class="pub-plain-tag">In Plain Terms</span>
     <p>{{ . | markdownify }}</p>
+    {{/* A short silent video of this summary, when static/media/papers/<slug>.mp4 exists (made with video/paper-video.mjs).
+       Collapsed by default and preload="none", so nothing downloads until the reader opens it and presses play. */}}
+    {{ $slug := path.Base (strings.TrimSuffix "/" $page.RelPermalink) }}
+    {{ if fileExists (printf "static/media/papers/%s.mp4" $slug) }}
+    <details class="pub-plain-video">
+      <summary>Watch a short video summary</summary>
+      <video controls preload="none" playsinline width="1080" height="1080"{{ if fileExists (printf "static/media/papers/%s-poster.jpg" $slug) }} poster="/media/papers/{{ $slug }}-poster.jpg"{{ end }}>
+        <source src="/media/papers/{{ $slug }}.mp4" type="video/mp4">
+      </video>
+    </details>
+    {{ end }}
   </div>
   {{ end }}
   <div class="pub-extras-grid">
