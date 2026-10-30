@@ -1,0 +1,48 @@
+/* Lab landing page only (static/lab/index.html). Loaded right after study.css, where the page's inline <style> block used to be,
+   so the cascade order is unchanged. Participant pages do not load this file. */
+/* Lab home: the shared tokens from study.css, laid out as a page. Georgia State web standards: GSU Blue and white,
+   Lato (self-hosted, so no visitor data goes to a font service), a text wordmark and no unit logo. */
+body { padding: 0; }
+.skip { position: absolute; left: -9999px; top: 8px; z-index: 100; background: var(--accent); color: var(--accent-text); padding: 8px 14px; border-radius: 8px; font-weight: 700; }
+.skip:focus { left: 16px; }
+main:focus { outline: none; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+header.site { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--card) 92%, transparent); -webkit-backdrop-filter: blur(18px) saturate(170%); backdrop-filter: blur(18px) saturate(170%); border-top: 4px solid var(--gsu-blue); border-bottom: 1px solid var(--line); }
+header.site .wrap { display: flex; justify-content: space-between; align-items: center; gap: 12px 20px; padding-top: 10px; padding-bottom: 10px; flex-wrap: wrap; }
+.brandrow { display: flex; align-items: center; gap: 16px; }
+nav a { color: var(--link); text-decoration: none; margin-left: 12px; padding: 12px 6px; display: inline-block; white-space: nowrap; font-size: .9375rem; font-weight: 700; }
+nav a:first-child { margin-left: 0; }
+nav a:hover { text-decoration: underline; text-underline-offset: .3em; text-decoration-thickness: 2px; }
+.hero-band { background: var(--hero-bg, #0039a6); color: #ffffff; }
+:root { --hero-bg: #0039a6; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --hero-bg: #13213f; } }
+:root[data-theme="dark"] { --hero-bg: #13213f; }
+.hero { max-width: 1080px; margin: 0 auto; padding: clamp(40px, 7vw, 84px) 20px clamp(36px, 6vw, 64px); }
+.eyebrow { color: #97caeb; font-size: .8125rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.hero h1 { color: #ffffff; font-weight: 300; font-size: clamp(2.1rem, 1.4rem + 3vw, 3.4rem); line-height: 1.1; letter-spacing: -.01em; margin: 12px 0 18px; max-width: 860px; }
+.hero .lede { color: #ffffff; font-size: 1.125rem; line-height: 1.6; max-width: 720px; margin: 0; }
+.hero :focus-visible { outline-color: #ffffff; }
+.lede { color: var(--muted); }
+section { padding: 36px 0; }
+section h2 { color: var(--heading-brand); font-size: 1.75rem; letter-spacing: -.01em; margin: 0 0 18px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+.card { border-radius: var(--radius); padding: 22px; }
+.grid .card { border-top: 4px solid var(--accent); }
+.card h3 { margin: 0 0 6px; font-size: 1.0625rem; }
+.card p { margin: 0; color: var(--muted); font-size: .9375rem; }
+.tag { display: inline-block; font-size: .75rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--text); margin-bottom: 10px; }
+.study { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.btn { display: inline-flex; }
+ul.plain { padding-left: 18px; color: var(--muted); margin: 0; }
+ul.plain li { margin: 6px 0; }
+footer { border-top: 1px solid var(--line); padding: 24px 0 40px; color: var(--muted); font-size: .8125rem; }
+footer a { display: inline-block; padding: 4px 2px; }
+/* Phones: the header scrolls away instead of taking 143px of every screen, and the links stay one line each. */
+@media (max-width: 760px) { header.site { position: static; } nav { display: flex; flex-wrap: wrap; } nav a { margin-left: 0; padding: 6px 8px; } }
+
+/* Formerly inline style="" attributes. One class each; every rule here outranks the only competing rules (study.css's
+   bare p and a selectors), so these still win as the attributes did. */
+.fine { color: var(--muted); font-size: 14px; }
+.fine-top { margin-top: 12px; }
+.measure { max-width: 720px; }
+.signin-link { margin-left: 14px; display: inline-block; padding: 12px 4px; }
