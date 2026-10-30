@@ -200,7 +200,7 @@ His research program builds <span id="bio-threat-intel"></span>AI-enabled cyber 
 
 From 2018-2021, he served as an **NSF CyberCorps Scholarship-for-Service Fellow**. <span class="bio-annotated">He currently serves as Associate Editor for *ACM Digital Threats: Research and Practice (DTRAP)* and on the Editorial Board of *Journal of Information Systems Education (JISE)*.<span class="bio-sidenote">Editorial Roles</span></span> He has co-chaired the AI4Cyber Workshop at ACM KDD and the HICSS Junior Faculty Consortium. <span class="bio-annotated">In 2025, he was recognized as the Robinson College of Business **IS Cybersecurity Graduate Program Top Professor**.<span class="bio-sidenote">Teaching Honor</span></span>
 
-He is also the creator of the [Scholar Utility Belt](https://chromewebstore.google.com/detail/scholar-utility-belt/omcogfcgldfmihfogbffflbocdbjockn), a Chrome extension used by over {{< extension_stat "users" >}} people daily to make Google Scholar workflows faster and more useful.
+He is also the creator of the [Scholar Utility Belt](https://chromewebstore.google.com/detail/scholar-utility-belt/omcogfcgldfmihfogbffflbocdbjockn), a Chrome extension installed by over {{< extension_stat "users" >}} researchers (Chrome Web Store, October 2026) that makes Google Scholar workflows faster and more useful.
 
 Outside research, he photographs travel and landscapes, from the Swiss Alps and Kyoto to Iceland and the Sonoran Desert. [His prints are available on Fine Art America](https://fineartamerica.com/profiles/benjamin-ampel), and [a short write-up](https://purplelink.llc/blog/travel-photographs-as-prints/) explains how the collection is organized.
 
