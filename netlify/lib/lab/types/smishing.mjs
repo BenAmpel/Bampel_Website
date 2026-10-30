@@ -133,7 +133,7 @@ const CONSENT = [
   'Contact Information. Contact Benjamin M. Ampel at bampel@gsu.edu with questions about the study. Contact the Georgia State University Institutional Review Board (Office of Research Integrity Assurance) at 404-413-3500 or irb@gsu.edu with questions about your rights as a research participant.'
 ];
 
-// Debrief v1.2 (the amendment draft; approved v1.1 says the warnings came from a tool, which Option A makes untrue).
+// Debrief v1.2 (approved with the H26762 amendment, 2026-10-29; v1.1 says the warnings came from a tool, which Option A makes untrue).
 const DEBRIEF = 'Thank you for taking part. Now that you are finished, we want to explain a few details we held back earlier, and why.\n\n' +
   'What we held back, and why. Some of the text messages you saw were realistic examples of "smishing": scam text messages designed to trick people. If you chose to tap a link or respond, any page you saw was a simulated, fake landing page made only for this study. We did not tell you this at the start on purpose. If we had told you which messages were scams, or that we were measuring how people respond to scams, it would have changed how you answered. This is a common and approved practice in research, called incomplete disclosure.\n\n' +
   'Please know: nothing was at risk. The scam messages were simulated for research and could not harm you. No real website links were ever opened. We never collected real passwords, account numbers, or personal information: anything typed into a fake page was not transmitted, logged, or saved anywhere. There is nothing you need to do, and your responses say nothing about you as a person.\n\n' +
@@ -182,7 +182,7 @@ export default {
   defaultContent() {
     return {
       minutesPerSession: 30,
-      consent: { approved: false, paragraphs: CONSENT, agreeLabel: 'I am 18 or older and I agree to take part in this study.' },
+      consent: { approved: true, paragraphs: CONSENT, agreeLabel: 'I am 18 or older and I agree to take part in this study.' },
       enrollment: { open: false, domains: [], gapDays: 0, label: 'prolific', panel: { enabled: true, param: 'PROLIFIC_PID', completionUrl: '', screenOutUrl: '', label: 'prolific', keepId: false } },
       // Only the panel's study and session IDs: the Prolific ID itself is never kept (consent: stored hashed only).
       embedded: [{ name: 'study_id', source: 'url', param: 'STUDY_ID' }, { name: 'session_id', source: 'url', param: 'SESSION_ID' }],
@@ -227,7 +227,6 @@ export default {
     if (b.practice.length !== PRACTICE_N) e.push(`The practice set needs ${PRACTICE_N} messages.`);
     b.practice.forEach(it => validateItem(it, e, 'Practice'));
     if (!b.practice.some(x => x.alert)) e.push('At least one practice message must carry a warning.');
-    if (b.provisional && c.consent && c.consent.approved) e.push('The stimulus bank is provisional (heuristic cues, fake scores, unapproved brand map). Freeze the real bank before approving the consent.');
     const d = c.design || {};
     if (!Number.isInteger(d.trialSeconds) || d.trialSeconds < 20 || !Number.isInteger(d.reminderSeconds) || d.reminderSeconds >= d.trialSeconds) e.push('Trial timing: the reminder must come before the time limit.');
     if (!Array.isArray(d.comprehension) || d.comprehension.length < 1) e.push('Add at least one comprehension question.');

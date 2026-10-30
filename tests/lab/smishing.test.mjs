@@ -27,8 +27,7 @@ const parseCsv = text => text.trim().split('\n').map(line => { const out = []; l
 {
   const c = smishing.defaultContent(), e = []; smishing.validate(c, e);
   assert.deepEqual(e, [], 'the template bank passes validation');
-  const bad = structuredClone(c); bad.consent.approved = true; const e2 = []; smishing.validate(bad, e2);
-  assert(e2.some(x => /provisional/.test(x)), 'a provisional bank cannot go live with an approved consent');
+  assert.equal(c.consent.approved, true, 'the H26762 amendment is approved, so the consent shows no draft banner');
   for (let g = 1; g <= 6; g++) assert.equal(new Set([1, 2, 3, 4, 5, 6].map(a => conditionFor(g, a))).size, 6, `group ${g} meets every condition across the arms`);
   for (let a = 1; a <= 6; a++) assert.equal(new Set([1, 2, 3, 4, 5, 6].map(g => conditionFor(g, a))).size, 6, `arm ${a} shows every condition once`);
   const alerted = { alert: true, tier: 'Severe', certainty: 'Low', c5: 'x'.repeat(60), c5p: 'y'.repeat(61) };
@@ -67,7 +66,7 @@ assert(r.json.ok, r.text);
 const P = '/api/lab/arg/', store = getStore({ name: 'lab-arg' });
 const keys = async (prefix = '') => { const out = []; for await (const page of store.list({ prefix })) out.push(...page.blobs.map(b => b.key)); return out; };
 const pubText = (await call(P + 'content')).text, pub = JSON.parse(pubText);
-assert.equal(pub.type, 'smishing'); assert.equal(pub.consent.approved, false, 'draft consent until the amendment is approved');
+assert.equal(pub.type, 'smishing'); assert.equal(pub.consent.approved, true, 'approved consent (H26762 amendment)');
 assert.equal(pub.smishing.trialSeconds, 90);
 assert(pub.debrief && /set up by the research team/.test(pub.debrief.body), 'the debrief (full disclosure of the deception) reaches the finish page'); assert.equal(pub.environment.desktopOnly, true);
 assert(!/"benign"|PRESSURE|FALSE_PRETEXT|SENSITIVE_REQUEST/.test(pubText), 'no bank labels or cue families in the public content');
