@@ -5,7 +5,10 @@
   'use strict';
   var A = window.LabAuth, esc = A.esc, root = document.getElementById('signin');
   var next = (function () { var n = new URLSearchParams(location.search).get('next') || ''; return /^\/lab\/[A-Za-z0-9\/_.#?=&-]*$/.test(n) && n.indexOf('//') < 0 ? n : '/lab/admin/'; })();
-  function view(html) { root.innerHTML = html; var h = root.querySelector('h1'); if (h) { h.setAttribute('tabindex', '-1'); h.focus(); } }
+  // The view shown on page load leaves focus at the top of the page, so the first Tab reaches the skip link; later views
+  // (an error, the code step, a link form) move focus to their heading or field as before.
+  var initial = true;
+  function view(html) { root.innerHTML = html; var h = root.querySelector('h1'); if (h) { h.setAttribute('tabindex', '-1'); if (!initial) h.focus(); } }
   function go() { location.href = next; }
   // Shows a validation message beside the field that needs fixing: text in the alert line, the field marked invalid and
   // described by it, and focus moved to it (WCAG 3.3.1). The mark clears when the person types.
@@ -27,7 +30,7 @@
       '<p class="error statusline" id="err" role="alert">' + esc(msg || '') + '</p><div class="row"><button type="submit" id="go">Sign in</button></div></form>' +
       '<p class="muted">No account yet? <a href="' + window.LabContact.access() + '">Request access</a> (opens your email app). <a href="' + window.LabContact.signin() + '">Trouble signing in?</a> See also the <a href="/lab/guide/">researcher guide</a>.</p>');
     var f = document.getElementById('f');
-    (needCode ? document.getElementById('code') : document.getElementById(email ? 'pw' : 'email')).focus();
+    if (!initial) (needCode ? document.getElementById('code') : document.getElementById(email ? 'pw' : 'email')).focus();
     f.addEventListener('submit', function (e) {
       e.preventDefault();
       var em = document.getElementById('email').value.trim(), pw = document.getElementById('pw').value, code = needCode ? document.getElementById('code').value.trim() : '';
@@ -73,4 +76,5 @@
   } else if (A.getSession()) {
     view('<h1>You are signed in</h1><p><a class="btn" href="' + esc(next) + '">Continue</a> <a href="/lab/account/">Account settings</a></p>');
   } else signinView();
+  initial = false;
 })();

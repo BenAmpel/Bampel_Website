@@ -1,4 +1,8 @@
 /* CCAIR Behavioral Lab: shared layout for the guide, support, sign-in, and account pages (with study.css and admin.css). */
+/* Skip link (as on the landing page, landing.css): hidden until it gets keyboard focus, the first Tab stop on each page. */
+.skip { position: absolute; left: -9999px; top: 8px; z-index: 100; background: var(--accent); color: var(--accent-text); padding: 8px 14px; border-radius: 8px; font-weight: 700; }
+.skip:focus { left: 16px; }
+main:focus { outline: none; }
 .labbar { border-top: 4px solid var(--accent); border-bottom: 1px solid var(--line); background: var(--card); margin: -24px -16px 24px; padding: 12px 16px; }
 /* Full-bleed bar: its negative margin matches the body padding in study.css (24px 16px, and 16px 12px on phones). */
 @media (max-width: 560px) { .labbar { margin: -16px -12px 20px; padding: 12px; } }
