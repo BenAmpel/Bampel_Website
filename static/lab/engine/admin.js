@@ -45,7 +45,21 @@
   }
   var getJSON = function (p) { return call(p).then(function (r) { return r.json(); }); };
   var postJSON = function (p, b) { return call(p, b).then(function (r) { return r.json(); }); };
+  // Exports with sealed values (seal.js): opened in the browser when this tab holds the study's key, else saved as they are with a
+  // note. Backups (.gz) are never opened: they stay encrypted on disk.
   function saveFile(data, name, type) {
+    if (!window.LabSeal || !/\.(csv|json|jsonl|txt)$/i.test(name)) return saveRaw(data, name, type);
+    var read = data instanceof Blob ? data.text() : Promise.resolve(String(data));
+    read.then(function (text) {
+      if (text.search(LabSeal.RE) < 0) return saveRaw(data, name, type);
+      if (!LabSeal.loaded()) { saveRaw(data, name, type); return err('This file has encrypted values (they start with "sealed:v1"). To open them, unlock the Encryption tab with the study\'s key file and download again, or run node scripts/lab/seal.mjs open.'); }
+      return LabSeal.openText(text, /\.jsonl?$/i.test(name) ? 'json' : 'csv').then(function (r) {
+        saveRaw(new Blob([r.text], { type: (data instanceof Blob && data.type) || type || 'text/plain' }), name, type);
+        if (r.other) err(r.other + ' value' + (r.other === 1 ? ' was' : 's were') + ' encrypted with a different key and ' + (r.other === 1 ? 'was' : 'were') + ' left as is. Unlock with the older key file to open ' + (r.other === 1 ? 'it' : 'them') + '.');
+      });
+    }).catch(function (e) { err(e.message); });
+  }
+  function saveRaw(data, name, type) {
     var a = document.createElement('a'); a.href = URL.createObjectURL(data instanceof Blob ? data : new Blob([data], { type: type })); a.download = name; document.body.appendChild(a); a.click();
     setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
   }
@@ -122,14 +136,32 @@
       '<div class="row"><button type="button" class="secondary" id="designdl">Download study design (JSON)</button></div><p class="muted" id="designmsg" role="status"></p>' +
       '<h3>Reproducibility bundle</h3><p class="muted">One .zip to deposit with a paper: the design file, this study\'s codebook (CSV and Markdown), the platform version and code commit, the list of content versions, how to cite, and the fields for a Zenodo upload (which gives it a DOI). It holds no participant data. Make it from the content version you ran.</p>' +
       '<div class="row"><button type="button" class="secondary" id="bundledl">Download reproducibility bundle (.zip)</button></div></div></section>' +
-    '<section data-tab="team" hidden><h2>Add a team member</h2><p class="muted">Each person gets their own key for this study. Share it privately. Removing a person disables their key immediately.</p>' +
+    '<section data-tab="team" hidden><h2>Researchers on this study</h2><p class="muted">People with a researcher account (email and password). Add someone by email: a new person gets an invitation link for you to send, and sees this study only. ' +
+      'Viewers see progress and download data; editors also edit the content; managers also handle students and the extra-credit list; owners can do everything, including deleting data and managing this list.</p>' +
+      '<div class="table-wrap"><table id="memtbl"></table></div>' +
+      '<form class="row" id="memform"><label>Email <input type="text" id="memail" style="width:220px" autocomplete="off"></label><label>Name <input type="text" id="mname" style="width:160px" autocomplete="off" placeholder="for new accounts"></label>' +
+      '<label>Access <select id="mrole"><option value="viewer">viewer</option><option value="editor">editor</option><option value="manager">manager</option><option value="owner">owner</option></select></label><button type="submit">Add or change</button></form><div id="memout" role="status"></div>' +
+      '<h2>Add a team member with a key</h2><p class="muted">Each person gets their own key for this study. Share it privately. Removing a person disables their key immediately.</p>' +
       '<form class="row" id="teamform"><label>Name <input type="text" id="tname" style="width:200px"></label><label>Access <select id="trole"></select></label><button type="submit">Create key</button></form>' +
       '<p class="muted" id="roledesc"></p><div id="newkey" hidden></div><div class="table-wrap"><table id="teamtbl"></table></div></section>' +
+    '<section data-tab="privacy" hidden><h2>Encryption</h2><p class="muted">With a key, the server encrypts each participant\'s email or panel ID, identifying link data (such as PROLIFIC_PID), and free-text answers before storing them. ' +
+      'Only someone holding this study\'s private key file can read them; the file never leaves your computer, and nobody with access to the website or to Netlify can read them without it. ' +
+      'Exports still download as usual: unlock this tab with the key file first and the values are opened in your browser as the file is saved. Ratings, choices and timings are not encrypted.</p>' +
+      '<div id="sealstatus"><p class="muted">Loading…</p></div>' +
+      '<div class="section"><h2>Unlock downloads in this tab</h2><p class="muted">Choose the study\'s key file. It is kept in this tab\'s memory only and forgotten when you close or reload it.</p>' +
+      '<div class="row"><label>Key file <input type="file" id="sealfile" accept=".json,application/json"></label><button type="button" class="secondary" id="sealforget" hidden>Forget the key</button></div><p id="sealunlocked" class="muted"></p></div>' +
+      '<div class="section" data-role="owner"><h2>Set the study key</h2>' +
+      '<p class="muted">Make a new key: your browser creates it, downloads the private key file, and asks you to choose that file again before encryption starts, so it cannot start without a saved copy. ' +
+      '<strong>If every copy of the key file is lost, the encrypted values cannot be recovered by anyone.</strong> Keep two copies on GSU-approved storage, not on shared drives. A new key applies to new values only; keep the old file for older ones.</p>' +
+      '<div class="row"><button type="button" id="sealnew">Make a new key</button></div><div id="sealconfirm" hidden><div class="warn">Saved the file? Choose it now to turn encryption on.</div><label>Saved key file <input type="file" id="sealcheck" accept=".json,application/json"></label></div>' +
+      '<details><summary>Use a key made with the command line</summary><p class="muted"><code>node scripts/lab/seal.mjs keygen ' + esc(studyId) + '</code> prints a public key. Paste it here.</p>' +
+      '<form class="row" id="sealpubform"><input type="text" id="sealpub" style="flex:1" placeholder="Public key (43 characters)" autocomplete="off"><button type="submit" class="secondary">Use this key</button></form></details>' +
+      '<p><button type="button" class="danger secondary small" id="sealoff" hidden>Stop encrypting new values</button></p></div></section>' +
     '<section data-tab="activity" hidden><p class="muted">Who added students, changed content, ran self-tests, deleted data, or changed the team.</p><div class="table-wrap"><table id="acttbl"></table></div></section></div>';
   $('keyhelp').innerHTML = 'Sign in with your researcher account, or use the lab owner key (the <code>LAB_ADMIN_KEY</code> or <code>VC_ADMIN_KEY</code> Netlify variable) or the team key the owner gave you. Keys and sign-ins are kept in this tab only. New here? Read the <a href="/lab/guide/">researcher guide</a>.';
 
   // ---------- sign-in and tabs ----------
-  var TABS = [['participants', 'Participants', 'viewer'], ['report', 'Pilot report', 'viewer'], ['students', 'Students', 'manager'], ['content', 'Study content', 'viewer'], ['team', 'Team', 'owner'], ['activity', 'Activity', 'owner']];
+  var TABS = [['participants', 'Participants', 'viewer'], ['report', 'Pilot report', 'viewer'], ['students', 'Students', 'manager'], ['content', 'Study content', 'viewer'], ['team', 'Team', 'owner'], ['privacy', 'Encryption', 'viewer'], ['activity', 'Activity', 'owner']];
   var tabKey = 'lab_admin_tab_' + studyId;
   function showTab(name) {
     document.querySelectorAll('section[data-tab]').forEach(function (s) { s.hidden = s.getAttribute('data-tab') !== name; });
@@ -142,6 +174,7 @@
     if (name === 'report') initReport();
     if (name === 'content') loadContent();
     if (name === 'team') loadTeam();
+    if (name === 'privacy') loadSeal();
     if (name === 'activity') loadActivity();
     // A study type may add top-level tabs (plugin.tabs: [{ id, label, role, render(sectionEl, api) }]), for example the economic game's operations tab.
     (plugin && plugin.tabs || []).forEach(function (t) { if (t.id === name) t.render(document.querySelector('section[data-tab="' + name + '"]'), pluginApi()); });
@@ -368,7 +401,7 @@
             if (window.CompressionStream) return new Response(new Blob([text]).stream().pipeThrough(new CompressionStream('gzip'))).blob().then(function (b) {
               saveFile(b, name + '.gz'); $('bkprog').textContent = 'Downloaded ' + all.participants.length + ' participants, ' + all.records.length + ' records (' + Math.round(b.size / 1024) + ' KB compressed). Save it to GSU-approved storage.';
             });
-            saveFile(text, name, 'application/json'); $('bkprog').textContent = 'Downloaded. Save it to GSU-approved storage.';
+            saveRaw(text, name, 'application/json'); $('bkprog').textContent = 'Downloaded. Save it to GSU-approved storage.';
           });
         });
     }).catch(function (e) { err(e.message); }).then(function () { btn.disabled = false; });
@@ -814,7 +847,34 @@
   });
 
   // ---------- team ----------
+  function loadMembers() {
+    getJSON('members').then(function (rows) {
+      $('memtbl').innerHTML = '<tr><th>Researcher</th><th>Access</th><th>Status</th><th></th></tr>' + rows.map(function (m) {
+        return '<tr><td class="wrap-cell"><strong>' + esc(m.name) + '</strong><br><span class="muted">' + esc(m.email) + '</span></td><td>' + esc(m.role) + (m.labOwner ? ' <span class="pill">lab owner</span>' : '') + '</td><td>' + esc(m.status) + '</td><td>' +
+          (m.labOwner ? '' : '<button type="button" class="danger secondary small" data-mrm="' + esc(m.email) + '">Remove</button>') + '</td></tr>';
+      }).join('');
+    }).catch(function (e) { err(e.message); });
+  }
+  $('memform').addEventListener('submit', function (e) {
+    e.preventDefault(); err();
+    var email = $('memail').value.trim(); if (!email) return err('Enter an email address.');
+    postJSON('member-set', { email: email, name: $('mname').value.trim(), role: $('mrole').value }).then(function (r) {
+      var out = $('memout');
+      if (r.link) {
+        var url = location.origin + r.link.path;
+        out.innerHTML = '<div class="warn"><strong>Invitation for ' + esc(r.member.email) + '.</strong> Copy it now and send it to them yourself; it works once for 7 days.<p><input type="text" readonly class="mono" value="' + esc(url) + '" style="width:100%" aria-label="Invitation link" id="memlink"></p></div>';
+        $('memlink').select();
+      } else out.innerHTML = '<p class="muted">' + esc(r.member.email) + ' now has ' + esc(r.member.role) + ' access.</p>';
+      $('memail').value = ''; $('mname').value = ''; loadMembers();
+    }).catch(function (x) { err(x.message); });
+  });
+  $('memtbl').addEventListener('click', function (e) {
+    var em = e.target.getAttribute && e.target.getAttribute('data-mrm'); if (!em) return;
+    if (!confirm('Take ' + em + '\'s access to this study away? Their account stays; they lose this study at once.')) return;
+    postJSON('member-set', { email: em, role: null }).then(loadMembers).catch(function (x) { err(x.message); });
+  });
   function loadTeam() {
+    loadMembers();
     getJSON('team').then(function (rows) {
       $('teamtbl').innerHTML = '<tr><th>Name</th><th>Access</th><th>Added</th><th>Last active</th><th></th></tr>' + rows.map(function (m) {
         return '<tr><td>' + esc(m.name) + '</td><td>' + esc(m.role) + '</td><td>' + esc(fmt(m.createdAt)) + ' by ' + esc(m.createdBy) + '</td><td>' + esc(fmt(m.lastUsedAt)) + '</td><td><button type="button" class="danger secondary small" data-rm="' + m.id + '" data-name="' + esc(m.name) + '">Remove</button></td></tr>';
@@ -837,6 +897,62 @@
     postJSON('team-remove', { id: id }).then(loadTeam).catch(function (e) { err(e.message); });
   });
 
+  // ---------- encryption (seal.js, netlify/lib/lab/seal.mjs) ----------
+  var pendingKid = null;
+  function loadSeal() {
+    var un = window.LabSeal && LabSeal.loaded();
+    $('sealunlocked').textContent = un ? 'Unlocked with key ' + un.kid + (un.study && un.study !== studyId ? ' (made for study ' + un.study + ')' : '') + '. Downloads from this tab are opened as they are saved.' : 'Locked.';
+    $('sealforget').hidden = !un;
+    getJSON('seal').then(function (s) {
+      var prev = (s.previous || []).map(function (p) { return p.kid; });
+      $('sealstatus').innerHTML = s.enabled
+        ? '<p><strong>On.</strong> New values are encrypted with key <code>' + esc(s.kid) + '</code>, set ' + esc(fmt(s.setAt)) + ' by ' + esc(s.setBy || '') + '.</p>'
+        : '<div class="warn">Off. Emails, panel IDs and free-text answers are stored in readable form. An owner can turn encryption on below.</div>';
+      if (prev.length) $('sealstatus').innerHTML += '<p class="muted">Older keys (values saved while they were in use need their file): ' + prev.map(function (k) { return '<code>' + esc(k) + '</code>'; }).join(', ') + '</p>';
+      $('sealoff').hidden = !s.enabled;
+    }).catch(function (e) { err(e.message); });
+  }
+  function sealUnsupported() { err('This browser cannot do X25519 encryption (needs Chrome or Edge 133+, Firefox 130+, or Safari 17+). Use the command line instead: node scripts/lab/seal.mjs.'); }
+  function readFile(input) { var f = input.files && input.files[0]; input.value = ''; return f ? f.text() : Promise.reject(new Error('Choose a file.')); }
+  $('sealfile').addEventListener('change', function () {
+    err(); var input = this;
+    LabSeal.supported().then(function (ok) {
+      if (!ok) return sealUnsupported();
+      return readFile(input).then(LabSeal.load).then(loadSeal);
+    }).catch(function (e) { err(e.message); });
+  });
+  $('sealforget').addEventListener('click', function () { LabSeal.forget(); loadSeal(); });
+  $('sealnew').addEventListener('click', function () {
+    err();
+    if (!confirm('Make a new key for this study? Your browser downloads the private key file; keep it safe, because encrypted values cannot be read without it.')) return;
+    LabSeal.supported().then(function (ok) {
+      if (!ok) return sealUnsupported();
+      return LabSeal.generate(studyId).then(function (k) {
+        pendingKid = k.kid; pendingPub = k.publicKey;
+        saveRaw(new Blob([JSON.stringify(k.file, null, 2) + '\n'], { type: 'application/json' }), studyId + '-private-key-' + k.kid + '.json');
+        $('sealconfirm').hidden = false;
+      });
+    }).catch(function (e) { err(e.message); });
+  });
+  var pendingPub = null;
+  $('sealcheck').addEventListener('change', function () {
+    err(); var input = this;
+    readFile(input).then(LabSeal.load).then(function (k) {
+      if (!pendingKid || k.kid !== pendingKid) throw new Error('That is not the key file just made (' + (pendingKid || 'none') + '). Choose the file that was downloaded.');
+      return postJSON('seal-set', { publicKey: pendingPub });
+    }).then(function () { pendingKid = pendingPub = null; $('sealconfirm').hidden = true; loadSeal(); }).catch(function (e) { err(e.message); });
+  });
+  $('sealpubform').addEventListener('submit', function (e) {
+    e.preventDefault(); err();
+    var pub = $('sealpub').value.trim(); if (!pub) return err('Paste the public key.');
+    if (!confirm('Encrypt new values with this key? Make sure you hold its private key file.')) return;
+    postJSON('seal-set', { publicKey: pub }).then(function () { $('sealpub').value = ''; loadSeal(); }).catch(function (e) { err(e.message); });
+  });
+  $('sealoff').addEventListener('click', function () {
+    if (!confirm('Stop encrypting? New emails, panel IDs and free-text answers will be stored in readable form. Values already encrypted stay encrypted.')) return;
+    postJSON('seal-set', { publicKey: null }).then(loadSeal).catch(function (e) { err(e.message); });
+  });
+
   // ---------- activity ----------
   function loadActivity() {
     getJSON('activity').then(function (rows) {
@@ -856,7 +972,7 @@
     root.innerHTML = '<div class="who"><div class="brandmark"><span class="wordmark"><b>CCAIR Behavioral Lab</b><small>Georgia State University · J. Mack Robinson College of Business</small></span><h1 style="margin:0" id="ctitle">CCAIR Lab: studies</h1></div><span id="whoami" class="muted"></span></div>' + SIGNIN + '<div id="app" hidden>' +
       '<p class="muted" id="cintro"></p>' +
       '<div class="table-wrap"><table id="stbl"></table></div><div id="clonebox"></div>' +
-      '<div data-owner><div class="section start"><h2>Start a new study</h2><p class="muted">Pick a starting point. Each one is a complete, working study: you can preview it as a participant straight away, then change anything on its Study content tab.</p>' +
+      '<div data-create><div class="section start"><h2>Start a new study</h2><p class="muted">Pick a starting point. Each one is a complete, working study: you can preview it as a participant straight away, then change anything on its Study content tab.</p>' +
       '<div class="tpl-grid" id="tplgrid" role="list"></div>' +
       '<form id="newform" class="newform"><h3 id="newhead" tabindex="-1">Name your study</h3><div class="grid3">' +
       '<label class="f">Starting point<select id="ntpl"></select></label>' +
@@ -864,17 +980,18 @@
       '<label class="f">Link name (lowercase letters, numbers, dashes)<input type="text" id="nid" class="mono" placeholder="phone-calls-pilot"></label></div><p class="muted" id="ntypedesc"></p>' +
       '<label class="f">Description (shown on the lab page once you list the study)<textarea id="ndesc" rows="2"></textarea></label>' +
       '<div class="row"><button type="submit" class="primary">Create study</button></div></form><div id="newout" role="status"></div></div>' +
-      '<div class="section"><h2 id="impheading">Create a study from a survey file</h2><p class="muted">Start from a survey you already have: a Qualtrics export (.qsf), a LimeSurvey structure (.lss), a REDCap data dictionary (.csv), or the lab\'s spreadsheet template (.csv or .xlsx; <a href="/lab/templates/survey-template.csv" download>download the template</a>). This creates a survey study (type "Vignettes and surveys") and opens its Study content, Import a survey page with your file already read and previewed. Nothing is saved to the study until you load the preview into the editor and click Save.</p>' +
+      '<div class="section" data-create><h2 id="impheading">Create a study from a survey file</h2><p class="muted">Start from a survey you already have: a Qualtrics export (.qsf), a LimeSurvey structure (.lss), a REDCap data dictionary (.csv), or the lab\'s spreadsheet template (.csv or .xlsx; <a href="/lab/templates/survey-template.csv" download>download the template</a>). This creates a survey study (type "Vignettes and surveys") and opens its Study content, Import a survey page with your file already read and previewed. Nothing is saved to the study until you load the preview into the editor and click Save.</p>' +
       '<form id="impform"><div class="grid3"><label class="f">Name<input type="text" id="iname" placeholder="Attitudes survey"></label>' +
       '<label class="f">ID (in the link)<input type="text" id="iid" class="mono" placeholder="attitudes-survey"></label>' +
       '<label class="f">Survey file<input type="file" id="ifile" accept=".qsf,.lss,.csv,.xlsx,.txt"></label></div><div class="row"><button type="submit">Create study and open the import page</button></div></form><div id="impout" role="status"></div></div>' +
-      '<div class="section" data-owner><h2>Create a study from a design file</h2><p class="muted">A study design file (.json) holds a study\'s whole design and no data. Download one from a study\'s Study content tab, or get one from another lab or a paper\'s materials. The new study starts unlisted, with no participants.</p>' +
+      '<div class="section" data-create><h2>Create a study from a design file</h2><p class="muted">A study design file (.json) holds a study\'s whole design and no data. Download one from a study\'s Study content tab, or get one from another lab or a paper\'s materials. The new study starts unlisted, with no participants.</p>' +
       '<form id="dsgform"><div class="grid3"><label class="f">Name<input type="text" id="dname" placeholder="Leave empty to keep the file\'s name"></label><label class="f">Link name<input type="text" id="did" class="mono" placeholder="replication-1"></label>' +
       '<label class="f">Design file<input type="file" id="dfile" accept=".json,application/json"></label></div><div class="row"><button type="submit">Create study from the file</button></div></form><div id="dsgout" role="status"></div></div>' +
       '<div class="section" id="researchers"><h2>Researchers</h2><p class="muted">Each researcher has their own account (email and password, with an optional authenticator app) and a role in each study: viewer, editor, manager, or owner. There is no email service here: an invitation is a link you copy or send from your own mail app. A link works once. Invitations last 7 days and password-reset links 24 hours. The owner key always works, whatever happens to accounts.</p>' +
       '<div class="table-wrap"><table id="rtbl"></table></div><div id="redit"></div>' +
       '<h3>Invite a researcher</h3><form id="invform"><div class="grid3"><label class="f">Name<input type="text" id="invname" autocomplete="off"></label><label class="f">Email<input type="text" id="invemail" autocomplete="off" inputmode="email"></label>' +
-      '<label class="f check"><input type="checkbox" id="invowner"> Lab owner (owner of every study, and can invite researchers)</label></div>' +
+      '<label class="f check"><input type="checkbox" id="invowner"> Lab owner (owner of every study, and can invite researchers)</label>' +
+      '<label class="f check"><input type="checkbox" id="invcreate"> Can create their own studies (they own what they make, run it, add their own team, and see no other study)</label></div>' +
       '<fieldset class="roles"><legend>Access to studies</legend><div id="invroles" class="rolegrid"></div></fieldset><div class="row" style="margin-top:8px"><button type="submit">Create invitation link</button></div></form><div id="invout" role="status"></div></div>' +
       '<div class="section" id="labactivity"><h2>Account activity</h2><p class="muted">Sign-ins, sign-outs, invitations, password and authenticator changes, role changes. Passwords are never logged.</p><div class="row"><button type="button" class="secondary" id="actload">Show recent activity</button></div><div class="table-wrap"><table id="acttbl2"></table></div></div></div></div>';
     $('keyhelp').innerHTML = 'Sign in with your researcher account, or use the lab owner key (the <code>LAB_ADMIN_KEY</code> or <code>VC_ADMIN_KEY</code> Netlify variable). Keys and sign-ins are kept in this tab only. New here? Read the <a href="/lab/guide/">researcher guide</a>.';
@@ -886,15 +1003,16 @@
     function list() {
       getJSON('mystudies').then(function (rows) {
         ROWS = rows;
-        var owner = isOwner();
-        $('stbl').innerHTML = '<tr><th>Study</th><th>Type</th><th>Your role</th><th>Last backup</th><th>Last self-test</th><th>Participants</th><th>Links</th>' + (owner ? '<th>On lab page</th><th></th>' : '') + '</tr>' + rows.map(function (s) {
+        var owner = isOwner(), manages = owner || rows.some(function (s) { return s.role === 'owner'; });
+        $('stbl').innerHTML = '<tr><th>Study</th><th>Type</th><th>Your role</th><th>Last backup</th><th>Last self-test</th><th>Participants</th><th>Links</th>' + (manages ? '<th>On lab page</th><th></th>' : '') + '</tr>' + rows.map(function (s) {
+          var mine = owner || s.role === 'owner';
           return '<tr><td class="wrap-cell"><strong>' + esc(s.name) + '</strong> <span class="muted mono">' + esc(s.id) + '</span>' + (s.archived ? ' <span class="pill">' + (s.deleting ? 'being deleted' : 'archived') + '</span>' : '') + (s.builtIn ? ' <span class="pill">built in</span>' : '') + '</td><td>' + esc(s.typeLabel) + '</td><td><span class="pill">' + esc(s.role) + '</span></td>' +
             '<td>' + (s.lastBackupAt ? esc(fmt(s.lastBackupAt)) : '<span class="muted">none yet</span>') + '</td><td>' + testText(s.lastSelfTest) + '</td>' +
             '<td id="sum-' + esc(s.id) + '">' + btn2('data-sum="' + esc(s.id) + '"', 'Load counts') + '</td>' +
             '<td class="links"><a href="' + esc(s.paths.admin) + '">Admin</a><a href="' + esc(s.paths.participant) + '" target="_blank" rel="noopener">Participant page</a></td>' +
-            (owner ? '<td>' + (s.listed && !s.archived ? 'yes' : 'no') + '</td><td>' + (s.builtIn ? '<span class="muted">set in code</span> ' : btn2('data-list="' + esc(s.id) + '|' + (s.listed ? '0' : '1') + '"', s.listed ? 'Unlist' : 'List') + ' ' + (s.deleting ? '' : btn2('data-arch="' + esc(s.id) + '|' + (s.archived ? '0' : '1') + '"', s.archived ? 'Restore' : 'Archive') + ' ')) + (s.archived ? '' : btn2('data-clone="' + esc(s.id) + '"', 'Clone')) +
-              (s.archived && !s.builtIn ? ' <button type="button" class="danger secondary small" data-del="' + esc(s.id) + '">' + (s.deleting ? 'Finish deleting' : 'Delete permanently') + '</button>' : '') + '</td>' : '') + '</tr>';
-        }).join('') + (rows.length ? '' : '<tr><td colspan="9" class="muted">No studies yet. Ask the lab owner to give your account access to a study.</td></tr>');
+            (!manages ? '' : !mine ? '<td>' + (s.listed && !s.archived ? 'yes' : 'no') + '</td><td></td>' : '<td>' + (s.listed && !s.archived ? 'yes' : 'no') + '</td><td>' + (s.builtIn ? '<span class="muted">set in code</span> ' : (owner ? btn2('data-list="' + esc(s.id) + '|' + (s.listed ? '0' : '1') + '"', s.listed ? 'Unlist' : 'List') + ' ' : '') + (s.deleting ? '' : btn2('data-arch="' + esc(s.id) + '|' + (s.archived ? '0' : '1') + '"', s.archived ? 'Restore' : 'Archive') + ' ')) + (s.archived || !(owner || (ME && ME.canCreate)) ? '' : btn2('data-clone="' + esc(s.id) + '"', 'Clone')) +
+              (s.archived && !s.builtIn ? ' <button type="button" class="danger secondary small" data-del="' + esc(s.id) + '">' + (s.deleting ? 'Finish deleting' : 'Delete permanently') + '</button>' : '') + '</td>') + '</tr>';
+        }).join('') + (rows.length ? '' : '<tr><td colspan="9" class="muted">No studies yet. ' + (ME && ME.canCreate ? 'Start one below.' : 'Ask the lab owner to give your account access to a study.') + '</td></tr>');
       }).catch(function (e) { err(e.message); });
     }
     // Participant counts are read when asked for: they list the study's participants, which is too much work to do for every study on every page load.
@@ -917,7 +1035,7 @@
       getJSON('researchers').then(function (rows) {
         PEOPLE = rows;
         $('rtbl').innerHTML = '<tr><th>Researcher</th><th>Status</th><th>Authenticator</th><th>Studies</th><th></th></tr>' + rows.map(function (a) {
-          return '<tr><td class="wrap-cell"><strong>' + esc(a.name) + '</strong>' + (a.labOwner ? ' <span class="pill">lab owner</span>' : '') + '<br><span class="muted">' + esc(a.email) + '</span></td><td>' + esc(a.status) + '</td><td>' + (a.totp ? 'on' : 'off') + '</td><td class="wrap-cell">' + rolesText(a.studyRoles) + '</td><td class="acts">' +
+          return '<tr><td class="wrap-cell"><strong>' + esc(a.name) + '</strong>' + (a.labOwner ? ' <span class="pill">lab owner</span>' : a.canCreate ? ' <span class="pill">creates studies</span>' : '') + '<br><span class="muted">' + esc(a.email) + '</span></td><td>' + esc(a.status) + '</td><td>' + (a.totp ? 'on' : 'off') + '</td><td class="wrap-cell">' + rolesText(a.studyRoles) + '</td><td class="acts">' +
             btn2('data-pedit="' + a.id + '"', 'Edit access') + ' ' + btn2('data-preset="' + a.id + '"', a.status === 'invited' ? 'New invitation link' : 'Reset password link') + ' ' + btn2('data-prevoke="' + a.id + '"', 'Sign out everywhere') + ' ' +
             (a.totp ? btn2('data-pclear="' + a.id + '"', 'Remove authenticator') + ' ' : '') + btn2('data-pdis="' + a.id + '|' + (a.disabled ? '0' : '1') + '"', a.disabled ? 'Enable' : 'Disable') + ' ' + btn2('data-prem="' + a.id + '"', 'Remove') + '</td></tr>';
         }).join('') + (rows.length ? '' : '<tr><td colspan="5" class="muted">No researchers yet. Invite one below.</td></tr>');
@@ -941,9 +1059,9 @@
     function wireResearchers() {
       $('invform').addEventListener('submit', function (e) {
         e.preventDefault(); err();
-        postJSON('researchers/invite', { name: $('invname').value.trim(), email: $('invemail').value.trim(), labOwner: $('invowner').checked, studyRoles: pickedRoles($('invroles')) }).then(function (r) {
+        postJSON('researchers/invite', { name: $('invname').value.trim(), email: $('invemail').value.trim(), labOwner: $('invowner').checked, canCreate: $('invcreate').checked, studyRoles: pickedRoles($('invroles')) }).then(function (r) {
           $('invout').innerHTML = linkPanel(r, 'Invitation (valid 7 days)', r.account.email, r.account.name); wireCopy();
-          $('invname').value = ''; $('invemail').value = ''; $('invowner').checked = false; $('invroles').innerHTML = roleSelects('inv-'); people();
+          $('invname').value = ''; $('invemail').value = ''; $('invowner').checked = false; $('invcreate').checked = false; $('invroles').innerHTML = roleSelects('inv-'); people();
         }).catch(function (x) { err(x.message); });
       });
       $('rtbl').addEventListener('click', function (e) {
@@ -951,10 +1069,10 @@
         var who = function (id) { return PEOPLE.filter(function (x) { return x.id === id; })[0] || {}; };
         if (a('data-pedit')) {
           var p = who(a('data-pedit'));
-          $('redit').innerHTML = '<div class="qcard"><h3>Access for ' + esc(p.name) + ' (' + esc(p.email) + ')</h3><div class="row"><label class="f check"><input type="checkbox" id="ed-owner"' + (p.labOwner ? ' checked' : '') + '> Lab owner</label></div><div class="rolegrid">' + roleSelects('ed-', p.studyRoles) + '</div>' +
+          $('redit').innerHTML = '<div class="qcard"><h3>Access for ' + esc(p.name) + ' (' + esc(p.email) + ')</h3><div class="row"><label class="f check"><input type="checkbox" id="ed-owner"' + (p.labOwner ? ' checked' : '') + '> Lab owner</label><label class="f check"><input type="checkbox" id="ed-create"' + (p.canCreate ? ' checked' : '') + '> Can create their own studies</label></div><div class="rolegrid">' + roleSelects('ed-', p.studyRoles) + '</div>' +
             '<div class="row" style="margin-top:8px"><button type="button" id="ed-save">Save</button><button type="button" class="secondary" id="ed-cancel">Cancel</button></div></div>';
           $('ed-cancel').addEventListener('click', function () { $('redit').innerHTML = ''; });
-          $('ed-save').addEventListener('click', function () { err(); postJSON('researchers/update', { id: p.id, labOwner: $('ed-owner').checked, studyRoles: pickedRoles($('redit')) }).then(function () { $('redit').innerHTML = ''; people(); }).catch(function (x) { err(x.message); }); });
+          $('ed-save').addEventListener('click', function () { err(); postJSON('researchers/update', { id: p.id, labOwner: $('ed-owner').checked, canCreate: $('ed-create').checked, studyRoles: pickedRoles($('redit')) }).then(function () { $('redit').innerHTML = ''; people(); }).catch(function (x) { err(x.message); }); });
           $('redit').scrollIntoView({ block: 'nearest' });
         } else if (a('data-preset')) {
           var q = who(a('data-preset'));
@@ -984,12 +1102,15 @@
         var ses = getSession();
         $('whoami').innerHTML = esc(me.name) + ' <span class="pill">' + esc(me.role === 'owner' ? 'owner' : 'researcher') + '</span>' + (ses ? ' <a href="/lab/account/">Account</a>' : '') + ' <a href="/lab/guide/">Researcher guide</a> <button type="button" class="secondary small" id="signout">Sign out</button>';
         $('signout').addEventListener('click', function () { endSession().then(function () { location.reload(); }); });
+        var creates = isOwner() || !!me.canCreate;
         document.querySelectorAll('[data-owner]').forEach(function (el) { el.hidden = !isOwner(); });
+        document.querySelectorAll('[data-create]').forEach(function (el) { el.hidden = !creates; });
+        $('researchers').hidden = $('labactivity').hidden = !isOwner();
         $('ctitle').textContent = isOwner() ? 'CCAIR Lab: studies' : 'My studies';
         $('cintro').innerHTML = isOwner()
           ? 'Every study runs on the same engine: sign-in, consent, sessions, surveys, behavior traces, exports, backups, team access, and the live self-test. A new study gets its own data store, admin page, and participant link. Studies start unlisted; list one on <a href="/lab/">the lab page</a> once its consent text is IRB-approved and it is ready to recruit. New to the lab? Send researchers to the <a href="/lab/guide/">researcher guide</a>.'
           : 'The studies your account can open, with your role in each. Open a study\'s admin page to see participants, edit content, and download data (what you can do depends on your role). Backup and self-test times come from the study itself; click "Load counts" to count participants. New to the lab? Read the <a href="/lab/guide/">researcher guide</a>.';
-        if (!isOwner()) { list(); return; }
+        if (!creates) { list(); return; }
         return Promise.all([getJSON('types'), getJSON('templates').catch(function () { return []; })]).then(function (res) {
           TYPES = res[0]; TPLS = res[1];
           // Templates first; a blank study of each type after them, for researchers who want to start from nothing.
@@ -1012,7 +1133,7 @@
             $('nname').focus({ preventScroll: true });
           });
           return getJSON('mystudies');
-        }).then(function (rows) { ROWS = rows; $('invroles').innerHTML = roleSelects('inv-'); wireResearchers(); list(); people(); });
+        }).then(function (rows) { ROWS = rows; list(); if (isOwner()) { $('invroles').innerHTML = roleSelects('inv-'); wireResearchers(); people(); } });
       }).catch(function (e) { setKey(''); if (e.code === 'session_expired') setSession(null); $('signinbox').hidden = false; $('app').hidden = true; err(e.message); });
     }
     $('keyform').addEventListener('submit', function (e) { e.preventDefault(); setSession(null); setKey($('key').value.trim()); begin(); });

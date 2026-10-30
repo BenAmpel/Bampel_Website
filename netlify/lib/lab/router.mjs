@@ -25,6 +25,7 @@ import { wideRows, WIDE_FIRST } from './wide.mjs';
 import { saveChecks, LANGUAGES } from './envcheck.mjs';
 import { saveDq } from './quality.mjs';
 import { buildBundle } from './bundle.mjs';
+import { sealInfo, setSealKey } from './seal.mjs';
 
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
 const csv = (text, name) => new Response(text, { headers: { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': `attachment; filename="${name}"`, 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
@@ -38,7 +39,8 @@ const NEED = {
   'content-save': 'editor', 'content-restore': 'editor', import: 'editor', preview: 'editor',
   roster: 'manager', lookup: 'manager', 'credit.csv': 'manager', create: 'manager', 'set-test': 'manager',
   delete: 'owner', 'delete-test': 'owner', 'self-test': 'owner', 'backup-status': 'owner', 'backup-run': 'owner', 'backup-part': 'owner',
-  team: 'owner', 'team-add': 'owner', 'team-remove': 'owner', activity: 'owner'
+  team: 'owner', 'team-add': 'owner', 'team-remove': 'owner', activity: 'owner',
+  seal: 'viewer', 'seal-set': 'owner', members: 'owner', 'member-set': 'owner'   // the study's public key for sealed fields (seal.mjs); the private key never comes here
 };
 
 export async function handle(req, { getStore, env, now }) {
@@ -97,7 +99,7 @@ export async function handle(req, { getStore, env, now }) {
         case 'handoff': {   // the code and redirect for the outcome this participant has reached (none while the study goes on)
           const p = await E.loadParticipant(S, pid), c = await content.getContent(S.store, type);
           if (!p) return json({ error: 'expired' }, 401);
-          return json(await recruit.handoff(S, p, (await E.resume(S, pid)).status || {}, c.enrollment.panel));
+          return json(await recruit.handoff(S, p, (await E.resume(S, pid)).status || {}, c.enrollment.panel, await E.panelIdFor(S, p.code, body.panelId)));
         }
       }
     }
@@ -161,6 +163,8 @@ export async function handle(req, { getStore, env, now }) {
           _conditions: type.conditionsOf(c), _surveyRules: type.surveyRules || [], _questionTypes: content.QUESTION_TYPES, _panelPresets: recruit.presetList(), _languages: LANGUAGES });
         case 'content-history': return json(await content.contentHistory(S.store));
         case 'team': return json(await admin.listMembers(S.store));
+        case 'seal': return json(await sealInfo(S.store));
+        case 'members': return json(await acc.studyTeam(registry, study.id));   // researcher accounts with a role here
         case 'activity': return json(await admin.auditLog(S.store));
         case 'backup-status': return json(await backup.backupStatus(backupStore()));
         case 'backup-part': {
@@ -257,6 +261,16 @@ export async function handle(req, { getStore, env, now }) {
           return json({ ok: true, participants: r.participants, records: r.records });
         }
         case 'team-add': return reply(await admin.addMember(S.store, body.name, body.role, who));
+        case 'member-set': {   // give, change or remove one researcher account's role on this study (accounts.mjs, setStudyMember)
+          const r = await acc.setStudyMember(registry, study.id, { email: body.email, name: body.name, role: body.role }, who, clock());
+          if (r.ok) await admin.audit(S.store, who, 'team.account', `${r.member.email}: ${r.member.role || 'removed'}`, clock());
+          return reply(r);
+        }
+        case 'seal-set': {   // body.publicKey: base64url X25519 key, or null to stop sealing new values
+          const r = await setSealKey(S.store, body.publicKey == null ? null : String(body.publicKey), who, clock());
+          if (r.ok) await admin.audit(S.store, who, 'seal.set', r.enabled ? `sealing new values with key ${r.kid}` : 'sealing turned off', clock());
+          return reply(r);
+        }
         case 'team-remove': return reply(await admin.removeMember(S.store, body.id, who));
       }
     }
@@ -301,7 +315,7 @@ async function labRoute(route, req, body, { registry, getStore, ownerKey, clock 
     session = await acc.sessionAccount(registry, bearer, now);
     if (!session) return json({ error: 'session_expired', hint: 'Your sign-in expired. Sign in again.' }, 401);
     const a = session.account;
-    who = { id: 'account', name: a.name, role: a.labOwner ? 'owner' : 'researcher', accountId: a.id };
+    who = { id: 'account', name: a.name, role: a.labOwner ? 'owner' : 'researcher', accountId: a.id, canCreate: a.canCreate === true };
   } else {
     if (!ownerKey) return json({ error: 'admin_disabled', hint: 'Set LAB_ADMIN_KEY (16+ characters) in Netlify environment variables.' }, 503);
     who = await admin.authAdmin(registry, key, ownerKey, now);
@@ -326,7 +340,7 @@ async function labRoute(route, req, body, { registry, getStore, ownerKey, clock 
       return json(await studySummary({ store: blobsStore(getStore, study.storeName), type: typeFor(study), study }));
     }
   }
-  if (!isOwner) return json({ error: 'forbidden' }, 403);
+  if (!isOwner) return researcherRoute(route, req, body, { registry, getStore, session, who, now, post, needPost });
   const studyIds = async () => (await listStudies(registry, { all: true })).map(s => s.id);
   switch (route) {
     case 'studies': return json(await listStudies(registry, { all: true }));
@@ -356,6 +370,53 @@ async function labRoute(route, req, body, { registry, getStore, ownerKey, clock 
     case 'activity': return json(await admin.auditLog(registry));
   }
   return json({ error: 'not_found' }, 404);
+}
+
+// What a researcher (not a lab owner) may do in the console. A study creator (canCreate) makes studies, from a template, a
+// type, a design file, or a copy of a study they own, up to MAX_OWN_STUDIES, and becomes owner of each. An owner of a study
+// renames, archives, or restores it; the account that made a study can also delete it for good. Listing a study on the public
+// lab page stays with the lab owner.
+async function researcherRoute(route, req, body, { registry, getStore, session, who, now, post, needPost }) {
+  const a = session && session.account;
+  if (!a) return json({ error: 'forbidden' }, 403);
+  const owns = id => a.studyRoles && a.studyRoles[id] === 'owner';
+  const creator = a.canCreate === true;
+  const made = async () => (await listStudies(registry, { all: true })).filter(s => s.createdByAccount === a.id && !s.deletingAt).length;
+  const tooMany = async () => ((await made()) >= acc.MAX_OWN_STUDIES ? json({ error: 'limit', hint: `You have made ${acc.MAX_OWN_STUDIES} studies, the most an account can. Delete one you no longer need, or ask the lab owner.` }, 403) : null);
+  const andOwn = async r => { if (r.ok) await acc.grantOwner(registry, a.id, r.study.id); return r; };
+  switch (route) {
+    case 'types': return creator ? json(Object.values(TYPES).map(t => ({ id: t.id, label: t.label, description: t.description }))) : json({ error: 'forbidden' }, 403);
+    case 'templates': return creator ? json(templateList()) : json({ error: 'forbidden' }, 403);
+    case 'create': {
+      if (!creator) return json({ error: 'forbidden', hint: 'Your account cannot create studies. Ask the lab owner.' }, 403);
+      if (!post) return needPost();
+      const lim = await tooMany(); if (lim) return lim;
+      if (body.design) return reply(await andOwn(await importDesign(registry, st => blobsStore(getStore, st.storeName), body.design, { id: body.id, name: body.name, description: body.description }, who, now)));
+      return reply(await andOwn(await createStudy(registry, body, who)));
+    }
+    case 'clone': {
+      if (!creator) return json({ error: 'forbidden', hint: 'Your account cannot create studies. Ask the lab owner.' }, 403);
+      if (!post) return needPost();
+      const from = await getStudy(registry, String(body.from || ''));
+      if (!from || !owns(from.id)) return json({ error: 'forbidden', hint: 'You can copy only studies you own.' }, 403);
+      const lim = await tooMany(); if (lim) return lim;
+      return reply(await andOwn(await cloneStudy(registry, st => blobsStore(getStore, st.storeName), { store: blobsStore(getStore, from.storeName), type: typeFor(from), study: from }, { id: body.id, name: body.name }, who, now)));
+    }
+    case 'update': {
+      if (!post) return needPost();
+      const id = String(body.id || '');
+      if (!owns(id)) return json({ error: 'forbidden' }, 403);
+      if (body.listed !== undefined) return json({ error: 'forbidden', hint: 'Only the lab owner lists a study on the public lab page. Your participant link works without it.' }, 403);
+      return reply(await updateStudy(registry, id, { name: body.name, description: body.description, archived: body.archived }));
+    }
+    case 'delete-study': {   // only a study this account made: an owner role the lab owner gave on their own study does not reach this far
+      if (!post) return needPost();
+      const s = await registry.get(`studies/${String(body.id || '')}`);
+      if (!s || !owns(s.id) || s.createdByAccount !== a.id) return json({ error: 'forbidden', hint: 'You can permanently delete only studies you created. Ask the lab owner.' }, 403);
+      return reply(await deleteStudy({ registry, registryBackup: blobsStore(getStore, 'lab-registry-backup'), getStoreFor: name => blobsStore(getStore, name) }, body.id, body.confirm, { ...who, role: 'owner' }, { now }));   // owner of this study (checked above)
+    }
+  }
+  return json({ error: 'forbidden' }, 403);
 }
 
 // Sign-in and links. No credentials needed; these never say whether an email has an account.
@@ -403,7 +464,7 @@ async function accountRoute(route, req, body, { registry, session, now }) {
 // last backup and one for the last self-test per study. Participant counts are not here (see studySummary).
 async function studiesFor(registry, getStore, account) {
   const all = await listStudies(registry, { all: true });
-  const rows = account && !account.labOwner ? all.filter(s => Object.hasOwn(account.studyRoles || {}, s.id) && !s.archived) : all;
+  const rows = account && !account.labOwner ? all.filter(s => Object.hasOwn(account.studyRoles || {}, s.id) && (!s.archived || account.studyRoles[s.id] === 'owner')) : all;
   return Promise.all(rows.map(async s => {
     const bk = await backup.backupStatus(blobsStore(getStore, s.backupName)), st = await blobsStore(getStore, s.storeName).get('meta/last-selftest');
     return { id: s.id, name: s.name, type: s.type, typeLabel: (TYPES[s.type] || {}).label || s.type, role: account && !account.labOwner ? account.studyRoles[s.id] : 'owner', paths: s.paths, listed: !!s.listed, archived: !!s.archived, builtIn: !!s.builtIn,

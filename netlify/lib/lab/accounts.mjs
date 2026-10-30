@@ -205,7 +205,7 @@ export async function bumpEpoch(registry, id, extra) {
 }
 
 // ---------- accounts ----------
-export const publicAccount = a => ({ id: a.id, email: a.email, name: a.name, labOwner: !!a.labOwner, disabled: !!a.disabled, status: a.disabled ? 'disabled' : a.pwHash ? 'active' : 'invited',
+export const publicAccount = a => ({ id: a.id, email: a.email, name: a.name, labOwner: !!a.labOwner, canCreate: !!a.canCreate, disabled: !!a.disabled, status: a.disabled ? 'disabled' : a.pwHash ? 'active' : 'invited',
   totp: !!(a.totp && a.totp.enabledAt), studyRoles: a.studyRoles || {}, createdAt: a.createdAt, createdBy: a.createdBy, passwordChangedAt: a.passwordChangedAt || null });
 
 const getAccount = async (registry, id) => { const a = ID_RE.test(String(id)) ? await registry.get(`accounts/${id}`) : null; return a ? { ...a, id } : null; };
@@ -238,21 +238,21 @@ async function issueLink(registry, kind, acct, who, now) {
   return { token, path: `/lab/signin/#${kind === 'invite' ? 'invite' : 'reset'}=${token}`, expiresAt };
 }
 
-export async function inviteResearcher(registry, { name, email, studyRoles, labOwner }, who, studyIds, now) {
+export async function inviteResearcher(registry, { name, email, studyRoles, labOwner, canCreate }, who, studyIds, now) {
   email = normalizeEmail(email); name = clean(name, 80);
   if (!validEmail(email)) return { error: 'bad_email', status: 400, hint: 'Enter a valid email address.' };
   if (!name) return { error: 'name_required', status: 400, hint: 'Enter the researcher\'s name.' };
   const cr = cleanRoles(studyRoles, studyIds); if (cr.error) return cr;
   const id = accountId(email);
-  const rec = { email, name, inc: randomBytes(8).toString('hex'), linkEpoch: 0, pwHash: null, pwSalt: null, pwParams: null, totp: null, studyRoles: cr.roles, labOwner: labOwner === true, disabled: false, createdAt: now, createdBy: who.name, tokenEpoch: 0, passwordChangedAt: null };
+  const rec = { email, name, inc: randomBytes(8).toString('hex'), linkEpoch: 0, pwHash: null, pwSalt: null, pwParams: null, totp: null, studyRoles: cr.roles, labOwner: labOwner === true, canCreate: canCreate === true, disabled: false, createdAt: now, createdBy: who.name, tokenEpoch: 0, passwordChangedAt: null };
   if (!(await setNew(registry, `accounts/${id}`, rec))) {
     const cur = await getAccount(registry, id);
     if (cur && cur.pwHash) return { error: 'exists', status: 409, hint: 'That person already has an account. Use "Reset password link" instead.' };
-    await update(registry, `accounts/${id}`, d => { d.name = name; d.studyRoles = cr.roles; d.labOwner = labOwner === true; d.disabled = false; });   // still waiting for the first invitation: refresh it
+    await update(registry, `accounts/${id}`, d => { d.name = name; d.studyRoles = cr.roles; d.labOwner = labOwner === true; d.canCreate = canCreate === true; d.disabled = false; });   // still waiting for the first invitation: refresh it
   }
   const link = await issueLink(registry, 'invite', { id }, who, now);
   if (link.error) return link;
-  await audit(registry, who, 'researcher.invite', `${name} <${email}>${labOwner === true ? ', lab owner' : ''}${rolesText(cr.roles)}`, now);
+  await audit(registry, who, 'researcher.invite', `${name} <${email}>${labOwner === true ? ', lab owner' : ''}${canCreate === true ? ', can create studies' : ''}${rolesText(cr.roles)}`, now);
   return { ok: true, link, account: publicAccount({ ...(await registry.get(`accounts/${id}`)), id }) };
 }
 const rolesText = r => { const e = Object.entries(r || {}); return e.length ? '; ' + e.map(([s, x]) => `${s}: ${x}`).join(', ') : ''; };
@@ -277,12 +277,14 @@ export async function updateResearcher(registry, id, ch, who, studyIds, now) {
   const r = await update(registry, `accounts/${id}`, d => {
     if (roles) d.studyRoles = roles;
     if (typeof ch.labOwner === 'boolean') d.labOwner = ch.labOwner;
+    if (typeof ch.canCreate === 'boolean') d.canCreate = ch.canCreate;
     if (typeof ch.disabled === 'boolean') d.disabled = ch.disabled;
     if (name) d.name = name;
   });
   if (r.error) return r;
   if (roles) await audit(registry, who, 'researcher.roles', `${a.email}: ${Object.keys(roles).length ? rolesText(roles).slice(2) : 'no study access'}`, now);
   if (typeof ch.labOwner === 'boolean' && ch.labOwner !== !!a.labOwner) await audit(registry, who, 'researcher.lab_owner', `${a.email}: ${ch.labOwner ? 'made lab owner' : 'lab owner removed'}`, now);
+  if (typeof ch.canCreate === 'boolean' && ch.canCreate !== !!a.canCreate) await audit(registry, who, 'researcher.can_create', `${a.email}: ${ch.canCreate ? 'may create studies' : 'may no longer create studies'}`, now);
   if (typeof ch.disabled === 'boolean' && ch.disabled !== !!a.disabled) { if (ch.disabled) await bumpEpoch(registry, id); await audit(registry, who, ch.disabled ? 'researcher.disable' : 'researcher.enable', a.email, now); }
   return { ok: true, account: publicAccount({ ...r.value, id }) };
 }
@@ -314,6 +316,54 @@ export async function dropStudyRoles(registry, studyId) {
     changed.push(a.email);
   }
   return { ok: true, changed };
+}
+
+// ---------- study creators and study teams (researchers who run their own studies) ----------
+// A researcher with canCreate makes studies and becomes owner of each one they make, and of no other. A study owner manages
+// who else may open that study (researcher accounts, by email) without the lab owner: they can give a role on their own
+// studies only, never lab owner or study creation, and never change an account's name, password, or other studies.
+export const MAX_OWN_STUDIES = 10;
+export async function grantOwner(registry, accountId, studyId) {
+  return update(registry, `accounts/${accountId}`, d => { d.studyRoles = { ...(d.studyRoles || {}), [studyId]: 'owner' }; });
+}
+
+// The researcher accounts with a role on one study (what a study owner sees: name, email, role, status; nothing else).
+export async function studyTeam(registry, studyId) {
+  const out = [];
+  for (const k of await registry.list('accounts/')) {
+    const a = await registry.get(k);
+    if (!a || !(a.labOwner || (a.studyRoles && Object.hasOwn(a.studyRoles, studyId)))) continue;
+    out.push({ id: k.slice(9), name: a.name, email: a.email, role: a.labOwner ? 'owner' : a.studyRoles[studyId], labOwner: !!a.labOwner, status: a.disabled ? 'disabled' : a.pwHash ? 'active' : 'invited' });
+  }
+  return out.sort((x, y) => Number(y.labOwner) - Number(x.labOwner) || String(x.name || x.email).localeCompare(String(y.name || y.email)));
+}
+
+// Give, change or take away one account's role on one study. A new email gets an account with only that role and an
+// invitation link (the study owner sends it); an account still waiting for its first sign-in gets a fresh link.
+export async function setStudyMember(registry, studyId, { email, name, role }, who, now) {
+  email = normalizeEmail(email); name = clean(name, 80);
+  if (!validEmail(email)) return { error: 'bad_email', status: 400, hint: 'Enter a valid email address.' };
+  if (role != null && role !== '' && !ROLES.includes(role)) return { error: 'bad_role', status: 400, hint: `"${role}" is not a role.` };
+  role = role || null;
+  const id = accountId(email), cur = await getAccount(registry, id);
+  if (cur && who.accountId === id) return { error: 'self', status: 400, hint: 'You cannot change your own access. Another owner of the study can.' };
+  if (cur && cur.labOwner) return { error: 'lab_owner', status: 400, hint: 'That person is a lab owner and already has access to every study.' };
+  if (!cur) {
+    if (!role) return { error: 'not_found', status: 404, hint: 'That person has no access to this study.' };
+    if (!name) return { error: 'name_required', status: 400, hint: 'Enter the researcher\'s name.' };
+    const rec = { email, name, inc: randomBytes(8).toString('hex'), linkEpoch: 0, pwHash: null, pwSalt: null, pwParams: null, totp: null, studyRoles: { [studyId]: role }, labOwner: false, canCreate: false,
+      disabled: false, createdAt: now, createdBy: who.name, tokenEpoch: 0, passwordChangedAt: null };
+    if (!(await setNew(registry, `accounts/${id}`, rec))) return { error: 'conflict', status: 409, hint: 'Try again.' };
+  } else {
+    if (cur.disabled && role) return { error: 'disabled', status: 400, hint: 'That account is disabled. Ask the lab owner.' };
+    const r = await update(registry, `accounts/${id}`, d => { d.studyRoles = { ...(d.studyRoles || {}) }; if (role) d.studyRoles[studyId] = role; else delete d.studyRoles[studyId]; });
+    if (r.error) return r;
+  }
+  const after = await getAccount(registry, id);
+  const link = role && !after.pwHash ? await issueLink(registry, 'invite', { id }, who, now) : null;
+  if (link && link.error) return link;
+  await audit(registry, who, 'study.member', `${studyId}: ${email} ${role ? 'is ' + role : 'removed'}`, now);
+  return { ok: true, member: { id, name: after.name, email, role, status: after.pwHash ? 'active' : 'invited' }, ...(link ? { link } : {}) };
 }
 
 export async function removeResearcher(registry, id, who, now) {
@@ -392,7 +442,7 @@ async function attemptGuard(registry, specs, now) {
 }
 const lockedReply = (until, now) => ({ error: 'locked', status: 429, hint: 'Too many sign-in attempts. Wait 15 minutes and try again, or ask the lab owner for help.', retryAfterSeconds: Math.max(1, Math.ceil((until - now) / 1000)) });
 
-export const me = a => ({ id: a.id, email: a.email, name: a.name, labOwner: !!a.labOwner, totp: !!(a.totp && a.totp.enabledAt), studyRoles: a.studyRoles || {} });
+export const me = a => ({ id: a.id, email: a.email, name: a.name, labOwner: !!a.labOwner, canCreate: !!a.canCreate, totp: !!(a.totp && a.totp.enabledAt), studyRoles: a.studyRoles || {} });
 const BAD = { error: 'bad_credentials', status: 401, hint: 'The email or password was not accepted.' };
 
 // Failures are logged at most once per email per 15 minutes (the audit entry says so), not once per attempt.

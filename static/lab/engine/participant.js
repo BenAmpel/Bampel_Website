@@ -420,7 +420,7 @@
       if (r.error === 'confirm_new') return showConfirm(r.email || creds.email);
       if (r.error && creds.panelId != null) return show('<h1>' + Th('login_title') + '</h1>' + errorBox('This study link is not complete. Please go back to the study page where you found it and open it again.'));
       if (r.error) return showLogin(loginError(r), creds.email != null ? 'email' : 'code', creds.email);
-      S.token = r.token; store(tokenKey, r.token); store(panelKey, creds.panelId != null ? '1' : null);
+      S.token = r.token; store(tokenKey, r.token); store(panelKey, creds.panelId != null ? String(creds.panelId) : null);   // kept in this tab: the server may hold the ID sealed (seal.mjs)
       if (r.status && r.status.screenedOut) return showScreenedOut();   // for example, the study was already full
       if (!r.consented) return showConsent();
       showStatus(r.status);
@@ -468,7 +468,7 @@
   }
   // Arrived from an online panel's link (Prolific and similar) in this tab: they never typed an email or code, so
   // "sign in again" and "Sign out" mean nothing to them; the panel's link is how they come back.
-  function viaPanel() { return !!(S.content && S.content.panel) && store(panelKey) === '1'; }
+  function viaPanel() { return !!(S.content && S.content.panel) && !!store(panelKey); }
   var PANEL_NAMES = { PROLIFIC_PID: 'Prolific', workerId: 'Amazon MTurk', participantId: 'CloudResearch Connect' };   // presets in netlify/lib/lab/recruit.mjs
   function panelName() { var pn = S.content.panel || {}; return pn.label || PANEL_NAMES[pn.param] || 'the site where you found this study'; }
   function signOutButton() { return viaPanel() ? '' : '<button class="secondary" id="out">' + Th('sign_out') + '</button>'; }
@@ -524,7 +524,7 @@
   function handoff(got, onReady) {
     var box = document.getElementById('handoff');
     if (!box || !S.token) return;
-    (got ? Promise.resolve(got) : api('handoff', { token: S.token })).then(function (r) {
+    (got ? Promise.resolve(got) : api('handoff', { token: S.token, panelId: store(panelKey) || undefined })).then(function (r) {
       // A failed request must not leave the page promising a button or code that never comes: say so and offer a retry.
       if (!r || r.error) {
         box.innerHTML = errorBox(ERR[(r && r.error)] || ERR.server_error) + '<div class="actions"><button type="button" class="secondary" id="hretry">Try again</button></div>';
@@ -557,7 +557,7 @@
   // and the panel's screened-out code. The page says "study full" when that is the reason.
   function showScreenedOut() {
     progress.textContent = ''; S.lab = null;
-    api('handoff', { token: S.token }).then(function (r) {
+    api('handoff', { token: S.token, panelId: store(panelKey) || undefined }).then(function (r) {
       var full = r && r.reason === 'quota_full';
       show('<h1>' + Th(full ? 'full_title' : 'screenout_title') + '</h1>' + Tp(full ? 'full_body' : 'screenout_body') + '<div id="handoff" aria-live="polite"></div>');
       handoff(r);

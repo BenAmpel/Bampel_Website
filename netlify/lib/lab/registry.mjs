@@ -63,7 +63,7 @@ export async function createStudy(registry, { id, name, type, description, templ
   if (!String(name || '').trim()) return { error: 'name_required', status: 400, hint: 'Give the study a name.' };
   const prefix = (id.replace(/[^a-z]/g, '') + 'xx').slice(0, 2).toUpperCase();
   const s = { id, name: String(name).trim().slice(0, 120), type, description: String(description || '').slice(0, 500),
-    storeName: `lab-${id}`, backupName: `lab-${id}-backup`, codePrefix: prefix, listed: false, createdAt: now, createdBy: who.name, ...(template ? { template } : {}) };
+    storeName: `lab-${id}`, backupName: `lab-${id}-backup`, codePrefix: prefix, listed: false, createdAt: now, createdBy: who.name, ...(who.accountId ? { createdByAccount: who.accountId } : {}), ...(template ? { template } : {}) };
   if (registry.setIf) { if (!(await registry.setIf(`studies/${id}`, s, { onlyIfNew: true }))) return { error: 'exists', status: 409 }; }
   else { if (await registry.get(`studies/${id}`)) return { error: 'exists', status: 409 }; await registry.set(`studies/${id}`, s); }
   return { ok: true, study: withPaths(s) };
@@ -93,7 +93,7 @@ export async function updateStudy(registry, id, changes) {
 export async function deleteStudy(ctx, id, confirm, who, { now = Date.now(), budgetMs = 6000 } = {}) {   // budget: well inside a function's 10-second limit
   const { registry, registryBackup, getStoreFor } = ctx, t0 = Date.now();
   id = String(id || '');
-  if (!who || who.role !== 'owner') return { error: 'forbidden', status: 403, hint: 'Only a lab owner can delete a study.' };
+  if (!who || who.role !== 'owner') return { error: 'forbidden', status: 403, hint: 'Only a lab owner, or the researcher who created the study, can delete it.' };
   if (BUILT_IN[id]) return { error: 'built_in', status: 400, hint: 'Built-in studies cannot be deleted.' };
   const s = ID_RE.test(id) ? await registry.get(`studies/${id}`) : null;
   if (!s) return { error: 'not_found', status: 404, hint: 'That study no longer exists.' };

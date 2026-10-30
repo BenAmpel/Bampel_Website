@@ -9,6 +9,7 @@
 // (participants/{id}.panel), so they appear in the exports.
 
 import { update } from './store.mjs';
+import { isSealed } from './seal.mjs';
 
 export const OUTCOMES = ['complete', 'screened_out', 'returned'];
 const CODE_FIELD = { complete: 'completionCode', screened_out: 'screenOutCode', returned: 'returnCode' };
@@ -86,12 +87,12 @@ export function outcomeOf(p, st) {
 }
 
 // What the participant's last page shows: the code to copy and the address that takes them back to the panel.
-export async function handoff(S, p, st, pn) {
+export async function handoff(S, p, st, pn, sentPanelId = '') {
   const outcome = outcomeOf(p, st);
   if (!outcome) return { outcome: null };
   const code = (pn && pn[CODE_FIELD[outcome]]) || '';
   const contact = pn && pn.enabled ? await S.store.get(`contact/${p.code}`) : null;
-  const url = pn && pn.enabled ? redirectFor(pn, outcome, code, contact && contact.panelId) : '';
+  const url = pn && pn.enabled ? redirectFor(pn, outcome, code, contact && !isSealed(contact.panelId) ? contact.panelId : sentPanelId) : '';
   return { outcome, code, url, panel: pn && pn.enabled ? (PRESETS[pn.preset] || {}).label || 'the study site' : null,
     ...(outcome === 'screened_out' && p.screenedOut && p.screenedOut.reason ? { reason: p.screenedOut.reason } : {}) };
 }

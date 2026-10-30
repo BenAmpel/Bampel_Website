@@ -11,7 +11,8 @@
 //   data/{id}/s{n}/t{i}          one trial (answers, evidence, trace features; no raw events)
 //   raw/{id}/s{n}/t{i}           raw TraceLab events for that trial
 //   data/{id}/s{n}/practice | survey-pre | survey-post
-//   contact/{id}                 the email (extra credit only; never in research exports)
+//   contact/{id}                 the email or panel ID (extra credit and bonuses only; never in research exports; sealed when
+//                                the study has a key, seal.mjs)
 //   cond/{condition}/{id}, cond-test/{condition}/{id}   assignment counts (minimization)
 //   screenout/{id}               write-once: the participant was screened out (reason, time)
 //   meta/pepper, content/*, admins/*, audit/*, selftest/*
@@ -27,6 +28,7 @@ import { quotaState } from './quota.mjs';
 import { cleanFullscreen } from './envcheck.mjs';
 import { chooseRow, applyRow, markerKey, latinColumns } from './latin.mjs';
 import { EXTRA_TYPES, cleanExtra } from './questiontypes.mjs';
+import { sealerFor, sensitiveEmbedded } from './seal.mjs';
 
 export const TOKEN_HOURS = 12;
 const DEFAULT_GAP = 6;
@@ -170,18 +172,30 @@ export function cleanAnswers(d, items, ctx = {}) {
     else out[it.id] = String(v).slice(0, 4000);
   }
   if (items.some(it => it.displayIf)) out = resolveLogic(items, out, { ed: ctx.embedded, condition: ctx.condition }).answers;
+  if (ctx.seal) for (const it of items) if (it.type === 'text' && typeof out[it.id] === 'string') out[it.id] = ctx.seal(out[it.id]);   // free text (seal.mjs)
   return out;
 }
 
 // Embedded data for a session: URL parameters the browser sent (only names declared in the content, cleaned
-// and capped) and constants from the content. Never used for sign-in or identity.
-export function resolveEmbedded(defs, sent) {
+// and capped) and constants from the content. Never used for sign-in or identity. With a sealer, fields that identify a
+// person (a panel ID, an email; seal.mjs, sensitiveEmbedded) are sealed before the plan is stored.
+export function resolveEmbedded(defs, sent, { seal = null, panelParam = '' } = {}) {
   const out = {}, src = sent && typeof sent === 'object' ? sent : {};
   for (const d of defs || []) {
     if (d.source === 'value') out[d.name] = String(d.value ?? '').slice(0, 300);
     else { const v = src[d.name]; out[d.name] = typeof v === 'string' ? v.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 200) : ''; }
+    if (seal && sensitiveEmbedded(d, panelParam)) out[d.name] = seal(out[d.name]);
   }
   return out;
+}
+
+// The participant's own panel ID, sent back by their tab for the redirect when the stored copy is sealed: accepted only if
+// it hashes to this participant's study ID, so a tab can never put someone else's ID in the address.
+export async function panelIdFor(S, code, sent) {
+  const id = String(sent || '').trim();
+  if (!/^[A-Za-z0-9_-]{4,64}$/.test(id)) return '';
+  const pepper = await getPepper(S.store);
+  return pepper && 'P-' + hmac(pepper, 'panel|' + id).toString('hex').slice(0, 16) === code ? id : '';
 }
 
 // ---------- participant routes ----------
@@ -202,7 +216,8 @@ export async function login(S, creds = {}, now = Date.now()) {
       if (!creds.confirm) return { error: 'confirm_new', status: 401, email };
       [p] = await enroll(S, [pid], { gapDays: en.gapDays, label: en.label || null, selfSignup: true }, now, Math.random);
     }
-    await setNew(store, contactKey(p.code), { email, firstSeenAt: now });
+    const seal = await sealerFor(S);
+    await setNew(store, contactKey(p.code), { email: seal ? seal(email) : email, firstSeenAt: now });
   } else if (creds.panelId != null) {
     // Online panels (Prolific, MTurk, CloudResearch): the panel's participant ID arrives in the study link
     // (?PROLIFIC_PID=...). The study ID is a keyed hash of it, like an email, so the same person always gets the
@@ -215,7 +230,7 @@ export async function login(S, creds = {}, now = Date.now()) {
     if (!p) [p] = await enroll(S, [pid], { gapDays: en.gapDays, label: panel.label || 'panel', selfSignup: true }, now, Math.random);
     // keepId: false (a study whose consent promises the panel ID is stored only hashed) skips the raw copy; the
     // record is still found again from the same ID, but bonus lists and {pid} completion links cannot name it.
-    if (panel.keepId !== false) await setNew(store, contactKey(p.code), { panelId: id, firstSeenAt: now });
+    if (panel.keepId !== false) { const seal = await sealerFor(S); await setNew(store, contactKey(p.code), { panelId: seal ? seal(id) : id, firstSeenAt: now }); }
     await recordPanelMeta(S, p.code, creds.panelMeta, now);   // the panel's study and session IDs (not identifying)
   } else {
     p = await loadParticipant(S, creds.code);
@@ -260,7 +275,7 @@ export function buildPlan(S, p, n, c, extra = {}) {
   const ordered = (list, k) => { const r = randomizeQuestions(list, orand); if (r.shown) order[k] = r.shown; return r.items; };
   const preItems = ordered(itemsFor(c.survey.pre, 'pre', ctx, S.type), 'pre'), postItems = ordered(itemsFor(c.survey.post, 'post', ctx, S.type), 'post');
   if (Array.isArray(plan.questions)) plan.questions = ordered(plan.questions, 'questions');
-  return { ...plan, session: n, contentVersion: c.version || 0, createdAt: Date.now(), condition: p.condition, embedded: resolveEmbedded(c.embedded, extra.embedded),
+  return { ...plan, session: n, contentVersion: c.version || 0, createdAt: Date.now(), condition: p.condition, embedded: resolveEmbedded(c.embedded, extra.embedded, { seal: extra.seal, panelParam: c.enrollment && c.enrollment.panel && c.enrollment.panel.enabled ? c.enrollment.panel.param : '' }),
     preItems, postItems, ...(Object.keys(order).length ? { order } : {}) };
 }
 
@@ -305,7 +320,7 @@ export async function startSession(S, code, now = Date.now(), extra = {}) {
   let plan = await getPlan(S, p, n);
   if (!plan) {   // written once: whoever writes first wins and everyone reads that copy
     const latinRow = await chooseRow(S, p, n, c);
-    if (await setNew(S.store, planKey(p.code, n), buildPlan(S, p, n, c, { ...extra, latinRow }))) {
+    if (await setNew(S.store, planKey(p.code, n), buildPlan(S, p, n, c, { ...extra, latinRow, seal: await sealerFor(S) }))) {
       await S.store.set(`started/${p.code}/s${n}-${now}`, { at: now });
       if (latinRow != null) await S.store.set(markerKey(p, n, latinRow), { at: now });
     }
@@ -347,6 +362,8 @@ export async function saveTrial(S, code, session, index, data, now = Date.now())
   if (!t) return { error: 'bad_index', status: 400 };
   // Hook: a study type that owns a trial's data (the economic game writes its round records on the server) takes over the save.
   if (kind === 'trial' && S.type.saveTrialHook) { const h = await S.type.saveTrialHook(S, p, plan, index, data, now); if (h) return h; }
+  const seal = await sealerFor(S);   // the type passes plan.seal to cleanAnswers and seals its own free text (seal.mjs)
+  if (seal) Object.defineProperty(plan, 'seal', { value: seal, enumerable: false });
   const clean = S.type.cleanTrialData(data, t, plan);
   const timing = cleanTiming(data && data.timing);   // engine-level, for every type: stimulus onset and the display's frame interval
   if (timing) clean.timing = timing;
@@ -397,7 +414,7 @@ export async function saveSurvey(S, code, session, kind, data, now = Date.now())
   if (kind === 'post' && (prog.sessions[session]?.trialsDone.length || 0) < plan.trials.length) return { error: 'trials_incomplete', status: 409 };
   const items = (kind === 'pre' ? plan.preItems : plan.postItems) || [];
   const created = await setNew(store, key, { code: p.code, condition: p.condition, session, kind, contentVersion: plan.contentVersion, receivedAt: now, ...(plan.order?.[kind] ? { shown: plan.order[kind] } : {}),
-    ...(plan.embedded && Object.keys(plan.embedded).length ? { embedded: plan.embedded } : {}), data: cleanAnswers(data, items, { condition: p.condition, embedded: plan.embedded }) });
+    ...(plan.embedded && Object.keys(plan.embedded).length ? { embedded: plan.embedded } : {}), data: cleanAnswers(data, items, { condition: p.condition, embedded: plan.embedded, seal: await sealerFor(S) }) });
   if (created && kind === 'post') await store.set(`done/${p.code}/s${session}-${now}`, { at: now });
   // Screening questions (for example eligibility): the type's rules decide whether these answers end the study.
   const why = created && S.type.screenSurvey ? S.type.screenSurvey(c, kind, session, (await store.get(key))?.data || {}) : null;

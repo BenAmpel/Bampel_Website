@@ -218,6 +218,7 @@ Each event has `t` (ms since start), `type`, and `item`. Types: `move`, `down`, 
 ## Before running a live study
 
 - IRB approval, with the consent text describing passive trace capture.
+- A study key on the Encryption tab, with two saved copies of the key file (see "Sealed fields").
 - An approved storage location for the `post` or `jatos` sink. Do not point a live study at storage that GSU has not approved for human-subjects data.
 - Test on desktop and mobile; pointer features mean little on touch devices.
 
@@ -343,6 +344,28 @@ Every contact, request-access, and trouble-signing-in action is a `mailto:bampel
 **Rotating the session secret** (if it may have leaked): delete `meta/session-secret` in the `lab-registry` store. Every session ends and the next sign-in creates a new secret.
 
 **Limits.** Sessions last 8 hours with no sliding renewal. There is no email verification beyond the invitation link, no self sign-up, and no single sign-on. The audit log lists attempts only for known accounts, so a flood against unknown addresses is visible only as `signin-fail/` keys.
+
+### Researchers who run their own studies
+
+The lab owner can let a researcher run studies without the owner's help: tick **Can create their own studies** when inviting them (or under Edit access). Such an account (`canCreate: true`):
+
+- **Creates studies** from a template, a type, a survey file or a design file, and copies studies it owns (`create`, `clone`, `types`, `templates` in `researcherRoute`, `router.mjs`). It becomes **owner of each study it makes and of no other** (`accounts.grantOwner`); the registry records `createdByAccount`. At most `MAX_OWN_STUDIES` (10) studies per account, counting deleted ones out.
+- **Builds its own team** on the study's Team tab (`members`, `member-set`; owners only; `accounts.setStudyMember`): add a person by email with a role. A new email gets an account with only that role and an invitation link that the study owner sends; an existing account just gets the role. A study owner can give roles on their own studies only, never lab owner or study creation, cannot change their own access, and cannot remove a lab owner. Removing someone takes effect on their next request. Changes go to the study's activity log (`team.account`) and the lab's (`study.member`).
+- **Renames, archives and restores** studies it owns, and **permanently deletes** archived studies it created (an owner role the lab owner gave on one of their own studies does not allow deleting it).
+- Does **not** see other studies, the Researchers list, or the lab activity log, cannot invite lab owners or other creators, and cannot list a study on the public lab page: listing stays with the lab owner (the participant link works without it).
+
+People a creator invites cannot create studies themselves. The lab owner still sees every study and every account, and can take creation away at any time (existing studies stay with their owners). Tests: `tests/lab/study-access.test.mjs`.
+
+## Sealed fields (encryption of identifiers and free text)
+
+Netlify encrypts its disks (AES-256), but anyone who can open the Netlify site, or holds a Netlify token, reads the data in the clear. With a study key, the lab encrypts the fields that identify people or carry their own words **before** storing them, so only whoever holds the study's private key file can read them. Code: `netlify/lib/lab/seal.mjs` (server), `static/lab/engine/seal.js` (browser), `scripts/lab/seal.mjs` (command line). Tests: `tests/lab/seal.test.mjs`.
+
+- **Sealed:** the email and panel ID under `contact/{id}`; link data that identifies a person (the panel's ID parameter, and embedded fields named like `email`, `PROLIFIC_PID`, `workerId`, `participant_id`, or marked `"sensitive": true`; mark one `"sensitive": false` to keep it readable); free-text answers (question type `text`) in surveys and items, their entries in the answer log, and typed call replies. **Not sealed:** ratings, choices, numbers, timings, traces, data-quality signals, call transcripts and recordings, uploaded files, and anything stored before the key was set.
+- **Scheme:** a sealed box. For each value a fresh X25519 key pair; the shared secret with the study key goes through HKDF-SHA256 to an AES-256-GCM key; the header names the key. A value is stored as `sealed:v1:<key id>:<base64url>`. The server holds only the public key (`meta/seal`), so it can seal but never open.
+- **Setting the key** (Encryption tab, owners): *Make a new key* creates the pair in the browser, downloads the private key file, and turns encryption on only after that file is chosen again, so it cannot start without a saved copy. Or run `node scripts/lab/seal.mjs keygen <study>` and paste the public key. **If every copy of the key file is lost, the sealed values are gone for good.** Keep two copies on GSU-approved storage. A new key applies to new values; older values need the older file (the tab lists every key used).
+- **Reading:** downloads from the admin page are opened in the browser as they are saved, once the Encryption tab is unlocked with the key file (kept in the tab's memory only; needs Chrome or Edge 133+, Firefox 130+, Safari 17+). Opened values get the same spreadsheet-formula guard as other exports. Backups stay sealed. Without the browser: `node scripts/lab/seal.mjs open <key.json> <export.csv>`.
+- **Panel redirects:** a sealed panel ID cannot go into the redirect address, so the participant's own tab keeps its ID and sends it back at the end; the server uses it only if it hashes to that participant's study ID (`engine.panelIdFor`). SONA credit links keep working.
+- **What it does not change:** the participant ID is still a keyed hash whose key (`meta/pepper`) is in the same store, so someone with Netlify access can still test whether a given email took part. They can no longer read who took part, or what anyone wrote.
 
 ## Economic games
 

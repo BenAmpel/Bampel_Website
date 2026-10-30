@@ -22,6 +22,7 @@
 // Participant renderer: static/lab/engine/types/multimodal.js. Editor: multimodal-admin.js.
 import { randomBytes } from 'node:crypto';
 import { cleanAnswers, loadParticipant, toCsv } from '../engine.mjs';
+import { sealLog } from '../seal.mjs';
 import { validateQuestions, getContent } from '../content.mjs';
 import { publicQuestions, evalDisplay, orderItems } from '../logic.mjs';
 import { getMany, setNew, deleteKeys } from '../store.mjs';
@@ -760,6 +761,7 @@ export default {
     const small = (v, max) => v && typeof v === 'object' && jsonSize(v) <= max ? v : null;
     const answerLog = Array.isArray(d.answerLog) ? d.answerLog.slice(0, 1000).map(a => ({ atMs: num(a?.atMs, 0, 864e5), name: typeof a?.name === 'string' ? a.name.slice(0, 40) : null,
       value: typeof a?.value === 'number' ? a.value : String(a?.value ?? '').slice(0, 300) })) : [];
+    sealLog(answerLog, questionsFor(plan, t), plan.seal);
     const dec = t.decision, decision = dec && dec.options.some(o => o.value === d.decision) ? d.decision : null;
     const points = dec && dec.mouseTracking ? cleanPoints(d.trajectory) : [];
     const m = d.media && typeof d.media === 'object' ? d.media : null;
@@ -773,10 +775,10 @@ export default {
       latencies: Array.isArray(c.latencies) ? c.latencies.slice(0, 100).map(x => num(x, 0, 6e4)) : [] } : null;
     const v = d.voice && typeof d.voice === 'object' ? d.voice : null;
     return {
-      answers: cleanAnswers(d.answers, questionsFor(plan, t), { condition: plan.condition, embedded: plan.embedded }),
+      answers: cleanAnswers(d.answers, questionsFor(plan, t), { condition: plan.condition, embedded: plan.embedded, seal: plan.seal }),
       decision, decisionMs: decision ? num(d.decisionMs, 0, 864e5) : null, trajectory: points.length ? points : null, mt: points.length && pathInput ? trajectoryMetrics(points) : null, mtInput,
       rtMs: num(d.rtMs, 0, 864e5), answerLog, traces: small(d.traces, 50000), media, call, callServer: small(d.callServer, 4000), checkServer: small(d.checkServer, 2000),
-      voice: v ? { recorded: v.recorded === true && !!plan.recording, durationMs: num(v.durationMs, 0, 36e5), typed: typeof v.typed === 'string' ? v.typed.slice(0, 4000) : '' } : null,
+      voice: v ? { recorded: v.recorded === true && !!plan.recording, durationMs: num(v.durationMs, 0, 36e5), typed: typeof v.typed === 'string' ? (plan.seal ? plan.seal(v.typed.slice(0, 4000)) : v.typed.slice(0, 4000)) : '' } : null,
       viewport: d.viewport ? { w: num(d.viewport.w, 0, 20000), h: num(d.viewport.h, 0, 20000) } : null, device: small(d.device, 4000), selfTest: d.selfTest === true || undefined,
       uiEvents: Array.isArray(d.uiEvents) ? d.uiEvents.slice(0, 200).map(x => ({ name: String(x && x.name || '').slice(0, 60), at: num(x && x.at, 0, 864e5) })) : [],
       live: t.item.live && dec ? X.cleanLive(d.live, num, dec.options) : null, slider: t.meta && t.meta.slider ? X.cleanSlider(d.slider, num) : null,

@@ -61,7 +61,7 @@ ok(await call(L + 'update', { body: { id: 'gone-study', archived: true } }));
 r = await del({ id: 'gone-study', confirm: 'gone-study' }, { key: team });
 assert.equal(r.status, 403, 'a team key for the study is refused');
 r = await del({ id: 'gone-study', confirm: 'gone-study' }, { token: pat });
-assert.equal(r.status, 403, 'a researcher who owns the study but is not a lab owner is refused');
+assert.equal(r.status, 403, 'a researcher who owns the study but did not create it is refused');
 assert.equal((await deleteStudy({ registry, registryBackup: regBackup, getStoreFor: n => blobsStore(getStore, n) }, 'gone-study', 'gone-study', { name: 'Pat', role: 'researcher' })).error, 'forbidden', 'and refused in the library too');
 for (const confirm of [undefined, '', 'gone', 'GONE-STUDY', 'kept-study']) {
   r = await del({ id: 'gone-study', confirm });
