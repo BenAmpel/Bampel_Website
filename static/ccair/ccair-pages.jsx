@@ -411,7 +411,7 @@ function PeoplePage() {
         lede="A small, collaborative group of faculty and Ph.D. researchers working across Georgia State and partner universities."
         photo="people-band" />
 
-      <DataSection needs={['people']} what="the people list" wrap>
+      <DataSection needs={['people']} what="the people list" wrap reserve="100vh">
       {d && <Section id="director" title="Director">
         <Reveal className="card director">
           <Avatar name={d.name} photo={d.photo} size="lg" />

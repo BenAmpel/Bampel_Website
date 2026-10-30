@@ -207,22 +207,6 @@
     "featured": false
   },
   {
-    "title": "Evading Anti-Phishing Models: A Field Note Documenting an Experience in the Machine Learning Security Evasion Competition 2022",
-    "authors": [
-      "Yang Gao",
-      "Benjamin M. Ampel",
-      "Sagar Samtani"
-    ],
-    "year": 2023,
-    "type": "journal",
-    "venue": "Digital Threats: Research and Practice",
-    "url": "/journal_publication/phish-dtrap/",
-    "date": "2023-09-01",
-    "abstract": "Although machine learning-based anti-phishing detectors have provided promising results in phishing website detection, they remain vulnerable to evasion attacks. The Machine Learning Security Evasion Competition 2022 (MLSEC 2022) provides researchers and practitioners with the opportunity to deploy evasion attacks against anti-phishing machine learning models in real-world settings. In this field note, we share our experience participating in MLSEC 2022. We manipulated the source code of ten phishing HTML pages provided by the competition using obfuscation techniques to evade anti-phishing models. Our evasion attacks employing a benign overlap strategy achieved third place in the competition with 46 out of a potential 80 points. The results of our MLSEC 2022 performance can provide valuable insights for research seeking to robustify machine learning-based anti-phishing detectors.",
-    "award": null,
-    "featured": false
-  },
-  {
     "title": "Generating Adversarial Phishing Websites to Evade Machine Learning-based Anti-Phishing Detectors: A Reinforcement Learning Approach",
     "authors": [
       "Yang Gao",
@@ -304,6 +288,22 @@
     "featured": true
   },
   {
+    "title": "Evading Anti-Phishing Models: A Field Note Documenting an Experience in the Machine Learning Security Evasion Competition 2022",
+    "authors": [
+      "Yang Gao",
+      "Benjamin M. Ampel",
+      "Sagar Samtani"
+    ],
+    "year": 2024,
+    "type": "journal",
+    "venue": "Digital Threats: Research and Practice",
+    "url": "/journal_publication/phish-dtrap/",
+    "date": "2024-01-01",
+    "abstract": "Although machine learning-based anti-phishing detectors have provided promising results in phishing website detection, they remain vulnerable to evasion attacks. The Machine Learning Security Evasion Competition 2022 (MLSEC 2022) provides researchers and practitioners with the opportunity to deploy evasion attacks against anti-phishing machine learning models in real-world settings. In this field note, we share our experience participating in MLSEC 2022. We manipulated the source code of ten phishing HTML pages provided by the competition using obfuscation techniques to evade anti-phishing models. Our evasion attacks employing a benign overlap strategy achieved third place in the competition with 46 out of a potential 80 points. The results of our MLSEC 2022 performance can provide valuable insights for research seeking to robustify machine learning-based anti-phishing detectors.",
+    "award": null,
+    "featured": false
+  },
+  {
     "title": "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach",
     "authors": [
       "Benjamin M. Ampel",
@@ -336,6 +336,20 @@
     "url": "/conference_publication/ai4cyber-kdd-2024/",
     "date": "2024-08-26",
     "abstract": "Cybersecurity remains a grand societal challenge. Large and constantly changing attack surfaces are non-trivial to protect against malicious actors. Entities like the United States and the European Union have recently emphasized the value of Artificial Intelligence (AI) for advancing cybersecurity. For example, the National Science Foundation has called for AI systems that can enhance cyber threat intelligence, detect new and evolving threats, and analyze massive troves of cybersecurity data. The 4th Workshop on Artificial Intelligence-enabled Cybersecurity Analytics (co-located with ACM KDD) sought to make significant and novel contributions within these relevant topics. Submissions were reviewed by highly qualified AI for cybersecurity researchers and practitioners spanning academia and private industry firms.",
+    "award": null,
+    "featured": false
+  },
+  {
+    "title": "A Computational Design Framework for Targeted Disruption of Hacker Communities",
+    "authors": [
+      "Benjamin M. Ampel"
+    ],
+    "year": 2025,
+    "type": "journal",
+    "venue": "Information Systems Frontiers",
+    "url": "/journal_publication/hacker-communities-isf/",
+    "date": "2025-01-01",
+    "abstract": "The rapid proliferation of complex information systems (IS) has been met by an ever-increasing number of attacks that can cause irreparable cyber breaches. These attacks are frequently discussed and disseminated in large international hacker forums. Prevailing approaches for studying hacker forum structures often identify key hackers but do not study how their removal changes information diffusion. In this study, we adopted the computational design science paradigm to develop a novel information technology artifact called the HackerVote framework. HackerVote incorporates network science principles and node centrality measures to maximize the disruption of information propagation in hacker communities. We rigorously evaluated the proposed HackerVote against state-of-the-art node centrality attack methods. The results suggest that the proposed HackerVote outperforms benchmark methods based on four established network measures: (1) average inverse distance, (2) average clustering coefficient, (3) largest connected component size, and (4) spectral radius. We also demonstrated HackerVote's proof-of-value with an in-depth case study simulating the removal of key hackers from a long-standing international hacker forum. Our proposed HackerVote framework provides important practical implications for law enforcement officials regarding targeted takedown strategies.",
     "award": null,
     "featured": false
   },
@@ -432,20 +446,6 @@
     "url": "/workshop_publication/multi-agent-treo-2025/",
     "date": "2025-12-15",
     "abstract": "This TREO talk explores provocative questions about the role of multi-agent AI systems in information systems scholarship. We examine the potential and pitfalls of AI-augmented research, discussing how multi-agent frameworks might transform academic inquiry while preserving scholarly rigor and ethical standards. Drawing on emerging paradigms like agentic services computing, we consider how role-differentiated AI agents can engage in collaborative problem-solving alongside human researchers.",
-    "award": null,
-    "featured": false
-  },
-  {
-    "title": "A Computational Design Framework for Targeted Disruption of Hacker Communities",
-    "authors": [
-      "Benjamin M. Ampel"
-    ],
-    "year": 2026,
-    "type": "journal",
-    "venue": "Information Systems Frontiers",
-    "url": "/journal_publication/hacker-communities-isf/",
-    "date": "2026-01-01",
-    "abstract": "The rapid proliferation of complex information systems (IS) has been met by an ever-increasing number of attacks that can cause irreparable cyber breaches. These attacks are frequently discussed and disseminated in large international hacker forums. Prevailing approaches for studying hacker forum structures often identify key hackers but do not study how their removal changes information diffusion. In this study, we adopted the computational design science paradigm to develop a novel information technology artifact called the HackerVote framework. HackerVote incorporates network science principles and node centrality measures to maximize the disruption of information propagation in hacker communities. We rigorously evaluated the proposed HackerVote against state-of-the-art node centrality attack methods. The results suggest that the proposed HackerVote outperforms benchmark methods based on four established network measures: (1) average inverse distance, (2) average clustering coefficient, (3) largest connected component size, and (4) spectral radius. We also demonstrated HackerVote's proof-of-value with an in-depth case study simulating the removal of key hackers from a long-standing international hacker forum. Our proposed HackerVote framework provides important practical implications for law enforcement officials regarding targeted takedown strategies.",
     "award": null,
     "featured": false
   },
