@@ -27,7 +27,10 @@ try {
   const made = await (await fetch(base + '/api/lab/_lab/create', { method: 'POST', headers: { 'x-admin-key': KEY, 'content-type': 'application/json' }, body: JSON.stringify({ id: 'tab-test', name: 'Tab test', type: 'vignettes' }) })).json();
   assert(made.ok, JSON.stringify(made));
 
-  const html = readFileSync(STATIC + '/lab/admin/index.html', 'utf8').replace(/<script src="[^"]*"><\/script>/, '');
+  // The page's own <script> tag is left out (jsdom runs nothing by itself here); admin.js is run below.
+  const page = readFileSync(STATIC + '/lab/admin/index.html', 'utf8'), TAG = '<script src="/lab/engine/admin.js"></script>';
+  assert(page.includes(TAG), 'the admin page loads admin.js');
+  const html = page.split(TAG).join('');
   const dom = new JSDOM(html, { url: base + '/lab/admin/tab-test/', runScripts: 'outside-only', pretendToBeVisual: true });
   const { window } = dom, doc = window.document;
   window.sessionStorage.setItem('lab_admin_key', KEY);
