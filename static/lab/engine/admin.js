@@ -114,7 +114,7 @@
       '<div class="section"><h2>Create pilot access codes</h2><p class="muted">For pilots and team testing without a roster. Mark them as test so they are excluded from the counts and can be deleted in one step. Gap days sets the minimum wait between sessions (0 for piloting).</p>' +
       '<form class="row" id="createform"><label>How many <input type="number" id="count" min="1" max="300" value="3" style="width:90px"></label><label>Label (optional) <input type="text" id="label" placeholder="pilot-oct" style="width:160px"></label>' +
       '<label>Gap days <input type="number" id="gap" min="0" max="60" placeholder="default" style="width:90px"></label><label class="check"><input type="checkbox" id="test" checked> Test codes</label><button type="submit">Create</button></form><div id="created" class="keybox" hidden></div></div></section>' +
-    '<section data-tab="content" hidden><p class="muted" id="contentinfo"></p><div id="contentwarn"></div><p class="ok" id="say" role="status"></p><nav class="tabs sub" id="subtabs"></nav><fieldset id="editor" style="border:0;padding:0;margin:0;min-width:0"></fieldset>' +
+    '<section data-tab="content" hidden><p class="muted" id="contentinfo"></p><div id="contentwarn"></div><p class="ok" id="say" role="status"></p><nav class="tabs sub" id="subtabs"></nav><div id="viewsw"></div><fieldset id="editor" style="border:0;padding:0;margin:0;min-width:0"></fieldset>' +
       '<div class="savebar" id="savebar" data-role="editor"><span id="dirty" class="muted">No unsaved changes.</span><input type="text" id="note" class="grow" placeholder="What changed? (optional, shown in the activity log)">' +
       '<button type="button" class="secondary" id="discard" disabled>Discard changes</button><button type="button" id="save" disabled>Save changes</button></div>' +
       '<div class="section"><h2>Versions</h2><p class="muted">Every save makes a new version. Restoring an old version saves it again as the newest version, so nothing is lost. Each answer records the version it was collected under.</p><div class="table-wrap"><table id="vtbl"></table></div></div>' +
@@ -560,6 +560,28 @@
       (it.type === 'info' ? '<p class="muted">Text shown to the participant. It has no answer and no column in the exports.</p>' : checkbox('data-path="' + b + '.required" data-bool="1"', it.required, 'Required (if unticked, a skipped question gets one gentle reminder)')) +
       advanced(list, it, b, opts) + '</div>';
   }
+  // The survey designer's side panel: one question's settings that are not edited on the page itself (its text,
+  // options, labels, type, Required, and page are). The same data-* bindings as the question cards, so applyEdit saves them.
+  function inspectorCard(list, it, i, opts) {
+    var b = list + '.' + i, conds = opts.conditions || [], hasOpts = /^(choice|select|multi|rank|matrix)$/.test(it.type);
+    var optText = (it.options || []).map(function (o) { return o.value === o.label ? o.label : o.value + ' | ' + o.label; }).join('\n');
+    function sec(t) { return '<h4 class="lc-ih">' + t + '</h4>'; }
+    function numBox(key, label) { return field(label, '<input type="text" data-optnum="' + b + '.' + key + '" value="' + esc(it[key] != null ? it[key] : '') + '">'); }
+    return '<div class="qcard">' + sec('Data') +
+      field('Variable name (the column in the surveys CSV)', inp(b + '.id', it.id, ' class="mono" spellcheck="false"')) +
+      (it.type === 'scale' ? numBox('start', 'First number (blank = 1; 0 for a 0-based scale)') : '') +
+      (it.type === 'slider' ? '<div class="grid3">' + numBox('min', 'Smallest') + numBox('max', 'Largest') + numBox('step', 'Step') + '</div>' : '') +
+      (hasOpts ? '<details class="vcard"><summary>Saved values' + (it.type === 'matrix' ? ' and statement names' : '') + '</summary><p class="muted">What the CSV records for each ' + (it.type === 'matrix' ? 'answer column' : 'option') + ': one per line, "saved value | text shown". Keep the values once data collection starts.</p>' +
+        '<textarea data-opts="' + b + '" rows="4" class="mono" spellcheck="false">' + esc(optText) + '</textarea>' +
+        (it.type === 'matrix' ? field('Statements: "variable name | statement", one per line (each is its own CSV column)', '<textarea data-rows="' + b + '" rows="3" class="mono" spellcheck="false">' + esc((it.rows || []).map(function (r) { return r.id + ' | ' + r.text; }).join('\n')) + '</textarea>') : '') + '</details>' : '') +
+      sec('Who sees it') +
+      (opts.rules && opts.rules.length ? field('Show when', sel(b + '.showIf', it.showIf || 'always', [['always', 'Always']].concat(opts.rules))) : '') +
+      field('Sessions (numbers, separated by commas; blank = ' + (opts.sessions === 'pre' ? 'session 1 only' : 'every session') + ')', '<input type="text" data-sessions="' + b + '" value="' + esc((it.sessions || []).join(', ')) + '">') +
+      (conds.length > 1 ? '<div class="f"><span>Groups (none ticked = everyone)</span><div class="row">' + conds.map(function (c) { return '<label class="check"><input type="checkbox" data-qcond="' + b + '|' + esc(c) + '"' + ((it.conditions || []).indexOf(c) >= 0 ? ' checked' : '') + '> ' + esc(c) + '</label>'; }).join('') + '</div></div>' : '') +
+      sec('Logic and order') +
+      '<p class="lc-rule">' + (it.displayIf && window.LabLogic ? 'Shown when ' + esc(window.LabLogic.describe(it.displayIf, getPath(list))) + '.' : 'Always shown (no display rule).') + '</p>' +
+      advanced(list, it, b, opts).replace(/<p class="muted">Shown when[^<]*<\/p>/, '') + '</div>';
+  }
   // Display rule, layout, and source note: the parts an imported survey fills in. Closed unless the question uses them.
   function advanced(list, it, b, opts) {
     var used = !!(it.displayIf || it.group || it.long != null || it.min != null || it.max != null || it.source || it.shuffle || it.shuffleOptions);
@@ -649,7 +671,7 @@
       h = '<p class="muted">' + (sub === 'pre' ? 'Shown at the start of a session, before the items. By default only in session 1; list other session numbers to ask again (for example, 1, 4).' : 'Shown at the end of a session. Leave "Sessions" blank to ask every session.') +
         (META.rules.length ? ' "Show when" limits a question to some sessions (for example, with or without the AI).' : '') +
         ' The variable name is the column name in the surveys CSV: keep it if you only reword a question, and use a new name if it now measures something different.</p>' +
-        qlist('survey.' + sub, { sessions: sub, rules: META.rules, conditions: conditionsNow() });
+        (surveyView() === 'design' ? '<div id="designer"></div>' : qlist('survey.' + sub, { sessions: sub, rules: META.rules, conditions: conditionsNow() }));
     } else if (sub === 'consent') {
       var en = draft.enrollment;
       h = '<h3 style="margin:0 0 8px">Sign-up</h3>' +
@@ -717,11 +739,38 @@
           area('text.' + f.key, draft.text[f.key], Math.min(6, Math.max(1, Math.ceil(String(draft.text[f.key]).length / 90)))) + '</div>';
       });
     } else h = plugin.render(sub, A);
+    $('viewsw').innerHTML = sub === 'pre' || sub === 'post' ? '<div class="lc-seg viewswitch" role="radiogroup" aria-label="Survey view">' + [['design', 'Design'], ['list', 'List']].map(function (v) {
+      return '<button type="button" role="radio" data-view="' + v[0] + '" aria-checked="' + (surveyView() === v[0]) + '" tabindex="' + (surveyView() === v[0] ? 0 : -1) + '">' + v[1] + '</button>'; }).join('') + '</div>' : '';
     $('editor').innerHTML = h;
-    $('editor').disabled = !can('editor');
+    // Viewers: the designer is read-only by itself (and disables its own settings panel), so its bar (Preview, Phone,
+    // pages) stays usable; every other editor tab is disabled as a whole.
+    $('editor').disabled = !can('editor') && !$('designer');
+    document.body.classList.toggle('lc-wide', !!$('designer'));
+    if ($('designer')) mountDesigner($('designer'), sub);
     if (plugin.afterRender) plugin.afterRender(sub, A);
   }
+  // Survey designer (canvas.js): the survey as participants see it, edited in place. Design is the default view; the
+  // List view (question cards) stays one click away and is remembered per browser.
+  function surveyView() { try { return localStorage.getItem('lab_survey_view') === 'list' ? 'list' : 'design'; } catch (e) { return 'design'; } }
+  function mountDesigner(host, kind) {
+    host.innerHTML = '<p class="muted">Loading the designer…</p>';
+    if (!document.querySelector('link[href="/lab/engine/canvas.css"]')) { var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = '/lab/engine/canvas.css'; document.head.appendChild(l); }
+    (window.LabCanvas ? Promise.resolve(true) : loadScript('/lab/engine/canvas.js')).then(function (ok) {
+      if (!ok || !window.LabCanvas || !host.isConnected) { if (host.isConnected) host.innerHTML = '<p class="error">The designer could not be loaded. Use the List view.</p>'; return; }
+      var path = 'survey.' + kind, opts = { sessions: kind, rules: META.rules, conditions: conditionsNow() }, defs = {};
+      (META.text || []).forEach(function (f) { defs[f.key] = f.def; });
+      window.LabCanvas.mount(host, {
+        kind: kind, list: getPath(path), text: draft.text, defaults: defs, studyId: studyId, readOnly: !can('editor'),
+        started: function () { return A.started; },   // read when used: it is refreshed every time the content reloads
+        qtypes: META.qtypes, onChange: function () { setDirty(true); },
+        inspector: function (i) { return inspectorCard(path, getPath(path)[i], i, opts); }
+      });
+    });
+  }
   $('subtabs').addEventListener('click', function (e) { var s = e.target.getAttribute && e.target.getAttribute('data-sub'); if (s) { sub = s; renderEditor(); } });
+  function setView(v) { try { localStorage.setItem('lab_survey_view', v); } catch (x) {} renderEditor(); var b = document.querySelector('#viewsw [data-view="' + v + '"]'); if (b) b.focus(); }
+  $('viewsw').addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('[data-view]'); if (b) setView(b.getAttribute('data-view')); });   // a view, not an edit
+  $('viewsw').addEventListener('keydown', function (e) { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); setView(surveyView() === 'design' ? 'list' : 'design'); } });
 
   // Applies one field edit to the draft. Returns true when the screen should be redrawn.
   function applyEdit(t) {
