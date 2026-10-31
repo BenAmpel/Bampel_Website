@@ -283,3 +283,8 @@ tr.is-test code { color: var(--muted); }
 .an-codehead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; font-size: 13px; }
 .an-codes pre { margin: 0; padding: 12px; border-radius: 10px; background: var(--status-bg); overflow-x: auto; font-size: 12px; line-height: 1.5; }
 @media (max-width: 860px) { .an-grid { grid-template-columns: minmax(0, 1fr); } .an-controls { position: static; } }
+/* Integrity tab (integrity.js): one card per person, reasons as a plain list, strong ones marked. */
+.int-list { list-style: none; padding: 0; margin: 8px 0 16px; display: grid; gap: 10px; }
+.int-reasons { margin: 6px 0 8px; padding-left: 20px; }
+.int-reasons li { margin: 2px 0; }
+.int-strong .pill { border-color: var(--warn); color: var(--warn); }

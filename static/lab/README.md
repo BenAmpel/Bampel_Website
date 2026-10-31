@@ -111,7 +111,15 @@ A graded quiz for a class, on the same engine as every study, so each question k
 - **Time limit:** counted on the server from when the student presses Start (the plan's creation), sent to the page as time left, so a reload or a wrong computer clock adds nothing. At zero the page sends the current answer and then every remaining question empty, marked `timed_out`. Answers that arrive more than 30 seconds after the limit are kept, marked `late`, and score 0. A participant record's `timeFactor` (1 to 4) multiplies the limit for extra time; there is no screen to set it yet.
 - **The consent page is the disclosure.** The template's consent text says what is recorded (time, tab switches, pastes, typing rhythm; no camera, no other programs) and that nothing is decided automatically; agreeing starts the quiz.
 - **Exports:** the trials CSV has a row per question (`response`, `correct`, `points`, `late`, `option_order`, and the usual trace columns); the wide CSV adds `s{n}_quiz_points`, `_possible`, `_percent`, `_to_grade`, `_late`, and `_unanswered` per student. A type can add per-participant wide columns this way through `wideColumns(records)`.
-- **Not built yet** (see the pilot spec): setting extra time from the admin page, an emailed one-time code at sign-in, one open attempt at a time, a grade export by email for iCollege, and the integrity report tab.
+- **Not built yet** (see the pilot spec): setting extra time from the admin page, an emailed one-time code at sign-in, one open attempt at a time, and a grade export by email for iCollege.
+
+## Integrity report (admin tab "Integrity")
+
+One report, two modes, from the records the downloads already use (`netlify/lib/lab/integrity.mjs`, route `integrity`; page `static/lab/engine/integrity.js`; tests `tests/lab/integrity.test.mjs`). Managers and owners only; each view is written to the activity log.
+
+- **Quiz** (type `quiz`): pasting into an answer (50+ characters, strong), being away from the tab on a question most of the class missed and then getting it right, a correct answer to such a question faster than 90% of the class, retyping (150+ keys with no correction), and pairs who chose the same uncommon wrong answer (picked by 25% or fewer) on two or more questions or submitted questions within 10 seconds of each other. "Hard" and "fast" come from the class's own answers, so they settle once everyone has finished.
+- **Study** (every other type): signs that software or an AI agent took it: scripted input, automation (`navigator.webdriver`), the hidden box filled, text that appeared with no key presses, keys faster than a person types (all strong), machine-even typing, answers faster than reading, a fast session, a mostly hidden tab, one panel ID with several sessions; and pairs who gave the same answer on 90% or more of 10 or more shared questions, or submitted items in lockstep.
+- **Both:** each person gets reasons in plain words, marked strong (worth a look alone) or context (worth a look with others), ordered by strong reasons and then by count; there are no scores. The page says "worth a look", lists what the report cannot see (a phone, an agent driving the operating system), and says that reasons are not proof. Test participants are left out unless ticked. Pairs are skipped above 1,500 people.
 
 ## Multimodal studies (type `multimodal`)
 
