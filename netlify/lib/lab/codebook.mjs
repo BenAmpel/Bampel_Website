@@ -215,6 +215,19 @@ const TYPE_COLUMNS = {
     ['other_keys', 'integer', 'Keys pressed after the stimulus that are not answer keys.'],
     ['hidden_at_stimulus', 'binary', 'The tab was hidden when the stimulus was due; such a trial times out without being a slow answer.', '0 = no; 1 = yes']
   ],
+  quiz: [
+    ['item_id', 'category', 'The question\'s ID in the editor.'], ['item_pool', 'category', 'The pool the question was drawn from (blank = no pool; everyone got this question).'],
+    ['item_kind', 'category', 'Kind of question.', 'single; multi; number; text'], ['points_possible', 'number', 'Points the question is worth.'],
+    ['response', 'as described', 'The answer: option number in the editor\'s order (1 = first option) for one-answer questions, option numbers separated by | for several-answer questions, the number typed for number questions; blank for short text and for no answer.'],
+    ['response_text', 'text', 'Short-text answer (encrypted when the study has a key; the Encryption tab opens it in downloads).'],
+    ['answered', 'binary', 'An answer was given.', '0 = no; 1 = yes'],
+    ['correct', 'binary', 'Scored on the server from the stored question (blank = short text, graded by hand).', '0 = no; 1 = yes'],
+    ['points', 'number', 'Points earned (blank = short text, graded by hand). Late answers earn 0.'],
+    ['timed_out', 'binary', 'Sent by the page when the time limit ran out on this question.', '0 = no; 1 = yes'],
+    ['late', 'binary', 'Arrived after the time limit plus 30 seconds of grace; kept, scored 0.', '0 = no; 1 = yes'], ['late_ms', 'ms', 'How long after the time limit a late answer arrived.'],
+    ['rt_ms', 'ms', 'Time on the question, from the screen appearing to Next.'],
+    ['option_order', 'list', 'Options in the order this student saw them, as editor option numbers (> separated; 3>1>2 = the third option first).']
+  ],
   game: [
     ['stage', 'category', 'Game stage.'], ['step', 'integer', 'Step within the round.'], ['acting', 'category', 'Role acting in this step.'], ['auto', 'binary', 'Decision made automatically (time-out or stored partner).', '0 = no; 1 = yes'],
     ['payoff', 'number', 'Payoff for the round.'], ['round', 'integer', 'Round number.'], ['group', 'integer', 'Group within the round.'], ['d_{decision}', 'number', 'This participant\'s value for each decision.'], ['o_{decision}', 'list', 'Other players\' values for each decision (| separated).']
@@ -312,6 +325,11 @@ export function buildCodebook(S, c) {
     ['s{n}_post_{question}', 'as in the surveys CSV', 'Answer to an end-of-session question in session n.'],
     ['s{n}_{item}_{measure}', 'as in the trials CSV', 'A trial measure for one item in session n, named by the item ID (t{index} when a trial has no item ID). Measures and values as in the trials CSV; identifiers and timestamps are left out.']
   ], 'engine');
+  if (typeId === 'quiz') add('wide', [
+    ['s{n}_quiz_points', 'number', 'Points earned in session n (short-text questions not included until graded).'], ['s{n}_quiz_possible', 'number', 'Points available in session n, short text included.'],
+    ['s{n}_quiz_percent', 'number', 'quiz_points / quiz_possible x 100.'], ['s{n}_quiz_to_grade', 'integer', 'Short-text answers waiting to be graded by hand.'],
+    ['s{n}_quiz_late', 'integer', 'Answers that arrived after the time limit (scored 0).'], ['s{n}_quiz_unanswered', 'integer', 'Questions left without an answer.']
+  ], 'quiz');
   return out;
 }
 

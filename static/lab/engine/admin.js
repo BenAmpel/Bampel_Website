@@ -131,7 +131,7 @@
         '<div class="row"><button type="button" id="selftest">Run self-test</button><label class="check"><input type="checkbox" id="stkeep"> Keep the test participants so I can look at them (delete later with "Delete all test participants")</label></div><p class="muted" id="stprog"></p><div id="stout"></div>' +
         '<div class="pt-danger"><div><strong>Test participants</strong><p class="muted">Pilots, previews, and kept self-test runs. Deleting them removes their answers and traces for good; real participants are not touched.</p></div><button type="button" class="danger secondary" id="deltest">Delete all test participants</button></div></div>' +
     '</section>' +
-    '<section data-tab="figures" hidden></section><section data-tab="analyze" hidden></section>' +
+    '<section data-tab="figures" hidden></section><section data-tab="analyze" hidden></section><section data-tab="integrity" hidden></section>' +
     '<section data-tab="report" hidden><p class="muted" id="rpintro"></p><div class="row">' +
       '<label>Participants <select id="rpwho"><option value="real">Real participants only</option><option value="all">Everyone, including test</option></select></label>' +
       '<label>Label <select id="rplabel"><option value="">All labels</option></select></label><button type="button" id="rprun">Build report</button>' +
@@ -182,7 +182,7 @@
   $('keyhelp').innerHTML = 'Sign in with your researcher account, or use the lab owner key (the <code>LAB_ADMIN_KEY</code> or <code>VC_ADMIN_KEY</code> Netlify variable) or the team key the owner gave you. Keys and sign-ins are kept in this tab only. New here? Read the <a href="/lab/guide/">researcher guide</a>.';
 
   // ---------- sign-in and tabs ----------
-  var TABS = [['participants', 'Participants', 'viewer'], ['report', 'Pilot report', 'viewer'], ['figures', 'Figures', 'viewer'], ['analyze', 'Analyze', 'viewer'], ['students', 'Students', 'manager'], ['content', 'Study content', 'viewer'], ['team', 'Team', 'owner'], ['privacy', 'Encryption', 'viewer'], ['activity', 'Activity', 'owner']];
+  var TABS = [['participants', 'Participants', 'viewer'], ['report', 'Pilot report', 'viewer'], ['figures', 'Figures', 'viewer'], ['analyze', 'Analyze', 'viewer'], ['integrity', 'Integrity', 'manager'], ['students', 'Students', 'manager'], ['content', 'Study content', 'viewer'], ['team', 'Team', 'owner'], ['privacy', 'Encryption', 'viewer'], ['activity', 'Activity', 'owner']];
   var tabKey = 'lab_admin_tab_' + studyId;
   function showTab(name) {
     document.querySelectorAll('section[data-tab]').forEach(function (s) { s.hidden = s.getAttribute('data-tab') !== name; });
@@ -193,7 +193,7 @@
     err();
     if (name === 'participants') { load(); if (can('owner')) loadBackup(); }
     if (name === 'report') initReport();
-    if (name === 'figures' || name === 'analyze') mountTool(name);
+    if (name === 'figures' || name === 'analyze' || name === 'integrity') mountTool(name);
     if (name === 'content') loadContent();
     if (name === 'team') loadTeam();
     if (name === 'privacy') loadSeal();
@@ -404,18 +404,19 @@
       (p.test ? '' : '\n\nThis is a REAL participant. Only do this if they withdrew or asked for their data to be removed.') + '\n\nThis cannot be undone.')) return;
     postJSON('delete', { id: id }).then(function (r) { load(); setTimeout(function () { $('exprog').innerHTML = '<span class="ok">Deleted ' + esc(r.code) + ' and ' + r.records + ' records.</span>'; }, 600); }).catch(function (x) { err(x.message); });
   });
-  // Figures (figures.js, with replay.js for reading traces) and Analyze (analyze.js with stats.js): loaded the first time
-  // their tab opens, then kept. Both read the same rows and traces as the downloads.
+  // Figures (figures.js, with replay.js for reading traces), Analyze (analyze.js with stats.js), and Integrity
+  // (integrity.js): loaded the first time their tab opens, then kept. They read the same records as the downloads.
+  var TOOLS = { figures: [['/lab/engine/replay.js', '/lab/engine/figures.js'], 'LabFigures'], analyze: [['/lab/engine/stats.js', '/lab/engine/analyze.js'], 'LabAnalyze'], integrity: [['/lab/engine/integrity.js'], 'LabIntegrity'] };
   var mounted = {};
   function mountTool(name) {
     if (mounted[name]) return;
-    var sec = document.querySelector('section[data-tab="' + name + '"]'), files = name === 'figures' ? ['/lab/engine/replay.js', '/lab/engine/figures.js'] : ['/lab/engine/stats.js', '/lab/engine/analyze.js'];
+    var sec = document.querySelector('section[data-tab="' + name + '"]'), files = TOOLS[name][0];
     sec.innerHTML = '<p class="muted">Loading…</p>';
     files.reduce(function (pr, f) { return pr.then(function () { return loadScript(f); }); }, Promise.resolve()).then(function () {
-      var mod = name === 'figures' ? window.LabFigures : window.LabAnalyze;
+      var mod = window[TOOLS[name][1]];
       if (!mod) throw new Error('This tool could not be loaded. Reload the page.');
       mounted[name] = true;
-      mod.mountTab(sec, { getJSON: getJSON, rowsFor: rowsFor, saveFile: saveFile, studyId: studyId, esc: esc, day: day, err: err, prepare: window.LabReplay && window.LabReplay.prepare });
+      mod.mountTab(sec, { getJSON: getJSON, rowsFor: rowsFor, saveFile: saveFile, studyId: studyId, esc: esc, day: day, err: err, prepare: window.LabReplay && window.LabReplay.prepare, replay: function (code, from) { showTab('participants'); openReplay(code, from); }, studyType: me && me.study.type });
     }).catch(function (e) { sec.innerHTML = ''; err(e.message); });
   }
   // Trial replay (replay.js, loaded the first time it is used): the participant's raw traces and trial rows.
@@ -1268,7 +1269,7 @@
             '<optgroup label="Blank study">' + TYPES.map(function (x) { return '<option value="type:' + esc(x.id) + '">Blank: ' + esc(x.label) + '</option>'; }).join('') + '</optgroup>';
           $('tplgrid').innerHTML = TPLS.map(function (x) {
             return '<button type="button" class="tpl-card" role="listitem" data-tpl="' + esc(x.id) + '"><span class="tpl-icon tpl-' + esc(x.icon) + '" aria-hidden="true"></span>' +
-              '<span class="tpl-name">' + esc(x.name) + '</span><span class="tpl-blurb">' + esc(x.blurb) + '</span><span class="tpl-meta">About ' + x.minutes + ' min · ' + (x.type === 'multimodal' ? 'media and voice' : x.type === 'reaction' ? 'reaction times' : 'text and surveys') + '</span></button>';
+              '<span class="tpl-name">' + esc(x.name) + '</span><span class="tpl-blurb">' + esc(x.blurb) + '</span><span class="tpl-meta">About ' + x.minutes + ' min · ' + (x.type === 'multimodal' ? 'media and voice' : x.type === 'reaction' ? 'reaction times' : x.type === 'quiz' ? 'graded questions' : 'text and surveys') + '</span></button>';
           }).join('');
           var d = function () {
             var v = $('ntpl').value, t = v.indexOf('tpl:') === 0 ? TPLS.filter(function (x) { return 'tpl:' + x.id === v; })[0] : null, y = !t ? TYPES.filter(function (x) { return 'type:' + x.id === v; })[0] : null;

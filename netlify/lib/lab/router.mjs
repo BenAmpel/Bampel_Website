@@ -22,6 +22,7 @@ import * as recruit from './recruit.mjs';
 import { exportDesign, importDesign, cloneStudy } from './studyfile.mjs';
 import { buildCodebook, codebookCsv, codebookMarkdown, dropTraces } from './codebook.mjs';
 import { wideRows, WIDE_FIRST } from './wide.mjs';
+import { integrityReport } from './integrity.mjs';
 import { saveChecks, LANGUAGES } from './envcheck.mjs';
 import { saveDq } from './quality.mjs';
 import { buildBundle } from './bundle.mjs';
@@ -37,7 +38,7 @@ const NEED = {
   me: 'viewer', participants: 'viewer', codes: 'viewer', 'design.json': 'viewer', 'codebook.csv': 'viewer', 'codebook.md': 'viewer', 'export-wide.csv': 'viewer', 'bundle.zip': 'viewer', 'export.csv': 'viewer', 'export-surveys.csv': 'viewer', 'export.json': 'viewer', rows: 'viewer', records: 'viewer', raw: 'viewer',
   content: 'viewer', 'content-history': 'viewer',
   'content-save': 'editor', 'content-restore': 'editor', import: 'editor', preview: 'editor',
-  roster: 'manager', lookup: 'manager', 'credit.csv': 'manager', create: 'manager', 'set-test': 'manager',
+  roster: 'manager', lookup: 'manager', 'credit.csv': 'manager', integrity: 'manager', create: 'manager', 'set-test': 'manager',
   delete: 'owner', 'delete-test': 'owner', 'self-test': 'owner', 'backup-status': 'owner', 'backup-run': 'owner', 'backup-part': 'owner',
   team: 'owner', 'team-add': 'owner', 'team-remove': 'owner', activity: 'owner',
   seal: 'viewer', 'seal-set': 'owner', members: 'owner', 'member-set': 'owner'   // the study's public key for sealed fields (seal.mjs); the private key never comes here
@@ -139,6 +140,12 @@ export async function handle(req, { getStore, env, now }) {
       switch (action) {
         case 'me': return json({ name: who.name, role: who.role, roles: admin.ROLE_INFO, study: { id: study.id, name: study.name, type: type.id, typeLabel: type.label, paths: study.paths }, conditions: type.conditionsOf(c) });
         case 'participants': return json(await E.listParticipants(S));
+        // The integrity report (integrity.mjs): reasons worth a look, per person and per pair. Each view is in the activity log.
+        case 'integrity': {
+          const r = await integrityReport(S, c, { includeTest: url.searchParams.get('test') === '1' });
+          await admin.audit(S.store, who, 'integrity.view', `${r.counts.withReasons} of ${r.counts.people} with reasons, ${r.counts.pairs} pairs`);
+          return json(r);
+        }
         case 'codes': return json(await E.exportCodes(S));   // the export's list of participants (exportCodes)
         case 'export.json': return json(await E.exportRecords(S));
         case 'design.json': return json(await exportDesign(S));

@@ -41,14 +41,14 @@ export function wideRows(S, { records, participants }, c = null) {
       row[`s${n}_started_at`] = iso(s.startedAt); row[`s${n}_completed_at`] = iso(s.completedAt);
       row[`s${n}_minutes`] = s.startedAt && s.completedAt ? ((s.completedAt - s.startedAt) / 60000).toFixed(2) : '';
     }
-    byCode.set(p.code, { p, row, dq: [], trials: [] });
+    byCode.set(p.code, { p, row, dq: [], trials: [], recs: [] });
   }
   const sorted = records.slice().sort((a, b) => (a.session - b.session) || String(a.key).localeCompare(String(b.key), 'en', { numeric: true }));
   for (const r of sorted) {
     const hit = byCode.get(r.code);
     if (!hit) continue;
     const row = hit.row, m = String(r.key).match(/\/survey-(pre|post)$/);
-    if (/\/t\d+$/.test(r.key)) hit.trials.push(r.data || {});   // every trial's traces feed the dq_* signals
+    if (/\/t\d+$/.test(r.key)) { hit.trials.push(r.data || {}); hit.recs.push(r); }   // every trial's traces feed the dq_* signals
     if (/\/checks$/.test(r.key)) Object.assign(row, checkColumns(r.session, r.data || {}));   // setup checks (envcheck.mjs)
     else if (/\/dq$/.test(r.key)) hit.dq.push(r.data || {});   // data-quality signals, summed below (quality.mjs)
     else if (m) {
@@ -63,6 +63,6 @@ export function wideRows(S, { records, participants }, c = null) {
       for (const [k, v] of Object.entries(t)) if (!SKIP.has(k) || own(k, v)) row[`s${r.session}_${item}_${k}`] = v;
     }
   }
-  for (const x of byCode.values()) Object.assign(x.row, dqColumns(x.dq, x.p, c, x.trials, S.type.id));
+  for (const x of byCode.values()) Object.assign(x.row, dqColumns(x.dq, x.p, c, x.trials, S.type.id), S.type.wideColumns ? S.type.wideColumns(x.recs) : {});
   return [...byCode.values()].map(x => x.row).sort((a, b) => (a.label || a.code).localeCompare(b.label || b.code));
 }
