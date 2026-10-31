@@ -57,7 +57,10 @@ export function wideRows(S, { records, participants }, c = null) {
     } else if (/\/t\d+$/.test(r.key) && !S.type.exportTrials) {   // the economic game's rounds stay in its own long export
       const t = trialRow(S, r, hit.p), item = slug(t.item_id || t.alert_id || `t${r.index}`);
       if (t.cb_row) { row[`s${r.session}_cb_row`] = t.cb_row; row[`s${r.session}_cb_sequence`] = t.cb_sequence; }   // once per session
-      for (const [k, v] of Object.entries(t)) if (!SKIP.has(k)) row[`s${r.session}_${item}_${k}`] = v;
+      // A trial's condition is normally the participant's and left out, but within-subject designs (smishing: C1-C5p
+      // per message and per comprehension screen) vary it by trial, so keep it whenever it differs.
+      const own = (k, v) => k === 'condition' && v !== '' && v != null && String(v) !== String(hit.p.condition ?? '');
+      for (const [k, v] of Object.entries(t)) if (!SKIP.has(k) || own(k, v)) row[`s${r.session}_${item}_${k}`] = v;
     }
   }
   for (const x of byCode.values()) Object.assign(x.row, dqColumns(x.dq, x.p, c, x.trials, S.type.id));

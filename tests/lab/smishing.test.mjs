@@ -138,6 +138,11 @@ assert.equal(compRows.length, 5); assert.deepEqual(compRows.map(x => x[col('cond
 assert(compRows.every(x => x[col('comprehension_score')] === '6.00'), 'COMP4 reverse-scored: (6 + 5 + 7 + 6 + 6) / 5');
 assert.equal(compRows.filter(x => x[col('att2_pass')] === '1').length, 1, 'ATT2 answered Disagree (2) passes');
 assert(!head.includes('comp9'), 'unknown comprehension items are dropped');
+{ // Wide: the condition varies by trial here, so each comprehension screen keeps its own (C4, C5 and C5p all show a tier).
+  const [wh, w] = parseCsv((await call(P + 'admin/export-wide.csv', { key: OWNER })).text);
+  const wc = [76, 77, 78, 79, 80].map(i => w[wh.indexOf(`s1_t${i}_condition`)]);
+  assert.deepEqual(wc.slice().sort(), ['C2', 'C3', 'C4', 'C5', 'C5p'], 'wide export keeps each comprehension screen\'s condition');
+}
 const r5 = rows.find(x => x[col('stimulus_id')] === rec5.stimulusId);
 assert.equal(r5[col('engaged')], '1'); assert.equal(r5[col('disclosed')], '1'); assert.equal(r5[col('funnel_stage')], '3'); assert.equal(r5[col('field_input_count')], '4');
 assert.equal(r5[col('suspicion_prob')], '0.50'); assert.equal(r5[col('rt_ms')], '800');
