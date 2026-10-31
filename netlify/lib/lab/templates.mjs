@@ -8,6 +8,7 @@
 
 import { VISHING_STUDY2 } from './studies/vishing-study2.mjs';
 import { ARGOS_SMISHING } from './studies/argos-smishing.mjs';
+import QUIZ from './types/quiz.mjs';
 
 const S = '/lab/media/samples/';
 const AGREE7 = ['Strongly disagree', 'Disagree', 'Somewhat disagree', 'Neither agree nor disagree', 'Somewhat agree', 'Agree', 'Strongly agree'];
@@ -241,6 +242,19 @@ TEMPLATES['stroop-flanker'] = {
     task: { paradigm: 'stroop', trialsPerSession: 96, practiceTrials: 8, fixationMs: 500, responseMs: 2000, itiMs: 400, feedbackPractice: true, keys: { red: 'd', green: 'f', blue: 'j', yellow: 'k' } },
     environment: { preload: false, fullscreen: true, desktopOnly: true, speechBrowser: false, micCheck: false, micRequired: false, headphoneCheck: false, headphoneFail: 'record', timingCheck: true, language: 'en-US' },
     survey: { pre: [], post: [q('keyboard', 'Did you use a physical keyboard?', 'choice', { options: [{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No (touch screen or on-screen keyboard)' }], sessions: [] }), ...DEMOGRAPHICS] }
+  })
+};
+// A graded quiz for a class. The consent page is where students read what the quiz records, and agreeing starts it.
+TEMPLATES['graded-quiz'] = {
+  name: 'Graded quiz', icon: 'survey', type: 'quiz', minutes: 15,
+  blurb: 'A class quiz scored on the server: one-answer, several-answer, number, and short-text questions, question pools, shuffling per student, and a time limit, with every question\'s behavior traces kept for review.',
+  content: () => ({
+    ...QUIZ.defaultContent(),
+    consent: { approved: true, agreeLabel: 'I have read this and want to start the quiz.', paragraphs: [
+      'This quiz records how you answer, not just what you answer: time on each question, switching away from this tab, pasting, and typing rhythm.',
+      'It does not use your camera or microphone and does not see other programs or devices. Your instructor reviews these records and may ask you about them. Nothing is decided automatically.'] },
+    environment: { preload: false, fullscreen: false, desktopOnly: false, speechBrowser: false, micCheck: false, micRequired: false, headphoneCheck: false, headphoneFail: 'record', timingCheck: false, language: 'en-US' },
+    survey: { pre: [], post: [] }
   })
 };
 export const templateList = () => Object.entries(TEMPLATES).map(([id, t]) => ({ id, name: t.name, icon: t.icon, type: t.type, minutes: t.minutes, blurb: t.blurb }));
