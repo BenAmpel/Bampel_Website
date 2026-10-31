@@ -7,15 +7,18 @@
 .pll-grid { display:grid; grid-template-columns:48px repeat(4,1fr); gap:6px 10px; align-items:center; }
 .pll-cell-head { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.06em; font-weight:600; text-align:center; padding-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.08); }
 .pll-cell-yr { font-size:0.75rem; font-weight:600; opacity:0.8; text-align:right; padding-right:8px; letter-spacing:0.02em; }
-.pll-cell-dots { min-height:32px; display:flex; flex-wrap:wrap; gap:5px; align-items:center; justify-content:center; padding:5px 6px; border-radius:8px; border:1px solid transparent; }
+.pll-cell-dots { min-height:32px; display:flex; flex-wrap:wrap; gap:0; align-items:center; justify-content:center; padding:4px 2px; border-radius:8px; border:1px solid transparent; }
 .pll-cell-dots:not(:empty) { background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.06); }
-.pll-dot { width:11px; height:11px; border-radius:50%; cursor:pointer; transition:transform 0.15s, box-shadow 0.15s; flex-shrink:0; }
-.pll-dot:hover, .pll-dot:focus-visible { transform:scale(1.7); box-shadow:0 0 8px currentColor; position:relative; z-index:2; outline:none; }
-.pll-dot:focus-visible { outline:2px solid var(--clr-cyan); outline-offset:3px; }
+/* Each dot is a 24px tap target (WCAG 2.5.8): the element is 24px square and the colour is painted only in its content
+   box, so the visible dot stays 11px (8px on phones). Hover and focus grow the painted dot by shrinking the padding, and
+   the glow is a drop-shadow so it follows the dot rather than the 24px box. */
+.pll-dot { box-sizing:border-box; width:24px; height:24px; padding:6.5px; background-clip:content-box !important; border-radius:50%; cursor:pointer; transition:padding 0.15s, filter 0.15s; flex-shrink:0; }
+.pll-dot:hover, .pll-dot:focus-visible { padding:3px; filter:drop-shadow(0 0 4px currentColor); position:relative; z-index:2; outline:none; }
+.pll-dot:focus-visible { outline:2px solid var(--clr-cyan); outline-offset:0; border-radius:50%; } /* the site-wide [tabindex]:focus-visible rule squares corners */
 .pll-d1 { background:var(--clr-magenta); color:var(--clr-magenta); }
 .pll-d2 { background:var(--clr-cyan); color:var(--clr-cyan); }
 .pll-d3 { background:rgba(74,222,128,0.55); color:rgba(74,222,128,0.7); }
-.pll-d4 { background:var(--clr-green); color:var(--clr-green); box-shadow:0 0 5px rgba(74,222,128,0.4); }
+.pll-d4 { background:var(--clr-green); color:var(--clr-green); filter:drop-shadow(0 0 3px rgba(74,222,128,0.4)); }
 .pll-h1 { color:var(--clr-magenta); }
 .pll-h2 { color:var(--clr-cyan); }
 .pll-h3 { color:#3aa962; } /* solid: the 75% green blended on the dark card, so the header text is not translucent */
@@ -36,7 +39,8 @@ body:not(.dark) .pll-cell-head { border-bottom-color:rgba(0,0,0,0.1); }
 body:not(.dark) .pll-tip { background:rgba(255,255,255,0.98); color:#222; border-color:rgba(0,229,255,0.35); }
 @media (max-width:560px) {
   .pll-grid { grid-template-columns:36px repeat(4,1fr); gap:4px 5px; }
-  .pll-dot { width:8px; height:8px; }
+  .pll-dot { padding:8px; }
+  .pll-dot:hover, .pll-dot:focus-visible { padding:5px; }
   .pll-cell-head { font-size:0.7rem; text-transform:none; letter-spacing:0; }
   .pll-cell-yr { font-size:0.7rem; padding-right:4px; }
 }
