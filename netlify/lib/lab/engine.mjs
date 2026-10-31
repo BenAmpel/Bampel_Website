@@ -103,9 +103,10 @@ export async function loadParticipant(S, raw) {
 }
 
 // ---------- progress (read back from write-once keys) ----------
-export async function progressOf(S, p) {
+// known.dataKeys: the participant's data/ keys when the caller has already listed them (exports), so they are not listed twice.
+export async function progressOf(S, p, known = {}) {
   const st = S.store;
-  const [dataKeys, doneKeys, startKeys] = await Promise.all([st.list(`data/${p.code}/`), st.list(`done/${p.code}/`), st.list(`started/${p.code}/`)]);
+  const [dataKeys, doneKeys, startKeys] = await Promise.all([known.dataKeys || st.list(`data/${p.code}/`), st.list(`done/${p.code}/`), st.list(`started/${p.code}/`)]);
   const sessions = {};
   const at = n => sessions[n] || (sessions[n] = { trialsDone: [], practiceDone: false, preSurveyDone: false, postDone: false, startedAt: null, completedAt: null });
   for (const k of dataKeys) {
@@ -556,6 +557,15 @@ export async function lookupEmails(S, emails, now = Date.now()) {
   return out;
 }
 
+// What an export needs to plan its batches: each participant's code and whether they are a test participant. One list and
+// one read per participant, all at once, instead of listParticipants' progress for everyone (several lists each).
+export async function exportCodes(S) {
+  const keys = await S.store.list('participants/');
+  return (await getMany(S.store, keys, 100)).filter(([, v]) => v).map(([, v]) => ({ code: v.code, test: !!v.test, label: v.label }))
+    .sort((a, b) => (a.label || a.code).localeCompare(b.label || b.code))   // the same order as listParticipants, so exports keep their row order
+    .map(({ code, test }) => ({ code, test }));
+}
+
 export async function listParticipants(S, now = Date.now()) {
   const c = await getContent(S.store, S.type);
   const people = (await getMany(S.store, await S.store.list('participants/'))).map(([, p]) => p).filter(Boolean);
@@ -571,9 +581,9 @@ export async function listParticipants(S, now = Date.now()) {
   return out.sort((a, b) => (a.label || a.code).localeCompare(b.label || b.code));
 }
 
-async function exportParticipant(S, rec) {
+async function exportParticipant(S, rec, dataKeys) {
   const { pin, pinFails, pinLockUntil, sessions, completed, ...p } = rec;
-  const prog = await progressOf(S, rec), views = await S.store.list(`views/${rec.code}/`);
+  const [prog, views] = await Promise.all([progressOf(S, rec, { dataKeys }), S.store.list(`views/${rec.code}/`)]);   // one round of lists, not two
   p.completed = prog.completed;
   p.sessions = Object.fromEntries(Object.entries(prog.sessions).map(([n, s]) => [n, { startedAt: s.startedAt, completedAt: s.completedAt, trialsDone: s.trialsDone.sort((a, b) => a - b),
     practiceDone: s.practiceDone, preSurveyDone: s.preSurveyDone,
@@ -585,10 +595,14 @@ async function exportParticipant(S, rec) {
 // whole study).
 export async function exportRecords(S, codes) {
   const list = codes && codes.length ? codes : (await S.store.list('participants/')).map(k => k.slice(13));
-  const keys = (await Promise.all(list.map(code => S.store.list(`data/${code}/`)))).flat();
-  const records = (await getMany(S.store, keys)).filter(([, v]) => v).map(([key, v]) => ({ key, ...v }));
-  const recs = (await getMany(S.store, list.map(pKey))).map(([, v]) => v).filter(Boolean);
-  const participants = await inBatches(recs, 10, r => exportParticipant(S, r));
+  // Storage waits are what an export costs, so everything that does not depend on something else runs at the same time:
+  // the data lists and the participant records first, then the records, and each participant's progress lists
+  // (built from the data list already in hand).
+  const [lists, people] = await Promise.all([Promise.all(list.map(code => S.store.list(`data/${code}/`))), getMany(S.store, list.map(pKey), 100)]);
+  const byCode = Object.fromEntries(list.map((code, i) => [code, lists[i]]));
+  const recs = people.map(([, v]) => v).filter(Boolean);
+  const [fetched, participants] = await Promise.all([getMany(S.store, lists.flat(), 100), inBatches(recs, 25, r => exportParticipant(S, r, byCode[r.code]))]);
+  const records = fetched.filter(([, v]) => v).map(([key, v]) => ({ key, ...v }));
   return { study: S.study.id, type: S.type.id, exportedAt: new Date().toISOString(), participants, records };
 }
 

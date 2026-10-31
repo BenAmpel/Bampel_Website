@@ -253,32 +253,38 @@
   // read the whole study (Netlify functions have a time and response-size limit).
   var FIRST = ['code', 'condition', 'test', 'label', 'self_signup', 'session', 'trial_index'];
   var WIDE_FIRST = ['code', 'condition', 'test', 'label', 'self_signup', 'consented', 'sessions_completed', 'total_sessions', 'finished', 'screened_out', 'returned', 'panel_study', 'panel_sessions'];   // netlify/lib/lab/wide.mjs
-  function batched(codes, size, fetchOne, onProgress) {
-    var batches = [], out = [];
+  // Up to `parallel` batches are in flight at once (each is its own function call, so they run side by side); the results
+  // keep the participants' order. Export time is almost all waiting on storage and the network, so this is the big win.
+  function batched(codes, size, fetchOne, onProgress, parallel) {
+    var batches = [], out = [], next = 0, done = 0, lanes = Math.max(1, parallel || 1);
     for (var i = 0; i < codes.length; i += size) batches.push(codes.slice(i, i + size));
-    return (function step(i) {
-      if (i >= batches.length) return Promise.resolve(out);
-      if (onProgress) onProgress(i / Math.max(1, batches.length));
-      return fetchOne(batches[i]).then(function (r) { out.push(r); return step(i + 1); });
-    })(0);
+    function lane() {
+      if (next >= batches.length) return Promise.resolve();
+      var i = next++;
+      return fetchOne(batches[i]).then(function (r) { out[i] = r; done++; if (onProgress) onProgress(done / batches.length); return lane(); });
+    }
+    if (onProgress) onProgress(0);
+    var all = []; for (var l = 0; l < Math.min(lanes, batches.length); l++) all.push(lane());
+    return Promise.all(all).then(function () { return out; });
   }
+  var LANES = 6;   // requests in flight during an export
   function rowsFor(codes, kind, progress) {
-    return batched(codes, 4, function (b) { return getJSON('rows?kind=' + kind + '&codes=' + b.join(',')); }, progress).then(function (parts) { return [].concat.apply([], parts); });
+    return batched(codes, 10, function (b) { return getJSON('rows?kind=' + kind + '&codes=' + b.join(',')); }, progress, LANES).then(function (parts) { return [].concat.apply([], parts); });
   }
   document.querySelectorAll('[data-export]').forEach(function (b) {
     b.addEventListener('click', function () {
       err(); var kind = b.getAttribute('data-export'), buttons = document.querySelectorAll('[data-export]');
       buttons.forEach(function (x) { x.disabled = true; });
       var prog = function (f) { $('exprog').textContent = 'Exporting… ' + Math.round(f * 100) + '%'; };
-      getJSON('participants').then(function (list) {
+      getJSON('codes').then(function (list) {   // just codes and test flags; the full participant list is much slower to build
         var codes = list.filter(function (p) { return !$('exreal').checked || !p.test; }).map(function (p) { return p.code; });
-        var work = kind === 'events' ? batched(codes, 1, function (c) { return getJSON('rows?kind=events&codes=' + c[0]); }, prog).then(function (parts) {
+        var work = kind === 'events' ? batched(codes, 1, function (c) { return getJSON('rows?kind=events&codes=' + c[0]); }, prog, LANES).then(function (parts) {
             saveFile(toCsv([].concat.apply([], parts), ['code', 'session', 'trial_index', 't_ms', 'type']), studyId + '_events_' + day() + '.csv', 'text/csv');
           })
-          : kind === 'raw' ? batched(codes, 1, function (c) { return getJSON('raw?codes=' + c[0]); }, prog).then(function (parts) {
+          : kind === 'raw' ? batched(codes, 1, function (c) { return getJSON('raw?codes=' + c[0]); }, prog, LANES).then(function (parts) {
             saveFile([].concat.apply([], parts).map(function (x) { return JSON.stringify(x); }).join('\n') + '\n', studyId + '_raw_' + day() + '.jsonl', 'application/x-ndjson');
           })
-          : kind === 'json' ? batched(codes, 2, function (c) { return getJSON('records?codes=' + c.join(',')); }, prog).then(function (parts) {
+          : kind === 'json' ? batched(codes, 5, function (c) { return getJSON('records?codes=' + c.join(',')); }, prog, LANES).then(function (parts) {
             saveFile(JSON.stringify({ study: studyId, type: me.study.type, exportedAt: new Date().toISOString(), participants: [].concat.apply([], parts.map(function (r) { return r.participants; })),
               records: [].concat.apply([], parts.map(function (r) { return r.records; })) }), studyId + '_all_' + day() + '.json', 'application/json');
           })

@@ -34,7 +34,7 @@ const MAX_BODY = 4_000_000;
 const MAX_IMPORT_BODY = 8_000_000;   // a survey file as JSON text (an .xlsx is base64); Netlify itself caps a request near 6 MB
 
 const NEED = {
-  me: 'viewer', participants: 'viewer', 'design.json': 'viewer', 'codebook.csv': 'viewer', 'codebook.md': 'viewer', 'export-wide.csv': 'viewer', 'bundle.zip': 'viewer', 'export.csv': 'viewer', 'export-surveys.csv': 'viewer', 'export.json': 'viewer', rows: 'viewer', records: 'viewer', raw: 'viewer',
+  me: 'viewer', participants: 'viewer', codes: 'viewer', 'design.json': 'viewer', 'codebook.csv': 'viewer', 'codebook.md': 'viewer', 'export-wide.csv': 'viewer', 'bundle.zip': 'viewer', 'export.csv': 'viewer', 'export-surveys.csv': 'viewer', 'export.json': 'viewer', rows: 'viewer', records: 'viewer', raw: 'viewer',
   content: 'viewer', 'content-history': 'viewer',
   'content-save': 'editor', 'content-restore': 'editor', import: 'editor', preview: 'editor',
   roster: 'manager', lookup: 'manager', 'credit.csv': 'manager', create: 'manager', 'set-test': 'manager',
@@ -138,6 +138,7 @@ export async function handle(req, { getStore, env, now }) {
       switch (action) {
         case 'me': return json({ name: who.name, role: who.role, roles: admin.ROLE_INFO, study: { id: study.id, name: study.name, type: type.id, typeLabel: type.label, paths: study.paths }, conditions: type.conditionsOf(c) });
         case 'participants': return json(await E.listParticipants(S));
+        case 'codes': return json(await E.exportCodes(S));   // the export's list of participants (exportCodes)
         case 'export.json': return json(await E.exportRecords(S));
         case 'design.json': return json(await exportDesign(S));
         case 'codebook.csv': return csv(codebookCsv(buildCodebook(S, c)), `${study.id}_codebook_v${c.version || 0}.csv`);
