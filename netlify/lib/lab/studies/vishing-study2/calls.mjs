@@ -33,8 +33,8 @@ const PRACTICE = {
   }
 };
 export const PRACTICE_ITEMS = [
-  callItem('practice-call', { ...PRACTICE, gate: { final: false } }, { title: 'Practice call', body: 'This is a practice call from a coworker. Answer it, speak your reply out loud, and hang up when you are done. Nothing here is scored.', decide: false, ask: 'none' }),
-  callItem('practice-call-retry', { ...PRACTICE, gate: { retryOf: 'practice-call', final: true } }, { title: 'Practice call (second try)', body: 'Let us try the practice call once more. Speak your reply out loud.', decide: false, ask: 'none' })
+  callItem('practice-call', { ...PRACTICE, gate: { final: false } }, { title: 'Practice call', body: 'A practice call from Sam, a coworker. Nothing here is scored. Click Answer. To reply, click Tap to talk, say your reply out loud, then click it again to send it. Wait for Sam to answer before you reply again. The call ends when Sam says goodbye, or click Hang up. Then click Continue.', decide: false, ask: 'none' }),
+  callItem('practice-call-retry', { ...PRACTICE, gate: { retryOf: 'practice-call', final: true } }, { title: 'Practice call (second try)', body: 'Sam will call once more. Click Answer, click Tap to talk, say your reply out loud, then click it again to send it. Typing does not count on this call: we need to hear you.', decide: false, ask: 'none' })
 ];
 
 // ---------- the shift (the writer's calls, stimuli-data.mjs) ----------

@@ -553,14 +553,15 @@
     function answer() {
       clearTimeout(ringTimer); ring.stop(); st.answered = true; st.ringMs = Math.round(now() - st.ringT0); st.callT0 = now();
       // Speech goes to the lab's own recognizer when the study has one (audio never leaves the lab's machines);
-      // otherwise the browser's recognizer is used where it exists. Typing is always available.
+      // otherwise the browser's recognizer is used where it exists. Typing is offered unless the call needs speech
+      // (scored calls, and the practice call, whose gate passes only on a spoken reply) and the microphone works.
       st.serverAsr = plan.asr === 'server';
       var canSpeak = st.serverAsr ? !!(plan.recording && navigator.mediaDevices && !micBlocked) : !!SR && !micBlocked;
       ui.show(phone(
         '<p class="phone-status" id="ph-status" aria-live="off">0:00</p>' + (plan.recording ? '<p class="rec-note" id="ph-rec" hidden><span class="dot" aria-hidden="true"></span>' + ui.Th('call_recording') + '</p>' : '') + authHtml() +
         '<div class="captions" id="ph-captions" aria-live="polite" hidden></div>' +
         '<div class="phone-talk">' + (canSpeak ? '<button type="button" class="talk" id="ph-talk" disabled>' + ui.Th('call_talk') + '</button><p class="interim muted" id="ph-interim" aria-live="polite"></p>' : '') +
-        '<form id="ph-typeform" class="typeform"' + (call.scored && canSpeak ? ' hidden' : '') + '><label for="ph-type">' + ui.Th('call_type_label') + '</label><div class="row"><input type="text" id="ph-type" autocomplete="off" disabled><button type="submit" class="secondary" id="ph-send" disabled>' + ui.Th('call_send') + '</button></div></form></div>' +
+        '<form id="ph-typeform" class="typeform"' + ((call.scored || call.gate) && canSpeak ? ' hidden' : '') + '><label for="ph-type">' + ui.Th('call_type_label') + '</label><div class="row"><input type="text" id="ph-type" autocomplete="off" disabled><button type="submit" class="secondary" id="ph-send" disabled>' + ui.Th('call_send') + '</button></div></form></div>' +
         '<div class="phone-btns small"><label class="check" for="ph-cc"><input type="checkbox" id="ph-cc"> ' + ui.Th('call_captions') + '</label><button type="button" class="secondary" id="ph-hold">' + ui.Th('call_hold') + '</button>' +
         ((plan.directory || []).length ? '<button type="button" class="secondary" id="ph-dirlive">' + ui.Th('directory_open') + '</button>' : '') +
         '<button type="button" class="decline" id="ph-hang">' + ui.Th('call_hangup') + '</button></div><div id="ph-dirbox-live" hidden></div>', 'live'));
@@ -583,7 +584,9 @@
         else { st.holdMs += now() - st.holdAt; st.holdAt = null; if (voice) voice.resume(); b.textContent = ui.T('call_hold'); setInput(!busy); turn('resume'); }
       });
       document.getElementById('ph-typeform').addEventListener('submit', function (e) {
-        e.preventDefault(); var box = document.getElementById('ph-type'), v = box.value.trim(); if (!v || busy || st.holdAt != null) return;
+        e.preventDefault(); var box = document.getElementById('ph-type'), v = box.value.trim();
+        if (v && busy) { var w = document.getElementById('ph-interim'); if (w) w.textContent = 'Wait for the caller to answer before you reply.'; return; }   // said, not silently dropped
+        if (!v || busy || st.holdAt != null) return;
         box.value = ''; st.typed++; st.lastWasSpoken = false; say(v);
       });
       var talk = document.getElementById('ph-talk');
@@ -601,6 +604,7 @@
     // speaking, and replying cuts the caller off (counted in "interruptions"). busy = waiting for the server.
     function callerSays(r) {
       busy = false;
+      if (st.ended) return;   // a reply that arrives after hanging up is never spoken over the after-call screen
       if (r.heard != null && st.pendingCaption) { st.pendingCaption.textContent = 'You: ' + (r.heard || '(nothing heard)'); st.pendingCaption = null; }
       if (r.code) addCode(r.code);
       if (r.say) caption('caller', r.say);
@@ -667,9 +671,11 @@
       if (voice) voice.stop(); if (recog) { try { recog.abort(); } catch (e) {} } if (st.stopClock) st.stopClock();
       if (st.holdAt != null) { st.holdMs += now() - st.holdAt; st.holdAt = null; }
       st.durationMs = Math.round(now() - st.callT0);
-      var after = byServer ? Promise.resolve() : turn('hangup');
+      // Hang up always works at once: the screen moves on now, and the hang-up turn is recorded in order behind any reply
+      // still pending (the save waits for it, below), so a slow or lost reply can never hold the participant on the call.
+      st.hangupSent = byServer ? Promise.resolve() : turn('hangup');
       st.recording = rec ? rec.stop().then(function (out) { if (stream) stream.getTracks().forEach(function (t) { t.stop(); }); return upload(ui, ctx, 'call', out); }) : Promise.resolve(false);
-      after.then(function () { afterCall(ui.T('call_ended') + ' · ' + fmtTime(st.durationMs / 1000)); });
+      afterCall(ui.T('call_ended') + ' · ' + fmtTime(st.durationMs / 1000));
     }
 
     // 2. after the call: the directory (call a number back), then the decision and questions
@@ -679,6 +685,14 @@
         '<fieldset class="mm-answers" id="mm-answers">' + decisionHtml(dec, ui) + ui.questionsHtml(qs) + '</fieldset>' +
         '<div id="trialmsg"></div><div class="actions"><button id="mm-submit">' + ui.Th('submit_button') + '</button></div>');
       var root = ui.stage, box = document.getElementById('mm-answers'), submit = document.getElementById('mm-submit'), msg = document.getElementById('trialmsg'), dirBtn = document.getElementById('ph-dir');
+      // When the caller ends the call just as the participant clicks Hang up, the click lands on this new screen (in the
+      // 2026-10-24 panel it ticked "1 Guessing"). Clicks in its first 400 ms are dropped, so nothing is chosen by accident.
+      var guardUntil = now() + 400;
+      function guard(e) { if (now() < guardUntil) { e.preventDefault(); e.stopPropagation(); } }
+      if (root && root.addEventListener) {
+        root.addEventListener('pointerdown', guard, true); root.addEventListener('click', guard, true);
+        setTimeout(function () { root.removeEventListener('pointerdown', guard, true); root.removeEventListener('click', guard, true); }, 500);
+      }
       if (dirBtn) dirBtn.addEventListener('click', function () {
         st.directoryOpened = true; logUi('directory_open_after');
         var b = document.getElementById('ph-dirbox'); b.hidden = false; dirBtn.hidden = true;
@@ -691,7 +705,7 @@
         if (!set.check()) return;
         submit.disabled = true; msg.innerHTML = '<p class="muted">Saving…</p>';
         if (window.speechSynthesis) speechSynthesis.cancel();
-        (st.recording || Promise.resolve(false)).then(function () {
+        Promise.all([st.recording || Promise.resolve(false), st.hangupSent || Promise.resolve()]).then(function () {   // the server scores the call from its turns
           ctx.submit({ answers: set.answers, decision: state.decision, decisionMs: state.decisionMs, trajectory: state.trajectory, mtInput: state.mtInput, rtMs: Math.round(now() - st.t0),
             call: { answered: st.answered, ringMs: st.ringMs, durationMs: st.durationMs || 0, holdMs: Math.round(st.holdMs), typedTurns: st.typed, spokenTurns: st.spoken, interruptions: st.interruptions || 0, captions: st.captions, directoryOpened: st.directoryOpened, endedBy: st.endedBy, latencies: st.latencies },
             uiEvents: takeUiLog() },

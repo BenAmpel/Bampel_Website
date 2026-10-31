@@ -16,7 +16,13 @@
 
 export const STATES = ['opener', 'pretext', 'ask', 'pressure1', 'pressure2', 'deflect', 'goAhead', 'closeComply', 'closeRefuse', 'close'];
 // Lines used when a script does not have one for a state.
-export const DEFAULT_LINES = { goAhead: 'Great. Go ahead whenever you are ready.' };
+export const DEFAULT_LINES = { goAhead: 'Great. Go ahead whenever you are ready.', waiting: 'Sure, take your time.' };
+// What the caller says after a reply: its line for the new state, except that a request to wait gets a waiting line
+// instead of the current line again (a caller repeating the same request word for word sounds like a loop).
+export function replyLine(script, cls, prev, after) {
+  if (cls && cls.intent === 'hold' && prev && after && prev.state === after.state && !after.done) return (script && script.waiting) || DEFAULT_LINES.waiting;
+  return (script && script[after.state]) || DEFAULT_LINES[after.state] || '';
+}
 export const ENDINGS = ['closeComply', 'closeRefuse', 'close'];
 const PRESSURE = ['ask', 'pressure1', 'pressure2'];
 
@@ -62,27 +68,38 @@ export function digitsIn(text) {
   return Math.max(best, run);
 }
 const RE = {
-  verify: /\b(call (you|them|the bank|it|your office|back)|call ?back|verify (you|this|who)|look (it |that )?up|official number|number on (the back of )?(my|the) card|hang up and call|let me (check|call)|i'?ll call|i will call|who is this|who'?s (this|calling)|who is calling|what'?s your (name|extension|number|department)|what is your (name|extension|number|department)|which (department|office|branch)|(can|could|may) i (call|ring) (you )?back|how do i know|prove)\b/i,
+  verify: /\b(call (you|them|the bank|it|your office|back)|call ?back|verify (you|this|who)|look (it |that )?up|official number|number on (the back of )?(my|the) card|hang up and call|let me (check|call)|i'?ll call|i will call|i'?ll (check|look into (it|this|that)) and (call|ring|get back)|get back to you|(call|check with|go through) (the |our |my )?(company )?directory|who is this|who'?s (this|calling)|who is calling|what'?s your (name|extension|number|department)|what is your (name|extension|number|department)|which (department|office|branch)|(can|could|may) i (call|ring) (you )?back|how do i know|prove)\b/i,
   // "fraud" alone is not a refusal ("is this fraud prevention?"); calling the call a scam or fraud is.
-  refuse: /\b(no|nope|not comfortable|won'?t|will not|don'?t (want|feel|think|give|share)|not going to|i refuse|stop calling|not interested|scam(mer)?|fraudster|(this|that|it) (is|sounds like|seems like) (a )?fraud|leave me alone|no thanks)\b/i,
+  refuse: /\b(no|nope|not comfortable|won'?t|will not|don'?t (want|feel|think|give|share)|not going to|i refuse|stop calling|not interested|scam(mer)?|fraudster|(this|that|it) (is|sounds like|seems like) (a )?fraud|leave me alone|no thanks|(not|n't) (ok|okay)|can'?t|cannot|can not|unable to|not able to|(i'?d )?rather not|prefer not|not (allowed|authorized|permitted)|against (our |company )?policy|i decline|not over the phone|not giving (that|it|you)|not sharing|i'?ll pass|no way)\b/i,
+  // Hedges are neither agreement nor refusal ("not sure" contains "sure", "no idea" contains "no"); checked first.
+  hedge: /\b((not|n't|never) (really |quite |too |so |100% )?(sure|certain)|unsure|uncertain|no idea|(i )?(don'?t|do not) know|dunno|maybe|perhaps|i'?m not positive|(don'?t|do not) have (it|that|this|the [a-z]+)( [a-z]+)? (in front of me|on hand|handy|here|with me))\b/i,
   // "fine" and "it's" are not agreement on their own ("I'm fine", "it's not something I can share").
   comply: /\b(yes|yeah|yep|sure|okay|ok|go ahead|here it is|the code is|my (code|pin|password|number) is|it arrived|got it)\b/i,
-  hold: /\b(hold on|one (sec|second|moment)|wait)\b/i
+  // A request to wait, not any "wait" ("wait, why do you need that?" is a question).
+  hold: /\b(hold on|hang on|one (sec|second|moment|minute)|just a (sec|second|moment|minute)|give me a (sec|second|moment|minute)|wait a (sec|second|moment|minute)|please wait)\b|^\s*wait[.!]?\s*$/i
 };
 // One intent per utterance, in this order of precedence: giving digits counts as complying whatever else is said
 // (digitRule; a study that knows the participant's secrets turns it off and scores disclosure from the secrets).
 export function classify(text, { digitRule = true } = {}) {
-  const raw = String(text || '').trim(), digits = digitsIn(raw);
-  // "oh no" is surprise and "no problem" is agreement, not a refusal.
-  const t = raw.replace(/\b(oh|uh|ah),?\s+no\b[!.,]?/gi, '').replace(/\bno (problem|worries|rush|trouble)\b/gi, 'okay').trim();
+  // Typed and transcribed text arrive with curly apostrophes and "O.K." spellings; normalize them first.
+  const raw = String(text || '').replace(/[\u2018\u2019\u02bc]/g, "'").replace(/\bo\.\s?k\.?(?=\W|$)/gi, 'ok').trim(), digits = digitsIn(raw);
+  // "oh no" is surprise and "no problem" is agreement, not a refusal; "make sure" and "are you sure" are not agreement.
+  const t = raw.replace(/\b(oh|uh|ah),?\s+no\b[!.,]?/gi, '').replace(/\bno (problem|worries|rush|trouble)\b/gi, 'okay')
+    .replace(/\b(make|making|be|are you|you)\s+sure\b/gi, ' ')
+    .replace(/\b(can'?t|cannot|can not) (hear|understand|make out|see)\b/gi, ' ').trim();   // a line problem, not a refusal
   if (!raw) return { intent: 'silence', digits: 0 };
   // A long run of digits is a disclosure only when nothing better is known; studies with persona secrets decide
   // disclosure from the secrets themselves (multimodal.mjs callTurn), so a read-back employee ID is not a leak.
   if (digitRule && digits >= 4) return { intent: 'comply', digits, disclosed: true };
   if (!t) return { intent: 'other', digits };
-  if (RE.verify.test(t)) return { intent: 'verify', digits };
+  // "Sure, I'll call them from the directory" verifies and agrees at once; a caller who asked for exactly that callback
+  // hears the yes (step, completeOnCall false) instead of restating the request.
+  if (RE.verify.test(t)) return { intent: 'verify', digits, agreed: !RE.refuse.test(t) && (RE.comply.test(t) || /\b(i'?ll|i will|let me|going to) (call|ring)\b/i.test(t)) };
+  if (RE.hedge.test(t)) return { intent: 'hedge', digits };     // before refuse: "no idea" is a hedge, not a "no"
   if (RE.refuse.test(t)) return { intent: 'refuse', digits };
   if (RE.hold.test(t)) return { intent: 'hold', digits };   // "okay, hold on" waits rather than agrees
+  // A question whose only agreeing word is "okay"/"sure" ("is that okay?") asks rather than agrees.
+  if (/\?\s*$/.test(t) && !/\b(yes|yeah|yep|go ahead|here it is|the code is|my (code|pin|password|number) is)\b/i.test(t)) return { intent: 'question', digits };
   if (RE.comply.test(t)) return { intent: 'comply', digits };
   if (/\?\s*$/.test(t)) return { intent: 'question', digits };
   return { intent: 'other', digits };
@@ -117,6 +134,8 @@ export function step(st, cls, { intent = 'attack', maxTurns = 8, completeOnCall 
   }
   const live = PRESSURE.includes(cur) || cur === 'deflect' || cur === 'goAhead';
   if (cls.intent === 'hold' && live) return capped({ ...s });   // "hold on": the caller waits and repeats itself
+  // A legitimate caller whose request is the callback itself takes "I'll call you through the directory" as the answer.
+  if (live && intent === 'benign' && !completeOnCall && cls.intent === 'verify' && cls.agreed) return end('closeComply', 'agreed');
   if (live) {
     if (cls.intent === 'comply') {
       if (intent === 'benign') return end('closeComply', completeOnCall ? 'completed' : 'agreed');

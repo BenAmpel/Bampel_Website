@@ -11,7 +11,7 @@ import { VOICES } from './world.mjs';
 const AUDIO = '/lab/media/vishing-study2/training/';
 const clip = (id, voice, tag, text, label) => ({ id, voice: VOICES[voice], tag, text, label });
 
-const INTRO = 'Front-desk staff handle many calls in a day: requests from coworkers, vendors and customers, notices from service providers, and now and then a call that is not what it seems. This briefing takes about 5 minutes and has eight short screens. Please play each audio example to the end. The Continue button unlocks after a short minimum time. The examples come from organizations you will not deal with at Northwind, so treat them as illustrations. Afterwards you will answer four short questions.';
+const INTRO = 'Front-desk staff handle many calls in a day: requests from coworkers, vendors and customers, notices from service providers, and now and then a call that is not what it seems. This briefing takes about 5 minutes and has eight short screens. Please play each audio example to the end. The Continue button unlocks after a short minimum time. The examples come from organizations you will not deal with at Northwind, so treat them as illustrations. Afterwards you will answer a few short questions about it.';
 const CLOSING = 'That is the end of the briefing. Next you will answer four questions about it.';
 
 const A0_SWAP = 'A front desk is often the first voice a caller hears. Callers form an impression of the whole organization in the first few seconds, from how quickly the phone is answered and how the greeting sounds. A consistent greeting, a steady pace and a clear closing make every caller\'s experience predictable, and they make the desk easier to cover when a colleague steps away. Small habits add up over a full shift.';

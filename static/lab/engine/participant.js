@@ -19,10 +19,17 @@
   function store(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); if (v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch (e) { return null; } }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function fmtDate(ms) { return new Date(ms).toLocaleString(undefined, { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' }); }
+  // Every request gives up after a while (REQUEST_MS; uploads get longer), so a reply that never comes is treated like
+  // a dropped connection: retried once, then reported, never waited on forever. The simulated panel saw requests hang
+  // for good when many participants started at once, leaving a call with no caller reply and Saving... on screen.
+  var REQUEST_MS = 20000, UPLOAD_MS = 120000;
   function post(route, body) {
-    return fetch(API + route, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body || {}) })
+    var ms = (window.LAB_REQUEST_MS || 0) || (route === 'media/upload' ? UPLOAD_MS : REQUEST_MS), ctl = typeof AbortController === 'function' ? new AbortController() : null;
+    var timer = ctl ? setTimeout(function () { ctl.abort(); }, ms) : null;
+    return fetch(API + route, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body || {}), signal: ctl ? ctl.signal : undefined })
       .then(function (r) { return r.json().then(function (j) { j._status = r.status; return j; }, function () { return { error: 'server_error', _status: r.status }; }); },
-            function () { return { error: 'network' }; });
+            function () { return { error: 'network' }; })
+      .then(function (j) { if (timer) clearTimeout(timer); return j; });
   }
   // End-to-end sealing (seal.js; netlify/lib/lab/seal.mjs): with a study key, free-text answers, their answer-log entries,
   // and identifying link data (such as PROLIFIC_PID) are encrypted here, in the participant's browser, before they are sent,

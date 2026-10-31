@@ -104,7 +104,7 @@ export const MEDIA_RE = /^(https:\/\/|\/lab\/|\/api\/lab\/[a-z][a-z0-9-]{2,30}\/
 const ITEM_FIELDS = ['title', 'kind', 'body', 'media', 'mediaAlt', 'transcript', 'mustFinish', 'maxPlays', 'autoplay', 'decide', 'decisionPrompt', 'decisionOptions', 'ask', 'recordVoice', 'voicePrompt',
   'clips', 'minSeconds', 'persona', 'practiceDial', 'live', 'agentText'];
 // callback: what the organization's real line says; deflectLine: what the attacker says on the number they gave out.
-const SCRIPT_STATES = ['opener', 'pretext', 'ask', 'pressure1', 'pressure2', 'deflect', 'goAhead', 'closeComply', 'closeRefuse', 'close', 'callback', 'deflectLine'];
+const SCRIPT_STATES = ['opener', 'pretext', 'ask', 'pressure1', 'pressure2', 'deflect', 'goAhead', 'waiting', 'closeComply', 'closeRefuse', 'close', 'callback', 'deflectLine'];
 
 // The item as this participant sees it: base wording, overridden by their condition's variant.
 function resolve(item, condition) {
@@ -263,7 +263,7 @@ async function callTurn(S, pid, body, now) {
     // A legitimate caller's own completion pattern (the truthful answer, which may be "no") counts as completing it.
     if (call.intent === 'benign' && call.completeRe && new RegExp(call.completeRe, 'i').test(said)) cls = { ...cls, intent: 'comply' };
     after = bot.step(st, cls, { intent: call.intent, maxTurns: call.maxTurns || 8, completeOnCall: !call.completeViaCallback });
-    line = call.script[after.state] || bot.DEFAULT_LINES[after.state] || '';
+    line = bot.replyLine(call.script, cls, st, after);
     Object.assign(rec, { heard: bot.redact(said), heardIntent: cls.intent, digits: cls.digits, ...(disclosed.length ? { disclosed } : {}) });
   }
   if (call.code && ctx.trial.callCode && after.state === (call.code.at || 'ask') && !turns.some(t => t.codeSent)) rec.codeSent = true;

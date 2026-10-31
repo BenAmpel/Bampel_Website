@@ -190,6 +190,10 @@ let passer = null;
   assert(train.slice(2, 6).every(t => t.item.clips.length === 2) && train.every(t => t.item.minSeconds > 0), 'two examples on each part screen, a minimum time on each');
   assert.equal(train.filter(t => t.item.practiceDial && t.item.practiceDial.target).length, 1, 'every arm\'s exercise has one directory lookup');
   assert(train.every(t => !(t.item.practiceDial) || t.item.practiceDial.directory.every(d => d.media)), 'practice-directory greetings are rendered in the study voice');
+  // Both clip-block intros describe the locked clips too, in the same words for every arm (the panel found the second
+  // intro promised answering while every call plays).
+  const intros = s2.trials.filter(t => t.item.kind === 'text' && /recorded calls/.test(t.item.body || ''));
+  assert.equal(intros.length, 2); assert(intros.every(t => /open only when the call ends/.test(t.item.body) && !t.item.variants), 'clip intros match the locked trials');
   const calls = s2.trials.filter(t => t.item.kind === 'call');
   assert(calls.every(t => t.item.call.scored && !t.item.call.intent && !t.item.call.script), 'the browser never learns whether a call is an attack');
   assert(calls.every(t => t.item.call.caller === 'Incoming call' && t.item.call.number === ''), 'no caller ID: every call rings as "Incoming call" with no number');
@@ -351,6 +355,26 @@ console.log('preview participants keep the arm the researcher chose');
   const best = p => ['accept', 'verify', 'refuse'].reduce((a, b) => (ev(p, b) > ev(p, a) ? b : a));
   assert.deepEqual([0.03, 0.06, 0.5, 0.79, 0.81].map(best), ['accept', 'verify', 'verify', 'verify', 'refuse']);
   console.log('clip lists balanced; disclosure detected on spoken and written digits and passwords; verify is optimal for p between .05 and .80');
+}
+
+{
+  // A clip must not give itself away. Each attack and legitimate twin is word for word the same outside the request,
+  // and a request names only amounts the call already gave (P-AHC-05 once quoted $185, then asked for $240).
+  const { STIMULI } = await import('../../netlify/lib/lab/studies/vishing-study2/stimuli-data.mjs');
+  const outside = t => t.replace(/\[ASK\][\s\S]*?\[\/ASK\]/, '<ask>').replace(/\[\/?RES\]/g, '');
+  const twins = {};
+  for (const s of STIMULI.filter(s => s.set === 'passive')) (twins[s.cell.slice(1) + s.id.slice(-2)] ||= []).push(s);
+  for (const [k, [a, b]] of Object.entries(twins)) {
+    assert(b, `${k} has both twins`);
+    assert.equal(outside(a.text), outside(b.text), `${a.id} and ${b.id} differ only in the request`);
+  }
+  for (const s of STIMULI) {
+    const texts = s.text ? [s.text] : Object.values(s.lines || {});
+    const said = new Set(texts.join(' ').replace(/\[ASK\][\s\S]*?\[\/ASK\]/, '').match(/\$[\d,.]+\d/g) || []);
+    const asked = s.text ? ((s.text.match(/\[ASK\]([\s\S]*?)\[\/ASK\]/) || [])[1] || '') : [s.lines.ask, s.lines.goAhead, s.lines.deflectLine].join(' ');
+    for (const amt of asked.match(/\$[\d,.]+\d/g) || []) if (said.size) assert(said.has(amt), `${s.id} asks for ${amt} but the call quotes ${[...said]}`);
+  }
+  console.log('clips: twins match outside the request; no request names an amount the call did not quote');
 }
 
 fake.close();
