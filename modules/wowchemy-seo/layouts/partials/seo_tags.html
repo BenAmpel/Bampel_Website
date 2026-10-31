@@ -160,10 +160,11 @@
   {{ if not .Lastmod.IsZero }}
     <meta property="article:modified_time" content="{{ .Lastmod.Format "2006-01-02T15:04:05-07:00" | safeHTML }}">
   {{ end }}
-{{ else }}
-  {{ if not .Date.IsZero }}
-    <meta property="og:updated_time" content="{{ .Date.Format "2006-01-02T15:04:05-07:00" | safeHTML }}" />
-  {{ end }}
+{{ end }}
+{{/* og:updated_time is the page's last real change (.Lastmod: git first, see frontmatter.lastmod in config.yaml), on
+   every page that has one. It used to be .Date on list pages only, which kept the home page at its 2022 date. */}}
+{{ if not .Lastmod.IsZero }}
+  <meta property="og:updated_time" content="{{ .Lastmod.Format "2006-01-02T15:04:05-07:00" | safeHTML }}" />
 {{ end }}
 
 {{/* JSONLD page metadata. */}}
