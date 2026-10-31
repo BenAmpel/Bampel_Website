@@ -10,7 +10,7 @@
 {{ end }}
 
 {{ if or (site.GetPage "/terms.md") (site.GetPage "/privacy.md") }}
-<p class="powered-by">
+<p class="powered-by footer-legal-links">
   {{ with site.GetPage "/privacy.md" }}
   {{ printf "<a href=\"%s\">%s</a>" .RelPermalink .Title | safeHTML }}
   {{ end }}

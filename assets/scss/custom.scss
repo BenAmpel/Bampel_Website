@@ -330,6 +330,19 @@ footer,
   margin: 1.5rem 0 0.75rem;
 }
 
+// The Privacy link stands alone on its line, so it needs a 24px-tall tap target on phones (WCAG 2.5.8).
+.site-footer .footer-legal-links a {
+  display: inline-block;
+  padding: 5px 0;
+}
+
+// Home, Research Impact: the "Download CV", "Explore Research" and similar links share a line separated by dots,
+// so each one gets a 24px-tall tap target when the line wraps on a phone (WCAG 2.5.8).
+#stats .spoiler-content > p > a {
+  display: inline-block;
+  padding: 2px 0;
+}
+
 // ===== EXPERIENCE/TIMELINE CYBER STYLE =====
 .experience,
 .timeline,
@@ -4722,6 +4735,10 @@ body:not(.dark) .teach-bar .bar-track {
   gap: 8px;
   font-size: 0.75rem;
   cursor: pointer;
+  // Each row is the checkbox's tap target: at least 24px tall (WCAG 2.5.8). Bootstrap's label margin is dropped so
+  // the rows sit about as close together as before (30px apart instead of 34px).
+  min-height: 24px;
+  margin-bottom: 0;
 }
 
 .pub-filter-option input {
