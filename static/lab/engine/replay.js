@@ -65,7 +65,9 @@
     var esc = opts.esc, raw = (opts.raw || []).slice().sort(function (a, b) { return (a.session - b.session) || (a.index - b.index); });
     var rows = {}; (opts.rows || []).forEach(function (r) { rows[r.session + ':' + r.trial_index] = r; });
     if (!raw.length) { box.innerHTML = '<div class="rp-head"><h2>Replay: <code>' + esc(opts.code) + '</code></h2><button type="button" class="secondary small" data-rp="close">Close</button></div><p class="muted">No behavior traces are stored for this participant yet (traces are saved with each finished trial).</p>'; wireClose(); return; }
-    box.innerHTML = '<div class="rp-head"><h2>Replay: <code>' + esc(opts.code) + '</code></h2><button type="button" class="secondary small" data-rp="close">Close</button></div>' +
+    box.innerHTML = '<div class="rp-head"><h2>Replay: <code>' + esc(opts.code) + '</code></h2><div class="row">' +
+        (opts.save ? '<button type="button" class="secondary small" data-rp="png">Save image</button><button type="button" class="secondary small" data-rp="video">Save video</button>' : '') +
+        '<button type="button" class="secondary small" data-rp="close">Close</button></div></div><p class="muted" id="rp-saving" role="status"></p>' +
       '<div class="row"><label>Trial <select id="rp-trial">' + raw.map(function (r, i) {
         var row = rows[r.session + ':' + r.index] || {};
         return '<option value="' + i + '">Session ' + r.session + ', trial ' + r.index + (itemName(row) ? ': ' + esc(itemName(row)) : '') + '</option>';
@@ -201,7 +203,19 @@
       var a = e.target.getAttribute && e.target.getAttribute('data-rp');
       if (a === 'prev' || a === 'next') { var i = Number(sel.value) + (a === 'next' ? 1 : -1); if (i >= 0 && i < raw.length) { sel.value = i; show(i); } }
       if (a === 'close') stop();
+      if ((a === 'png' || a === 'video') && opts.figures) exportTrial(a, e.target);
     });
+    // The trial on screen as a shareable figure (figures.js): the full trail as a PNG, or the trail drawing itself as a video.
+    function exportTrial(kind, btn) {
+      var i = Number(sel.value), rec = raw[i], row = rows[rec.session + ':' + rec.index] || {}, msg = box.querySelector('#rp-saving');
+      btn.disabled = true; msg.textContent = kind === 'png' ? 'Drawing…' : 'Recording…';
+      opts.figures().then(function () {
+        var F = window.LabFigures, tr = F.trailFrom(rec, row, prepare), name = (opts.studyId || 'study') + '_' + opts.code + '_s' + rec.session + 't' + rec.index;
+        var fig = F.build({ title: itemName(row) || 'Session ' + rec.session + ', trial ' + rec.index, caption: opts.code + (row.condition ? ' · ' + row.condition : '') + ' · CCAIR Behavioral Lab', panels: [{ title: opts.code, sub: secs(tr.end) + ' · ' + tr.clicks.length + ' click' + (tr.clicks.length === 1 ? '' : 's'), trails: tr.moves.length ? [tr] : [] }] }, { width: 1200 });
+        if (kind === 'png') return F.png(fig).then(function (b) { opts.save(b, name + '.png'); msg.textContent = ''; });
+        return F.video(fig, { seconds: Math.min(20, Math.max(4, tr.end / 1000)), progress: function (f) { msg.textContent = 'Recording… ' + Math.round(f * 100) + '%'; } }).then(function (v) { opts.save(v.blob, name + '.' + v.ext); msg.textContent = 'Saved as ' + v.ext.toUpperCase() + '.'; });
+      }).catch(function (x) { msg.textContent = x.message; }).then(function () { btn.disabled = false; });
+    }
     wireClose();
     show(0);
 

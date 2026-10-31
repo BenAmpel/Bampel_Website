@@ -10,6 +10,8 @@ static/lab/
   engine/participant.js, .css   shared participant app (every server-backed study)
   engine/logic.js               survey display logic and piped text (browser copy of netlify/lib/lab/logic.mjs)
   engine/admin.js, .css         shared admin page and lab console
+  engine/figures.js             Figures tab and replay exports: pointer trails as PNG or video (MP4/WebM), side by side or overlaid by condition
+  engine/analyze.js, stats.js   Analyze tab: outcome by condition, t-test / ANOVA / regression with robust or clustered errors, R and Python code
   engine/types/<type>.js        a study type's item screen
   engine/types/<type>-admin.js  a study type's content-editor tabs and report sections
   s/index.html                  participant page for /lab/s/<study>
@@ -82,6 +84,11 @@ Settings in `content.environment` (Study content → Devices & timing; `netlify/
 ## Latin-square counterbalancing
 
 `design.latinSquare: true` (Study content → Block order, multimodal and vignette studies; `netlify/lib/lab/latin.mjs`) orders each session's blocks (multimodal) or items (vignettes; the type's "shuffle the items" is then set aside) by a balanced Williams design: for an even number n of units, n sequences in which each unit appears once in every position and follows every other unit exactly once; for an odd n, that square and its mirror image (2n sequences), balanced together. `startSession` picks the least-used sequence within the participant's condition (`chooseRow`, from markers `lsq[-test]/s{n}/{condition}/{row}/{id}`) before the plan is written; `buildPlan` hands the type a copy of the content with that session's units reordered (`applyRow`), so the types need no change; the plan and every trial record keep `latin: { row, units, sequence }`; the trials CSV has `cb_row` and `cb_sequence` (`2>1>3` = the second unit was shown first) and the wide CSV `s{n}_cb_row`, `s{n}_cb_sequence`. Deleting a participant removes their marker, which frees that sequence. Tests: `tests/lab/latin.test.mjs`.
+
+## Figures and Analyze (admin tabs)
+
+- **Figures** (`engine/figures.js`, viewers and up): pointer trails from the raw behavior traces, drawn to each participant's window size, coloured from blue (start) to orange (end), clicks numbered. *Side by side* puts up to six chosen participants on the same item in one figure; *By condition* overlays a random sample of participants per condition, one panel per condition. Save as a PNG, or as a video in which every panel plays on the same clock (MP4 where the browser records it, as Chrome and Safari do, else WebM). The trial replay (Participants → Replay) saves the trial on screen the same way. Real participants only. Traces are fetched per participant and cached for the tab.
+- **Analyze** (`engine/analyze.js` with `engine/stats.js`, viewers and up): pick rows (one per participant: the wide CSV; one per trial), an outcome, a comparison and covariates. With one row per participant: Welch's t-test (two groups) or one-way ANOVA, or least squares with robust (HC1), classical, or participant-clustered (CR1) standard errors. With one row per trial, comparisons always use regression with errors clustered by participant (trials are not independent), and the R code adds an `lme4` mixed model. Category references are the first level in sorted order, as in R and Python, so the exported R and Python code reproduces the estimates; clustered p-values use G − 1 degrees of freedom (R's `coeftest` uses n − k). Results: a sentence, group and coefficient tables, a chart (means with 95% CIs over the raw points, or a scatter with the fitted line), PNG and CSV downloads. `tests/lab/stats.test.mjs` checks the statistics against R. It is for exploring; report the preregistered analysis, run with the exported code.
 
 ## Data-quality flags (no CAPTCHA)
 
