@@ -23,6 +23,27 @@
   // Titles, URLs, awards and names come from JSON; escape them so a quote or ampersand cannot break the markup.
   const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+  // Links from JSON are kept only when they resolve to http or https (relative links resolve against the page), so a
+  // javascript: or data: URL is never written into an href. Returns '' for anything else; the title is then plain text.
+  const safeUrl = (v) => {
+    const s = String(v == null ? '' : v).trim();
+    if (!s) return '';
+    try {
+      const { protocol } = new URL(s, document.baseURI);
+      return protocol === 'http:' || protocol === 'https:' ? s : '';
+    } catch (e) {
+      return '';
+    }
+  };
+
+  // The checkbox for a group and value, found by comparing data attributes rather than building a selector string,
+  // so a value with quotes or brackets cannot break or widen the match.
+  const findOption = (group, value) => {
+    const wanted = String(value);
+    return Array.from(root.querySelectorAll('input[type="checkbox"][data-group]'))
+      .find((input) => input.dataset.group === group && input.dataset.value === wanted) || null;
+  };
+
   const normalizeTypeLabel = (value) => {
     const map = { journal: 'Journal', conference: 'Conference', workshop: 'Workshop' };
     return map[value] || value;
@@ -31,8 +52,8 @@
   const buildCheckbox = (value, label, group) => {
     const id = `pub-filter-${group}-${String(value).replace(/[^a-z0-9]+/gi, '-')}`;
     return `
-      <label for="${id}" class="pub-filter-option">
-        <input type="checkbox" id="${id}" data-group="${group}" data-value="${esc(value)}">
+      <label for="${esc(id)}" class="pub-filter-option">
+        <input type="checkbox" id="${esc(id)}" data-group="${esc(group)}" data-value="${esc(value)}">
         <span>${esc(label)}</span>
       </label>
     `;
@@ -62,7 +83,7 @@
     };
     const badgesFor = (pub) => {
       const chips = (PRESTIGE_VENUES[pub.venue] || []).map(
-        (b) => `<span class="pub-badge pub-badge--${b.toLowerCase()}" title="${b === 'FT50' ? 'Financial Times Top 50 journal' : 'UT Dallas Top 24 journal'}">${b}</span>`
+        (b) => `<span class="pub-badge pub-badge--${b.toLowerCase()}" title="${b === 'FT50' ? 'Financial Times Top 50 journal' : 'UT Dallas Top 24 journal'}">${esc(b)}</span>`
       );
       if (pub.award) {
         chips.push(`<span class="pub-badge pub-badge--award" title="${esc(pub.award)}"><i class="fas fa-trophy" aria-hidden="true"></i> ${esc(pub.award)}</span>`);
@@ -74,8 +95,9 @@
       const authors = Array.isArray(pub.authors) ? esc(pub.authors.join(', ')) : '';
       const typeLabel = normalizeTypeLabel(pub.type || '');
       const meta = esc([pub.year, pub.venue, typeLabel].filter(Boolean).join(' · '));
-      const title = pub.url
-        ? `<a href="${esc(pub.url)}" class="pub-title">${esc(pub.title)}</a>`
+      const href = safeUrl(pub.url);
+      const title = href
+        ? `<a href="${esc(href)}" class="pub-title">${esc(pub.title)}</a>`
         : `<span class="pub-title">${esc(pub.title)}</span>`;
       return `
         <div class="pub-item">
@@ -147,8 +169,8 @@
     GROUPS.forEach((group) => {
       const wanted = new Set(params.getAll(group).map((v) => v.trim()).filter(Boolean));
       if (!wanted.size) return;
-      root.querySelectorAll(`input[type="checkbox"][data-group="${group}"]`).forEach((input) => {
-        if (!wanted.has(input.dataset.value)) return;
+      root.querySelectorAll('input[type="checkbox"][data-group]').forEach((input) => {
+        if (input.dataset.group !== group || !wanted.has(input.dataset.value)) return;
         input.checked = true;
         state[group].add(group === 'year' ? Number(input.dataset.value) : input.dataset.value);
         restored = true;
@@ -226,16 +248,16 @@
       clearState();
 
       if (payload.type) {
-        const typeTarget = root.querySelector(`input[data-group=\"type\"][data-value=\"${payload.type}\"]`);
+        const typeTarget = findOption('type', payload.type);
         if (typeTarget) {
           typeTarget.checked = true;
-          state.type.add(payload.type);
+          state.type.add(typeTarget.dataset.value);
         }
       }
 
       if (payload.year !== undefined && payload.year !== null) {
         const yearValue = Number(payload.year);
-        const yearTarget = root.querySelector(`input[data-group=\"year\"][data-value=\"${yearValue}\"]`);
+        const yearTarget = findOption('year', yearValue);
         if (yearTarget) {
           yearTarget.checked = true;
           state.year.add(yearValue);
