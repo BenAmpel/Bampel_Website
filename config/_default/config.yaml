@@ -56,7 +56,12 @@ build:
     - source: 'postcss\.config\.js'
       target: 'css'
 
-enableGitInfo: false
+# Git info gives every page a real last-change date (.Lastmod), used for og:updated_time and article:modified_time
+# (2026-10-31; the home page had shown its 2022 front-matter date). Netlify also sets HUGO_ENABLEGITINFO. Git wins over
+# front matter so an old `lastmod` or `date` left in a file cannot make a page look stale.
+enableGitInfo: true
+frontmatter:
+  lastmod: [':git', 'lastmod', 'modified', 'date', 'publishDate']
 summaryLength: 30
 pagination:
   pagerSize: 10
