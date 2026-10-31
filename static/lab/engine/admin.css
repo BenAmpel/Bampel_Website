@@ -246,3 +246,31 @@ tr.is-test code { color: var(--muted); }
   .pt-pop { right: auto; left: 0; }
   .pt-acts .pt-pop { left: auto; right: 0; }
 }
+
+/* Figures and Analyze tabs. */
+.fg-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px 20px; align-items: end; margin: 16px 0 8px; }
+.fg-controls .f, .an-controls .f { margin: 0; }
+.fg-style { gap: 16px; align-items: center; min-height: 34px; }
+#fg-q { max-width: 320px; margin: 4px 0 8px; }
+.fg-hint { margin: 8px 0 4px; }
+.fg-pick { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 2px 16px; max-height: 260px; overflow: auto; padding: 8px 10px; border: 1px solid var(--line); border-radius: 12px; margin-bottom: 12px; }
+.fg-p { font-size: 13px; color: var(--text); }
+.fg-p code { font-size: 12px; }
+.fg-out { margin-top: 16px; display: grid; gap: 12px; }
+.fg-canvas canvas { width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--line); display: block; }
+.an-grid { display: grid; grid-template-columns: minmax(250px, 300px) minmax(0, 1fr); gap: 28px; align-items: start; margin-top: 12px; }
+.an-controls { display: grid; gap: 14px; position: sticky; top: 12px; }
+#an-form { display: grid; gap: 14px; }
+.an-covs { display: grid; gap: 2px; max-height: 180px; overflow: auto; padding: 6px 10px; border: 1px solid var(--line); border-radius: 10px; font-size: 13px; }
+.an-covs label { color: var(--text); }
+.an-results { min-width: 0; display: grid; gap: 14px; }
+.an-sentence { font-size: 17px; line-height: 1.5; margin: 0; color: var(--text); }
+.an-meta { margin: -6px 0 0; font-size: 13px; }
+.an-chartbox svg { width: 100%; height: auto; border: 1px solid var(--line); border-radius: 12px; }
+.an-tbl td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.an-tbl td, .an-tbl th { white-space: nowrap; }
+.an-code summary { cursor: pointer; font-weight: 600; font-size: 14px; }
+.an-codes { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-top: 10px; }
+.an-codehead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; font-size: 13px; }
+.an-codes pre { margin: 0; padding: 12px; border-radius: 10px; background: var(--status-bg); overflow-x: auto; font-size: 12px; line-height: 1.5; }
+@media (max-width: 860px) { .an-grid { grid-template-columns: minmax(0, 1fr); } .an-controls { position: static; } }
