@@ -57,6 +57,20 @@ const SHARED_TRIAL_TAIL = [
   ['days_since_prev_session', 'number', 'Days between finishing the previous session and starting this one.'],
   ['content_version', 'integer', 'Version of the study content the session plan was built from.']
 ];
+// The behavior-trace measures TraceLab adds to every trial (the start of SHARED_TRIAL_TAIL). Downloads can leave them
+// out (rows?...&traces=0, export.csv?traces=0, export-wide.csv?traces=0) for a table of answers only. Timing (onset,
+// frame), device, full-screen, session and data-quality columns stay: they are analysis variables, not traces.
+export const TRACE_COLUMNS = new Set(['trial_ms', 'mouse_path_px', 'idle_ms', 'hidden_ms', 'first_interaction_ms', 'no_input_ms', 'longest_no_input_ms', 'clicks',
+  'pointer_type', 'scroll_px', 'window_blurs', 'keystrokes', 'deletions', 'paste_count', 'key_interval_ms', 'key_hold_ms', 'typing_pauses', 'key_interval_cv',
+  'scripted_events', 'trace_version', 'raw_events', 'raw_events_sent', 'save_retries']);
+// Rows without those columns. Wide rows name trial measures s{n}_{item}_{measure}; start- and end-of-session survey
+// columns (s{n}_pre_..., s{n}_post_...) are answers and always stay, whatever the question is called.
+export function dropTraces(rows, kind) {
+  const isTrace = kind === 'wide'
+    ? k => /^s\d+_/.test(k) && !/^s\d+_(pre|post)_/.test(k) && [...TRACE_COLUMNS].some(m => k.endsWith('_' + m))
+    : k => TRACE_COLUMNS.has(k);
+  return rows.map(r => Object.fromEntries(Object.entries(r).filter(([k]) => !isTrace(k))));
+}
 const SHARED_SURVEY = [
   ['survey', 'category', 'Which survey: pre (start of session) or post (end of session).', 'pre; post'],
   ['content_version', 'integer', 'Version of the study content the session plan was built from.'],

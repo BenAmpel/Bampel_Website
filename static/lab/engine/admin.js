@@ -104,6 +104,7 @@
         '<button type="button" class="secondary small" id="refresh">Refresh</button>' +
         '<details class="pt-menu" id="dlmenu"><summary class="btn small">Download</summary><div class="pt-pop" role="group" aria-label="Downloads">' +
           '<label class="check pt-real"><input type="checkbox" id="exreal"> Real participants only</label>' +
+          '<label class="check pt-real pt-notrace"><input type="checkbox" id="exnotrace"> Leave out behavior traces<small>Wide and trials CSV: answers, timing and data-quality flags, without the TraceLab measures (pointer, keys, scrolling)</small></label>' +
           '<p class="pt-grp">Answers</p>' +
           '<button type="button" data-export="wide">Wide CSV<small>One row per participant</small></button>' +
           '<button type="button" data-export="trials">Trials CSV<small>One row per item answered</small></button>' +
@@ -296,6 +297,7 @@
       var prog = function (f) { $('exprog').textContent = 'Exporting… ' + Math.round(f * 100) + '%'; };
       getJSON('codes').then(function (list) {   // just codes and test flags; the full participant list is much slower to build
         var codes = list.filter(function (p) { return !$('exreal').checked || !p.test; }).map(function (p) { return p.code; });
+        var noTrace = (kind === 'wide' || kind === 'trials') && $('exnotrace').checked;   // answers only (codebook.mjs, TRACE_COLUMNS)
         var work = kind === 'events' ? batched(codes, 1, function (c) { return getJSON('rows?kind=events&codes=' + c[0]); }, prog, LANES).then(function (parts) {
             saveFile(toCsv([].concat.apply([], parts), ['code', 'session', 'trial_index', 't_ms', 'type']), studyId + '_events_' + day() + '.csv', 'text/csv');
           })
@@ -306,7 +308,7 @@
             saveFile(JSON.stringify({ study: studyId, type: me.study.type, exportedAt: new Date().toISOString(), participants: [].concat.apply([], parts.map(function (r) { return r.participants; })),
               records: [].concat.apply([], parts.map(function (r) { return r.records; })) }), studyId + '_all_' + day() + '.json', 'application/json');
           })
-          : rowsFor(codes, kind, prog).then(function (rows) { saveFile(toCsv(rows, kind === 'trials' ? FIRST : kind === 'wide' ? WIDE_FIRST : FIRST.slice(0, 6)), studyId + '_' + kind + '_' + day() + '.csv', 'text/csv'); });
+          : rowsFor(codes, kind + (noTrace ? '&traces=0' : ''), prog).then(function (rows) { saveFile(toCsv(rows, kind === 'trials' ? FIRST : kind === 'wide' ? WIDE_FIRST : FIRST.slice(0, 6)), studyId + '_' + kind + (noTrace ? '_answers' : '') + '_' + day() + '.csv', 'text/csv'); });
         return work.then(function () { $('exprog').textContent = 'Exported ' + codes.length + ' participants.'; });
       }).catch(function (e) { err(e.message); }).then(function () { buttons.forEach(function (x) { x.disabled = false; }); });
     });
