@@ -86,13 +86,13 @@
     </div>
     <div class="rd-footprint-controls" style="position:absolute; top:20px; right:20px; z-index:1000; display:flex; flex-direction:column; gap:8px; background:var(--card-bg, rgba(0,0,0,0.55)); border:1px solid var(--card-border, #333); border-radius:8px; padding:10px 12px; font-size:0.75rem;">
       <div role="group" aria-label="Point categories" style="display:flex; gap:10px;">
-        <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" data-footprint-cat="Conference" checked> Conferences</label>
-        <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" data-footprint-cat="Collaboration" checked> Collaborations</label>
-        <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" data-footprint-cat="Institution" checked> Institutions</label>
+        <label class="footprint-toggle"><input type="checkbox" data-footprint-cat="Conference" checked> Conferences</label>
+        <label class="footprint-toggle"><input type="checkbox" data-footprint-cat="Collaboration" checked> Collaborations</label>
+        <label class="footprint-toggle"><input type="checkbox" data-footprint-cat="Institution" checked> Institutions</label>
       </div>
       <div role="group" aria-label="Map layers" style="display:flex; gap:10px;">
-        <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" data-footprint-layer="routes" checked> Timeline arcs</label>
-        <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" data-footprint-layer="clusters" checked> Cluster markers</label>
+        <label class="footprint-toggle"><input type="checkbox" data-footprint-layer="routes" checked> Timeline arcs</label>
+        <label class="footprint-toggle"><input type="checkbox" data-footprint-layer="clusters" checked> Cluster markers</label>
       </div>
       <div style="display:flex; align-items:center; gap:8px;">
         <label for="footprint-year-range" style="white-space:nowrap;">Through <span id="footprint-year-label">2026</span></label>

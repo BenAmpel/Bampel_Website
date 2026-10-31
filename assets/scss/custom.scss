@@ -336,6 +336,14 @@ footer,
   padding: 5px 0;
 }
 
+// CV, Contact: the email (and phone, if one is listed) link stands alone on its line, so it gets a 24px-tall tap target
+// on phones (WCAG 2.5.8; it was 21px).
+#person-email a,
+#person-telephone a {
+  display: inline-block;
+  padding: 2px 0;
+}
+
 // Home, Research Impact: the "Download CV", "Explore Research" and similar links share a line separated by dots,
 // so each one gets a 24px-tall tap target when the line wraps on a phone (WCAG 2.5.8).
 #stats .spoiler-content > p > a {
