@@ -20,7 +20,7 @@ import { importSurvey, ImportError } from './import/index.mjs';
 import { templateList } from './templates.mjs';
 import * as recruit from './recruit.mjs';
 import { exportDesign, importDesign, cloneStudy } from './studyfile.mjs';
-import { buildCodebook, codebookCsv, codebookMarkdown } from './codebook.mjs';
+import { buildCodebook, codebookCsv, codebookMarkdown, dropTraces } from './codebook.mjs';
 import { wideRows, WIDE_FIRST } from './wide.mjs';
 import { saveChecks, LANGUAGES } from './envcheck.mjs';
 import { saveDq } from './quality.mjs';
@@ -132,6 +132,7 @@ export async function handle(req, { getStore, env, now }) {
       const gap = body.gapDays == null || body.gapDays === '' ? undefined : Number(body.gapDays);
       if (gap !== undefined && !(Number.isInteger(gap) && gap >= 0 && gap <= 60)) return json({ error: 'bad_gap', hint: 'Gap days must be a whole number from 0 to 60.' }, 400);
       // Batched exports: the admin page asks for a few participants per request.
+      const noTraces = url.searchParams.get('traces') === '0';   // answers only: no TraceLab measures (codebook.mjs, TRACE_COLUMNS)
       const codes = (url.searchParams.get('codes') || '').split(',').filter(x => E.PID_RE.test(x) || /^[A-Z]{2}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(x)).slice(0, 25);
       const c = await content.getContent(S.store, type);
 
@@ -148,13 +149,14 @@ export async function handle(req, { getStore, env, now }) {
           await admin.audit(S.store, who, 'bundle.download', `${b.name} (${b.files.length} files)`);
           return new Response(b.bytes, { headers: { 'content-type': 'application/zip', 'content-disposition': `attachment; filename="${b.name}"`, 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
         }
-        case 'export-wide.csv': return csv(E.toCsv(wideRows(S, await E.exportRecords(S), c), WIDE_FIRST), `${study.id}_wide.csv`);
-        case 'export.csv': return csv(await E.exportCsv(S), `${study.id}_trials.csv`);
+        case 'export-wide.csv': { const w = wideRows(S, await E.exportRecords(S), c); return csv(E.toCsv(noTraces ? dropTraces(w, 'wide') : w, WIDE_FIRST), `${study.id}_wide${noTraces ? '_answers' : ''}.csv`); }
+        case 'export.csv': return csv(noTraces ? E.toCsv(dropTraces(await E.exportRows(S, 'trials', null), 'trials'), E.FIRST_COLUMNS) : await E.exportCsv(S), `${study.id}_trials${noTraces ? '_answers' : ''}.csv`);
         case 'export-surveys.csv': return csv(await E.exportSurveyCsv(S), `${study.id}_surveys.csv`);
         case 'credit.csv': return csv(await E.exportCredit(S), `${study.id}_extra_credit.csv`);
         case 'rows': {
           const kind = url.searchParams.get('kind');
-          if (kind === 'wide') return json(wideRows(S, await E.exportRecords(S, codes.length ? codes : ['none']), c));   // one row per participant
+          if (kind === 'wide') { const w = wideRows(S, await E.exportRecords(S, codes.length ? codes : ['none']), c); return json(noTraces ? dropTraces(w, 'wide') : w); }   // one row per participant
+          if (kind === 'trials' && noTraces) return json(dropTraces(await E.exportRows(S, 'trials', codes.length ? codes : ['none']), 'trials'));
           if (kind === 'events') return json(codes.length === 1 ? await E.rawEventRows(S, codes[0]) : { error: 'one_code' });   // raw events, one row each (one participant per request: logs are large)
           return json(await E.exportRows(S, kind === 'surveys' ? 'surveys' : 'trials', codes.length ? codes : ['none']));
         }
