@@ -103,10 +103,11 @@ export async function loadParticipant(S, raw) {
 }
 
 // ---------- progress (read back from write-once keys) ----------
-// known.dataKeys: the participant's data/ keys when the caller has already listed them (exports), so they are not listed twice.
+// known: the participant's data/, done/ and started/ keys when the caller has already listed them (exports, the
+// Participants list), so they are not listed again per participant.
 export async function progressOf(S, p, known = {}) {
   const st = S.store;
-  const [dataKeys, doneKeys, startKeys] = await Promise.all([known.dataKeys || st.list(`data/${p.code}/`), st.list(`done/${p.code}/`), st.list(`started/${p.code}/`)]);
+  const [dataKeys, doneKeys, startKeys] = await Promise.all([known.dataKeys || st.list(`data/${p.code}/`), known.doneKeys || st.list(`done/${p.code}/`), known.startKeys || st.list(`started/${p.code}/`)]);
   const sessions = {};
   const at = n => sessions[n] || (sessions[n] = { trialsDone: [], practiceDone: false, preSurveyDone: false, postDone: false, startedAt: null, completedAt: null });
   for (const k of dataKeys) {
@@ -566,11 +567,21 @@ export async function exportCodes(S) {
     .map(({ code, test }) => ({ code, test }));
 }
 
+// Keys under prefix (data/, done/, started/), grouped by participant code: three lists for the whole study instead of three
+// per participant. Each key is <prefix><code>/...
+function byCode(keys, prefix) {
+  const out = {};
+  for (const k of keys) { const end = k.indexOf('/', prefix.length); if (end < 0) continue; const code = k.slice(prefix.length, end); (out[code] || (out[code] = [])).push(k); }
+  return out;
+}
+
 export async function listParticipants(S, now = Date.now()) {
-  const c = await getContent(S.store, S.type);
-  const people = (await getMany(S.store, await S.store.list('participants/'))).map(([, p]) => p).filter(Boolean);
-  const out = await inBatches(people, 20, async p => {
-    const prog = await progressOf(S, p), total = totalFor(S, p, c, prog), st = status(p, now, total, prog.completed);
+  const st = S.store;
+  const [c, pkeys, data, done, started] = await Promise.all([getContent(st, S.type), st.list('participants/'), st.list('data/'), st.list('done/'), st.list('started/')]);
+  const people = (await getMany(st, pkeys, 100)).map(([, p]) => p).filter(Boolean);
+  const D = byCode(data, 'data/'), F = byCode(done, 'done/'), B = byCode(started, 'started/');
+  const out = await inBatches(people, 100, async p => {
+    const prog = await progressOf(S, p, { dataKeys: D[p.code] || [], doneKeys: F[p.code] || [], startKeys: B[p.code] || [] }), total = totalFor(S, p, c, prog), st = status(p, now, total, prog.completed);
     const cur = st.nextSession && prog.sessions[st.nextSession];
     const plan = cur && cur.startedAt ? await getPlan(S, p, st.nextSession) : null;
     return { code: p.code, type: PID_RE.test(p.code) ? (p.selfSignup ? 'email (self)' : 'email') : 'code', condition: p.condition, label: p.label, test: !!p.test, gapDays: p.gapDays, consented: !!p.consentedAt, declined: !!p.declinedAt,

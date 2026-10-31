@@ -66,6 +66,17 @@ console.log('exportCodes matches the Participants list; batched rows keep their 
     assert.ok(rounds <= 3, `exportRecords for ${n} participants waited on storage ${rounds} times in a row (at most 3)`);
   }
   console.log('exportRecords: at most 3 storage rounds per request, for 4, 10 or 23 participants');
+
+  // The Participants list: the same answer as building each participant's progress on its own, in a fixed number of
+  // rounds (study-wide lists, then participant records, then plans), not one round per 20 participants.
+  const before = raw.rounds, list = await E.listParticipants(S, 1_900_000_000_000), rounds = raw.rounds - before;
+  assert.ok(rounds <= 4, `listParticipants waited on storage ${rounds} times in a row (at most 4)`);
+  for (const p of list) {
+    const rec = await S.store.get(`participants/${p.code}`), one = await E.progressOf(S, rec);
+    assert.equal(p.completedSessions, one.completed.length, `${p.code}: completed sessions`);
+  }
+  assert.equal(list.length, 23);
+  console.log(`listParticipants: ${rounds} storage rounds for 23 participants, same progress as per-participant reads`);
 }
 
 // The admin page's batched(): several batches in flight, results in the participants' order, progress reaches 100%.
