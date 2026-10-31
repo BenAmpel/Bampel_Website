@@ -98,21 +98,37 @@
     '<div class="preview-bar" id="previewbar" hidden><div><strong>See it as a participant</strong><span class="muted">Opens the study in a new tab as a test participant (left out of real counts), with no wait between sessions.</span></div>' +
       '<div class="row"><label id="pvcondwrap">Arm <select id="pvcond"></select></label><button type="button" class="primary" id="preview">Preview as a participant</button></div><p class="muted" id="pvout" role="status"></p></div>' +
     '<nav class="tabs" id="tabs" aria-label="Study admin sections"></nav>' +
-    '<section data-tab="participants"><div class="row">' +
-      '<button type="button" class="secondary" id="refresh">Refresh</button>' +
-      '<button type="button" class="secondary" data-export="trials">Download trials CSV</button><button type="button" class="secondary" data-export="surveys">Download surveys CSV</button>' +
-      '<button type="button" class="secondary" data-export="wide">Download wide CSV (one row per participant)</button>' +
-      '<button type="button" class="secondary" data-export="json">Download full JSON</button><button type="button" class="secondary" data-export="raw">Download raw behavior traces (JSONL)</button><button type="button" class="secondary" data-export="events">Raw events as CSV (one row per event)</button>' +
-      '<label class="check" style="font-size:13px"><input type="checkbox" id="exreal"> Real participants only</label>' +
-      '<button type="button" class="danger secondary" data-role="owner" id="deltest">Delete all test participants</button></div>' +
-      '<p class="muted" id="exprog"></p><div class="row"><button type="button" class="secondary" data-codebook="csv">Download this study\'s codebook (CSV)</button><button type="button" class="secondary" data-codebook="md">Codebook as a document (Markdown)</button></div>' +
-      '<p class="muted">Analysis starters that read the trials and wide CSVs, leave out test participants, apply a data-quality rule you choose, and fit a mixed model by participant and item: <a href="/lab/analysis/starter.R" download>R</a> · <a href="/lab/analysis/starter.py" download>Python</a> (<a href="/lab/analysis/">how to use them</a>).</p>' +
-      '<p class="muted">The study\'s codebook lists every column of the downloads: its name, kind, allowed values and their labels, the question text, and the conditions and sessions it applies to. It is made from the current study content, so download it again after you change the questions. General definitions: <a href="/lab/CODEBOOK.md" target="_blank" rel="noopener">lab codebook</a>. Test participants are included and marked in the <code>test</code> column unless "Real participants only" is ticked.</p>' +
-      '<p class="muted" id="summary"></p><div class="table-wrap"><table id="tbl"></table></div><div class="section rp" id="replaybox" hidden></div>' +
+    '<section data-tab="participants">' +
+      // Summary figures, then one Download menu (every export, the codebook, analysis starters), then the filtered list.
+      '<div class="pt-head"><div class="pt-stats" id="summary" aria-live="polite"></div><div class="pt-actions">' +
+        '<button type="button" class="secondary small" id="refresh">Refresh</button>' +
+        '<details class="pt-menu" id="dlmenu"><summary class="btn small">Download</summary><div class="pt-pop" role="group" aria-label="Downloads">' +
+          '<label class="check pt-real"><input type="checkbox" id="exreal"> Real participants only</label>' +
+          '<p class="pt-grp">Answers</p>' +
+          '<button type="button" data-export="wide">Wide CSV<small>One row per participant</small></button>' +
+          '<button type="button" data-export="trials">Trials CSV<small>One row per item answered</small></button>' +
+          '<button type="button" data-export="surveys">Surveys CSV<small>Start- and end-of-session answers</small></button>' +
+          '<button type="button" data-export="json">Full JSON<small>Every record, for archiving</small></button>' +
+          '<p class="pt-grp">Behavior traces</p>' +
+          '<button type="button" data-export="events">Raw events CSV<small>One row per event</small></button>' +
+          '<button type="button" data-export="raw">Raw traces JSONL<small>As recorded</small></button>' +
+          '<p class="pt-grp">Codebook</p>' +
+          '<button type="button" data-codebook="csv">Codebook CSV<small>Every column, its values and labels</small></button>' +
+          '<button type="button" data-codebook="md">Codebook document<small>Markdown</small></button>' +
+          '<p class="pt-foot">Test participants are included and marked in the <code>test</code> column unless "Real participants only" is ticked. The codebook follows the current study content. ' +
+          'Analysis starters: <a href="/lab/analysis/starter.R" download>R</a> · <a href="/lab/analysis/starter.py" download>Python</a> (<a href="/lab/analysis/">how to use them</a>) · <a href="/lab/CODEBOOK.md" target="_blank" rel="noopener">lab codebook</a></p>' +
+        '</div></details></div></div>' +
+      '<p class="muted" id="exprog" role="status"></p>' +
+      '<details class="pt-conds" id="condbox" hidden><summary>Real participants by condition</summary><div class="pt-chips" id="condchips"></div></details>' +
+      '<div class="pt-filter"><div class="lc-seg ptseg" role="radiogroup" aria-label="Show" id="ptshow">' +
+        [['all', 'All'], ['real', 'Real'], ['test', 'Test'], ['active', 'In progress'], ['done', 'Finished']].map(function (f, i) { return '<button type="button" role="radio" data-show="' + f[0] + '" aria-checked="' + (i === 0) + '" tabindex="' + (i ? -1 : 0) + '">' + f[1] + '</button>'; }).join('') +
+        '</div><input type="search" id="ptq" placeholder="Search ID, label, or condition" aria-label="Search participants"><span class="muted" id="ptcount"></span></div>' +
+      '<div class="table-wrap pt-table"><table id="tbl"></table></div><div class="section rp" id="replaybox" hidden></div>' +
       '<div class="section" data-role="owner"><h2>Backups</h2><p class="muted">Every hour the study data is copied to a separate backup store on Netlify (answers once, changing records every time). That protects against mistakes and bugs. For a copy outside Netlify, download a complete backup (every record, raw traces, emails, study content, team, and activity log) and save it to GSU-approved storage, for example weekly. It contains emails, so treat it as identifiable data. Deleting a participant also removes them from the backup store.</p>' +
         '<p id="bkstatus" class="muted"></p><div class="row"><button type="button" class="secondary" id="bkrun">Run backup now</button><button type="button" class="secondary" id="bkdl">Download complete backup (.json.gz)</button></div><p id="bkprog" class="muted"></p></div>' +
       '<div class="section" data-role="owner"><h2>Live self-test</h2><p class="muted">Runs one throwaway test participant per group through every session of the current design on this live site (practice, surveys, every item), then checks what was saved and what the exports say, and deletes the test participants. Real participants are not touched.</p>' +
-        '<div class="row"><button type="button" id="selftest">Run self-test</button><label class="check"><input type="checkbox" id="stkeep"> Keep the test participants so I can look at them (delete later with "Delete all test participants")</label></div><p class="muted" id="stprog"></p><div id="stout"></div></div>' +
+        '<div class="row"><button type="button" id="selftest">Run self-test</button><label class="check"><input type="checkbox" id="stkeep"> Keep the test participants so I can look at them (delete later with "Delete all test participants")</label></div><p class="muted" id="stprog"></p><div id="stout"></div>' +
+        '<div class="pt-danger"><div><strong>Test participants</strong><p class="muted">Pilots, previews, and kept self-test runs. Deleting them removes their answers and traces for good; real participants are not touched.</p></div><button type="button" class="danger secondary" id="deltest">Delete all test participants</button></div></div>' +
     '</section>' +
     '<section data-tab="report" hidden><p class="muted" id="rpintro"></p><div class="row">' +
       '<label>Participants <select id="rpwho"><option value="real">Real participants only</option><option value="all">Everyone, including test</option></select></label>' +
@@ -302,25 +318,76 @@
   $('credit').addEventListener('click', function () {
     err(); call('credit.csv').then(function (r) { return r.blob(); }).then(function (blob) { saveFile(blob, studyId + '_extra_credit_' + day() + '.csv'); }).catch(function (e) { err(e.message); });
   });
-  var people = [];
+  var people = [], show = 'all';
+  // One status per participant, in the words a researcher uses: what happened last, or what happens next.
+  function status(p) {
+    if (p.declined) return ['Declined', 'st-off'];
+    if (!p.consented) return ['Not consented', 'st-off'];
+    if (p.completedSessions >= p.totalSessions) return ['Finished', 'st-done'];
+    if (p.inProgress) return ['In session · ' + p.inProgress + ' / ' + p.inProgressOf, 'st-live'];
+    if (p.nextSession) return [(p.availableAt && new Date(p.availableAt).getTime() > Date.now() ? 'Session ' + p.nextSession + ' opens ' + fmt(p.availableAt) : 'Session ' + p.nextSession + ' ready'), 'st-wait'];
+    return ['', ''];
+  }
+  function finished(p) { return p.completedSessions >= p.totalSessions; }
   function load() {
     getJSON('participants').then(function (rows) {
       people = rows;
-      var real = rows.filter(function (p) { return !p.test; });
-      var by = {}; real.forEach(function (p) { by[p.condition] = (by[p.condition] || 0) + 1; });
-      $('summary').textContent = rows.length + ' participants (' + (rows.length - real.length) + ' test). Real participants by condition: ' +
-        (Object.keys(by).map(function (k) { return k + ' ' + by[k]; }).join(', ') || 'none yet') + '. Finished all sessions: ' + real.filter(function (p) { return p.completedSessions >= p.totalSessions; }).length + '.';
-      var head = ['Study ID', 'Sign-in', 'Label', 'Condition', 'Test', 'Consent', 'Sessions done', 'In progress', 'Next opens', 'Gap', 'Last seen', 'Behavior'].concat(can('owner') ? [''] : []);
-      $('tbl').innerHTML = '<tr>' + head.map(function (h) { return '<th>' + h + '</th>'; }).join('') + '</tr>' + rows.map(function (p) {
-        return '<tr><td><code>' + esc(p.code) + '</code></td><td>' + esc(p.type) + '</td><td>' + esc(p.label) + '</td><td>' + esc(p.condition) + '</td><td>' + (p.test ? 'yes ' : '') +
-          (can('manager') ? '<button type="button" class="secondary small" data-settest="' + esc(p.code) + '|' + (p.test ? '0' : '1') + '">' + (p.test ? 'Mark real' : 'Mark test') + '</button>' : '') + '</td><td>' +
-          (p.declined ? 'declined' : p.consented ? 'yes' : '') + '</td><td>' + p.completedSessions + ' / ' + p.totalSessions + '</td><td>' + (p.inProgress ? p.inProgress + ' / ' + p.inProgressOf : '') + '</td><td>' +
-          (p.nextSession ? 'S' + p.nextSession + ' ' + esc(fmt(p.availableAt)) : 'done') + '</td><td>' + p.gapDays + 'd</td><td>' + esc(fmt(p.lastSeenAt)) + '</td>' +
-          '<td><button type="button" class="secondary small" data-replay="' + esc(p.code) + '" aria-label="Replay ' + esc(p.code) + '\'s trials">Replay</button></td>' +
-          (can('owner') ? '<td><button type="button" class="danger secondary small" data-del="' + esc(p.code) + '">Delete</button></td>' : '') + '</tr>';
-      }).join('');
+      var real = rows.filter(function (p) { return !p.test; }), by = {};
+      real.forEach(function (p) { by[p.condition] = (by[p.condition] || 0) + 1; });
+      var stat = function (n, label, cls) { return '<div class="pt-stat' + (cls ? ' ' + cls : '') + '"><b>' + n.toLocaleString() + '</b><span>' + label + '</span></div>'; };
+      $('summary').innerHTML = stat(rows.length, 'participants') + stat(real.length, 'real') + stat(rows.length - real.length, 'test') +
+        stat(real.filter(finished).length, 'finished all sessions', 'good') + stat(real.filter(function (p) { return !finished(p) && p.inProgress; }).length, 'in a session now');
+      var conds = Object.keys(by).sort();
+      $('condbox').hidden = !conds.length;
+      $('condbox').querySelector('summary').textContent = 'Real participants by condition (' + conds.length + ')';
+      $('condchips').innerHTML = conds.map(function (k) { return '<span class="pt-chip"><code>' + esc(k) + '</code><b>' + by[k] + '</b></span>'; }).join('');
+      $('deltest').disabled = !(rows.length - real.length);
+      render();
     }).catch(function (e) { err(e.message); });
   }
+  function render() {
+    var q = $('ptq').value.trim().toLowerCase();
+    var rows = people.filter(function (p) {
+      if (show === 'real' && p.test) return false;
+      if (show === 'test' && !p.test) return false;
+      if (show === 'active' && (finished(p) || !p.inProgress)) return false;
+      if (show === 'done' && !finished(p)) return false;
+      return !q || [p.code, p.label, p.condition, p.type].some(function (x) { return String(x || '').toLowerCase().indexOf(q) >= 0; });
+    });
+    $('ptcount').textContent = rows.length === people.length ? people.length + ' shown' : rows.length + ' of ' + people.length + ' shown';
+    var more = can('manager') || can('owner');
+    $('tbl').innerHTML = '<thead><tr><th>Participant</th><th>Condition</th><th>Sessions</th><th>Status</th><th>Last seen</th><th><span class="sr">Actions</span></th></tr></thead><tbody>' + rows.map(function (p) {
+      var st = status(p);
+      return '<tr' + (p.test ? ' class="is-test"' : '') + '><td><code>' + esc(p.code) + '</code>' + (p.test ? ' <span class="pill pt-test">Test</span>' : '') +
+        '<div class="pt-sub">' + esc([p.type, p.label].filter(Boolean).join(' · ')) + (p.gapDays ? ' · ' + p.gapDays + '-day gap' : '') + '</div></td>' +
+        '<td><code>' + esc(p.condition) + '</code></td><td class="num">' + p.completedSessions + ' / ' + p.totalSessions + '</td>' +
+        '<td>' + (st[0] ? '<span class="pt-st ' + st[1] + '">' + esc(st[0]) + '</span>' : '') + '</td><td class="pt-seen">' + esc(fmt(p.lastSeenAt)) + '</td>' +
+        '<td class="pt-acts"><button type="button" class="secondary small" data-replay="' + esc(p.code) + '" aria-label="Replay ' + esc(p.code) + '\'s trials">Replay</button>' +
+        (more ? '<details class="pt-menu pt-row"><summary class="btn small" aria-label="More for ' + esc(p.code) + '">⋯</summary><div class="pt-pop">' +
+          (can('manager') ? '<button type="button" data-settest="' + esc(p.code) + '|' + (p.test ? '0' : '1') + '">' + (p.test ? 'Mark as real participant' : 'Mark as test') + '</button>' : '') +
+          (can('owner') ? '<button type="button" class="danger" data-del="' + esc(p.code) + '">Delete participant…</button>' : '') + '</div></details>' : '') + '</td></tr>';
+    }).join('') + (rows.length ? '' : '<tr><td colspan="6" class="muted">' + (people.length ? 'No participants match.' : 'No participants yet. Share the study link or use Preview as a participant.') + '</td></tr>') + '</tbody>';
+  }
+  $('ptq').addEventListener('input', render);
+  $('ptshow').addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-show]'); if (!b) return;
+    show = b.getAttribute('data-show');
+    $('ptshow').querySelectorAll('[data-show]').forEach(function (x) { var on = x === b; x.setAttribute('aria-checked', String(on)); x.tabIndex = on ? 0 : -1; });
+    render();
+  });
+  $('ptshow').addEventListener('keydown', function (e) {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    var bs = [].slice.call($('ptshow').querySelectorAll('[data-show]')), i = bs.indexOf(document.activeElement); if (i < 0) return;
+    e.preventDefault(); var n = bs[(i + (e.key === 'ArrowRight' ? 1 : bs.length - 1)) % bs.length]; n.click(); n.focus();
+  });
+  // Menus close when one of their items is used, on Escape, and on a click elsewhere.
+  document.addEventListener('click', function (e) {
+    document.querySelectorAll('details.pt-menu[open]').forEach(function (d) { if (!d.contains(e.target) || (e.target.closest('button') && !e.target.closest('summary'))) d.open = false; });
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    document.querySelectorAll('details.pt-menu[open]').forEach(function (d) { d.open = false; d.querySelector('summary').focus(); });
+  });
   $('refresh').addEventListener('click', load);
   $('tbl').addEventListener('click', function (e) {
     var rp = e.target.getAttribute && e.target.getAttribute('data-replay');
@@ -331,7 +398,7 @@
     var p = people.filter(function (x) { return x.code === id; })[0] || {};
     if (!confirm('Permanently delete ' + id + (p.test ? ' (test)' : '') + ' and all of their answers and traces?' +
       (p.test ? '' : '\n\nThis is a REAL participant. Only do this if they withdrew or asked for their data to be removed.') + '\n\nThis cannot be undone.')) return;
-    postJSON('delete', { id: id }).then(function (r) { load(); setTimeout(function () { $('summary').insertAdjacentHTML('afterbegin', '<span class="ok">Deleted ' + esc(r.code) + ' and ' + r.records + ' records.</span> '); }, 600); }).catch(function (x) { err(x.message); });
+    postJSON('delete', { id: id }).then(function (r) { load(); setTimeout(function () { $('exprog').innerHTML = '<span class="ok">Deleted ' + esc(r.code) + ' and ' + r.records + ' records.</span>'; }, 600); }).catch(function (x) { err(x.message); });
   });
   // Trial replay (replay.js, loaded the first time it is used): the participant's raw traces and trial rows.
   function openReplay(code, from) {
@@ -372,7 +439,7 @@
     var n = people.filter(function (p) { return p.test; }).length;
     if (!n) return err('There are no test participants.');
     if (prompt('This permanently deletes all ' + n + ' test participants and their data. Real participants are not touched.\n\nType DELETE to confirm.') !== 'DELETE') return;
-    postJSON('delete-test', { confirm: 'DELETE' }).then(function (r) { load(); setTimeout(function () { $('summary').insertAdjacentHTML('afterbegin', '<span class="ok">Deleted ' + r.participants + ' test participants and ' + r.records + ' records.</span> '); }, 600); }).catch(function (e) { err(e.message); });
+    postJSON('delete-test', { confirm: 'DELETE' }).then(function (r) { load(); setTimeout(function () { $('exprog').innerHTML = '<span class="ok">Deleted ' + r.participants + ' test participants and ' + r.records + ' records.</span>'; }, 600); }).catch(function (e) { err(e.message); });
   });
 
   // ---------- backups (owner) ----------
