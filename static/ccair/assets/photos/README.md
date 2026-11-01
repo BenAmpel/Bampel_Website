@@ -68,7 +68,8 @@ match.
    With an empty `license` the short credit reads "Photo: Georgia State University". Add the photographer to `author`
    if the DAL record names one (for example "Georgia State University / <photographer>").
 4. `focal` is the CSS `object-position` that keeps the subject in view when a frame crops the photo (wide on desktop,
-   4:3 on phones). Keep the subject near it.
+   4:3 on phones). Keep the subject near it. Pathway Finder and Student Guide pages apply it as a class, so a new
+   value needs its rule in `static/ccair/assets/pathways/pathways.css` (the build names the missing rule).
 5. Delete the old files once nothing refers to them, and remove an old entry's credit if the photo is no longer shown.
 6. Run `npm run build:ccair`. The build stops if a file named in `photos.json` is missing, or a photo has no alt text or
    author.

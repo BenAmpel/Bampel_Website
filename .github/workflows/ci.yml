@@ -72,6 +72,9 @@ jobs:
       - name: Pathway Finder share link test
         run: node --test tests/pathways-share-link.test.mjs
 
+      - name: Pathway Finder has no inline style attributes
+        run: node --test tests/pathways-no-inline-style.test.mjs
+
       - name: Internal links
         run: node scripts/check-links.mjs public
 
