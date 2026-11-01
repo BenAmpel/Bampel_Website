@@ -142,12 +142,23 @@
     for (var k = 1; k < a.length; k++) if (a[k].role === a[k - 1].role) { var m = (k + 2) % a.length; var tmp = a[k]; a[k] = a[m]; a[m] = tmp; }
     return a;
   }
-  var steps, pos, ansA, ansB, ansC, started;
+  var steps, pos, ansA, ansB, ansC, started, finished;
   function reset() {
     steps = shuffled(A).concat(B, C);
-    pos = 0; ansA = new Array(A.length).fill(null); ansB = new Array(B.length).fill(null); ansC = new Array(C.length).fill(null); started = false;
+    pos = 0; ansA = new Array(A.length).fill(null); ansB = new Array(B.length).fill(null); ansC = new Array(C.length).fill(null); started = false; finished = false;
   }
   reset();
+
+  /* ---------- Browser history ----------
+     The quiz takes over the page's own history entry and the results screen gets a second one, so Back from the results
+     returns to the last question and Back from the quiz leaves the page. One entry per question would not work: Chrome
+     keeps only 50 entries, so 61 questions would push out the page before the quiz and Back could never leave.
+     Entries hold only the step number and a run id; the answers stay in memory. An entry from another run (after a
+     reload or Start over) cannot be rebuilt from memory: a results entry is read back from its #r= link, a quiz entry
+     shows the start screen. */
+  var run = String(Math.random()), gen = 0;
+  function mark(how, st, url) { try { history[how](st, '', url == null ? location.pathname + location.search : url); } catch (e) {} }
+  function ours(st) { return st && st.pf && st.run === run; }
 
   // The quiz's only live region: a persistent, visually hidden role="status" line outside #quiz. #quiz itself is rebuilt
   // with innerHTML on every screen and is deliberately not live; questions are read by moving focus to their .qtext.
@@ -228,7 +239,13 @@
       '<div class="hero-cta"><button class="btn btn-primary" id="pf-start">Start <span class="arrow" aria-hidden="true">&rarr;</span></button></div>' +
       '<p class="privacy-note">Nothing you answer is saved or sent anywhere. We only count, anonymously, how many people start and finish.</p>');
     mount.appendChild(w);
-    document.getElementById('pf-start').addEventListener('click', function () { show(0, 1); });
+    document.getElementById('pf-start').addEventListener('click', start);
+  }
+  // From the start screen a fresh run begins (the start screen also stands in for an entry from an old run); the first
+  // question takes over the current history entry.
+  function start() {
+    if (mount.querySelector('#pf-start')) { run = String(Math.random()); reset(); seenPart = {}; }
+    mark('replaceState', { pf: 'q', i: 0, run: run }); show(0, 1);
   }
 
   var PARTS = {
@@ -252,6 +269,7 @@
     var st = steps[i];
     if (!skipInterlude && dir > 0 && st.kind !== 'a' && !seenPart[st.kind] && i > 0 && steps[i - 1].kind !== st.kind) { pos = i; return interstitial(i, st.kind); }
     pos = i;
+    if (ours(history.state) && history.state.pf === 'q') mark('replaceState', { pf: 'q', i: i, run: run });
     var done = ansA.concat(ansB, ansC).filter(function (x) { return x !== null; }).length;
     var html = '<div class="quiz-head"><span class="part">' + partLabel(st) + '</span>' + ring(done) + '</div><div class="stage"><div class="qcard' + (dir < 0 ? ' back-in' : '') + '">';
     var cur = current(st);
@@ -294,10 +312,12 @@
     btn.classList.add('picked');
     btn.setAttribute('aria-pressed', 'true');
     busy = true;
-    var card = mount.querySelector('.qcard');
+    var card = mount.querySelector('.qcard'), g = gen;
     setTimeout(function () {
+      if (g !== gen) return;
       if (card && !reduce) card.classList.add('out');
       setTimeout(function () {
+        if (g !== gen) return;
         busy = false;
         if (pos + 1 < steps.length) show(pos + 1, 1); else finish();
       }, reduce ? 0 : 180);
@@ -319,9 +339,10 @@
   });
 
   function finish() {
-    var r = score();
-    track('quiz_finished');
-    try { history.replaceState(null, '', '#r=' + encode()); } catch (e) {}
+    var r = score(), g = gen;
+    // Counted once per run: answering the last question again after Back does not count a second finish.
+    if (!finished) { finished = true; track('quiz_finished'); }
+    mark('pushState', { pf: 'r', run: run }, '#r=' + encode());
     if (reduce) return results(r, true);
     // A short "matching" moment: role names flick past while the scan line sweeps. Not a live region: the names change
     // every 110 ms. The screen is silent to a screen reader (the flick and bar are aria-hidden, and focus left with the
@@ -332,7 +353,7 @@
       '<p class="qtext flick" aria-hidden="true">&nbsp;</p><div class="interlude-bar" aria-hidden="true"><i></i></div></div>';
     var f = mount.querySelector('.flick'), names = ROLES.map(function (x) { return x.name; }), n = 0;
     var iv = setInterval(function () { f.textContent = names[n++ % names.length]; }, 110);
-    setTimeout(function () { clearInterval(iv); results(r, true); }, 1500);
+    setTimeout(function () { clearInterval(iv); if (g === gen) results(r, true); }, 1500);
   }
 
   /* ---------- Results ---------- */
@@ -423,7 +444,8 @@
     });
     document.getElementById('pf-print').addEventListener('click', function () { window.print(); });
     document.getElementById('pf-again').addEventListener('click', function () {
-      try { history.replaceState(null, '', location.pathname); } catch (e) {}
+      // A new run with its own entry: Back from its first question returns to these results through their #r= link.
+      run = String(Math.random()); mark('pushState', { pf: 'q', i: 0, run: run }, location.pathname);
       // Empty the status line so the next result is announced even if it matches this one word for word.
       reset(); seenPart = {}; setStatus(''); show(0, 1);
     });
@@ -433,6 +455,17 @@
     t.textContent = msg; t.classList.add('show'); setTimeout(function () { t.classList.remove('show'); }, 2600);
   }
 
+  // Back and Forward: show the screen the entry belongs to. Timers still running from the last screen (an answer's
+  // short exit animation, the matching moment) see gen change and stop. show() and results() move focus as usual.
+  window.addEventListener('popstate', function (e) {
+    var st = e.state, h = /#r=([^&]+)/.exec(location.hash);
+    if (!(st && st.pf) && !h) return; // an in-page anchor such as the skip link: leave the screen as it is
+    gen++; busy = false;
+    if (ours(st) && st.pf === 'q') { show(st.i, st.i < pos || mount.querySelector('.results') ? -1 : 1, true); return; }
+    if (h && (ours(st) || decode(decodeURIComponent(h[1])))) { results(score(), true); return; }
+    intro();
+  });
+
   /* Entry: shared results link, a "start" button elsewhere on the page, or the intro card. */
   var m = /#r=([^&]+)/.exec(location.hash);
   if (m && decode(decodeURIComponent(m[1]))) results(score(), false);
@@ -441,7 +474,7 @@
     a.addEventListener('click', function (e) {
       e.preventDefault();
       document.getElementById('finder').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
-      if (!mount.querySelector('.qcard [data-v]') && !mount.querySelector('.results')) setTimeout(function () { show(0, 1); }, reduce ? 0 : 450);
+      if (!mount.querySelector('.qcard [data-v]') && !mount.querySelector('.results')) setTimeout(start, reduce ? 0 : 450);
     });
   });
 })();
