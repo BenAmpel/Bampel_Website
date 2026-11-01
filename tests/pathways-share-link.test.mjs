@@ -8,8 +8,9 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { JSDOM } from 'jsdom';
 
-const HUB = readFileSync(new URL('../static/ccair/pathways/index.html', import.meta.url), 'utf8')
-  .replace(/<script\b(?![^>]*type="application\/(?:json|ld\+json)")[^>]*>[\s\S]*?<\/script>/g, '');
+// The page's own <script> tags never run: runScripts 'outside-only' runs only the window.eval below, and jsdom loads no
+// external resources by default.
+const HUB = readFileSync(new URL('../static/ccair/pathways/index.html', import.meta.url), 'utf8');
 const SCRIPT = readFileSync(new URL('../static/ccair/assets/pathways/pathways.js', import.meta.url), 'utf8');
 const BASE = 'https://bampel.test/ccair/pathways/';
 const tick = (ms = 0) => new Promise((r) => setTimeout(r, ms));
