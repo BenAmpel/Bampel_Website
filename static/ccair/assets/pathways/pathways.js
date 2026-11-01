@@ -177,6 +177,21 @@
     for (var i = 0; i < C.length; i++) if (c[i] >= C[i].ctx.options.length) return false;
     ansA = a; ansB = b; ansC = c; return true;
   }
+  // The #r= code in the address, or null when there is none. '' (also for a code that cannot be URL-decoded, such as a
+  // link cut off inside a %-escape) means a link that is there but cannot be read.
+  function linkCode() {
+    var h = /#r=([^&]*)/.exec(location.hash); if (!h) return null;
+    try { return decodeURIComponent(h[1]); } catch (e) { return ''; }
+  }
+  // A results link that is garbled, cut short or from an older version of the quiz: show the start screen with a short
+  // note, and take the bad code out of the address (replaceState, so a reload or Back does not show the note again).
+  // Opening any results link, good or bad, counts nothing: quiz_started and quiz_finished fire only from answer() and
+  // finish(), in a run someone actually takes.
+  var BAD_LINK = 'That results link could not be read. Start the quiz to see your matches.';
+  function badLink() {
+    mark('replaceState', null);
+    intro(BAD_LINK);
+  }
 
   /* ---------- Scoring ---------- */
   function score() {
@@ -230,9 +245,12 @@
   }
 
   /* ---------- Screens ---------- */
-  function intro() {
+  // msg: a short line shown above the start screen (a results link that could not be read). It goes in a polite live
+  // region that starts empty and is filled a moment later, so screen readers announce it.
+  function intro(msg) {
     mount.innerHTML = '';
     var w = el('div', { class: 'intro-card qcard' },
+      (msg ? '<p class="note pf-msg" role="status" aria-live="polite"></p>' : '') +
       '<p class="part">About 5 minutes · ' + TOTAL + ' taps</p>' +
       '<h3 class="qtext" style="min-height:0" tabindex="-1">Tap how much each activity appeals to you. There are no wrong answers, and you don\'t need any cyber knowledge yet.</h3>' +
       '<p>You\'ll get your top 3 roles, why they fit, the realistic first job, which certifications to start with and free places to practice.</p>' +
@@ -240,6 +258,7 @@
       '<p class="privacy-note">Nothing you answer is saved or sent anywhere. We only count, anonymously, how many people start and finish.</p>');
     mount.appendChild(w);
     document.getElementById('pf-start').addEventListener('click', start);
+    if (msg) { var note = w.querySelector('.pf-msg'); setTimeout(function () { note.textContent = msg; }, 100); }
   }
   // From the start screen a fresh run begins (the start screen also stands in for an entry from an old run); the first
   // question takes over the current history entry.
@@ -458,18 +477,26 @@
   // Back and Forward: show the screen the entry belongs to. Timers still running from the last screen (an answer's
   // short exit animation, the matching moment) see gen change and stop. show() and results() move focus as usual.
   window.addEventListener('popstate', function (e) {
-    var st = e.state, h = /#r=([^&]+)/.exec(location.hash);
-    if (!(st && st.pf) && !h) return; // an in-page anchor such as the skip link: leave the screen as it is
+    var st = e.state, code = linkCode();
+    if (!(st && st.pf) && code === null) return; // an in-page anchor such as the skip link: leave the screen as it is
     gen++; busy = false;
     if (ours(st) && st.pf === 'q') { show(st.i, st.i < pos || mount.querySelector('.results') ? -1 : 1, true); return; }
-    if (h && (ours(st) || decode(decodeURIComponent(h[1])))) { results(score(), true); return; }
+    if (code !== null && ours(st)) { results(score(), true); return; }
+    if (code !== null) {
+      if (!decode(code)) return badLink();
+      // Results read back from a link replace the answers in memory, so this run's quiz entries can no longer be
+      // rebuilt: a new run id sends them to the start screen.
+      run = String(Math.random());
+      results(score(), true); return;
+    }
     intro();
   });
 
   /* Entry: shared results link, a "start" button elsewhere on the page, or the intro card. */
-  var m = /#r=([^&]+)/.exec(location.hash);
-  if (m && decode(decodeURIComponent(m[1]))) results(score(), false);
-  else intro();
+  var code0 = linkCode();
+  if (code0 === null) intro();
+  else if (decode(code0)) results(score(), false);
+  else badLink();
   document.querySelectorAll('[data-start-quiz]').forEach(function (a) {
     a.addEventListener('click', function (e) {
       e.preventDefault();

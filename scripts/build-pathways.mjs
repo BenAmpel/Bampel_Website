@@ -54,7 +54,7 @@ function top(current) {
 }
 
 // The hub carries a photo, so its footer lists the photo credits; role pages have no photos.
-const foot = (photoCredits = false) => baseFoot({ note: `Reviewed ${REVIEWED}`, scripts: [`/ccair/assets/pathways/pathways.js?v=${ASSET_V}-anon3-hist1`], photoCredits });
+const foot = (photoCredits = false) => baseFoot({ note: `Reviewed ${REVIEWED}`, scripts: [`/ccair/assets/pathways/pathways.js?v=${ASSET_V}-anon3-share1`], photoCredits });
 
 function faqHtml(faq) {
   return `<div class="faq">${faq.map((f, i) => `<details class="reveal" style="--d:${(i * 0.05).toFixed(2)}s"><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join('')}</div>`;
