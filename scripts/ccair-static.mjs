@@ -225,15 +225,22 @@ export function photoCredit(p) {
   return `Photo: ${who}${lic}`;
 }
 // A <figure> with the photo in a rounded frame and its short credit underneath. priority: an above-the-fold hero image.
+const PATHWAYS_CSS = fs.readFileSync(path.join(CCAIR, 'assets', 'pathways', 'pathways.css'), 'utf8');
 export function photoHtml(slot, { sizes = '(min-width: 1200px) 1120px, calc(100vw - 32px)', priority = false, className = 'photo-band' } = {}) {
   const p = photoFor(slot);
   if (!p) return '';
   const fb = p.fallbackWidths || p.widths;
+  // The focal point is a class ("55% 35%" -> focal-55-35) set in pathways.css, not a style attribute (CSP style-src).
+  const focal = p.focal || '50% 50%';
+  const focalClass = 'focal-' + focal.replace(/%/g, '').trim().split(/\s+/).join('-');
+  if (!PATHWAYS_CSS.includes(`.${focalClass} `)) {
+    throw new Error(`photos.json: photo "${p.id}" has focal "${focal}"; add \`.photo-frame img.${focalClass} { --focal: ${focal}; }\` to static/ccair/assets/pathways/pathways.css`);
+  }
   return `<figure class="${className} reveal">
     <div class="photo-frame"><picture>
       <source type="image/avif" srcset="${srcset(p.base, p.widths, 'avif')}" sizes="${sizes}">
       <source type="image/webp" srcset="${srcset(p.base, p.widths, 'webp')}" sizes="${sizes}">
-      <img src="${PHOTO_DIR}${p.base}-${fb[fb.length - 1]}.jpg" srcset="${srcset(p.base, fb, 'jpg')}" sizes="${sizes}" width="${p.width}" height="${p.height}" alt="${esc(p.alt)}" style="--focal: ${esc(p.focal || '50% 50%')}" decoding="async" ${priority ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'}>
+      <img src="${PHOTO_DIR}${p.base}-${fb[fb.length - 1]}.jpg" srcset="${srcset(p.base, fb, 'jpg')}" sizes="${sizes}" width="${p.width}" height="${p.height}" alt="${esc(p.alt)}" class="${focalClass}" decoding="async" ${priority ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'}>
     </picture></div>
     <figcaption class="photo-credit">${photoCredit(p)}</figcaption>
   </figure>`;

@@ -252,7 +252,7 @@
     var w = el('div', { class: 'intro-card qcard' },
       (msg ? '<p class="note pf-msg" role="status" aria-live="polite"></p>' : '') +
       '<p class="part">About 5 minutes · ' + TOTAL + ' taps</p>' +
-      '<h3 class="qtext" style="min-height:0" tabindex="-1">Tap how much each activity appeals to you. There are no wrong answers, and you don\'t need any cyber knowledge yet.</h3>' +
+      '<h3 class="qtext" tabindex="-1">Tap how much each activity appeals to you. There are no wrong answers, and you don\'t need any cyber knowledge yet.</h3>' +
       '<p>You\'ll get your top 3 roles, why they fit, the realistic first job, which certifications to start with and free places to practice.</p>' +
       '<div class="hero-cta"><button class="btn btn-primary" id="pf-start">Start <span class="arrow" aria-hidden="true">&rarr;</span></button></div>' +
       '<p class="privacy-note">Nothing you answer is saved or sent anywhere. We only count, anonymously, how many people start and finish.</p>');
@@ -402,7 +402,7 @@
     var len = 0; for (var i = 0; i < pts.length; i++) { var a = pts[i], b = pts[(i + 1) % pts.length]; len += Math.hypot(a[0] - b[0], a[1] - b[1]); }
     var labels = FAMILIES.map(function (f, i) { var p = pt(i, 1.2); return '<text x="' + p[0].toFixed(1) + '" y="' + (p[1] + 4).toFixed(1) + '" text-anchor="middle">' + f[0] + '</text>'; }).join('');
     return '<svg class="radar' + (reduce ? '' : ' draw') + '" viewBox="0 0 300 280" role="img" aria-label="Your interest shape across six areas of cybersecurity: ' +
-      FAMILIES.map(function (f, i) { return f[0] + ' ' + Math.round(norm[i] * 100) + ' percent'; }).join(', ') + '" style="--len:' + len.toFixed(0) + '">' +
+      FAMILIES.map(function (f, i) { return f[0] + ' ' + Math.round(norm[i] * 100) + ' percent'; }).join(', ') + '" data-len="' + len.toFixed(0) + '">' +
       grid + spokes + '<polygon class="you" points="' + pts.map(function (p) { return p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' ') + '"/>' + labels + '</svg>';
   }
   function results(r, animate) {
@@ -420,7 +420,7 @@
         '<div><dt>Getting in</dt><dd>' + esc(route) + '</dd></div>' +
         (ro.certsStart.length ? '<div><dt>Start with</dt><dd>' + esc(ro.certsStart.join(', ')) + '</dd></div>' : '<div><dt>Certifications</dt><dd>' + esc(ro.certsNote || '') + '</dd></div>') +
         '<div><dt>Practice free</dt><dd>' + ro.resources.slice(0, 2).map(function (x) { return '<a href="' + esc(x.url) + '" rel="noopener" target="_blank">' + esc(x.name) + '<span class="sr-only"> (opens in a new tab)</span></a>'; }).join(', ') + '</dd></div>' +
-        (pay ? '<div><dt>Median pay, all experience levels</dt><dd>' + money(pay.median) + ' <span class="mono" style="color:var(--muted);font-size:12px">BLS, ' + esc(D.sources.blsDate) + '</span></dd></div>' : '') +
+        (pay ? '<div><dt>Median pay, all experience levels</dt><dd>' + money(pay.median) + ' <span class="mono bls-src">BLS, ' + esc(D.sources.blsDate) + '</span></dd></div>' : '') +
         '</dl><a class="go" href="' + slug + '/">Read the full ' + esc(ro.name) + ' guide &rarr;</a></div></article>';
     });
     html += '</div>';
@@ -439,13 +439,20 @@
     var vals = r.order.map(function (s) { return r.s[s]; }), lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals), span = hi - lo || 1;
     r.order.forEach(function (s, i) {
       var w = Math.max(4, Math.round(100 * (r.s[s] - lo) / span));
-      html += '<li><a href="' + s + '/">' + esc(BY[s].name) + '</a><span class="b"><i style="width:' + w + '%;animation-delay:' + (i * 0.04).toFixed(2) + 's"></i></span></li>';
+      html += '<li><a href="' + s + '/">' + esc(BY[s].name) + '</a><span class="b"><i data-w="' + w + '"></i></span></li>';
     });
     html += '</ul></details></div></div>' +
       '<div class="res-actions no-print"><button class="btn btn-primary" id="pf-copy">Copy link to my results</button>' +
       '<button class="btn btn-ghost" id="pf-print">Print or save as PDF</button>' +
       '<button class="btn btn-ghost" id="pf-again">Start over</button></div></div>';
     mount.innerHTML = html;
+    // Sizes and delays go in through the CSSOM after insertion, never as a style attribute in the markup (CSP style-src 'self').
+    var svg = mount.querySelector('.radar');
+    if (svg) svg.style.setProperty('--len', svg.getAttribute('data-len'));
+    Array.prototype.forEach.call(mount.querySelectorAll('.bars .b i'), function (bar, i) {
+      bar.style.width = bar.getAttribute('data-w') + '%';
+      bar.style.animationDelay = (i * 0.04).toFixed(2) + 's';
+    });
     var rh = mount.querySelector('.results h2');
     if (rh) rh.setAttribute('tabindex', '-1');
     if (animate) {

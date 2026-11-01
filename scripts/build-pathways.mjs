@@ -41,7 +41,9 @@ const word = (n) => WORDS[n] || String(n);
 const NR = D.roles.length;
 const REVIEWED = fmtDate(D.updated);
 
-const head = (o) => baseHead({ ...o, css: [`/ccair/assets/pathways/pathways.css?v=${ASSET_V}-gsu1-tap1`] });
+// Reveal delay as a class (d-0 ... d-60 in pathways.css: hundredths of a second), never a style attribute (CSP).
+const dly = (sec) => `d-${Math.min(60, Math.round(sec * 100))}`;
+const head = (o) => baseHead({ ...o, css: [`/ccair/assets/pathways/pathways.css?v=${ASSET_V}-gsu1-css1`] });
 
 function top(current) {
   return baseTop([
@@ -54,15 +56,15 @@ function top(current) {
 }
 
 // The hub carries a photo, so its footer lists the photo credits; role pages have no photos.
-const foot = (photoCredits = false) => baseFoot({ note: `Reviewed ${REVIEWED}`, scripts: [`/ccair/assets/pathways/pathways.js?v=${ASSET_V}-anon3-share1`], photoCredits });
+const foot = (photoCredits = false) => baseFoot({ note: `Reviewed ${REVIEWED}`, scripts: [`/ccair/assets/pathways/pathways.js?v=${ASSET_V}-anon3-css1`], photoCredits });
 
 function faqHtml(faq) {
-  return `<div class="faq">${faq.map((f, i) => `<details class="reveal" style="--d:${(i * 0.05).toFixed(2)}s"><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join('')}</div>`;
+  return `<div class="faq">${faq.map((f, i) => `<details class="reveal ${dly(i * 0.05)}"><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join('')}</div>`;
 }
 const faqLd = (faq) => ({ '@type': 'FAQPage', mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) });
 
 function roleCard(r, i) {
-  return `<a class="role-card reveal" style="--d:${((i % 3) * 0.08).toFixed(2)}s" href="/ccair/pathways/${r.slug}/" data-hiring="${r.hiring}">
+  return `<a class="role-card reveal ${dly((i % 3) * 0.08)}" href="/ccair/pathways/${r.slug}/" data-hiring="${r.hiring}">
   <span class="badge ${r.hiring}">${HIRING[r.hiring]}</span>
   <h3>${esc(r.name)}</h3>
   <p>${esc(r.tagline)}</p>
@@ -105,13 +107,13 @@ ${top('hub')}
 <main id="main" tabindex="-1">
   <section class="hero"><div class="wrap">
     <span class="eyebrow reveal"><span class="dot"></span>CCAIR Cyber Career Pathway Finder</span>
-    <h1 class="reveal" data-split style="--d:.08s">Find where you <span class="grad">fit</span> in cybersecurity</h1>
-    <p class="lede reveal" style="--d:.16s">Cybersecurity is not one job. It is ${word(NR)} very different ones, from catching scams to auditing companies to protecting power plants. Answer a few plain questions and see which ones suit you, and exactly how to get your first one.</p>
-    <div class="hero-cta reveal" style="--d:.24s">
+    <h1 class="reveal d-8" data-split>Find where you <span class="grad">fit</span> in cybersecurity</h1>
+    <p class="lede reveal d-16">Cybersecurity is not one job. It is ${word(NR)} very different ones, from catching scams to auditing companies to protecting power plants. Answer a few plain questions and see which ones suit you, and exactly how to get your first one.</p>
+    <div class="hero-cta reveal d-24">
       <a class="btn btn-primary" href="#finder" data-start-quiz>Start the 5-minute finder <span class="arrow" aria-hidden="true">&rarr;</span></a>
       <a class="btn btn-ghost" href="#roles">Browse all ${NR} roles</a>
     </div>
-    <div class="stats reveal" style="--d:.32s">
+    <div class="stats reveal d-32">
       <div class="stat"><b data-count="${D.roles.length}">${D.roles.length}</b><span>Roles explained</span></div>
       <div class="stat"><b data-count="5" data-pre="~" data-suf=" min">~5 min</b><span>${TAPS} taps</span></div>
       <div class="stat"><b>0</b><span>Answers stored</span></div>
@@ -124,8 +126,8 @@ ${top('hub')}
     <h2 class="reveal">No jargon. No experience needed.</h2>
     <div class="steps3">
       <div class="card reveal"><span class="num">01</span><h3>Tap what appeals</h3><p>Short, everyday statements like "Teaching people how to spot scam emails." Answer Not for me, Maybe or Yes.</p></div>
-      <div class="card reveal" style="--d:.1s"><span class="num">02</span><h3>Settle the close calls</h3><p>A few this-or-that choices separate jobs that sound alike, like building a security plan versus checking one.</p></div>
-      <div class="card reveal" style="--d:.2s"><span class="num">03</span><h3>Get a real plan</h3><p>Your top 3 roles, why they fit, the realistic first job, which certifications to start with and free places to practice.</p></div>
+      <div class="card reveal d-10"><span class="num">02</span><h3>Settle the close calls</h3><p>A few this-or-that choices separate jobs that sound alike, like building a security plan versus checking one.</p></div>
+      <div class="card reveal d-20"><span class="num">03</span><h3>Get a real plan</h3><p>Your top 3 roles, why they fit, the realistic first job, which certifications to start with and free places to practice.</p></div>
     </div>
   </div></section>
 
@@ -259,9 +261,9 @@ ${top('role')}
   <nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="/ccair/">CCAIR</a></li><li><a href="/ccair/pathways/">Pathway Finder</a></li><li aria-current="page">${esc(r.name)}</li></ol></nav>
   <div class="guide-hero">
     <span class="badge ${r.hiring} reveal">${HIRING[r.hiring]}</span>
-    <h1 class="reveal" data-split style="--d:.06s">How to become ${/^[AEIOU]/.test(r.name) ? 'an' : 'a'} <span class="grad">${esc(r.name)}</span></h1>
-    <p class="lede reveal" style="--d:.12s">${esc(r.summary)}</p>
-    <dl class="keyfacts reveal" style="--d:.18s">
+    <h1 class="reveal d-6" data-split>How to become ${/^[AEIOU]/.test(r.name) ? 'an' : 'a'} <span class="grad">${esc(r.name)}</span></h1>
+    <p class="lede reveal d-12">${esc(r.summary)}</p>
+    <dl class="keyfacts reveal d-18">
       <div><dt>First job?</dt><dd>${HIRING[r.hiring]}<small>${esc(r.feeder)}</small></dd></div>
       <div><dt>Coding</dt><dd>${CODE_SHORT[r.code]}</dd></div>
       ${r.certsStart.length ? `<div><dt>Start with</dt><dd>${esc(r.certsStart[0])}</dd></div>` : `<div><dt>Certifications</dt><dd>${esc(r.certsNote)}</dd></div>`}
@@ -273,24 +275,24 @@ ${top('role')}
 
   <section><h2 class="reveal">What the job is like</h2>
     <p class="body reveal">${esc(r.tagline)} A typical week might include:</p>
-    <ul class="list">${r.day.map((d, i) => `<li class="reveal" style="--d:${(i * 0.06).toFixed(2)}s">${esc(d)}</li>`).join('')}</ul>
+    <ul class="list">${r.day.map((d, i) => `<li class="reveal ${dly(i * 0.06)}">${esc(d)}</li>`).join('')}</ul>
   </section>
 
   <section><h2 class="reveal">How to get in</h2>
     <p class="body reveal">${esc(r.feeder)}</p>
-    <ol class="list">${r.steps.map((d, i) => `<li class="reveal" style="--d:${(i * 0.06).toFixed(2)}s">${esc(d)}</li>`).join('')}</ol>
+    <ol class="list">${r.steps.map((d, i) => `<li class="reveal ${dly(i * 0.06)}">${esc(d)}</li>`).join('')}</ol>
     ${r.close ? `<div class="note reveal"><b>Close cousin:</b> ${esc(r.close.note)} <a href="/ccair/pathways/${r.close.role}/">Compare with ${esc(BY[r.close.role].name)} &rarr;</a></div>` : ''}
   </section>
 
   <section><h2 class="reveal">Certifications</h2>
     <div class="certs">
       <div class="card reveal"><h3>Start with</h3>${r.certsStart.length ? `<ul>${r.certsStart.map((c) => `<li>${esc(c)}</li>`).join('')}</ul>` : `<p>${esc(r.certsNote)}.</p>`}</div>
-      <div class="card reveal" style="--d:.08s"><h3>Later, with experience</h3><ul>${(r.certsLater.length ? r.certsLater : ['None needed yet; projects matter most']).map((c) => `<li>${esc(c)}</li>`).join('')}</ul></div>
+      <div class="card reveal d-8"><h3>Later, with experience</h3><ul>${(r.certsLater.length ? r.certsLater : ['None needed yet; projects matter most']).map((c) => `<li>${esc(c)}</li>`).join('')}</ul></div>
     </div>
   </section>
 
   <section><h2 class="reveal">Free places to practice and learn</h2>
-    <div class="res">${r.resources.map((x, i) => `<a class="reveal" style="--d:${(i * 0.06).toFixed(2)}s" href="${esc(x.url)}" rel="noopener" target="_blank"><b>${esc(x.name)}</b><span>${esc(x.note)}${NEW_TAB}</span></a>`).join('')}</div>
+    <div class="res">${r.resources.map((x, i) => `<a class="reveal ${dly(i * 0.06)}" href="${esc(x.url)}" rel="noopener" target="_blank"><b>${esc(x.name)}</b><span>${esc(x.note)}${NEW_TAB}</span></a>`).join('')}</div>
   </section>
 
   <section><h2 class="reveal">Habits that help in every cyber role</h2>
