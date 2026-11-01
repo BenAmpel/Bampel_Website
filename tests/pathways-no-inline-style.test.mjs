@@ -56,3 +56,16 @@ test('a finished quiz sizes the ranked bars and the radar through the CSSOM', as
   const radar = q('#quiz .radar');
   assert.equal(radar.style.getPropertyValue('--len'), radar.getAttribute('data-len'));
 });
+
+// The student guide (scripts/build-students.mjs) shares pathways.css and its d-N delay classes.
+test('the generated student guide pages have no style attribute', () => {
+  const sp = [];
+  const walk = (rel) => { for (const d of readdirSync(new URL(rel, root), { withFileTypes: true })) {
+    if (d.isDirectory()) walk(`${rel}${d.name}/`); else if (d.name === 'index.html') sp.push([`${rel}${d.name}`, read(`${rel}${d.name}`)]); } };
+  walk('students/');
+  assert.ok(sp.length >= 8, 'student guide pages exist (run npm run build:ccair first)');
+  for (const [name, html] of sp) {
+    assert.doesNotMatch(html, /\sstyle\s*=/, name);
+    for (const m of html.matchAll(/class="([^"]*)"/g)) for (const c of m[1].split(/\s+/)) if (/^d-\d+$/.test(c)) assert.ok(CSS.includes(`.${c} {`), `pathways.css has a rule for .${c} (${name})`);
+  }
+});
