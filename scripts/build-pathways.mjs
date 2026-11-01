@@ -43,7 +43,7 @@ const REVIEWED = fmtDate(D.updated);
 
 // Reveal delay as a class (d-0 ... d-60 in pathways.css: hundredths of a second), never a style attribute (CSP).
 const dly = (sec) => `d-${Math.min(60, Math.round(sec * 100))}`;
-const head = (o) => baseHead({ ...o, css: [`/ccair/assets/pathways/pathways.css?v=${ASSET_V}-gsu1-css1`] });
+const head = (o) => baseHead({ ...o, css: [`/ccair/assets/pathways/pathways.css?v=${ASSET_V}-gsu1-a11y1`] });
 
 function top(current) {
   return baseTop([

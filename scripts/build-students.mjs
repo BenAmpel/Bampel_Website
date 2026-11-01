@@ -104,8 +104,11 @@ function plain(text) {
 }
 
 /* ---------- Blocks ---------- */
+// Reveal delay as a class (d-0 ... d-60 in pathways.css: hundredths of a second), never a style attribute (CSP).
+const dly = (sec) => `d-${Math.min(60, Math.round(sec * 100))}`;
+
 function cardsHtml() {
-  const cards = S.pages.filter((p) => p.slug).map((p, i) => `<a class="card reveal" style="--d:${((i % 2) * 0.06).toFixed(2)}s" href="${pageUrl(p)}">
+  const cards = S.pages.filter((p) => p.slug).map((p, i) => `<a class="card reveal ${dly((i % 2) * 0.06)}" href="${pageUrl(p)}">
     <h3>${esc(p.nav)}</h3><p>${esc(p.summary)}</p><span class="go">Read &rarr;</span></a>`);
   cards.push(`<a class="card reveal${OUTCOMES_LIVE ? '' : ' soon'}" href="${pageUrl(OUTCOMES)}">
     ${OUTCOMES_LIVE ? '' : '<span class="badge emerging">Coming soon</span>'}<h3>${esc(OUTCOMES.nav)}</h3><p>${OUTCOMES_LIVE ? 'Internships and first jobs of CCAIR and CIS students, as group counts.' : 'Internships and first jobs of CCAIR and CIS students. The data is being collected.'}</p><span class="go">${OUTCOMES_LIVE ? 'Read' : 'What it will show'} &rarr;</span></a>`);
@@ -113,7 +116,7 @@ function cardsHtml() {
 }
 
 function audiencesHtml(list, cite) {
-  return `<div class="audiences">${list.map((a, i) => `<article class="aud reveal${a.wide ? ' wide' : ''}" style="--d:${((i % 2) * 0.06).toFixed(2)}s" id="for-${a.id}" aria-labelledby="for-${a.id}-h">
+  return `<div class="audiences">${list.map((a, i) => `<article class="aud reveal ${dly((i % 2) * 0.06)}${a.wide ? ' wide' : ''}" id="for-${a.id}" aria-labelledby="for-${a.id}-h">
     <h3 id="for-${a.id}-h">${esc(a.h)}</h3>
     <p>${md(a.p, cite)}</p>
     ${a.ul ? `<ul class="list">${a.ul.map((x) => `<li>${md(x, cite)}</li>`).join('')}</ul>` : ''}
@@ -193,7 +196,7 @@ const sortedDatasets = () => [...DS.datasets].sort((a, b) => a.category.localeCo
 const kb = (text) => `${Math.max(1, Math.round(Buffer.byteLength(text, 'utf8') / 1000))} KB`;
 function downloadHtml() {
   const rows = `${DS.datasets.length} rows`;
-  return `<div class="download reveal" id="download" style="--d:.2s">
+  return `<div class="download reveal d-20" id="download">
     <p class="download-h">Download the whole catalog</p>
     <p class="download-links"><a class="btn-dl" href="${CSV_PATH}" download>CSV<span class="sr-only"> file of the dataset catalog</span>, ${rows}, ${kb(DOWNLOADS.csv)}</a><a class="btn-dl" href="${JSON_PATH}" download>JSON<span class="sr-only"> file of the dataset catalog</span>, ${rows}, ${kb(DOWNLOADS.json)}</a></p>
     <p class="download-cite"><b>How to cite this catalog:</b> ${esc(CITATION)}</p>
@@ -391,9 +394,9 @@ function pageMain(p, idx) {
   <nav class="crumbs" aria-label="Breadcrumb"><ol>${crumbs}</ol></nav>
   <div class="guide-hero">
     <span class="eyebrow reveal"><span class="dot"></span>CCAIR Student Guide${p.slug && !standalone ? ` · Part ${idx + 1} of ${S.pages.length}` : ''}</span>
-    <h1 class="reveal" style="--d:.06s">${esc(p.title)}</h1>
-    <p class="lede reveal" style="--d:.12s">${md(p.lede, cite)}</p>
-    <p class="guide-meta reveal" style="--d:.16s"><span class="verified">Last verified: ${esc(standalone ? fmtDate(OC.updated) : S.verified)}</span> · Reviewed by Dr. Benjamin M. Ampel, Director of CCAIR</p>
+    <h1 class="reveal d-6">${esc(p.title)}</h1>
+    <p class="lede reveal d-12">${md(p.lede, cite)}</p>
+    <p class="guide-meta reveal d-16"><span class="verified">Last verified: ${esc(standalone ? fmtDate(OC.updated) : S.verified)}</span> · Reviewed by Dr. Benjamin M. Ampel, Director of CCAIR</p>
     ${p.disclaimer ? `<div class="warn reveal" role="note"><b>General information, not legal advice.</b> ${esc(p.disclaimer.replace(/^General information, not legal advice\.\s*/, ''))}</div>` : ''}
     ${standalone && !OUTCOMES_LIVE ? `<div class="note reveal" role="note"><b>Data is being collected.</b> This page has no outcomes yet. It explains what will appear and how student privacy is protected.</div>` : ''}
     ${p.slug === 'data' ? downloadHtml() : ''}${!p.slug ? '\n    ' + photoHtml('students-hero', { priority: true, sizes: '(min-width: 820px) 780px, calc(100vw - 32px)' }) : ''}
@@ -439,7 +442,7 @@ function pageHtml(p, idx, main, order, modified, image, robots) {
   };
   const scripts = [`/ccair/assets/pathways/pathways.js?v=${ASSET_V}-anon3-css1`, ...(p.slug === 'data' ? [`/ccair/assets/students/students.js?v=${ASSET_V}-2`] : [])];
   return `${baseHead({ title: p.metaTitle, ogTitle: p.title, desc: p.desc, url, ogType: 'article', image, robots, extra: feedLink,
-    css: [`/ccair/assets/pathways/pathways.css?v=${ASSET_V}-gsu1-css1`, `/ccair/assets/students/students.css?v=${ASSET_V}-gsu1-refs`] })}
+    css: [`/ccair/assets/pathways/pathways.css?v=${ASSET_V}-gsu1-a11y1`, `/ccair/assets/students/students.css?v=${ASSET_V}-gsu1-refs`] })}
 <meta property="article:modified_time" content="${modified}">
 ${ld(graph)}
 </head>
