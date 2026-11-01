@@ -37,6 +37,11 @@ export function typeFor(study) {
 
 const ID_RE = /^[a-z][a-z0-9-]{2,30}$/;
 const RESERVED = ['lab', 'admin', 's', 'studies', 'engine', 'assets', 'tracelab', 'api', 'new'];
+// A study's stores are lab-<id> and lab-<id>-backup, so an ID must never make one of those names equal the lab's own stores
+// (lab-registry, lab-registry-backup) or another study's backup store (lab-<other>-backup).
+const SYSTEM_STORES = ['lab-registry', 'lab-registry-backup'];
+const takesStoreName = id => id === 'registry' || id.endsWith('-backup');
+const isSystemStore = s => SYSTEM_STORES.includes(s.storeName) || SYSTEM_STORES.includes(s.backupName);
 const withPaths = s => ({ ...s, paths: s.paths || { participant: `/lab/s/${s.id}`, admin: `/lab/admin/${s.id}` } });
 
 export async function getStudy(registry, id) {
@@ -54,7 +59,7 @@ export async function listStudies(registry, { all = false } = {}) {
 
 export async function createStudy(registry, { id, name, type, description, template }, who, now = Date.now()) {
   id = String(id || '').trim().toLowerCase();
-  if (!ID_RE.test(id) || RESERVED.includes(id) || BUILT_IN[id]) return { error: 'bad_id', status: 400, hint: 'The link name needs 3 to 31 lowercase letters, numbers, and dashes, starting with a letter (for example "phone-calls-pilot").' };
+  if (!ID_RE.test(id) || RESERVED.includes(id) || takesStoreName(id) || BUILT_IN[id]) return { error: 'bad_id', status: 400, hint: 'The link name needs 3 to 31 lowercase letters, numbers, and dashes, starting with a letter (for example "phone-calls-pilot").' };
   if (template != null && template !== '') {
     if (!Object.hasOwn(TEMPLATES, template)) return { error: 'bad_template', status: 400, hint: 'That template no longer exists. Reload the page.' };
     type = TEMPLATES[template].type;
@@ -97,6 +102,7 @@ export async function deleteStudy(ctx, id, confirm, who, { now = Date.now(), bud
   if (BUILT_IN[id]) return { error: 'built_in', status: 400, hint: 'Built-in studies cannot be deleted.' };
   const s = ID_RE.test(id) ? await registry.get(`studies/${id}`) : null;
   if (!s) return { error: 'not_found', status: 404, hint: 'That study no longer exists.' };
+  if (isSystemStore(s)) return { error: 'forbidden', status: 403, hint: 'This study uses one of the lab\'s own stores and cannot be deleted here.' };
   if (!s.archived) return { error: 'not_archived', status: 409, hint: 'Archive the study first. Only an archived study can be deleted.' };
   if (String(confirm == null ? '' : confirm).trim() !== id) return { error: 'confirm', status: 400, hint: `To confirm, type the study's link name exactly: ${id}` };
   if (!s.deletingAt) {
