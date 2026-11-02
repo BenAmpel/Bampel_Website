@@ -2,7 +2,7 @@ name: Update Scholar Metrics
 
 on:
   schedule:
-    # Run on the 1st of every month at 9:00 AM UTC
+    # Every Monday at 09:00 UTC
     - cron: '0 9 * * 1'
   workflow_dispatch:  # Allow manual trigger
 
@@ -56,11 +56,6 @@ jobs:
       - name: Validate Publications JSON
         run: python scripts/validate_publications_json.py
 
-      - name: Update Altmetric Stats
-        env:
-          ALTMETRIC_API_KEY: ${{ secrets.ALTMETRIC_API_KEY }}
-        run: python scripts/update_altmetric.py
-      
       - name: Generate Network Analysis
         run: python scripts/generate_network.py
       
@@ -102,6 +97,9 @@ jobs:
       - name: Fetch OpenCitations Data
         run: python scripts/fetch_opencitations.py
 
+      - name: Fetch Dimensions Citation Metrics
+        run: python scripts/fetch_dimensions_metrics.py
+
       - name: Fetch GitHub Research Repos
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -113,7 +111,7 @@ jobs:
           git config --local user.name "github-actions[bot]"
 
           # Stage the specific metric files
-          git add static/data/publications.json static/data/scholar-metrics.json static/data/visitor_stats.json static/data/altmetric.json static/data/dashboard_network.json static/data/dashboard_payload.json static/data/hot_papers.json
+          git add static/data/publications.json static/data/scholar-metrics.json static/data/visitor_stats.json data/dimensions.json static/data/dashboard_network.json static/data/dashboard_payload.json static/data/hot_papers.json
           git add static/data/arxiv_papers.json static/data/nsf_grants.json static/data/semantic_scholar.json
           git add static/data/openalex.json static/data/grants_gov.json static/data/opencitations.json static/data/github_research.json
           git add content/journal_publication content/conference_publication content/workshop_publication
@@ -125,7 +123,7 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else
-            git commit -m "chore: Update metrics (Scholar, Visitor, Altmetric)"
+            git commit -m "chore: Update metrics (Scholar, Visitor)"
             # Use --autostash to safely handle any last-second file changes during the pull
             git pull --rebase --autostash origin main
             

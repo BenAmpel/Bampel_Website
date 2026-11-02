@@ -9,7 +9,7 @@ sections:
     content:
       title: Publications
       text: |
-        {{< altmetric_summary >}}
+        {{< attention_note >}}
 
         {{< publications_filter open="true" >}}
 
