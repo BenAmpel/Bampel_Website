@@ -1,7 +1,8 @@
 /* Collapse without Bootstrap's jQuery plugin (stage 2 of docs/superpowers/plans/2026-10-25-theme-migration.md).
    A button with data-site-toggle="collapse" and data-target="#id" opens and closes that element: the same classes as
    Bootstrap 4 (.collapse, .show, .collapsing, and .collapsed on the button), so Bootstrap's CSS still animates the
-   height (0.35 s, none under prefers-reduced-motion), and aria-expanded stays in step. Used by the phone menu.
+   height (0.35 s, none under prefers-reduced-motion), and aria-expanded stays in step. Used by the phone menu; Escape
+   closes it and returns focus to its toggle button.
    window.siteCollapse.hide(el) closes one from elsewhere (wowchemy-navigation.js closes the menu after a link tap). */
 (function () {
   'use strict';
@@ -49,6 +50,18 @@
     if (!el) return;
     e.preventDefault();
     if (el.classList.contains('show')) hide(el); else show(el);
+  });
+
+  // Escape closes an open collapse whose toggle button is on screen (the phone menu) and puts focus back on that button.
+  // Skipped while the search dialog is open: wowchemy.js closes that on the same Escape.
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape' || e.defaultPrevented || document.body.classList.contains('searching')) return;
+    Array.prototype.forEach.call(document.querySelectorAll('.collapse.show'), function (el) {
+      var b = togglersFor(el).filter(function (t) { return t.offsetParent !== null; })[0];
+      if (!b || b.getAttribute('aria-expanded') !== 'true') return;
+      hide(el);
+      b.focus();
+    });
   });
 
   window.siteCollapse = { show: show, hide: hide };
