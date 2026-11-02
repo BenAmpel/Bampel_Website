@@ -4476,6 +4476,17 @@ body:not(.dark) .service-toggle.active {
   font-weight: 600;
 }
 
+/* Spotlight titles that link to the coverage (media_spotlight.js); colour stays the title's own */
+.media-title-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.media-title-link:hover,
+.media-title-link:focus-visible {
+  text-decoration: underline;
+}
+
 .media-card-meta {
   margin-top: 6px;
   font-size: 0.75rem;

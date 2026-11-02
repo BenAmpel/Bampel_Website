@@ -75,6 +75,9 @@ jobs:
       - name: Pathway Finder has no inline style attributes
         run: node --test tests/pathways-no-inline-style.test.mjs
 
+      - name: Media Spotlight test
+        run: node --test tests/media-spotlight.test.mjs
+
       - name: Internal links
         run: node scripts/check-links.mjs public
 

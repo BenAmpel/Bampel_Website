@@ -9,6 +9,24 @@
   const listEl = document.getElementById('media-list');
 
   const safeFetch = (url) => fetch(url).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  // Text from media.json is set with textContent, never as markup. A url becomes a link only if it is https and not a
+  // Google redirect or consent page (docs/media-tracker/design.md, Change S).
+  const blockedHosts = ['news.google.com', 'www.google.com', 'consent.google.com'];
+  const safeUrl = (value) => {
+    const url = String(value || '').trim();
+    if (!url.toLowerCase().startsWith('https://')) return '';
+    try {
+      return blockedHosts.includes(new URL(url).hostname) ? '' : url;
+    } catch (e) {
+      return '';
+    }
+  };
+  const el = (tag, className, text) => {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  };
   const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   const normalize = (item) => {
@@ -21,8 +39,10 @@
       }
     }
 
-    const year = dateObj ? dateObj.getFullYear() : null;
-    const month = dateObj ? dateObj.getMonth() : null;
+    // A YYYY-MM-DD date parses as UTC midnight; read it back in UTC so 1 January does not become December of the
+    // year before in American time zones.
+    const year = dateObj ? dateObj.getUTCFullYear() : null;
+    const month = dateObj ? dateObj.getUTCMonth() : null;
     const dateLabel = dateObj ? `${monthNames[month]} ${year}` : '';
 
     return {
@@ -31,6 +51,7 @@
       type: item.type || 'Coverage',
       tags: Array.isArray(item.tags) ? item.tags.filter(Boolean) : [],
       summary: item.summary || '',
+      url: safeUrl(item.url),
       dateObj,
       year,
       dateLabel
@@ -78,6 +99,31 @@
       render();
     };
 
+    const titleNode = (item, className) => {
+      const node = el('div', className);
+      if (item.url) {
+        const link = el('a', 'media-title-link', item.title);
+        link.href = item.url;
+        link.rel = 'noopener';
+        link.target = '_blank';
+        node.appendChild(link);
+      } else {
+        node.textContent = item.title;
+      }
+      return node;
+    };
+
+    const tagsNode = (tags, className) => {
+      const node = el('div', className);
+      tags.forEach((tag) => node.appendChild(el('span', 'media-tag', String(tag))));
+      return node;
+    };
+
+    const empty = (text) => {
+      featuredEl.replaceChildren();
+      listEl.replaceChildren(el('div', 'media-empty', text));
+    };
+
     const render = () => {
       const filtered = items.filter((item) => (
         (activeYear === 'All' || String(item.year) === String(activeYear)) &&
@@ -85,59 +131,56 @@
       ));
 
       if (!filtered.length) {
-        featuredEl.innerHTML = '';
-        listEl.innerHTML = '<div class="media-empty">No coverage matches those filters.</div>';
+        empty('No coverage matches those filters.');
         return;
       }
 
       const featured = filtered[0];
-      const featuredTags = featured.tags.map((tag) => `<span class="media-tag">${tag}</span>`).join('');
       const featuredMeta = [featured.outlet, featured.dateLabel, featured.type].filter(Boolean).join(' • ');
-
-      featuredEl.innerHTML = `
-        <div class="media-featured-label">Featured</div>
-        <div class="media-featured-title">${featured.title}</div>
-        <div class="media-featured-meta">${featuredMeta}</div>
-        ${featured.summary ? `<div class="media-featured-summary">${featured.summary}</div>` : ''}
-        ${featuredTags ? `<div class="media-featured-tags">${featuredTags}</div>` : ''}
-      `;
+      const featuredNodes = [
+        el('div', 'media-featured-label', 'Featured'),
+        titleNode(featured, 'media-featured-title'),
+        el('div', 'media-featured-meta', featuredMeta)
+      ];
+      if (featured.summary) featuredNodes.push(el('div', 'media-featured-summary', featured.summary));
+      if (featured.tags.length) featuredNodes.push(tagsNode(featured.tags, 'media-featured-tags'));
+      featuredEl.replaceChildren(...featuredNodes);
 
       const remaining = filtered.slice(1);
       if (!remaining.length) {
-        listEl.innerHTML = '<div class="media-empty">Additional coverage coming soon.</div>';
+        listEl.replaceChildren(el('div', 'media-empty', 'Additional coverage coming soon.'));
         return;
       }
 
-      listEl.innerHTML = remaining.map((item) => {
-        const meta = [item.outlet, item.dateLabel, item.type].filter(Boolean).join(' • ');
-        const tags = item.tags.map((tag) => `<span class="media-tag">${tag}</span>`).join('');
-        return `
-          <div class="media-card">
-            <div class="media-card-title">${item.title}</div>
-            <div class="media-card-meta">${meta}</div>
-            ${item.summary ? `<div class="media-card-summary">${item.summary}</div>` : ''}
-            ${tags ? `<div class="media-card-tags">${tags}</div>` : ''}
-          </div>
-        `;
-      }).join('');
+      listEl.replaceChildren(...remaining.map((item) => {
+        const card = el('div', 'media-card');
+        card.appendChild(titleNode(item, 'media-card-title'));
+        card.appendChild(el('div', 'media-card-meta', [item.outlet, item.dateLabel, item.type].filter(Boolean).join(' • ')));
+        if (item.summary) card.appendChild(el('div', 'media-card-summary', item.summary));
+        if (item.tags.length) card.appendChild(tagsNode(item.tags, 'media-card-tags'));
+        return card;
+      }));
     };
 
-    yearsEl.innerHTML = ['All', ...years].map((year) => (
-      `<button class="media-year" type="button" data-year="${year}" aria-selected="false">${year}</button>`
-    )).join('');
-
-    yearsEl.querySelectorAll('.media-year').forEach((button) => {
+    yearsEl.replaceChildren(...['All', ...years].map((year) => {
+      const button = el('button', 'media-year', String(year));
+      button.type = 'button';
+      button.dataset.year = String(year);
+      button.setAttribute('aria-selected', 'false');
       button.addEventListener('click', () => setActiveYear(button.dataset.year));
-    });
+      return button;
+    }));
 
-    typesEl.innerHTML = ['All', ...types].map((type) => {
+    typesEl.replaceChildren(...['All', ...types].map((type) => {
+      const button = el('button', 'media-type', type);
       const typeClass = slugify(type);
-      return `<button class="media-type ${typeClass}" type="button" data-type="${type}" aria-selected="false">${type}</button>`;
-    }).join('');
-
-    typesEl.querySelectorAll('.media-type').forEach((button) => {
+      if (typeClass) button.classList.add(typeClass);
+      button.type = 'button';
+      button.dataset.type = type;
+      button.setAttribute('aria-selected', 'false');
       button.addEventListener('click', () => setActiveType(button.dataset.type));
-    });
+      return button;
+    }));
 
     setActiveYear('All');
     setActiveType('All');
