@@ -33,8 +33,6 @@
 
   <a class="skip-link" href="#main">Skip to main content</a>
 
-  {{ partial "search" . }}
-
   {{ if .Params.announcement.text -}}
     {{ partial "components/announcement_bar" . }}
   {{ end -}}
@@ -62,6 +60,9 @@
 
     {{ block "main" . }}{{ end }}
   </main>
+
+  {{/* The search overlay comes after <main> so the page's own h1 is the first heading in the document (it is a fixed overlay, so its place in the DOM does not change how it looks). */}}
+  {{ partial "search" . }}
 
   <div class="page-footer">
     {{/* Docs and Updates layouts include the site footer in a different location. */}}

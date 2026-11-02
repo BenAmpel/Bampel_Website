@@ -1,4 +1,4 @@
-{{/* Local override: the modal title is an h2 so the page h1 stays the first h1 (audit 2026-10-24). */}}
+{{/* Local override: the modal title is an h2 so the page h1 stays the only h1 (audit 2026-10-24); baseof.html includes this partial after <main>, so the page h1 is also the first heading. */}}
 {{ $search_provider := lower site.Params.features.search.provider }}
 {{ if in (slice "wowchemy" "algolia") $search_provider }}
 <aside class="search-modal" id="search">
