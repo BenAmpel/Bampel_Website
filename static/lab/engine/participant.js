@@ -1039,7 +1039,9 @@
   var ui = { esc: esc, T: T, Th: Th, Tp: Tp, show: show, setProgress: function (text) { progress.textContent = text || ''; }, errorBox: errorBox, choiceGroup: choiceGroup, scaleGroup: scaleGroup, vas: vas, questionHtml: questionHtml, questionsHtml: questionsHtml, fillPipes: fillPipes,
     wire: wire, flag: flag, blank: blank, questionSet: questionSet, nextId: nextId, reduceMotion: reduceMotion, stage: stage,
     // Study types with their own server routes (for example the economic game's polling) call them with the sign-in token.
-    call: function (route, body) { return api(route, Object.assign({ token: S.token }, body)); } };
+    call: function (route, body) { return api(route, Object.assign({ token: S.token }, body)); },
+    // The study's public key for sealing (seal.js), or null: the multimodal type seals recordings with it before upload.
+    sealInfo: function () { return (S.content && S.content.seal) || null; } };
   window.LabEngine = { registerType: function (id, impl) { types[id] = impl; }, ui: ui,
     internals: { S: S, mediaUrls: mediaUrls, swapUrls: swapUrls, preloadPlan: preloadPlan, runChecks: runChecks, DQ: DQ, dqFlush: dqFlush, dqStart: dqStart, honeypotHtml: honeypotHtml,
       showLogin: showLogin, showConsent: showConsent, showStatus: showStatus, showFinished: showFinished, headphoneStep: headphoneStep, micStep: micStep, runTrial: runTrial, measureFrames: measureFrames } };   // for tests (tests/lab/*.test.mjs)

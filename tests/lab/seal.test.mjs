@@ -32,6 +32,35 @@ assert.equal(S.checkPublicKey(publicKey).kid, privateKey.kid);
 }
 console.log('scheme: round trip, wrong key, tampering, CSV and JSON opening');
 
+// ---------- recordings (bytes) ----------
+// A fixed vector made once with seal.mjs: if either implementation's key derivation or additional data drifts, it stops opening.
+const KAT_KEY = { x: 'b4y87192qXNGOxyzGLYITjH-6GzTHmdOLn5vWdp3p1k', d: 'ePYKiEmYXeF3xzrk4qzZOqF_kMSzqGzciQFHXA4ZZ2I' };
+const KAT = { aad: 'sealedbin:v1:ad7e35965bf62dee:katcode/s1/t4-call:audio/webm', plain: 'OggS fixed recording bytes',
+  env: 'j7ylPPlbKVoN+8NiPJ0vHJ+bRw/AMiu/do/hXSAZkwq8cF8KU6f4Rn5ZFxnilraAwePAaq0LiQlxtuBDCVkDw/EKboY5SFT0Ow+HKCnYY9PhUP8MGe4=' };
+{
+  assert.equal(S.kidOf(KAT_KEY.x), 'ad7e35965bf62dee');
+  assert.equal(S.binAad('ad7e35965bf62dee', 'katcode/s1/t4-call', 'Audio/WebM; codecs=opus'), KAT.aad, 'the type is normalized: no parameters, lower case');
+  assert.equal(S.openBytes(Buffer.from(KAT.env, 'base64'), KAT_KEY, KAT.aad).toString(), KAT.plain, 'the fixed vector opens');
+  const bytes = Buffer.from('RIFF....WAVEfmt a recording'), aad = S.binAad(privateKey.kid, 'abc/s2/practice-call', 'audio/wav');
+  const env = S.sealBytes(publicKey, bytes, aad), env2 = S.sealBytes(publicKey, bytes, aad);
+  assert.equal(env.length, bytes.length + S.SEAL_OVERHEAD); assert(!env.equals(env2), 'a fresh key pair and iv per recording');
+  assert(S.openBytes(env, privateKey, aad).equals(bytes));
+  assert.throws(() => S.openBytes(env, privateKey, S.binAad(privateKey.kid, 'xyz/s2/practice-call', 'audio/wav')), 'moved to another participant: does not open');
+  assert.throws(() => S.openBytes(env, privateKey, S.binAad(privateKey.kid, 'abc/s2/practice-call', 'audio/ogg')), 'another type: does not open');
+  assert.throws(() => S.openBytes(env, S.generateKeys().privateKey, aad), /another key/);
+  const bent = Buffer.from(env); bent[50] ^= 1;
+  assert.throws(() => S.openBytes(bent, privateKey, aad), 'a changed envelope fails authentication');
+  assert.throws(() => S.unseal(`sealed:v1:${privateKey.kid}:${env.toString('base64url')}`, privateKey), 'a recording never opens as a text token');
+  assert.throws(() => S.openBytes(Buffer.from(seal('text').split(':')[3], 'base64url'), privateKey, aad), 'nor a text token as a recording');
+  assert(S.goodPoint(env) && !S.goodPoint(Buffer.alloc(40)) && !S.goodPoint(Buffer.from('0100000000000000000000000000000000000000000000000000000000000080', 'hex')), 'low-order keys are refused');
+  assert(S.AUDIO_KEY_RE.test('audio/abc/s1/t4-call') && !S.AUDIO_KEY_RE.test('audio/../s1/t4-call/x'));
+  const now = 1e12, meta = { publicKey, kid: 'cur', previous: [{ kid: 'old0', replacedAt: now - 1000 }, { kid: 'old', replacedAt: now - 3600e3 }] };
+  assert(S.acceptsKid(meta, 'cur', now) && S.acceptsKid(meta, 'old', now), 'the current key, and the one it replaced within 24 hours');
+  assert(!S.acceptsKid(meta, 'old', now + S.KEY_GRACE_MS) && !S.acceptsKid(meta, 'old0', now), 'not after 24 hours, and not an older one');
+  assert(!S.acceptsKid({ previous: meta.previous }, 'old', now), 'nothing while sealing is off');
+  console.log('recordings: round trip, bound to participant, item and type, fixed vector, key grace');
+}
+
 // ---------- the browser copy agrees ----------
 {
   const ctx = { window: { crypto: globalThis.crypto }, TextEncoder, TextDecoder, atob, btoa };
@@ -53,6 +82,29 @@ console.log('scheme: round trip, wrong key, tampering, CSV and JSON opening');
     assert.equal(await B.seal(publicKey, privateKey.kid, ''), '');
     globalThis.browserSeal = v => B.seal(publicKey, privateKey.kid, v);
     console.log('browser copy: same key IDs, opens server tokens, seals for the server');
+
+    // Recordings (bytes): the browser seals for the server's key file, and opens what Node sealed and the fixed vector.
+    const audio = new Uint8Array(70000).map((_, i) => (i * 7) & 255), aad = B.binAad(privateKey.kid, 'p1/s1/t2-call', 'audio/webm;codecs=opus');
+    assert.equal(aad, S.binAad(privateKey.kid, 'p1/s1/t2-call', 'audio/webm'), 'both sides build the same additional data');
+    const env = await B.sealBytes(publicKey, audio, aad);
+    assert.equal(env.length, audio.length + S.SEAL_OVERHEAD);
+    assert.deepEqual(new Uint8Array(S.openBytes(Buffer.from(env), privateKey, aad)), audio, 'the server key file opens a recording the browser sealed');
+    assert.throws(() => S.openBytes(Buffer.from(env), privateKey, S.binAad(privateKey.kid, 'p2/s1/t2-call', 'audio/webm')), 'not as another participant\'s');
+    await B.load(JSON.stringify({ kty: 'OKP', crv: 'X25519', ...KAT_KEY }));
+    assert.equal(new TextDecoder().decode(await B.openBytes(Buffer.from(KAT.env, 'base64'), KAT.aad)), KAT.plain, 'the browser opens the fixed vector');
+    await assert.rejects(B.openBytes(Buffer.from(KAT.env, 'base64'), KAT.aad.replace('t4-call', 't5-call')), 'and refuses it under other additional data');
+    await B.load(JSON.stringify(made.file));
+    const fromNode = S.sealBytes(made.publicKey, Buffer.from(audio), B.binAad(made.kid, 'p1/s1/t2-call', 'audio/ogg'));
+    assert.deepEqual(new Uint8Array(await B.openBytes(fromNode, B.binAad(made.kid, 'p1/s1/t2-call', 'audio/ogg'))), audio, 'the browser opens a recording Node sealed');
+    await assert.rejects(B.openBytes(fromNode, B.binAad(privateKey.kid, 'p1/s1/t2-call', 'audio/ogg')), 'not with another key\'s additional data');
+    const w = JSON.stringify(S.wrapKey(privateKey, 'a long test passphrase'));
+    await assert.rejects(B.load(w), e => e.code === 'need_passphrase', 'a wrapped key file asks for its passphrase');
+    await assert.rejects(B.load(w, 'not the passphrase'), /Wrong passphrase/);
+    assert.equal((await B.load(w, 'a long test passphrase')).kid, privateKey.kid, 'and opens with it');
+    assert.equal(await B.open(seal('opened with the wrapped copy')), 'opened with the wrapped copy');
+    assert.throws(() => S.wrapKey(privateKey, 'short'), /12 characters/);
+    globalThis.browserSealBytes = (bytes, a) => B.sealBytes(publicKey, bytes, a);
+    console.log('browser copy: recordings seal and open both ways, and the fixed vector opens');
   } else console.log('browser copy: skipped (this Node has no WebCrypto X25519)');
 }
 

@@ -16,7 +16,7 @@
 // receives those as tokens. The server checks a token's form and key ID (accepts) and stores it as it came. What the
 // browser could not seal (an old browser) is sealed here on arrival, unless the study requires browser sealing
 // (requireBrowser), in which case it is refused and the participant page turns such browsers away at the start.
-import { createCipheriv, createDecipheriv, createHash, createPrivateKey, createPublicKey, diffieHellman, generateKeyPairSync, hkdfSync, randomBytes } from 'node:crypto';
+import { createCipheriv, createDecipheriv, createHash, createPrivateKey, createPublicKey, diffieHellman, generateKeyPairSync, hkdfSync, pbkdf2Sync, randomBytes } from 'node:crypto';
 
 export const SEAL_RE = /sealed:v1:[0-9a-f]{16}:[A-Za-z0-9_-]{80,}/g;
 const INFO = Buffer.from('ccair-lab-seal-v1');
@@ -94,6 +94,92 @@ export function unsealText(text, priv, { format = 'csv' } = {}) {
     return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
   });
   return { text: out, opened, other };
+}
+
+// ---------- sealed recordings (bytes, not text) ----------
+// A recording is too large for a text token (JSON inside base64 inside JSON), so it is sealed as bytes with the same key pair
+// and construction, under a different HKDF info so a text token and a recording can never open as each other. The additional
+// data names the key, the recording's storage key (participant code, session, item, kind) and its type, so a file moved to
+// another participant or item does not open. Envelope: ephemeral public key 32 | iv 12 | ciphertext | tag 16.
+// The browser copy is in static/lab/engine/seal.js (sealBytes, openBytes); docs/designs/audio-sealing.md has the design.
+const INFO_BIN = Buffer.from('ccair-lab-seal-bin-v1');
+export const SEAL_OVERHEAD = 60;
+// A recording's storage key: audio/<participant code>/s<session>/<practice|t<index>>-<call|voice>.
+export const AUDIO_KEY_RE = /^audio\/([^/]+)\/s(\d+)\/(t\d+|practice)-(call|voice)$/;
+// One rule for a recording's type everywhere it is sealed, stored or opened: no parameters (";codecs=opus"), lower case.
+export const audioMime = m => String(m || '').split(';')[0].trim().toLowerCase();
+// tag: the storage key without "audio/" (k7q2.../s1/t4-call).
+export const binAad = (kid, tag, mime) => `sealedbin:v1:${kid}:${tag}:${audioMime(mime)}`;
+
+// X25519 public keys that give a predictable shared secret (libsodium's list, top bit ignored). An envelope may not start with one.
+const LOW_ORDER = ['0000000000000000000000000000000000000000000000000000000000000000', '0100000000000000000000000000000000000000000000000000000000000000',
+  'e0eb7a7c3b41b8ae1656e3faf19fc46ada098deb9c32b1fd866205165f49b800', '5f9c95bca3508c24b1d0b1559c83ef5b04445cc4581c8e86d8224eddd09f1157',
+  'ecffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f', 'edffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f',
+  'eeffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f'];
+export function goodPoint(b) {
+  if (!b || b.length < 32) return false;
+  const x = Buffer.from(b.subarray(0, 32)); x[31] &= 0x7f;
+  return !LOW_ORDER.includes(x.toString('hex'));
+}
+const binKey = (shared, epk, rpk) => {
+  if (shared.every(x => x === 0)) throw new Error('bad shared secret');
+  return Buffer.from(hkdfSync('sha256', shared, Buffer.concat([epk, rpk]), INFO_BIN, 32));
+};
+
+// bytes -> envelope (Buffer), sealed to the study's public key (base64url, as stored in meta/seal).
+export function sealBytes(pub, bytes, aad) {
+  const k = checkPublicKey(pub);
+  if (!k) throw new Error('not a study public key');
+  const rpk = raw(k.publicKey), recipient = createPublicKey({ key: { kty: 'OKP', crv: 'X25519', x: k.publicKey }, format: 'jwk' });
+  const eph = generateKeyPairSync('x25519'), epk = raw(eph.publicKey.export({ format: 'jwk' }).x), iv = randomBytes(12);
+  const c = createCipheriv('aes-256-gcm', binKey(diffieHellman({ privateKey: eph.privateKey, publicKey: recipient }), epk, rpk), iv); c.setAAD(Buffer.from(aad));
+  return Buffer.concat([epk, iv, c.update(bytes), c.final(), c.getAuthTag()]);
+}
+
+// envelope -> bytes, with a private key file ({ x, d }). Throws on a wrong key, wrong additional data, or a changed envelope.
+export function openBytes(envelope, priv, aad) {
+  const b = Buffer.from(envelope);
+  if (b.length <= SEAL_OVERHEAD) throw new Error('not a sealed recording');
+  if (!String(aad).startsWith(`sealedbin:v1:${kidOf(priv.x)}:`)) throw new Error(`sealed with another key, not this key (${kidOf(priv.x)})`);
+  const epk = b.subarray(0, 32), iv = b.subarray(32, 44), body = b.subarray(44, b.length - 16), tag = b.subarray(b.length - 16);
+  const pk = createPrivateKey({ key: { kty: 'OKP', crv: 'X25519', x: priv.x, d: priv.d }, format: 'jwk' });
+  const shared = diffieHellman({ privateKey: pk, publicKey: createPublicKey({ key: { kty: 'OKP', crv: 'X25519', x: Buffer.from(epk).toString('base64url') }, format: 'jwk' }) });
+  const d = createDecipheriv('aes-256-gcm', binKey(shared, epk, raw(priv.x)), iv); d.setAAD(Buffer.from(aad)); d.setAuthTag(tag);
+  return Buffer.concat([d.update(body), d.final()]);
+}
+
+// Whether a recording sealed to `kid` is accepted now: the study's current key, or the key it replaced less than 24 hours ago
+// (a participant tab opened before a key change still saves its recordings). With sealing off, nothing is.
+export const KEY_GRACE_MS = 24 * 3600 * 1000;
+export function acceptsKid(meta, kid, now = Date.now()) {
+  if (!meta || !meta.publicKey || typeof kid !== 'string') return false;
+  if (kid === meta.kid) return true;
+  const last = (meta.previous || [])[(meta.previous || []).length - 1];
+  return !!(last && last.kid === kid && Number.isFinite(last.replacedAt) && now - last.replacedAt < KEY_GRACE_MS);
+}
+
+// ---------- a key file kept under a passphrase ----------
+// A copy of the private key file that can sit on shared storage (GSU OneDrive): the key file's JSON, encrypted with AES-256-GCM
+// under a key from PBKDF2-SHA256 of the passphrase (WebCrypto has PBKDF2 and not scrypt, and the admin page must open it too).
+export const WRAP_FORMAT = 'ccair-lab-key-wrapped-v1';
+const WRAP_ITER = 600000;
+export const isWrapped = j => !!(j && j.format === WRAP_FORMAT);
+export function wrapKey(priv, passphrase) {
+  if (String(passphrase || '').length < 12) throw new Error('Use a passphrase of at least 12 characters.');
+  const salt = randomBytes(16), iv = randomBytes(12), kid = priv.kid || kidOf(priv.x);
+  const k = pbkdf2Sync(String(passphrase).normalize('NFC'), salt, WRAP_ITER, 32, 'sha256');
+  const c = createCipheriv('aes-256-gcm', k, iv); c.setAAD(Buffer.from(`${WRAP_FORMAT}:${kid}`));
+  const ct = Buffer.concat([c.update(JSON.stringify(priv), 'utf8'), c.final(), c.getAuthTag()]);
+  return { format: WRAP_FORMAT, kid, study: priv.study || '', kdf: 'pbkdf2-sha256', iter: WRAP_ITER, salt: salt.toString('base64url'), iv: iv.toString('base64url'), ct: ct.toString('base64url') };
+}
+export function unwrapKey(w, passphrase) {
+  if (!isWrapped(w) || w.kdf !== 'pbkdf2-sha256') throw new Error('not a wrapped lab key file');
+  const k = pbkdf2Sync(String(passphrase || '').normalize('NFC'), Buffer.from(w.salt, 'base64url'), w.iter, 32, 'sha256'), ct = Buffer.from(w.ct, 'base64url');
+  const d = createDecipheriv('aes-256-gcm', k, Buffer.from(w.iv, 'base64url')); d.setAAD(Buffer.from(`${WRAP_FORMAT}:${w.kid}`)); d.setAuthTag(ct.subarray(ct.length - 16));
+  let priv;
+  try { priv = JSON.parse(Buffer.concat([d.update(ct.subarray(0, ct.length - 16)), d.final()]).toString('utf8')); } catch { throw new Error('wrong passphrase, or the file was changed'); }
+  if (kidOf(priv.x) !== w.kid) throw new Error('the key inside does not match the file');
+  return priv;
 }
 
 // ---------- the study's key (meta/seal in the study store) ----------

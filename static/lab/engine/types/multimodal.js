@@ -106,11 +106,25 @@
       }
     };
   }
+  // Uploads a recording. With a study key, the bytes are sealed here first (seal.js sealBytes) so the server never stores them
+  // readable; the additional data names the recording's storage key (plan.recordingTag + item + kind) and its type. A browser
+  // that cannot seal sends it readable: the server seals it on arrival, or refuses it when the study requires browser sealing.
+  // Resolves to { ok } or { ok: false, error } with the reason kept on the answer (voice.recordingError, call.recordingError).
+  var UPLOAD_ERRORS = { wrong_key: 1, seal_required: 1, no_study_key: 1 };
+  function bytesToBase64(u) { var s = ''; for (var i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); }
   function upload(ui, ctx, kind, rec) {
-    if (!rec || !rec.blob || !rec.blob.size) return Promise.resolve(false);
-    return blobToBase64(rec.blob).then(function (b64) {
-      return ui.call('media/upload', { session: ctx.plan.session, index: ctx.index, kind: kind, mime: rec.blob.type, data: b64, durationMs: rec.durationMs });
-    }).then(function (r) { return !!(r && r.ok); }, function () { return false; });
+    if (!rec || !rec.blob || !rec.blob.size) return Promise.resolve({ ok: false });
+    var sc = ui.sealInfo && ui.sealInfo(), tag = ctx.plan.recordingTag, body = { session: ctx.plan.session, index: ctx.index, kind: kind, mime: rec.blob.type, durationMs: rec.durationMs };
+    var sealing = !!(sc && tag && window.LabSeal && LabSeal.sealBytes);
+    return (sealing ? LabSeal.supported() : Promise.resolve(false)).then(function (can) {
+      if (!can) return blobToBase64(rec.blob).then(function (b64) { body.data = b64; return body; });
+      var aad = LabSeal.binAad(sc.kid, tag + '/' + (ctx.index === 'practice' ? 'practice' : 't' + ctx.index) + '-' + kind, rec.blob.type);
+      return rec.blob.arrayBuffer().then(function (buf) { return LabSeal.sealBytes(sc.publicKey, new Uint8Array(buf), aad); })
+        .then(function (env) { body.data = bytesToBase64(env); body.sealed = { v: 1, kid: sc.kid }; return body; }, function () { return null; });
+    }).then(function (b) {
+      if (!b) return { ok: false, error: 'seal_failed' };
+      return ui.call('media/upload', b).then(function (r) { return r && r.ok ? { ok: true } : { ok: false, error: r && UPLOAD_ERRORS[r.error] ? r.error : 'upload_failed' }; }, function () { return { ok: false, error: 'upload_failed' }; });
+    }, function () { return { ok: false, error: 'upload_failed' }; });
   }
 
   // ---------- sound check (once per session, before the first item with sound) ----------
@@ -483,8 +497,8 @@
       if (!set.check()) return;
       submit.disabled = true; msg.innerHTML = '';
       var el = root.querySelector('#mm-el'); if (el && !el.paused) el.pause();
-      (state.voiceRec ? upload(ui, ctx, 'voice', state.voiceRec) : Promise.resolve(false)).then(function (ok) {
-        if (state.voice && state.voiceRec && !ok) state.voice.recorded = false;
+      (state.voiceRec ? upload(ui, ctx, 'voice', state.voiceRec) : Promise.resolve({ ok: false })).then(function (ok) {
+        if (state.voice && state.voiceRec && !ok.ok) { state.voice.recorded = false; if (ok.error) state.voice.recordingError = ok.error; }
         if (screenGate) screen.dwellMs = Math.round(now() - state.t0);
         ctx.submit({ answers: set.answers, decision: state.decision, decisionMs: state.decisionMs, trajectory: state.trajectory, mtInput: state.mtInput, media: state.media || null, voice: it.recordVoice ? state.voice : null, rtMs: Math.round(now() - state.t0),
           screen: screenGate ? screen : null, uiEvents: takeUiLog() },
@@ -674,7 +688,7 @@
       // Hang up always works at once: the screen moves on now, and the hang-up turn is recorded in order behind any reply
       // still pending (the save waits for it, below), so a slow or lost reply can never hold the participant on the call.
       st.hangupSent = byServer ? Promise.resolve() : turn('hangup');
-      st.recording = rec ? rec.stop().then(function (out) { if (stream) stream.getTracks().forEach(function (t) { t.stop(); }); return upload(ui, ctx, 'call', out); }) : Promise.resolve(false);
+      st.recording = rec ? rec.stop().then(function (out) { if (stream) stream.getTracks().forEach(function (t) { t.stop(); }); return upload(ui, ctx, 'call', out); }) : Promise.resolve({ ok: false });
       afterCall(ui.T('call_ended') + ' · ' + fmtTime(st.durationMs / 1000));
     }
 
@@ -705,9 +719,10 @@
         if (!set.check()) return;
         submit.disabled = true; msg.innerHTML = '<p class="muted">Saving…</p>';
         if (window.speechSynthesis) speechSynthesis.cancel();
-        Promise.all([st.recording || Promise.resolve(false), st.hangupSent || Promise.resolve()]).then(function () {   // the server scores the call from its turns
+        Promise.all([st.recording || Promise.resolve({ ok: false }), st.hangupSent || Promise.resolve()]).then(function (done) {   // the server scores the call from its turns
+          var recErr = done[0] && done[0].error;
           ctx.submit({ answers: set.answers, decision: state.decision, decisionMs: state.decisionMs, trajectory: state.trajectory, mtInput: state.mtInput, rtMs: Math.round(now() - st.t0),
-            call: { answered: st.answered, ringMs: st.ringMs, durationMs: st.durationMs || 0, holdMs: Math.round(st.holdMs), typedTurns: st.typed, spokenTurns: st.spoken, interruptions: st.interruptions || 0, captions: st.captions, directoryOpened: st.directoryOpened, endedBy: st.endedBy, latencies: st.latencies },
+            call: { answered: st.answered, ringMs: st.ringMs, durationMs: st.durationMs || 0, holdMs: Math.round(st.holdMs), typedTurns: st.typed, spokenTurns: st.spoken, interruptions: st.interruptions || 0, captions: st.captions, directoryOpened: st.directoryOpened, endedBy: st.endedBy, latencies: st.latencies, recordingError: recErr || undefined },
             uiEvents: takeUiLog() },
             function (err) { submit.disabled = false; msg.innerHTML = ui.errorBox(err); });
         });

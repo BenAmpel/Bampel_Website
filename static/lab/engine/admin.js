@@ -1069,9 +1069,18 @@
     err(); var input = this;
     LabSeal.supported().then(function (ok) {
       if (!ok) return sealUnsupported();
-      return readFile(input).then(LabSeal.load).then(loadSeal);
+      return readFile(input).then(loadKeyText).then(loadSeal);
     }).catch(function (e) { err(e.message); });
   });
+  // A key file, or its passphrase-protected copy (scripts/lab/seal.mjs keygen --wrap): the passphrase is asked for, used once, not kept.
+  function loadKeyText(text) {
+    return LabSeal.load(text).catch(function (e) {
+      if (e.code !== 'need_passphrase') throw e;
+      var pass = prompt('This key file is protected by a passphrase. Enter it to unlock the key in this tab.');
+      if (!pass) throw new Error('No passphrase given: the key was not loaded.');
+      return LabSeal.load(text, pass);
+    });
+  }
   $('sealforget').addEventListener('click', function () { LabSeal.forget(); loadSeal(); });
   $('sealnew').addEventListener('click', function () {
     err();
@@ -1088,7 +1097,7 @@
   var pendingPub = null;
   $('sealcheck').addEventListener('change', function () {
     err(); var input = this;
-    readFile(input).then(LabSeal.load).then(function (k) {
+    readFile(input).then(loadKeyText).then(function (k) {
       if (!pendingKid || k.kid !== pendingKid) throw new Error('That is not the key file just made (' + (pendingKid || 'none') + '). Choose the file that was downloaded.');
       return postJSON('seal-set', { publicKey: pendingPub });
     }).then(function () { pendingKid = pendingPub = null; $('sealconfirm').hidden = true; loadSeal(); }).catch(function (e) { err(e.message); });
@@ -1101,7 +1110,12 @@
   });
   $('sealoff').addEventListener('click', function () {
     if (!confirm('Stop encrypting? New emails, panel IDs and free-text answers will be stored in readable form. Values already encrypted stay encrypted.')) return;
-    postJSON('seal-set', { publicKey: null }).then(loadSeal).catch(function (e) { err(e.message); });
+    // A study that records voices refuses recordings without a key, so the server asks for a typed confirmation (and logs it).
+    postJSON('seal-set', { publicKey: null }).then(loadSeal).catch(function (e) {
+      if (e.code !== 'recording_on') return err(e.message);
+      if (prompt('This study records voices. Without a key, new recordings are refused until a key is set again. Type REMOVE to turn sealing off anyway.') !== 'REMOVE') return;
+      postJSON('seal-set', { publicKey: null, confirm: 'REMOVE' }).then(loadSeal).catch(function (x) { err(x.message); });
+    });
   });
 
   // ---------- activity ----------

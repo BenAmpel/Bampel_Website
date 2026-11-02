@@ -9,6 +9,7 @@ import * as bot from '../../netlify/lib/lab/voicebot.mjs';
 import { TEMPLATES, templateList } from '../../netlify/lib/lab/templates.mjs';
 import { typeFor } from '../../netlify/lib/lab/registry.mjs';
 import * as content from '../../netlify/lib/lab/content.mjs';
+import * as Seal from '../../netlify/lib/lab/seal.mjs';
 
 // ---------- mouse-tracking measures ----------
 {
@@ -198,6 +199,10 @@ r = await call(P + 'call/callback', { body: { token: tok, session: 1, index: ci,
 assert(/not in service/.test(r.json.say));
 // participant audio: needs consent, size and type checks, write-once
 const audio = Buffer.concat([Buffer.from('1a45dfa3', 'hex'), Buffer.from('fake-opus-bytes')]).toString('base64');   // starts like a WebM file
+// a study that records but has no study key stores no recording (docs/designs/audio-sealing.md, decision 7)
+assert.equal((await call(P + 'media/upload', { body: { token: tok, session: 1, index: ci, kind: 'call', mime: 'audio/webm', data: audio } })).json.error, 'no_study_key');
+const keys = Seal.generateKeys('calls-pilot');
+assert((await call(P + 'admin/seal-set', { key: OWNER, body: { publicKey: keys.publicKey } })).json.ok);
 assert.equal((await call(P + 'media/upload', { body: { token: tok, session: 1, index: ci, kind: 'call', mime: 'text/html', data: audio } })).json.error, 'bad_type');
 assert.equal((await call(P + 'media/upload', { body: { token: tok, session: 1, index: ci, kind: 'call', mime: 'audio/webm;codecs=opus', data: 'x'.repeat(3_700_000) } })).status, 413);
 assert.equal((await call(P + 'media/upload', { body: { token: tok, session: 1, index: ci, kind: 'call', mime: 'audio/webm', data: Buffer.from('<html>not audio</html>').toString('base64') } })).json.error, 'bad_data', 'the bytes must look like audio');
@@ -228,9 +233,46 @@ assert.equal(r.status, 200); assert(r.text.includes('[number]'), 'transcripts ar
 assert(r.text.split('\n')[0].startsWith('code,session,trial_index,turn'));
 // recordings: list, download (managers and up), delete (owner)
 r = await call(P + 'admin/recordings', { key: OWNER }); assert.equal(r.json.length, 1); assert.equal(r.json[0].kind, 'call');
-r = await call(P + 'admin/recording?key=' + encodeURIComponent(r.json[0].key), { key: OWNER }); assert.equal(r.json.data, audio); assert.equal(r.json.mime, 'audio/webm');
+r = await call(P + 'admin/recording?key=' + encodeURIComponent(r.json[0].key), { key: OWNER }); assert.equal(r.json.mime, 'audio/webm');
+assert.equal(r.json.sealed.by, 'server', 'a readable upload is sealed on arrival'); assert.notEqual(r.json.data, audio, 'and never stored readable');
+assert.equal(r.json.aad, Seal.binAad(keys.privateKey.kid, `${code}/s1/t${ci}-call`, 'audio/webm'));
+assert.equal(Seal.openBytes(Buffer.from(r.json.data, 'base64'), keys.privateKey, r.json.aad).toString('base64'), audio, 'the key file opens it');
 assert.equal((await call(P + 'admin/recording?key=contact/x', { key: OWNER })).json.error, 'bad_key');
+// sealed in the browser: the envelope is stored as sent; the server checks the key ID, the size and the first bytes
+{
+  const c3 = intro.index, tag = `${code}/s1/t${c3}-call`, up = body => call(P + 'media/upload', { body: { token: tok, session: 1, index: c3, kind: 'call', mime: 'audio/ogg;codecs=opus', ...body } });
+  assert.equal(plan.recordingTag, `${code}/s1`, 'the plan gives the page its recording tag');
+  const env = Seal.sealBytes(keys.publicKey, Buffer.from('OggS a browser recording'), Seal.binAad(keys.privateKey.kid, tag, 'audio/ogg'));
+  assert.equal((await up({ data: env.toString('base64'), sealed: { v: 1, kid: 'ffffffffffffffff' } })).json.error, 'wrong_key');
+  assert.equal((await up({ data: Buffer.from('OggS plain audio marked sealed').toString('base64').padEnd(200, 'A'), sealed: { v: 1, kid: keys.privateKey.kid } })).json.error, 'bad_data', 'not a sealed envelope');
+  const plainInside = Buffer.concat([env.subarray(0, 44), Buffer.from('OggS readable audio after a real header')]);
+  assert.equal((await up({ data: plainInside.toString('base64'), sealed: { v: 1, kid: keys.privateKey.kid } })).json.error, 'bad_data', 'readable audio behind a header');
+  assert.equal((await up({ data: Buffer.concat([Buffer.alloc(32), env.subarray(32)]).toString('base64'), sealed: { v: 1, kid: keys.privateKey.kid } })).json.error, 'bad_data', 'a weak key');
+  r = await up({ data: env.toString('base64'), sealed: { v: 1, kid: keys.privateKey.kid }, durationMs: 9000 });
+  assert(r.json.ok, r.text);
+  const got = (await call(P + 'admin/recording?key=' + encodeURIComponent('audio/' + tag), { key: OWNER })).json;
+  assert.equal(got.sealed.by, 'browser'); assert.equal(got.data, env.toString('base64'), 'stored as sent');
+  assert.equal(Seal.openBytes(Buffer.from(got.data, 'base64'), keys.privateKey, got.aad).toString(), 'OggS a browser recording');
+  // the key it replaced is accepted for 24 hours; with browser sealing required, readable uploads are refused
+  const k2 = Seal.generateKeys('calls-pilot');
+  assert((await call(P + 'admin/seal-set', { key: OWNER, body: { publicKey: k2.publicKey } })).json.ok);
+  assert((await call(P + 'admin/seal-set', { key: OWNER, body: { requireBrowser: true } })).json.ok);
+  const voiceUp = body => call(P + 'media/upload', { body: { token: tok, session: 1, index: c3, kind: 'voice', mime: 'audio/ogg', ...body } });
+  assert.equal((await voiceUp({ data: audio })).json.error, 'seal_required');
+  const envOld = Seal.sealBytes(keys.publicKey, Buffer.from('OggS old key'), Seal.binAad(keys.privateKey.kid, `${code}/s1/t${c3}-voice`, 'audio/ogg'));
+  assert((await voiceUp({ data: envOld.toString('base64'), sealed: { v: 1, kid: keys.privateKey.kid } })).json.ok, 'a tab opened before the key change still saves');
+  // turning sealing off while recording is on needs the owner to confirm
+  r = await call(P + 'admin/seal-set', { key: OWNER, body: { publicKey: null } });
+  assert.equal(r.status, 409); assert.equal(r.json.error, 'recording_on');
+  assert((await call(P + 'admin/seal-set', { key: OWNER, body: { publicKey: null, confirm: 'REMOVE' } })).json.ok);
+  assert((await call(P + 'admin/activity', { key: OWNER })).text.includes('while recording is on (confirmed)'));
+  assert((await call(P + 'admin/seal-set', { key: OWNER, body: { publicKey: k2.publicKey } })).json.ok);
+  // transcripts stay readable (redacted), so calls.csv is for managers and owners only
+  const viewerKey = (await call(P + 'admin/team-add', { key: OWNER, body: { name: 'V', role: 'viewer' } })).json.key;
+  assert.equal((await call(P + 'admin/calls.csv', { key: viewerKey })).status, 403);
+}
 console.log('voice calls: turns, retries, order, callbacks, audio upload, server-side outcome, transcripts, recordings');
+console.log('recordings sealed: on arrival or in the browser, envelope checks, key grace, key removal confirmed, calls.csv for managers');
 
 // stimulus files: upload (editors), served publicly with byte ranges
 const png = Buffer.from('89504e470d0a1a0a0000000d49484452', 'hex');

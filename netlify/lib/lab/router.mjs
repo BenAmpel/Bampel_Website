@@ -282,8 +282,16 @@ export async function handle(req, { getStore, env, now }) {
             if (r.ok) await admin.audit(S.store, who, 'seal.require_browser', r.requireBrowser ? 'free text and link data accepted only when sealed in the participant\'s browser' : 'the server may seal what a browser could not', clock());
             return reply(r);
           }
+          // A study that records voices refuses recordings without a key (types/multimodal.mjs mediaUpload), so turning the key
+          // off while recording consent is on stops recording: it needs the owner to confirm, and the log says so.
+          let recordingOn = false;
+          if (body.publicKey == null) {
+            const rec = (await content.getContent(S.store, type)).consent?.recording;
+            recordingOn = !!(rec && rec.enabled && (await sealInfo(S.store)).enabled);
+            if (recordingOn && body.confirm !== 'REMOVE') return json({ error: 'recording_on', hint: 'This study records voices. Without a key, new recordings are refused. Type REMOVE to turn sealing off anyway.' }, 409);
+          }
           const r = await setSealKey(S.store, body.publicKey == null ? null : String(body.publicKey), who, clock());
-          if (r.ok) await admin.audit(S.store, who, 'seal.set', r.enabled ? `sealing new values with key ${r.kid}` : 'sealing turned off', clock());
+          if (r.ok) await admin.audit(S.store, who, 'seal.set', r.enabled ? `sealing new values with key ${r.kid}` : recordingOn ? 'sealing turned off while recording is on (confirmed); new recordings are refused' : 'sealing turned off', clock());
           return reply(r);
         }
         case 'team-remove': return reply(await admin.removeMember(S.store, body.id, who));

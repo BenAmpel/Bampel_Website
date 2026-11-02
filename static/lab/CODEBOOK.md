@@ -141,6 +141,7 @@ Trials CSV columns after `trial_index` (the generic identifier, behavior, and co
 | `call_duration_ms`, `call_hold_ms`, `call_median_latency_ms` | Call length, time on hold, and the median time from the participant's turn to the caller starting to speak |
 | `call_llm_turns`, `call_typed_turns`, `call_interruptions`, `call_captions`, `call_directory_opened` | Caller lines rephrased by the AI; participant turns typed rather than spoken; times the participant talked over the caller; captions turned on (1/0); directory opened (1/0) |
 | `voice_recorded`, `voice_ms`, `voice_typed` | Spoken answer recorded (1/0), its length, or the typed answer when not recorded |
+| `recording_error` | Why the item's recording (call or spoken answer) was not saved: `seal_failed` (the browser could not seal it), `upload_failed` (no reply after a retry), `wrong_key` (sealed to a key the study no longer accepts), `seal_required` (sent readable to a study that requires browser sealing), `no_study_key` (the study had no key). Blank when it was saved or nothing was recorded |
 | `a_{question}` | Answer to each item question asked about this item |
 
 The full mouse path (`[x, y, ms]` points) is in the full JSON export under `records[].data.trajectory`.

@@ -155,6 +155,7 @@ const TYPE_COLUMNS = {
     ['call_typed_turns', 'integer', 'Participant turns typed instead of spoken.'], ['call_interruptions', 'integer', 'Times the participant talked over the caller.'],
     ['call_captions', 'binary', 'Captions turned on.', '0 = no; 1 = yes'], ['call_directory_opened', 'binary', 'Phone directory opened.', '0 = no; 1 = yes'],
     ['voice_recorded', 'binary', 'Spoken answer recorded.', '0 = no; 1 = yes'], ['voice_ms', 'ms', 'Length of the spoken answer.'], ['voice_typed', 'text', 'Typed answer when not recorded.'],
+    ['recording_error', 'category', 'Why this item\'s recording (call or spoken answer) was not saved; blank when it was, or when nothing was recorded.', 'seal_failed = the browser could not seal it; upload_failed = no reply after a retry; wrong_key = sealed to a key the study no longer accepts; seal_required = sent readable to a study that requires browser sealing; no_study_key = the study had no key'],
     // Equipment checks (check items: headphones, spoken word), scored on the server.
     ['check_test', 'category', 'Equipment check on this item.', 'headphones; word'], ['check_passed', 'binary', 'Passed the check.', '0 = no; 1 = yes'],
     ['check_attempts', 'integer', 'Attempts used.'], ['check_outages', 'integer', 'Attempts lost to a speech-server outage (never counted against the participant).'],

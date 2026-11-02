@@ -22,7 +22,7 @@
 // Participant renderer: static/lab/engine/types/multimodal.js. Editor: multimodal-admin.js.
 import { randomBytes } from 'node:crypto';
 import { cleanAnswers, loadParticipant, toCsv } from '../engine.mjs';
-import { sealLog, logValue } from '../seal.mjs';
+import { sealLog, logValue, sealBytes, binAad, audioMime, acceptsKid, goodPoint, AUDIO_KEY_RE, SEAL_OVERHEAD } from '../seal.mjs';
 import { validateQuestions, getContent } from '../content.mjs';
 import { publicQuestions, evalDisplay, orderItems } from '../logic.mjs';
 import { getMany, setNew, deleteKeys } from '../store.mjs';
@@ -434,6 +434,14 @@ export function looksLikeAudio(b) {
   const hex = b.subarray(0, 4).toString('hex'), ascii = b.subarray(0, 12).toString('latin1');
   return hex === '1a45dfa3' || ascii.startsWith('OggS') || ascii.startsWith('RIFF') || ascii.slice(4, 8) === 'ftyp' || ascii.startsWith('ID3') || (b[0] === 0xff && (b[1] & 0xe0) === 0xe0);
 }   // about 2.7 MB: 10+ minutes of speech at the browser's default bitrate
+// With a study key, recordings are stored sealed (seal.mjs sealBytes; docs/designs/audio-sealing.md). The participant page
+// seals them in the browser and sends the envelope with sealed: { v: 1, kid }; the server checks what it can without the key
+// (the key ID, the size, that the envelope does not start with a weak key or an audio file) and stores it as sent. A readable
+// upload is sealed here, unless the study requires browser sealing. A study that records but has no key stores nothing.
+export const RECORDING_ERRORS = ['seal_failed', 'upload_failed', 'wrong_key', 'seal_required', 'no_study_key'];
+// A recording container's signature (the long ones only: random bytes match one by chance about once in 16 million, where the
+// MP3 frame-sync test in looksLikeAudio would match sealed bytes once in 2,048). Used to refuse readable audio sent as sealed.
+const audioContainer = b => b.length >= 12 && (b.subarray(0, 4).toString('hex') === '1a45dfa3' || ['OggS', 'RIFF'].includes(b.subarray(0, 4).toString('latin1')) || b.subarray(4, 8).toString('latin1') === 'ftyp' || b.subarray(0, 3).toString('latin1') === 'ID3');
 async function mediaUpload(S, pid, body, now) {
   const ctx = await trialContext(S, pid, body);
   if (ctx.error) return ctx;
@@ -444,11 +452,27 @@ async function mediaUpload(S, pid, body, now) {
   if (!AUDIO_TYPES.test(mime)) return { error: 'bad_type', status: 400 };
   const data = typeof body.data === 'string' ? body.data : '';
   if (!data || !/^[A-Za-z0-9+/=]+$/.test(data)) return { error: 'bad_data', status: 400 };
-  if (data.length > MAX_AUDIO_B64) return { error: 'too_large', status: 413 };
-  if (!looksLikeAudio(Buffer.from(data.slice(0, 64), 'base64'))) return { error: 'bad_data', status: 400 };
+  const sealedUp = !!(body.sealed && typeof body.sealed === 'object');
+  if (data.length > MAX_AUDIO_B64 + (sealedUp ? 80 : 0)) return { error: 'too_large', status: 413 };
+  const meta = await S.store.get('meta/seal');
+  if (!meta || !meta.publicKey) return { error: 'no_study_key', status: 409 };
+  const key = `audio/${ctx.tag}-${kind}`, tag = key.slice(6), type = audioMime(mime);
+  let rec;
+  if (sealedUp) {
+    const kid = String(body.sealed.kid || '');
+    if (body.sealed.v !== 1 || !acceptsKid(meta, kid, now)) return { error: 'wrong_key', status: 409 };
+    const env = Buffer.from(data, 'base64');
+    if (env.length <= SEAL_OVERHEAD || !goodPoint(env) || audioContainer(env) || audioContainer(env.subarray(44))) return { error: 'bad_data', status: 400 };
+    rec = { at: now, mime: type, bytes: env.length - SEAL_OVERHEAD, durationMs: num(body.durationMs, 0, 36e5), sealed: { v: 1, kid, by: 'browser' }, data };
+  } else {
+    if (meta.requireBrowser) return { error: 'seal_required', status: 400 };
+    const buf = Buffer.from(data, 'base64');
+    if (!looksLikeAudio(buf.subarray(0, 64))) return { error: 'bad_data', status: 400 };
+    const env = sealBytes(meta.publicKey, buf, binAad(meta.kid, tag, type));
+    rec = { at: now, mime: type, bytes: buf.length, durationMs: num(body.durationMs, 0, 36e5), sealed: { v: 1, kid: meta.kid, by: 'server' }, data: env.toString('base64') };
+  }
   if ((await S.store.list(`audio/${ctx.p.code}/`)).length >= MAX_AUDIO_PER_PARTICIPANT) return { error: 'too_many', status: 429 };
-  const key = `audio/${ctx.tag}-${kind}`;
-  const created = await setNew(S.store, key, { at: now, mime: mime.split(';')[0], bytes: Math.floor(data.length * 3 / 4), durationMs: num(body.durationMs, 0, 36e5), data });
+  const created = await setNew(S.store, key, rec);
   return { ok: true, key, repeat: !created || undefined };
 }
 
@@ -481,7 +505,6 @@ export async function callSummary(S, tag, trial, plan, test = false) {
 }
 
 // ---------- admin routes ----------
-const AUDIO_KEY_RE = /^audio\/([^/]+)\/s(\d+)\/(t\d+|practice)-(call|voice)$/;
 const FILE_TYPES = { 'audio/mpeg': 'mp3', 'audio/mp3': 'mp3', 'audio/mp4': 'm4a', 'audio/x-m4a': 'm4a', 'audio/wav': 'wav', 'audio/x-wav': 'wav', 'audio/ogg': 'ogg', 'audio/webm': 'webm',
   'video/mp4': 'mp4', 'video/webm': 'webm', 'video/quicktime': 'mov', 'image/png': 'png', 'image/jpeg': 'jpg', 'image/gif': 'gif', 'image/webp': 'webp' };
 export const FILE_MIME = Object.fromEntries(Object.entries(FILE_TYPES).map(([m, e]) => [e, m]));
@@ -496,7 +519,9 @@ const adminRoutes = {
     const r = await S.store.get(key);
     if (!r) return { error: 'not_found', status: 404 };
     await audit('recording.download', key);
-    return { key, mime: r.mime, data: r.data, durationMs: r.durationMs };
+    // A sealed recording comes back as its envelope, with the additional data the opener needs (built here from the storage
+    // key; the openers rebuild it the same way rather than trust this). A recording from before the study key is plain.
+    return { key, mime: r.mime, data: r.data, durationMs: r.durationMs, sealed: r.sealed || null, aad: r.sealed ? binAad(r.sealed.kid, key.slice(6), r.mime) : null };
   } },
   'recordings-delete': { need: 'owner', post: true, handler: async (S, { body, audit }) => {
     if (body.confirm !== 'DELETE') return { error: 'confirm_required', status: 400, hint: 'Type DELETE to confirm.' };
@@ -506,7 +531,8 @@ const adminRoutes = {
     await audit('recordings.delete', `${keys.length} recordings${code ? ' of ' + code : ''}`);
     return { ok: true, deleted: keys.length };
   } },
-  'calls.csv': { need: 'viewer', handler: async S => {
+  'calls.csv': { need: 'manager',   // transcripts are readable (redacted, not sealed): managers only (docs/designs/audio-sealing.md, T2)
+    handler: async S => {
     const keys = (await S.store.list('calls/')).sort();
     const rows = [];
     for (const [k, v] of await getMany(S.store, keys)) {
@@ -733,7 +759,7 @@ export default {
     item.ask = questionsFor(plan, t).map(q => q.id);
     return { item, block: t.block, decision: t.decision };
   },
-  publicPlanExtras: plan => ({ questions: publicQuestions(plan.questions, plan.condition), directory: (plan.directory || []).map(x => ({ name: x.name, number: x.number, dept: x.dept || '' })), recording: !!plan.recording,
+  publicPlanExtras: (plan, state) => ({ questions: publicQuestions(plan.questions, plan.condition), directory: (plan.directory || []).map(x => ({ name: x.name, number: x.number, dept: x.dept || '' })), recording: !!plan.recording, recordingTag: plan.recording && state && state.code ? `${state.code}/s${plan.session}` : null,
     persona: X.publicPersona(plan.persona), asr: plan.asr || 'browser', agent: !!plan.agent, payoff: plan.payoff ? { benignComplete: plan.payoff.benignComplete, disclose: plan.payoff.disclose, callback: plan.payoff.callback } : null }),
 
   // Attaches the server's record of a call to the answer before it is cleaned and saved; anything the browser
@@ -772,13 +798,13 @@ export default {
     const c = d.call && typeof d.call === 'object' ? d.call : null;
     const call = c ? { answered: c.answered === true, ringMs: num(c.ringMs, 0, 36e5), durationMs: num(c.durationMs, 0, 36e5), holdMs: num(c.holdMs, 0, 36e5), typedTurns: num(c.typedTurns, 0, 200),
       spokenTurns: num(c.spokenTurns, 0, 200), interruptions: num(c.interruptions, 0, 200), captions: c.captions === true, directoryOpened: c.directoryOpened === true, endedBy: ['participant', 'caller', 'timeout'].includes(c.endedBy) ? c.endedBy : null,
-      latencies: Array.isArray(c.latencies) ? c.latencies.slice(0, 100).map(x => num(x, 0, 6e4)) : [] } : null;
+      latencies: Array.isArray(c.latencies) ? c.latencies.slice(0, 100).map(x => num(x, 0, 6e4)) : [], ...(RECORDING_ERRORS.includes(c.recordingError) ? { recordingError: c.recordingError } : {}) } : null;
     const v = d.voice && typeof d.voice === 'object' ? d.voice : null;
     return {
       answers: cleanAnswers(d.answers, questionsFor(plan, t), { condition: plan.condition, embedded: plan.embedded, seal: plan.seal }),
       decision, decisionMs: decision ? num(d.decisionMs, 0, 864e5) : null, trajectory: points.length ? points : null, mt: points.length && pathInput ? trajectoryMetrics(points) : null, mtInput,
       rtMs: num(d.rtMs, 0, 864e5), answerLog, traces: small(d.traces, 50000), media, call, callServer: small(d.callServer, 4000), checkServer: small(d.checkServer, 2000),
-      voice: v ? { recorded: v.recorded === true && !!plan.recording, durationMs: num(v.durationMs, 0, 36e5), typed: typeof v.typed === 'string' ? (plan.seal ? plan.seal(v.typed.slice(0, 4000)) : v.typed.slice(0, 4000)) : '' } : null,
+      voice: v ? { recorded: v.recorded === true && !!plan.recording, ...(RECORDING_ERRORS.includes(v.recordingError) ? { recordingError: v.recordingError } : {}), durationMs: num(v.durationMs, 0, 36e5), typed: typeof v.typed === 'string' ? (plan.seal ? plan.seal(v.typed.slice(0, 4000)) : v.typed.slice(0, 4000)) : '' } : null,
       viewport: d.viewport ? { w: num(d.viewport.w, 0, 20000), h: num(d.viewport.h, 0, 20000) } : null, device: small(d.device, 4000), selfTest: d.selfTest === true || undefined,
       uiEvents: Array.isArray(d.uiEvents) ? d.uiEvents.slice(0, 200).map(x => ({ name: String(x && x.name || '').slice(0, 60), at: num(x && x.at, 0, 864e5) })) : [],
       live: t.item.live && dec ? X.cleanLive(d.live, num, dec.options) : null, slider: t.meta && t.meta.slider ? X.cleanSlider(d.slider, num) : null,
@@ -806,6 +832,7 @@ export default {
       call_callbacks_dialpad_listed: cs.callbacksDialpadListed ?? '', call_callback_resolved_via: cs.callbackResolvedVia || '', call_agreed_no_disclosure: cs.agreed ?? '', call_benign_completed_on_call: cs.completedOnCall == null ? '' : cs.completedOnCall ? 1 : 0, call_benign_completed_via_callback: cs.completedViaCallback == null ? '' : cs.completedViaCallback ? 1 : 0,
       call_duration_ms: c.durationMs ?? '', call_hold_ms: c.holdMs ?? '', call_median_latency_ms: cs.medianLatencyMs ?? '', call_llm_turns: cs.llmTurns ?? '', call_typed_turns: c.typedTurns ?? '', call_interruptions: c.interruptions ?? '', call_captions: d.call ? (c.captions ? 1 : 0) : '', call_directory_opened: d.call ? (c.directoryOpened ? 1 : 0) : '',
       voice_recorded: d.voice ? (d.voice.recorded ? 1 : 0) : '', voice_ms: d.voice?.durationMs ?? '', voice_typed: d.voice?.typed || '',
+      recording_error: d.voice?.recordingError || d.call?.recordingError || '',
       check_test: d.checkServer?.test || '', check_passed: d.checkServer ? (d.checkServer.passed == null ? '' : d.checkServer.passed ? 1 : 0) : '', check_attempts: d.checkServer?.attempts ?? '', check_outages: d.checkServer?.outages ?? '' };
     // Study design factors (clip cell, phase, list; call slot) and counterbalancing, for trial-level models.
     const meta = r.meta || {}, f = r.flags || {}, lv = d.live || null, sl = d.slider || null;

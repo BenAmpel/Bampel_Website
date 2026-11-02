@@ -176,38 +176,76 @@
   function recordingsTab(sec, api) {
     var esc = api.esc, mgr = api.can('manager'), owner = api.can('owner');
     sec.innerHTML = '<h2>Call transcripts</h2><p class="muted">One row per turn of every call: what the participant said (with numbers, emails, and addresses removed before saving), what the caller said, the caller\'s state, and timing. Column definitions are in the codebook.</p>' +
-      '<div class="row"><button type="button" class="secondary" id="rc-csv">Download call transcripts (CSV)</button></div>' +
+      (mgr ? '<div class="row"><button type="button" class="secondary" id="rc-csv">Download call transcripts (CSV)</button></div>' : '<p class="muted">Managers and owners can download the transcripts.</p>') +
+      '<p class="muted" id="rc-key" role="status"></p>' +
       '<h2 style="margin-top:28px">Participant recordings</h2>' + (mgr ? '<p class="muted">Recorded only from participants who agreed to recording. Recordings identify people by voice: keep downloads on approved storage, and delete them on your IRB\'s schedule.</p><div class="row"><button type="button" class="secondary" id="rc-load">Show recordings</button><button type="button" class="secondary" id="rc-zip" disabled>Download all (.zip)</button>' +
         (owner ? '<button type="button" class="danger secondary" id="rc-del">Delete all recordings…</button>' : '') + '</div><p class="muted" id="rc-prog" role="status"></p><div class="table-wrap"><table id="rc-tbl"></table></div>' : '<p class="muted">Managers and owners can listen to and download recordings.</p>');
     var rows = [];
+    if (!mgr) return;
     sec.querySelector('#rc-csv').addEventListener('click', function () {
       api.err(); api.call('calls.csv').then(function (r) { return r.text(); }).then(function (t) { api.saveFile(t, api.studyId + '_call_turns_' + api.day() + '.csv', 'text/csv'); }).catch(function (e) { api.err(e.message); });
     });
-    if (!mgr) return;
+    // Recordings are sealed with the study key (docs/designs/audio-sealing.md): they open here only while this tab holds the key
+    // file (Encryption tab), else they are saved sealed for node scripts/lab/seal.mjs open-audio. Without a study key the
+    // server refuses new recordings, so say so.
+    api.getJSON('seal').then(function (k) {
+      sec.querySelector('#rc-key').innerHTML = k.enabled ? 'New recordings are sealed with study key <span class="mono">' + esc(k.kid) + '</span>.' + (window.LabSeal && LabSeal.loaded() && LabSeal.loaded().kid === k.kid ? ' This tab holds that key: recordings open here.' : ' Load the key file on the Encryption tab to listen here.')
+        : '<strong>This study has no study key: new recordings are refused until one is set on the Encryption tab.</strong>';
+    }).catch(function () {});
+    function fname(row, mime) { return row.code + '_s' + row.session + '_' + row.item + '_' + row.kind + '.' + (EXT[mime] || 'webm'); }
+    // A recording as fetched -> { bytes, opened } (opened: readable audio) or a rejection saying why it stays sealed. The
+    // additional data is rebuilt from the storage key, never taken from the reply.
+    function openRec(row, r) {
+      var bytes = b64bytes(r.data);
+      if (!r.sealed) return Promise.resolve({ bytes: bytes, opened: true, plain: true });
+      var k = window.LabSeal && LabSeal.loaded();
+      if (!k || k.kid !== r.sealed.kid) return Promise.resolve({ bytes: bytes, opened: false, kid: r.sealed.kid });
+      return LabSeal.openBytes(bytes, LabSeal.binAad(r.sealed.kid, row.key.slice(6), r.mime)).then(function (pt) { return { bytes: new Uint8Array(pt), opened: true }; },
+        function () { throw new Error('This recording did not open with the loaded key: it may have been changed in storage. Check the activity log.'); });
+    }
     function load() {
       api.getJSON('recordings').then(function (list) {
         rows = list;
         sec.querySelector('#rc-zip').disabled = !list.length;
         sec.querySelector('#rc-tbl').innerHTML = '<tr><th>Participant</th><th>Session</th><th>Item</th><th>Kind</th><th></th></tr>' + list.map(function (r, i) {
-          return '<tr><td class="mono">' + esc(r.code) + '</td><td>' + r.session + '</td><td>' + esc(r.item) + '</td><td>' + esc(r.kind) + '</td><td><button type="button" class="secondary small" data-play="' + i + '">Listen</button> <span id="rc-a' + i + '"></span></td></tr>';
+          return '<tr><td class="mono">' + esc(r.code) + '</td><td>' + r.session + '</td><td>' + esc(r.item) + '</td><td>' + esc(r.kind) + '</td><td><button type="button" class="secondary small" data-play="' + i + '">Listen</button> <button type="button" class="secondary small" data-save="' + i + '">Download</button> <span id="rc-a' + i + '"></span></td></tr>';
         }).join('') + (list.length ? '' : '<tr><td colspan="5" class="muted">No recordings yet.</td></tr>');
       }).catch(function (e) { api.err(e.message); });
     }
     sec.querySelector('#rc-load').addEventListener('click', load);
     sec.querySelector('#rc-tbl').addEventListener('click', function (e) {
-      var i = e.target.getAttribute && e.target.getAttribute('data-play'); if (i == null) return;
-      api.getJSON('recording?key=' + encodeURIComponent(rows[i].key)).then(function (r) {
-        var url = URL.createObjectURL(new Blob([b64bytes(r.data)], { type: r.mime }));
-        document.getElementById('rc-a' + i).innerHTML = '<audio controls autoplay src="' + url + '"></audio>';
+      var play = e.target.getAttribute && e.target.getAttribute('data-play'), save = e.target.getAttribute && e.target.getAttribute('data-save'), i = play != null ? play : save;
+      if (i == null) return;
+      var row = rows[i], out = document.getElementById('rc-a' + i);
+      api.getJSON('recording?key=' + encodeURIComponent(row.key)).then(function (r) {
+        return openRec(row, r).then(function (o) {
+          var note = o.plain ? ' <span class="muted">(not sealed)</span>' : '';
+          if (save != null) {
+            if (o.opened) api.saveFile(new Blob([o.bytes], { type: r.mime }), fname(row, r.mime));
+            else api.saveFile(new Blob([o.bytes], { type: 'application/octet-stream' }), fname(row, r.mime) + '.sealed');
+            out.innerHTML = (o.opened ? 'Saved.' : 'Saved sealed (key ' + esc(o.kid) + ').') + note;
+          } else if (o.opened) out.innerHTML = '<audio controls autoplay src="' + URL.createObjectURL(new Blob([o.bytes], { type: r.mime })) + '"></audio>' + note;
+          else out.innerHTML = 'Sealed with key <span class="mono">' + esc(o.kid) + '</span>. Load that key file on the Encryption tab to listen.';
+        });
       }).catch(function (x) { api.err(x.message); });
     });
     sec.querySelector('#rc-zip').addEventListener('click', function () {
-      var b = sec.querySelector('#rc-zip'), files = [], prog = sec.querySelector('#rc-prog'); b.disabled = true;
+      // Recordings this tab can open are saved as audio; the rest stay sealed (.sealed), listed in manifest.json for
+      // node scripts/lab/seal.mjs open-audio. For a large study, use node scripts/lab/recordings.mjs pull instead.
+      var b = sec.querySelector('#rc-zip'), files = [], manifest = [], prog = sec.querySelector('#rc-prog'); b.disabled = true;
       (function next(i) {
-        if (i >= rows.length) { api.saveFile(zip(files), api.studyId + '_recordings_' + api.day() + '.zip'); prog.textContent = files.length + ' recordings saved.'; b.disabled = false; return; }
+        if (i >= rows.length) {
+          if (manifest.length) files.push({ name: 'manifest.json', data: new TextEncoder().encode(JSON.stringify({ format: 'ccair-lab-recordings', study: api.studyId, recordings: manifest }, null, 2)) });
+          api.saveFile(zip(files), api.studyId + '_recordings_' + api.day() + '.zip'); prog.textContent = (files.length - (manifest.length ? 1 : 0)) + ' recordings saved' + (manifest.length ? ', ' + manifest.length + ' of them sealed.' : '.'); b.disabled = false; return;
+        }
         prog.textContent = 'Fetching ' + (i + 1) + ' of ' + rows.length + '…';
         api.getJSON('recording?key=' + encodeURIComponent(rows[i].key)).then(function (r) {
-          files.push({ name: rows[i].code + '_s' + rows[i].session + '_' + rows[i].item + '_' + rows[i].kind + '.' + (EXT[r.mime] || 'webm'), data: b64bytes(r.data) }); next(i + 1);
+          return openRec(rows[i], r).then(function (o) {
+            var name = fname(rows[i], r.mime) + (o.opened ? '' : '.sealed');
+            files.push({ name: name, data: o.bytes });
+            if (!o.opened) manifest.push({ key: rows[i].key, file: name, mime: r.mime, kid: o.kid, bytes: r.bytes || null });
+            next(i + 1);
+          });
         }).catch(function (e) { api.err(e.message); b.disabled = false; });
       })(0);
     });

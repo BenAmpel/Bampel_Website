@@ -296,7 +296,7 @@ export function publicPlan(S, plan, state) {
     practiceDone: !!state.practiceDone, preSurveyDone: !!state.preSurveyDone,
     preItems: publicQuestions(plan.preItems, plan.condition), postItems: publicQuestions(plan.postItems, plan.condition), embedded: plan.embedded || {},
     trials: plan.trials.map(t => ({ index: t.index, done: done.has(t.index), ...S.type.publicTrial(t, plan) })),
-    ...(S.type.publicPlanExtras ? S.type.publicPlanExtras(plan) : {})
+    ...(S.type.publicPlanExtras ? S.type.publicPlanExtras(plan, state) : {})
   };
 }
 
@@ -336,7 +336,7 @@ export async function startSession(S, code, now = Date.now(), extra = {}) {
     if (n === 1 && p.totalSessions == null) await update(S.store, pKey(p.code), d => { if (d.totalSessions == null) d.totalSessions = S.type.sessionCount(c); });
   }
   const s = prog.sessions[n] || {};
-  const state = { trialsDone: s.trialsDone || [], practiceDone: s.practiceDone || !plan.practice, preSurveyDone: s.preSurveyDone || !(plan.preItems || []).length };
+  const state = { trialsDone: s.trialsDone || [], practiceDone: s.practiceDone || !plan.practice, preSurveyDone: s.preSurveyDone || !(plan.preItems || []).length, code: p.code };   // code: for types that bind data to the participant (multimodal recordingTag)
   return { ...publicPlan(S, plan, state), contentVersion: plan.contentVersion };
 }
 
