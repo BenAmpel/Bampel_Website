@@ -1,19 +1,18 @@
 {
-  "lastUpdated": "October 28, 2026",
-  "asOf": "2026-10-26",
+  "lastUpdated": "November 02, 2026",
+  "asOf": "2026-11-02",
   "windowWeeks": 8,
-  "totalNew": 28,
+  "totalNew": 34,
   "papers": [
     {
       "title": "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach",
       "metrics": {
-        "monthly": 8,
-        "trend": "rising",
-        "previous": 7,
-        "total": 79
+        "monthly": 7,
+        "trend": "cooling",
+        "previous": 8,
+        "total": 80
       },
       "series": [
-        53,
         56,
         57,
         57,
@@ -38,7 +37,8 @@
         79,
         79,
         79,
-        79
+        79,
+        80
       ],
       "venue": "Journal of Management Information Systems",
       "year": 2024,
@@ -52,60 +52,14 @@
       ]
     },
     {
-      "title": "Performance Modeling of Hyperledger Sawtooth Blockchain",
-      "metrics": {
-        "monthly": 6,
-        "trend": "rising",
-        "previous": 0,
-        "total": 139
-      },
-      "series": [
-        131,
-        131,
-        131,
-        131,
-        132,
-        132,
-        133,
-        134,
-        134,
-        134,
-        134,
-        134,
-        134,
-        131,
-        132,
-        132,
-        133,
-        133,
-        133,
-        133,
-        133,
-        133,
-        135,
-        136,
-        138,
-        139
-      ],
-      "venue": "IEEE ISI",
-      "year": 2019,
-      "url": "/conference_publication/sawtooth-19-isi/",
-      "authors": [
-        "Benjamin M. Ampel",
-        "Mark Patton",
-        "Hsinchun Chen"
-      ]
-    },
-    {
       "title": "Linking Common Vulnerabilities and Exposures to the MITRE ATT&CK Framework: A Self-Distillation Approach",
       "metrics": {
-        "monthly": 5,
+        "monthly": 7,
         "trend": "cooling",
         "previous": 8,
-        "total": 99
+        "total": 101
       },
       "series": [
-        84,
         85,
         85,
         86,
@@ -130,7 +84,8 @@
         97,
         97,
         99,
-        99
+        99,
+        101
       ],
       "venue": "AI4Cyber-KDD",
       "year": 2021,
@@ -139,6 +94,51 @@
         "Benjamin M. Ampel",
         "Sagar Samtani",
         "Steven Ullman",
+        "Hsinchun Chen"
+      ]
+    },
+    {
+      "title": "Performance Modeling of Hyperledger Sawtooth Blockchain",
+      "metrics": {
+        "monthly": 6,
+        "trend": "rising",
+        "previous": 0,
+        "total": 139
+      },
+      "series": [
+        131,
+        131,
+        131,
+        132,
+        132,
+        133,
+        134,
+        134,
+        134,
+        134,
+        134,
+        134,
+        131,
+        132,
+        132,
+        133,
+        133,
+        133,
+        133,
+        133,
+        133,
+        135,
+        136,
+        138,
+        139,
+        139
+      ],
+      "venue": "IEEE ISI",
+      "year": 2019,
+      "url": "/conference_publication/sawtooth-19-isi/",
+      "authors": [
+        "Benjamin M. Ampel",
+        "Mark Patton",
         "Hsinchun Chen"
       ]
     }
