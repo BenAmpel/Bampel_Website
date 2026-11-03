@@ -193,6 +193,12 @@ function writeRoutePages() {
 }
 console.log('CCAIR pages: %d prerendered page shells written to /ccair/<page>/index.html', writeRoutePages());
 
+// Official lockup switch (static/ccair/assets/brand/official/lockup.json): inlined into the bundle as CCAIR_LOCKUP, the
+// config when it is switched on and has a light file, else null, so the app does not fetch it on every load.
+const lockup = JSON.parse(fs.readFileSync(path.join(ccairDir, 'assets', 'brand', 'official', 'lockup.json'), 'utf8'));
+const lockupDefine = lockup.enabled && lockup.files && lockup.files.light ? JSON.stringify(lockup) : 'null';
+console.log('CCAIR official lockup: %s', lockupDefine === 'null' ? 'off (text wordmark)' : 'on');
+
 // One file for the whole app (was four requests). Each source file is still transpiled on its own and wrapped in its own
 // function, exactly as before (they share state only through window.CCAIR), then joined in load order.
 Promise.all(
@@ -204,6 +210,7 @@ Promise.all(
       jsx: 'transform',
       jsxFactory: 'React.createElement',
       jsxFragment: 'React.Fragment',
+      define: { CCAIR_LOCKUP: lockupDefine },
       target: 'es2020',
       minify: true,
       bundle: false,
