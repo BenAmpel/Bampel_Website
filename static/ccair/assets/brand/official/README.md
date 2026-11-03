@@ -21,8 +21,9 @@ symbol or graphic mark. The favicon is a plain Georgia State Blue rounded square
    - optionally the official flame favicon set from PRMC, to replace the neutral one in `../`
 2. Edit `lockup.json`: set `"enabled": true`, `files.light` and `files.reversed` to the file names, and `width`/`height`
    to the artwork's intrinsic size (used to reserve space). Keep `alt` as the full unit name.
-3. Run `npm run build:ccair`. The React site (`OfficialLockup` in `static/ccair/ccair-components.jsx`) reads this file at
-   run time; the static pages (`scripts/ccair-static.mjs`) read it at build time. With `"enabled": false` the slot renders nothing.
+3. Run `npm run build:ccair`. Both read this file at build time: `scripts/build-ccair.js` inlines it into
+   `dist/ccair.js` for the React site (`OfficialLockup` in `static/ccair/ccair-components.jsx`), and the static pages
+   (`scripts/ccair-static.mjs`) read it directly. The browser never fetches it, so a change shows only after a rebuild. With `"enabled": false` the slot renders nothing.
 4. Respect the lockup's clear space (half the flame height on every side) and minimum size from the PRMC files; the CSS
    gives the header slot a 40 px height and the footer the same, with no other element inside that margin.
 

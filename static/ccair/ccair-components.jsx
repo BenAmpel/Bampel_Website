@@ -23,24 +23,10 @@ const hrefFor = (page) => (page === 'home' ? '/ccair/' : '/ccair/' + page + '/')
 /* Brand. GSU rules (commkit.gsu.edu): a center may not create its own logo; it uses the college sub-brand lockup with a
    unit wordmark, supplied by Public Relations & Marketing Communications. Until those files exist the site shows a
    plain-text wordmark. When assets/brand/official/lockup.json is switched on (see the README there), OfficialLockup
-   shows the supplied files in its place, unaltered; with "enabled": false it renders nothing. */
+   shows the supplied files in its place, unaltered; with "enabled": false it renders nothing. scripts/build-ccair.js
+   inlines that file as CCAIR_LOCKUP (null while it is switched off), so the page makes no request for it. */
 const LOCKUP_DIR = '/ccair/assets/brand/official/';
-let lockupConfig = null;
-function useLockup() {
-  const [cfg, setCfg] = useState(null);
-  useEffect(() => {
-    let live = true;
-    // The config is a switch for files that do not exist yet ("enabled": false), so it is read when the browser is idle
-    // instead of competing with the data files for the first paint.
-    const idle = window.requestIdleCallback || ((f) => setTimeout(f, 1500));
-    const handle = idle(() => {
-      lockupConfig = lockupConfig || fetch(LOCKUP_DIR + 'lockup.json').then((r) => (r.ok ? r.json() : null)).catch(() => null);
-      lockupConfig.then((c) => { if (live && c && c.enabled && c.files && c.files.light) setCfg(c); });
-    });
-    return () => { live = false; if (window.cancelIdleCallback && window.requestIdleCallback) window.cancelIdleCallback(handle); };
-  }, []);
-  return cfg;
-}
+const LOCKUP = CCAIR_LOCKUP;
 // onDark: the slot sits on a dark band (the footer), so it uses the reversed file.
 function OfficialLockup({ cfg, onDark }) {
   if (!cfg) return null;
@@ -60,7 +46,7 @@ function Wordmark() {
   );
 }
 function Brand({ onDark }) {
-  const cfg = useLockup();
+  const cfg = LOCKUP;
   return (
     <a className="brand" href="/ccair/" aria-label={cfg ? cfg.alt + ', home' : undefined}>
       {cfg ? <OfficialLockup cfg={cfg} onDark={onDark} /> : <Wordmark />}
