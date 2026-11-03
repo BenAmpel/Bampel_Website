@@ -9,7 +9,9 @@
   # npm ci installs exactly what package-lock.json pins (and fails if package.json disagrees with it).
   # Two Hugo passes: the first only writes hugo_stats.json (every tag, class and id on the rendered pages) into a scratch folder;
   # the second removes unused rules from css/wowchemy.css with PostCSS and PurgeCSS (postcss.config.js) and writes the site.
-  command = "curl -sSfL -o /tmp/dart-sass.tar.gz https://github.com/sass/dart-sass/releases/download/${DART_SASS_VERSION}/dart-sass-${DART_SASS_VERSION}-linux-x64.tar.gz && printf '%s  %s\\n' ${DART_SASS_SHA256} /tmp/dart-sass.tar.gz | sha256sum -c - && tar -xzf /tmp/dart-sass.tar.gz -C /tmp && export PATH=/tmp/dart-sass:$PATH && npm ci && node scripts/lab/build-info.mjs && npm run build:ccair && hugo --gc --minify --destination \"$(mktemp -d)\" && WC_PURGE_CSS=true hugo --gc --minify --ignoreCache"
+  # scripts/fingerprint-ccair.mjs then gives the CCAIR app's CSS and scripts content-hashed names in public/ (see the
+  # /ccair/ cache rules below); the CI workflow runs the same step.
+  command = "curl -sSfL -o /tmp/dart-sass.tar.gz https://github.com/sass/dart-sass/releases/download/${DART_SASS_VERSION}/dart-sass-${DART_SASS_VERSION}-linux-x64.tar.gz && printf '%s  %s\\n' ${DART_SASS_SHA256} /tmp/dart-sass.tar.gz | sha256sum -c - && tar -xzf /tmp/dart-sass.tar.gz -C /tmp && export PATH=/tmp/dart-sass:$PATH && npm ci && node scripts/lab/build-info.mjs && npm run build:ccair && hugo --gc --minify --destination \"$(mktemp -d)\" && WC_PURGE_CSS=true hugo --gc --minify --ignoreCache && node scripts/fingerprint-ccair.mjs public"
   publish = "public"
 
 # Site-wide security headers (added 2026-10-16). HSTS, nosniff and Referrer-Policy come from the _headers file that the
@@ -73,6 +75,25 @@
 
 [[headers]]
   for = "/ccair/vendor/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# CCAIR app CSS and scripts (2026-11-03): scripts/fingerprint-ccair.mjs writes copies named with a content hash
+# (ccair.<hash>.css, dist/ccair.<hash>.js, boot.<hash>.js) at build time and the page shells load those, so a changed file
+# always gets a new name. Only the hashed names match these rules (they need two dots); the unhashed originals, the
+# page HTML and data/*.json keep the default "max-age=0, must-revalidate".
+[[headers]]
+  for = "/ccair/assets/ccair.*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/ccair/dist/ccair.*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/ccair/assets/boot.*.js"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
