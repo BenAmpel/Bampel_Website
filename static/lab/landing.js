@@ -4,7 +4,7 @@
     if (!list || !list.length) return;
     var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
     document.getElementById('live').innerHTML = list.map(function (s) {
-      return '<div class="card study" style="margin-top:14px"><div><span class="tag">Live · email sign-in</span><h3>' + esc(s.name) + '</h3><p>' + esc(s.description) + '</p></div>' +
+      return '<div class="card study study-live"><div><span class="tag">Live · email sign-in</span><h3>' + esc(s.name) + '</h3><p>' + esc(s.description) + '</p></div>' +
         '<a class="btn" href="' + esc(s.paths.participant) + '">Sign in</a></div>';
     }).join('');
   }).catch(function () {});
