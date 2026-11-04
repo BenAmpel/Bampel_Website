@@ -17,8 +17,8 @@ const me = { email: 'r@example.edu', name: 'R', labOwner: false, expiresAt: Date
 
 async function open(signedIn) {
   const page = readFileSync(STATIC + '/lab/account/index.html', 'utf8');
-  const html = page.replace(/<script src="[^"]*"><\/script>/g, '');
-  const dom = new JSDOM(html, { url: 'http://localhost/lab/account/', runScripts: 'outside-only', pretendToBeVisual: true });
+  // runScripts is 'outside-only', so the page's own script tags do nothing; auth.js and account.js are run below.
+  const dom = new JSDOM(page, { url: 'http://localhost/lab/account/', runScripts: 'outside-only', pretendToBeVisual: true });
   const { window } = dom;
   if (signedIn) window.sessionStorage.setItem('lab_session', JSON.stringify({ token: 't', expiresAt: Date.now() + 3600e3, email: me.email }));
   let meCalls = 0;
