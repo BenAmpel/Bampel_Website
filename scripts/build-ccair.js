@@ -193,6 +193,61 @@ function writeRoutePages() {
 }
 console.log('CCAIR pages: %d prerendered page shells written to /ccair/<page>/index.html', writeRoutePages());
 
+// Sitemap lastmod for the app pages (/ccair/ and /ccair/<page>/), the same way scripts/build-students.mjs dates the
+// Student Guide: each page is hashed from its <Name>Page() function in ccair-pages.jsx plus the data files that function
+// reads through useData(), and data/ccair/app-lastmod.json (committed, unpublished) keeps the hash and the date it last
+// changed, so lastmod moves only when what the page shows changes. A page new to the store starts at the date of the
+// last commit to its inputs. Commit app-lastmod.json after a build that changes it. scripts/ccair-static.mjs
+// (writeSitemap) reads it.
+const APP_LASTMOD_STORE = path.join(root, 'data', 'ccair', 'app-lastmod.json');
+function writeAppLastmod() {
+  const crypto = require('crypto');
+  const { execFileSync } = require('child_process');
+  const today = new Date().toISOString().slice(0, 10);
+  const pagesSrc = fs.readFileSync(path.join(ccairDir, 'ccair-pages.jsx'), 'utf8');
+  // Data key (ccair-data.jsx DATA_FILES) -> [published file it hashes, source file whose commits date it].
+  const dataFile = (key) => ({
+    materials: ['static/ccair/data/materials.json', 'data/ccair/materials-source.json'],
+    paperPages: ['static/ccair/data/paper-pages.json', 'content'],
+  }[key] || [`static/ccair/data/${key}.json`, `static/ccair/data/${key}.json`]);
+  const gitDate = (paths) => {
+    try {
+      const d = execFileSync('git', ['log', '-1', '--format=%cs', '--', ...paths], { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+      return /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : null;
+    } catch { return null; }
+  };
+  const funcs = [...pagesSrc.matchAll(/^function (\w+)Page\(\)/gm)].map((m) => ({ name: m[1].toLowerCase(), at: m.index }));
+  const store = fs.existsSync(APP_LASTMOD_STORE) ? JSON.parse(fs.readFileSync(APP_LASTMOD_STORE, 'utf8')) : { pages: {} };
+  const next = { note: 'Written by scripts/build-ccair.js. lastmod is the date the hash of the page\'s function in ccair-pages.jsx and the data files it reads last changed. Commit this file after a build that changes it.', pages: {} };
+  funcs.forEach((f, i) => {
+    const body = pagesSrc.slice(f.at, i + 1 < funcs.length ? funcs[i + 1].at : undefined);
+    const used = /const \{([^}]*)\} = useData\(\)/.exec(body);
+    const keys = used ? used[1].split(',').map((k) => k.split(':')[0].trim()).filter(Boolean).sort() : [];
+    // Data is hashed with its object keys sorted, so the order a file was written in (paper-pages.json follows
+    // readdirSync, which differs between macOS and Netlify's Linux) does not change the date.
+    const canon = (v) => Array.isArray(v) ? v.map(canon)
+      : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, canon(v[k])])) : v;
+    const hash = crypto.createHash('sha256').update(body);
+    for (const k of keys) {
+      const file = path.join(root, dataFile(k)[0]);
+      hash.update(`\n${k}\n`).update(fs.existsSync(file) ? JSON.stringify(canon(JSON.parse(fs.readFileSync(file, 'utf8')))) : '');
+    }
+    const digest = hash.digest('hex');
+    const u = f.name === 'home' ? '/ccair/' : `/ccair/${f.name}/`, prev = store.pages[u];
+    const lastmod = prev && prev.hash === digest ? prev.lastmod
+      : prev ? today
+      : gitDate(['static/ccair/ccair-pages.jsx', ...keys.map((k) => dataFile(k)[1])]) || today;
+    next.pages[u] = { hash: digest, lastmod };
+  });
+  const text = JSON.stringify(next, null, 2) + '\n';
+  if (!fs.existsSync(APP_LASTMOD_STORE) || fs.readFileSync(APP_LASTMOD_STORE, 'utf8') !== text) {
+    fs.writeFileSync(APP_LASTMOD_STORE, text);
+    console.log('app-lastmod.json changed (a CCAIR page\'s content changed); commit data/ccair/app-lastmod.json.');
+  }
+  return Object.keys(next.pages).length;
+}
+console.log('CCAIR page dates: %d app pages dated in data/ccair/app-lastmod.json', writeAppLastmod());
+
 // Official lockup switch (static/ccair/assets/brand/official/lockup.json): inlined into the bundle as CCAIR_LOCKUP, the
 // config when it is switched on and has a light file, else null, so the app does not fetch it on every load.
 const lockup = JSON.parse(fs.readFileSync(path.join(ccairDir, 'assets', 'brand', 'official', 'lockup.json'), 'utf8'));

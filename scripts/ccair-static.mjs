@@ -273,14 +273,17 @@ ${scripts.map((s) => `<script src="${s}" defer></script>`).join('\n')}
 // One sitemap for every generated CCAIR page. Each generator calls this after writing its pages, so the file is the
 // same whichever runs last. Student Guide URLs and their lastmod dates come from static/ccair/data/guide-lastmod.json,
 // which scripts/build-students.mjs keeps: a page's lastmod moves only when the hash of its content changes. Pages the
-// store marks sitemap: false (for example the outcomes page while it has no data) are left out. /ccair/ (the React app
-// home) has no lastmod: no single data file dates its content.
+// store marks sitemap: false (for example the outcomes page while it has no data) are left out. The CCAIR app's own
+// pages (/ccair/ and /ccair/<page>/, prerendered by scripts/build-ccair.js) take their lastmod from
+// data/ccair/app-lastmod.json, which that script keeps the same way (a date moves only when the page's hash changes).
 export const LASTMOD_STORE = path.join(CCAIR, 'data', 'guide-lastmod.json');
+export const APP_LASTMOD_STORE = path.join(ROOT, 'data', 'ccair', 'app-lastmod.json');
+const APP_PAGES = ['/ccair/', ...['research', 'publications', 'people', 'resources', 'materials', 'about', 'contact'].map((p) => `/ccair/${p}/`)];
 export function writeSitemap() {
   const P = readJson('pathways.json');
-  // The CCAIR app's own pages (/ccair/<page>/, prerendered by scripts/build-ccair.js) have no lastmod either.
-  const appPages = ['research', 'publications', 'people', 'resources', 'materials', 'about', 'contact'].map((p) => [`${SITE}/ccair/${p}/`, null]);
-  const urls = [[`${SITE}/ccair/`, null], ...appPages, [`${SITE}/ccair/pathways/`, P.updated], ...P.roles.map((r) => [`${SITE}/ccair/pathways/${r.slug}/`, P.updated])];
+  const app = fs.existsSync(APP_LASTMOD_STORE) ? JSON.parse(fs.readFileSync(APP_LASTMOD_STORE, 'utf8')).pages : {};
+  const appPages = [...new Set([...APP_PAGES, ...Object.keys(app)])].map((u) => [`${SITE}${u}`, app[u] ? app[u].lastmod : null]);
+  const urls = [...appPages, [`${SITE}/ccair/pathways/`, P.updated], ...P.roles.map((r) => [`${SITE}/ccair/pathways/${r.slug}/`, P.updated])];
   if (fs.existsSync(LASTMOD_STORE)) {
     const store = JSON.parse(fs.readFileSync(LASTMOD_STORE, 'utf8'));
     for (const [u, e] of Object.entries(store.pages)) if (e.sitemap) urls.push([`${SITE}${u}`, e.lastmod]);
