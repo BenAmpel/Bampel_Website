@@ -288,3 +288,24 @@ tr.is-test code { color: var(--muted); }
 .int-reasons { margin: 6px 0 8px; padding-left: 20px; }
 .int-reasons li { margin: 2px 0; }
 .int-strong .pill { border-color: var(--warn); color: var(--warn); }
+
+/* Skip link: same rule as assets/pages.css and assets/landing.css. */
+.skip { position: absolute; left: -9999px; top: 8px; z-index: 100; background: var(--accent); color: var(--accent-text); padding: 8px 14px; border-radius: 8px; font-weight: 700; }
+.skip:focus { left: 16px; }
+
+/* Spacing and sizing helpers that replace inline style="" attributes in admin.js (specificity matches an inline value). */
+#admin .mt8 { margin-top: 8px; }
+#admin .mt12 { margin-top: 12px; }
+#admin .h-flush { margin: 0; }
+#admin .ta110 { width: 100%; min-height: 110px; }
+#admin .ta90 { width: 100%; min-height: 90px; }
+#admin .w90 { width: 90px; }
+#admin .w160 { width: 160px; }
+#admin .w180 { width: 180px; }
+#admin .w200 { width: 200px; }
+#admin .w220 { width: 220px; }
+#admin .w100 { width: 100%; }
+#admin .flex1 { flex: 1; }
+#admin .fs-plain { border: 0; padding: 0; margin: 0; min-width: 0; }
+#admin .st-details { margin: 8px 0; }
+#admin .st-list { margin: 6px 0; font-size: 13px; }

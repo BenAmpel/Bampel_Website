@@ -86,14 +86,14 @@
     try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
   })();
 
-  var SIGNIN = '<div id="signinbox"><p style="margin-top:12px"><a class="btn" href="' + esc(signInLink()) + '">Sign in with your researcher account</a></p>' +
-    '<form class="row" id="keyform" style="margin-top:12px"><label>Or use an admin key <input type="password" id="key" autocomplete="off" size="36"></label><button type="submit" class="secondary">Use key</button></form></div>' +
+  var SIGNIN = '<div id="signinbox"><p class="mt12"><a class="btn" href="' + esc(signInLink()) + '">Sign in with your researcher account</a></p>' +
+    '<form class="row mt12" id="keyform"><label>Or use an admin key <input type="password" id="key" autocomplete="off" size="36"></label><button type="submit" class="secondary">Use key</button></form></div>' +
     '<p class="muted" id="keyhelp"></p><p class="error" id="err" role="alert"></p>';
 
   if (!studyId) return labConsole();
 
   // ======================= study admin =======================
-  root.innerHTML = '<div class="who"><div class="brandmark"><span class="wordmark"><b>CCAIR Behavioral Lab</b><small>Georgia State University · J. Mack Robinson College of Business</small></span><h1 style="margin:0" id="title">Study admin</h1></div><span id="whoami" class="muted"></span></div>' + SIGNIN + '<div id="app" hidden>' +
+  root.innerHTML = '<div class="who"><div class="brandmark"><span class="wordmark"><b>CCAIR Behavioral Lab</b><small>Georgia State University · J. Mack Robinson College of Business</small></span><h1 class="h-flush" id="title">Study admin</h1></div><span id="whoami" class="muted"></span></div>' + SIGNIN + '<div id="app" hidden>' +
     '<p class="muted links" id="links"></p>' +
     '<div class="preview-bar" id="previewbar" hidden><div><strong>See it as a participant</strong><span class="muted">Opens the study in a new tab as a test participant (left out of real counts), with no wait between sessions.</span></div>' +
       '<div class="row"><label id="pvcondwrap">Arm <select id="pvcond"></select></label><button type="button" class="primary" id="preview">Preview as a participant</button></div><p class="muted" id="pvout" role="status"></p></div>' +
@@ -137,16 +137,16 @@
       '<label>Label <select id="rplabel"><option value="">All labels</option></select></label><button type="button" id="rprun">Build report</button>' +
       '<button type="button" class="secondary" id="rpcsv" disabled>Download per-item table (CSV)</button></div><p class="muted" id="rpprog"></p><div id="rpout"></div></section>' +
     '<section data-tab="students" hidden><h2>Add students</h2><p class="muted">Optional while self sign-up is on (Study content → Sign-up &amp; consent): add emails here to pre-enroll a class with its own label or gap days, to mark pilots as test, or to let in addresses outside the sign-up domains. One per line or separated by commas. Each email is stored once, apart from the answers (for extra credit); research exports identify people only by a study ID derived from the email with a secret key. Conditions are assigned so the groups stay balanced. Emails already enrolled are skipped.</p>' +
-      '<form id="rosterform"><textarea id="emails" class="mono" style="width:100%;min-height:110px" placeholder="jdoe1@student.gsu.edu&#10;asmith2@student.gsu.edu"></textarea><div class="row" style="margin-top:8px">' +
-      '<label>Label (optional) <input type="text" id="rlabel" placeholder="CIS8080-fall26" style="width:180px"></label><label>Gap days <input type="number" id="rgap" min="0" max="60" placeholder="default" style="width:90px"></label>' +
+      '<form id="rosterform"><textarea id="emails" class="mono ta110" placeholder="jdoe1@student.gsu.edu&#10;asmith2@student.gsu.edu"></textarea><div class="row mt8">' +
+      '<label>Label (optional) <input class="w180" type="text" id="rlabel" placeholder="CIS8080-fall26"></label><label>Gap days <input class="w90" type="number" id="rgap" min="0" max="60" placeholder="default"></label>' +
       '<label class="check"><input type="checkbox" id="rtest"> Test</label><button type="submit">Add students</button></div></form><p id="rosterout" class="muted"></p>' +
-      '<div class="section"><h2>Check completion</h2><p class="muted">Paste emails to see who has finished, for awarding credit. Emails are looked up, not saved.</p><form id="lookupform"><textarea id="lemails" class="mono" style="width:100%;min-height:90px"></textarea>' +
-      '<div class="row" style="margin-top:8px"><button type="submit">Check</button><button type="button" class="secondary" id="lcsv" disabled>Download as CSV</button></div></form><div class="table-wrap"><table id="ltbl"></table></div></div>' +
+      '<div class="section"><h2>Check completion</h2><p class="muted">Paste emails to see who has finished, for awarding credit. Emails are looked up, not saved.</p><form id="lookupform"><textarea id="lemails" class="mono ta90"></textarea>' +
+      '<div class="row mt8"><button type="submit">Check</button><button type="button" class="secondary" id="lcsv" disabled>Download as CSV</button></div></form><div class="table-wrap"><table id="ltbl"></table></div></div>' +
       '<div class="section"><h2>Extra credit</h2><p class="muted">Every email with how many sessions they completed. Emails are stored apart from the answers and never appear in the research exports.</p><div class="row"><button type="button" class="secondary" id="credit">Download extra-credit list (CSV)</button></div></div>' +
       '<div class="section"><h2>Create pilot access codes</h2><p class="muted">For pilots and team testing without a roster. Mark them as test so they are excluded from the counts and can be deleted in one step. Gap days sets the minimum wait between sessions (0 for piloting).</p>' +
-      '<form class="row" id="createform"><label>How many <input type="number" id="count" min="1" max="300" value="3" style="width:90px"></label><label>Label (optional) <input type="text" id="label" placeholder="pilot-oct" style="width:160px"></label>' +
-      '<label>Gap days <input type="number" id="gap" min="0" max="60" placeholder="default" style="width:90px"></label><label class="check"><input type="checkbox" id="test" checked> Test codes</label><button type="submit">Create</button></form><div id="created" class="keybox" hidden></div></div></section>' +
-    '<section data-tab="content" hidden><p class="muted" id="contentinfo"></p><div id="contentwarn"></div><p class="ok" id="say" role="status"></p><nav class="tabs sub" id="subtabs" aria-label="Study content sections"></nav><div id="viewsw"></div><fieldset id="editor" style="border:0;padding:0;margin:0;min-width:0"></fieldset>' +
+      '<form class="row" id="createform"><label>How many <input class="w90" type="number" id="count" min="1" max="300" value="3"></label><label>Label (optional) <input class="w160" type="text" id="label" placeholder="pilot-oct"></label>' +
+      '<label>Gap days <input class="w90" type="number" id="gap" min="0" max="60" placeholder="default"></label><label class="check"><input type="checkbox" id="test" checked> Test codes</label><button type="submit">Create</button></form><div id="created" class="keybox" hidden></div></div></section>' +
+    '<section data-tab="content" hidden><p class="muted" id="contentinfo"></p><div id="contentwarn"></div><p class="ok" id="say" role="status"></p><nav class="tabs sub" id="subtabs" aria-label="Study content sections"></nav><div id="viewsw"></div><fieldset class="fs-plain" id="editor"></fieldset>' +
       '<div class="savebar" id="savebar" data-role="editor"><span id="dirty" class="muted">No unsaved changes.</span><input type="text" id="note" class="grow" placeholder="What changed? (optional, shown in the activity log)">' +
       '<button type="button" class="secondary" id="discard" disabled>Discard changes</button><button type="button" id="save" disabled>Save changes</button></div>' +
       '<div class="section"><h2>Versions</h2><p class="muted">Every save makes a new version. Restoring an old version saves it again as the newest version, so nothing is lost. Each answer records the version it was collected under.</p><div class="table-wrap"><table id="vtbl"></table></div></div>' +
@@ -157,10 +157,10 @@
     '<section data-tab="team" hidden><h2>Researchers on this study</h2><p class="muted">People with a researcher account (email and password). Add someone by email: a new person gets an invitation link for you to send, and sees this study only. ' +
       'Viewers see progress and download data; editors also edit the content; managers also handle students and the extra-credit list; owners can do everything, including deleting data and managing this list.</p>' +
       '<div class="table-wrap"><table id="memtbl"></table></div>' +
-      '<form class="row" id="memform"><label>Email <input type="text" id="memail" style="width:220px" autocomplete="off"></label><label>Name <input type="text" id="mname" style="width:160px" autocomplete="off" placeholder="for new accounts"></label>' +
+      '<form class="row" id="memform"><label>Email <input class="w220" type="text" id="memail" autocomplete="off"></label><label>Name <input class="w160" type="text" id="mname" autocomplete="off" placeholder="for new accounts"></label>' +
       '<label>Access <select id="mrole"><option value="viewer">viewer</option><option value="editor">editor</option><option value="manager">manager</option><option value="owner">owner</option></select></label><button type="submit">Add or change</button></form><div id="memout" role="status"></div>' +
       '<h2>Add a team member with a key</h2><p class="muted">Each person gets their own key for this study. Share it privately. Removing a person disables their key immediately.</p>' +
-      '<form class="row" id="teamform"><label>Name <input type="text" id="tname" style="width:200px"></label><label>Access <select id="trole"></select></label><button type="submit">Create key</button></form>' +
+      '<form class="row" id="teamform"><label>Name <input class="w200" type="text" id="tname"></label><label>Access <select id="trole"></select></label><button type="submit">Create key</button></form>' +
       '<p class="muted" id="roledesc"></p><div id="newkey" hidden></div><div class="table-wrap"><table id="teamtbl"></table></div></section>' +
     '<section data-tab="privacy" hidden><h2>Encryption</h2><p class="muted">With a key, the server encrypts each participant\'s email or panel ID, identifying link data (such as PROLIFIC_PID), and free-text answers before storing them. ' +
       'Only someone holding this study\'s private key file can read them; the file never leaves your computer, and nobody with access to the website or to Netlify can read them without it. ' +
@@ -173,7 +173,7 @@
       '<strong>If every copy of the key file is lost, the encrypted values cannot be recovered by anyone.</strong> Keep two copies on GSU-approved storage, not on shared drives. A new key applies to new values only; keep the old file for older ones.</p>' +
       '<div class="row"><button type="button" id="sealnew">Make a new key</button></div><div id="sealconfirm" hidden><div class="warn">Saved the file? Choose it now to turn encryption on.</div><label>Saved key file <input type="file" id="sealcheck" accept=".json,application/json"></label></div>' +
       '<details><summary>Use a key made with the command line</summary><p class="muted"><code>node scripts/lab/seal.mjs keygen ' + esc(studyId) + '</code> prints a public key. Paste it here.</p>' +
-      '<form class="row" id="sealpubform"><input type="text" id="sealpub" style="flex:1" placeholder="Public key (43 characters)" autocomplete="off"><button type="submit" class="secondary">Use this key</button></form></details>' +
+      '<form class="row" id="sealpubform"><input class="flex1" type="text" id="sealpub" placeholder="Public key (43 characters)" autocomplete="off"><button type="submit" class="secondary">Use this key</button></form></details>' +
       '<div id="sealbrowser" hidden><h3>Encrypt in the participant\'s browser</h3><p class="muted">Free-text answers and identifying link data are encrypted in the participant\'s browser before they are sent, so the server never receives them readable. ' +
       'A browser too old to encrypt (before Chrome or Edge 133, Firefox 130, Safari 17) sends them over the encrypted connection and the server encrypts them on arrival. Tick this to refuse that instead: such browsers are turned away before consent. ' +
       'Each saved record notes how many values the browser encrypted and how many the server did.</p><label class="f check"><input type="checkbox" id="sealreq"> Accept free text and link data only when encrypted in the participant\'s browser</label></div>' +
@@ -448,7 +448,7 @@
       var failed = results.reduce(function (n, r) { return n + r.failed; }, 0), passed = results.reduce(function (n, r) { return n + r.passed; }, 0);
       $('stprog').innerHTML = failed ? '<span class="error">' + failed + ' check(s) failed, ' + passed + ' passed.</span>' : '<span class="ok">All ' + passed + ' checks passed</span> (content version ' + results[0].contentVersion + ').';
       $('stout').innerHTML = results.map(function (r) {
-        return '<details' + (r.failed ? ' open' : '') + ' style="margin:8px 0"><summary><strong>' + esc(r.condition) + '</strong>: ' + r.passed + ' passed, ' + r.failed + ' failed, ' + Math.round(r.ms / 1000) + 's' + (r.kept ? ' (kept as ' + esc(r.code) + ')' : '') + '</summary><ul style="margin:6px 0;font-size:13px">' +
+        return '<details class="st-details"' + (r.failed ? ' open' : '') + '><summary><strong>' + esc(r.condition) + '</strong>: ' + r.passed + ' passed, ' + r.failed + ' failed, ' + Math.round(r.ms / 1000) + 's' + (r.kept ? ' (kept as ' + esc(r.code) + ')' : '') + '</summary><ul class="st-list">' +
           r.checks.map(function (c) { return '<li class="' + (c.pass ? '' : 'error') + '">' + (c.pass ? '✓ ' : '✗ ') + esc(c.what) + '</li>'; }).join('') + '</ul></details>';
       }).join('');
       load();
@@ -1007,7 +1007,7 @@
       var out = $('memout');
       if (r.link) {
         var url = location.origin + r.link.path;
-        out.innerHTML = '<div class="warn"><strong>Invitation for ' + esc(r.member.email) + '.</strong> Copy it now and send it to them yourself; it works once for 7 days.<p><input type="text" readonly class="mono" value="' + esc(url) + '" style="width:100%" aria-label="Invitation link" id="memlink"></p></div>';
+        out.innerHTML = '<div class="warn"><strong>Invitation for ' + esc(r.member.email) + '.</strong> Copy it now and send it to them yourself; it works once for 7 days.<p><input type="text" readonly class="mono w100" value="' + esc(url) + '" aria-label="Invitation link" id="memlink"></p></div>';
         $('memlink').select();
       } else out.innerHTML = '<p class="muted">' + esc(r.member.email) + ' now has ' + esc(r.member.role) + ' access.</p>';
       $('memail').value = ''; $('mname').value = ''; loadMembers();
@@ -1031,7 +1031,7 @@
     var name = $('tname').value.trim(); if (!name) return err('Enter a name.');
     postJSON('team-add', { name: name, role: $('trole').value }).then(function (r) {
       var box = $('newkey'); box.hidden = false;
-      box.innerHTML = '<div class="warn">Copy this key now and send it to ' + esc(r.name) + ' privately. It will not be shown again. They sign in at ' + esc(location.origin + location.pathname) + ' with it.</div><div class="row"><div class="keybox" style="flex:1">' + esc(r.key) + '</div><button type="button" class="secondary" id="copykey">Copy</button></div>';
+      box.innerHTML = '<div class="warn">Copy this key now and send it to ' + esc(r.name) + ' privately. It will not be shown again. They sign in at ' + esc(location.origin + location.pathname) + ' with it.</div><div class="row"><div class="keybox flex1">' + esc(r.key) + '</div><button type="button" class="secondary" id="copykey">Copy</button></div>';
       $('copykey').addEventListener('click', function () { try { navigator.clipboard.writeText(r.key); $('copykey').textContent = 'Copied'; } catch (x) {} });
       $('tname').value = ''; loadTeam();
     }).catch(function (e) { err(e.message); });
@@ -1134,7 +1134,7 @@
   // Any other signed-in researcher: "My studies", the studies their account can open.
   function labConsole() {
     document.title = 'Lab console';
-    root.innerHTML = '<div class="who"><div class="brandmark"><span class="wordmark"><b>CCAIR Behavioral Lab</b><small>Georgia State University · J. Mack Robinson College of Business</small></span><h1 style="margin:0" id="ctitle">CCAIR Lab: studies</h1></div><span id="whoami" class="muted"></span></div>' + SIGNIN + '<div id="app" hidden>' +
+    root.innerHTML = '<div class="who"><div class="brandmark"><span class="wordmark"><b>CCAIR Behavioral Lab</b><small>Georgia State University · J. Mack Robinson College of Business</small></span><h1 class="h-flush" id="ctitle">CCAIR Lab: studies</h1></div><span id="whoami" class="muted"></span></div>' + SIGNIN + '<div id="app" hidden>' +
       '<p class="muted" id="cintro"></p>' +
       '<div class="table-wrap"><table id="stbl"></table></div><div id="clonebox"></div>' +
       '<div data-create><div class="section start"><h2>Start a new study</h2><p class="muted">Pick a starting point. Each one is a complete, working study: you can preview it as a participant straight away, then change anything on its Study content tab.</p>' +
@@ -1157,7 +1157,7 @@
       '<h3>Invite a researcher</h3><form id="invform"><div class="grid3"><label class="f">Name<input type="text" id="invname" autocomplete="off"></label><label class="f">Email<input type="text" id="invemail" autocomplete="off" inputmode="email"></label>' +
       '<label class="f check"><input type="checkbox" id="invowner"> Lab owner (owner of every study, and can invite researchers)</label>' +
       '<label class="f check"><input type="checkbox" id="invcreate"> Can create their own studies (they own what they make, run it, add their own team, and see no other study)</label></div>' +
-      '<fieldset class="roles"><legend>Access to studies</legend><div id="invroles" class="rolegrid"></div></fieldset><div class="row" style="margin-top:8px"><button type="submit">Create invitation link</button></div></form><div id="invout" role="status"></div></div>' +
+      '<fieldset class="roles"><legend>Access to studies</legend><div id="invroles" class="rolegrid"></div></fieldset><div class="row mt8"><button type="submit">Create invitation link</button></div></form><div id="invout" role="status"></div></div>' +
       '<div class="section" id="labactivity"><h2>Account activity</h2><p class="muted">Sign-ins, sign-outs, invitations, password and authenticator changes, role changes. Passwords are never logged.</p><div class="row"><button type="button" class="secondary" id="actload">Show recent activity</button></div><div class="table-wrap"><table id="acttbl2"></table></div></div></div></div>';
     $('keyhelp').innerHTML = 'Sign in with your researcher account, or use the lab owner key (the <code>LAB_ADMIN_KEY</code> or <code>VC_ADMIN_KEY</code> Netlify variable). Keys and sign-ins are kept in this tab only. New here? Read the <a href="/lab/guide/">researcher guide</a>.';
     var TYPES = [], TPLS = [], idTouched = false, ME = null, ROWS = [], PEOPLE = [];
@@ -1211,7 +1211,7 @@
       var url = location.origin + r.link.path, days = Math.round((r.link.expiresAt - Date.now()) / 3600000);
       var body = 'Hello ' + (name || '') + ',\n\nHere is your link for the CCAIR Behavioral Lab (' + what + '). It works once and expires in ' + (days >= 48 ? Math.round(days / 24) + ' days' : days + ' hours') + ':\n\n' + url + '\n\nBen';
       return '<div class="warn"><strong>' + esc(what) + ' for ' + esc(email) + '.</strong> Copy it now: it is not shown again, though you can make a new one at any time.' +
-        '<p><input type="text" readonly class="mono" id="linkbox" value="' + esc(url) + '" style="width:100%" aria-label="Link"></p>' +
+        '<p><input type="text" readonly class="mono w100" id="linkbox" value="' + esc(url) + '" aria-label="Link"></p>' +
         '<div class="row"><button type="button" id="linkcopy">Copy link</button><a href="mailto:' + encodeURIComponent(email).replace(/%40/g, '@') + '?subject=' + encodeURIComponent('CCAIR Behavioral Lab') + '&amp;body=' + esc(encodeURIComponent(body)) + '">Email this invitation</a></div><p class="muted" id="linkstate" role="status"></p></div>';
     }
     function wireCopy() {
@@ -1235,7 +1235,7 @@
         if (a('data-pedit')) {
           var p = who(a('data-pedit'));
           $('redit').innerHTML = '<div class="qcard"><h3>Access for ' + esc(p.name) + ' (' + esc(p.email) + ')</h3><div class="row"><label class="f check"><input type="checkbox" id="ed-owner"' + (p.labOwner ? ' checked' : '') + '> Lab owner</label><label class="f check"><input type="checkbox" id="ed-create"' + (p.canCreate ? ' checked' : '') + '> Can create their own studies</label></div><div class="rolegrid">' + roleSelects('ed-', p.studyRoles) + '</div>' +
-            '<div class="row" style="margin-top:8px"><button type="button" id="ed-save">Save</button><button type="button" class="secondary" id="ed-cancel">Cancel</button></div></div>';
+            '<div class="row mt8"><button type="button" id="ed-save">Save</button><button type="button" class="secondary" id="ed-cancel">Cancel</button></div></div>';
           $('ed-cancel').addEventListener('click', function () { $('redit').innerHTML = ''; });
           $('ed-save').addEventListener('click', function () { err(); postJSON('researchers/update', { id: p.id, labOwner: $('ed-owner').checked, canCreate: $('ed-create').checked, studyRoles: pickedRoles($('redit')) }).then(function () { $('redit').innerHTML = ''; people(); }).catch(function (x) { err(x.message); }); });
           $('redit').scrollIntoView({ block: 'nearest' });
