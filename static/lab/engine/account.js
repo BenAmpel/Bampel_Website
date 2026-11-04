@@ -6,13 +6,15 @@
   function say(id, msg, bad) { var el = document.getElementById(id); if (el) { el.textContent = msg || ''; el.className = (bad ? 'error' : 'ok') + ' statusline'; } }
   if (!A.getSession()) { root.innerHTML = '<h1>Account settings</h1><p>You are not signed in. <a class="btn" href="/lab/signin/?next=%2Flab%2Faccount%2F">Sign in</a></p>'; return; }
 
-  function load() {
+  // Focus moves to the heading only after something the researcher did (turning the authenticator on or off, saving recovery codes), never on page load: a script focus there would start the next Tab after the heading and skip the skip link.
+  function reload() { load(true); }
+  function load(moveFocus) {
     A.api('account/me').then(function (r) {
       if (!r.ok) { root.innerHTML = '<h1>Account settings</h1><p class="error" role="alert">' + esc(A.message(r.data)) + '</p><p><a class="btn" href="/lab/signin/?next=%2Flab%2Faccount%2F">Sign in</a></p>'; return; }
-      render(r.data);
+      render(r.data, moveFocus === true);
     });
   }
-  function render(a) {
+  function render(a, moveFocus) {
     root.innerHTML = '<h1 tabindex="-1" id="h">Account settings</h1><p class="muted">Signed in as ' + esc(a.email) + (a.labOwner ? ' (lab owner)' : '') + '. This sign-in ends ' + esc(fmt(a.expiresAt)) + '. <a href="/lab/admin/">My studies</a> · <a href="/lab/guide/">Researcher guide</a></p>' +
       '<section aria-labelledby="h-name"><h2 id="h-name">Name</h2><form id="nameform" class="form-narrow"><label>Your name<input type="text" id="name" autocomplete="name" value="' + esc(a.name) + '"></label><div class="row"><button type="submit">Save name</button></div><p class="statusline" id="s-name" role="status"></p></form></section>' +
       '<section aria-labelledby="h-pw"><h2 id="h-pw">Password</h2><p class="muted">Last changed ' + esc(fmt(a.passwordChangedAt)) + '. Changing it signs out every other browser.</p><form id="pwform" class="form-narrow"><label>Current password<input type="password" id="cur" autocomplete="current-password"></label>' +
@@ -25,7 +27,7 @@
       '<section aria-labelledby="h-st"><h2 id="h-st">Your studies and roles</h2>' + (a.labOwner ? '<p>You are a lab owner: owner of every study.</p>' : a.studies.length
         ? '<div class="table-wrap"><table><tr><th>Study</th><th>Role</th></tr>' + a.studies.map(function (s) { return '<tr><td><a href="/lab/admin/' + esc(s.id) + '">' + esc(s.name) + '</a></td><td>' + esc(s.role) + '</td></tr>'; }).join('') + '</table></div>'
         : '<p>No study access yet. Ask the lab owner to add you to a study.</p>') + '</section>';
-    document.getElementById('h').focus();
+    if (moveFocus) document.getElementById('h').focus();
     document.getElementById('nameform').addEventListener('submit', function (e) { e.preventDefault(); A.api('account/name', { name: document.getElementById('name').value }).then(function (r) { say('s-name', r.ok ? 'Saved.' : A.message(r.data), !r.ok); }); });
     document.getElementById('pwform').addEventListener('submit', function (e) {
       e.preventDefault();
@@ -39,14 +41,14 @@
     });
     if (a.totp) {
       document.getElementById('regen').addEventListener('click', function () {
-        A.api('account/recovery', { password: document.getElementById('tpw').value }).then(function (r) { if (!r.ok) return say('s-totp', A.message(r.data), true); say('s-totp', ''); A.showCodes(document.getElementById('codes'), r.data.recoveryCodes, load); });
+        A.api('account/recovery', { password: document.getElementById('tpw').value }).then(function (r) { if (!r.ok) return say('s-totp', A.message(r.data), true); say('s-totp', ''); A.showCodes(document.getElementById('codes'), r.data.recoveryCodes, reload); });
       });
       document.getElementById('totpoff').addEventListener('click', function () {
         if (!confirm('Turn off the authenticator? You will sign in with your password alone.')) return;
-        A.api('account/totp-disable', { password: document.getElementById('tpw').value }).then(function (r) { if (!r.ok) return say('s-totp', A.message(r.data), true); load(); });
+        A.api('account/totp-disable', { password: document.getElementById('tpw').value }).then(function (r) { if (!r.ok) return say('s-totp', A.message(r.data), true); reload(); });
       });
     } else {
-      document.getElementById('totpon').addEventListener('click', function () { A.setupTotp(document.getElementById('totp'), load, load); });
+      document.getElementById('totpon').addEventListener('click', function () { A.setupTotp(document.getElementById('totp'), reload, reload); });
     }
     document.getElementById('out').addEventListener('click', function () { A.api('account/signout', {}).then(function () { A.setSession(null); location.href = '/lab/signin/'; }); });
     document.getElementById('outall').addEventListener('click', function () {
