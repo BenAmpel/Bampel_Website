@@ -1,0 +1,45 @@
+tracks:
+  - id: proactive-defense
+    title: Proactive cyber threat intelligence
+    summary: Turn hacker-community signals, exploit code, and vulnerability data into earlier warning and more targeted defense.
+    signals:
+      - Hacker-community signals
+      - Exploit and CVE mapping
+      - Risk mitigation
+    papers:
+      - /journal_publication/dtl-el-misq/
+      - /conference_publication/mitre-attandck-isi-2023/
+      - /journal_publication/attack-link-jmis/
+  - id: phishing-detection
+    title: Phishing and social engineering
+    summary: Detect deceptive messages across email, URLs, and voice with language models, audio models, and behavioral signals.
+    signals:
+      - Email and web content
+      - Voice and audio cues
+      - Adversarial robustness
+    papers:
+      - /journal_publication/voice-phishing-misq/
+      - /conference_publication/four-signal-phishing-cars-2026/
+      - /conference_publication/phishing-robustness-amcis-2023/
+  - id: hacker-communities
+    title: Hacker communities
+    summary: Study how illicit communities share knowledge, evolve over time, and expose signals that defenders can use.
+    signals:
+      - Community measurement
+      - Vulnerability lifecycle
+      - Privacy and harm reduction
+    papers:
+      - /journal_publication/hacker-communities-isf/
+      - /journal_publication/phi-hacker-jmis/
+      - /conference_publication/hackersignal-a-large-scale-multi-source-dataset-linking-hacker-communi/
+  - id: language-models
+    title: Language models for security research
+    summary: Apply large language models to text analytics and cyber defense while examining bias, reliability, and responsible use.
+    signals:
+      - Large language models
+      - Text analytics
+      - Bias and reliability
+    papers:
+      - /journal_publication/llm_tmis/
+      - /conference_publication/authority-bias-emnlp-2026/
+      - /conference_publication/bias-detection-hicss-2026/

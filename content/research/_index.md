@@ -9,7 +9,9 @@ sections:
     content:
       title: Research
       text: |
-        Explore the lab's live intelligence feeds, funding, and research analytics. Expand any section below.
+        Follow a research thread from question to evidence, then explore the full publication record and research analytics.
+
+        {{< research_explorer >}}
 
         {{< spoiler text="Funding & Grants" open="true" >}}
         {{< grant_experience >}}

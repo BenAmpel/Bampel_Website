@@ -1,13 +1,15 @@
-<div class="featured-publication" data-featured-publication data-baseurl="{{ "/" | relURL }}">
+{{- $publications := os.ReadFile "static/data/publications.json" | transform.Unmarshal -}}
+{{- $latest := index (sort $publications "date" "desc") 0 -}}
+{{- $abstract := $latest.abstract | default $latest.summary | default "" | plainify | replaceRE "\\s+" " " | strings.TrimSpace -}}
+<div class="featured-publication">
   <div class="featured-header">
     <div class="featured-kicker">Latest Paper</div>
-    <div class="featured-updated" data-featured-updated>Updated --</div>
+    <div class="featured-updated">Updated {{ now.Format "January 2006" }}</div>
   </div>
   <div class="featured-body">
-    <div class="featured-title" data-featured-title>Loading latest publication...</div>
-    <div class="featured-abstract" data-featured-abstract></div>
-    <div class="featured-meta" data-featured-meta></div>
+    <div class="featured-title">{{ $latest.title }}</div>
+    <div class="featured-abstract">{{ $abstract | truncate 200 }}</div>
+    <div class="featured-meta">{{ delimit (slice $latest.venue (printf "%v" $latest.year)) " • " }}</div>
   </div>
-  <a class="featured-link" data-featured-link href="#">Read more</a>
+  <a class="featured-link" href="{{ $latest.url }}">Read more<span class="sr-only">: {{ $latest.title }}</span></a>
 </div>
-{{ partial "functions/js_tag" (dict "path" "js/site/featured_publication.js" "attrs" "defer") }}

@@ -1,33 +1,97 @@
+{{- $rows := os.ReadFile "static/data/teaching.json" | transform.Unmarshal -}}
+{{- $institutions := slice -}}
+{{- $uniqueCourses := slice -}}
+{{- $evalCount := 0 -}}
+{{- $evalSum := 0.0 -}}
+{{- $bestScore := -1.0 -}}
+{{- $bestCourse := "" -}}
+{{- $bestTerm := "" -}}
+{{- $latestOrder := 0 -}}
+{{- $latestTerm := "" -}}
+{{- $seasonOrder := dict "Spring" 1 "Summer" 2 "Fall" 3 "Winter" 4 -}}
+{{- range $rows -}}
+  {{- $row := . -}}
+  {{- if and .institution (not (in $institutions .institution)) -}}
+    {{- $institutions = $institutions | append .institution -}}
+  {{- end -}}
+  {{- if and .course (not (in $uniqueCourses .course)) -}}
+    {{- $uniqueCourses = $uniqueCourses | append .course -}}
+  {{- end -}}
+  {{- if ne .evaluation nil -}}
+    {{- $score := float .evaluation -}}
+    {{- $evalSum = add $evalSum $score -}}
+    {{- $evalCount = add $evalCount 1 -}}
+    {{- if gt $score $bestScore -}}
+      {{- $bestScore = $score -}}
+      {{- $bestCourse = .course -}}
+      {{- $bestTerm = .term -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $parts := split (.term | default "") " " -}}
+  {{- if eq (len $parts) 2 -}}
+    {{- $season := index $parts 0 -}}
+    {{- with index $seasonOrder $season -}}
+      {{- $order := add (mul (int (index $parts 1)) 10) . -}}
+      {{- if gt $order $latestOrder -}}
+        {{- $latestOrder = $order -}}
+        {{- $latestTerm = $row.term -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- $average := 0.0 -}}
+{{- if gt $evalCount 0 -}}{{- $average = div $evalSum $evalCount -}}{{- end -}}
+{{- $institutionCounts := slice -}}
+{{- $maxInstitutionCount := 1 -}}
+{{- range $institutions -}}
+  {{- $institution := . -}}
+  {{- $count := 0 -}}
+  {{- range $rows -}}
+    {{- if eq .institution $institution -}}{{- $count = add $count 1 -}}{{- end -}}
+  {{- end -}}
+  {{- $institutionCounts = $institutionCounts | append $count -}}
+  {{- if gt $count $maxInstitutionCount -}}{{- $maxInstitutionCount = $count -}}{{- end -}}
+{{- end -}}
 <div class="teach-outcomes" id="teach-outcomes">
   <div class="teach-header">
     <div class="teach-title">Teaching Outcomes</div>
-    <div class="teach-subtitle">Aggregate metrics from course evaluations</div>
+    <div class="teach-subtitle">Summary of course offerings and available student evaluations</div>
   </div>
   <div class="teach-metrics">
     <div class="teach-card">
-      <div class="label">Average Eval</div>
-      <div class="value" id="teach-avg">-</div>
-      <div class="meta" id="teach-avg-meta"></div>
+      <div class="label">Mean Evaluation</div>
+      <div class="value">{{ if gt $evalCount 0 }}{{ printf "%.2f/5" $average }}{{ else }}n/a{{ end }}</div>
+      <div class="meta">{{ $evalCount }} term-level scores; courses weighted equally</div>
     </div>
     <div class="teach-card">
-      <div class="label">Courses Taught</div>
-      <div class="value" id="teach-total">0</div>
-      <div class="meta" id="teach-unique"></div>
+      <div class="label">Course Offerings</div>
+      <div class="value">{{ len $rows }}</div>
+      <div class="meta">{{ len $uniqueCourses }} unique course titles</div>
     </div>
     <div class="teach-card">
       <div class="label">Institutions</div>
-      <div class="value" id="teach-institutions">0</div>
-      <div class="meta" id="teach-latest"></div>
+      <div class="value">{{ len $institutions }}</div>
+      <div class="meta">{{ with $latestTerm }}Latest: {{ . }}{{ end }}</div>
     </div>
     <div class="teach-card">
-      <div class="label">Top Eval</div>
-      <div class="value" id="teach-top">-</div>
-      <div class="meta" id="teach-top-meta"></div>
+      <div class="label">Highest Evaluation</div>
+      <div class="value">{{ if gt $evalCount 0 }}{{ printf "%.1f/5" $bestScore }}{{ else }}n/a{{ end }}</div>
+      <div class="meta">{{ if gt $evalCount 0 }}{{ $bestCourse }} · {{ $bestTerm }}{{ end }}</div>
     </div>
   </div>
+  <p class="teach-method">The mean is calculated from the {{ $evalCount }} term-level scores shown below; offerings without a reported score are excluded. Evaluation instruments may differ by institution and term, so the mean is a summary rather than a direct comparison.</p>
   <div class="teach-breakdown">
-    <div class="teach-breakdown-title">Institution Mix</div>
-    <div class="teach-bars" id="teach-bars"></div>
+    <div class="teach-breakdown-title">Course Offerings by Institution</div>
+    <div class="teach-bars">
+      {{- range $i, $institution := $institutions }}
+        {{- $count := index $institutionCounts $i -}}
+        {{- $width := div (mul $count 100) $maxInstitutionCount -}}
+        <div class="teach-bar">
+          <div class="label">{{ $institution }}</div>
+          <div class="bar-track" aria-hidden="true"><div class="bar-fill" style="width:{{ $width }}%"></div></div>
+          <div class="count">{{ $count }}</div>
+        </div>
+      {{- end }}
+    </div>
   </div>
 </div>
-{{ partial "functions/js_tag" (dict "path" "js/site/teaching_outcomes.js" "attrs" "defer") }}

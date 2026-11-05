@@ -2,6 +2,7 @@
      below, and the research footprint for the home map, written as its own small fingerprinted file. Both are read at
      build time, so the monthly metrics update still flows through. */ -}}
 {{- $payload := os.ReadFile "static/data/dashboard_payload.json" | transform.Unmarshal -}}
+{{- $stats := $payload.impactStats -}}
 {{- $footprint := resources.FromString "data/home-footprint.json" ($payload.footprint | jsonify) | minify | fingerprint -}}
 {{- /* WebP versions of the research map PNGs (550 KB each; scripts/generate_map.py writes them) for the home page's
      Research Footprint fallback image, which assets/js/head-enhancements.js builds. */ -}}
@@ -21,62 +22,61 @@
 <div class="impact-stats" data-impact-stats data-baseurl="{{ "/" | relURL }}" data-footprint-url="{{ $footprint.RelPermalink }}">
   <div class="impact-stats-header">
     <div class="impact-stats-title">Impact Snapshot</div>
-    <div class="impact-stats-updated" data-impact-updated>Updated --</div>
+    <div class="impact-stats-updated" data-impact-updated>Updated {{ $stats.updatedLabel | default "Recent" }}</div>
   </div>
   <div class="impact-stats-tags" data-impact-tags>
     <button
       type="button"
       class="impact-tag impact-tag-action"
       data-impact-latest-filter
-      disabled
-      aria-disabled="true">
-      New in <span data-impact-latest-year>--</span>
+      {{ if not $stats.latestYear }}disabled aria-disabled="true"{{ else }}aria-disabled="false" title="Filter publications to {{ $stats.latestYear }}"{{ end }}>
+      New in <span data-impact-latest-year>{{ $stats.latestYear | default "—" }}</span>
     </button>
-    <span class="impact-tag impact-tag-count" data-impact-latest-count hidden>0 papers</span>
+    {{ with $stats.latestYearCount }}<span class="impact-tag impact-tag-count" data-impact-latest-count>{{ . }} paper{{ if ne . 1 }}s{{ end }}</span>{{ end }}
   </div>
   <div class="impact-stats-grid" data-impact-row="primary">
     <div class="impact-card" data-metric="journals" data-filter-type="journal" data-action="filter" data-tooltip="Journal articles" tabindex="0">
       <div class="impact-label">Journal Articles</div>
-      <div class="impact-value" data-value>--</div>
-      <div class="impact-meta" data-meta></div>
+      <div class="impact-value" data-value>{{ $stats.journals.value }}</div>
+      <div class="impact-meta" data-meta>{{ $stats.journals.meta }}</div>
       <div class="impact-progress"><span data-progress></span></div>
     </div>
     <div class="impact-card" data-metric="conferences" data-filter-type="conference" data-action="filter" data-tooltip="Conference papers" tabindex="0">
       <div class="impact-label">Conference Papers</div>
-      <div class="impact-value" data-value>--</div>
-      <div class="impact-meta" data-meta></div>
+      <div class="impact-value" data-value>{{ $stats.conferences.value }}</div>
+      <div class="impact-meta" data-meta>{{ $stats.conferences.meta }}</div>
       <div class="impact-progress"><span data-progress></span></div>
     </div>
     <div class="impact-card" data-metric="workshops" data-filter-type="workshop" data-action="filter" data-tooltip="Workshop papers" tabindex="0">
       <div class="impact-label">Workshop Papers</div>
-      <div class="impact-value" data-value>--</div>
-      <div class="impact-meta" data-meta></div>
+      <div class="impact-value" data-value>{{ $stats.workshops.value }}</div>
+      <div class="impact-meta" data-meta>{{ $stats.workshops.meta }}</div>
       <div class="impact-progress"><span data-progress></span></div>
     </div>
     <div class="impact-card" data-metric="best-paper" data-tooltip="Best paper awards" tabindex="0">
       <div class="impact-label">Best Paper Awards</div>
-      <div class="impact-value" data-value>--</div>
-      <div class="impact-meta" data-meta></div>
+      <div class="impact-value" data-value>{{ (index $stats "best-paper").value }}</div>
+      <div class="impact-meta" data-meta>{{ (index $stats "best-paper").meta }}</div>
       <div class="impact-progress"><span data-progress></span></div>
     </div>
   </div>
   <div class="impact-stats-grid" data-impact-row="secondary">
     <div class="impact-card" data-metric="q1" data-tooltip="Q1 journal publications" tabindex="0">
       <div class="impact-label">Q1 Journal Publications</div>
-      <div class="impact-value" data-value>--</div>
-      <div class="impact-meta" data-meta></div>
+      <div class="impact-value" data-value>{{ $stats.q1.value }}</div>
+      <div class="impact-meta" data-meta>{{ $stats.q1.meta }}</div>
       <div class="impact-progress"><span data-progress></span></div>
     </div>
     <div class="impact-card" data-metric="ft50" data-tooltip="FT50 journal publications" tabindex="0">
       <div class="impact-label">FT50 Publications</div>
-      <div class="impact-value" data-value>--</div>
-      <div class="impact-meta" data-meta></div>
+      <div class="impact-value" data-value>{{ $stats.ft50.value }}</div>
+      <div class="impact-meta" data-meta>{{ $stats.ft50.meta }}</div>
       <div class="impact-progress"><span data-progress></span></div>
     </div>
     <div class="impact-card" data-metric="utd24" data-tooltip="UTD24 journal publications" tabindex="0">
       <div class="impact-label">UTD24 Publications</div>
-      <div class="impact-value" data-value>--</div>
-      <div class="impact-meta" data-meta></div>
+      <div class="impact-value" data-value>{{ $stats.utd24.value }}</div>
+      <div class="impact-meta" data-meta>{{ $stats.utd24.meta }}</div>
       <div class="impact-progress"><span data-progress></span></div>
     </div>
   </div>

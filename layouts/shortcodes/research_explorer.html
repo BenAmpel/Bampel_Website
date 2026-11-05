@@ -1,0 +1,65 @@
+{{- $tracks := site.Data.research_explorer.tracks -}}
+{{- $publications := os.ReadFile "static/data/publications.json" | transform.Unmarshal -}}
+<section class="research-explorer" data-research-explorer aria-labelledby="research-explorer-title">
+  <div class="research-explorer-heading">
+    <div>
+      <p class="research-explorer-kicker">A guided view of the work</p>
+      <h2 id="research-explorer-title">Research Explorer</h2>
+    </div>
+    <p class="research-explorer-intro">Choose a thread to see how the questions, methods, and papers connect.</p>
+  </div>
+
+  <nav class="research-explorer-tabs" data-research-tabs aria-label="Research themes">
+    {{- range $i, $track := $tracks }}
+      {{- $panelID := printf "research-thread-%s" $track.id -}}
+      <a class="research-explorer-tab{{ if eq $i 0 }} is-active{{ end }}" data-research-tab href="#{{ $panelID }}">
+        <span class="research-explorer-tab-number">{{ printf "%02d" (add $i 1) }}</span>
+        <span>{{ $track.title }}</span>
+      </a>
+    {{- end }}
+  </nav>
+
+  <div class="research-explorer-panels" data-research-panels>
+    {{- range $i, $track := $tracks }}
+      {{- $panelID := printf "research-thread-%s" $track.id -}}
+      <section class="research-explorer-panel{{ if eq $i 0 }} is-active{{ end }}" id="{{ $panelID }}" data-research-panel>
+        <div class="research-explorer-copy">
+          <p class="research-explorer-index">Research thread {{ printf "%02d" (add $i 1) }} <span aria-hidden="true">/ {{ printf "%02d" (len $tracks) }}</span></p>
+          <h3>{{ $track.title }}</h3>
+          <p class="research-explorer-summary">{{ $track.summary }}</p>
+          <h4 class="research-explorer-section-label">Selected papers</h4>
+          <ol class="research-explorer-papers">
+            {{- range $track.papers }}
+              {{- $paperURL := . -}}
+              {{- $matches := where $publications "url" $paperURL -}}
+              {{- if gt (len $matches) 0 }}
+                {{- with index $matches 0 }}
+                  {{- $abstract := .abstract | default "" | plainify | replaceRE "\\s+" " " | strings.TrimSpace -}}
+                  <li>
+                    <p class="research-explorer-paper-meta">{{ .year }} · {{ .venue }}</p>
+                    <h4><a href="{{ .url }}">{{ .title }}</a></h4>
+                    {{ with $abstract }}<p class="research-explorer-paper-summary">{{ . | truncate 170 }}</p>{{ end }}
+                  </li>
+                {{- end }}
+              {{- end }}
+            {{- end }}
+          </ol>
+          <a class="research-explorer-all" href="/publications/">Browse all publications <span aria-hidden="true">→</span></a>
+        </div>
+
+        <aside class="research-explorer-trail" aria-label="Research signals in this thread">
+          <p class="research-explorer-trail-label">Follow the thread</p>
+          <ol>
+            {{- range $j, $signal := $track.signals }}
+              <li><span class="research-explorer-node" aria-hidden="true">{{ printf "%02d" (add $j 1) }}</span><span>{{ $signal }}</span></li>
+            {{- end }}
+          </ol>
+          <p class="research-explorer-trail-note">Questions become signals, methods, and defensive insight.</p>
+        </aside>
+      </section>
+    {{- end }}
+  </div>
+
+  <p class="research-explorer-help" data-research-status role="status" aria-live="polite">Use the theme links to jump between threads. When the explorer is active, use arrow keys to browse.</p>
+</section>
+{{ partial "functions/js_tag" (dict "path" "js/site/research_explorer.js" "attrs" "defer") }}

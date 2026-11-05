@@ -24,22 +24,6 @@
       .then((response) => (response.ok ? response.json() : null))
       .catch(() => null);
 
-  const animateValue = (el, value) => {
-    if (prefersReducedMotion) {
-      el.textContent = String(value);
-      return;
-    }
-
-    const duration = 900;
-    const start = performance.now();
-    const tick = (now) => {
-      const progress = Math.min((now - start) / duration, 1);
-      el.textContent = String(Math.round(value * progress));
-      if (progress < 1) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-  };
-
   const setProgress = (card, value, total) => {
     const bar = card.querySelector("[data-progress]");
     if (!bar) return;
@@ -65,10 +49,7 @@
 
     const valueEl = card.querySelector("[data-value]");
     const metaEl = card.querySelector("[data-meta]");
-    if (valueEl && !card.dataset.animated) {
-      animateValue(valueEl, metric.value || 0);
-      card.dataset.animated = "true";
-    }
+    if (valueEl) valueEl.textContent = String(metric.value ?? 0);
     if (metaEl) metaEl.textContent = metric.meta || "";
     if (metric.tooltip) card.dataset.tooltip = metric.tooltip;
     setProgress(card, metric.value || 0, metric.base || 1);
