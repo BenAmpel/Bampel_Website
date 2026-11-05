@@ -1,5 +1,5 @@
 ---
-title: "HackerSignal: A Large-Scale Multi-Source Dataset Linking Hacker Community Discourse to the CVE Vulnerability Lifecycle"
+title: "HackerSignal: A Multi-Source, CVE-Linked Corpus and Prospective Benchmark for Cyber Threat Intelligence"
 
 authors:
   - admin
