@@ -9,12 +9,7 @@
     </div>
   </details>
 
-  <details class="spoiler">
-    <summary>Cumulative Research Attention</summary>
-    <div class="spoiler-content">
-      {{ partial "media/altmetric_summary.html" . }}
-    </div>
-  </details>
+  {{ partial "media/attention_note.html" (dict "wrap" true) }}
 
   <details class="spoiler">
     <summary>Media Spotlight</summary>

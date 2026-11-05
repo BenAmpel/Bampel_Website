@@ -1,0 +1,25 @@
+{{/* Research attention note: Dimensions citation counts for the papers with DOIs, from data/dimensions.json, which
+   scripts/fetch_dimensions_metrics.py writes each Monday. Context: dict "wrap" (true on the CV page, where the note sits in
+   a spoiler; false on the publications page, via the attention_note shortcode). Renders nothing before the first run.
+   A file more than 16 days old is hidden and warned about (CI fails on Hugo warnings); Dimensions' terms allow showing
+   only the latest metrics. See docs/media-tracker/design.md, Change A. */}}
+{{ $wrap := .wrap }}
+{{ with hugo.Data.dimensions }}{{ if gt (.papers_counted | default 0) 0 }}
+{{ $h := (now.Sub (time.AsTime .generated_at)).Hours }}
+{{ if gt $h 384.0 }}
+  {{ warnf "dimensions.json is %d days old; run Update Scholar Metrics or see Risks in docs/media-tracker/design.md" (int (div $h 24)) }}
+{{ else }}
+{{ if $wrap }}<details class="spoiler"><summary>Research attention</summary><div class="spoiler-content">{{ end }}
+<div class="attention-note">
+  <style>
+    .attention-note p { margin: 0 0 8px 0; }
+    .attention-note .attention-note-source { color: #57606a; font-size: 0.85rem; }
+    .dark .attention-note .attention-note-source { color: #8b949e; }
+  </style>
+  {{ if not $wrap }}<h3>Research attention</h3>{{ end }}
+  <p>{{ .citations_sum | lang.FormatNumber 0 }} citations across {{ if lt .papers_counted .papers_with_doi }}{{ .papers_counted }} of {{ .papers_with_doi }}{{ else }}{{ .papers_counted }}{{ end }} papers with DOIs, counted by <a href="https://www.dimensions.ai/" rel="noopener">Dimensions</a> (updated {{ (time.AsTime .generated_at).Format "2 January 2006" }}).</p>
+  <p class="attention-note-source">These are citation counts, not an Altmetric score. Paper pages show Altmetric and Dimensions badges where those services have data.</p>
+</div>
+{{ if $wrap }}</div></details>{{ end }}
+{{ end }}
+{{ end }}{{ end }}
