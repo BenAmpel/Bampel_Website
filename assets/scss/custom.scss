@@ -5672,6 +5672,11 @@ body:not(.dark) .impact-card:focus-visible {
 :root {
   color-scheme: dark;
 }
+// The theme code switches by the `dark` class on <body> (wowchemy-theming.js). Should the light variation ever be turned
+// on (theme_day in params.yaml), native controls and scrollbars follow it.
+:root:has(body:not(.dark)) {
+  color-scheme: light;
+}
 
 // ===== EDUCATION TIMELINE ON PHONES (audit 2026-10-24) =====
 // A horizontal scroller put the second and third steps off-screen at 375px with only a "Scroll" hint. Below 700px the steps stack.

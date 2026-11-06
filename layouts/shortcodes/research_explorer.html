@@ -1,4 +1,4 @@
-{{- $tracks := site.Data.research_explorer.tracks -}}
+{{- $tracks := hugo.Data.research_explorer.tracks -}}
 {{- $publications := os.ReadFile "static/data/publications.json" | transform.Unmarshal -}}
 <section class="research-explorer" data-research-explorer aria-labelledby="research-explorer-title">
   <div class="research-explorer-heading">
