@@ -90,7 +90,7 @@ console.log('CCAIR friends: %d organizations checked', checkFriends());
 function checkPeopleAndPublications() {
   const people = JSON.parse(fs.readFileSync(path.join(ccairDir, 'data', 'people.json'), 'utf8'));
   if (people.director) for (const k of ['name', 'title', 'dept', 'email']) if (!people.director[k]) throw new Error(`people.json: director needs ${k}`);
-  for (const group of ['students', 'mentees', 'affiliates']) {
+  for (const group of ['students', 'sfsScholars', 'mentees', 'affiliates']) {
     for (const p of people[group] || []) for (const k of ['name', 'role']) if (!p[k]) throw new Error(`people.json: ${group} entry "${p.name || '?'}" needs ${k}`);
   }
   const pubs = JSON.parse(fs.readFileSync(path.join(ccairDir, 'data', 'publications.json'), 'utf8'));

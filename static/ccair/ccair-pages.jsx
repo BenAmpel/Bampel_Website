@@ -31,39 +31,37 @@ const PIPELINE = [
   { level: "Doctoral", description: "Ph.D. students lead CCAIR research with dissertations contributing durable center artifacts.", programs: ["Dissertation Research", "Center Publications", "Conference Leadership"] },
 ];
 
-// The three research pillars, each with the published systems that put it into practice.
+// The four research areas, each with the published systems that put it into practice.
 const PILLARS = [
-  { n: '01', title: 'Adversarial Signal Emergence', desc: 'How malicious intent, capabilities, and tactics emerge across heterogeneous data sources prior to exploitation.',
-    points: ['How attacker knowledge diffuses over time', 'Slang and jargon evolution to evade detection', 'Experimental exploits maturing into operational tools', 'Cross-modal signal integration for intent inference'],
+  { n: '01', title: 'Threat intelligence and adversary behavior', desc: 'How attackers organize, communicate, and adapt (e.g., hacker forums, dark web markets), studied to detect threats before they reach a target.',
+    points: ['How attacker knowledge spreads and matures over time', 'Jargon that shifts to evade detection', 'Exploits moving from proof of concept to working tools', 'Early warning for the organizations most likely to be targeted'],
     systems: [
       { name: 'TRACE', href: 'https://bampel.com/conference_publication/vendor-conditioned-contrastive-learning-for-predicting-organizational-/' },
       { name: 'PHI-NEXT', href: 'https://bampel.com/journal_publication/phi-hacker-jmis/' },
       { name: 'HackerSignal', href: 'https://bampel.com/conference_publication/hackersignal-a-large-scale-multi-source-dataset-linking-hacker-communi/' },
+      { name: 'HackerVote', href: 'https://bampel.com/journal_publication/hacker-communities-isf/' },
     ] },
-  { n: '02', title: 'Ambiguity-Aware Intelligence', desc: 'AI systems that operate under adversarial uncertainty: reasoning about ambiguity, deception, and partial information.',
-    points: ['Robust ML under adversarial label noise', 'Adversarially resilient architectures', 'Agentic systems with adaptive decision-making', 'Treating uncertainty as a first-class design constraint'],
+  { n: '02', title: 'Social engineering and deception', desc: 'How people are manipulated through phishing, voice phishing, and deepfakes, and how to detect and train against it.',
+    points: ['Phishing written and adapted by AI', 'Voice phishing and the vocal cues of deception', 'Deepfake audio and video', 'Training that carries over to real attacks'],
     systems: [
       { name: 'Adaptive Phishing GAN', href: 'https://bampel.com/conference_publication/adaptive-phishing-gan-cars-2026/' },
       { name: 'Four-Signal Fusion', href: 'https://bampel.com/conference_publication/four-signal-phishing-cars-2026/' },
+      { name: 'Prosody Training', href: 'https://bampel.com/conference_publication/prosody-vishing-icis-2026/' },
+    ] },
+  { n: '03', title: 'Secure and trustworthy AI', desc: 'Securing AI systems themselves (e.g., large language models, AI agents) and building models that hold up under deception, scarce labels, and shifting data.',
+    points: ['Attacks on large language models and AI agents', 'Models that hold up under adversarial label noise', 'Learning from scarce labels and shifting data', 'AI for finding and fixing vulnerabilities'],
+    systems: [
       { name: 'AVA', href: 'https://bampel.com/conference_publication/vuln-variant-cars-2026/' },
     ] },
-  { n: '03', title: 'Human–AI Collaboration', desc: 'How humans and AI jointly interpret, validate, and act on adversarial signals in realistic security workflows.',
-    points: ['Joint interpretation of adversarial signals', 'Trust calibration between analysts and AI', 'Workflow integration for CTI production', 'Organizational context in security decisions'],
+  { n: '04', title: 'Human-AI teaming in security', desc: 'Workflows in which analysts and AI share triage, validation, and decisions, with calibrated trust and explanations analysts can use.',
+    points: ['Shared triage and validation between analysts and AI', 'Trust calibrated to how accurate the model is', 'Explanations analysts can act on', 'AI-assisted security training'],
     systems: [
       { name: 'AI-Assisted Training', href: 'https://bampel.com/conference_publication/performance-transfer-cars-2026/' },
-      { name: 'Prosody Training', href: 'https://bampel.com/conference_publication/prosody-vishing-icis-2026/' },
-      { name: 'HackerVote', href: 'https://bampel.com/journal_publication/hacker-communities-isf/' },
     ] },
 ];
 
-const JOIN_AREAS = [
-  { area: 'LLM Security & Robustness', desc: 'Adversarial attacks, jailbreaking, alignment for security applications' },
-  { area: 'Cyber Threat Intelligence', desc: 'Automated collection and analysis of threat data from dark web and hacker communities' },
-  { area: 'Phishing & Social Engineering', desc: 'AI-driven detection and generation analysis of phishing campaigns' },
-  { area: 'Proactive Threat Hunting', desc: 'Predictive models and early-warning systems for emerging cyber threats' },
-  { area: 'Human–AI Collaboration', desc: 'Designing AI tools that augment analyst decision-making in SOC environments' },
-  { area: 'Generative AI for Security', desc: 'LLMs for vulnerability analysis, code auditing, and threat modeling' },
-];
+// The Join section lists the same four areas.
+const JOIN_AREAS = PILLARS.map((p) => ({ area: p.title, desc: p.desc }));
 
 const byYearDesc = (a, b) => (b.year || 0) - (a.year || 0);
 
@@ -114,8 +112,8 @@ function HomePage() {
     <div className="hero-inner" ref={innerRef}>
       <p className="hero-affil">Georgia State University · J. Mack Robinson College of Business</p>
       <h1 id="hero-title">Center for <em>CyberAI</em> Research</h1>
-      <p className="lede">We study how intelligent systems can spot malicious behavior before it turns into an attack,
-        and we help people and organizations act on what those systems find.</p>
+      <p className="lede">AI for security, and security for AI. We build AI that spots threats before they become attacks,
+        and we study how to keep AI systems themselves secure.</p>
       <div className="hero-cta">
         <a className="btn btn-primary" href="/ccair/research/">Explore our research <Arrow /></a>
         <a className="btn btn-secondary" href="/ccair/pathways/">Find your cyber career path</a>
@@ -151,9 +149,9 @@ function HomePage() {
         </section>
       )}
 
-      <Section id="pillars" eyebrow="What we study" title="Three questions guide our work"
-        intro="CCAIR shifts security from reacting to attacks toward anticipating them. Each project maps to one of these research pillars.">
-        <div className="grid grid-3">
+      <Section id="pillars" eyebrow="What we study" title="Four research areas"
+        intro="Each CCAIR project maps to at least one of these areas.">
+        <div className="grid grid-2">
           {PILLARS.map((p) => (
             <Reveal key={p.n} className="card">
               <span className="card-num">{p.n}</span>
@@ -204,68 +202,20 @@ function HomePage() {
   );
 }
 
-// How the three primitives connect, drawn as one flow: signals emerge, AI reasons over them under ambiguity, analysts and
-// AI decide together. The motion is decoration only (CSS, off under prefers-reduced-motion); the caption says the same.
-const PFLOW_DOTS = [[14, 20], [36, 10], [58, 26], [22, 44], [46, 50], [72, 14], [82, 40], [30, 68], [62, 70], [10, 60], [86, 68], [52, 36]];
-function PillarFlow() {
-  return (
-    <figure className="pflow">
-      <div className="pflow-steps">
-        <div className="pflow-step">
-          <svg className="pflow-art" viewBox="0 0 96 84" aria-hidden="true">
-            {PFLOW_DOTS.map(([x, y], i) => <circle key={i} cx={x} cy={y} r="3.2" className="pflow-dot" style={{ animationDelay: `${((i * 0.37) % 2.4).toFixed(2)}s` }} />)}
-          </svg>
-          <span className="pflow-num">P1</span>
-          <b>{PILLARS[0].title}</b>
-          <span className="pflow-text">Intent and capability surface across forums, exploits, and code before an attack.</span>
-        </div>
-        <div className="pflow-link" aria-hidden="true"><svg viewBox="0 0 64 16"><path d="M2 8 H54" /><path className="pflow-head" d="M50 3 L58 8 L50 13" /></svg></div>
-        <div className="pflow-step">
-          <svg className="pflow-art" viewBox="0 0 96 84" aria-hidden="true">
-            <path className="pflow-edge" d="M16 16 L48 28 M16 16 L48 52 M16 40 L48 28 M16 40 L48 52 M16 64 L48 28 M16 64 L48 52 M48 28 L80 40 M48 52 L80 40" />
-            {[[16, 16], [16, 40], [16, 64], [48, 28], [48, 52]].map(([x, y], i) => <circle key={i} className="pflow-node" cx={x} cy={y} r="5" style={{ animationDelay: `${(i * 0.18).toFixed(2)}s` }} />)}
-            <circle className="pflow-core" cx="80" cy="40" r="6.5" />
-            <rect className="pflow-track" x="20" y="78" width="56" height="5" rx="2.5" />
-            <rect className="pflow-band" x="20" y="78" width="56" height="5" rx="2.5" />
-          </svg>
-          <span className="pflow-num">P2</span>
-          <b>{PILLARS[1].title}</b>
-          <span className="pflow-text">Models weigh deception and partial information, and say how sure they are.</span>
-        </div>
-        <div className="pflow-link" aria-hidden="true"><svg viewBox="0 0 64 16"><path d="M2 8 H54" /><path className="pflow-head" d="M50 3 L58 8 L50 13" /></svg></div>
-        <div className="pflow-step">
-          <svg className="pflow-art" viewBox="0 0 96 84" aria-hidden="true">
-            <circle className="pflow-person" cx="30" cy="30" r="10" />
-            <path className="pflow-person" d="M12 70 C 12 54, 48 54, 48 70" />
-            <rect className="pflow-box" x="56" y="22" width="30" height="30" rx="7" />
-            <path className="pflow-chip" d="M71 28 C 72 34, 74 36, 80 37 C 74 38, 72 40, 71 46 C 70 40, 68 38, 62 37 C 68 36, 70 34, 71 28 Z" />
-            <path className="pflow-check" d="M58 66 L66 73 L84 56" />
-          </svg>
-          <span className="pflow-num">P3</span>
-          <b>{PILLARS[2].title}</b>
-          <span className="pflow-text">Analysts and AI interpret the result together and act on it in real workflows.</span>
-        </div>
-      </div>
-      <figcaption>Each CCAIR project advances at least one step: finding threats early, reasoning about them under uncertainty, and turning them into decisions people trust.</figcaption>
-    </figure>
-  );
-}
-
 function ResearchPage() {
   const { publications } = useData();
   const pubsReady = useDataStatus('publications') === 'ready';
   return (
     <div className="page">
-      <PageHead eyebrow="Research" title="Anticipating attacks, not just reacting to them"
-        lede="CCAIR investigates how intelligent systems can anticipate, interpret, and adapt to malicious behavior before exploitation. All center activities, proposals, and artifacts map to at least one of three research primitives."
+      <PageHead eyebrow="Research" title="AI for security, and security for AI"
+        lede="CCAIR builds AI that detects threats before exploitation and studies how to secure AI systems themselves. All center activities, proposals, and artifacts map to at least one of four research areas."
         photo="research-band" />
 
-      <Section id="primitives" title="Research primitives" intro="The foundational questions every project contributes to.">
-        <PillarFlow />
-        <div className="grid grid-3">
-          {PILLARS.map((p, i) => (
+      <Section id="primitives" title="Research areas" intro="The questions every project contributes to.">
+        <div className="grid grid-2">
+          {PILLARS.map((p) => (
             <Reveal key={p.n} className="card">
-              <span className="card-num">P{i + 1}</span>
+              <span className="card-num">{p.n}</span>
               <h3>{p.title}</h3>
               <p>{p.desc}</p>
               <ul className="list-check">{p.points.map((pt) => <li key={pt}>{pt}</li>)}</ul>
@@ -430,11 +380,17 @@ function PeoplePage() {
         </Reveal>
       </Section>}
 
-      <Section id="students" alt title="Graduate researchers" intro="Ph.D. students advised and mentored by CCAIR faculty at Georgia State and partner institutions.">
+      <Section id="students" alt title="Graduate researchers" intro="Ph.D. students and SFS scholars advised and mentored by CCAIR faculty at Georgia State and partner institutions.">
         <h3 className="group-label">Georgia State University</h3>
         <div className="grid grid-3">
           {(people.students || []).map((s) => <Reveal key={s.name}><PersonCard name={s.name} role={s.role} meta={[s.org, s.years].filter(Boolean).join(' · ')} photo={s.photo} headingLevel={4} /></Reveal>)}
         </div>
+        {(people.sfsScholars || []).length > 0 && <>
+          <h3 className="group-label">NSF CyberCorps Scholarship for Service (SFS) scholars</h3>
+          <div className="grid grid-3">
+            {people.sfsScholars.map((s) => <Reveal key={s.name}><PersonCard name={s.name} role={s.role} meta={s.org} photo={s.photo} headingLevel={4} /></Reveal>)}
+          </div>
+        </>}
         <h3 className="group-label">Mentees at partner universities</h3>
         <div className="grid grid-3">
           {current.map((s) => <Reveal key={s.name}><PersonCard name={s.name} role={s.role} meta={[s.org, s.years].filter(Boolean).join(' · ')} photo={s.photo} warm headingLevel={4} /></Reveal>)}
@@ -448,7 +404,7 @@ function PeoplePage() {
         </>}
       </Section>
 
-      <Section id="affiliates" title="Faculty affiliates" intro="Internal and external faculty contributing to shared CCAIR artifacts across research primitives.">
+      <Section id="affiliates" title="Faculty affiliates" intro="Internal and external faculty contributing to shared CCAIR artifacts across the four research areas.">
         <div className="grid grid-3">
           {(people.affiliates || []).map((a) => (
             <Reveal key={a.name}><PersonCard name={a.name} role={a.role} meta={a.dept} note={a.synergy} photo={a.photo} /></Reveal>
@@ -620,7 +576,7 @@ function AboutPage() {
   return (
     <div className="page">
       <PageHead eyebrow="About" title="A home for AI-enabled cybersecurity at Georgia State"
-        lede="CCAIR advances AI-enabled cybersecurity through three pillars: adversarial signal emergence, ambiguity-aware intelligence, and human–AI collaboration. We study how malicious intent surfaces across data sources before exploitation, build AI that reasons under deception and partial information, and design how analysts and AI act on adversarial signals together." />
+        lede="CCAIR works on AI for security, and security for AI, across four research areas: threat intelligence and adversary behavior, social engineering and deception, secure and trustworthy AI, and human-AI teaming in security." />
 
       <Section id="pipeline" title="Talent pipeline" intro="A multi-stage pipeline spanning K–12 through doctoral research, building technically sophisticated and theoretically grounded CyberAI professionals.">
         <ol className="steps">
@@ -755,7 +711,7 @@ function ContactPage() {
       <Section id="join" alt eyebrow="Open positions" title="Join CCAIR"
         intro="CCAIR is recruiting motivated Ph.D. and M.S. students to join our research group at Georgia State University. We value curiosity, persistence, and a willingness to work at the intersection of AI and cybersecurity.">
         <h3 className="group-label">Research areas</h3>
-        <div className="grid grid-3">
+        <div className="grid grid-2">
           {JOIN_AREAS.map(({ area, desc }) => (
             <Reveal key={area} className="card"><h3>{area}</h3><p>{desc}</p></Reveal>
           ))}
