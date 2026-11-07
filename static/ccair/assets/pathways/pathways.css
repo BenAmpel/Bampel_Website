@@ -227,6 +227,8 @@ h3 { font-size: 20px; line-height: 1.3; font-weight: 700; }
 .match .go { display: inline-block; margin-top: 16px; font-weight: 700; }
 .note { margin-top: 18px; padding: 16px 18px; border: 1px dashed var(--border); border-radius: 14px; color: var(--text2); font-size: 15px; }
 .note b { color: var(--text); }
+/* Links inside a note sit in running text, so they are underlined and do not rely on colour alone (WCAG 1.4.1). */
+.note a { text-decoration: underline; text-underline-offset: 3px; }
 .shape { display: grid; grid-template-columns: minmax(240px, 340px) 1fr; gap: 28px; align-items: center; margin-top: 34px; }
 @media (max-width: 720px) { .shape { grid-template-columns: 1fr; } .match { grid-template-columns: 1fr; gap: 6px; } }
 .radar { width: 100%; height: auto; overflow: visible; }
