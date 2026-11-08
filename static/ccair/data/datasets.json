@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-23",
+  "updated": "2026-11-08",
   "datasets": [
     {
       "name": "AdvBench",
@@ -636,15 +636,15 @@
       "category": "Fraud and financial crime",
       "subcategory": "Financial fraud graph",
       "description": "DGraphFin is a dynamic social graph from the Finvolution Group for graph anomaly detection. It has about 3 million nodes, 4 million dynamic edges, and 1 million labeled nodes.",
-      "access": "Free registration",
-      "link": "https://dgraph.xinye.com/dataset",
+      "access": "Unavailable: download site offline",
+      "link": "https://github.com/DGraphXinye",
       "dataType": "Dynamic graph with node features and labels",
       "size": "About 3 million nodes",
       "timeSpan": "",
       "license": "",
       "paper": "https://arxiv.org/abs/2207.03579",
-      "caveats": "The DGraph website (dgraph.xinye.com), the only download source, no longer resolved on 2026-10-25; confirm the data is available before planning a project around it. The download required a free account. Node features are anonymized, which limits interpretation of model results.",
-      "checked": "2026-09-27"
+      "caveats": "The only official download site, dgraph.xinye.com, has not resolved since 2026-10-25 and still did not on 2026-11-08. The link goes to the creators' GitHub organization, which holds baseline code but not the data, and the PyTorch Geometric loader still expects files from the offline site. Plan a project around it only if you already have a copy. Node features are anonymized, which limits interpretation of model results.",
+      "checked": "2026-11-08"
     },
     {
       "name": "Elliptic Data Set",
@@ -2286,15 +2286,15 @@
       "category": "Network traffic and intrusion detection",
       "subcategory": "Honeypot data",
       "description": "Kyoto 2006+ contains session records from honeypots and servers deployed at Kyoto University. It provides traffic features and IDS alert labels for network intrusion detection research.",
-      "access": "Open download",
-      "link": "https://www.takakura.com/Kyoto_data/",
+      "access": "Unavailable: download site offline",
+      "link": "https://web.archive.org/web/20260930005921/http://www.takakura.com/Kyoto_data/",
       "dataType": "Session feature text files",
       "size": "",
       "timeSpan": "November 2006 to December 2015",
       "license": "",
       "paper": "https://doi.org/10.1145/1978672.1978676",
-      "caveats": "The download site refused connections on 2026-10-25; confirm it is back before planning a project around it. Labels depend on IDS and antivirus alerts, which miss unknown attacks. Traffic that reaches honeypots is mostly malicious by design, which differs from enterprise networks.",
-      "checked": "2026-09-27"
+      "caveats": "The only download site, takakura.com/Kyoto_data, has refused connections since 2026-10-25 and still did on 2026-11-08, and no official mirror exists. The link goes to an Internet Archive copy of that page, which keeps the description PDFs but not the data folders. A later set built from the same honeypots, Kyoto 2016, is described in IEICE and IPSJ papers. Labels depend on IDS and antivirus alerts, which miss unknown attacks. Traffic that reaches honeypots is mostly malicious by design, which differs from enterprise networks.",
+      "checked": "2026-11-08"
     },
     {
       "name": "LANL Comprehensive, Multi-Source Cyber-Security Events (2015)",
@@ -2458,8 +2458,8 @@
       "timeSpan": "March to August 2016",
       "license": "",
       "paper": "https://doi.org/10.1016/j.cose.2017.11.004",
-      "caveats": "Later studies report labeling inaccuracies that make measured model performance uncertain. The real background traffic may also contain attacks that carry no label.",
-      "checked": "2026-09-27"
+      "caveats": "On 2026-11-08 the dataset page returned a server error (403, the host could not read its own access file) while the rest of nesg.ugr.es loaded; try again later or contact the NESG group at the University of Granada. Later studies report labeling inaccuracies that make measured model performance uncertain. The real background traffic may also contain attacks that carry no label.",
+      "checked": "2026-11-08"
     },
     {
       "name": "UNSW-NB15",
