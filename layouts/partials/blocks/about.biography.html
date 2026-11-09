@@ -52,14 +52,14 @@
           {{- end -}}
         </h1>
 
-        {{ with $person.role }}<h3>{{ . | markdownify | emojify }}</h3>{{ end }}
+        {{ with $person.role }}<h2 class="about-role">{{ . | markdownify | emojify }}</h2>{{ end }}
 
         {{ range $person.organizations }}
-        <h3>
+        <h2 class="about-role">
           {{ with .url }}<a href="{{ . }}" target="_blank" rel="noopener">{{ end }}
           <span>{{ .name }}</span>
           {{ if .url }}</a>{{ end }}
-        </h3>
+        </h2>
         {{ end }}
       </div>
 
