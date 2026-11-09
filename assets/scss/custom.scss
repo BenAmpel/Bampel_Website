@@ -1788,6 +1788,7 @@ section#about .col-md-5,
 
 // Style the section titles "Interests" and "Education"
 section#about h3,
+section#about h2.about-role,
 section#about .hb-about-interests-title,
 section#about .hb-about-education-title,
 section#about [class*="title"]:not(.article-title) {
@@ -5757,6 +5758,7 @@ a.nav-link.js-search::after {
 }
 
 section#about h3 > a,
+section#about h2.about-role > a,
 .selected-pubs-more > a,
 .wg-research-impact-overview p > a:only-child {
   display: inline-block;
@@ -5943,7 +5945,10 @@ time,
 
 // Job title and affiliation under the portrait: regular weight (the theme sets 300), text colour, the name above in bold.
 section#about .portrait-title h3,
-.portrait-title h3 {
+.portrait-title h3,
+section#about .portrait-title h2.about-role,
+.portrait-title h2.about-role {
+  margin-top: 0;
   font-weight: 400;
   color: $text-color !important;
 }
