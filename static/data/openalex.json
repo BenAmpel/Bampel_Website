@@ -1,46 +1,24 @@
 {
-  "refresh_date": "2026-11-02",
+  "refresh_date": "2026-11-09",
   "papers": [
     {
-      "id": "https://openalex.org/W4391136507",
-      "title": "A Survey on Evaluation of Large Language Models",
+      "id": "https://openalex.org/W4404330874",
+      "title": "GPT-4o System Card",
       "authors": [
-        "Yupeng Chang",
-        "Xu Wang",
-        "Jindong Wang",
-        "Yuan Wu"
+        "OpenAI",
+        ":",
+        "Hurst, Aaron",
+        "Adam K. Lerer"
       ],
       "year": 2024,
-      "venue": "ACM Transactions on Intelligent Systems and Technology",
-      "doi": "10.1145/3641289",
-      "cited_by_count": 3154,
+      "venue": "arXiv (Cornell University)",
+      "doi": "10.48550/arxiv.2410.21276",
+      "cited_by_count": 8441,
       "topics": [
-        "Popularity",
         "Computer science"
       ],
-      "url": "https://doi.org/10.1145/3641289",
-      "abstract": "Large language models (LLMs) are gaining increasing popularity in both academia and industry, owing to their unprecedented performance in various applications. As LLMs continue to play a vital role in both research and daily use, their evaluation becomes increasingly critical, not only at the task l"
-    },
-    {
-      "id": "https://openalex.org/W4404534210",
-      "title": "A Survey on Hallucination in Large Language Models: Principles, Taxonomy, Challenges, and Open Questions",
-      "authors": [
-        "Lei Huang",
-        "Weijiang Yu",
-        "Weitao Ma",
-        "Weihong Zhong"
-      ],
-      "year": 2024,
-      "venue": "ACM Transactions on Information Systems",
-      "doi": "10.1145/3703155",
-      "cited_by_count": 2525,
-      "topics": [
-        "Visual Hallucination",
-        "Psychology",
-        "Cognitive psychology"
-      ],
-      "url": "https://doi.org/10.1145/3703155",
-      "abstract": "The emergence of large language models (LLMs) has marked a significant breakthrough in natural language processing (NLP), fueling a paradigm shift in information acquisition. Nevertheless, LLMs are prone to hallucination, generating plausible yet nonfactual content. This phenomenon raises significan"
+      "url": "https://doi.org/10.48550/arxiv.2410.21276",
+      "abstract": "GPT-4o is an autoregressive omni model that accepts as input any combination of text, audio, image, and video, and generates any combination of text, audio, and image outputs. It's trained end-to-end across text, vision, and audio, meaning all inputs and outputs are processed by the same neural netw"
     },
     {
       "id": "https://openalex.org/W4362515116",
@@ -54,7 +32,7 @@
       "year": 2026,
       "venue": "Frontiers of Computer Science",
       "doi": "10.1007/s11704-026-60308-3",
-      "cited_by_count": 2093,
+      "cited_by_count": 8095,
       "topics": [
         "Language model",
         "Computer science",
@@ -63,6 +41,47 @@
       ],
       "url": "https://doi.org/10.1007/s11704-026-60308-3",
       "abstract": "Abstract The rapid evolution of large language models (LLMs) has driven a transformative shift in artificial intelligence (AI), reshaping both research paradigms and practical applications. Distinguished from their predecessors by unprecedented scale and advanced capabilities, LLMs necessitate new f"
+    },
+    {
+      "id": "https://openalex.org/W4404534210",
+      "title": "A Survey on Hallucination in Large Language Models: Principles, Taxonomy, Challenges, and Open Questions",
+      "authors": [
+        "Lei Huang",
+        "Weijiang Yu",
+        "Weitao Ma",
+        "Weihong Zhong"
+      ],
+      "year": 2024,
+      "venue": "ACM Transactions on Information Systems",
+      "doi": "10.1145/3703155",
+      "cited_by_count": 4688,
+      "topics": [
+        "Visual Hallucination",
+        "Psychology",
+        "Cognitive psychology"
+      ],
+      "url": "https://doi.org/10.1145/3703155",
+      "abstract": "The emergence of large language models (LLMs) has marked a significant breakthrough in natural language processing (NLP), fueling a paradigm shift in information acquisition. Nevertheless, LLMs are prone to hallucination, generating plausible yet nonfactual content. This phenomenon raises significan"
+    },
+    {
+      "id": "https://openalex.org/W4391136507",
+      "title": "A Survey on Evaluation of Large Language Models",
+      "authors": [
+        "Yupeng Chang",
+        "Xu Wang",
+        "Jindong Wang",
+        "Yuan Wu"
+      ],
+      "year": 2024,
+      "venue": "ACM Transactions on Intelligent Systems and Technology",
+      "doi": "10.1145/3641289",
+      "cited_by_count": 4254,
+      "topics": [
+        "Popularity",
+        "Computer science"
+      ],
+      "url": "https://doi.org/10.1145/3641289",
+      "abstract": "Large language models (LLMs) are gaining increasing popularity in both academia and industry, owing to their unprecedented performance in various applications. As LLMs continue to play a vital role in both research and daily use, their evaluation becomes increasingly critical, not only at the task l"
     },
     {
       "id": "https://openalex.org/W4393065402",
@@ -76,7 +95,7 @@
       "year": 2024,
       "venue": "Frontiers of Computer Science",
       "doi": "10.1007/s11704-024-40231-1",
-      "cited_by_count": 1941,
+      "cited_by_count": 3272,
       "topics": [
         "Computer science"
       ],
@@ -84,45 +103,23 @@
       "abstract": "Abstract Autonomous agents have long been a research focus in academic and industry communities. Previous research often focuses on training agents with limited knowledge within isolated environments, which diverges significantly from human learning processes, and makes the agents hard to achieve hu"
     },
     {
-      "id": "https://openalex.org/W4392353733",
-      "title": "A survey on large language model (LLM) security and privacy: The Good, The Bad, and The Ugly",
+      "id": "https://openalex.org/W7155906632",
+      "title": "A Prompt Pattern Catalog to Enhance Prompt Engineering with ChatGPT",
       "authors": [
-        "Yifan Yao",
-        "Jinhao Duan",
-        "Kaidi Xu",
-        "Yuanfang Cai"
+        "Jules White",
+        "Quchen Fu",
+        "Sam Hays",
+        "Michael Sandborn"
       ],
       "year": 2024,
-      "venue": "High-Confidence Computing",
-      "doi": "10.1016/j.hcc.2024.100211",
-      "cited_by_count": 1085,
+      "venue": "Conference on Pattern Languages of Programs",
+      "doi": "10.64346/plop2023p05",
+      "cited_by_count": 2730,
       "topics": [
-        "Internet privacy",
-        "Computer security",
         "Computer science"
       ],
-      "url": "https://doi.org/10.1016/j.hcc.2024.100211",
-      "abstract": "Large Language Models (LLMs), such as ChatGPT and Bard, have revolutionized natural language understanding and generation. They possess deep language comprehension, human-like text generation capabilities, contextual awareness, and robust problem-solving skills, making them invaluable in various dom"
-    },
-    {
-      "id": "https://openalex.org/W4399083018",
-      "title": "Intelligent Clinical Documentation: Harnessing Generative AI for Patient-Centric Clinical Note Generation",
-      "authors": [
-        "Anjanava Biswas",
-        "Wrick Talukdar"
-      ],
-      "year": 2024,
-      "venue": "International Journal of Innovative Science and Research Technology (IJISRT)",
-      "doi": "10.38124/ijisrt/ijisrt24may1483",
-      "cited_by_count": 1029,
-      "topics": [
-        "Documentation",
-        "Health care",
-        "Generative grammar",
-        "Confidentiality"
-      ],
-      "url": "https://doi.org/10.38124/ijisrt/ijisrt24may1483",
-      "abstract": "Comprehensive clinical documentation is crucial for effective healthcare delivery, yet it poses a significant burden on healthcare professionals, leading to burnout, increased medical errors, and compromised patient safety. This paper explores the potential of generative AI (Artificial Intelligence)"
+      "url": "https://doi.org/10.64346/plop2023p05",
+      "abstract": "Prompt engineering is an increasingly important skill set needed to converse effectively with large language models (LLMs), such as ChatGPT. Prompts are instructions given to an LLM to enforce rules, automate processes, and ensure specific qualities (and quantities) of generated output. Prompts are "
     },
     {
       "id": "https://openalex.org/W4406800520",
@@ -136,7 +133,7 @@
       "year": 2025,
       "venue": "Science China Information Sciences",
       "doi": "10.1007/s11432-024-4222-0",
-      "cited_by_count": 975,
+      "cited_by_count": 2498,
       "topics": [
         "Computer science"
       ],
@@ -144,46 +141,83 @@
       "abstract": ""
     },
     {
-      "id": "https://openalex.org/W4400217631",
-      "title": "Classifying Crop Leaf Diseases using Different Deep Learning Models with Transfer Learning",
+      "id": "https://openalex.org/W4399848789",
+      "title": "GPTs are GPTs: Labor market impact potential of LLMs",
       "authors": [
-        "Lakshin Pathak",
-        "Mili Virani",
-        "Drashti Kansara"
+        "Tyna Eloundou",
+        "Sam Manning",
+        "Pamela Mishkin",
+        "Daniel Rock"
       ],
       "year": 2024,
-      "venue": "International Journal of Innovative Science and Research Technology (IJISRT)",
-      "doi": "10.38124/ijisrt/ijisrt24jun654",
-      "cited_by_count": 960,
+      "venue": "Science",
+      "doi": "10.1126/science.adj0998",
+      "cited_by_count": 2330,
       "topics": [
-        "Interpretability",
-        "Computer science",
-        "Artificial intelligence",
-        "Optimal distinctiveness theory"
+        "Economics"
       ],
-      "url": "https://doi.org/10.38124/ijisrt/ijisrt24jun654",
-      "abstract": "Within the scope of the research, we put forward a technique of exactly confirming the distinctiveness of agricultural leaf pathologies with the assist of deep mastering algorithms and switch getting to know generation. We have pre-skilled models like VGG19, MobileNet, InceptionV3, EfficientNetB0, S"
+      "url": "https://doi.org/10.1126/science.adj0998",
+      "abstract": "Research is needed to estimate how jobs may be affected."
     },
     {
-      "id": "https://openalex.org/W4391855109",
-      "title": "A Review on Large Language Models: Architectures, Applications, Taxonomies, Open Issues and Challenges",
+      "id": "https://openalex.org/W7119523234",
+      "title": "OpenAI GPT-5 System Card",
       "authors": [
-        "Mohaimenul Azam Khan Raiaan",
-        "Md. Saddam Hossain Mukta",
-        "Kaniz Fatema",
-        "Nur Mohammad Fahad"
+        "Aaditya Singh",
+        "Adam Fry",
+        "Adam Perelman",
+        "Adam Tart"
+      ],
+      "year": 2025,
+      "venue": "arXiv (Cornell University)",
+      "doi": "10.48550/arxiv.2601.03267",
+      "cited_by_count": 1953,
+      "topics": [
+        "Feature (linguistics)",
+        "Computer science",
+        "Domain (mathematical analysis)",
+        "Router"
+      ],
+      "url": "https://doi.org/10.48550/arxiv.2601.03267",
+      "abstract": "This is the system card published alongside the OpenAI GPT-5 launch, August 2025. GPT-5 is a unified system with a smart and fast model that answers most questions, a deeper reasoning model for harder problems, and a real-time router that quickly decides which model to use based on conversation type"
+    },
+    {
+      "id": "https://openalex.org/W4391766565",
+      "title": "Large Language Models: A Survey",
+      "authors": [
+        "Shervin Minaee",
+        "Tomáš Mikolov",
+        "Nikzad, Narjes",
+        "Meysam Asgari-Chenaghlu"
       ],
       "year": 2024,
-      "venue": "IEEE Access",
-      "doi": "10.1109/access.2024.3365742",
-      "cited_by_count": 935,
+      "venue": "arXiv (Cornell University)",
+      "doi": "10.48550/arxiv.2402.06196",
+      "cited_by_count": 1850,
+      "topics": [],
+      "url": "https://doi.org/10.48550/arxiv.2402.06196",
+      "abstract": "Large Language Models (LLMs) have drawn a lot of attention due to their strong performance on a wide range of natural language tasks, since the release of ChatGPT in November 2022. LLMs' ability of general-purpose language understanding and generation is acquired by training billions of model's para"
+    },
+    {
+      "id": "https://openalex.org/W4402665833",
+      "title": "Large Language Models for Software Engineering: A Systematic Literature Review",
+      "authors": [
+        "Xinyi Hou",
+        "Yanjie Zhao",
+        "Yue Liu",
+        "Zhou Yang"
+      ],
+      "year": 2024,
+      "venue": "ACM Transactions on Software Engineering and Methodology",
+      "doi": "10.1145/3695988",
+      "cited_by_count": 1800,
       "topics": [
         "Computer science",
-        "Open research",
-        "Data science"
+        "Systematic review",
+        "Software engineering"
       ],
-      "url": "https://doi.org/10.1109/access.2024.3365742",
-      "abstract": "Large Language Models (LLMs) recently demonstrated extraordinary capability, including natural language processing (NLP), language translation, text generation, question answering, etc. Moreover, LLMs are a new and essential part of computerized language processing, having the ability to understand "
+      "url": "https://doi.org/10.1145/3695988",
+      "abstract": "Large Language Models (LLMs) have significantly impacted numerous domains, including Software Engineering (SE). Many recent publications have explored LLMs applied to various SE tasks. Nevertheless, a comprehensive understanding of the application, effects, and possible limitations of LLMs on SE is "
     },
     {
       "id": "https://openalex.org/W4404356490",
@@ -197,258 +231,223 @@
       "year": 2024,
       "venue": "National Science Review",
       "doi": "10.1093/nsr/nwae403",
-      "cited_by_count": 897,
+      "cited_by_count": 1786,
       "topics": [],
       "url": "https://doi.org/10.1093/nsr/nwae403",
       "abstract": "Recently, the multimodal large language model (MLLM) represented by GPT-4V has been a new rising research hotspot, which uses powerful large language models (LLMs) as a brain to perform multimodal tasks. The surprising emergent capabilities of the MLLM, such as writing stories based on images and op"
     },
     {
-      "id": "https://openalex.org/W4401889742",
-      "title": "Recurrent Neural Networks: A Comprehensive Review of Architectures, Variants, and Applications",
+      "id": "https://openalex.org/W7120088840",
+      "title": "A survey on LLM-as-a-judge",
       "authors": [
-        "Ibomoiye Domor Mienye",
-        "Theo G. Swart",
-        "George Obaido"
+        "Jiawei Gu",
+        "Xuhui Jiang",
+        "Zhichao Shi",
+        "Hexiang Tan"
+      ],
+      "year": 2026,
+      "venue": "The Innovation",
+      "doi": "10.1016/j.xinn.2025.101253",
+      "cited_by_count": 1781,
+      "topics": [
+        "Computer science",
+        "Process (computing)",
+        "Data science",
+        "Management science"
+      ],
+      "url": "https://doi.org/10.1016/j.xinn.2025.101253",
+      "abstract": "Accurate and consistent evaluation is crucial for decision-making across numerous fields, yet it remains challenging due to inherent subjectivity, variability, and scale. Large language models (LLMs) have achieved remarkable success, leading to \"LLM-as-a-judge,\" where LLMs serve as evaluators for co"
+    },
+    {
+      "id": "https://openalex.org/W4407142724",
+      "title": "Generative AI at Work",
+      "authors": [
+        "Erik Brynjolfsson",
+        "Danielle Li",
+        "Lindsey Raymond"
       ],
       "year": 2024,
-      "venue": "Information",
-      "doi": "10.3390/info15090517",
-      "cited_by_count": 752,
+      "venue": "The Quarterly Journal of Economics",
+      "doi": "10.1093/qje/qjae044",
+      "cited_by_count": 1760,
       "topics": [
-        "Recurrent neural network",
+        "Generative grammar",
+        "Work (physics)",
+        "Computer science"
+      ],
+      "url": "https://doi.org/10.1093/qje/qjae044",
+      "abstract": "Abstract We study the staggered introduction of a generative AI–based conversational assistant using data from 5,172 customer-support agents. Access to AI assistance increases worker productivity, as measured by issues resolved per hour, by 15% on average, with substantial heterogeneity across worke"
+    },
+    {
+      "id": "https://openalex.org/W4382142077",
+      "title": "MME: A Comprehensive Evaluation Benchmark for Multimodal Large Language Models",
+      "authors": [
+        "Chaoyou Fu",
+        "Peixian Chen",
+        "Yunhang Shen",
+        "Yulei Qin"
+      ],
+      "year": 2025,
+      "venue": "neural information processing systems",
+      "doi": "10.52202/085713-4899",
+      "cited_by_count": 1573,
+      "topics": [
         "Computer science",
+        "Benchmark (surveying)",
         "Artificial intelligence",
-        "Transformer"
+        "Perception"
       ],
-      "url": "https://doi.org/10.3390/info15090517",
-      "abstract": "Recurrent Neural Networks (RNNs) have significantly advanced the field of machine learning by enabling the effective processing of sequential data. This paper provides a comprehensive review of RNNs and their applications, highlighting advancements in architectures such as Long Short-Term Memory (LS"
+      "url": "https://doi.org/10.52202/085713-4899",
+      "abstract": "Multimodal Large Language Model (MLLM) relies on the powerful LLM to perform multimodal tasks, showing amazing emergent abilities in recent studies, such as writing poems based on an image. However, it is difficult for these case studies to fully reflect the performance of MLLM, lacking a comprehens"
     },
     {
-      "id": "https://openalex.org/W4402056503",
-      "title": "Deep Learning for Time Series Anomaly Detection: A Survey",
+      "id": "https://openalex.org/W4392822190",
+      "title": "LiveCodeBench: Holistic and Contamination Free Evaluation of Large Language Models for Code",
       "authors": [
-        "Zahra Zamanzadeh Darban",
-        "Geoffrey I. Webb",
-        "Shirui Pan",
-        "Charų C. Aggarwal"
+        "Naman Jain",
+        "King Han",
+        "Gu, Alex",
+        "Wen-Ding Li"
       ],
       "year": 2024,
-      "venue": "ACM Computing Surveys",
-      "doi": "10.1145/3691338",
-      "cited_by_count": 645,
+      "venue": "arXiv (Cornell University)",
+      "doi": "10.48550/arxiv.2403.07974",
+      "cited_by_count": 1491,
       "topics": [
-        "Anomaly detection",
+        "Contamination",
+        "Code (set theory)",
+        "Computer science"
+      ],
+      "url": "https://doi.org/10.48550/arxiv.2403.07974",
+      "abstract": "Large Language Models (LLMs) applied to code-related applications have emerged as a prominent field, attracting significant interest from both academia and industry. However, as new and improved LLMs are developed, existing evaluation benchmarks (e.g., HumanEval, MBPP) are no longer sufficient for a"
+    },
+    {
+      "id": "https://openalex.org/W4417258000",
+      "title": "Your Brain on ChatGPT: Accumulation of Cognitive Debt when Using an AI Assistant for Essay Writing Task",
+      "authors": [
+        "Nataliya Kosmyna",
+        "Eugene Hauptmann",
+        "Ye Yuan",
+        "Jessica Situ"
+      ],
+      "year": 2025,
+      "venue": "arXiv (Cornell University)",
+      "doi": "10.48550/arxiv.2506.08872",
+      "cited_by_count": 1407,
+      "topics": [
+        "Session (web analytics)",
+        "Psychology",
+        "Cognition",
+        "Task (project management)"
+      ],
+      "url": "https://doi.org/10.48550/arxiv.2506.08872",
+      "abstract": "This study explores the neural and behavioral consequences of LLM-assisted essay writing. Participants were divided into three groups: LLM, Search Engine, and Brain-only (no tools). Each completed three sessions under the same condition. In a fourth session, LLM users were reassigned to Brain-only g"
+    },
+    {
+      "id": "https://openalex.org/W4392353733",
+      "title": "A survey on large language model (LLM) security and privacy: The Good, The Bad, and The Ugly",
+      "authors": [
+        "Yifan Yao",
+        "Jinhao Duan",
+        "Kaidi Xu",
+        "Yuanfang Cai"
+      ],
+      "year": 2024,
+      "venue": "High-Confidence Computing",
+      "doi": "10.1016/j.hcc.2024.100211",
+      "cited_by_count": 1383,
+      "topics": [
+        "Internet privacy",
+        "Computer security",
+        "Computer science"
+      ],
+      "url": "https://doi.org/10.1016/j.hcc.2024.100211",
+      "abstract": "Large Language Models (LLMs), such as ChatGPT and Bard, have revolutionized natural language understanding and generation. They possess deep language comprehension, human-like text generation capabilities, contextual awareness, and robust problem-solving skills, making them invaluable in various dom"
+    },
+    {
+      "id": "https://openalex.org/W4410609100",
+      "title": "Jailbreaking Black Box Large Language Models in Twenty Queries",
+      "authors": [
+        "Patrick Chao",
+        "Alexander Robey",
+        "Edgar Dobriban",
+        "Hamed Hassani"
+      ],
+      "year": 2025,
+      "venue": "IEEE Conference on Secure and Trustworthy Machine Learning (SaTML)",
+      "doi": "10.1109/satml64287.2025.00010",
+      "cited_by_count": 1301,
+      "topics": [
+        "Black box",
+        "Computer science"
+      ],
+      "url": "https://doi.org/10.1109/satml64287.2025.00010",
+      "abstract": "There is growing interest in ensuring that large language models (LLMs) align with human values. However, the alignment of such models is vulnerable to adversarial jailbreaks, which coax LLMs into overriding their safety guardrails. The identification of these vulnerabilities is therefore instrument"
+    },
+    {
+      "id": "https://openalex.org/W4390690464",
+      "title": "DeepSeek LLM: Scaling Open-Source Language Models with Longtermism",
+      "authors": [
+        "DeepSeek-AI",
+        ":",
+        "Bi, Xiao",
+        "Deli Chen"
+      ],
+      "year": 2024,
+      "venue": "arXiv (Cornell University)",
+      "doi": "10.48550/arxiv.2401.02954",
+      "cited_by_count": 1240,
+      "topics": [
         "Computer science",
-        "Deep learning",
-        "Anomaly (physics)"
+        "Open source",
+        "Scaling",
+        "Perspective (graphical)"
       ],
-      "url": "https://doi.org/10.1145/3691338",
-      "abstract": "Time series anomaly detection is important for a wide range of research fields and applications, including financial markets, economics, earth sciences, manufacturing, and healthcare. The presence of anomalies can indicate novel or unexpected events, such as production faults, system defects, and he"
+      "url": "https://doi.org/10.48550/arxiv.2401.02954",
+      "abstract": "The rapid development of open-source large language models (LLMs) has been truly remarkable. However, the scaling law described in previous literature presents varying conclusions, which casts a dark cloud over scaling LLMs. We delve into the study of scaling laws and present our distinctive finding"
     },
     {
-      "id": "https://openalex.org/W4392240262",
-      "title": "Harnessing the Power of LLMs in Practice: A Survey on ChatGPT and Beyond",
+      "id": "https://openalex.org/W7125135101",
+      "title": "A Survey on Large Language Models for Code Generation",
       "authors": [
-        "Jingfeng Yang",
-        "Hongye Jin",
-        "Ruixiang Tang",
-        "Xiaotian Han"
+        "Juyong Jiang",
+        "Fan Wang",
+        "Jiasi Shen",
+        "Sungju Kim"
       ],
-      "year": 2024,
-      "venue": "ACM Transactions on Knowledge Discovery from Data",
-      "doi": "10.1145/3649506",
-      "cited_by_count": 645,
-      "topics": [
-        "Power (physics)"
-      ],
-      "url": "https://doi.org/10.1145/3649506",
-      "abstract": "This article presents a comprehensive and practical guide for practitioners and end-users working with Large Language Models (LLMs) in their downstream Natural Language Processing (NLP) tasks. We provide discussions and insights into the usage of LLMs from the perspectives of models, data, and downs"
-    },
-    {
-      "id": "https://openalex.org/W4390906246",
-      "title": "A review of graph neural networks: concepts, architectures, techniques, challenges, datasets, applications, and future directions",
-      "authors": [
-        "Bharti Khemani",
-        "Shruti Patil",
-        "Ketan V. Kotecha",
-        "Sudeep Tanwar"
-      ],
-      "year": 2024,
-      "venue": "Journal Of Big Data",
-      "doi": "10.1186/s40537-023-00876-4",
-      "cited_by_count": 634,
+      "year": 2025,
+      "venue": "ACM Transactions on Software Engineering and Methodology",
+      "doi": "10.1145/3747588",
+      "cited_by_count": 1206,
       "topics": [
         "Computer science",
-        "Python (programming language)",
-        "Implementation",
-        "Graph"
+        "Code review",
+        "Software engineering",
+        "Data science"
       ],
-      "url": "https://doi.org/10.1186/s40537-023-00876-4",
-      "abstract": "Abstract Deep learning has seen significant growth recently and is now applied to a wide range of conventional use cases, including graphs. Graph data provides relational information between elements and is a standard data format for various machine learning and deep learning tasks. Models that can "
+      "url": "https://doi.org/10.1145/3747588",
+      "abstract": "Large Language Models (LLMs) have garnered remarkable advancements across diverse code-related tasks, known as Code LLMs, particularly in code generation that generates source code with LLM from natural language descriptions. This burgeoning field has captured significant interest from both academic"
     },
     {
-      "id": "https://openalex.org/W4394828356",
-      "title": "GPT (Generative Pre-Trained Transformer)— A Comprehensive Review on Enabling Technologies, Potential Applications, Emerging Challenges, and Future Directions",
+      "id": "https://openalex.org/W4391855109",
+      "title": "A Review on Large Language Models: Architectures, Applications, Taxonomies, Open Issues and Challenges",
       "authors": [
-        "Gokul Yenduri",
-        "M. Ramalingam",
-        "G. Chemmalar Selvi",
-        "Y. Supriya"
+        "Mohaimenul Azam Khan Raiaan",
+        "Md. Saddam Hossain Mukta",
+        "Kaniz Fatema",
+        "Nur Mohammad Fahad"
       ],
       "year": 2024,
       "venue": "IEEE Access",
-      "doi": "10.1109/access.2024.3389497",
-      "cited_by_count": 603,
+      "doi": "10.1109/access.2024.3365742",
+      "cited_by_count": 1134,
       "topics": [
         "Computer science",
-        "Transformer",
-        "Architecture",
-        "Natural language understanding"
+        "Open research",
+        "Data science"
       ],
-      "url": "https://doi.org/10.1109/access.2024.3389497",
-      "abstract": "The Generative Pre-trained Transformer (GPT) represents a notable breakthrough in the domain of natural language processing, which is propelling us toward the development of machines that can understand and communicate using language in a manner that closely resembles that of humans. GPT is based on"
-    },
-    {
-      "id": "https://openalex.org/W4404658388",
-      "title": "A comprehensive survey on pretrained foundation models: a history from BERT to ChatGPT",
-      "authors": [
-        "Ce Zhou",
-        "Qian Li",
-        "Chen Li",
-        "Jun Yu"
-      ],
-      "year": 2024,
-      "venue": "International Journal of Machine Learning and Cybernetics",
-      "doi": "10.1007/s13042-024-02443-6",
-      "cited_by_count": 571,
-      "topics": [
-        "Computer science",
-        "Modalities",
-        "Transformer",
-        "Scalability"
-      ],
-      "url": "https://doi.org/10.1007/s13042-024-02443-6",
-      "abstract": ""
-    },
-    {
-      "id": "https://openalex.org/W4391974543",
-      "title": "Software Testing With Large Language Models: Survey, Landscape, and Vision",
-      "authors": [
-        "Junjie Wang",
-        "Yuchao Huang",
-        "Chunyang Chen",
-        "Zhe Liu"
-      ],
-      "year": 2024,
-      "venue": "IEEE Transactions on Software Engineering",
-      "doi": "10.1109/tse.2024.3368208",
-      "cited_by_count": 570,
-      "topics": [
-        "Computer science",
-        "Software engineering",
-        "Software"
-      ],
-      "url": "https://doi.org/10.1109/tse.2024.3368208",
-      "abstract": "Pre-trained large language models (LLMs) have recently emerged as a breakthrough technology in natural language processing and artificial intelligence, with the ability to handle large-scale datasets and exhibit remarkable performance across a wide range of tasks. Meanwhile, software testing is a cr"
-    },
-    {
-      "id": "https://openalex.org/W4390829176",
-      "title": "Balancing Privacy and Progress: A Review of Privacy Challenges, Systemic Oversight, and Patient Perceptions in AI-Driven Healthcare",
-      "authors": [
-        "Steven M. Williamson",
-        "Victor R. Prybutok"
-      ],
-      "year": 2024,
-      "venue": "Applied Sciences",
-      "doi": "10.3390/app14020675",
-      "cited_by_count": 568,
-      "topics": [
-        "Health care",
-        "Autonomy",
-        "Confidentiality",
-        "Transformative learning"
-      ],
-      "url": "https://doi.org/10.3390/app14020675",
-      "abstract": "Integrating Artificial Intelligence (AI) in healthcare represents a transformative shift with substantial potential for enhancing patient care. This paper critically examines this integration, confronting significant ethical, legal, and technological challenges, particularly in patient privacy, deci"
-    },
-    {
-      "id": "https://openalex.org/W4399044986",
-      "title": "Revolutionizing Cybersecurity Audit through Artificial Intelligence Automation: A Comprehensive Exploration",
-      "authors": [
-        "Nirjhor Anjum",
-        "Rubel Chowdhury"
-      ],
-      "year": 2024,
-      "venue": "IJARCCE",
-      "doi": "10.17148/ijarcce.2024.13575",
-      "cited_by_count": 560,
-      "topics": [
-        "Computer science",
-        "Automation",
-        "Audit",
-        "Computer security"
-      ],
-      "url": "https://doi.org/10.17148/ijarcce.2024.13575",
-      "abstract": "In today's fast-paced digital world, integrating Artificial Intelligence (AI) into cybersecurity practices is crucial for making auditing processes better and faster.This paper explores how AI automation is changing cybersecurity audits, showing its many impacts.By looking at current research, we se"
-    },
-    {
-      "id": "https://openalex.org/W4395483946",
-      "title": "Generative AI and the future of higher education: a threat to academic integrity or reformation? Evidence from multicultural perspectives",
-      "authors": [
-        "Abdullahi Yusuf",
-        "Nasrin Pervin",
-        "‪Marcos Román-González‬"
-      ],
-      "year": 2024,
-      "venue": "International Journal of Educational Technology in Higher Education",
-      "doi": "10.1186/s41239-024-00453-6",
-      "cited_by_count": 554,
-      "topics": [
-        "Multiculturalism",
-        "Higher education",
-        "Academic integrity",
-        "Generative grammar"
-      ],
-      "url": "https://doi.org/10.1186/s41239-024-00453-6",
-      "abstract": "Abstract In recent years, higher education (HE) globally has witnessed extensive adoption of technology, particularly in teaching and research. The emergence of generative Artificial Intelligence (GenAI) further accelerates this trend. However, the increasing sophistication of GenAI tools has raised"
-    },
-    {
-      "id": "https://openalex.org/W4392851477",
-      "title": "Generative AI in healthcare: an implementation science informed translational path on application, integration and governance",
-      "authors": [
-        "Sandeep Reddy"
-      ],
-      "year": 2024,
-      "venue": "Implementation Science",
-      "doi": "10.1186/s13012-024-01357-9",
-      "cited_by_count": 554,
-      "topics": [
-        "Health care",
-        "Health informatics",
-        "Generative grammar",
-        "Knowledge management"
-      ],
-      "url": "https://doi.org/10.1186/s13012-024-01357-9",
-      "abstract": "BACKGROUND: Artificial intelligence (AI), particularly generative AI, has emerged as a transformative tool in healthcare, with the potential to revolutionize clinical decision-making and improve health outcomes. Generative AI, capable of generating new data such as text and images, holds promise in "
-    },
-    {
-      "id": "https://openalex.org/W4402128637",
-      "title": "The promise and challenges of generative AI in education",
-      "authors": [
-        "Michail N. Giannakos",
-        "Roger Azevedo",
-        "Peter L. Brusilovsky",
-        "Mutlu Cukurova"
-      ],
-      "year": 2024,
-      "venue": "Behaviour and Information Technology",
-      "doi": "10.1080/0144929x.2024.2394886",
-      "cited_by_count": 541,
-      "topics": [
-        "Generative grammar"
-      ],
-      "url": "https://doi.org/10.1080/0144929x.2024.2394886",
-      "abstract": "Generative artificial intelligence (GenAI) tools, such as large language models (LLMs), generate natural language and other types of content to perform a wide range of tasks. This represents a significant technological advancement that poses opportunities and challenges to educational research and p"
+      "url": "https://doi.org/10.1109/access.2024.3365742",
+      "abstract": "Large Language Models (LLMs) recently demonstrated extraordinary capability, including natural language processing (NLP), language translation, text generation, question answering, etc. Moreover, LLMs are a new and essential part of computerized language processing, having the ability to understand "
     },
     {
       "id": "https://openalex.org/W4410202262",
@@ -462,12 +461,96 @@
       "year": 2025,
       "venue": "Patterns",
       "doi": "10.1016/j.patter.2025.101260",
-      "cited_by_count": 512,
+      "cited_by_count": 1043,
       "topics": [
         "Computer science"
       ],
       "url": "https://doi.org/10.1016/j.patter.2025.101260",
       "abstract": "This review explores the role of prompt engineering in unleashing the capabilities of large language models (LLMs). Prompt engineering is the process of structuring inputs, and it has emerged as a crucial technique for maximizing the utility and accuracy of these models. Both foundational and advanc"
+    },
+    {
+      "id": "https://openalex.org/W4392240262",
+      "title": "Harnessing the Power of LLMs in Practice: A Survey on ChatGPT and Beyond",
+      "authors": [
+        "Jingfeng Yang",
+        "Hongye Jin",
+        "Ruixiang Tang",
+        "Xiaotian Han"
+      ],
+      "year": 2024,
+      "venue": "ACM Transactions on Knowledge Discovery from Data",
+      "doi": "10.1145/3649506",
+      "cited_by_count": 1027,
+      "topics": [
+        "Power (physics)"
+      ],
+      "url": "https://doi.org/10.1145/3649506",
+      "abstract": "This article presents a comprehensive and practical guide for practitioners and end-users working with Large Language Models (LLMs) in their downstream Natural Language Processing (NLP) tasks. We provide discussions and insights into the usage of LLMs from the perspectives of models, data, and downs"
+    },
+    {
+      "id": "https://openalex.org/W4401889742",
+      "title": "Recurrent Neural Networks: A Comprehensive Review of Architectures, Variants, and Applications",
+      "authors": [
+        "Ibomoiye Domor Mienye",
+        "Theo G. Swart",
+        "George Obaido"
+      ],
+      "year": 2024,
+      "venue": "Information",
+      "doi": "10.3390/info15090517",
+      "cited_by_count": 964,
+      "topics": [
+        "Recurrent neural network",
+        "Computer science",
+        "Artificial intelligence",
+        "Transformer"
+      ],
+      "url": "https://doi.org/10.3390/info15090517",
+      "abstract": "Recurrent Neural Networks (RNNs) have significantly advanced the field of machine learning by enabling the effective processing of sequential data. This paper provides a comprehensive review of RNNs and their applications, highlighting advancements in architectures such as Long Short-Term Memory (LS"
+    },
+    {
+      "id": "https://openalex.org/W4404658388",
+      "title": "A comprehensive survey on pretrained foundation models: a history from BERT to ChatGPT",
+      "authors": [
+        "Ce Zhou",
+        "Qian Li",
+        "Chen Li",
+        "Jun Yu"
+      ],
+      "year": 2024,
+      "venue": "International Journal of Machine Learning and Cybernetics",
+      "doi": "10.1007/s13042-024-02443-6",
+      "cited_by_count": 964,
+      "topics": [
+        "Computer science",
+        "Modalities",
+        "Transformer",
+        "Scalability"
+      ],
+      "url": "https://doi.org/10.1007/s13042-024-02443-6",
+      "abstract": ""
+    },
+    {
+      "id": "https://openalex.org/W4394828356",
+      "title": "GPT (Generative Pre-Trained Transformer)— A Comprehensive Review on Enabling Technologies, Potential Applications, Emerging Challenges, and Future Directions",
+      "authors": [
+        "Gokul Yenduri",
+        "M. Ramalingam",
+        "G. Chemmalar Selvi",
+        "Y. Supriya"
+      ],
+      "year": 2024,
+      "venue": "IEEE Access",
+      "doi": "10.1109/access.2024.3389497",
+      "cited_by_count": 907,
+      "topics": [
+        "Computer science",
+        "Transformer",
+        "Architecture",
+        "Natural language understanding"
+      ],
+      "url": "https://doi.org/10.1109/access.2024.3389497",
+      "abstract": "The Generative Pre-trained Transformer (GPT) represents a notable breakthrough in the domain of natural language processing, which is propelling us toward the development of machines that can understand and communicate using language in a manner that closely resembles that of humans. GPT is based on"
     },
     {
       "id": "https://openalex.org/W4392681182",
@@ -480,7 +563,7 @@
       "year": 2024,
       "venue": "Harvard Data Science Review",
       "doi": "10.1162/99608f92.5317da47",
-      "cited_by_count": 507,
+      "cited_by_count": 876,
       "topics": [
         "Computer science",
         "Task (project management)"
@@ -489,127 +572,48 @@
       "abstract": "GPT-3.5 and GPT-4 are the two most widely used large language model (LLM) services. However, when and how these models are updated over time is opaque. Here, we evaluate the March 2023 and June 2023 versions of GPT-3.5 and GPT-4 on several diverse tasks: 1) math problems, 2) sensitive/dangerous ques"
     },
     {
-      "id": "https://openalex.org/W4390828922",
-      "title": "Unleashing the Power of Edge-Cloud Generative AI in Mobile Networks: A Survey of AIGC Services",
+      "id": "https://openalex.org/W4405181600",
+      "title": "\"Do Anything Now\": Characterizing and Evaluating In-The-Wild Jailbreak Prompts on Large Language Models",
       "authors": [
-        "Minrui Xu",
-        "Hongyang Du",
-        "Dusit Tao Niyato",
-        "Jiawen Kang"
+        "Xinyue Shen",
+        "Zeyuan Chen",
+        "Michael Backes A",
+        "Yun Shen"
       ],
       "year": 2024,
-      "venue": "IEEE Communications Surveys & Tutorials",
-      "doi": "10.1109/comst.2024.3353265",
-      "cited_by_count": 456,
+      "venue": "ACM SIGSAC Conference on Computer and Communications Security (CCS)",
+      "doi": "10.1145/3658644.3670388",
+      "cited_by_count": 865,
       "topics": [
-        "Computer science",
-        "Cloud computing",
-        "Enhanced Data Rates for GSM Evolution",
-        "Mobile computing"
+        "Harm",
+        "Set (abstract data type)",
+        "Adversarial system",
+        "Privilege (computing)"
       ],
-      "url": "https://doi.org/10.1109/comst.2024.3353265",
-      "abstract": "Artificial Intelligence-Generated Content (AIGC) is an automated method for generating, manipulating, and modifying valuable and diverse data using AI algorithms creatively. This survey paper focuses on the deployment of AIGC applications, e.g., ChatGPT and Dall-E, at mobile edge networks, namely mo"
+      "url": "https://doi.org/10.1145/3658644.3670388",
+      "abstract": "The misuse of large language models (LLMs) has drawn significant attention from the general public and LLM vendors. One particular type of adversarial prompt, known as jailbreak prompt, has emerged as the main attack vector to bypass the safeguards and elicit harmful content from LLMs. In this paper"
     },
     {
-      "id": "https://openalex.org/W4401386758",
-      "title": "Large Language Models in Healthcare and Medical Domain: A Review",
+      "id": "https://openalex.org/W4390833079",
+      "title": "Sleeper Agents: Training Deceptive LLMs that Persist Through Safety Training",
       "authors": [
-        "Zabir Al Nazi",
-        "Wei Peng"
+        "Evan Hubinger",
+        "Carson Denison",
+        "Jesse Mu",
+        "Lambert, Mike"
       ],
       "year": 2024,
-      "venue": "Informatics",
-      "doi": "10.3390/informatics11030057",
-      "cited_by_count": 415,
+      "venue": "arXiv (Cornell University)",
+      "doi": "10.48550/arxiv.2401.05566",
+      "cited_by_count": 794,
       "topics": [
-        "Health care",
-        "Domain (mathematical analysis)",
-        "Computer science"
+        "Backdoor",
+        "Training (meteorology)",
+        "Deception",
+        "Construct (python library)"
       ],
-      "url": "https://doi.org/10.3390/informatics11030057",
-      "abstract": "The deployment of large language models (LLMs) within the healthcare sector has sparked both enthusiasm and apprehension. These models exhibit the remarkable ability to provide proficient responses to free-text queries, demonstrating a nuanced understanding of professional medical knowledge. This co"
-    },
-    {
-      "id": "https://openalex.org/W4396685186",
-      "title": "Advancements in Generative AI: A Comprehensive Review of GANs, GPT, Autoencoders, Diffusion Model, and Transformers",
-      "authors": [
-        "Staphord Bengesi",
-        "Hoda El-Sayed",
-        "Md Kamruzzaman Sarker",
-        "Yao Houkpati"
-      ],
-      "year": 2024,
-      "venue": "IEEE Access",
-      "doi": "10.1109/access.2024.3397775",
-      "cited_by_count": 376,
-      "topics": [
-        "Computer science",
-        "Transformer",
-        "Generative grammar",
-        "Generative model"
-      ],
-      "url": "https://doi.org/10.1109/access.2024.3397775",
-      "abstract": "The launch of ChatGPT in 2022 garnered global attention, marking a significant milestone in the Generative Artificial Intelligence (GAI) field. While GAI has been in effect for the past decade, the introduction of ChatGPT sparked a new wave of research and innovation in the Artificial Intelligence ("
-    },
-    {
-      "id": "https://openalex.org/W4406302454",
-      "title": "Security and Privacy Challenges of Large Language Models: A Survey",
-      "authors": [
-        "Badhan Chandra Das",
-        "M. Hadi Amini",
-        "Yanzhao Wu"
-      ],
-      "year": 2025,
-      "venue": "ACM Computing Surveys",
-      "doi": "10.1145/3712001",
-      "cited_by_count": 370,
-      "topics": [
-        "Computer science",
-        "Computer security"
-      ],
-      "url": "https://doi.org/10.1145/3712001",
-      "abstract": "Large language models (LLMs) have demonstrated extraordinary capabilities and contributed to multiple fields, such as generating and summarizing text, language translation, and question-answering. Today, LLMs have become quite popular tools in natural language processing tasks, with the capability t"
-    },
-    {
-      "id": "https://openalex.org/W4392599656",
-      "title": "Generative AI in Medical Practice: In-Depth Exploration of Privacy and Security Challenges",
-      "authors": [
-        "Yan Chen",
-        "Pouyan Esmaeilzadeh"
-      ],
-      "year": 2024,
-      "venue": "Journal of Medical Internet Research",
-      "doi": "10.2196/53008",
-      "cited_by_count": 353,
-      "topics": [
-        "Generative grammar",
-        "Health care",
-        "Computer science",
-        "Field (mathematics)"
-      ],
-      "url": "https://doi.org/10.2196/53008",
-      "abstract": "As advances in artificial intelligence (AI) continue to transform and revolutionize the field of medicine, understanding the potential uses of generative AI in health care becomes increasingly important. Generative AI, including models such as generative adversarial networks and large language model"
-    },
-    {
-      "id": "https://openalex.org/W4402155831",
-      "title": "Multimodal Large Language Models in Health Care: Applications, Challenges, and Future Outlook",
-      "authors": [
-        "Rawan AlSaad",
-        "Alaa Ali Abd-Alrazaq",
-        "Sabri Boughorbel",
-        "Arfan Ahmed"
-      ],
-      "year": 2024,
-      "venue": "Journal of Medical Internet Research",
-      "doi": "10.2196/59505",
-      "cited_by_count": 349,
-      "topics": [
-        "Preprint",
-        "Health care",
-        "Computer science"
-      ],
-      "url": "https://doi.org/10.2196/59505",
-      "abstract": "In the complex and multidimensional field of medicine, multimodal data are prevalent and crucial for informed clinical decisions. Multimodal data span a broad spectrum of data types, including medical images (eg, MRI and CT scans), time-series data (eg, sensor data from wearable devices and electron"
+      "url": "https://doi.org/10.48550/arxiv.2401.05566",
+      "abstract": "Humans are capable of strategically deceptive behavior: behaving helpfully in most situations, but then behaving very differently in order to pursue alternative objectives when given the opportunity. If an AI system learned such a deceptive strategy, could we detect it and remove it using current st"
     }
   ]
 }
