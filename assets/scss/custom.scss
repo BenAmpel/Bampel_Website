@@ -5964,3 +5964,10 @@ section#about h2.about-heading {
     font-size: 1.5rem;
   }
 }
+
+// CV page: the standalone PDF download link is a control, not prose, so give it a 44px-high target (WCAG 2.5.8).
+section#cv-download a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
