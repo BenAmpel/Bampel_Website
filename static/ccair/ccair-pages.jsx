@@ -678,7 +678,7 @@ function ContactPage() {
   return (
     <div className="page">
       <PageHead eyebrow="Contact" title="Get in touch"
-        lede="Interested in collaboration, joining the lab, or learning more about CCAIR? Email is the best way to reach us." >
+        lede="Interested in collaboration, joining the research group, or learning more about CCAIR? Email is the best way to reach us." >
         <div className="hero-cta" style={{ justifyContent: 'flex-start' }}>
           <a className="btn btn-primary" href="mailto:bampel@gsu.edu">Email Dr. Ampel <Arrow /></a>
           <a className="btn btn-secondary" href="https://robinson.gsu.edu/profile/benjamin-ampel/">GSU profile</a>
