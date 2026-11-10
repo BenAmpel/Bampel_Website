@@ -202,7 +202,7 @@
               {{/* Alt text names the institution from the education entry (the logo file name is only a key). */}}
               {{ $logoAlt := $institution | default . }}
               <div class="edu-logo">
-                <img src="{{ $logo_img.RelPermalink }}" alt="{{ $logoAlt }} logo" loading="lazy" decoding="async">
+                <img src="{{ $logo_img.RelPermalink }}" width="{{ $logo_img.Width }}" height="{{ $logo_img.Height }}" alt="{{ $logoAlt }} logo" loading="lazy" decoding="async">
               </div>
               {{ end }}
               {{ end }}
