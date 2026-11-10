@@ -22,3 +22,6 @@
 {{/* Motion & prestige layer: scroll reveals, MPA view transitions,
      publication card glow, FT50/UTD24/award badges. */}}
 {{ partial "hooks/prestige-polish.html" . }}
+
+{{/* Pages that set `noindex: true` in front matter (e.g. /watchlight/privacy/) ask search engines not to index them. */}}
+{{ if .Params.noindex }}<meta name="robots" content="noindex">{{ end }}
