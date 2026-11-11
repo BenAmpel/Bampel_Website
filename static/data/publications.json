@@ -636,6 +636,22 @@
     "featured": true
   },
   {
+    "title": "Multimodal Phishing Detection on Social Media: Evaluating Text-Image Fusion",
+    "authors": [
+      "Kayla Redwing",
+      "Benjamin M. Ampel",
+      "Hsinchun Chen"
+    ],
+    "year": 2026,
+    "type": "workshop",
+    "venue": "WISP",
+    "url": "/workshop_publication/multimodal-phishing-wisp-2026/",
+    "date": "2026-12-12",
+    "abstract": "Social media platforms are a primary vector for phishing attacks that combine text and images to increase credibility. Prior research suggests that multimodal fusion improves classification performance. However, its effectiveness in social media phishing, where images may add noise rather than discriminative signal, remains unclear. We propose PhishFusion, a multimodal detection framework that integrates a Large Language Model-based text encoder, a transformer-based vision model, and a learned fusion mechanism. Following Computational Design Science principles, we evaluate PhishFusion against unimodal baselines, existing multimodal architectures, and 93 fusion configurations. The text-only BERT baseline (F1 = 86.96%) outperforms every multimodal model, including the best PhishFusion configuration (F1 = 81.87%). A case study on 10,000 unseen posts illustrates the artifact's outputs and its false positives. We contribute a reusable detection artifact and a candidate design principle: multimodal fusion helps only when each modality provides discriminative value.",
+    "award": null,
+    "featured": false
+  },
+  {
     "title": "Pathways to AI-Ready Entry-Level Talent for Industry Domains: Modular, Adaptive Design Principles for Business-School Curriculum",
     "authors": [
       "Arun Rai",
@@ -698,6 +714,23 @@
     "url": "/journal_publication/deepfake-jise/",
     "date": "2026-03-01",
     "abstract": "This teaching case uses a deepfake-enabled executive impersonation scam to help analyze cybersecurity failures and to design verification controls for communication environments. Pan-Asia Trading Ltd. is a fictional mid-sized firm that regularly conducts high-value monetary transfers. In early 2024, senior finance officer Grace Lee joins what appears to be a confidential video call with her CFO. However, the convincing face and voice are an advanced deepfake. The case examines failures in identity, authentication, and authorization, the role of AI-enabled deception, and the governance and privacy trade-offs faced by organizations. The case is designed for undergraduate and graduate courses in cybersecurity, information assurance, and MIS governance and supports experiential learning through realistic analysis of control gaps and AI-driven impersonation. The case emphasizes experiential learning around realistic AI-driven fraud scenarios and implementable verification controls.",
+    "award": null,
+    "featured": false
+  },
+  {
+    "title": "Semantic Conformance Scoring for Electric Vehicle Charging Station Cybersecurity Review Prioritization Using NIST IR 8473",
+    "authors": [
+      "Jizell Quijada",
+      "Benjamin M. Ampel",
+      "Steven Ullman",
+      "Hsinchun Chen"
+    ],
+    "year": 2026,
+    "type": "workshop",
+    "venue": "WISP",
+    "url": "/workshop_publication/evcs-conformance-wisp-2026/",
+    "date": "2026-12-12",
+    "abstract": "Electric Vehicle Charging Stations (EVCS) are increasingly networked components of transportation and energy infrastructure. However, practical methods for translating observed EVCS data into cybersecurity framework-aligned review priorities remain limited. Existing work often emphasizes attack detection and vulnerability discovery but provides less support for standards-based assessment. This paper proposes a semantic conformance-scoring method that maps EVCS asset profiles to task-level guidance extracted from the Identify function of the EVCS-specific NIST IR 8473 framework. In the absence of gold-standard EVCS-to-NIST labels, the study evaluates candidate models using intrinsic diagnostics, including score behavior, rank stability, cross-model convergence, and ablation analysis. A MiniLM + CTI-BERT consensus model was selected based on these criteria. The final scoring converts 17,325 successfully scored EVCS records into ranked NIST IR 8473 Identify-task review profiles. Results suggest that the workflow can support prioritization of EVCS assets for vendor review and identify relevant task areas for follow-up, while the scores should be interpreted as review-prioritization signals rather than verified compliance findings. This work contributes a scalable, framework-grounded workflow for EVCS cybersecurity assessment.",
     "award": null,
     "featured": false
   },
