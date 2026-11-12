@@ -371,8 +371,9 @@
     mount.innerHTML = '<div class="matching"><div class="scan" aria-hidden="true"></div><p class="part">Matching you to ' + ROLES.length + ' roles</p>' +
       '<p class="qtext flick" aria-hidden="true">&nbsp;</p><div class="interlude-bar" aria-hidden="true"><i></i></div></div>';
     var f = mount.querySelector('.flick'), names = ROLES.map(function (x) { return x.name; }), n = 0;
-    var iv = setInterval(function () { f.textContent = names[n++ % names.length]; }, 110);
-    setTimeout(function () { clearInterval(iv); if (g === gen) results(r, true); }, 1500);
+    // Reduced motion: no rapidly changing role names (a flicker) and a much shorter pause; the status line above still announces it.
+    var iv = reduce ? 0 : setInterval(function () { f.textContent = names[n++ % names.length]; }, 110);
+    setTimeout(function () { clearInterval(iv); if (g === gen) results(r, true); }, reduce ? 250 : 1500);
   }
 
   /* ---------- Results ---------- */
