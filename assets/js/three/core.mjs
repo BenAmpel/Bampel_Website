@@ -235,6 +235,37 @@ export function labelLayer(container, className = 't3-labels') {
   };
 }
 
+// Growable float buffers for a non-indexed geometry with vec3 positions and vec4 colours.
+export function vertexBuffers(geo) {
+  let cap = 0;
+  let pos = null;
+  let colr = null;
+  let n = 0;
+  const c = new Color();
+  return {
+    reset(verts) {
+      if (verts > cap) {
+        cap = Math.ceil(verts * 1.3);
+        pos = new Float32Array(cap * 3);
+        colr = new Float32Array(cap * 4);
+        geo.setAttribute('position', new BufferAttribute(pos, 3));
+        geo.setAttribute('color', new BufferAttribute(colr, 4));
+      }
+      n = 0;
+    },
+    push(x, y, z, css, a) {
+      const k = setColor(c, css) * a;
+      pos[n * 3] = x; pos[n * 3 + 1] = y; pos[n * 3 + 2] = z;
+      colr[n * 4] = c.r; colr[n * 4 + 1] = c.g; colr[n * 4 + 2] = c.b; colr[n * 4 + 3] = k;
+      n += 1;
+    },
+    commit() {
+      geo.setDrawRange(0, n);
+      if (pos) { geo.attributes.position.needsUpdate = true; geo.attributes.color.needsUpdate = true; }
+    },
+  };
+}
+
 export const easeOut = (t) => 1 - Math.pow(1 - t, 3);
 
 // Builds a view only once its box is on (or near) screen and has a size, so a page with several 3D views opens one

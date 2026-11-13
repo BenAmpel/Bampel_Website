@@ -6,6 +6,11 @@ date: 2022-10-24
 type: landing
 
 sections:
+  # ---------- OPENING BAND (three.js research constellation; hides itself without WebGL) ----------
+  - block: hero_constellation
+    id: constellation
+    content: {}
+
   # ---------- ABOUT / BIOGRAPHY ----------
   - block: about.biography
     id: about

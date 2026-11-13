@@ -118,8 +118,16 @@
 
   function loadScriptOnce(src, testFn) {
     if (testFn && testFn()) return Promise.resolve();
-    const exists = Array.from(document.scripts).some((script) => script.src === src);
-    if (exists) return Promise.resolve();
+    // Another script (the hero) may have added the same tag and still be loading it: wait for that load, not a no-op.
+    const abs = new URL(src, document.baseURI).href;
+    const existing = Array.from(document.scripts).find((script) => script.src === abs);
+    if (existing) {
+      if (!testFn) return Promise.resolve();
+      return new Promise((resolve, reject) => {
+        existing.addEventListener("load", resolve, { once: true });
+        existing.addEventListener("error", () => reject(new Error(`Failed to load ${src}`)), { once: true });
+      });
+    }
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
       script.src = src;

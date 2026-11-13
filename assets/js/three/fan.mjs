@@ -14,7 +14,7 @@ import {
   Scene, PerspectiveCamera, Group, BufferGeometry, BufferAttribute, Mesh, MeshBasicMaterial, LineSegments,
   LineBasicMaterial, Color, Vector3, AdditiveBlending, NormalBlending, DoubleSide,
 } from 'three';
-import { createStage, setColor, glowPoints, labelLayer, easeOut, whenVisible, prefersReducedMotion } from './core.mjs';
+import { createStage, glowPoints, labelLayer, vertexBuffers as buffers, easeOut, whenVisible, prefersReducedMotion } from './core.mjs';
 
 const FOV = 28;
 const DEPTH = 220; // CSS px of depth the peers spread over when fully tilted
@@ -24,37 +24,6 @@ function niceMax(v) {
   const p = Math.pow(10, Math.floor(Math.log10(v)));
   for (const m of [1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10]) if (m * p >= v) return m * p;
   return 10 * p;
-}
-
-// Growable float buffers for a non-indexed geometry with vec3 positions and vec4 colours.
-function buffers(geo) {
-  let cap = 0;
-  let pos = null;
-  let colr = null;
-  let n = 0;
-  const c = new Color();
-  return {
-    reset(verts) {
-      if (verts > cap) {
-        cap = Math.ceil(verts * 1.3);
-        pos = new Float32Array(cap * 3);
-        colr = new Float32Array(cap * 4);
-        geo.setAttribute('position', new BufferAttribute(pos, 3));
-        geo.setAttribute('color', new BufferAttribute(colr, 4));
-      }
-      n = 0;
-    },
-    push(x, y, z, css, a) {
-      const k = setColor(c, css) * a;
-      pos[n * 3] = x; pos[n * 3 + 1] = y; pos[n * 3 + 2] = z;
-      colr[n * 4] = c.r; colr[n * 4 + 1] = c.g; colr[n * 4 + 2] = c.b; colr[n * 4 + 3] = k;
-      n += 1;
-    },
-    commit() {
-      geo.setDrawRange(0, n);
-      if (pos) { geo.attributes.position.needsUpdate = true; geo.attributes.color.needsUpdate = true; }
-    },
-  };
 }
 
 export function create(container, opts = {}) {
