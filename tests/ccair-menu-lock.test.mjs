@@ -20,7 +20,7 @@ const SCRIPTS = ['vendor/react-18.3.1.production.min.js', 'vendor/react-dom-18.3
 const tick = (ms = 60) => new Promise((r) => setTimeout(r, ms));
 
 async function boot(route) {
-  const html = read(route + 'index.html').replace(/<script[^>]*src=[^>]*><\/script>/g, '');
+  const html = read(route + 'index.html'); // runScripts 'outside-only' and no resource loader: the page's own scripts never run
   const dom = new JSDOM(html, { url: 'http://localhost/ccair/' + route, runScripts: 'outside-only', pretendToBeVisual: true });
   const w = dom.window;
   w.fetch = () => new Promise(() => {});
