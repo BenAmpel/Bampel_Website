@@ -1,13 +1,17 @@
-/* Moved out of layouts/shortcodes/coauthor_evolution.html so the site CSP can drop script-src 'unsafe-inline'. */
+/* Authorship: first-author rate per year as "n of m" bars, and co-authors by the year of their first paper with
+   Dr. Ampel, coloured and filterable by relationship (mentor, peer, student). */
 (() => {
   const barsEl    = document.getElementById('cae-bars');
   const collabEl  = document.getElementById('cae-collab');
   const insightEl = document.getElementById('cae-insight');
+  const filterEl  = document.getElementById('cae-filter');
+  const statusEl  = document.getElementById('cae-status');
   if (!barsEl || !collabEl) return;
 
   const MENTORS = ['chen','samtani','nunamaker'];
   const PEERS   = ['hashim'];
   const MENTEES = ['otto','marx','gao','wagner','zhang','dacosta','reyes','vahedi','yang','hu'];
+  const REL_LABEL = { mentor:'Mentor', peer:'Peer', mentee:'Student' };
 
   const matchTerm = (text, term) => new RegExp('\\b' + term + '\\b').test(text);
   const classifyAuthor = name => {
@@ -24,6 +28,7 @@
     const parts = name.trim().split(/\s+/).filter(p => !/^[A-Z]\.$/.test(p) && !/^(Jr|Sr|II|III)\.?$/i.test(p));
     return parts.length >= 2 ? (parts[0] + ' ' + parts[parts.length - 1]).toLowerCase() : name.toLowerCase();
   };
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   loadPublications()
     .then(pubs => {
@@ -35,8 +40,8 @@
       });
       const years = Object.keys(byYear).sort();
 
-      barsEl.innerHTML = '';
       const firstRates = {};
+      let bars = '';
       years.forEach(yr => {
         const yrPubs = byYear[yr];
         const firstCount = yrPubs.filter(p => {
@@ -45,18 +50,16 @@
         }).length;
         const rate = Math.round((firstCount / yrPubs.length) * 100);
         firstRates[yr] = rate;
-
-        const row = document.createElement('div');
-        row.className = 'cae-bar-row';
-        row.innerHTML = '<div class="cae-bar-yr">' + yr + '</div>'
-          + '<div class="cae-bar-track"><div class="cae-bar-fill" style="width:' + rate + '%"></div></div>'
-          + '<div class="cae-bar-pct">' + rate + '%</div>';
-        barsEl.appendChild(row);
+        const thin = yrPubs.length <= 2 ? ' is-thin' : '';
+        bars += `<div class="cae-yr">${yr}</div>`
+          + `<div class="cae-track${thin}" role="img" aria-label="${yr}: first author on ${firstCount} of ${yrPubs.length} papers, ${rate}%"><span class="cae-fill" style="--w:${rate}%"></span></div>`
+          + `<div class="cae-val" aria-hidden="true">${rate}% <span>${firstCount} of ${yrPubs.length}</span></div>`;
       });
+      barsEl.innerHTML = bars;
 
-      collabEl.innerHTML = '';
       const seenCollabs = new Set();
-
+      const relCount = { mentor:0, peer:0, mentee:0 };
+      let rows = '';
       years.forEach(yr => {
         const newThisYear = [];
         byYear[yr].forEach(p => {
@@ -69,31 +72,41 @@
             }
           });
         });
-
         if (!newThisYear.length) return;
 
-        const row = document.createElement('div');
-        row.className = 'cae-collab-yr';
-        const lbl = document.createElement('div');
-        lbl.className = 'cae-collab-yr-lbl';
-        lbl.textContent = yr;
-        row.appendChild(lbl);
-
-        const chips = document.createElement('div');
-        chips.className = 'cae-chips';
-        newThisYear.forEach(name => {
+        const chips = newThisYear.map(name => {
           const rel = classifyAuthor(name);
-          if (rel === 'self') return;
-          const chip = document.createElement('span');
-          chip.className = 'cae-chip cae-' + rel;
+          if (rel === 'self') return '';
+          relCount[rel] += 1;
           // Display last name, skipping "Jr." suffix
           const parts = name.trim().split(/\s+/).filter(p => !/^(Jr|Sr|II|III)\.?$/i.test(p));
-          chip.textContent = parts[parts.length - 1];
-          chip.title = name;
-          chips.appendChild(chip);
+          return `<span class="cae-chip cae-${rel}" data-rel="${rel}" title="${esc(name)} (${REL_LABEL[rel]})">${esc(parts[parts.length - 1])}</span>`;
+        }).join('');
+        rows += `<div class="cae-year"><div class="cae-year-lbl">${yr}<span>${newThisYear.length} new</span></div><div class="cae-chips">${chips}</div></div>`;
+      });
+      collabEl.innerHTML = rows;
+
+      const total = relCount.mentor + relCount.peer + relCount.mentee;
+      const FILTERS = [['all', 'All', total], ['mentor', 'Mentors', relCount.mentor], ['peer', 'Peers', relCount.peer], ['mentee', 'Students', relCount.mentee]];
+      filterEl.innerHTML = FILTERS.map(([k, l, n]) => `<button class="rdm-btn" type="button" data-cae-rel="${k}" aria-pressed="${k === 'all'}">${k === 'all' ? '' : `<span class="im-swatch cae-${k}"></span>`}${l}<span class="rdm-count">${n}</span></button>`).join('');
+      filterEl.hidden = false;
+      filterEl.addEventListener('click', e => {
+        const btn = e.target.closest('[data-cae-rel]');
+        if (!btn) return;
+        const k = btn.dataset.caeRel;
+        filterEl.querySelectorAll('[data-cae-rel]').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+        let shown = 0;
+        collabEl.querySelectorAll('.cae-year').forEach(row => {
+          let inRow = 0;
+          row.querySelectorAll('.cae-chip').forEach(chip => {
+            const on = k === 'all' || chip.dataset.rel === k;
+            chip.hidden = !on;
+            if (on) inRow += 1;
+          });
+          row.hidden = inRow === 0;
+          shown += inRow;
         });
-        row.appendChild(chips);
-        collabEl.appendChild(row);
+        statusEl.textContent = k === 'all' ? '' : `Showing ${shown} ${FILTERS.find(f => f[0] === k)[1].toLowerCase()}`;
       });
 
       const early  = years.filter(y => y <= '2021');
@@ -102,5 +115,5 @@
       const menteeCount = [...seenCollabs].filter(n => MENTEES.some(m => n.includes(m))).length;
       insightEl.textContent = 'First-author rate: ' + avg(early) + '% (2019–21) → ' + avg(recent) + '% (2024–26). ' + menteeCount + ' PhD students joined the collaboration network since 2021.';
     })
-    .catch(() => { barsEl.innerHTML = '<div class="cae-loading">Could not load data.</div>'; });
+    .catch(() => { barsEl.innerHTML = '<p class="rdm-loading">Could not load the publication list.</p>'; });
 })();

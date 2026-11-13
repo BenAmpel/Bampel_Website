@@ -1,0 +1,6 @@
+{{- /* Shared research-page chrome (assets/css/widgets/rdm.css), linked once per page by whichever section renders first.
+     Usage in a shortcode: {{ partial "rdm_css" .Page }} */ -}}
+{{- if not (.Store.Get "rdmCSS") -}}
+  {{- .Store.Set "rdmCSS" true -}}
+  {{- partial "functions/css_tag" "css/widgets/rdm.css" -}}
+{{- end -}}

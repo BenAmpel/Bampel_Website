@@ -1,30 +1,37 @@
-<div class="cae-root" id="cae-root">
-<div class="cae-hdr">
-<div>
-<h3 class="cae-title">Authorship &amp; Collaboration Evolution</h3>
-<p class="cae-sub">From mentee to PI — how authorship position and collaboration structure shifted across career stages.</p>
-</div>
-</div>
-<div class="cae-panels">
-<div class="cae-panel">
-<div class="cae-panel-title">First-Authorship Rate</div>
-<div class="cae-panel-sub">% of papers where you are first or sole author</div>
-<div class="cae-bars" id="cae-bars"><div class="cae-loading">Loading…</div></div>
-</div>
-<div class="cae-panel">
-<div class="cae-panel-title">Collaboration Network Growth</div>
-<div class="cae-panel-sub">New co-authors per year · colors indicate relationship</div>
-<div class="cae-collab" id="cae-collab"><div class="cae-loading">Loading…</div></div>
-<div class="cae-collab-legend">
-<span class="cae-cl"><span class="cae-clsq cae-mentor"></span>Mentor</span>
-<span class="cae-cl"><span class="cae-clsq cae-peer"></span>Peer / Collaborator</span>
-<span class="cae-cl"><span class="cae-clsq cae-mentee"></span>Student / Mentee</span>
-</div>
-</div>
-</div>
-<div class="cae-insight" id="cae-insight"></div>
-</div>
+{{- /* Authorship: first-author rate per year and new co-authors per year by relationship.
+     Logic: assets/js/widgets/coauthor-evolution.js. */ -}}
+<section class="rdm rdm-card cae-root" id="cae-root" aria-labelledby="cae-heading">
+  <div class="rdm-head">
+    <div>
+      <h3 class="rdm-title" id="cae-heading">Authorship and Collaboration</h3>
+      <p class="rdm-sub">How authorship position and the co-author network have changed, year by year.</p>
+    </div>
+  </div>
+  <div class="cae-panels">
+    <div class="cae-panel">
+      <div class="cae-panel-head">
+        <div>
+          <h4 class="cae-panel-title">First-author rate</h4>
+          <p class="cae-panel-sub">Papers each year with Dr. Ampel as first or sole author</p>
+        </div>
+      </div>
+      <div class="cae-bars" id="cae-bars"><p class="rdm-loading">Loading publications…</p></div>
+      <p class="cae-note">Lighter bars cover two papers or fewer.</p>
+    </div>
+    <div class="cae-panel">
+      <div class="cae-panel-head">
+        <div>
+          <h4 class="cae-panel-title">New co-authors</h4>
+          <p class="cae-panel-sub">First paper together, by year</p>
+        </div>
+        <div class="rdm-seg cae-seg" id="cae-filter" role="group" aria-label="Show co-authors" hidden></div>
+      </div>
+      <div class="cae-years" id="cae-collab"><p class="rdm-loading">Loading publications…</p></div>
+      <span class="rdm-status" id="cae-status" role="status"></span>
+    </div>
+  </div>
+  <p class="rdm-insight" id="cae-insight"></p>
+</section>
 
-{{ partial "functions/css_tag" "css/widgets/coauthor-evolution.css" }}
-
+{{ partial "rdm_css" .Page }}
 {{ with resources.Get "js/widgets/coauthor-evolution.js" | minify | fingerprint }}<script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}"></script>{{ end }}

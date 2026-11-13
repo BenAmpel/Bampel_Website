@@ -1,48 +1,102 @@
+{{- /* Funding: summary tiles, then one row per grant on a shared year axis with a build-time "today" marker.
+     Data: data/grants.yaml. Sorting and the role filter: assets/js/widgets/grants.js (the list reads fine without it). */ -}}
 {{- $grants := sort hugo.Data.grants "year" "desc" -}}
 {{- $total := 0 -}}
+{{- $piCount := 0 -}}
+{{- $sources := slice -}}
+{{- $minY := 9999 -}}
+{{- $maxY := 0 -}}
 {{- range $grants -}}
   {{- $total = add $total (int .amount) -}}
-{{- end -}}
-{{- $sources := slice -}}
-{{- range $grants -}}
+  {{- if eq .role "PI" }}{{ $piCount = add $piCount 1 }}{{ end -}}
   {{- $sources = $sources | append .funding_source -}}
+  {{- $yrs := split (string .duration) "-" -}}
+  {{- $s := int (trim (index $yrs 0) " ") -}}
+  {{- $e := int (trim (index $yrs (sub (len $yrs) 1)) " ") -}}
+  {{- if lt $s $minY }}{{ $minY = $s }}{{ end -}}
+  {{- if gt $e $maxY }}{{ $maxY = $e }}{{ end -}}
 {{- end -}}
 {{- $sources = uniq $sources -}}
 {{- $totalFormatted := printf "%d" $total -}}
 {{- range seq 1 10 -}}
   {{- $totalFormatted = replaceRE "^(-?\\d+)(\\d{3})" "${1},${2}" $totalFormatted -}}
 {{- end -}}
+{{- /* The axis runs from the start of the first year to the end of the last (end years are inclusive). */ -}}
+{{- $span := float (add (sub $maxY $minY) 1) -}}
+{{- $today := add (float now.Year) (div (float (sub now.YearDay 1)) 365.0) -}}
+{{- $todayPct := mul (div (sub $today (float $minY)) $span) 100 -}}
+{{- $showToday := and (ge $todayPct 0.0) (le $todayPct 100.0) -}}
 
-<p><strong>Dr. Ampel has received ${{ $totalFormatted }} in funding from {{ delimit $sources ", " ", and " }}.</strong></p>
+<section class="rdm rdm-card gx-root" aria-labelledby="gx-heading">
+  <div class="rdm-head">
+    <div>
+      <h3 class="rdm-title" id="gx-heading">Funding</h3>
+      <p class="rdm-sub">External and internal grants, with each award's period on a shared timeline.</p>
+    </div>
+  </div>
 
-{{/* The six columns are wider than a phone; the wrapper scrolls sideways instead of clipping Amount, Role and Duration. */}}
-<div class="table-responsive" role="region" tabindex="0" aria-label="Funding and grants table, scrolls sideways">
-<table>
-  <thead>
-    <tr>
-      <th>Year</th>
-      <th>Funding Source</th>
-      <th>Grant Title</th>
-      <th>Amount</th>
-      <th>Role</th>
-      <th>Duration</th>
-    </tr>
-  </thead>
-  <tbody>
-    {{- range $grants }}
-    {{- $amountFormatted := printf "%d" (int .amount) -}}
+  <p class="gx-summary-text"><strong>Dr. Ampel has received ${{ $totalFormatted }} in funding from {{ delimit $sources ", " ", and " }}.</strong></p>
+
+  <dl class="rdm-stats">
+    <div class="rdm-stat"><dt>Total funding</dt><dd class="rdm-stat-num">${{ $totalFormatted }}</dd></div>
+    <div class="rdm-stat"><dt>Grants</dt><dd class="rdm-stat-num">{{ len $grants }}</dd></div>
+    <div class="rdm-stat"><dt>As PI</dt><dd class="rdm-stat-num">{{ $piCount }}<span class="rdm-stat-note">Co-PI on {{ sub (len $grants) $piCount }}</span></dd></div>
+    <div class="rdm-stat"><dt>Funders</dt><dd class="rdm-stat-num">{{ len $sources }}</dd></div>
+  </dl>
+
+  <div class="rdm-toolbar gx-toolbar" id="gx-toolbar" hidden>
+    <div class="rdm-seg" role="group" aria-label="Sort grants">
+      <button class="rdm-btn" type="button" data-gx-sort="newest" aria-pressed="true">Newest</button>
+      <button class="rdm-btn" type="button" data-gx-sort="largest" aria-pressed="false">Largest</button>
+    </div>
+    <div class="rdm-seg" role="group" aria-label="Filter by role">
+      <button class="rdm-btn" type="button" data-gx-role="all" aria-pressed="true">All roles</button>
+      <button class="rdm-btn" type="button" data-gx-role="PI" aria-pressed="false">PI</button>
+      <button class="rdm-btn" type="button" data-gx-role="Co-PI" aria-pressed="false">Co-PI</button>
+    </div>
+    <span class="rdm-status" id="gx-status" role="status"></span>
+  </div>
+
+  <div class="gx-axis-row" aria-hidden="true">
+    <div class="gx-axis">
+      {{- range $y := seq $minY $maxY }}
+      <span class="gx-tick{{ if modBool (sub $y $minY) 2 | not }} is-odd{{ end }}" style="--x:{{ mul (div (add (float (sub $y $minY)) 0.5) $span) 100 }}%">{{ $y }}</span>
+      {{- end }}
+      {{- if $showToday }}<span class="gx-today-label" style="--t:{{ $todayPct }}%">Today</span>{{ end }}
+    </div>
+    <div class="gx-legend"><span class="gx-role gx-pi">PI</span><span class="gx-role gx-copi">Co-PI</span></div>
+  </div>
+
+  <ol class="gx-list" id="gx-list">
+    {{- range $i, $g := $grants }}
+    {{- $amountFormatted := printf "%d" (int $g.amount) -}}
     {{- range seq 1 10 -}}
       {{- $amountFormatted = replaceRE "^(-?\\d+)(\\d{3})" "${1},${2}" $amountFormatted -}}
     {{- end -}}
-    <tr>
-      <td>{{ .year }}</td>
-      <td>{{ .funding_source }}</td>
-      <td>{{ .grant_title }}</td>
-      <td>${{ $amountFormatted }}</td>
-      <td>{{ .role }}</td>
-      <td>{{ .duration }}</td>
-    </tr>
+    {{- $yrs := split (string $g.duration) "-" -}}
+    {{- $s := int (trim (index $yrs 0) " ") -}}
+    {{- $e := int (trim (index $yrs (sub (len $yrs) 1)) " ") -}}
+    {{- $roleClass := cond (eq $g.role "PI") "gx-pi" "gx-copi" -}}
+    <li class="gx-item {{ $roleClass }}" data-order="{{ $i }}" data-amount="{{ int $g.amount }}" data-role="{{ $g.role }}">
+      <div>
+        <p class="gx-funder">{{ $g.funding_source }}</p>
+        <p class="gx-title">{{ $g.grant_title }}</p>
+      </div>
+      <div class="gx-side">
+        <span class="gx-amount">${{ $amountFormatted }}</span>
+        <span class="gx-role">{{ $g.role }}</span>
+      </div>
+      <div class="gx-when">
+        <div class="gx-track" role="img" aria-label="Awarded {{ $g.year }}, runs {{ if eq $s $e }}{{ $s }}{{ else }}{{ $s }} to {{ $e }}{{ end }}">
+          <span class="gx-span" style="--x0:{{ mul (div (float (sub $s $minY)) $span) 100 }}%; --w:{{ mul (div (float (add (sub $e $s) 1)) $span) 100 }}%"></span>
+          {{- if $showToday }}<span class="gx-today" style="--t:{{ $todayPct }}%"></span>{{ end }}
+        </div>
+        <span class="gx-dur">{{ if eq $s $e }}{{ $s }}{{ else }}{{ $s }}–{{ $e }}{{ end }}</span>
+      </div>
+    </li>
     {{- end }}
-  </tbody>
-</table>
-</div>
+  </ol>
+</section>
+
+{{ partial "rdm_css" .Page }}
+{{ with resources.Get "js/widgets/grants.js" | minify | fingerprint }}<script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" defer></script>{{ end }}

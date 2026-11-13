@@ -1,0 +1,289 @@
+/* Shared chrome for the research page sections (bampel.com/research): Funding, Impact at a glance, Impact Map,
+   Collaboration Network, Research Footprint, Publication Trajectory, Topic Evolution, Authorship. Moved out of
+   assets/scss/research_dashboard.scss on 2026-11-12 so the widgets outside the dashboard share the same tokens.
+   Loaded once per page by layouts/partials/rdm_css.html. */
+/* ---- Impact Map and Collaboration Network (redesign 2026-11-12) ----------------------------------------------------
+   Controls sit in a toolbar above each chart and the details live in a side panel, never floating over the plot.
+   rdm- = shared map chrome, im- = impact map (and shared panel/list pieces), cn- = collaboration network. */
+body.dark .rdm {
+  --rdm-text:#e6edf3; --rdm-body:#c9d1d9; --rdm-muted:#8b949e; --rdm-line:#30363d; --rdm-soft:rgba(110,118,129,0.12);
+  --rdm-hover:rgba(110,118,129,0.2); --rdm-on:#4ade80; --rdm-on-bg:rgba(74,222,128,0.12); --rdm-input:#0d1117;
+  --rdm-focus:#00e5ff;
+}
+body:not(.dark) .rdm {
+  --rdm-text:#1f2328; --rdm-body:#3d444d; --rdm-muted:#59636e; --rdm-line:#d1d9e0; --rdm-soft:rgba(175,184,193,0.16);
+  --rdm-hover:rgba(175,184,193,0.3); --rdm-on:#166534; --rdm-on-bg:rgba(22,101,52,0.1); --rdm-input:#ffffff;
+  --rdm-focus:#0077b6;
+}
+.rdm { border-top:1px solid var(--card-border, #333); padding:24px; color:var(--rdm-body); }
+.rdm p, .rdm li, .rdm dd { text-align:left !important; hyphens:none; }
+.rdm-head { display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:space-between; gap:12px 20px; margin-bottom:14px; }
+.rdm-title { margin:0 0 4px; font-size:1.05rem; font-weight:700; letter-spacing:0; text-transform:none; color:var(--rdm-text); }
+.rdm-sub { margin:0; max-width:60ch; font-size:0.85rem; line-height:1.45; color:var(--rdm-muted); }
+.rdm-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px; }
+.rdm-toolbar-2 { justify-content:space-between; margin-bottom:12px; }
+.rdm-seg { display:inline-flex; padding:3px; gap:2px; border:1px solid var(--rdm-line); border-radius:8px; background:var(--rdm-soft); }
+.rdm-btn { min-height:32px; padding:4px 12px; border:0; border-radius:6px; background:transparent; color:var(--rdm-body); font:600 0.8rem/1.2 Lato, sans-serif; cursor:pointer; transition:background-color 0.15s ease, color 0.15s ease; }
+.rdm-btn:hover { background:var(--rdm-hover); color:var(--rdm-text); }
+.rdm-btn[aria-pressed="true"] { background:var(--rdm-on-bg); color:var(--rdm-on); box-shadow:inset 0 0 0 1px var(--rdm-on); }
+.rdm-search { display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; flex:1 1 260px; }
+.rdm-search-label, .rdm-checks-label { font-size:0.8rem; font-weight:600; color:var(--rdm-muted); }
+.rdm-input { min-height:34px; width:100%; max-width:340px; padding:6px 10px; border:1px solid var(--rdm-line); border-radius:8px; background:var(--rdm-input); color:var(--rdm-text); font:0.85rem Lato, sans-serif; }
+.rdm-input::placeholder { color:var(--rdm-muted); }
+.rdm-status { font-size:0.8rem; color:var(--rdm-muted); }
+.rdm-checks { display:flex; flex-wrap:wrap; align-items:center; gap:4px 14px; margin:0; padding:0; border:0; }
+.rdm-checks-label { float:left; padding:0; margin-right:4px; }
+.rdm-check { display:inline-flex; align-items:center; gap:6px; min-height:32px; font-size:0.85rem; color:var(--rdm-body); cursor:pointer; }
+.rdm-check input { width:16px; height:16px; accent-color:var(--rdm-on); }
+
+.im-legend { display:flex; flex-wrap:wrap; align-items:center; gap:6px 8px; margin-bottom:12px; font-size:0.8rem; color:var(--rdm-body); }
+.im-legend-item, .im-legend-btn { display:inline-flex; align-items:center; gap:6px; min-height:30px; padding:2px 10px; border-radius:999px; }
+.im-legend-btn { border:1px solid var(--rdm-line); background:transparent; color:var(--rdm-body); font:0.8rem Lato, sans-serif; cursor:pointer; transition:opacity 0.15s ease, background-color 0.15s ease; }
+.im-legend-btn:hover { background:var(--rdm-hover); }
+.im-legend-btn[aria-pressed="false"] { opacity:0.55; text-decoration:line-through; }
+.im-legend-btn[aria-pressed="false"] .im-swatch { background:transparent; box-shadow:inset 0 0 0 2px var(--swatch); }
+.im-legend-count { font-family:'Fira Code', monospace; font-size:0.75rem; color:var(--rdm-muted); }
+.im-legend-note { font-size:0.8rem; color:var(--rdm-muted); padding:0 4px; }
+.im-swatch { flex:none; display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--swatch, #8b949e); }
+
+.rdm-btn:focus-visible, .rdm-input:focus-visible, .rdm-check input:focus-visible, .im-legend-btn:focus-visible,
+.im-clear:focus-visible, .im-item:focus-visible, .cn-item:focus-visible, .cn-mutual-btn:focus-visible,
+.im-canvas:focus-visible, .cn-canvas:focus-visible { outline:2px solid #00e5ff; outline-offset:2px; }
+body:not(.dark) .rdm :is(.rdm-btn, .rdm-input, .im-legend-btn, .im-clear, .im-item, .cn-item, .cn-mutual-btn, .im-canvas, .cn-canvas):focus-visible { outline-color:#0077b6; }
+
+/* custom.scss "BUTTONS CYBER STYLE" paints every button green with !important; the map controls opt out here. */
+.rdm :is(.rdm-btn, .im-legend-btn, .im-clear, .im-item, .cn-item, .cn-mutual-btn) { text-transform:none; letter-spacing:normal; }
+.rdm :is(.rdm-btn, .im-legend-btn, .im-clear, .im-item, .cn-item, .cn-mutual-btn):hover { transform:none; }
+.rdm .rdm-btn { background:transparent !important; border:0 !important; color:var(--rdm-body) !important; }
+.rdm .rdm-btn:hover { background:var(--rdm-hover) !important; color:var(--rdm-text) !important; }
+.rdm .rdm-btn[aria-pressed="true"] { background:var(--rdm-on-bg) !important; color:var(--rdm-on) !important; }
+.rdm :is(.im-legend-btn, .im-clear, .cn-mutual-btn) { background:transparent !important; border:1px solid var(--rdm-line) !important; color:var(--rdm-body) !important; }
+.rdm :is(.im-legend-btn, .im-clear, .cn-mutual-btn):hover { background:var(--rdm-hover) !important; border-color:var(--rdm-muted) !important; color:var(--rdm-text) !important; }
+.rdm :is(.im-item, .cn-item) { background:transparent !important; border:0 !important; color:var(--rdm-body) !important; }
+.rdm :is(.im-item, .cn-item):hover { background:var(--rdm-hover) !important; }
+.rdm .cn-item[aria-pressed="true"] { background:var(--rdm-on-bg) !important; }
+
+/* Detail panel, lists and stat cells shared by the maps and the widgets. */
+.im-body { display:grid; grid-template-columns:minmax(0, 1fr) 300px; gap:16px; align-items:start; }
+.im-canvas { width:100%; height:500px; border-radius:10px; }
+.im-panel { min-width:0; max-height:500px; overflow:auto; padding:14px; border:1px solid var(--rdm-line); border-radius:10px; background:var(--rdm-soft); font-size:0.85rem; line-height:1.45; }
+.im-panel-head { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+.im-kicker { margin:12px 0 6px; font-size:0.75rem; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:var(--rdm-muted); }
+.im-panel-head .im-kicker { margin:0; flex:1; }
+.im-panel > .im-kicker:first-child, #collab-spotlight > .im-kicker:first-child { margin-top:0; }
+.im-kicker-inline { font-weight:700; color:var(--rdm-muted); margin-right:4px; }
+.im-clear { min-height:28px; padding:2px 10px; border:1px solid var(--rdm-line); border-radius:6px; background:transparent; color:var(--rdm-body); font:600 0.75rem Lato, sans-serif; cursor:pointer; }
+.im-clear:hover { background:var(--rdm-hover); color:var(--rdm-text); }
+.im-panel-title { margin:0 0 4px; font-size:0.98rem; line-height:1.35; font-weight:700; color:var(--rdm-text); }
+.im-panel-title:focus { outline:none; }
+.im-panel-title:focus-visible { outline:2px solid var(--rdm-focus); outline-offset:2px; }
+.im-meta { margin:0 0 8px; color:var(--rdm-body); }
+.im-authors { margin:8px 0; font-size:0.8rem; color:var(--rdm-muted); }
+.im-authors strong { color:var(--rdm-text); }
+.im-stats { display:flex; flex-wrap:wrap; gap:8px; margin:8px 0; }
+.im-stats > div { flex:1 1 80px; padding:8px 10px; border:1px solid var(--rdm-line); border-radius:8px; }
+.im-stats dt { font-size:0.72rem; font-weight:600; color:var(--rdm-muted); }
+.im-stats dd { margin:0; font:600 1.05rem 'Fira Code', monospace; color:var(--rdm-text); }
+.im-cite { display:flex; flex-wrap:wrap; gap:6px; margin:6px 0 4px; }
+.im-list { list-style:none; margin:0; padding:0; display:grid; gap:2px; }
+.im-item { display:flex; align-items:flex-start; gap:8px; width:100%; padding:6px 8px; border:0; border-radius:6px; background:transparent; color:var(--rdm-body); text-align:left; font:inherit; cursor:pointer; }
+.im-item:hover { background:var(--rdm-hover); }
+.im-item .im-swatch { margin-top:5px; }
+.im-item-text { display:flex; flex-direction:column; min-width:0; }
+.im-item-title { color:var(--rdm-text); font-size:0.82rem; line-height:1.35; }
+.im-item-sub { font-size:0.75rem; color:var(--rdm-muted); }
+.im-hint { margin:10px 0 0; font-size:0.8rem; color:var(--rdm-muted); }
+
+/* ---- Research page sections (redesign 2026-11-12) -------------------------------------------------------------------
+   Data colours. Single series: the site accent. Tiers are ordinal, so one blue ramp light to dark (validated with the
+   dataviz --ordinal checks on #ffffff and #0d1117). Relationship and role are categorical; "peer" is the neutral bucket,
+   like "Other" on the Impact Map, and every colour also has a text label. */
+body.dark .rdm {
+  --rdm-series:#4ade80; --rdm-series-soft:rgba(74,222,128,0.35); --rdm-track:rgba(110,118,129,0.18);
+  --tier-1:#184f95; --tier-2:#2a78d6; --tier-3:#6da7ec; --tier-4:#cde2fb;
+  --rel-mentor:#a855f7; --rel-peer:#8b949e; --rel-mentee:#d97706;
+  --role-pi:#16a34a; --role-copi:#0284c7;
+}
+body:not(.dark) .rdm {
+  --rdm-series:#15803d; --rdm-series-soft:rgba(21,128,61,0.3); --rdm-track:rgba(175,184,193,0.28);
+  --tier-1:#86b6ef; --tier-2:#3987e5; --tier-3:#1c5cab; --tier-4:#0d366b;
+  --rel-mentor:#9333ea; --rel-peer:#6e7681; --rel-mentee:#c2410c;
+  --role-pi:#16a34a; --role-copi:#0284c7;
+}
+.rdm-card { margin:24px 0; border:1px solid var(--card-border, #333); border-radius:12px; background:var(--card-bg, rgba(255,255,255,0.02)); }
+.rdm h3.rdm-title { font-size:1.05rem; }
+.rdm-insight { margin:16px 0 0; padding:10px 14px; border-left:3px solid var(--rdm-series); border-radius:0 8px 8px 0; background:var(--rdm-soft); font-size:0.85rem; line-height:1.5; color:var(--rdm-body); }
+.rdm-insight:empty { display:none; }
+.rdm-insight strong { color:var(--rdm-text); }
+.rdm-mono { font-family:'Fira Code', monospace; }
+.rdm-loading { padding:16px 0; font-size:0.85rem; color:var(--rdm-muted); }
+.rdm-count { margin-left:4px; font:0.72rem 'Fira Code', monospace; color:var(--rdm-muted); }
+.rdm-btn[aria-pressed="true"] .rdm-count { color:inherit; }
+.rdm-link { display:inline-flex; align-items:center; gap:6px; margin-top:6px; font-weight:600; font-size:0.85rem; }
+
+/* Stat tiles (Impact at a glance, Funding). Text wears text tokens; numbers are monospace. */
+.rdm-stats { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; margin:0 0 18px; }
+.rdm-stat { margin:0; padding:12px 14px; border:1px solid var(--rdm-line); border-radius:10px; background:var(--rdm-soft); min-width:0; }
+.rdm-stat dt { font-size:0.75rem; font-weight:600; color:var(--rdm-muted); }
+.rdm-stat dd { margin:4px 0 0; font-size:1rem; font-weight:700; line-height:1.3; color:var(--rdm-text); overflow-wrap:anywhere; }
+.rdm-stat dd.rdm-stat-num { font:600 1.55rem/1.2 'Fira Code', monospace; }
+.rdm-stat-note { display:block; margin-top:2px; font-size:0.72rem; font-weight:400; color:var(--rdm-muted); }
+
+/* Impact at a glance: citations per year. */
+.rg-chart-head { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:4px 12px; margin-bottom:4px; }
+.rg-chart-title { margin:0; font-size:0.9rem; font-weight:700; color:var(--rdm-text); }
+.rg-chart-note { margin:0; font-size:0.78rem; color:var(--rdm-muted); }
+.rg-chart { width:100%; height:220px; }
+
+/* Research Footprint: controls above, legend below, nothing floating over the map. */
+.rf-controls { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 20px; margin-bottom:12px; }
+.rf-year { display:flex; align-items:center; gap:10px; font-size:0.85rem; color:var(--rdm-body); }
+.rf-year label { font-weight:600; color:var(--rdm-muted); white-space:nowrap; }
+.rf-year output { min-width:3.2em; font:600 0.85rem 'Fira Code', monospace; color:var(--rdm-text); }
+.rf-year input[type="range"] { width:180px; accent-color:var(--rdm-on); }
+.rf-map { position:relative; height:480px; border:1px solid var(--rdm-line); border-radius:10px; overflow:hidden; isolation:isolate; }
+.rf-map #dashboard-footprint-map { width:100%; height:100%; }
+.rf-legend { display:flex; flex-wrap:wrap; gap:6px 16px; margin-top:10px; font-size:0.8rem; color:var(--rdm-body); }
+.rf-legend .legend-row { display:inline-flex; align-items:center; gap:6px; }
+.rf-legend .footprint-legend-dot { width:10px; height:10px; border-radius:50%; background:var(--legend-color); }
+.rf-legend-note { color:var(--rdm-muted); }
+
+/* Funding: summary tiles, a shared year axis, one row per grant. */
+.gx-toolbar { margin:0 0 10px; justify-content:space-between; }
+.gx-toolbar[hidden] { display:none; }
+.gx-axis, .gx-track { position:relative; height:18px; }
+.gx-axis { margin:0 0 4px; height:36px; border-bottom:1px solid var(--rdm-line); }
+.gx-tick { position:absolute; bottom:3px; left:var(--x); transform:translateX(-50%); font:0.7rem 'Fira Code', monospace; color:var(--rdm-muted); }
+.gx-today-label { position:absolute; top:0; left:var(--t); transform:translateX(-50%); padding:0 4px; border-radius:4px; background:var(--rdm-on-bg); font:600 0.65rem 'Fira Code', monospace; color:var(--rdm-on); }
+.gx-list { list-style:none; margin:0; padding:0; display:grid; gap:8px; }
+.gx-item { display:grid; grid-template-columns:minmax(0, 1fr) auto; gap:4px 16px; padding:12px 14px; border:1px solid var(--rdm-line); border-radius:10px; background:var(--rdm-soft); }
+.gx-item[hidden] { display:none; }
+.gx-funder { margin:0; font-size:0.75rem; font-weight:700; color:var(--rdm-muted); }
+.gx-title { margin:2px 0 0; font-size:0.92rem; line-height:1.4; font-weight:600; color:var(--rdm-text); }
+.gx-side { display:flex; flex-direction:column; align-items:flex-end; gap:4px; text-align:right; }
+.gx-amount { font:600 1rem 'Fira Code', monospace; color:var(--rdm-text); white-space:nowrap; }
+.gx-role { display:inline-flex; align-items:center; gap:6px; padding:1px 8px; border:1px solid var(--rdm-line); border-radius:999px; font-size:0.72rem; font-weight:700; color:var(--rdm-body); white-space:nowrap; }
+.gx-role::before { content:""; width:8px; height:8px; border-radius:50%; background:var(--role); }
+.gx-pi { --role:var(--role-pi); }
+.gx-copi { --role:var(--role-copi); }
+.gx-when { grid-column:1 / -1; display:grid; grid-template-columns:minmax(0, 1fr) 92px; align-items:center; gap:12px; margin-top:6px; }
+.gx-track { border-radius:4px; background:var(--rdm-track); }
+.gx-span { position:absolute; top:4px; bottom:4px; left:var(--x0); width:var(--w); min-width:6px; border-radius:4px; background:var(--role); }
+.gx-today { position:absolute; top:-3px; bottom:-3px; left:var(--t); width:2px; border-radius:1px; background:var(--rdm-text); opacity:0.7; }
+.gx-dur { font:0.75rem 'Fira Code', monospace; color:var(--rdm-muted); text-align:right; }
+.gx-axis-row { display:grid; grid-template-columns:minmax(0, 1fr) 92px; gap:12px; margin:4px 14px 2px; }
+.gx-axis-row .gx-legend { display:flex; gap:10px; justify-content:flex-end; font-size:0.72rem; color:var(--rdm-muted); }
+.gx-summary-text { margin:0 0 14px; font-size:0.9rem; color:var(--rdm-body); }
+.gx-summary-text strong { color:var(--rdm-text); }
+
+/* Publication Trajectory: year rows by tier columns; selecting a dot pins the paper in the side panel. */
+.pll-legend-btn { --swatch:var(--tier); }
+.pll-t1 { --tier:var(--tier-1); } .pll-t2 { --tier:var(--tier-2); } .pll-t3 { --tier:var(--tier-3); } .pll-t4 { --tier:var(--tier-4); }
+.pll-grid { display:grid; grid-template-columns:44px repeat(4, minmax(0, 1fr)) 34px; gap:4px 8px; align-items:center; }
+.pll-col-head { padding-bottom:6px; border-bottom:1px solid var(--rdm-line); font-size:0.72rem; font-weight:700; text-align:center; color:var(--rdm-muted); }
+.pll-col-head.is-total { text-align:right; }
+.pll-yr { font:600 0.78rem 'Fira Code', monospace; text-align:right; color:var(--rdm-body); }
+.pll-total { font:0.75rem 'Fira Code', monospace; text-align:right; color:var(--rdm-muted); }
+.pll-cell { display:flex; flex-wrap:wrap; justify-content:center; align-content:center; min-height:32px; padding:2px; border-radius:8px; background:var(--rdm-soft); transition:opacity 0.15s ease; }
+.pll-cell:empty { background:transparent; box-shadow:inset 0 0 0 1px var(--rdm-soft); }
+.pll-root[data-off~="1"] .pll-cell.pll-t1, .pll-root[data-off~="2"] .pll-cell.pll-t2,
+.pll-root[data-off~="3"] .pll-cell.pll-t3, .pll-root[data-off~="4"] .pll-cell.pll-t4 { opacity:0.12; pointer-events:none; }
+/* Each dot is a 24px button (WCAG 2.5.8) painting an 11px dot in its content box. */
+.rdm .pll-dot { box-sizing:border-box; width:24px; height:24px; min-height:0; margin:0; padding:6.5px !important; border:0 !important; border-radius:50%; background:var(--tier) !important; background-clip:content-box !important; cursor:pointer; transition:padding 0.15s ease; }
+.rdm .pll-dot:hover, .rdm .pll-dot:focus-visible { padding:4px !important; transform:none; }
+.rdm .pll-dot[aria-pressed="true"] { padding:3px !important; box-shadow:0 0 0 2px var(--rdm-text) inset; }
+.pll-panel-tiers { list-style:none; margin:0; padding:0; display:grid; gap:8px; }
+.pll-panel-tiers li { display:grid; grid-template-columns:10px minmax(0, 1fr); gap:8px; font-size:0.8rem; }
+.pll-panel-tiers .im-swatch { margin-top:4px; --swatch:var(--tier); }
+.pll-panel-tiers li::before { content:none !important; display:none !important; }
+.pll-panel-tiers strong { color:var(--rdm-text); }
+.pll-panel-tiers span { color:var(--rdm-muted); }
+
+/* Topic Evolution: three phase bars per term, a trend label, and the matching papers on selection. */
+.td-grid { display:grid; grid-template-columns:minmax(120px, 1.1fr) repeat(3, minmax(0, 1fr)) 104px; gap:4px 10px; align-items:center; }
+.td-head { padding-bottom:6px; border-bottom:1px solid var(--rdm-line); font-size:0.75rem; font-weight:700; color:var(--rdm-text); }
+.td-head span { display:block; font:400 0.68rem 'Fira Code', monospace; color:var(--rdm-muted); }
+.td-row { display:contents; }
+.td-row[hidden] { display:none; }
+.rdm .td-term { display:flex; align-items:center; width:100%; min-height:32px; margin:0; padding:4px 8px !important; border:0 !important; border-radius:6px; background:transparent !important; color:var(--rdm-text) !important; font:600 0.82rem Lato, sans-serif; text-align:left; text-transform:none; letter-spacing:normal; cursor:pointer; }
+.rdm .td-term:hover { background:var(--rdm-hover) !important; transform:none; }
+.rdm .td-term[aria-pressed="true"] { background:var(--rdm-on-bg) !important; box-shadow:inset 0 0 0 1px var(--rdm-on); }
+.td-cell { display:grid; grid-template-columns:minmax(0, 1fr) 36px; align-items:center; gap:6px; }
+.td-track { height:10px; border-radius:3px; background:var(--rdm-track); overflow:hidden; }
+.td-fill { display:block; height:100%; width:var(--w); border-radius:3px; background:var(--rdm-series); }
+.td-val { font:0.72rem 'Fira Code', monospace; text-align:right; color:var(--rdm-body); }
+.td-val.is-zero { color:var(--rdm-muted); }
+.td-trend { display:inline-flex; align-items:center; gap:6px; white-space:nowrap; font-size:0.75rem; font-weight:600; color:var(--rdm-body); }
+.td-trend::before { content:""; width:0; height:0; border:5px solid transparent; }
+.td-rise::before { border-bottom:8px solid var(--rdm-series); border-top-width:0; }
+.td-fall::before { border-top:8px solid var(--rdm-muted); border-bottom-width:0; }
+.td-stable::before { width:9px; height:3px; border:0; border-radius:2px; background:var(--rdm-muted); }
+.td-papers { margin:0 0 10px; padding:0; list-style:none; display:grid; gap:6px; font-size:0.8rem; }
+.td-papers .td-yr { margin-right:6px; font:0.72rem 'Fira Code', monospace; color:var(--rdm-muted); }
+
+/* Authorship: first-author rate as "n of m" bars; new co-authors per year with a relationship filter. */
+.cae-panels { display:grid; grid-template-columns:minmax(0, 0.9fr) minmax(0, 1.1fr); gap:16px; align-items:start; }
+.cae-panel { min-width:0; padding:14px; border:1px solid var(--rdm-line); border-radius:10px; background:var(--rdm-soft); }
+.cae-panel-head { display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:space-between; gap:8px 12px; margin-bottom:10px; }
+.cae-panel-title { margin:0; font-size:0.9rem; font-weight:700; color:var(--rdm-text); }
+.cae-panel-sub { margin:2px 0 0; font-size:0.78rem; color:var(--rdm-muted); }
+.cae-bars { display:grid; grid-template-columns:40px minmax(0, 1fr) 82px; gap:6px 10px; align-items:center; }
+.cae-yr { font:600 0.78rem 'Fira Code', monospace; text-align:right; color:var(--rdm-body); }
+.cae-track { position:relative; height:14px; border-radius:4px; background:var(--rdm-track); overflow:hidden; }
+.cae-fill { display:block; height:100%; width:var(--w); border-radius:4px; background:var(--rdm-series); }
+.cae-track.is-thin .cae-fill { background:var(--rdm-series-soft); }
+.cae-val { font:0.75rem 'Fira Code', monospace; color:var(--rdm-text); white-space:nowrap; }
+.cae-val span { color:var(--rdm-muted); }
+.cae-note { margin:10px 0 0; font-size:0.75rem; color:var(--rdm-muted); }
+.cae-seg .rdm-btn { padding:4px 9px; }
+.cae-years { display:grid; gap:10px; max-height:420px; overflow:auto; padding-right:4px; }
+.cae-year { display:grid; grid-template-columns:40px minmax(0, 1fr); gap:10px; align-items:start; }
+.cae-year[hidden] { display:none; }
+.cae-year-lbl { padding-top:3px; font:600 0.78rem 'Fira Code', monospace; text-align:right; color:var(--rdm-body); }
+.cae-year-lbl span { display:block; font-weight:400; font-size:0.68rem; color:var(--rdm-muted); }
+.cae-chips { display:flex; flex-wrap:wrap; gap:4px; }
+.cae-chip { display:inline-flex; align-items:center; gap:5px; min-height:24px; padding:1px 8px; border:1px solid var(--rdm-line); border-radius:999px; font-size:0.76rem; color:var(--rdm-body); }
+.cae-chip::before { content:""; flex:none; width:7px; height:7px; border-radius:50%; background:var(--rel); }
+.cae-chip[hidden] { display:none; }
+.cae-mentor { --rel:var(--rel-mentor); } .cae-peer { --rel:var(--rel-peer); } .cae-mentee { --rel:var(--rel-mentee); }
+.cae-mentor, .cae-mentee { color:var(--rdm-text); }
+
+.rdm :is(.pll-dot, .td-term):focus-visible { outline:2px solid #00e5ff; outline-offset:1px; }
+body:not(.dark) .rdm :is(.pll-dot, .td-term):focus-visible { outline-color:#0077b6; }
+
+@media (max-width: 800px) {
+  .rdm { padding:16px; }
+  .im-body { grid-template-columns:minmax(0, 1fr); }
+  .im-panel { max-height:none; }
+  .rf-map { height:380px; }
+  .cae-panels { grid-template-columns:minmax(0, 1fr); }
+  .td-grid { grid-template-columns:minmax(96px, 1fr) repeat(3, minmax(0, 1fr)); }
+  .td-trend { display:none; }
+  .td-head-trend { display:none; }
+}
+@media (max-width: 560px) {
+  .cae-seg { flex-wrap:wrap; }
+  .pll-grid { grid-template-columns:36px repeat(4, minmax(0, 1fr)) 24px; gap:4px; }
+  .pll-col-head { font-size:0.62rem; }
+  .rdm .pll-dot { width:22px; height:22px; padding:6px !important; }
+  .td-cell { grid-template-columns:minmax(0, 1fr); gap:2px; }
+  .td-grid { grid-template-columns:minmax(84px, 0.9fr) repeat(3, minmax(0, 1fr)); gap:4px 6px; }
+  .td-head { font-size:0.68rem; hyphens:manual; }
+  .rdm .td-term { padding:4px 4px !important; font-size:0.78rem; }
+  #td-filter { flex-wrap:wrap; }
+  .td-val { text-align:left; }
+  .gx-item { grid-template-columns:minmax(0, 1fr); }
+  .gx-side { flex-direction:row; align-items:center; justify-content:flex-start; }
+  .gx-when, .gx-axis-row { grid-template-columns:minmax(0, 1fr) 72px; gap:8px; }
+  .gx-tick.is-odd { visibility:hidden; }
+  .gx-axis-row .gx-legend { flex-direction:column; align-items:flex-end; gap:2px; }
+  .rf-year input[type="range"] { width:130px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rdm-btn, .im-legend-btn, .pll-cell, .rdm .pll-dot { transition:none; }
+}
+.pll-root .im-swatch { --swatch:var(--tier); }
+.cae-seg .im-swatch { --swatch:var(--rel); width:8px; height:8px; margin-right:5px; }
+.cae-chips:empty { display:none; }
+.cae-panel .rdm-status { display:block; margin-top:8px; }
+.cae-panel .rdm-status:empty { display:none; }
