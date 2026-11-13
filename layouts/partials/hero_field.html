@@ -1,0 +1,32 @@
+{{- /* Three.js "research constellation" band, shared by the home page and the Research Explorer.
+       Params: variant ("home" | "explorer"), caption, follow (CSS selector of an element whose data-active-track the
+       hero follows; it listens for "research-explorer:track" on it). The canvas is decorative: the caption and key
+       say in text what the points are. assets/js/site/hero_field.js mounts it after load; without WebGL the band hides. */ -}}
+{{- $tracks := hugo.Data.research_explorer.tracks -}}
+{{- $groups := slice -}}
+{{- range $tracks -}}{{- $groups = $groups | append (dict "id" .id "papers" .papers) -}}{{- end -}}
+{{- $rules := slice
+      (slice 1 "phish|vish|smish|social engineer|scam|fraud|deepfake")
+      (slice 2 "hacker|dark ?web|darknet|forum|underground|communit|marketplace")
+      (slice 3 "language model|\\bllms?\\b|gpt|transformer|generative") -}}
+{{- $cfg := dict
+      "bundle" ("vendor/three/0.170.0/site-3d.min.js" | relURL)
+      "src" ("data/publications.json" | relURL)
+      "groups" $groups
+      "rules" $rules
+      "defaultGroup" 0
+      "minShared" 2
+      "follow" (.follow | default "") -}}
+<div class="hero-field hero-field--{{ .variant }}" data-hero-field>
+  <div class="hero-field__stage" data-hero-stage aria-hidden="true"></div>
+  <div class="hero-field__legend">
+    <p class="hero-field__caption">{{ .caption }}</p>
+    <ul class="hero-field__key">
+      {{- range $i, $t := $tracks }}
+      <li class="hero-key hero-key--{{ $i }}">{{ $t.title }}</li>
+      {{- end }}
+    </ul>
+  </div>
+  <script type="application/json" data-hero-config>{{ $cfg | jsonify | safeJS }}</script>
+</div>
+{{- partial "functions/js_tag" (dict "path" "js/site/hero_field.js" "attrs" "defer") -}}

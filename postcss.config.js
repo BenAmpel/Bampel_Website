@@ -26,12 +26,14 @@ module.exports = {
         './assets/js/{body-end,css-swap,ga-init,head-enhancements,research_dashboard,wowchemy-search}.js',
         './assets/js/site/**/*.js',
         './assets/js/widgets/**/*.js',
+        // The three.js views build their canvas and label classes in these modules (hero-canvas, t3-label, ...).
+        './assets/js/three/**/*.mjs',
         './layouts/**/*.html',
         './content/**/*.md',
       ],
       extractors: [
         { extractor: hugoStats, extensions: ['json'] },
-        { extractor: words, extensions: ['js', 'html', 'md'] },
+        { extractor: words, extensions: ['js', 'mjs', 'html', 'md'] },
       ],
       // State classes the theme's scripts toggle at run time stay whole. Bootstrap's JavaScript is no longer loaded (theme
       // plan stage 2), so its modal, tooltip, popover, carousel, toast, spinner and offcanvas classes are no longer kept.

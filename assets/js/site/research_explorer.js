@@ -48,6 +48,7 @@
     });
 
     root.dataset.activeTrack = activePanel.id;
+    root.dispatchEvent(new CustomEvent("research-explorer:track", { detail: { id: activePanel.id } }));
     if (status) {
       const title = activePanel.querySelector("h3")?.textContent.trim() || "Research theme";
       const paperCount = activePanel.querySelectorAll(".research-explorer-papers > li").length;

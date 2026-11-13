@@ -52,6 +52,7 @@
       footprint: null,
       footprintObserver: null,
     },
+    globe: null,
     impact: {
       view: "timeline",
       colorMode: "topic",
@@ -71,7 +72,7 @@
     },
     footprint: {
       categories: { Conference: true, Collaboration: true, Institution: true },
-      layers: { routes: true, clusters: true },
+      layers: { routes: true, clusters: true, spin: true },
       year: null,
       markerLayer: null,
       clusterLayer: null,
@@ -117,8 +118,16 @@
 
   function loadScriptOnce(src, testFn) {
     if (testFn && testFn()) return Promise.resolve();
-    const exists = Array.from(document.scripts).some((script) => script.src === src);
-    if (exists) return Promise.resolve();
+    // Another script (the hero) may have added the same tag and still be loading it: wait for that load, not a no-op.
+    const abs = new URL(src, document.baseURI).href;
+    const existing = Array.from(document.scripts).find((script) => script.src === abs);
+    if (existing) {
+      if (!testFn) return Promise.resolve();
+      return new Promise((resolve, reject) => {
+        existing.addEventListener("load", resolve, { once: true });
+        existing.addEventListener("error", () => reject(new Error(`Failed to load ${src}`)), { once: true });
+      });
+    }
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
       script.src = src;
@@ -129,24 +138,94 @@
     });
   }
 
+  // The site's 3D bundle (window.Site3D: globe, graph, fan). Resolves to null when WebGL is missing, too slow (software
+  // rendering) or the bundle fails, and the caller keeps its ECharts chart. Loaded once, only when a map is drawn.
+  let site3dPromise = null;
+  let site3dReady = null;
+  function load3D() {
+    if (!supportsWebGL()) return Promise.resolve(null);
+    if (!site3dPromise) {
+      site3dPromise = loadScriptOnce(buildUrl("vendor/three/0.170.0/site-3d.min.js"), () => window.Site3D)
+        .then(() => (window.Site3D && window.Site3D.supported() ? window.Site3D : null))
+        .catch(() => null)
+        .then((Site3D) => (site3dReady = Site3D));
+    }
+    return site3dPromise;
+  }
+
+  // Places a 3D view's tooltip above its point (below it near the top edge), kept inside the box.
+  function placeTip(tip, dom, html, x, y) {
+    if (!html) {
+      tip.hidden = true;
+      return;
+    }
+    tip.innerHTML = html;
+    tip.hidden = false;
+    const w = tip.offsetWidth;
+    const h = tip.offsetHeight;
+    const left = Math.max(6, Math.min(x - w / 2, dom.clientWidth - w - 6));
+    const top = y - h - 10 < 6 ? y + 26 : y - h - 10;
+    tip.style.transform = `translate(${Math.round(left)}px, ${Math.round(top)}px)`;
+  }
+
+  // A 3D graph in `dom` with a hover tooltip. Returns { view, shim } where shim stands in for an ECharts instance in
+  // dashboardState.charts (resize and dispose), or null if the view could not be made.
+  function mountGraph3D(dom, Site3D, { tipHtml, onSelect, onFail }) {
+    const tip = document.createElement("div");
+    tip.className = "t3-tip";
+    tip.hidden = true;
+    let view = null;
+    try {
+      view = Site3D.graph.create(dom, {
+        reducedMotion: prefersReducedMotion,
+        onSelect,
+        onFail,
+        onHover: (id, x, y) => placeTip(tip, dom, id ? tipHtml(id) : "", x, y),
+      });
+    } catch (err) {
+      return null;
+    }
+    dom.classList.add("is-3d");
+    dom.appendChild(tip);
+    return {
+      view,
+      shim: {
+        resize() {},
+        dispose() {
+          view.dispose();
+          tip.remove();
+          dom.classList.remove("is-3d");
+        },
+      },
+    };
+  }
+
+  // ECharts loads with the dashboard. The Footprint loads its own renderer: the three.js globe when WebGL works, otherwise
+  // Leaflet (loadLeafletAssets), so most visitors never download Leaflet.
   function loadDashboardAssets() {
     if (window.__dashboardAssetsPromise) return window.__dashboardAssetsPromise;
-    window.__dashboardAssetsPromise = Promise.all([
+    window.__dashboardAssetsPromise = loadScriptOnce(
+      buildUrl("vendor/echarts/6.1.0/echarts.custom.min.js"), // trimmed build: scripts/build-echarts.mjs
+      () => window.echarts
+    );
+    return window.__dashboardAssetsPromise;
+  }
+
+  function loadLeafletAssets() {
+    if (window.__leafletAssetsPromise) return window.__leafletAssetsPromise;
+    window.__leafletAssetsPromise = Promise.all([
       loadStyleOnce(buildUrl("vendor/leaflet/leaflet.css")),
       loadStyleOnce(buildUrl("vendor/leaflet-markercluster/MarkerCluster.css")),
       loadStyleOnce(buildUrl("vendor/leaflet-markercluster/MarkerCluster.Default.css")),
-    ]).then(() =>
-      Promise.all([
-        loadScriptOnce(buildUrl("vendor/echarts/6.1.0/echarts.custom.min.js"), () => window.echarts), // trimmed build: scripts/build-echarts.mjs
-        loadScriptOnce(buildUrl("vendor/leaflet/leaflet.js"), () => window.L),
-      ]).then(() =>
+    ])
+      .then(() => loadScriptOnce(buildUrl("vendor/leaflet/leaflet.js"), () => window.L))
+      .then(() =>
         loadScriptOnce(
           buildUrl("vendor/leaflet-markercluster/leaflet.markercluster.js"),
           () => window.L && window.L.markerClusterGroup
         )
-      )
-    );
-    return window.__dashboardAssetsPromise;
+      );
+    return window.__leafletAssetsPromise;
   }
 
   function updateText(id, value) {
@@ -209,80 +288,226 @@
 
   // Citations per year: one series in the site accent, text in text tokens, the current year drawn lighter and labelled
   // "so far" because it is still counting. The tooltip adds the change on the year before.
-  function renderLine(history) {
+  // When static/data/citation_projection.json is present (scripts/citation_projection.py), the next years are drawn as
+  // a peer-based projection: a dashed median line from this year's full-year estimate and a hollow 50% range. They are
+  // never solid bars, so they cannot be read as data. The 80% range lives in the tooltip and the note.
+  function projectionFor(history, proj) {
+    if (!proj || !Array.isArray(proj.years) || !proj.anchor || !history.length) return null;
+    const last = history[history.length - 1];
+    if (String(last.year) !== String(proj.anchor.year)) return null;
+    // A newer Scholar count than the one the projection was built on scales the estimate, never below the count.
+    const scale = proj.anchor.soFar ? last.citations / proj.anchor.soFar : 1;
+    const base = Math.max(last.citations, Math.round(proj.anchor.fullYear * scale));
+    const years = proj.years
+      .filter((y) => Number(y.year) > Number(last.year))
+      .map((y) => ({
+        year: String(y.year),
+        mid: Math.round(base * y.mid),
+        innerLow: Math.round(base * y.innerLow),
+        innerHigh: Math.round(base * y.innerHigh),
+        low: Math.round(base * y.low),
+        high: Math.round(base * y.high),
+      }));
+    return years.length ? { base, years, meta: proj } : null;
+  }
+
+  function renderLine(history, projection) {
     const dom = document.getElementById(IDS.LINE);
     if (!dom || !history || !history.length) return;
     dashboardState.lineHistory = history;
+    if (projection !== undefined) dashboardState.lineProjection = projection;
+    const proj = projectionFor(history, dashboardState.lineProjection);
     if (dashboardState.charts.line) dashboardState.charts.line.dispose();
-    const chart = window.echarts.init(dom, 'v5');
-    dashboardState.charts.line = chart;
+    dashboardState.charts.line = null;
+    const token = (dashboardState.lineToken = (dashboardState.lineToken || 0) + 1);
     const t = mapTheme();
     const thisYear = String(new Date().getFullYear());
     const partial = (year) => String(year) === thisYear;
+    const n = history.length;
+    const years = history.map((item) => item.year).concat(proj ? proj.years.map((y) => y.year) : []);
+    const pad = (arr) => arr.concat(proj ? proj.years.map(() => null) : []);
     const note = document.getElementById("dashboard-timeline-note");
-    if (note && history.some((item) => partial(item.year))) {
-      note.textContent = `${thisYear} is the year so far. Hover a bar for the change on the year before.`;
-    }
-    chart.setOption(
-      withReducedMotion({
-        tooltip: Object.assign(mapTooltip(t), {
-          trigger: "axis",
-          axisPointer: { type: "shadow", shadowStyle: { color: t.dark ? "rgba(139,148,158,0.12)" : "rgba(89,99,110,0.08)" } },
-          formatter: (params) => {
-            const p = params[0];
-            const i = p.dataIndex;
-            const cur = history[i].citations;
-            const prev = i > 0 ? history[i - 1].citations : null;
-            let change = "";
-            if (prev) {
-              const pct = Math.round(((cur - prev) / prev) * 100);
-              change = `<div style="color:${t.muted}">${pct >= 0 ? "+" : ""}${pct}% on ${history[i - 1].year}</div>`;
+    const held = proj ? Object.values(proj.meta.backtest.outer || {}) : [];
+    const heldIn10 = held.length ? Math.round((held.reduce((a, b) => a + b, 0) / held.length) * 10) : 8;
+    const setNote = (fan) => {
+      if (!note) return;
+      const parts = [];
+      if (history.some((item) => partial(item.year))) parts.push(`${thisYear} is the year so far.`);
+      if (proj && fan) {
+        const m = proj.meta;
+        parts.push(`Starred years are a projection from the ${m.cohort.neighbours} most similar of ${m.cohort.eligible} researchers in security, IS and AI, matched on citations by years since first publication. Each faint line is one of them, scaled to meet this year; the bands hold their middle half and 80% of them, a range that held for peers about ${heldIn10} times in 10. Drag to tilt the lines apart.`);
+      } else if (proj) {
+        const m = proj.meta;
+        parts.push(`Dashed years are a projection from the ${m.cohort.neighbours} most similar of ${m.cohort.eligible} researchers in security, IS and AI, matched on citations by years since first publication. The shaded box is their middle half; the 80% range, in the tooltip, held for peers about ${heldIn10} times in 10.`);
+      } else {
+        parts.push("Hover a bar for the change on the year before.");
+      }
+      note.textContent = parts.join(" ");
+    };
+    // Tooltip text for column i, shared by the ECharts chart and the 3D fan.
+    const tipFor = (i) => {
+      if (i >= n && proj) {
+        const y = proj.years[i - n];
+        return `<div style="font-weight:700">${escapeHtml(y.year)} (projected)</div><div>Median ${y.mid} citations</div>` +
+          `<div style="color:${t.muted}">Middle half ${y.innerLow} to ${y.innerHigh}</div>` +
+          `<div style="color:${t.muted}">80% range ${y.low} to ${y.high}</div>`;
+      }
+      const cur = history[i].citations;
+      const prev = i > 0 ? history[i - 1].citations : null;
+      let change = "";
+      if (prev) {
+        const pct = Math.round(((cur - prev) / prev) * 100);
+        change = `<div style="color:${t.muted}">${pct >= 0 ? "+" : ""}${pct}% on ${history[i - 1].year}</div>`;
+      }
+      const est = proj && i === n - 1 && proj.base > cur ? `<div style="color:${t.muted}">About ${proj.base} expected for the full year</div>` : "";
+      const label = partial(history[i].year) ? `${history[i].year} (so far)` : history[i].year;
+      return `<div style="font-weight:700">${escapeHtml(label)}</div><div>${cur} citations</div>${change}${est}`;
+    };
+    // The description carries the numbers, since a screen reader cannot see the bars.
+    const description = `Citations by year: ${history.map((item) => `${item.year}, ${item.citations}${partial(item.year) ? " so far" : ""}`).join("; ")}.` +
+      (proj ? ` Projected from peer researchers: ${proj.years.map((y) => `${y.year}, median ${y.mid}, 80% range ${y.low} to ${y.high}`).join("; ")}.` : "");
+
+    const useECharts = () => {
+      setNote(false);
+      const chart = window.echarts.init(dom, 'v5');
+      dashboardState.charts.line = chart;
+      const accentSoft = t.dark ? "rgba(74,222,128,0.16)" : "rgba(21,128,61,0.12)";
+      const series = [
+        {
+          name: "Citations",
+          type: "bar",
+          barMaxWidth: 36,
+          barGap: "-100%",
+          data: pad(history.map((item) => ({
+            value: item.citations,
+            itemStyle: { color: t.accent, opacity: partial(item.year) ? 0.45 : 1, borderRadius: [4, 4, 0, 0] },
+          }))),
+          label: {
+            show: true,
+            position: "top",
+            color: t.body,
+            fontSize: 11,
+            fontFamily: "Fira Code, monospace",
+            formatter: (p) => (p.dataIndex === n - 1 || p.dataIndex === 0 ? String(p.value) : ""),
+          },
+          emphasis: { itemStyle: { opacity: 1 } },
+        },
+      ];
+      if (proj) {
+        const lead = history.map(() => null);
+        series.push(
+          { name: "rangeBase", type: "bar", stack: "proj", barMaxWidth: 36, barGap: "-100%", silent: true,
+            itemStyle: { color: "transparent" }, data: lead.concat(proj.years.map((y) => y.innerLow)) },
+          { name: "Projected middle half", type: "bar", stack: "proj", barMaxWidth: 36, barGap: "-100%",
+            itemStyle: { color: accentSoft, borderColor: t.accent, borderWidth: 1, borderType: "dashed", borderRadius: 4 },
+            data: lead.concat(proj.years.map((y) => y.innerHigh - y.innerLow)) },
+          { name: "Projected median", type: "line", z: 5,
+            lineStyle: { color: t.accent, width: 2, type: "dashed" },
+            itemStyle: { color: t.surface, borderColor: t.accent, borderWidth: 2 },
+            symbol: "circle", symbolSize: 8,
+            // Starts at this year's full-year estimate so the line joins the real bars.
+            data: history.map((item, i) => (i === n - 1 ? proj.base : null)).concat(proj.years.map((y) => y.mid)),
+            label: { show: true, position: "top", distance: 8, color: t.muted, fontSize: 11, fontFamily: "Fira Code, monospace",
+              formatter: (p) => (p.dataIndex === years.length - 1 ? `~${p.value}` : "") } }
+        );
+      }
+      chart.setOption(
+        withReducedMotion({
+          tooltip: Object.assign(mapTooltip(t), {
+            trigger: "axis",
+            axisPointer: { type: "shadow", shadowStyle: { color: t.dark ? "rgba(139,148,158,0.12)" : "rgba(89,99,110,0.08)" } },
+            formatter: (params) => tipFor(params[0].dataIndex),
+          }),
+          aria: { enabled: true, description },
+          grid: { top: 22, right: 8, bottom: 4, left: 4, containLabel: true },
+          xAxis: {
+            type: "category",
+            data: years,
+            axisLine: { lineStyle: { color: t.grid } },
+            axisTick: { show: false },
+            axisLabel: { color: t.muted, fontSize: 11, fontFamily: "Fira Code, monospace",
+              formatter: (v, i) => (i >= n ? `${v}*` : v) },
+          },
+          yAxis: {
+            type: "value",
+            splitNumber: 3,
+            splitLine: { lineStyle: { color: t.grid } },
+            axisLabel: { color: t.muted, fontSize: 11, fontFamily: "Fira Code, monospace" },
+          },
+          series,
+        })
+      );
+    };
+
+    // The peer paths fan: the same numbers, plus each matched peer's own path. Needs the projection and WebGL.
+    const use3D = (Site3D) => {
+      if (!Site3D.fan) return false;
+      const peers = proj.meta.peerPaths;
+      const fromIndex = peers && Array.isArray(peers.paths) && peers.paths.length
+        ? history.findIndex((item) => String(item.year) === String(peers.fromYear)) : -1;
+      const tip = document.createElement("div");
+      tip.className = "t3-tip";
+      tip.hidden = true;
+      let view = null;
+      const fallback = () => {
+        if (token !== dashboardState.lineToken) return;
+        if (dashboardState.charts.line) dashboardState.charts.line.dispose();
+        useECharts();
+      };
+      try {
+        view = Site3D.fan.create(dom, {
+          reducedMotion: prefersReducedMotion,
+          onFail: fallback,
+          onHover: (i, x, y) => {
+            if (i == null) {
+              tip.hidden = true;
+              return;
             }
-            const label = partial(history[i].year) ? `${history[i].year} (so far)` : history[i].year;
-            return `<div style="font-weight:700">${escapeHtml(label)}</div><div>${cur} citations</div>${change}`;
+            placeTip(tip, dom, tipFor(i), x, y);
           },
-        }),
-        // The description carries the numbers, since a screen reader cannot see the bars.
-        aria: { enabled: true, description: `Citations by year: ${history.map((item) => `${item.year}, ${item.citations}${partial(item.year) ? " so far" : ""}`).join("; ")}.` },
-        grid: { top: 18, right: 8, bottom: 4, left: 4, containLabel: true },
-        xAxis: {
-          type: "category",
-          data: history.map((item) => item.year),
-          axisLine: { lineStyle: { color: t.grid } },
-          axisTick: { show: false },
-          axisLabel: { color: t.muted, fontSize: 11, fontFamily: "Fira Code, monospace" },
+        });
+      } catch (err) {
+        return false;
+      }
+      dom.classList.add("is-3d");
+      dom.appendChild(tip);
+      dom.setAttribute("aria-label", description);
+      view.setData({
+        years,
+        actual: history.map((item) => ({ value: item.citations, partial: partial(item.year) })),
+        base: proj.base,
+        proj: proj.years,
+        peers: fromIndex >= 0 ? { fromIndex, paths: peers.paths } : null,
+        theme: { dark: t.dark, accent: t.accent, peer: t.other, muted: t.muted, grid: t.grid, focus: t.focus },
+      });
+      setNote(true);
+      dashboardState.charts.line = {
+        resize() {},
+        dispose() {
+          view.dispose();
+          tip.remove();
+          dom.classList.remove("is-3d");
+          dom.setAttribute("aria-label", "Citations per year");
         },
-        yAxis: {
-          type: "value",
-          splitNumber: 3,
-          splitLine: { lineStyle: { color: t.grid } },
-          axisLabel: { color: t.muted, fontSize: 11, fontFamily: "Fira Code, monospace" },
-        },
-        series: [
-          {
-            type: "bar",
-            barMaxWidth: 36,
-            data: history.map((item) => ({
-              value: item.citations,
-              itemStyle: {
-                color: t.accent,
-                opacity: partial(item.year) ? 0.45 : 1,
-                borderRadius: [4, 4, 0, 0],
-              },
-            })),
-            label: {
-              show: true,
-              position: "top",
-              color: t.body,
-              fontSize: 11,
-              fontFamily: "Fira Code, monospace",
-              formatter: (p) => (p.dataIndex === history.length - 1 || p.dataIndex === 0 ? String(p.value) : ""),
-            },
-            emphasis: { itemStyle: { opacity: 1 } },
-          },
-        ],
-      })
-    );
+      };
+      return true;
+    };
+
+    if (!proj) {
+      useECharts();
+      return;
+    }
+    // Theme changes redraw at once with the bundle already loaded; the first draw shows ECharts until it arrives.
+    if (site3dReady) {
+      if (!use3D(site3dReady)) useECharts();
+      return;
+    }
+    useECharts();
+    load3D().then((Site3D) => {
+      if (!Site3D || token !== dashboardState.lineToken) return;
+      dashboardState.charts.line.dispose();
+      if (!use3D(Site3D)) useECharts();
+    });
   }
 
   // ---- Shared theme for the two network maps ---------------------------------------------------------------------
@@ -346,10 +571,14 @@
     const dom = document.getElementById(IDS.MAP);
     if (!dom || !graphData || !Array.isArray(graphData.nodes) || !graphData.nodes.length) return;
     if (dashboardState.charts.impact) dashboardState.charts.impact.dispose();
-    const chart = window.echarts.init(dom, "v5");
-    dashboardState.charts.impact = chart;
+    dashboardState.charts.impact = null;
+    // Drawn in 3D when the bundle loads and WebGL works (see load3D); otherwise ECharts. Both read the same state.
+    let chart = null;
+    let g3 = null;
 
     const state = dashboardState.impact;
+    const renderToken = {};
+    state.renderToken = renderToken;
     const section = dom.closest(".rd-impact") || dom.parentElement;
     const panel = document.getElementById("impact-map-inspector");
     const legendEl = document.getElementById("impact-map-legend");
@@ -424,6 +653,122 @@
         .filter((link) => link.source === id || link.target === id)
         .map((link) => ({ link, other: byId.get(link.source === id ? link.target : link.source) }))
         .sort((a, b) => b.link.value - a.link.value || b.other.value - a.other.value);
+
+    function paperTip(id) {
+      const paper = byId.get(id);
+      if (!paper) return "";
+      const typeLabel = TYPE_LABELS[paper.type] || paper.type;
+      return `<strong>${escapeHtml(paper.name)}</strong><br>${escapeHtml(paper.venue)} · ${paper.year || "—"} · ${escapeHtml(typeLabel)}<br>${paper.value} citations · ${escapeHtml(paper.topic)}`;
+    }
+
+    // The 3D scene, laid out in CSS pixels around the box centre (1 world unit = 1 px at rest), so it lines up with
+    // the 2D chart it replaces. Depth carries no data: guides and axis labels sit a little behind the papers, and
+    // links bow toward the viewer, which only shows when the reader drags the map to tilt it.
+    function buildSpec() {
+      const t = mapTheme();
+      const W = dom.clientWidth || 640;
+      const H = dom.clientHeight || 440;
+      const narrow = W < 560;
+      const isTimeline = state.view === "timeline";
+      const focus = state.focusId && byId.has(state.focusId) ? state.focusId : null;
+      const links = activeLinks();
+      const neighbors = new Set();
+      if (focus) {
+        links.forEach((link) => {
+          if (link.source === focus) neighbors.add(link.target);
+          if (link.target === focus) neighbors.add(link.source);
+        });
+      }
+      const hidden = (paper) => state.hiddenTopics.has(paper.topic);
+      const focusColor = focus ? colorFor(byId.get(focus), t) : t.accent;
+      const at = (x, y, z) => [x - W / 2, H / 2 - y, z || 0];
+      const back = -36;
+      const guides = [];
+      const labels = [];
+      const pos = new Map();
+
+      if (isTimeline) {
+        const left = narrow ? 84 : 156;
+        const right = 18;
+        const top = 16;
+        const bottom = 30;
+        const plotW = W - left - right;
+        const plotH = H - top - bottom;
+        const span = maxYear - minYear + 1;
+        const X = (year) => left + ((year - (minYear - 0.5)) / span) * plotW;
+        const Y = (row) => top + ((row + 0.5) / rows.length) * plotH;
+        papers.forEach((paper) => {
+          const [year, row] = timelinePos.get(paper.id);
+          pos.set(paper.id, at(X(year), Y(row)));
+        });
+        for (let row = 0; row < rows.length - 1; row += 1) {
+          guides.push({ points: [at(left, Y(row + 0.5), back), at(W - right, Y(row + 0.5), back)], color: t.grid, alpha: 1 });
+        }
+        guides.push({ points: [at(left, top + plotH, back), at(W - right, top + plotH, back)], color: t.grid, alpha: 1 });
+        for (let year = minYear; year < maxYear; year += 1) {
+          const x = X(year + 0.5);
+          const pts = [];
+          for (let k = 0; k <= 40; k += 1) pts.push(at(x, top + (plotH * k) / 40, back));
+          guides.push({ points: pts, color: t.grid, alpha: 0.8, dashed: true });
+        }
+        rows.forEach((topic, row) => {
+          labels.push({ key: `row:${topic}`, text: narrow ? TOPIC_SHORT[topic] || topic : topic, p: at(left - 12, Y(row), back), cls: "t3-axis is-left" });
+        });
+        for (let year = minYear; year <= maxYear; year += 1) {
+          if (narrow && year % 2 === 0) continue;
+          labels.push({ key: `year:${year}`, text: String(year), p: at(X(year), top + plotH + 14, back), cls: "t3-axis t3-axis-num" });
+        }
+      } else {
+        const radius = Math.max(60, Math.min(W, H) / 2 - (narrow ? 34 : 54));
+        circleOrder.forEach((paper, index) => {
+          const angle = Math.PI / 2 - (index / circleOrder.length) * Math.PI * 2;
+          pos.set(paper.id, [radius * Math.cos(angle), radius * Math.sin(angle), 0]);
+        });
+        const ring = [];
+        for (let k = 0; k < 96; k += 1) {
+          const angle = (k / 96) * Math.PI * 2;
+          ring.push([radius * Math.cos(angle), radius * Math.sin(angle), back]);
+        }
+        guides.push({ points: ring, color: t.grid, alpha: 0.9, closed: true });
+      }
+
+      const nodes = papers.map((paper) => {
+        const isFocus = paper.id === focus;
+        const lit = !focus || isFocus || neighbors.has(paper.id);
+        const gone = hidden(paper);
+        return {
+          id: paper.id,
+          p: pos.get(paper.id),
+          size: sizeFor(paper) + (isFocus ? 4 : 0),
+          color: colorFor(paper, t),
+          alpha: gone ? 0.08 : lit ? 1 : 0.2,
+          focus: isFocus,
+          glow: gone ? 0 : isFocus ? 1 : focus ? (neighbors.has(paper.id) ? 0.8 : 0) : 0.5,
+          pickable: !gone,
+          label: isFocus ? truncate(paper.name, narrow ? 28 : 44) : null,
+          labelCls: "is-pill",
+        };
+      });
+
+      const edges = links
+        .filter((link) => !hidden(byId.get(link.source)) && !hidden(byId.get(link.target)))
+        .filter((link) => !isTimeline || (focus && (link.source === focus || link.target === focus)))
+        .map((link) => {
+          const touches = focus && (link.source === focus || link.target === focus);
+          return {
+            a: link.source,
+            b: link.target,
+            color: touches ? focusColor : colorFor(byId.get(link.source), t),
+            alpha: touches ? 0.85 : focus ? 0.05 : 0.2,
+            lift: isTimeline ? 0.22 : 0.12,
+            inward: isTimeline ? 0 : 0.5,
+            beads: !!touches,
+            flow: !!touches,
+          };
+        });
+
+      return { nodes, edges, guides, labels, bounds: { cx: 0, cy: 0, w: W, h: H, pad: 1 }, bg: t.surface, dark: t.dark, focusColor: t.focus, sway: 2 };
+    }
 
     function buildOption() {
       const t = mapTheme();
@@ -515,10 +860,7 @@
               if (!a || !b) return "";
               return `<strong>${escapeHtml(params.data.reason || "Connected")}</strong><br>${escapeHtml(truncate(a.name, 60))}<br>${escapeHtml(truncate(b.name, 60))}`;
             }
-            const paper = byId.get(String(params.data.id));
-            if (!paper) return "";
-            const typeLabel = TYPE_LABELS[paper.type] || paper.type;
-            return `<strong>${escapeHtml(paper.name)}</strong><br>${escapeHtml(paper.venue)} · ${paper.year || "—"} · ${escapeHtml(typeLabel)}<br>${paper.value} citations · ${escapeHtml(paper.topic)}`;
+            return paperTip(String(params.data.id));
           },
         }),
         aria: { enabled: true, label: { description: describeImpact(papers, allLinks) } },
@@ -603,9 +945,11 @@
 
     let lastView = null;
     function update() {
-      const option = buildOption();
-      chart.setOption(option, lastView !== state.view);
-      lastView = state.view;
+      if (g3) g3.view.setGraph(buildSpec());
+      else if (chart) {
+        chart.setOption(buildOption(), lastView !== state.view);
+        lastView = state.view;
+      }
       renderLegend();
     }
 
@@ -683,13 +1027,46 @@
       section.querySelectorAll(selector).forEach((btn) => btn.setAttribute("aria-pressed", String(btn.getAttribute(attr) === value)));
     }
 
-    chart.on("click", (params) => {
-      if (params.seriesId !== "papers" || params.dataType !== "node") return;
-      select(state.focusId === String(params.data.id) ? null : params.data.id, false);
-    });
-    chart.getZr().on("click", (event) => {
-      if (!event.target && state.focusId) select(null, false);
-    });
+    function useECharts() {
+      if (state.renderToken !== renderToken || chart) return;
+      if (g3) {
+        g3.shim.dispose();
+        g3 = null;
+      }
+      chart = window.echarts.init(dom, "v5");
+      dashboardState.charts.impact = chart;
+      chart.on("click", (params) => {
+        if (params.seriesId !== "papers" || params.dataType !== "node") return;
+        select(state.focusId === String(params.data.id) ? null : params.data.id, false);
+      });
+      chart.getZr().on("click", (event) => {
+        if (!event.target && state.focusId) select(null, false);
+      });
+      update();
+    }
+
+    function use3D(Site3D) {
+      if (state.renderToken !== renderToken) return;
+      if (!Site3D) {
+        useECharts();
+        return;
+      }
+      g3 = mountGraph3D(dom, Site3D, {
+        tipHtml: paperTip,
+        onSelect: (id) => {
+          if (id) select(state.focusId === id ? null : id, false);
+          else if (state.focusId) select(null, false);
+        },
+        onFail: () => useECharts(),
+      });
+      if (!g3) {
+        useECharts();
+        return;
+      }
+      dom.setAttribute("aria-label", describeImpact(papers, allLinks));
+      dashboardState.charts.impact = g3.shim;
+      update();
+    }
 
     if (!section.dataset.mapBound) {
       section.dataset.mapBound = "1";
@@ -785,8 +1162,9 @@
 
     setPressed("[data-impact-view]", "data-impact-view", state.view);
     setPressed("[data-impact-color]", "data-impact-color", state.colorMode);
-    update();
+    renderLegend();
     renderPanel();
+    load3D().then(use3D);
   }
 
   function normalizeAuthor(nameMap, name) {
@@ -808,10 +1186,13 @@
     const dom = document.getElementById(IDS.COLLAB);
     if (!dom || !collaboration || !collaboration.ranges) return;
     if (dashboardState.charts.collab) dashboardState.charts.collab.dispose();
-    const chart = window.echarts.init(dom, "v5");
-    dashboardState.charts.collab = chart;
+    dashboardState.charts.collab = null;
+    let chart = null;
+    let g3 = null;
 
     const state = dashboardState.collab;
+    const renderToken = {};
+    state.renderToken = renderToken;
     const section = dom.closest(".rd-collab") || dom.parentElement;
     const spotEl = document.getElementById("collab-spotlight");
     const listEl = document.getElementById("collab-list");
@@ -883,6 +1264,90 @@
       if (cos < -0.35) return "left";
       return sin < 0 ? "top" : "bottom";
     };
+
+    function personTip(id) {
+      if (!id || id.startsWith("__ring")) return "";
+      if (id === model.self) return `<strong>Ben Ampel</strong><br>${model.people.length} co-authors in this range`;
+      const person = model.byId.get(id);
+      if (!person) return "";
+      const years = person.first ? (person.first === person.last ? `${person.first}` : `${person.first}–${person.last}`) : "—";
+      return `<strong>${escapeHtml(id)}</strong><br>${person.count} paper${person.count === 1 ? "" : "s"} together · ${years}`;
+    }
+
+    // The same rings in three.js: people are glowing spheres, Ben glows at the centre, spokes and shared-paper arcs
+    // are lines. Depth carries no data; the scene only sways a few degrees and tilts while dragged.
+    function buildSpec() {
+      const t = mapTheme();
+      const W = dom.clientWidth || 640;
+      const H = dom.clientHeight || 440;
+      const narrow = W < 560;
+      const R = Math.max(70, Math.min(W - (narrow ? 96 : 150), H - 80) / 2);
+      const back = -30;
+      const focus = state.focusId && model.byId.has(state.focusId) ? state.focusId : null;
+      const neighbors = new Set();
+      if (focus) {
+        model.links.forEach((link) => {
+          if (link.source === focus) neighbors.add(link.target);
+          if (link.target === focus) neighbors.add(link.source);
+        });
+      }
+      const guides = RADII.map((radius) => {
+        const pts = [];
+        for (let k = 0; k < 120; k += 1) {
+          const angle = (k / 120) * Math.PI * 2;
+          pts.push([Math.cos(angle) * radius * R, Math.sin(angle) * radius * R, back]);
+        }
+        return { points: pts, color: t.grid, alpha: 0.9, closed: true, dashed: true };
+      });
+      const nodes = [
+        {
+          id: model.self,
+          p: [0, 0, 0],
+          size: 34,
+          color: t.self,
+          alpha: focus ? 0.9 : 1,
+          glow: 1,
+          pickable: true,
+          label: "Ben Ampel",
+          labelPos: "below",
+        },
+      ];
+      model.people.forEach((person) => {
+        const isFocus = person.id === focus;
+        const lit = !focus || isFocus || neighbors.has(person.id);
+        const showLabel = isFocus || (lit && (person.ring === 0 || (focus && neighbors.has(person.id)) || (!narrow && !focus && person.ring === 1)));
+        const side = labelPosition(person.angle);
+        nodes.push({
+          id: person.id,
+          p: [person.x * R, -person.y * R, 0],
+          size: sizeFor(person.count) + (isFocus ? 4 : 0),
+          color: t.recency[recencyIndex(person.last)],
+          alpha: lit ? 1 : 0.2,
+          focus: isFocus,
+          glow: isFocus ? 1 : focus ? (neighbors.has(person.id) ? 0.7 : 0) : person.ring === 0 ? 0.6 : 0.35,
+          pickable: true,
+          label: showLabel ? (isFocus ? person.id : shortName(person.id)) : null,
+          labelPos: side === "top" ? "above" : side === "bottom" ? "below" : side,
+          labelCls: isFocus ? "is-pill" : person.ring === 0 ? "is-strong" : "",
+        });
+      });
+      const edges = model.links.map((link) => {
+        const spoke = link.source === model.self || link.target === model.self;
+        const touches = focus && (link.source === focus || link.target === focus);
+        const other = model.byId.get(link.source === model.self ? link.target : link.source);
+        return {
+          a: link.source,
+          b: link.target,
+          color: touches ? t.accent : spoke && other ? t.recency[recencyIndex(other.last)] : t.muted,
+          alpha: touches ? 0.85 : focus ? 0.04 : spoke ? 0.3 : 0.14,
+          lift: spoke ? 0.04 : 0.14,
+          inward: spoke ? 0 : 0.35,
+          beads: !!touches,
+          flow: !!touches || (!focus && spoke && other && other.ring === 0),
+        };
+      });
+      return { nodes, edges, guides, labels: [], bounds: { cx: 0, cy: 0, w: W, h: H, pad: 1 }, bg: t.surface, dark: t.dark, focusColor: t.focus, sway: 3 };
+    }
 
     function buildOption() {
       const t = mapTheme();
@@ -978,13 +1443,7 @@
               const label = (name) => (name === model.self ? "Ben Ampel" : name);
               return `${escapeHtml(label(a))} and ${escapeHtml(label(b))}<br><strong>${params.data.count}</strong> paper${params.data.count === 1 ? "" : "s"} together`;
             }
-            const id = String(params.data.id || "");
-            if (!id || id.startsWith("__ring")) return "";
-            if (id === model.self) return `<strong>Ben Ampel</strong><br>${model.people.length} co-authors in this range`;
-            const person = model.byId.get(id);
-            if (!person) return "";
-            const years = person.first ? (person.first === person.last ? `${person.first}` : `${person.first}–${person.last}`) : "—";
-            return `<strong>${escapeHtml(id)}</strong><br>${person.count} paper${person.count === 1 ? "" : "s"} together · ${years}`;
+            return personTip(String(params.data.id || ""));
           },
         }),
         aria: { enabled: true, label: { description: describeCollab(model.people.map((p) => ({ id: p.id, name: p.id, value: p.count })), model.self) } },
@@ -1103,7 +1562,8 @@
     }
 
     function update() {
-      chart.setOption(buildOption());
+      if (g3) g3.view.setGraph(buildSpec());
+      else if (chart) chart.setOption(buildOption());
       renderLegend();
     }
 
@@ -1118,18 +1578,50 @@
       }
     }
 
-    chart.on("click", (params) => {
-      if (params.dataType !== "node") return;
-      const id = String(params.data.id || "");
-      if (id.startsWith("__ring") || id === model.self) {
-        select(null, false);
+    function useECharts() {
+      if (state.renderToken !== renderToken || chart) return;
+      if (g3) {
+        g3.shim.dispose();
+        g3 = null;
+      }
+      chart = window.echarts.init(dom, "v5");
+      dashboardState.charts.collab = chart;
+      chart.on("click", (params) => {
+        if (params.dataType !== "node") return;
+        const id = String(params.data.id || "");
+        if (id.startsWith("__ring") || id === model.self) {
+          select(null, false);
+          return;
+        }
+        select(state.focusId === id ? null : id, false);
+      });
+      chart.getZr().on("click", (event) => {
+        if (!event.target && state.focusId) select(null, false);
+      });
+      update();
+    }
+
+    function use3D(Site3D) {
+      if (state.renderToken !== renderToken) return;
+      if (Site3D) {
+        g3 = mountGraph3D(dom, Site3D, {
+          tipHtml: personTip,
+          onSelect: (id) => {
+            if (!id || id === model.self) {
+              if (state.focusId) select(null, false);
+            } else select(state.focusId === id ? null : id, false);
+          },
+          onFail: () => useECharts(),
+        });
+      }
+      if (!g3) {
+        useECharts();
         return;
       }
-      select(state.focusId === id ? null : id, false);
-    });
-    chart.getZr().on("click", (event) => {
-      if (!event.target && state.focusId) select(null, false);
-    });
+      dom.setAttribute("aria-label", describeCollab(model.people.map((p) => ({ id: p.id, name: p.id, value: p.count })), model.self));
+      dashboardState.charts.collab = g3.shim;
+      update();
+    }
 
     if (!section.dataset.mapBound) {
       section.dataset.mapBound = "1";
@@ -1177,6 +1669,7 @@
     model = buildModel();
     setRangePressed();
     state.api.update();
+    load3D().then(use3D);
   }
 
   // Theme switches (body.dark toggled by the site's theme button) repaint both maps with their own light/dark values.
@@ -1193,6 +1686,7 @@
         if (api) api.update();
       });
       if (dashboardState.lineHistory) renderLine(dashboardState.lineHistory);
+      if (dashboardState.footprint.applyGlobe) dashboardState.footprint.applyGlobe();
     });
     mapThemeObserver.observe(document.body, { attributes: true, attributeFilter: ["class"] });
   }
@@ -1219,7 +1713,7 @@
     return coords;
   }
 
-  function renderFootprintMap(footprint) {
+  function renderFootprintLeaflet(footprint) {
     const container = document.getElementById(IDS.FOOTPRINT);
     if (!container || !window.L) return;
 
@@ -1269,18 +1763,11 @@
       }
     }
 
-    const legendEl = document.getElementById("footprint-legend");
-    if (legendEl) {
-      legendEl.innerHTML = [
-        `<div class="legend-row"><span class="footprint-legend-dot" style="--legend-color:#4ade80;"></span><span>Conference</span></div>`,
-        `<div class="legend-row"><span class="footprint-legend-dot" style="--legend-color:#00bfff;"></span><span>Collaboration</span></div>`,
-        `<div class="legend-row"><span class="footprint-legend-dot" style="--legend-color:#ff6b35;"></span><span>Institution</span></div>`,
-      ].join("");
-    }
+    renderFootprintLegend();
 
     function createIcon(category) {
       const lower = String(category || "Collaboration").toLowerCase();
-      const color = category === "Conference" ? "#4ade80" : category === "Institution" ? "#ff6b35" : "#00bfff";
+      const color = footprintPalette().cat[category] || footprintPalette().cat.Collaboration;
       return window.L.divIcon({
         className: "",
         html: `<div class="footprint-marker ${lower}" style="color:${color}"><span class="ring"></span><span class="dot"></span></div>`,
@@ -1372,6 +1859,247 @@
     setTimeout(() => map.invalidateSize(), 200);
   }
 
+  // ---- Research Footprint (redesign 2026-11-12) ---------------------------------------------------------------------
+  // A three.js globe (assets/js/footprint-globe.mjs, bundled by scripts/build-three.mjs) with the place list and the
+  // selected place in a side panel. Without WebGL, or if the globe fails to load, the Leaflet map above takes over with
+  // the same filters.
+  const FOOTPRINT_CATS = ["Conference", "Collaboration", "Institution"];
+
+  function footprintPalette() {
+    const dark = document.body.classList.contains("dark");
+    return dark
+      ? {
+          dark, additive: true, globe: "#0f1620", land: "#4f6d8c", glow: "#38bdf8", glowStrength: 0.55,
+          arc: "#7dd3fc", arcOpacity: 0.5, pulse: "#e0f2fe", halo: 0.4, select: "#ffffff",
+          cat: { Conference: "#4ade80", Collaboration: "#38bdf8", Institution: "#fb923c" },
+        }
+      : {
+          dark, additive: false, globe: "#f3f6f9", land: "#9fb0c2", glow: "#0369a1", glowStrength: 0.18,
+          arc: "#0369a1", arcOpacity: 0.55, pulse: "#0369a1", halo: 0.22, select: "#1f2328",
+          cat: { Conference: "#15803d", Collaboration: "#0369a1", Institution: "#c2410c" },
+        };
+  }
+
+  function renderFootprintLegend() {
+    const legendEl = document.getElementById("footprint-legend");
+    if (!legendEl || legendEl.dataset.built) return;
+    legendEl.dataset.built = "true";
+    legendEl.innerHTML = FOOTPRINT_CATS.map(
+      (cat) => `<div class="legend-row"><span class="footprint-legend-dot is-${cat.toLowerCase()}"></span><span>${cat}</span></div>`
+    ).join("");
+  }
+
+  function footprintPapers(point) {
+    const match = /^(\d+)\s+paper/.exec(point.desc || "");
+    return match ? Number(match[1]) : 1;
+  }
+
+  function supportsWebGL() {
+    try {
+      const canvas = document.createElement("canvas");
+      return !!(window.WebGLRenderingContext && (canvas.getContext("webgl2") || canvas.getContext("webgl")));
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function showFootprintMode(mode) {
+    const section = document.querySelector(".rd-footprint");
+    if (section) section.dataset.mode = mode;
+    document.querySelectorAll("[data-footprint-mode]").forEach((el) => {
+      el.hidden = el.getAttribute("data-footprint-mode") !== mode;
+    });
+  }
+
+  function renderFootprintMap(footprint) {
+    const container = document.getElementById(IDS.FOOTPRINT);
+    if (!container) return;
+    const fallback = (error) => {
+      if (error) console.warn("Footprint globe unavailable, using the flat map:", error);
+      if (dashboardState.globe) {
+        dashboardState.globe.dispose();
+        dashboardState.globe = null;
+      }
+      showFootprintMode("map");
+      loadLeafletAssets()
+        .then(() => renderFootprintLeaflet(footprint))
+        .catch((err) => console.error("Footprint map failed:", err));
+    };
+    if (!supportsWebGL()) {
+      fallback();
+      return;
+    }
+    Promise.all([
+      load3D(),
+      safeFetch(buildUrl("data/globe_land.json")),
+    ])
+      .then(([, land]) => {
+        if (!window.FootprintGlobe || !land) throw new Error("globe assets missing");
+        renderFootprintGlobe(footprint, land.dots || []);
+      })
+      .catch(fallback);
+  }
+
+  function renderFootprintGlobe(footprint, land) {
+    const container = document.getElementById(IDS.FOOTPRINT);
+    const state = dashboardState.footprint;
+    const points = (Array.isArray(footprint.points) ? footprint.points : []).map((point) => ({
+      ...point,
+      weight: footprintPapers(point),
+    }));
+    const routes = Array.isArray(footprint.routes) ? footprint.routes : [];
+    state.year = state.year || footprint.maxYear || new Date().getFullYear();
+    showFootprintMode("globe");
+    renderFootprintLegend();
+    container.removeAttribute("role");
+    container.removeAttribute("tabindex");
+    container.setAttribute("aria-hidden", "true");
+
+    const tip = document.createElement("div");
+    tip.className = "rf-tip";
+    tip.hidden = true;
+    container.appendChild(tip);
+    const listEl = document.getElementById("footprint-places");
+    const detailEl = document.getElementById("footprint-detail");
+    const countEl = document.getElementById("footprint-count");
+
+    let selected = null;
+    const globe = window.FootprintGlobe.create(container, {
+      land,
+      theme: footprintPalette(),
+      reducedMotion: prefersReducedMotion,
+      onSelect: (point) => select(point, false),
+      onHover: (point, event) => {
+        if (!point || !event) {
+          tip.hidden = true;
+          return;
+        }
+        const rect = container.getBoundingClientRect();
+        tip.textContent = `${point.title} · ${point.location || ""}`;
+        tip.hidden = false;
+        const x = Math.min(event.clientX - rect.left + 14, rect.width - tip.offsetWidth - 8);
+        tip.style.transform = `translate(${Math.max(8, x)}px, ${Math.max(8, event.clientY - rect.top - 34)}px)`;
+      },
+    });
+    dashboardState.globe = globe;
+    globe.setSpin(state.layers.spin !== false && !prefersReducedMotion);
+
+    function visiblePoints() {
+      return points.filter((point) => state.categories[point.cat] && (!point.minYear || point.minYear <= state.year));
+    }
+
+    function renderDetail() {
+      if (!detailEl) return;
+      if (!selected) {
+        detailEl.innerHTML = `<p class="rf-detail-empty">Choose a place on the globe or in the list to see what was presented or written there.</p>`;
+        return;
+      }
+      const papers = String(selected.desc || "").replace(/^\d+\s+papers?:\s*/, "");
+      const years = Array.isArray(selected.years) && selected.years.length ? selected.years.join(", ") : "";
+      detailEl.innerHTML = `
+        <p class="rf-detail-kicker"><span class="footprint-legend-dot is-${String(selected.cat).toLowerCase()}"></span>${escapeHtml(selected.cat || "")}${years ? ` · ${escapeHtml(years)}` : ""}</p>
+        <h3 class="rf-detail-title">${escapeHtml(selected.title)}</h3>
+        <p class="rf-detail-place">${escapeHtml(selected.location || "")}</p>
+        <p class="rf-detail-count">${selected.weight} ${selected.weight === 1 ? "paper" : "papers"}</p>
+        ${papers ? `<ul class="rf-detail-papers">${papers.split(/;\s*/).map((t) => `<li>${escapeHtml(t)}</li>`).join("")}</ul>` : ""}`;
+    }
+
+    function renderList(list) {
+      if (countEl) countEl.textContent = `${list.length} ${list.length === 1 ? "place" : "places"} through ${state.year}`;
+      if (!listEl) return;
+      const sorted = list.slice().sort((a, b) => (b.maxYear || 0) - (a.maxYear || 0) || a.title.localeCompare(b.title));
+      listEl.innerHTML = sorted
+        .map(
+          (point) => `<li><button type="button" class="rf-place${selected && selected.title === point.title ? " is-on" : ""}" data-title="${escapeHtml(point.title)}" aria-pressed="${selected && selected.title === point.title ? "true" : "false"}">
+            <span class="footprint-legend-dot is-${String(point.cat).toLowerCase()}"></span>
+            <span class="rf-place-name">${escapeHtml(point.title)}</span>
+            <span class="rf-place-meta">${escapeHtml(point.location || "")}</span></button></li>`
+        )
+        .join("");
+    }
+
+    function select(point, fromList) {
+      selected = point && selected && selected.title === point.title && fromList ? null : point;
+      globe.select(selected);
+      renderDetail();
+      renderList(visiblePoints());
+      if (!fromList && selected && listEl) {
+        const btn = Array.from(listEl.querySelectorAll(".rf-place")).find((el) => el.dataset.title === selected.title);
+        if (btn) btn.scrollIntoView({ block: "nearest", behavior: prefersReducedMotion ? "auto" : "smooth" });
+      }
+    }
+
+    function applyFilters() {
+      const list = visiblePoints();
+      const visibleTitles = new Set(list.map((p) => p.title));
+      if (selected && !visibleTitles.has(selected.title)) selected = null;
+      const arcs = state.layers.routes
+        ? routes.filter((r) => (!r.year || r.year <= state.year) && visibleTitles.has(r.from.title) && visibleTitles.has(r.to.title))
+        : [];
+      globe.setData(list, arcs);
+      globe.select(selected);
+      renderList(list);
+      renderDetail();
+    }
+    state.applyGlobe = () => {
+      globe.setTheme(footprintPalette());
+      applyFilters();
+    };
+
+    if (listEl && !listEl.dataset.bound) {
+      listEl.dataset.bound = "true";
+      listEl.addEventListener("click", (event) => {
+        const btn = event.target.closest(".rf-place");
+        if (!btn) return;
+        const point = points.find((p) => p.title === btn.dataset.title);
+        if (point) select(point, true);
+        const again = Array.from(listEl.querySelectorAll(".rf-place")).find((el) => el.dataset.title === btn.dataset.title);
+        if (again) again.focus();
+      });
+    }
+
+    const rangeEl = document.getElementById(IDS.FOOTPRINT_YEAR);
+    const labelEl = document.getElementById(IDS.FOOTPRINT_YEAR_LABEL);
+    if (rangeEl && labelEl) {
+      rangeEl.min = String(footprint.minYear || state.year);
+      rangeEl.max = String(footprint.maxYear || state.year);
+      rangeEl.value = String(state.year);
+      labelEl.textContent = String(state.year);
+      if (!rangeEl.dataset.bound) {
+        rangeEl.dataset.bound = "true";
+        rangeEl.addEventListener("input", () => {
+          state.year = Number(rangeEl.value);
+          labelEl.textContent = String(state.year);
+          window.requestAnimationFrame(applyFilters);
+        });
+      }
+    }
+    document.querySelectorAll("input[data-footprint-cat]").forEach((input) => {
+      if (input.dataset.bound) return;
+      input.dataset.bound = "true";
+      input.addEventListener("change", () => {
+        state.categories[input.getAttribute("data-footprint-cat")] = input.checked;
+        applyFilters();
+      });
+    });
+    document.querySelectorAll("input[data-footprint-layer]").forEach((input) => {
+      if (input.dataset.bound) return;
+      input.dataset.bound = "true";
+      const layer = input.getAttribute("data-footprint-layer");
+      if (layer === "spin" && prefersReducedMotion) {
+        input.checked = false;
+        input.closest("label").hidden = true;
+      }
+      input.addEventListener("change", () => {
+        state.layers[layer] = input.checked;
+        if (layer === "spin") globe.setSpin(input.checked);
+        else applyFilters();
+      });
+    });
+
+    applyFilters();
+  }
+
   function refreshLayout() {
     const charts = dashboardState.charts;
     Object.values(charts).forEach((chart) => {
@@ -1405,13 +2133,16 @@
     dashboardState.initialized = true;
 
     loadDashboardAssets()
-      .then(() => safeFetch(buildUrl("data/dashboard_payload.json")))
-      .then((payload) => {
+      .then(() => Promise.all([
+        safeFetch(buildUrl("data/dashboard_payload.json")),
+        safeFetch(buildUrl("data/citation_projection.json")),
+      ]))
+      .then(([payload, projection]) => {
         if (!payload) return;
         dashboardState.payload = payload;
         renderMetricSummary(payload);
         scheduleWork(() => {
-          renderLine((payload.scholar && payload.scholar.citationsByYear) || []);
+          renderLine((payload.scholar && payload.scholar.citationsByYear) || [], projection);
           renderImpactMap(payload.impactGraph || {});
           renderCollabNetwork(payload.network && payload.network.collaboration);
           renderFootprintMap(payload.footprint || {});

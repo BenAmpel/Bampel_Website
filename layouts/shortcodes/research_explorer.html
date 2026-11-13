@@ -9,6 +9,8 @@
     <p class="research-explorer-intro">Choose a thread to see how the questions, methods, and papers connect.</p>
   </div>
 
+  {{ partial "hero_field" (dict "variant" "explorer" "follow" "[data-research-explorer]" "caption" "Each point is a paper. The thread you pick below comes forward; lines join papers that share co-authors.") }}
+
   <nav class="research-explorer-tabs" data-research-tabs aria-label="Research themes">
     {{- range $i, $track := $tracks }}
       {{- $panelID := printf "research-thread-%s" $track.id -}}

@@ -5976,3 +5976,129 @@ section#cv-download a {
   align-items: center;
   min-height: 44px;
 }
+
+/* ---------- Research constellation hero (layouts/partials/hero_field.html, assets/js/three/hero.mjs) ----------
+   The band reserves its height and shows a soft CSS poster, so nothing moves when the canvas fades in after load. */
+.hero-field {
+  --hero-h: clamp(220px, 38vh, 380px);
+  position: relative;
+  margin: 0 auto;
+}
+
+.hero-field__stage {
+  position: relative;
+  height: var(--hero-h);
+  overflow: hidden;
+  border-radius: 18px;
+  background:
+    radial-gradient(38% 60% at 22% 55%, rgba(22, 163, 74, 0.1), transparent 70%),
+    radial-gradient(34% 55% at 50% 40%, rgba(2, 132, 199, 0.09), transparent 70%),
+    radial-gradient(34% 55% at 78% 58%, rgba(168, 85, 247, 0.08), transparent 70%),
+    #f6f8fa;
+}
+
+.hero-field__stage .hero-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 900ms ease;
+}
+
+.hero-field.is-live .hero-canvas {
+  opacity: 1;
+}
+
+.hero-field__legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 18px;
+  padding: 10px 4px 0;
+}
+
+.hero-field__caption {
+  margin: 0;
+  color: #57606a;
+  font-size: 0.82rem;
+}
+
+.hero-field__key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: #57606a;
+  font-size: 0.78rem;
+}
+
+.hero-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hero-field__key .hero-key::before {
+  content: "";
+  flex: none;
+  font-size: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.hero-field__key .hero-key--0::before { background: #16a34a; }
+.hero-field__key .hero-key--1::before { background: #0284c7; }
+.hero-field__key .hero-key--2::before { background: #d97706; }
+.hero-field__key .hero-key--3::before { background: #a855f7; }
+
+body.dark .hero-field__stage {
+  background:
+    radial-gradient(38% 60% at 22% 55%, rgba(74, 222, 128, 0.09), transparent 70%),
+    radial-gradient(34% 55% at 50% 40%, rgba(2, 132, 199, 0.1), transparent 70%),
+    radial-gradient(34% 55% at 78% 58%, rgba(168, 85, 247, 0.09), transparent 70%),
+    #0a0d12;
+}
+
+body.dark .hero-field__caption,
+body.dark .hero-field__key {
+  color: #8b949e;
+}
+
+/* Home: the band opens the page, so the section around it stays tight and drops the card frame the other blocks use. */
+.wg-hero-constellation {
+  padding-top: 20px !important;
+  padding-bottom: 0 !important;
+}
+
+.wg-hero-constellation > .container {
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* Explorer: a shorter band inside the explorer card. */
+.hero-field--explorer {
+  --hero-h: clamp(190px, 28vh, 290px);
+  padding: 0 24px 6px;
+}
+
+.hero-field--explorer .hero-field__stage {
+  border: 1px solid rgba(139, 148, 158, 0.16);
+}
+
+@media (max-width: 640px) {
+  .hero-field { --hero-h: clamp(200px, 34vh, 280px); }
+  .hero-field--explorer { padding: 0 14px 6px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-field__stage .hero-canvas { transition: none; }
+}
