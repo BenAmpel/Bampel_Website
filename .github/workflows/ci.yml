@@ -73,6 +73,9 @@ jobs:
       - name: Publications filter test
         run: node --test tests/publications-filter.test.mjs
 
+      - name: CCAIR sitemap lastmod test
+        run: node --test tests/ccair-lastmod.test.mjs
+
       - name: Pathway Finder share link test
         run: node --test tests/pathways-share-link.test.mjs
 
