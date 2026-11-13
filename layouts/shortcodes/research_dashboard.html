@@ -100,7 +100,7 @@
     </div>
   </section>
 
-  <!-- Research Footprint: interactive world map, auto-derived from publications.json
+  <!-- Research Footprint: a three.js globe (Leaflet map without WebGL), auto-derived from publications.json
        via data/venue_locations.yaml (see build_dashboard_payload.py). -->
   <section class="rd-footprint rdm" aria-labelledby="footprint-heading">
     <div class="rdm-head">
@@ -119,7 +119,8 @@
       <fieldset class="rdm-checks">
         <legend class="rdm-checks-label">Layers</legend>
         <label class="rdm-check footprint-toggle"><input type="checkbox" data-footprint-layer="routes" checked> Travel arcs</label>
-        <label class="rdm-check footprint-toggle"><input type="checkbox" data-footprint-layer="clusters" checked> Group nearby points</label>
+        <label class="rdm-check footprint-toggle" data-footprint-mode="globe"><input type="checkbox" data-footprint-layer="spin" checked> Spin globe</label>
+        <label class="rdm-check footprint-toggle" data-footprint-mode="map" hidden><input type="checkbox" data-footprint-layer="clusters" checked> Group nearby points</label>
       </fieldset>
       <div class="rf-year">
         <label for="footprint-year-range">Through</label>
@@ -127,8 +128,16 @@
         <output id="footprint-year-label" for="footprint-year-range">2026</output>
       </div>
     </div>
-    <div class="rf-map">
-      <div id="dashboard-footprint-map" role="application" aria-label="Interactive world map of conference presentations and collaborating institutions" tabindex="0"></div>
+    <div class="rf-stage">
+      <div class="rf-map">
+        <div id="dashboard-footprint-map" role="application" aria-label="Interactive world map of conference presentations and collaborating institutions" tabindex="0"></div>
+        <p class="rf-hint" data-footprint-mode="globe">Drag to turn the globe. Select a place for details.</p>
+      </div>
+      <aside class="rf-side" data-footprint-mode="globe" aria-label="Footprint places">
+        <div id="footprint-detail" class="rf-detail" aria-live="polite"></div>
+        <p id="footprint-count" class="rf-count"></p>
+        <ul id="footprint-places" class="rf-places"></ul>
+      </aside>
     </div>
     <div id="footprint-legend" class="rf-legend"></div>
   </section>
