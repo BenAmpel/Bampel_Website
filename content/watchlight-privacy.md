@@ -24,8 +24,8 @@ and calls for signs of scams and tells you what it found.
 - **Everything is checked on your iPhone.** Watchlight has no server, no account, no analytics, no ads and no tracking.
   It contains no code from other companies.
 - **Nothing is sent to us.** Your messages, the numbers they come from, your contacts and your checks never reach us.
-- **Some things leave your phone only when you send them**: a report to 7726, a message to someone you trust, or a
-  purchase through Apple. Each is listed below.
+- **Some things leave your phone only when you send them**: a report to 7726 or a message to someone you trust. Each is
+  listed below.
 
 ## What Watchlight looks at
 
@@ -44,7 +44,7 @@ and calls for signs of scams and tells you what it found.
 ## What stays on your iPhone
 
 1. **Counts** of the messages you checked, by kind, for the stats screen. Numbers only.
-2. **Your settings**: the campaign-text setting and, if you bought the unlock and chose one, your trusted person's first
+2. **Your settings**: the campaign-text setting and, if you chose one, your trusted person's first
    name and one phone number or email.
 3. **A small diagnostic log** in the app's own storage, capped in size: which rules matched, the scores, the verdict and
    the message length in characters. Never the message or the sender.
@@ -60,9 +60,7 @@ Only when you choose to send it:
 - **Report it to 7726** opens a draft in Messages with the text. You decide whether to send it.
 - **Ask someone I trust** and **Text [your trusted person]** open the share sheet or a draft in Messages or Mail with the
   message and Watchlight's verdict. You pick who gets it and you send it.
-- **Buying the unlock** goes through Apple's App Store. Apple handles payment, and Watchlight learns only that the unlock
-  is owned. Apple's privacy policy applies.
-- **Links** in the app (sources, the refund page, the support email, data-broker and breach sites) open in Safari or
+- **Links** in the app (sources, the support email, data-broker and breach sites) open in Safari or
   Mail.
 
 Apple may share crash reports with us if you turned on "Share with App Developers" in Settings, and TestFlight testers
@@ -96,5 +94,5 @@ Benjamin M. Ampel, Georgia State University, [bampel@gsu.edu](mailto:bampel@gsu.
 
 ## App Store privacy label
 
-**Data Not Collected.** Watchlight does its checks on your iPhone and sends nothing to us. Reports, messages and
-purchases you start go to 7726, the people you choose, or Apple.
+**Data Not Collected.** Watchlight does its checks on your iPhone and sends nothing to us. Reports and messages
+you start go to 7726 or the people you choose.

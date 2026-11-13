@@ -65,13 +65,13 @@ To the maximum extent the law allows:
 
 - We are not liable for any loss or harm that comes from a scam, a fraud, a missed or misfiled message or call, a wrong label or warning, or any action you take or don't take based on Watchlight. This includes money lost, information shared, identity theft and missed appointments or codes.
 - We are not liable for indirect, incidental, special, consequential or punitive damages, or for lost profits, lost data or lost time, however caused, even if we were told they were possible.
-- Our total liability to you for any claim about Watchlight is limited to the greater of the amount you paid for Watchlight in the 12 months before the claim, or fifty U.S. dollars ($50).
+- Our total liability to you for any claim about Watchlight is limited to fifty U.S. dollars ($50). Watchlight is free.
 
 Nothing in these terms limits liability that cannot be limited by law, such as for fraud, or for death or personal injury caused by negligence where the law does not allow it, or your rights as a consumer that the law says cannot be waived.
 
 ## 8. Other services and information
 
-Watchlight helps you use services run by others: reporting to 7726 goes to your wireless carrier, links open other websites, purchases go through Apple, and caller labels use FTC data. We don't control these services or information and are not responsible for them. Their own terms apply, and you agree to follow them when you use them, including your wireless plan.
+Watchlight helps you use services run by others: reporting to 7726 goes to your wireless carrier, links open other websites, and caller labels use FTC data. We don't control these services or information and are not responsible for them. Their own terms apply, and you agree to follow them when you use them, including your wireless plan.
 
 ## 9. Using Watchlight properly
 
@@ -81,22 +81,18 @@ Use Watchlight only for lawful purposes and only on devices you own or control, 
 
 Watchlight checks everything on your iPhone and sends nothing to us. The privacy policy at https://bampel.com/watchlight/privacy/ explains what stays on your iPhone and what leaves it only when you send it.
 
-## 11. Purchases and refunds
-
-The optional one-time unlock is sold by Apple. Apple handles payment and refunds at https://reportaproblem.apple.com. If you use Family Sharing, members of your Apple family group can use the unlock too.
-
-## 12. Changes
+## 11. Changes
 
 We may update these terms, for example when Watchlight gains a feature. The version number and date at the top will change. If a change matters to you, Watchlight will ask you to agree again before you keep using it. If you don't agree, you can stop using Watchlight and delete it.
 
-## 13. Ending
+## 12. Ending
 
 You can stop using Watchlight at any time by deleting it. These terms end when you do, except sections 4 to 8 and 14, which continue.
 
-## 14. Governing law
+## 13. Governing law
 
 These terms are governed by the laws of the State of Georgia, United States, without regard to its conflict-of-law rules. If you are a consumer, you keep any protection the law of the place where you live gives you that cannot be waived by agreement. If part of these terms can't be enforced, the rest still applies.
 
-## 15. Questions
+## 14. Questions
 
 Email bampel@gsu.edu. A person reads every message.
