@@ -66,6 +66,22 @@ body:not(.dark) .rdm :is(.rdm-btn, .rdm-input, .im-legend-btn, .im-clear, .im-it
 /* Detail panel, lists and stat cells shared by the maps and the widgets. */
 .im-body { display:grid; grid-template-columns:minmax(0, 1fr) 300px; gap:16px; align-items:start; }
 .im-canvas { width:100%; height:500px; border-radius:10px; }
+.is-3d { position:relative; overflow:hidden; isolation:isolate; }
+/* 3D views (assets/js/three): canvas, HTML labels pinned to 3D points, and the hover tip. */
+.t3-canvas { position:absolute; inset:0; display:block; width:100%; height:100%; cursor:grab; touch-action:pan-y; }
+.t3-canvas:active { cursor:grabbing; }
+.t3-labels { position:absolute; inset:0; pointer-events:none; overflow:hidden; }
+.t3-label { position:absolute; top:0; left:0; --lx:-50%; --ly:-50%; white-space:nowrap; font:0.75rem/1.2 Lato, sans-serif; color:var(--rdm-text); will-change:transform; }
+.t3-label.is-above { --ly:-100%; }
+.t3-label.is-below { --ly:0%; }
+.t3-label.is-left { --lx:-100%; }
+.t3-label.is-right { --lx:0%; }
+.t3-label.is-pill { padding:3px 7px; border-radius:4px; font-size:0.78rem; background:var(--rdm-input); border:1px solid var(--rdm-line); box-shadow:0 4px 14px rgba(0,0,0,0.22); }
+.t3-axis { color:var(--rdm-body); font-size:0.78rem; }
+.t3-axis-num { color:var(--rdm-muted); font:0.7rem 'Fira Code', monospace; }
+.t3-tip { position:absolute; top:0; left:0; z-index:3; max-width:300px; padding:8px 10px; border-radius:8px; font:0.75rem/1.4 Lato, sans-serif;
+  color:var(--rdm-text); background:var(--rdm-input); border:1px solid var(--rdm-line); pointer-events:none; box-shadow:0 6px 20px rgba(0,0,0,0.25); }
+.t3-tip[hidden] { display:none; }
 .im-panel { min-width:0; max-height:500px; overflow:auto; padding:14px; border:1px solid var(--rdm-line); border-radius:10px; background:var(--rdm-soft); font-size:0.85rem; line-height:1.45; }
 .im-panel-head { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
 .im-kicker { margin:12px 0 6px; font-size:0.75rem; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:var(--rdm-muted); }

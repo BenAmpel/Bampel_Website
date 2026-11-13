@@ -130,6 +130,64 @@
     });
   }
 
+  // The site's 3D bundle (window.Site3D: globe, graph, fan). Resolves to null when WebGL is missing, too slow (software
+  // rendering) or the bundle fails, and the caller keeps its ECharts chart. Loaded once, only when a map is drawn.
+  let site3dPromise = null;
+  function load3D() {
+    if (!supportsWebGL()) return Promise.resolve(null);
+    if (!site3dPromise) {
+      site3dPromise = loadScriptOnce(buildUrl("vendor/three/0.170.0/site-3d.min.js"), () => window.Site3D)
+        .then(() => (window.Site3D && window.Site3D.supported() ? window.Site3D : null))
+        .catch(() => null);
+    }
+    return site3dPromise;
+  }
+
+  // A 3D graph in `dom` with a hover tooltip. Returns { view, shim } where shim stands in for an ECharts instance in
+  // dashboardState.charts (resize and dispose), or null if the view could not be made.
+  function mountGraph3D(dom, Site3D, { tipHtml, onSelect, onFail }) {
+    const tip = document.createElement("div");
+    tip.className = "t3-tip";
+    tip.hidden = true;
+    let view = null;
+    try {
+      view = Site3D.graph.create(dom, {
+        reducedMotion: prefersReducedMotion,
+        onSelect,
+        onFail,
+        onHover: (id, x, y) => {
+          const html = id ? tipHtml(id) : "";
+          if (!html) {
+            tip.hidden = true;
+            return;
+          }
+          tip.innerHTML = html;
+          tip.hidden = false;
+          const w = tip.offsetWidth;
+          const h = tip.offsetHeight;
+          const left = Math.max(6, Math.min(x - w / 2, dom.clientWidth - w - 6));
+          const top = y - h - 10 < 6 ? y + 26 : y - h - 10;
+          tip.style.transform = `translate(${Math.round(left)}px, ${Math.round(top)}px)`;
+        },
+      });
+    } catch (err) {
+      return null;
+    }
+    dom.classList.add("is-3d");
+    dom.appendChild(tip);
+    return {
+      view,
+      shim: {
+        resize() {},
+        dispose() {
+          view.dispose();
+          tip.remove();
+          dom.classList.remove("is-3d");
+        },
+      },
+    };
+  }
+
   // ECharts loads with the dashboard. The Footprint loads its own renderer: the three.js globe when WebGL works, otherwise
   // Leaflet (loadLeafletAssets), so most visitors never download Leaflet.
   function loadDashboardAssets() {
@@ -419,10 +477,14 @@
     const dom = document.getElementById(IDS.MAP);
     if (!dom || !graphData || !Array.isArray(graphData.nodes) || !graphData.nodes.length) return;
     if (dashboardState.charts.impact) dashboardState.charts.impact.dispose();
-    const chart = window.echarts.init(dom, "v5");
-    dashboardState.charts.impact = chart;
+    dashboardState.charts.impact = null;
+    // Drawn in 3D when the bundle loads and WebGL works (see load3D); otherwise ECharts. Both read the same state.
+    let chart = null;
+    let g3 = null;
 
     const state = dashboardState.impact;
+    const renderToken = {};
+    state.renderToken = renderToken;
     const section = dom.closest(".rd-impact") || dom.parentElement;
     const panel = document.getElementById("impact-map-inspector");
     const legendEl = document.getElementById("impact-map-legend");
@@ -497,6 +559,122 @@
         .filter((link) => link.source === id || link.target === id)
         .map((link) => ({ link, other: byId.get(link.source === id ? link.target : link.source) }))
         .sort((a, b) => b.link.value - a.link.value || b.other.value - a.other.value);
+
+    function paperTip(id) {
+      const paper = byId.get(id);
+      if (!paper) return "";
+      const typeLabel = TYPE_LABELS[paper.type] || paper.type;
+      return `<strong>${escapeHtml(paper.name)}</strong><br>${escapeHtml(paper.venue)} · ${paper.year || "—"} · ${escapeHtml(typeLabel)}<br>${paper.value} citations · ${escapeHtml(paper.topic)}`;
+    }
+
+    // The 3D scene, laid out in CSS pixels around the box centre (1 world unit = 1 px at rest), so it lines up with
+    // the 2D chart it replaces. Depth carries no data: guides and axis labels sit a little behind the papers, and
+    // links bow toward the viewer, which only shows when the reader drags the map to tilt it.
+    function buildSpec() {
+      const t = mapTheme();
+      const W = dom.clientWidth || 640;
+      const H = dom.clientHeight || 440;
+      const narrow = W < 560;
+      const isTimeline = state.view === "timeline";
+      const focus = state.focusId && byId.has(state.focusId) ? state.focusId : null;
+      const links = activeLinks();
+      const neighbors = new Set();
+      if (focus) {
+        links.forEach((link) => {
+          if (link.source === focus) neighbors.add(link.target);
+          if (link.target === focus) neighbors.add(link.source);
+        });
+      }
+      const hidden = (paper) => state.hiddenTopics.has(paper.topic);
+      const focusColor = focus ? colorFor(byId.get(focus), t) : t.accent;
+      const at = (x, y, z) => [x - W / 2, H / 2 - y, z || 0];
+      const back = -36;
+      const guides = [];
+      const labels = [];
+      const pos = new Map();
+
+      if (isTimeline) {
+        const left = narrow ? 84 : 156;
+        const right = 18;
+        const top = 16;
+        const bottom = 30;
+        const plotW = W - left - right;
+        const plotH = H - top - bottom;
+        const span = maxYear - minYear + 1;
+        const X = (year) => left + ((year - (minYear - 0.5)) / span) * plotW;
+        const Y = (row) => top + ((row + 0.5) / rows.length) * plotH;
+        papers.forEach((paper) => {
+          const [year, row] = timelinePos.get(paper.id);
+          pos.set(paper.id, at(X(year), Y(row)));
+        });
+        for (let row = 0; row < rows.length - 1; row += 1) {
+          guides.push({ points: [at(left, Y(row + 0.5), back), at(W - right, Y(row + 0.5), back)], color: t.grid, alpha: 1 });
+        }
+        guides.push({ points: [at(left, top + plotH, back), at(W - right, top + plotH, back)], color: t.grid, alpha: 1 });
+        for (let year = minYear; year < maxYear; year += 1) {
+          const x = X(year + 0.5);
+          const pts = [];
+          for (let k = 0; k <= 40; k += 1) pts.push(at(x, top + (plotH * k) / 40, back));
+          guides.push({ points: pts, color: t.grid, alpha: 0.8, dashed: true });
+        }
+        rows.forEach((topic, row) => {
+          labels.push({ key: `row:${topic}`, text: narrow ? TOPIC_SHORT[topic] || topic : topic, p: at(left - 12, Y(row), back), cls: "t3-axis is-left" });
+        });
+        for (let year = minYear; year <= maxYear; year += 1) {
+          if (narrow && year % 2 === 0) continue;
+          labels.push({ key: `year:${year}`, text: String(year), p: at(X(year), top + plotH + 14, back), cls: "t3-axis t3-axis-num" });
+        }
+      } else {
+        const radius = Math.max(60, Math.min(W, H) / 2 - (narrow ? 34 : 54));
+        circleOrder.forEach((paper, index) => {
+          const angle = Math.PI / 2 - (index / circleOrder.length) * Math.PI * 2;
+          pos.set(paper.id, [radius * Math.cos(angle), radius * Math.sin(angle), 0]);
+        });
+        const ring = [];
+        for (let k = 0; k < 96; k += 1) {
+          const angle = (k / 96) * Math.PI * 2;
+          ring.push([radius * Math.cos(angle), radius * Math.sin(angle), back]);
+        }
+        guides.push({ points: ring, color: t.grid, alpha: 0.9, closed: true });
+      }
+
+      const nodes = papers.map((paper) => {
+        const isFocus = paper.id === focus;
+        const lit = !focus || isFocus || neighbors.has(paper.id);
+        const gone = hidden(paper);
+        return {
+          id: paper.id,
+          p: pos.get(paper.id),
+          size: sizeFor(paper) + (isFocus ? 4 : 0),
+          color: colorFor(paper, t),
+          alpha: gone ? 0.08 : lit ? 1 : 0.2,
+          focus: isFocus,
+          glow: gone ? 0 : isFocus ? 1 : focus ? (neighbors.has(paper.id) ? 0.8 : 0) : 0.5,
+          pickable: !gone,
+          label: isFocus ? truncate(paper.name, narrow ? 28 : 44) : null,
+          labelCls: "is-pill",
+        };
+      });
+
+      const edges = links
+        .filter((link) => !hidden(byId.get(link.source)) && !hidden(byId.get(link.target)))
+        .filter((link) => !isTimeline || (focus && (link.source === focus || link.target === focus)))
+        .map((link) => {
+          const touches = focus && (link.source === focus || link.target === focus);
+          return {
+            a: link.source,
+            b: link.target,
+            color: touches ? focusColor : colorFor(byId.get(link.source), t),
+            alpha: touches ? 0.85 : focus ? 0.05 : 0.2,
+            lift: isTimeline ? 0.22 : 0.12,
+            inward: isTimeline ? 0 : 0.5,
+            beads: !!touches,
+            flow: !!touches,
+          };
+        });
+
+      return { nodes, edges, guides, labels, bounds: { cx: 0, cy: 0, w: W, h: H, pad: 1 }, bg: t.surface, dark: t.dark, focusColor: t.focus, sway: 2 };
+    }
 
     function buildOption() {
       const t = mapTheme();
@@ -588,10 +766,7 @@
               if (!a || !b) return "";
               return `<strong>${escapeHtml(params.data.reason || "Connected")}</strong><br>${escapeHtml(truncate(a.name, 60))}<br>${escapeHtml(truncate(b.name, 60))}`;
             }
-            const paper = byId.get(String(params.data.id));
-            if (!paper) return "";
-            const typeLabel = TYPE_LABELS[paper.type] || paper.type;
-            return `<strong>${escapeHtml(paper.name)}</strong><br>${escapeHtml(paper.venue)} · ${paper.year || "—"} · ${escapeHtml(typeLabel)}<br>${paper.value} citations · ${escapeHtml(paper.topic)}`;
+            return paperTip(String(params.data.id));
           },
         }),
         aria: { enabled: true, label: { description: describeImpact(papers, allLinks) } },
@@ -676,9 +851,11 @@
 
     let lastView = null;
     function update() {
-      const option = buildOption();
-      chart.setOption(option, lastView !== state.view);
-      lastView = state.view;
+      if (g3) g3.view.setGraph(buildSpec());
+      else if (chart) {
+        chart.setOption(buildOption(), lastView !== state.view);
+        lastView = state.view;
+      }
       renderLegend();
     }
 
@@ -756,13 +933,46 @@
       section.querySelectorAll(selector).forEach((btn) => btn.setAttribute("aria-pressed", String(btn.getAttribute(attr) === value)));
     }
 
-    chart.on("click", (params) => {
-      if (params.seriesId !== "papers" || params.dataType !== "node") return;
-      select(state.focusId === String(params.data.id) ? null : params.data.id, false);
-    });
-    chart.getZr().on("click", (event) => {
-      if (!event.target && state.focusId) select(null, false);
-    });
+    function useECharts() {
+      if (state.renderToken !== renderToken || chart) return;
+      if (g3) {
+        g3.shim.dispose();
+        g3 = null;
+      }
+      chart = window.echarts.init(dom, "v5");
+      dashboardState.charts.impact = chart;
+      chart.on("click", (params) => {
+        if (params.seriesId !== "papers" || params.dataType !== "node") return;
+        select(state.focusId === String(params.data.id) ? null : params.data.id, false);
+      });
+      chart.getZr().on("click", (event) => {
+        if (!event.target && state.focusId) select(null, false);
+      });
+      update();
+    }
+
+    function use3D(Site3D) {
+      if (state.renderToken !== renderToken) return;
+      if (!Site3D) {
+        useECharts();
+        return;
+      }
+      g3 = mountGraph3D(dom, Site3D, {
+        tipHtml: paperTip,
+        onSelect: (id) => {
+          if (id) select(state.focusId === id ? null : id, false);
+          else if (state.focusId) select(null, false);
+        },
+        onFail: () => useECharts(),
+      });
+      if (!g3) {
+        useECharts();
+        return;
+      }
+      dom.setAttribute("aria-label", describeImpact(papers, allLinks));
+      dashboardState.charts.impact = g3.shim;
+      update();
+    }
 
     if (!section.dataset.mapBound) {
       section.dataset.mapBound = "1";
@@ -858,8 +1068,9 @@
 
     setPressed("[data-impact-view]", "data-impact-view", state.view);
     setPressed("[data-impact-color]", "data-impact-color", state.colorMode);
-    update();
+    renderLegend();
     renderPanel();
+    load3D().then(use3D);
   }
 
   function normalizeAuthor(nameMap, name) {
@@ -1510,7 +1721,7 @@
       return;
     }
     Promise.all([
-      loadScriptOnce(buildUrl("vendor/three/0.170.0/footprint-globe.min.js"), () => window.FootprintGlobe),
+      load3D(),
       safeFetch(buildUrl("data/globe_land.json")),
     ])
       .then(([, land]) => {

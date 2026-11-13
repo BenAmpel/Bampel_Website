@@ -14,7 +14,8 @@ How it works
    the 80% band held the real outcome. If it held less often, the band is widened in log space until it does.
 
 Only aggregates leave this script: per-year low / median / high multipliers, cohort sizes and backtest coverage.
-No peer names or IDs are written. Raw API pages are cached outside the repo (--cache).
+No peer names or IDs are written. The matched peers' paths are written only as shuffled ratios to their own anchor
+year (no start year, no level), so the chart can draw the fan without identifying anyone. Raw API pages are cached outside the repo (--cache).
 
 Usage: python3 scripts/citation_projection.py --cache /path/to/scratch/openalex-cache
 """
@@ -245,6 +246,12 @@ def main() -> None:
         print(f"{this_year + h}: 80% {nowcast * lo:.0f}-{nowcast * hi:.0f}, 50% {nowcast * ilo:.0f}-{nowcast * ihi:.0f}, "
               f"median {nowcast * mid:.0f}")
 
+    # Anonymous peer paths for the 3D fan: each matched peer's career years 2-10 as a ratio to its own anchor year.
+    rng = random.Random(SEED)
+    paths = [[round(p["series"].get(k, 0) / p["series"][ANCHOR_K], 3) for k in range(2, ANCHOR_K + max_h + 1)]
+             for p in nb]
+    rng.shuffle(paths)
+
     out = {
         "generated": dt.date.today().isoformat(),
         "source": "OpenAlex author records, seeded random sample",
@@ -253,6 +260,7 @@ def main() -> None:
         "anchor": {"year": this_year, "soFar": ytd, "fullYear": nowcast},
         "cohort": {"sampled": len(authors), "eligible": len(pool), "neighbours": len(nb)},
         "years": years,
+        "peerPaths": {"fromYear": CAREER_START + 2, "paths": paths},
         "backtest": {
             "cases": len(pool),
             "inner": {str(this_year + h): round(bt[h][0]["inner"][2], 3) for h in HORIZONS},
