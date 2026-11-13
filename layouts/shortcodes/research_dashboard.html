@@ -22,60 +22,76 @@
     </div>
   </div>
 
-  <!-- Impact Map -->
-  <div class="rd-impact" style="position:relative; height:520px;">
-    <div class="rd-impact-title" style="position:absolute; top:20px; left:20px; z-index:10; pointer-events:none;">
-      <h2 class="dash-label" style="margin:0; font-size:0.8rem; opacity:0.7; text-transform:uppercase;">Impact Map</h2>
-      <p style="margin:0; font-size:0.75rem; opacity:0.7;">Connections by Topic, Venue &amp; Co-authors</p>
-    </div>
-    <div class="impact-map-controls" aria-label="Impact map controls">
-      <div class="impact-control-group" role="group" aria-label="Color mode">
-        <button class="impact-toggle is-active" data-impact-color="topic" type="button">Color: Topic</button>
-        <button class="impact-toggle" data-impact-color="year" type="button">Color: Year</button>
+  <!-- Impact Map: every publication placed by year and topic (Timeline) or on a topic-grouped circle (Network).
+       Data: payload.impactGraph. Logic: renderImpactMap() in assets/js/research_dashboard.js. -->
+  <section class="rd-impact rdm" aria-labelledby="impact-map-heading">
+    <div class="rdm-head">
+      <div>
+        <h2 class="rdm-title" id="impact-map-heading">Impact Map</h2>
+        <p class="rdm-sub">Each dot is a paper, sized by citations. Select one to see the papers it shares a topic, venue or co-author with.</p>
       </div>
-      <div class="impact-control-group" role="group" aria-label="Connection types">
-        <label class="impact-check"><input type="checkbox" data-impact-link="topic" checked> Topics</label>
-        <label class="impact-check"><input type="checkbox" data-impact-link="venue" checked> Venues</label>
-        <label class="impact-check"><input type="checkbox" data-impact-link="author" checked> Co-authors</label>
+      <div class="rdm-toolbar">
+        <div class="rdm-seg" role="group" aria-label="Layout">
+          <button class="rdm-btn" type="button" data-impact-view="timeline" aria-pressed="true">Timeline</button>
+          <button class="rdm-btn" type="button" data-impact-view="network" aria-pressed="false">Network</button>
+        </div>
+        <div class="rdm-seg" role="group" aria-label="Color by">
+          <button class="rdm-btn" type="button" data-impact-color="topic" aria-pressed="true">Topic</button>
+          <button class="rdm-btn" type="button" data-impact-color="type" aria-pressed="false">Venue type</button>
+        </div>
       </div>
     </div>
-    <div class="impact-map-legend" id="impact-map-legend"></div>
-    <div class="impact-map-inspector" id="impact-map-inspector" aria-live="polite">
-      <div class="impact-inspector-title">Focus lens</div>
-      <div class="impact-inspector-body">Click a node to reveal context, then pin highlights you want to keep.</div>
-      <div class="impact-inspector-actions">
-        <button class="impact-action" type="button" data-impact-action="pin" disabled>Pin highlight</button>
-        <button class="impact-action" type="button" data-impact-action="clear" disabled>Clear focus</button>
+    <div class="rdm-toolbar rdm-toolbar-2">
+      <div class="rdm-search">
+        <label class="rdm-search-label" for="impact-search">Find a paper</label>
+        <input class="rdm-input" id="impact-search" type="search" list="impact-paper-list" placeholder="Search titles" autocomplete="off">
+        <datalist id="impact-paper-list"></datalist>
+        <span class="rdm-status" id="impact-search-status" role="status"></span>
       </div>
-      <div class="impact-inspector-pins" id="impact-map-pins"></div>
+      <fieldset class="rdm-checks">
+        <legend class="rdm-checks-label">Link papers by</legend>
+        <label class="rdm-check"><input type="checkbox" data-impact-link="topic" checked> Topic</label>
+        <label class="rdm-check"><input type="checkbox" data-impact-link="venue" checked> Venue</label>
+        <label class="rdm-check"><input type="checkbox" data-impact-link="author" checked> Co-author</label>
+      </fieldset>
     </div>
-    <div id="dashboard-impact-map" style="width:100%; height:100%;" role="img" aria-label="Impact map connecting papers by topic, venue, and co-authorship" tabindex="0"></div>
-  </div>
+    <div class="im-legend" id="impact-map-legend" aria-label="Topics; select one to hide or show it"></div>
+    <div class="im-body">
+      <div id="dashboard-impact-map" class="im-canvas" role="img" aria-label="Impact map of publications by year and topic" tabindex="0"></div>
+      <aside class="im-panel" id="impact-map-inspector" aria-live="polite" aria-label="Paper details"></aside>
+    </div>
+  </section>
 
-  <!-- Collaboration Network: interactive co-author graph (payload.network.collaboration,
+  <!-- Collaboration Network: co-authors in rings around Ben by papers together (payload.network.collaboration,
        built from the publication record by generate_network.py / build_dashboard_payload.py). -->
-  <div class="rd-collab">
-    <div>
-      <div style="display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:10px;">
-        <div>
-          <h2 class="dash-label" style="margin:0; font-size:0.8rem; opacity:0.7; text-transform:uppercase;">Collaboration Network</h2>
-          <p style="margin:0 0 10px; font-size:0.75rem; opacity:0.7;">Co-authorship graph from the publication record — click a node for details</p>
-        </div>
-        <div class="collab-chip-row" role="group" aria-label="Time range" style="display:flex; gap:6px;">
-          <button class="collab-chip impact-toggle is-active" data-collab-range="all" type="button">All time</button>
-          <button class="collab-chip impact-toggle" data-collab-range="5" type="button">5 yrs</button>
-          <button class="collab-chip impact-toggle" data-collab-range="3" type="button">3 yrs</button>
-          <button class="collab-chip impact-toggle" data-collab-range="2" type="button">2 yrs</button>
+  <section class="rd-collab rdm" aria-labelledby="collab-heading">
+    <div class="rdm-head">
+      <div>
+        <h2 class="rdm-title" id="collab-heading">Collaboration Network</h2>
+        <p class="rdm-sub">Co-authors arranged by how often and how recently we have written together.</p>
+      </div>
+      <div class="rdm-toolbar">
+        <div class="rdm-seg" role="group" aria-label="Time range">
+          <button class="rdm-btn" data-collab-range="all" type="button" aria-pressed="true">All time</button>
+          <button class="rdm-btn" data-collab-range="5" type="button" aria-pressed="false">5 yrs</button>
+          <button class="rdm-btn" data-collab-range="3" type="button" aria-pressed="false">3 yrs</button>
+          <button class="rdm-btn" data-collab-range="2" type="button" aria-pressed="false">2 yrs</button>
         </div>
       </div>
-      <div id="dashboard-collab-network" style="width:100%; height:420px;" role="img" aria-label="Interactive co-author collaboration network" tabindex="0"></div>
     </div>
-    <aside class="rd-collab-aside">
-      <div class="collab-spotlight-title" style="font-weight:800; font-size:0.85rem; margin-bottom:6px;">Collaborator spotlight</div>
-      <div class="collab-spotlight-body" style="font-size:0.75rem; opacity:0.75; margin-bottom:10px;">Select a node to see their co-authorship footprint, top venues, and key connections.</div>
-      <div id="collab-spotlight-meta" style="font-size:0.75rem; display:flex; flex-direction:column; gap:6px;"></div>
-    </aside>
-  </div>
+    <div class="im-body cn-body">
+      <div class="cn-main">
+        <div id="dashboard-collab-network" class="cn-canvas" role="img" aria-label="Co-author network" tabindex="0"></div>
+        <div class="im-legend cn-legend" id="collab-legend"></div>
+      </div>
+      <aside class="im-panel cn-panel" aria-label="Collaborators">
+        <div id="collab-spotlight" aria-live="polite"></div>
+        <label class="rdm-search-label" for="collab-filter">Filter co-authors</label>
+        <input class="rdm-input" id="collab-filter" type="search" placeholder="Name" autocomplete="off">
+        <ol class="cn-list" id="collab-list"></ol>
+      </aside>
+    </div>
+  </section>
 
   <!-- Research Footprint: interactive world map, auto-derived from publications.json
        via data/venue_locations.yaml (see build_dashboard_payload.py). -->

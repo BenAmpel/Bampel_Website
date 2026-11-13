@@ -6,64 +6,142 @@
 .institution-marker .marker-pin { background: #ff6b35; }
 body.dark .custom-marker .marker-pin { border-color: #000; box-shadow: 0 0 8px currentColor; }
 
-/* Impact map controls */
-.impact-map-controls { position:absolute; top:16px; right:16px; z-index:20; display:flex; flex-direction:column; gap:8px; pointer-events:auto; }
-.impact-control-group { display:flex; flex-wrap:wrap; gap:6px; padding:6px; border-radius:10px; border:1px solid var(--card-border, #333); background:rgba(0,0,0,0.35); backdrop-filter: blur(6px); }
-.impact-toggle { border:1px solid rgba(74,222,128,0.3); background:transparent; color:#b9f6ca; font-size:0.75rem; letter-spacing:0.05em; text-transform:uppercase; padding:4px 8px; border-radius:999px; cursor:pointer; }
-.impact-toggle.is-active { background:rgba(74,222,128,0.18); border-color:#4ade80; color:#4ade80; }
-.impact-check { display:flex; align-items:center; gap:6px; min-height:24px; font-size:0.75rem; color:#cfead2; }
-.impact-check input { accent-color:#4ade80; }
+/* Footprint legend (the Impact Map no longer uses these; the footprint map shares the class). */
 .impact-map-legend { position:absolute; bottom:14px; left:14px; z-index:15; max-width:240px; background:rgba(0,0,0,0.4); border:1px solid var(--card-border, #333); border-radius:12px; padding:8px 10px; font-size:0.75rem; color:#d6dde2; backdrop-filter: blur(6px); pointer-events:auto; }
 .impact-map-legend .legend-row { display:flex; align-items:center; gap:6px; margin-bottom:4px; }
 .impact-map-legend .legend-row:last-child { margin-bottom:0; }
 .impact-legend-dot { width:8px; height:8px; border-radius:50%; background:var(--legend-color); box-shadow:0 0 6px rgba(0,0,0,0.4); }
-.impact-map-inspector { position:absolute; top:auto; bottom:16px; right:16px; width:230px; z-index:20; background:rgba(0,0,0,0.48); border:1px solid var(--card-border, #333); border-radius:12px; padding:10px; font-size:0.75rem; color:#e0e0e0; backdrop-filter: blur(6px); pointer-events:auto; }
-.impact-inspector-title { font-size:0.75rem; text-transform:uppercase; opacity:0.7; margin-bottom:6px; }
-.impact-inspector-body { line-height:1.4; margin-bottom:8px; opacity:0.9; }
-.impact-inspector-actions { display:flex; gap:6px; margin-bottom:8px; }
-.impact-action { flex:1; border-radius:999px; border:1px solid rgba(74,222,128,0.3); background:transparent; color:#c8f7c5; font-size:0.75rem; padding:4px 6px; text-transform:uppercase; letter-spacing:0.08em; cursor:pointer; }
-.impact-action:disabled { opacity:0.65; cursor:not-allowed; } /* .4 left the label at 3:1 */
-.impact-inspector-pins { display:flex; flex-wrap:wrap; gap:6px; }
-.impact-pin { display:flex; align-items:center; gap:6px; padding:4px 6px; border-radius:999px; background:rgba(0,229,255,0.12); border:1px solid rgba(0,229,255,0.3); font-size:0.75rem; }
-.impact-pin button { border:none; background:transparent; color:#00e5ff; cursor:pointer; font-size:0.7rem; line-height:1; }
+body:not(.dark) .impact-map-legend { background:rgba(255,255,255,0.85); color:#333; border-color:#e0e0e0; }
 
-/* Collaboration network controls */
-.collab-controls { position:absolute; top:16px; right:16px; z-index:20; pointer-events:auto; }
-.collab-chip-row { display:flex; flex-wrap:wrap; gap:6px; padding:6px; border-radius:10px; border:1px solid var(--card-border, #333); background:rgba(0,0,0,0.35); backdrop-filter: blur(6px); }
-.collab-chip { border:1px solid rgba(0,229,255,0.3); background:transparent; color:#bde8ff; font-size:0.75rem; letter-spacing:0.04em; text-transform:uppercase; padding:4px 8px; border-radius:999px; cursor:pointer; }
-.collab-chip.is-active { background:rgba(0,229,255,0.18); border-color:#00e5ff; color:#00e5ff; }
-.collab-spotlight { position:absolute; bottom:16px; left:16px; width:240px; z-index:20; background:rgba(0,0,0,0.48); border:1px solid var(--card-border, #333); border-radius:12px; padding:10px; font-size:0.75rem; color:#e0e0e0; backdrop-filter: blur(6px); pointer-events:auto; }
-.collab-spotlight-title { font-size:0.75rem; text-transform:uppercase; opacity:0.7; margin-bottom:6px; }
-.collab-spotlight-body { line-height:1.4; margin-bottom:8px; opacity:0.9; }
-.collab-spotlight-meta { display:grid; gap:6px; }
-.collab-meta-row { display:flex; justify-content:space-between; gap:10px; }
-.collab-meta-row span { opacity:0.7; }
-.collab-meta-row strong { font-weight:700; color:#00e5ff; }
-
-@media (max-width: 900px) {
-    .impact-map-controls { top:12px; right:12px; }
-    .impact-map-legend { bottom:12px; left:12px; }
-    .impact-map-inspector { top:auto; bottom:12px; right:12px; width:200px; }
-    .collab-controls { top:12px; right:12px; }
-    .collab-spotlight { bottom:12px; left:12px; width:210px; }
+/* ---- Impact Map and Collaboration Network (redesign 2026-11-12) ----------------------------------------------------
+   Controls sit in a toolbar above each chart and the details live in a side panel, never floating over the plot.
+   rdm- = shared map chrome, im- = impact map (and shared panel/list pieces), cn- = collaboration network. */
+body.dark .rdm {
+  --rdm-text:#e6edf3; --rdm-body:#c9d1d9; --rdm-muted:#8b949e; --rdm-line:#30363d; --rdm-soft:rgba(110,118,129,0.12);
+  --rdm-hover:rgba(110,118,129,0.2); --rdm-on:#4ade80; --rdm-on-bg:rgba(74,222,128,0.12); --rdm-input:#0d1117;
+  --rdm-focus:#00e5ff;
 }
-
-body:not(.dark) .impact-control-group,
-body:not(.dark) .impact-map-legend,
-body:not(.dark) .impact-map-inspector,
-body:not(.dark) .collab-chip-row,
-body:not(.dark) .collab-spotlight {
-    background:rgba(255,255,255,0.85);
-    color:#333;
-    border-color:#e0e0e0;
+body:not(.dark) .rdm {
+  --rdm-text:#1f2328; --rdm-body:#3d444d; --rdm-muted:#59636e; --rdm-line:#d1d9e0; --rdm-soft:rgba(175,184,193,0.16);
+  --rdm-hover:rgba(175,184,193,0.3); --rdm-on:#166534; --rdm-on-bg:rgba(22,101,52,0.1); --rdm-input:#ffffff;
+  --rdm-focus:#0077b6;
 }
-body:not(.dark) .impact-toggle,
-body:not(.dark) .impact-action,
-body:not(.dark) .collab-chip { color:#1a1a1a; border-color:#bdbdbd; }
-body:not(.dark) .impact-toggle.is-active { color:#0b7a2f; border-color:#0b7a2f; background:rgba(11,122,47,0.15); }
-body:not(.dark) .collab-chip.is-active { color:#0077b6; border-color:#0077b6; background:rgba(0,119,182,0.15); }
-body:not(.dark) .impact-action { color:#0b7a2f; }
-body:not(.dark) .impact-pin { background:rgba(0,119,182,0.12); border-color:rgba(0,119,182,0.3); }
+.rdm { border-top:1px solid var(--card-border, #333); padding:24px; color:var(--rdm-body); }
+.rdm p, .rdm li, .rdm dd { text-align:left !important; hyphens:none; }
+.rdm-head { display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:space-between; gap:12px 20px; margin-bottom:14px; }
+.rdm-title { margin:0 0 4px; font-size:1.05rem; font-weight:700; letter-spacing:0; text-transform:none; color:var(--rdm-text); }
+.rdm-sub { margin:0; max-width:60ch; font-size:0.85rem; line-height:1.45; color:var(--rdm-muted); }
+.rdm-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px; }
+.rdm-toolbar-2 { justify-content:space-between; margin-bottom:12px; }
+.rdm-seg { display:inline-flex; padding:3px; gap:2px; border:1px solid var(--rdm-line); border-radius:8px; background:var(--rdm-soft); }
+.rdm-btn { min-height:32px; padding:4px 12px; border:0; border-radius:6px; background:transparent; color:var(--rdm-body); font:600 0.8rem/1.2 Lato, sans-serif; cursor:pointer; transition:background-color 0.15s ease, color 0.15s ease; }
+.rdm-btn:hover { background:var(--rdm-hover); color:var(--rdm-text); }
+.rdm-btn[aria-pressed="true"] { background:var(--rdm-on-bg); color:var(--rdm-on); box-shadow:inset 0 0 0 1px var(--rdm-on); }
+.rdm-search { display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; flex:1 1 260px; }
+.rdm-search-label, .rdm-checks-label { font-size:0.8rem; font-weight:600; color:var(--rdm-muted); }
+.rdm-input { min-height:34px; width:100%; max-width:340px; padding:6px 10px; border:1px solid var(--rdm-line); border-radius:8px; background:var(--rdm-input); color:var(--rdm-text); font:0.85rem Lato, sans-serif; }
+.rdm-input::placeholder { color:var(--rdm-muted); }
+.rdm-status { font-size:0.8rem; color:var(--rdm-muted); }
+.rdm-checks { display:flex; flex-wrap:wrap; align-items:center; gap:4px 14px; margin:0; padding:0; border:0; }
+.rdm-checks-label { float:left; padding:0; margin-right:4px; }
+.rdm-check { display:inline-flex; align-items:center; gap:6px; min-height:32px; font-size:0.85rem; color:var(--rdm-body); cursor:pointer; }
+.rdm-check input { width:16px; height:16px; accent-color:var(--rdm-on); }
+
+.im-legend { display:flex; flex-wrap:wrap; align-items:center; gap:6px 8px; margin-bottom:12px; font-size:0.8rem; color:var(--rdm-body); }
+.im-legend-item, .im-legend-btn { display:inline-flex; align-items:center; gap:6px; min-height:30px; padding:2px 10px; border-radius:999px; }
+.im-legend-btn { border:1px solid var(--rdm-line); background:transparent; color:var(--rdm-body); font:0.8rem Lato, sans-serif; cursor:pointer; transition:opacity 0.15s ease, background-color 0.15s ease; }
+.im-legend-btn:hover { background:var(--rdm-hover); }
+.im-legend-btn[aria-pressed="false"] { opacity:0.55; text-decoration:line-through; }
+.im-legend-btn[aria-pressed="false"] .im-swatch { background:transparent; box-shadow:inset 0 0 0 2px var(--swatch); }
+.im-legend-count { font-family:'Fira Code', monospace; font-size:0.75rem; color:var(--rdm-muted); }
+.im-legend-note { font-size:0.8rem; color:var(--rdm-muted); padding:0 4px; }
+.im-swatch { flex:none; display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--swatch, #8b949e); }
+
+.im-body { display:grid; grid-template-columns:minmax(0, 1fr) 300px; gap:16px; align-items:start; }
+.im-canvas { width:100%; height:500px; border-radius:10px; }
+.im-panel { min-width:0; max-height:500px; overflow:auto; padding:14px; border:1px solid var(--rdm-line); border-radius:10px; background:var(--rdm-soft); font-size:0.85rem; line-height:1.45; }
+.im-panel-head { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+.im-kicker { margin:12px 0 6px; font-size:0.75rem; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:var(--rdm-muted); }
+.im-panel-head .im-kicker { margin:0; flex:1; }
+.im-panel > .im-kicker:first-child, #collab-spotlight > .im-kicker:first-child { margin-top:0; }
+.im-kicker-inline { font-weight:700; color:var(--rdm-muted); margin-right:4px; }
+.im-clear { min-height:28px; padding:2px 10px; border:1px solid var(--rdm-line); border-radius:6px; background:transparent; color:var(--rdm-body); font:600 0.75rem Lato, sans-serif; cursor:pointer; }
+.im-clear:hover { background:var(--rdm-hover); color:var(--rdm-text); }
+.im-panel-title { margin:0 0 4px; font-size:0.98rem; line-height:1.35; font-weight:700; color:var(--rdm-text); }
+.im-panel-title:focus { outline:none; }
+.im-panel-title:focus-visible { outline:2px solid var(--rdm-focus); outline-offset:2px; }
+.im-meta { margin:0 0 8px; color:var(--rdm-body); }
+.im-authors { margin:8px 0; font-size:0.8rem; color:var(--rdm-muted); }
+.im-authors strong { color:var(--rdm-text); }
+.im-stats { display:flex; flex-wrap:wrap; gap:8px; margin:8px 0; }
+.im-stats > div { flex:1 1 80px; padding:8px 10px; border:1px solid var(--rdm-line); border-radius:8px; }
+.im-stats dt { font-size:0.72rem; font-weight:600; color:var(--rdm-muted); }
+.im-stats dd { margin:0; font:600 1.05rem 'Fira Code', monospace; color:var(--rdm-text); }
+.im-cite { display:flex; flex-wrap:wrap; gap:6px; margin:6px 0 4px; }
+.im-list { list-style:none; margin:0; padding:0; display:grid; gap:2px; }
+.im-item { display:flex; align-items:flex-start; gap:8px; width:100%; padding:6px 8px; border:0; border-radius:6px; background:transparent; color:var(--rdm-body); text-align:left; font:inherit; cursor:pointer; }
+.im-item:hover { background:var(--rdm-hover); }
+.im-item .im-swatch { margin-top:5px; }
+.im-item-text { display:flex; flex-direction:column; min-width:0; }
+.im-item-title { color:var(--rdm-text); font-size:0.82rem; line-height:1.35; }
+.im-item-sub { font-size:0.75rem; color:var(--rdm-muted); }
+.im-hint { margin:10px 0 0; font-size:0.8rem; color:var(--rdm-muted); }
+
+.cn-main { min-width:0; }
+.cn-canvas { width:100%; height:520px; }
+.cn-legend { margin:8px 0 0; gap:6px 18px; }
+.cn-legend-group { display:inline-flex; flex-wrap:wrap; align-items:center; gap:4px 6px; }
+.cn-legend-title { font-weight:700; color:var(--rdm-muted); margin-right:2px; }
+.cn-legend .im-legend-item { min-height:24px; padding:0 4px; }
+.cn-panel { max-height:600px; display:flex; flex-direction:column; gap:8px; }
+.cn-panel .rdm-input { max-width:none; }
+.cn-panel .rdm-search-label { margin-top:6px; }
+.cn-mutual { display:flex; flex-wrap:wrap; gap:6px; }
+.cn-mutual-btn { display:inline-flex; align-items:center; gap:6px; min-height:28px; padding:2px 10px; border:1px solid var(--rdm-line); border-radius:999px; background:transparent; color:var(--rdm-body); font:0.8rem Lato, sans-serif; cursor:pointer; }
+.cn-mutual-btn:hover { background:var(--rdm-hover); }
+.cn-mutual-btn.is-static { cursor:default; opacity:0.85; }
+.cn-mutual-btn.is-static:hover { background:transparent; }
+.cn-papers { margin:0; padding:0; list-style:none; display:grid; gap:6px; font-size:0.8rem; color:var(--rdm-body); }
+.cn-paper-year { font-family:'Fira Code', monospace; font-size:0.75rem; color:var(--rdm-muted); margin-right:4px; }
+.cn-list { list-style:none; margin:0; padding:0; overflow:auto; min-height:120px; flex:1; display:grid; gap:1px; align-content:start; }
+.cn-item { display:grid; grid-template-columns:10px minmax(0, 1fr) 48px 22px; align-items:center; gap:8px; width:100%; min-height:34px; padding:4px 8px; border:0; border-radius:6px; background:transparent; color:var(--rdm-body); text-align:left; font:inherit; cursor:pointer; }
+.cn-item:hover { background:var(--rdm-hover); }
+.cn-item[aria-pressed="true"] { background:var(--rdm-on-bg); box-shadow:inset 0 0 0 1px var(--rdm-on); }
+.cn-name { display:flex; flex-direction:column; min-width:0; }
+.cn-name-text { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:0.82rem; color:var(--rdm-text); }
+.cn-years { font-family:'Fira Code', monospace; font-size:0.7rem; color:var(--rdm-muted); }
+.cn-bar { height:6px; border-radius:3px; background:var(--rdm-soft); overflow:hidden; }
+.cn-bar > span { display:block; width:var(--w); height:100%; border-radius:3px; background:var(--swatch); }
+.cn-count { font:600 0.8rem 'Fira Code', monospace; text-align:right; color:var(--rdm-text); }
+
+.rdm-btn:focus-visible, .rdm-input:focus-visible, .rdm-check input:focus-visible, .im-legend-btn:focus-visible,
+.im-clear:focus-visible, .im-item:focus-visible, .cn-item:focus-visible, .cn-mutual-btn:focus-visible,
+.im-canvas:focus-visible, .cn-canvas:focus-visible { outline:2px solid #00e5ff; outline-offset:2px; }
+body:not(.dark) .rdm :is(.rdm-btn, .rdm-input, .im-legend-btn, .im-clear, .im-item, .cn-item, .cn-mutual-btn, .im-canvas, .cn-canvas):focus-visible { outline-color:#0077b6; }
+
+/* custom.scss "BUTTONS CYBER STYLE" paints every button green with !important; the map controls opt out here. */
+.rdm :is(.rdm-btn, .im-legend-btn, .im-clear, .im-item, .cn-item, .cn-mutual-btn) { text-transform:none; letter-spacing:normal; }
+.rdm :is(.rdm-btn, .im-legend-btn, .im-clear, .im-item, .cn-item, .cn-mutual-btn):hover { transform:none; }
+.rdm .rdm-btn { background:transparent !important; border:0 !important; color:var(--rdm-body) !important; }
+.rdm .rdm-btn:hover { background:var(--rdm-hover) !important; color:var(--rdm-text) !important; }
+.rdm .rdm-btn[aria-pressed="true"] { background:var(--rdm-on-bg) !important; color:var(--rdm-on) !important; }
+.rdm :is(.im-legend-btn, .im-clear, .cn-mutual-btn) { background:transparent !important; border:1px solid var(--rdm-line) !important; color:var(--rdm-body) !important; }
+.rdm :is(.im-legend-btn, .im-clear, .cn-mutual-btn):hover { background:var(--rdm-hover) !important; border-color:var(--rdm-muted) !important; color:var(--rdm-text) !important; }
+.rdm :is(.im-item, .cn-item) { background:transparent !important; border:0 !important; color:var(--rdm-body) !important; }
+.rdm :is(.im-item, .cn-item):hover { background:var(--rdm-hover) !important; }
+.rdm .cn-item[aria-pressed="true"] { background:var(--rdm-on-bg) !important; }
+
+@media (max-width: 800px) {
+  .rdm { padding:16px; }
+  .im-body { grid-template-columns:minmax(0, 1fr); }
+  .im-canvas { height:420px; }
+  .cn-canvas { height:380px; }
+  .im-panel { max-height:none; }
+  .cn-list { max-height:320px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rdm-btn, .im-legend-btn { transition:none; }
+}
 
 /* Footprint map controls */
 .footprint-controls { position:absolute; top:16px; left:16px; z-index:20; display:flex; flex-direction:column; gap:8px; pointer-events:auto; }
@@ -225,28 +303,15 @@ body:not(.dark) .profile-topic-title { color:#1a1a1a; }
 /* Phones (audit 2026-10-24): the impact map, collaboration graph and footprint map overflowed a 309px column, the
    overlay controls were clipped, and the Leaflet zoom glyphs were light grey on white. Below 700px each map card stacks:
    title, map, then its controls as ordinary blocks under the map instead of floating over it. */
-/* Collaboration network: graph beside a 260px spotlight panel (moved out of an inline style 2026-10-28). */
-.rd-collab { position:relative; border-top:1px solid var(--card-border, #333); padding:25px; display:grid; grid-template-columns:minmax(0, 1fr) 260px; gap:20px; }
-.rd-collab-aside { border:1px solid var(--card-border, #333); border-radius:10px; padding:14px; align-self:start; position:sticky; top:20px; }
-
 @media (max-width: 700px) {
-    .rd-collab { grid-template-columns:minmax(0, 1fr); padding:16px; }
-    .rd-collab-aside { position:static; }
-    .rd-collab .collab-chip-row { flex-wrap: wrap; }
-
-    .rd-impact, .rd-footprint { height: auto !important; display: flex; flex-direction: column; }
-    .rd-impact-title, .rd-footprint-title { position: static !important; padding: 16px 16px 8px; order: 0; }
-    #dashboard-impact-map, #dashboard-footprint-map { height: 360px !important; order: 1; }
-    .rd-impact .impact-map-controls, .rd-impact .impact-map-legend, .rd-impact .impact-map-inspector,
+    .rd-footprint { height: auto !important; display: flex; flex-direction: column; }
+    .rd-footprint-title { position: static !important; padding: 16px 16px 8px; order: 0; }
+    #dashboard-footprint-map { height: 360px !important; order: 1; }
     .rd-footprint .rd-footprint-controls, .rd-footprint .rd-footprint-legend {
         position: static !important; width: auto !important; max-width: none !important; margin: 8px 16px 0; order: 2;
     }
-    .rd-impact .impact-map-legend, .rd-footprint .rd-footprint-legend { order: 3; }
-    .rd-impact .impact-map-inspector { order: 4; margin-bottom: 16px; }
-    .rd-footprint .rd-footprint-legend { margin-bottom: 16px; }
+    .rd-footprint .rd-footprint-legend { order: 3; margin-bottom: 16px; }
     .rd-footprint .rd-footprint-controls div[role="group"] { flex-wrap: wrap; }
-    .impact-control-group { flex-wrap: wrap; }
-    .impact-toggle, .impact-action, .collab-chip { min-height: 32px; }
 }
 
 /* Leaflet controls: dark navy on the white control background (1.54:1 before, 10:1 now), larger hit area. */
