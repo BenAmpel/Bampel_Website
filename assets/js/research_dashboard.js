@@ -53,16 +53,17 @@
       footprintObserver: null,
     },
     impact: {
+      view: "timeline",
       colorMode: "topic",
       linkTypes: { topic: true, venue: true, author: true },
       focusId: null,
-      pinned: new Set(),
-      renderedNodes: [],
-      renderedLinks: [],
+      hiddenTopics: new Set(),
+      api: null,
     },
     collab: {
       range: "all",
       focusId: null,
+      api: null,
     },
     centrality: {
       metric: "eigen",
@@ -80,7 +81,9 @@
     },
   };
 
-  const topicPalette = ["#4ade80", "#00e5ff", "#e040fb", "#ffd166", "#ff6b35", "#7c4dff", "#4dd0e1", "#80cbc4"];
+  // Fixed topic order and hues (validated for color-vision deficiency and 3:1 contrast on both the dark #0d1117 and
+  // light #ffffff surfaces). "Other" has no hue: it takes the theme's neutral gray at render time.
+  const topicPalette = ["#16a34a", "#0284c7", "#d97706", "#a855f7", "#e11d48", "#0d9488"];
   const topicColors = {};
   [
     "AI / Deep Learning",
@@ -91,7 +94,7 @@
     "Behavioral",
     "Other",
   ].forEach((topic, index) => {
-    topicColors[topic] = topicPalette[index % topicPalette.length];
+    topicColors[topic] = topicPalette[index] || "#8b949e";
   });
 
   const safeFetch = (url) =>
@@ -149,13 +152,6 @@
   function updateText(id, value) {
     const el = document.getElementById(id);
     if (el) el.textContent = value;
-  }
-
-  function getColorByYear(year) {
-    const value = Number(year || 0);
-    if (value <= 2019) return "#4dd0e1";
-    if (value <= 2022) return "#00e5ff";
-    return "#4ade80";
   }
 
   function buildCitationButtons(meta) {
@@ -250,253 +246,508 @@
     );
   }
 
+  // ---- Shared theme for the two network maps ---------------------------------------------------------------------
+  // Text wears text tokens; series colors appear only on marks. Light and dark each get their own values (the topic
+  // palette passes the CVD and 3:1 checks on both #0d1117 and #ffffff, so it is shared).
+  function mapTheme() {
+    const dark = document.body.classList.contains("dark");
+    return dark
+      ? {
+          dark, text: "#e6edf3", body: "#c9d1d9", muted: "#8b949e", grid: "rgba(139,148,158,0.22)",
+          ring: "rgba(139,148,158,0.45)", surface: "#0d1117", other: "#8b949e", focus: "#00e5ff",
+          accent: "#4ade80", tipBg: "#161b22", tipBorder: "#30363d", self: "#e6edf3",
+          recency: ["#4ade80", "#16a34a", "#6e7681"],
+        }
+      : {
+          dark, text: "#1f2328", body: "#3d444d", muted: "#59636e", grid: "rgba(89,99,110,0.2)",
+          ring: "rgba(89,99,110,0.45)", surface: "#ffffff", other: "#6e7681", focus: "#0077b6",
+          accent: "#15803d", tipBg: "#ffffff", tipBorder: "#d1d9e0", self: "#1f2328",
+          recency: ["#166534", "#22a355", "#8c959f"],
+        };
+  }
+
+  function mapTooltip(t) {
+    return {
+      trigger: "item",
+      confine: true,
+      backgroundColor: t.tipBg,
+      borderColor: t.tipBorder,
+      borderWidth: 1,
+      padding: [8, 10],
+      textStyle: { color: t.text, fontSize: 12, fontFamily: "Lato, sans-serif" },
+      extraCssText: "border-radius:8px; max-width:300px; white-space:normal; box-shadow:0 6px 20px rgba(0,0,0,0.25);",
+    };
+  }
+
+  const truncate = (text, max) => {
+    const value = String(text || "");
+    return value.length > max ? `${value.slice(0, max - 1).trimEnd()}…` : value;
+  };
+
+  const SELF_RE = /^Benjamin (M\. )?Ampel$/;
+  const TOPIC_SHORT = {
+    "AI / Deep Learning": "AI / DL",
+    Cybersecurity: "Security",
+    "LLMs & NLP": "LLMs",
+    "Hacker Communities": "Hackers",
+    "Design Science": "Design sci.",
+    Behavioral: "Behavioral",
+    Other: "Other",
+  };
+  const TYPE_ORDER = ["journal", "conference", "workshop"];
+  const TYPE_COLORS = { journal: "#0284c7", conference: "#16a34a", workshop: "#d97706" };
+  const TYPE_LABELS = { journal: "Journal", conference: "Conference", workshop: "Workshop" };
+
+  // ---- Impact Map ------------------------------------------------------------------------------------------------
+  // Two deterministic views of the same papers, so the map always fits its box (the old force layout scattered
+  // nodes outside the visible area and the map often looked empty):
+  //   Timeline: x = year, row = topic, size = citations. Links appear for the selected paper only.
+  //   Network:  papers on a circle grouped by topic, every shared-topic / venue / co-author link drawn faintly.
   function renderImpactMap(graphData) {
     const dom = document.getElementById(IDS.MAP);
-    if (!dom || !graphData || !Array.isArray(graphData.nodes)) return;
+    if (!dom || !graphData || !Array.isArray(graphData.nodes) || !graphData.nodes.length) return;
     if (dashboardState.charts.impact) dashboardState.charts.impact.dispose();
-    const chart = window.echarts.init(dom, 'v5');
+    const chart = window.echarts.init(dom, "v5");
     dashboardState.charts.impact = chart;
 
-    const baseNodes = graphData.nodes.map((node) => ({
-      id: node.id,
-      name: node.name,
-      value: node.value || 0,
-      year: node.year,
-      authors: node.authors,
-      venue: node.venue,
-      type: node.type,
-      topic: node.topic || "Other",
-      symbolSize: node.symbolSize || 14,
-      topicColor: topicColors[node.topic] || topicColors.Other,
-      yearColor: getColorByYear(node.year),
-    }));
-    const baseLinks = Array.isArray(graphData.links) ? graphData.links : [];
-    dashboardState.impact.renderedNodes = baseNodes;
-    dashboardState.impact.renderedLinks = baseLinks;
-    dashboardState.impact.pinned = new Set(
-      Array.from(dashboardState.impact.pinned).filter((id) => baseNodes.some((node) => node.id === id))
-    );
-
+    const state = dashboardState.impact;
+    const section = dom.closest(".rd-impact") || dom.parentElement;
+    const panel = document.getElementById("impact-map-inspector");
     const legendEl = document.getElementById("impact-map-legend");
-    const inspectorEl = document.getElementById("impact-map-inspector");
-    const inspectorBody = inspectorEl ? inspectorEl.querySelector(".impact-inspector-body") : null;
-    const inspectorPin = inspectorEl ? inspectorEl.querySelector('[data-impact-action="pin"]') : null;
-    const inspectorClear = inspectorEl ? inspectorEl.querySelector('[data-impact-action="clear"]') : null;
-    const pinsEl = document.getElementById("impact-map-pins");
+    const searchEl = document.getElementById("impact-search");
+    const searchStatus = document.getElementById("impact-search-status");
+    const datalist = document.getElementById("impact-paper-list");
+
+    const topicList = Object.keys(topicColors);
+    const papers = graphData.nodes.map((node) => ({
+      id: String(node.id),
+      name: node.name || "Untitled",
+      value: Number(node.value) || 0,
+      year: Number(node.year) || null,
+      venue: node.venue || "",
+      type: String(node.type || "").toLowerCase(),
+      authors: Array.isArray(node.authors) ? node.authors : [],
+      topic: topicList.includes(node.topic) ? node.topic : "Other",
+    }));
+    const byId = new Map(papers.map((paper) => [paper.id, paper]));
+    const allLinks = (graphData.links || [])
+      .map((link) => ({
+        source: String(link.source),
+        target: String(link.target),
+        value: Number(link.value) || 1,
+        reason: link.reason || "",
+        types: link.types || {},
+      }))
+      .filter((link) => byId.has(link.source) && byId.has(link.target));
+
+    const maxCites = Math.max(1, ...papers.map((paper) => paper.value));
+    const sizeFor = (paper) => Math.round(9 + 25 * Math.sqrt(paper.value / maxCites));
+    const topicCount = (topic) => papers.filter((paper) => paper.topic === topic).length;
+    const rows = topicList.filter((topic) => topic !== "Other" && topicCount(topic) > 0).sort((a, b) => topicCount(b) - topicCount(a));
+    if (topicCount("Other") > 0) rows.push("Other");
+    const yearsPresent = papers.map((paper) => paper.year).filter(Boolean);
+    const minYear = Math.min(...yearsPresent);
+    const maxYear = Math.max(...yearsPresent);
+
+    // Timeline positions: papers sharing a year and topic sit on a small grid inside their cell, most cited first.
+    const timelinePos = new Map();
+    const cells = new Map();
+    papers.forEach((paper) => {
+      const key = `${paper.year || minYear}|${paper.topic}`;
+      if (!cells.has(key)) cells.set(key, []);
+      cells.get(key).push(paper);
+    });
+    cells.forEach((list) => {
+      list.sort((a, b) => b.value - a.value || a.name.localeCompare(b.name));
+      const count = list.length;
+      const cols = Math.min(count, Math.ceil(Math.sqrt(count * 2)));
+      const rowCount = Math.ceil(count / cols);
+      list.forEach((paper, index) => {
+        const col = index % cols;
+        const row = Math.floor(index / cols);
+        const dx = cols > 1 ? (col - (cols - 1) / 2) * (0.74 / cols) : 0;
+        const dy = rowCount > 1 ? (row - (rowCount - 1) / 2) * (0.6 / rowCount) : 0;
+        timelinePos.set(paper.id, [(paper.year || minYear) + dx, rows.indexOf(paper.topic) + dy]);
+      });
+    });
+
+    // Network order: grouped by topic, then by year, so each topic forms an arc of the circle.
+    const circleOrder = papers.slice().sort((a, b) => rows.indexOf(a.topic) - rows.indexOf(b.topic) || (a.year || 0) - (b.year || 0));
+
+    const colorFor = (paper, t) => {
+      if (state.colorMode === "type") return TYPE_COLORS[paper.type] || t.other;
+      return paper.topic === "Other" ? t.other : topicColors[paper.topic];
+    };
+    const activeLinks = () =>
+      allLinks.filter((link) => Object.keys(state.linkTypes).some((type) => state.linkTypes[type] && link.types[type]));
+    const linksOf = (id) =>
+      activeLinks()
+        .filter((link) => link.source === id || link.target === id)
+        .map((link) => ({ link, other: byId.get(link.source === id ? link.target : link.source) }))
+        .sort((a, b) => b.link.value - a.link.value || b.other.value - a.other.value);
+
+    function buildOption() {
+      const t = mapTheme();
+      const isTimeline = state.view === "timeline";
+      const narrow = dom.clientWidth < 560;
+      const focus = state.focusId && byId.has(state.focusId) ? state.focusId : null;
+      const links = activeLinks();
+      const neighbors = new Set();
+      if (focus) {
+        links.forEach((link) => {
+          if (link.source === focus) neighbors.add(link.target);
+          if (link.target === focus) neighbors.add(link.source);
+        });
+      }
+      const hidden = (paper) => state.hiddenTopics.has(paper.topic);
+      const focusColor = focus ? colorFor(byId.get(focus), t) : t.accent;
+
+      const nodes = (isTimeline ? papers : circleOrder).map((paper) => {
+        const lit = !focus || paper.id === focus || neighbors.has(paper.id);
+        const isFocus = paper.id === focus;
+        return {
+          id: paper.id,
+          name: paper.name,
+          value: isTimeline ? timelinePos.get(paper.id) : paper.value,
+          symbolSize: sizeFor(paper) + (isFocus ? 4 : 0),
+          itemStyle: {
+            color: colorFor(paper, t),
+            borderColor: isFocus ? t.focus : t.surface,
+            borderWidth: isFocus ? 3 : 1.5,
+            opacity: hidden(paper) ? 0.08 : lit ? 1 : 0.2,
+          },
+          label: { show: isFocus },
+          z: isFocus ? 10 : neighbors.has(paper.id) ? 5 : 2,
+        };
+      });
+
+      const edges = links
+        .filter((link) => !hidden(byId.get(link.source)) && !hidden(byId.get(link.target)))
+        .filter((link) => !isTimeline || (focus && (link.source === focus || link.target === focus)))
+        .map((link) => {
+          const touches = focus && (link.source === focus || link.target === focus);
+          return {
+            source: link.source,
+            target: link.target,
+            reason: link.reason,
+            lineStyle: {
+              color: touches ? focusColor : isTimeline ? t.muted : "source",
+              width: touches ? Math.min(1 + link.value / 8, 3.5) : Math.min(0.6 + link.value / 20, 1.6),
+              opacity: touches ? 0.75 : focus ? 0.04 : 0.16,
+              curveness: isTimeline ? 0.3 : 0.25,
+            },
+          };
+        });
+
+      const graph = {
+        id: "papers",
+        type: "graph",
+        data: nodes,
+        links: edges,
+        roam: !isTimeline,
+        scaleLimit: { min: 0.6, max: 4 },
+        draggable: false,
+        symbol: "circle",
+        animationDurationUpdate: 350,
+        label: {
+          position: "top",
+          distance: 6,
+          color: t.text,
+          fontSize: 12,
+          fontFamily: "Lato, sans-serif",
+          backgroundColor: t.tipBg,
+          borderColor: t.tipBorder,
+          borderWidth: 1,
+          borderRadius: 4,
+          padding: [3, 6],
+          formatter: (params) => truncate(params.data.name, narrow ? 28 : 44),
+        },
+        emphasis: { scale: 1.12, label: { show: true } },
+        lineStyle: { curveness: 0.25 },
+      };
+
+      const option = {
+        tooltip: Object.assign(mapTooltip(t), {
+          formatter: (params) => {
+            if (params.seriesId !== "papers") return "";
+            if (params.dataType === "edge") {
+              const a = byId.get(String(params.data.source));
+              const b = byId.get(String(params.data.target));
+              if (!a || !b) return "";
+              return `<strong>${escapeHtml(params.data.reason || "Connected")}</strong><br>${escapeHtml(truncate(a.name, 60))}<br>${escapeHtml(truncate(b.name, 60))}`;
+            }
+            const paper = byId.get(String(params.data.id));
+            if (!paper) return "";
+            const typeLabel = TYPE_LABELS[paper.type] || paper.type;
+            return `<strong>${escapeHtml(paper.name)}</strong><br>${escapeHtml(paper.venue)} · ${paper.year || "—"} · ${escapeHtml(typeLabel)}<br>${paper.value} citations · ${escapeHtml(paper.topic)}`;
+          },
+        }),
+        aria: { enabled: true, label: { description: describeImpact(papers, allLinks) } },
+      };
+
+      if (isTimeline) {
+        option.grid = { left: 8, right: 18, top: 14, bottom: 8, containLabel: true };
+        option.xAxis = {
+          type: "value",
+          min: minYear - 0.5,
+          max: maxYear + 0.5,
+          interval: 1,
+          axisLine: { lineStyle: { color: t.grid } },
+          axisTick: { show: false },
+          splitLine: { show: false },
+          axisLabel: {
+            // min/max sit on half-years so every column is centred on its year; customValues puts a label on each year.
+            customValues: Array.from({ length: maxYear - minYear + 1 }, (_, k) => minYear + k),
+            color: t.muted,
+            fontSize: 11,
+            fontFamily: "'Fira Code', monospace",
+            formatter: (value) => (Number.isInteger(value) && (!narrow || value % 2 === 1) ? String(value) : ""),
+          },
+        };
+        option.yAxis = {
+          type: "value",
+          inverse: true,
+          min: -0.5,
+          max: rows.length - 0.5,
+          interval: 1,
+          axisLine: { show: false },
+          axisTick: { show: false },
+          splitLine: { show: false },
+          axisLabel: {
+            customValues: rows.map((_, k) => k),
+            color: t.body,
+            fontSize: 12,
+            fontFamily: "Lato, sans-serif",
+            formatter: (value) => {
+              const topic = rows[value];
+              if (!topic) return "";
+              return narrow ? TOPIC_SHORT[topic] || topic : topic;
+            },
+          },
+        };
+        // Row separators and year boundaries as quiet guide lines.
+        const guides = [];
+        for (let row = 0; row < rows.length - 1; row += 1) {
+          guides.push([[minYear - 0.5, row + 0.5], [maxYear + 0.5, row + 0.5]]);
+        }
+        for (let year = minYear; year < maxYear; year += 1) {
+          guides.push([[year + 0.5, -0.5], [year + 0.5, rows.length - 0.5]]);
+        }
+        option.series = [
+          Object.assign(graph, { coordinateSystem: "cartesian2d", layout: "none" }),
+          ...guides.map((data, index) => ({
+            id: `guide-${index}`,
+            type: "line",
+            data,
+            silent: true,
+            symbol: "none",
+            z: 0,
+            animation: false,
+            lineStyle: { color: t.grid, width: 1, type: index < rows.length - 1 ? "solid" : [2, 4] },
+            tooltip: { show: false },
+          })),
+        ];
+      } else {
+        option.series = [
+          Object.assign(graph, {
+            layout: "circular",
+            circular: { rotateLabel: false },
+            left: narrow ? 24 : 60,
+            right: narrow ? 24 : 60,
+            top: 36,
+            bottom: 36,
+          }),
+        ];
+      }
+      return withReducedMotion(option);
+    }
+
+    let lastView = null;
+    function update() {
+      const option = buildOption();
+      chart.setOption(option, lastView !== state.view);
+      lastView = state.view;
+      renderLegend();
+    }
 
     function renderLegend() {
       if (!legendEl) return;
-      if (dashboardState.impact.colorMode === "topic") {
-        const usedTopics = Array.from(new Set(baseNodes.map((node) => node.topic)));
-        legendEl.innerHTML = usedTopics
-          .map(
-            (topic) =>
-              `<div class="legend-row"><span class="impact-legend-dot" style="--legend-color:${topicColors[topic] || topicColors.Other};"></span><span>${escapeHtml(topic)}</span></div>`
-          )
-          .join("");
+      const t = mapTheme();
+      if (state.colorMode === "type") {
+        const types = TYPE_ORDER.filter((type) => papers.some((paper) => paper.type === type));
+        legendEl.innerHTML = types
+          .map((type) => `<span class="im-legend-item"><span class="im-swatch" style="--swatch:${TYPE_COLORS[type]}"></span>${TYPE_LABELS[type]} <span class="im-legend-count">${papers.filter((p) => p.type === type).length}</span></span>`)
+          .join("") + `<span class="im-legend-note">Size: citations</span>`;
         return;
       }
-      legendEl.innerHTML = [
-        `<div class="legend-row"><span class="impact-legend-dot" style="--legend-color:${getColorByYear(2018)};"></span><span>2019 &amp; earlier</span></div>`,
-        `<div class="legend-row"><span class="impact-legend-dot" style="--legend-color:${getColorByYear(2021)};"></span><span>2020 - 2022</span></div>`,
-        `<div class="legend-row"><span class="impact-legend-dot" style="--legend-color:${getColorByYear(2024)};"></span><span>2023 - present</span></div>`,
-      ].join("");
+      legendEl.innerHTML = rows
+        .map((topic) => {
+          const shown = !state.hiddenTopics.has(topic);
+          const color = topic === "Other" ? t.other : topicColors[topic];
+          return `<button type="button" class="im-legend-btn" data-impact-topic="${escapeHtml(topic)}" aria-pressed="${shown}" title="${shown ? "Hide" : "Show"} ${escapeHtml(topic)}"><span class="im-swatch" style="--swatch:${color}"></span>${escapeHtml(topic)} <span class="im-legend-count">${topicCount(topic)}</span></button>`;
+        })
+        .join("") + `<span class="im-legend-note">Size: citations</span>`;
     }
 
-    function renderPins() {
-      if (!pinsEl) return;
-      if (!dashboardState.impact.pinned.size) {
-        pinsEl.innerHTML = "";
+    const itemHtml = (paper, sub) => {
+      const t = mapTheme();
+      return `<li><button type="button" class="im-item" data-impact-select="${paper.id}"><span class="im-swatch" style="--swatch:${colorFor(paper, t)}"></span><span class="im-item-text"><span class="im-item-title">${escapeHtml(truncate(paper.name, 90))}</span><span class="im-item-sub">${escapeHtml(sub || `${paper.year || "—"} · ${paper.value} citations`)}</span></span></button></li>`;
+    };
+
+    function renderPanel() {
+      if (!panel) return;
+      const paper = state.focusId && byId.get(state.focusId);
+      if (!paper) {
+        const top = papers.slice().sort((a, b) => b.value - a.value).slice(0, 6);
+        panel.innerHTML = `
+          <p class="im-kicker">Most cited</p>
+          <ol class="im-list">${top.map((item) => itemHtml(item)).join("")}</ol>
+          <p class="im-hint">Select a paper on the map, search by title, or pick one here to see what it connects to. Esc clears the selection.</p>`;
         return;
       }
-      pinsEl.innerHTML = Array.from(dashboardState.impact.pinned)
-        .map((id) => {
-          const node = baseNodes.find((item) => item.id === id);
-          const label = node ? node.name.slice(0, 26) + (node.name.length > 26 ? "..." : "") : "Pinned";
-          return `<div class="impact-pin"><span>${escapeHtml(label)}</span><button type="button" data-pin-remove="${id}">x</button></div>`;
-        })
+      const t = mapTheme();
+      const connections = linksOf(paper.id);
+      const typeLabel = TYPE_LABELS[paper.type] || paper.type || "Paper";
+      const authors = paper.authors.map((name) => (SELF_RE.test(name) ? `<strong>${escapeHtml(name)}</strong>` : escapeHtml(name))).join(", ");
+      panel.innerHTML = `
+        <div class="im-panel-head">
+          <span class="im-swatch" style="--swatch:${colorFor(paper, t)}"></span>
+          <span class="im-kicker">${escapeHtml(paper.topic)}</span>
+          <button type="button" class="im-clear" data-impact-action="clear">Clear</button>
+        </div>
+        <h3 class="im-panel-title" tabindex="-1">${escapeHtml(paper.name)}</h3>
+        <p class="im-meta">${escapeHtml(paper.venue)} · ${paper.year || "—"} · ${escapeHtml(typeLabel)}</p>
+        <dl class="im-stats">
+          <div><dt>Citations</dt><dd>${paper.value}</dd></div>
+          <div><dt>Linked papers</dt><dd>${connections.length}</dd></div>
+        </dl>
+        ${authors ? `<p class="im-authors">${authors}</p>` : ""}
+        <div class="im-cite">${buildCitationButtons(paper)}</div>
+        <p class="im-kicker">${connections.length ? "Connected papers" : "No links with the current filters"}</p>
+        <ol class="im-list">${connections.slice(0, 10).map((entry) => itemHtml(entry.other, entry.link.reason)).join("")}</ol>
+        ${connections.length > 10 ? `<p class="im-hint">${connections.length - 10} more on the map.</p>` : ""}`;
+    }
+
+    function select(id, moveFocus) {
+      const paper = id && byId.get(String(id));
+      if (paper && state.hiddenTopics.has(paper.topic)) state.hiddenTopics.delete(paper.topic);
+      state.focusId = paper ? paper.id : null;
+      update();
+      renderPanel();
+      if (moveFocus && panel) {
+        const heading = panel.querySelector(".im-panel-title");
+        if (heading) heading.focus({ preventScroll: true });
+      }
+    }
+
+    function setPressed(selector, attr, value) {
+      section.querySelectorAll(selector).forEach((btn) => btn.setAttribute("aria-pressed", String(btn.getAttribute(attr) === value)));
+    }
+
+    chart.on("click", (params) => {
+      if (params.seriesId !== "papers" || params.dataType !== "node") return;
+      select(state.focusId === String(params.data.id) ? null : params.data.id, false);
+    });
+    chart.getZr().on("click", (event) => {
+      if (!event.target && state.focusId) select(null, false);
+    });
+
+    if (!section.dataset.mapBound) {
+      section.dataset.mapBound = "1";
+      section.addEventListener("click", (event) => {
+        const api = dashboardState.impact.api;
+        if (!api) return;
+        const view = event.target.closest("[data-impact-view]");
+        const color = event.target.closest("[data-impact-color]");
+        const topic = event.target.closest("[data-impact-topic]");
+        const pick = event.target.closest("[data-impact-select]");
+        const clear = event.target.closest("[data-impact-action='clear']");
+        if (view) api.setView(view.getAttribute("data-impact-view"));
+        else if (color) api.setColor(color.getAttribute("data-impact-color"));
+        else if (topic) api.toggleTopic(topic.getAttribute("data-impact-topic"));
+        else if (pick) api.select(pick.getAttribute("data-impact-select"), true);
+        else if (clear) api.select(null, false);
+      });
+      section.addEventListener("change", (event) => {
+        const api = dashboardState.impact.api;
+        const box = event.target.closest("[data-impact-link]");
+        if (api && box) api.setLink(box.getAttribute("data-impact-link"), box.checked);
+      });
+      section.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && dashboardState.impact.focusId && dashboardState.impact.api) {
+          dashboardState.impact.api.select(null, false);
+          dom.focus({ preventScroll: true });
+        }
+      });
+      if (searchEl) {
+        const runSearch = () => {
+          const api = dashboardState.impact.api;
+          const query = searchEl.value.trim().toLowerCase();
+          if (!api || !query) {
+            if (searchStatus) searchStatus.textContent = "";
+            return;
+          }
+          const hit = papers.find((paper) => paper.name.toLowerCase() === query) || papers.find((paper) => paper.name.toLowerCase().includes(query));
+          if (searchStatus) searchStatus.textContent = hit ? "" : "No paper matches that title.";
+          if (hit) api.select(hit.id, false);
+        };
+        searchEl.addEventListener("change", runSearch);
+        searchEl.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            runSearch();
+          }
+        });
+      }
+    }
+
+    if (datalist) {
+      datalist.innerHTML = papers
+        .slice()
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((paper) => `<option value="${escapeHtml(paper.name)}"></option>`)
         .join("");
     }
 
-    function setInspector(node) {
-      if (!inspectorBody || !inspectorPin || !inspectorClear) return;
-      if (!node) {
-        inspectorBody.textContent = "Click a node to reveal context, then pin highlights you want to keep.";
-        inspectorPin.disabled = true;
-        inspectorClear.disabled = true;
-        return;
-      }
-      inspectorBody.innerHTML = `<strong>${escapeHtml(node.name)}</strong><br>
-        <span style="opacity:0.8">Topic: ${escapeHtml(node.topic || "Other")}</span><br>
-        <span style="opacity:0.8">Venue: ${escapeHtml(node.venue || "—")}</span><br>
-        <span style="opacity:0.8">Year: ${escapeHtml(node.year || "—")} · Citations: ${node.value}</span>`;
-      inspectorPin.disabled = false;
-      inspectorClear.disabled = false;
-    }
+    state.api = {
+      select,
+      update: () => {
+        update();
+        renderPanel();
+      },
+      setView(view) {
+        if (view !== "timeline" && view !== "network") return;
+        state.view = view;
+        setPressed("[data-impact-view]", "data-impact-view", view);
+        update();
+      },
+      setColor(mode) {
+        if (mode !== "topic" && mode !== "type") return;
+        state.colorMode = mode;
+        setPressed("[data-impact-color]", "data-impact-color", mode);
+        update();
+        renderPanel();
+      },
+      toggleTopic(topic) {
+        if (state.hiddenTopics.has(topic)) state.hiddenTopics.delete(topic);
+        else state.hiddenTopics.add(topic);
+        const focused = state.focusId && byId.get(state.focusId);
+        if (focused && state.hiddenTopics.has(focused.topic)) state.focusId = null;
+        update();
+        renderPanel();
+      },
+      setLink(type, on) {
+        if (!(type in state.linkTypes)) return;
+        state.linkTypes[type] = on;
+        update();
+        renderPanel();
+      },
+    };
 
-    function getFilteredLinks() {
-      const types = dashboardState.impact.linkTypes;
-      return baseLinks.filter(
-        (link) =>
-          (types.topic && link.types && link.types.topic) ||
-          (types.venue && link.types && link.types.venue) ||
-          (types.author && link.types && link.types.author)
-      );
-    }
-
-    function updateImpactGraph() {
-      const activeLinks = getFilteredLinks();
-      const neighborMap = new Map();
-      activeLinks.forEach((link) => {
-        if (!neighborMap.has(link.source)) neighborMap.set(link.source, new Set());
-        if (!neighborMap.has(link.target)) neighborMap.set(link.target, new Set());
-        neighborMap.get(link.source).add(link.target);
-        neighborMap.get(link.target).add(link.source);
-      });
-
-      const highlight = new Set(dashboardState.impact.pinned);
-      const focusId = dashboardState.impact.focusId;
-      if (focusId !== null && focusId !== undefined) {
-        highlight.add(focusId);
-        const neighbors = neighborMap.get(focusId);
-        if (neighbors) neighbors.forEach((value) => highlight.add(value));
-      }
-
-      const isDark = document.body.classList.contains("dark");
-      const styledNodes = baseNodes.map((node) => {
-        const isFocus = node.id === focusId;
-        const isPinned = dashboardState.impact.pinned.has(node.id);
-        const isHighlighted = !highlight.size || highlight.has(node.id);
-        const baseColor = dashboardState.impact.colorMode === "topic" ? node.topicColor : node.yearColor;
-        return Object.assign({}, node, {
-          itemStyle: {
-            color: baseColor,
-            opacity: highlight.size ? (isHighlighted ? 1 : 0.08) : 1,
-            borderColor: isFocus ? "#fff" : isPinned ? "#00e5ff" : "transparent",
-            borderWidth: isFocus ? 2 : isPinned ? 1 : 0,
-          },
-          label: {
-            show: isFocus || isPinned,
-            color: isDark ? "#eee" : "#222",
-            position: "right",
-            formatter: (params) => (params.name.length > 18 ? `${params.name.slice(0, 18)}...` : params.name),
-          },
-        });
-      });
-
-      const styledLinks = activeLinks.map((link) => {
-        const active = !highlight.size || (highlight.has(link.source) && highlight.has(link.target));
-        return Object.assign({}, link, {
-          lineStyle: Object.assign({}, link.lineStyle || {}, {
-            opacity: highlight.size ? (active ? Math.min(0.65, (link.lineStyle?.opacity || 0.25) + 0.15) : 0.03) : Math.min(0.25, link.lineStyle?.opacity || 0.25),
-            color: isDark ? "#aaa" : "#666",
-          }),
-        });
-      });
-
-      chart.setOption(
-        withReducedMotion({
-          backgroundColor: "transparent",
-          tooltip: {
-            trigger: "item",
-            enterable: true,
-            confine: true,
-            extraCssText: "pointer-events:auto; max-width:340px;",
-            formatter: (params) => {
-              if (params.dataType === "edge") {
-                return `<div style="max-width:200px; white-space:normal;"><strong>Connection</strong><br>Strength: ${Math.floor(params.value)}<br>${escapeHtml(params.data.reason || "")}</div>`;
-              }
-              return `<div style="max-width:260px; white-space:normal; word-wrap:break-word;">
-                <strong>${escapeHtml(params.name)}</strong><br>
-                <span style="opacity:0.8">Topic: ${escapeHtml(params.data.topic || "Other")}</span><br>
-                <span style="opacity:0.8">Venue: ${escapeHtml(params.data.venue || "—")}</span><br>
-                <span style="opacity:0.8">Year: ${escapeHtml(params.data.year || "—")} · Citations: ${params.value}</span>
-                <div class="cite-tooltip-actions">${buildCitationButtons(params.data || {})}</div>
-              </div>`;
-            },
-          },
-          aria: { enabled: true, description: describeImpact(baseNodes, activeLinks) },
-          series: [
-            {
-              type: "graph",
-              layout: "force",
-              roam: true,
-              zoom: 0.75,
-              data: styledNodes,
-              links: styledLinks,
-              force: { repulsion: 500, gravity: 0.1, edgeLength: [50, 300] },
-              lineStyle: { color: isDark ? "#aaa" : "#666" },
-            },
-          ],
-        }),
-        false
-      );
-    }
-
-    const controls = document.querySelector(".impact-map-controls");
-    if (controls && !controls.dataset.bound) {
-      controls.dataset.bound = "true";
-      controls.addEventListener("click", (event) => {
-        const button = event.target.closest("button[data-impact-color]");
-        if (!button) return;
-        dashboardState.impact.colorMode = button.getAttribute("data-impact-color");
-        controls.querySelectorAll(".impact-toggle").forEach((toggle) => {
-          toggle.classList.toggle("is-active", toggle === button);
-        });
-        renderLegend();
-        updateImpactGraph();
-      });
-      controls.querySelectorAll("input[data-impact-link]").forEach((input) => {
-        input.addEventListener("change", () => {
-          dashboardState.impact.linkTypes[input.getAttribute("data-impact-link")] = input.checked;
-          updateImpactGraph();
-        });
-      });
-    }
-
-    if (inspectorEl && !inspectorEl.dataset.bound) {
-      inspectorEl.dataset.bound = "true";
-      inspectorEl.addEventListener("click", (event) => {
-        const action = event.target.closest("[data-impact-action]");
-        if (action) {
-          const type = action.getAttribute("data-impact-action");
-          if (type === "pin" && dashboardState.impact.focusId !== null) {
-            dashboardState.impact.pinned.add(dashboardState.impact.focusId);
-            renderPins();
-            updateImpactGraph();
-          }
-          if (type === "clear") {
-            dashboardState.impact.focusId = null;
-            setInspector(null);
-            updateImpactGraph();
-          }
-        }
-        const remove = event.target.closest("[data-pin-remove]");
-        if (remove) {
-          dashboardState.impact.pinned.delete(Number(remove.getAttribute("data-pin-remove")));
-          renderPins();
-          updateImpactGraph();
-        }
-      });
-    }
-
-    chart.off("click");
-    chart.on("click", (params) => {
-      if (params.dataType !== "node") return;
-      if (dashboardState.impact.focusId === params.data.id) {
-        dashboardState.impact.focusId = null;
-        setInspector(null);
-      } else {
-        dashboardState.impact.focusId = params.data.id;
-        setInspector(params.data);
-      }
-      updateImpactGraph();
-    });
-
-    renderLegend();
-    renderPins();
-    setInspector(null);
-    updateImpactGraph();
+    setPressed("[data-impact-view]", "data-impact-view", state.view);
+    setPressed("[data-impact-color]", "data-impact-color", state.colorMode);
+    update();
+    renderPanel();
   }
 
   function normalizeAuthor(nameMap, name) {
@@ -510,186 +761,400 @@
     return nameMap[clean] || clean;
   }
 
+  // ---- Collaboration Network -------------------------------------------------------------------------------------
+  // An orbit chart with Ben at the center. Ring = how often we wrote together (5+ papers, 2-4, 1); position around
+  // the ring = when we first wrote together, clockwise from the top; color = how recent the last shared paper is.
+  // The side list ranks every collaborator and is the keyboard route into the chart.
   function renderCollabNetwork(collaboration) {
     const dom = document.getElementById(IDS.COLLAB);
     if (!dom || !collaboration || !collaboration.ranges) return;
     if (dashboardState.charts.collab) dashboardState.charts.collab.dispose();
-    const chart = window.echarts.init(dom, 'v5');
+    const chart = window.echarts.init(dom, "v5");
     dashboardState.charts.collab = chart;
 
-    const rangeData = collaboration.ranges[dashboardState.collab.range] || collaboration.ranges.all || { nodes: [], links: [], authorMeta: {} };
-    const nodeCounts = new Map((rangeData.nodes || []).map((node) => [node.id, node.count || 0]));
-    const metaMap = rangeData.authorMeta || {};
-    // Ben's node, whichever form of the name the data uses ("Benjamin M. Ampel" in the payload). A fixed "Benjamin Ampel"
-    // never matched, so his node was not centered or drawn in white, and the color scale ran up to his own paper count.
-    const myName = ((rangeData.nodes || []).find((node) => /^Benjamin (M\. )?Ampel$/.test(node.id)) || {}).id || "Benjamin M. Ampel";
-    const maxCount = Math.max(...(rangeData.nodes || []).filter((node) => node.id !== myName).map((node) => node.count || 0), 1);
+    const state = dashboardState.collab;
+    const section = dom.closest(".rd-collab") || dom.parentElement;
+    const spotEl = document.getElementById("collab-spotlight");
+    const listEl = document.getElementById("collab-list");
+    const filterEl = document.getElementById("collab-filter");
+    const legendEl = document.getElementById("collab-legend");
+    const currentYear = Number(collaboration.currentYear) || new Date().getFullYear();
+    const papers = (dashboardState.payload && dashboardState.payload.impactGraph && dashboardState.payload.impactGraph.nodes) || [];
+    const RADII = [0.36, 0.68, 1];
+    const RING_LABELS = ["5+ papers", "2–4 papers", "1 paper"];
 
-    const nameMap = {
-      "B Ampel": myName,
-      "BM Ampel": myName,
-      "B. Ampel": myName,
-      admin: myName,
+    const shortName = (name) => {
+      const parts = String(name).split(" ").filter(Boolean);
+      if (parts.length < 2) return name;
+      return `${parts[0][0]}. ${parts[parts.length - 1]}`;
+    };
+    const recencyIndex = (last) => {
+      if (!last) return 2;
+      if (last >= currentYear - 1) return 0;
+      if (last >= currentYear - 3) return 1;
+      return 2;
+    };
+    const recencyLabels = [`${currentYear - 1}–${currentYear}`, `${currentYear - 3}–${currentYear - 2}`, `Before ${currentYear - 3}`];
+
+    let model = null;
+    function buildModel() {
+      const rangeData = collaboration.ranges[state.range] || collaboration.ranges.all || { nodes: [], links: [], authorMeta: {} };
+      const meta = rangeData.authorMeta || {};
+      const rawNodes = rangeData.nodes || [];
+      const self = (rawNodes.find((node) => SELF_RE.test(node.id)) || {}).id || "Benjamin M. Ampel";
+      const nameMap = { "B Ampel": self, "BM Ampel": self, "B. Ampel": self, admin: self };
+      const people = rawNodes
+        .filter((node) => node.id !== self)
+        .map((node) => {
+          const info = meta[node.id] || {};
+          const years = (info.years || []).map(Number).filter(Boolean).sort((a, b) => a - b);
+          const count = node.count || info.count || 0;
+          return {
+            id: node.id,
+            count,
+            first: years[0] || null,
+            last: years[years.length - 1] || null,
+            info,
+            ring: count >= 5 ? 0 : count >= 2 ? 1 : 2,
+          };
+        });
+      [0, 1, 2].forEach((ring) => {
+        const members = people
+          .filter((person) => person.ring === ring)
+          .sort((a, b) => (a.first || 0) - (b.first || 0) || b.count - a.count || a.id.localeCompare(b.id));
+        const offset = ring === 1 ? Math.PI / Math.max(members.length, 1) : 0;
+        members.forEach((person, index) => {
+          const angle = -Math.PI / 2 + offset + (index / Math.max(members.length, 1)) * Math.PI * 2;
+          person.angle = angle;
+          person.x = Math.cos(angle) * RADII[ring];
+          person.y = Math.sin(angle) * RADII[ring];
+        });
+      });
+      const byId = new Map(people.map((person) => [person.id, person]));
+      const links = (rangeData.links || []).filter((link) => (link.source === self || byId.has(link.source)) && (link.target === self || byId.has(link.target)));
+      const maxCount = Math.max(1, ...people.map((person) => person.count));
+      return { self, people, byId, links, maxCount, nameMap };
+    }
+
+    const sizeFor = (count) => Math.round(8 + 28 * Math.sqrt(Math.max(count - 1, 0) / Math.max(model.maxCount - 1, 1)));
+    const labelPosition = (angle) => {
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+      if (cos > 0.35) return "right";
+      if (cos < -0.35) return "left";
+      return sin < 0 ? "top" : "bottom";
     };
 
-    const nodes = (rangeData.nodes || []).map((node) => ({
-      id: node.id,
-      name: node.id,
-      value: node.count || 0,
-      symbolSize: node.id === myName ? 60 : Math.max(18, Math.min(52, (node.count || 0) * 7)),
-      fixed: node.id === myName,
-      x: node.id === myName ? dom.clientWidth / 2 : null,
-      y: node.id === myName ? dom.clientHeight / 2 : null,
-    }));
+    function buildOption() {
+      const t = mapTheme();
+      const focus = state.focusId && model.byId.has(state.focusId) ? state.focusId : null;
+      const neighbors = new Set();
+      if (focus) {
+        model.links.forEach((link) => {
+          if (link.source === focus) neighbors.add(link.target);
+          if (link.target === focus) neighbors.add(link.source);
+        });
+      }
+      const nodes = [];
+      // Dotted ring guides: tiny fixed points, no tooltip or hover.
+      RADII.forEach((radius, ring) => {
+        const dots = ring === 0 ? 60 : ring === 1 ? 96 : 132;
+        for (let k = 0; k < dots; k += 1) {
+          const angle = (k / dots) * Math.PI * 2;
+          nodes.push({
+            id: `__ring${ring}_${k}`,
+            name: "",
+            x: Math.cos(angle) * radius,
+            y: Math.sin(angle) * radius,
+            symbolSize: 1.6,
+            itemStyle: { color: t.ring, borderWidth: 0 },
+            label: { show: false },
+            emphasis: { disabled: true },
+            tooltip: { show: false },
+            silent: true,
+            z: 0,
+          });
+        }
+      });
+      nodes.push({
+        id: model.self,
+        name: "Ben Ampel",
+        x: 0,
+        y: 0,
+        symbolSize: 40,
+        itemStyle: { color: t.self, borderColor: t.surface, borderWidth: 2, opacity: focus ? 0.9 : 1 },
+        label: { show: true, position: "bottom", formatter: "Ben Ampel", color: t.text, fontWeight: 700 },
+        z: 6,
+      });
+      model.people.forEach((person) => {
+        const isFocus = person.id === focus;
+        const lit = !focus || isFocus || neighbors.has(person.id);
+        const showLabel = isFocus || (lit && (person.ring < 2 || (focus && neighbors.has(person.id))));
+        nodes.push({
+          id: person.id,
+          name: person.id,
+          x: person.x,
+          y: person.y,
+          symbolSize: sizeFor(person.count) + (isFocus ? 4 : 0),
+          itemStyle: {
+            color: t.recency[recencyIndex(person.last)],
+            borderColor: isFocus ? t.focus : t.surface,
+            borderWidth: isFocus ? 3 : 1.5,
+            opacity: lit ? 1 : 0.22,
+          },
+          label: {
+            show: showLabel,
+            position: labelPosition(person.angle),
+            formatter: shortName(person.id),
+            color: lit ? t.text : t.muted,
+            fontWeight: isFocus || person.ring === 0 ? 700 : 400,
+          },
+          z: isFocus ? 10 : lit ? 5 : 2,
+        });
+      });
 
-    const links = (rangeData.links || []).map((link) => ({
-      source: link.source,
-      target: link.target,
-      value: link.count,
-      lineStyle: {
-        width: Math.min(1.5 + (link.count * 0.8), 6),
-        opacity: 0.6,
-      },
-    }));
+      const edges = model.links.map((link) => {
+        const spoke = link.source === model.self || link.target === model.self;
+        const touches = focus && (link.source === focus || link.target === focus);
+        const count = Number(link.count) || 1;
+        return {
+          source: link.source,
+          target: link.target,
+          count,
+          lineStyle: {
+            color: touches ? t.accent : t.muted,
+            width: touches ? Math.min(1.2 + Math.sqrt(count), 5) : Math.min(0.5 + Math.sqrt(count) * 0.4, 2.4),
+            opacity: touches ? 0.85 : focus ? 0.04 : spoke ? 0.22 : 0.14,
+            curveness: spoke ? 0 : 0.22,
+          },
+        };
+      });
 
-    const spotlight = document.getElementById("collab-spotlight-meta");
-    const spotlightBody = document.querySelector(".collab-spotlight-body");
-    const spotlightTitle = document.querySelector(".collab-spotlight-title");
+      return withReducedMotion({
+        tooltip: Object.assign(mapTooltip(t), {
+          formatter: (params) => {
+            if (params.dataType === "edge") {
+              const a = String(params.data.source);
+              const b = String(params.data.target);
+              const label = (name) => (name === model.self ? "Ben Ampel" : name);
+              return `${escapeHtml(label(a))} and ${escapeHtml(label(b))}<br><strong>${params.data.count}</strong> paper${params.data.count === 1 ? "" : "s"} together`;
+            }
+            const id = String(params.data.id || "");
+            if (!id || id.startsWith("__ring")) return "";
+            if (id === model.self) return `<strong>Ben Ampel</strong><br>${model.people.length} co-authors in this range`;
+            const person = model.byId.get(id);
+            if (!person) return "";
+            const years = person.first ? (person.first === person.last ? `${person.first}` : `${person.first}–${person.last}`) : "—";
+            return `<strong>${escapeHtml(id)}</strong><br>${person.count} paper${person.count === 1 ? "" : "s"} together · ${years}`;
+          },
+        }),
+        aria: { enabled: true, label: { description: describeCollab(model.people.map((p) => ({ id: p.id, name: p.id, value: p.count })), model.self) } },
+        series: [
+          {
+            id: "collab",
+            type: "graph",
+            layout: "none",
+            data: nodes,
+            links: edges,
+            roam: false,
+            draggable: false,
+            symbol: "circle",
+            left: 64,
+            right: 64,
+            top: 36,
+            bottom: 40,
+            animationDurationUpdate: 350,
+            label: { color: t.text, fontSize: 11, fontFamily: "Lato, sans-serif", distance: 5 },
+            emphasis: { scale: 1.12, label: { show: true } },
+          },
+        ],
+      });
+    }
 
-    function setSpotlight(name) {
-      if (!spotlight || !spotlightBody || !spotlightTitle) return;
-      if (!name || !metaMap[name]) {
-        spotlightTitle.textContent = "Collaborator spotlight";
-        spotlightBody.textContent = "Select a node to see their co-authorship footprint, top venues, and key connections.";
-        spotlight.innerHTML = "";
+    function renderLegend() {
+      if (!legendEl) return;
+      const t = mapTheme();
+      legendEl.innerHTML =
+        `<span class="cn-legend-group"><span class="cn-legend-title">Last paper together</span>${recencyLabels
+          .map((label, index) => `<span class="im-legend-item"><span class="im-swatch" style="--swatch:${t.recency[index]}"></span>${label}</span>`)
+          .join("")}</span>` +
+        `<span class="cn-legend-group"><span class="cn-legend-title">Rings, inside out</span><span class="im-legend-item">${RING_LABELS.join(" · ")}</span></span>` +
+        `<span class="cn-legend-group"><span class="im-legend-note">Clockwise from the top: first paper together, earliest first. Size: papers together.</span></span>`;
+    }
+
+    function renderSpotlight() {
+      if (!spotEl) return;
+      const person = state.focusId && model.byId.get(state.focusId);
+      if (!person) {
+        const core = model.people.filter((p) => p.ring === 0).length;
+        const recent = model.people.filter((p) => recencyIndex(p.last) === 0).length;
+        spotEl.innerHTML = `
+          <p class="im-kicker">Collaborators</p>
+          <dl class="im-stats">
+            <div><dt>Co-authors</dt><dd>${model.people.length}</dd></div>
+            <div><dt>5+ papers</dt><dd>${core}</dd></div>
+            <div><dt>Since ${currentYear - 1}</dt><dd>${recent}</dd></div>
+          </dl>
+          <p class="im-hint">Pick a name below or a dot on the chart to see shared papers, venues and mutual co-authors.</p>`;
         return;
       }
-      const meta = metaMap[name];
-      const years = Array.isArray(meta.years) ? meta.years.slice().sort() : [];
-      const yearRange = years.length ? `${years[0]} - ${years[years.length - 1]}` : "—";
-      const topVenues = Object.entries(meta.venues || {})
-        .sort((left, right) => right[1] - left[1])
+      const t = mapTheme();
+      const years = person.first ? (person.first === person.last ? `${person.first}` : `${person.first}–${person.last}`) : "—";
+      const venues = Object.entries(person.info.venues || {})
+        .sort((a, b) => b[1] - a[1])
         .slice(0, 3)
-        .map((entry) => entry[0])
-        .join(", ") || "—";
-      const topCoauthors = Object.entries(meta.coauthors || {})
-        .sort((left, right) => right[1] - left[1])
-        .slice(0, 3)
-        .map((entry) => `${normalizeAuthor(nameMap, entry[0])} (${entry[1]})`)
-        .join(", ") || "—";
-
-      spotlightTitle.textContent = name;
-      spotlightBody.textContent = `${meta.count || 0} co-authored papers`;
-      spotlight.innerHTML = `
-        <div class="collab-meta-row"><span>Active years</span><strong>${escapeHtml(yearRange)}</strong></div>
-        <div class="collab-meta-row"><span>Top venues</span><strong>${escapeHtml(topVenues)}</strong></div>
-        <div class="collab-meta-row"><span>Key co-authors</span><strong>${escapeHtml(topCoauthors)}</strong></div>
-      `;
+        .map(([venue, count]) => `${escapeHtml(venue)} (${count})`)
+        .join(", ");
+      const mutual = Object.entries(person.info.coauthors || {})
+        .map(([name, count]) => [normalizeAuthor(model.nameMap, name), count])
+        .filter(([name]) => name !== model.self && name !== person.id)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 6);
+      const shared = papers
+        .filter((paper) => Array.isArray(paper.authors) && paper.authors.includes(person.id))
+        .sort((a, b) => (b.year || 0) - (a.year || 0) || (b.value || 0) - (a.value || 0));
+      spotEl.innerHTML = `
+        <div class="im-panel-head">
+          <span class="im-swatch" style="--swatch:${t.recency[recencyIndex(person.last)]}"></span>
+          <span class="im-kicker">${RING_LABELS[person.ring]}</span>
+          <button type="button" class="im-clear" data-collab-action="clear">Clear</button>
+        </div>
+        <h3 class="im-panel-title" tabindex="-1">${escapeHtml(person.id)}</h3>
+        <dl class="im-stats">
+          <div><dt>Papers together</dt><dd>${person.count}</dd></div>
+          <div><dt>Years</dt><dd>${years}</dd></div>
+        </dl>
+        ${venues ? `<p class="im-meta"><span class="im-kicker-inline">Top venues</span> ${venues}</p>` : ""}
+        ${mutual.length ? `<p class="im-kicker">Also wrote with</p><div class="cn-mutual">${mutual
+          .map(([name, count]) =>
+            model.byId.has(name)
+              ? `<button type="button" class="cn-mutual-btn" data-collab-select="${escapeHtml(name)}">${escapeHtml(shortName(name))} <span class="im-legend-count">${count}</span></button>`
+              : `<span class="cn-mutual-btn is-static">${escapeHtml(shortName(name))} <span class="im-legend-count">${count}</span></span>`)
+          .join("")}</div>` : ""}
+        ${shared.length ? `<p class="im-kicker">Shared papers</p><ul class="cn-papers">${shared
+          .slice(0, 5)
+          .map((paper) => `<li><span class="cn-paper-year">${paper.year || "—"}</span> ${escapeHtml(truncate(paper.name, 96))}</li>`)
+          .join("")}</ul>${shared.length > 5 ? `<p class="im-hint">${shared.length - 5} more.</p>` : ""}` : ""}`;
     }
 
-    function getCollabColor(value, maxValue, isDark) {
-      const ratio = Math.min(Math.max(((value || 0) - 1) / ((maxValue || 1) - 1 || 1), 0), 1);
-      const hue = (1 - ratio) * 120;
-      return isDark ? `hsl(${hue}, 90%, 60%)` : `hsl(${hue}, 80%, 40%)`;
-    }
-
-    function updateChart() {
-      const isDark = document.body.classList.contains("dark");
-      const neighborMap = new Map();
-      links.forEach((link) => {
-        if (!neighborMap.has(link.source)) neighborMap.set(link.source, new Set());
-        if (!neighborMap.has(link.target)) neighborMap.set(link.target, new Set());
-        neighborMap.get(link.source).add(link.target);
-        neighborMap.get(link.target).add(link.source);
-      });
-
-      const highlight = new Set();
-      if (dashboardState.collab.focusId) {
-        highlight.add(dashboardState.collab.focusId);
-        const neighbors = neighborMap.get(dashboardState.collab.focusId);
-        if (neighbors) neighbors.forEach((value) => highlight.add(value));
+    function renderList() {
+      if (!listEl) return;
+      const t = mapTheme();
+      const query = filterEl ? filterEl.value.trim().toLowerCase() : "";
+      const rows = model.people
+        .slice()
+        .sort((a, b) => b.count - a.count || (b.last || 0) - (a.last || 0) || a.id.localeCompare(b.id))
+        .filter((person) => !query || person.id.toLowerCase().includes(query));
+      if (!rows.length) {
+        listEl.innerHTML = `<li class="im-hint">No collaborator matches.</li>`;
+        return;
       }
-
-      const styledNodes = nodes.map((node) => {
-        const active = !highlight.size || highlight.has(node.id);
-        const isFocus = dashboardState.collab.focusId === node.id;
-        const color = node.id === myName ? (isDark ? "#fff" : "#000") : getCollabColor(node.value, maxCount, isDark);
-        return Object.assign({}, node, {
-          itemStyle: {
-            color,
-            opacity: highlight.size ? (active ? 1 : 0.08) : 1,
-            borderColor: isFocus ? "#00e5ff" : node.id === myName ? (isDark ? "#000" : "#fff") : "transparent",
-            borderWidth: isFocus ? 2 : node.id === myName ? 2 : 0,
-          },
-          label: { show: node.value > 1 || node.id === myName || active, color: isDark ? "#eee" : "#333" },
-        });
-      });
-
-      const styledLinks = links.map((link) => {
-        const active = !highlight.size || (highlight.has(link.source) && highlight.has(link.target));
-        return Object.assign({}, link, {
-          lineStyle: Object.assign({}, link.lineStyle, {
-            color: getCollabColor(link.value, maxCount, isDark),
-            opacity: highlight.size ? (active ? 0.8 : 0.05) : link.lineStyle.opacity,
-          }),
-        });
-      });
-
-      chart.setOption(
-        withReducedMotion({
-          backgroundColor: "transparent",
-          tooltip: {
-            formatter: (params) =>
-              params.dataType === "edge"
-                ? `${escapeHtml(params.data.source)} & ${escapeHtml(params.data.target)}<br>${params.value} Papers`
-                : `${escapeHtml(params.name)}: ${params.value} Papers`,
-          },
-          aria: { enabled: true, description: describeCollab(nodes, myName) },
-          series: [
-            {
-              type: "graph",
-              layout: "force",
-              roam: true,
-              zoom: 0.6,
-              data: styledNodes,
-              links: styledLinks,
-              force: { repulsion: 800, gravity: 0.1, edgeLength: [30, 150] },
-              lineStyle: { curveness: 0.2 },
-            },
-          ],
-        }),
-        false
-      );
+      listEl.innerHTML = rows
+        .map((person) => {
+          const width = Math.max(4, Math.round((person.count / model.maxCount) * 100));
+          const years = person.first ? (person.first === person.last ? `${person.first}` : `${person.first}–${String(person.last).slice(2)}`) : "";
+          return `<li><button type="button" class="cn-item" data-collab-select="${escapeHtml(person.id)}" aria-pressed="${person.id === state.focusId}">
+            <span class="im-swatch" style="--swatch:${t.recency[recencyIndex(person.last)]}"></span>
+            <span class="cn-name"><span class="cn-name-text">${escapeHtml(person.id)}</span><span class="cn-years">${years}</span></span>
+            <span class="cn-bar" aria-hidden="true"><span style="--w:${width}%; --swatch:${t.recency[recencyIndex(person.last)]}"></span></span>
+            <span class="cn-count">${person.count}</span>
+          </button></li>`;
+        })
+        .join("");
     }
 
-    const chipRow = document.querySelector(".collab-chip-row");
-    if (chipRow && !chipRow.dataset.bound) {
-      chipRow.dataset.bound = "true";
-      chipRow.querySelectorAll(".collab-chip").forEach((chip) => {
-        chip.addEventListener("click", () => {
-          dashboardState.collab.range = chip.getAttribute("data-collab-range");
-          dashboardState.collab.focusId = null;
-          chipRow.querySelectorAll(".collab-chip").forEach((other) => other.classList.toggle("is-active", other === chip));
-          renderCollabNetwork(collaboration);
-        });
-      });
-    }
-    if (chipRow) {
-      chipRow.querySelectorAll(".collab-chip").forEach((chip) => {
-        chip.classList.toggle("is-active", chip.getAttribute("data-collab-range") === dashboardState.collab.range);
-      });
+    function update() {
+      chart.setOption(buildOption());
+      renderLegend();
     }
 
-    chart.off("click");
+    function select(id, moveFocus) {
+      state.focusId = id && model.byId.has(id) ? id : null;
+      update();
+      renderSpotlight();
+      renderList();
+      if (moveFocus && spotEl) {
+        const heading = spotEl.querySelector(".im-panel-title");
+        if (heading) heading.focus({ preventScroll: true });
+      }
+    }
+
     chart.on("click", (params) => {
       if (params.dataType !== "node") return;
-      dashboardState.collab.focusId = dashboardState.collab.focusId === params.data.id ? null : params.data.id;
-      setSpotlight(dashboardState.collab.focusId);
-      updateChart();
+      const id = String(params.data.id || "");
+      if (id.startsWith("__ring") || id === model.self) {
+        select(null, false);
+        return;
+      }
+      select(state.focusId === id ? null : id, false);
+    });
+    chart.getZr().on("click", (event) => {
+      if (!event.target && state.focusId) select(null, false);
     });
 
-    setSpotlight(dashboardState.collab.focusId);
-    updateChart();
+    if (!section.dataset.mapBound) {
+      section.dataset.mapBound = "1";
+      section.addEventListener("click", (event) => {
+        const api = dashboardState.collab.api;
+        if (!api) return;
+        const range = event.target.closest("[data-collab-range]");
+        const pick = event.target.closest("[data-collab-select]");
+        const clear = event.target.closest("[data-collab-action='clear']");
+        if (range) api.setRange(range.getAttribute("data-collab-range"));
+        else if (pick) api.select(pick.getAttribute("data-collab-select"), true);
+        else if (clear) api.select(null, false);
+      });
+      section.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && dashboardState.collab.focusId && dashboardState.collab.api) {
+          dashboardState.collab.api.select(null, false);
+        }
+      });
+      if (filterEl) filterEl.addEventListener("input", () => dashboardState.collab.api && dashboardState.collab.api.renderList());
+    }
+
+    const setRangePressed = () =>
+      section.querySelectorAll("[data-collab-range]").forEach((btn) => btn.setAttribute("aria-pressed", String(btn.getAttribute("data-collab-range") === state.range)));
+
+    state.api = {
+      select,
+      renderList,
+      update: () => {
+        update();
+        renderSpotlight();
+        renderList();
+      },
+      setRange(range) {
+        if (!collaboration.ranges[range]) return;
+        state.range = range;
+        model = buildModel();
+        if (state.focusId && !model.byId.has(state.focusId)) state.focusId = null;
+        setRangePressed();
+        update();
+        renderSpotlight();
+        renderList();
+      },
+    };
+
+    model = buildModel();
+    setRangePressed();
+    state.api.update();
+  }
+
+  // Theme switches (body.dark toggled by the site's theme button) repaint both maps with their own light/dark values.
+  let mapThemeObserver = null;
+  function watchMapTheme() {
+    if (mapThemeObserver || !("MutationObserver" in window)) return;
+    let wasDark = document.body.classList.contains("dark");
+    mapThemeObserver = new MutationObserver(() => {
+      const isDark = document.body.classList.contains("dark");
+      if (isDark === wasDark) return;
+      wasDark = isDark;
+      ["impact", "collab"].forEach((key) => {
+        const api = dashboardState[key] && dashboardState[key].api;
+        if (api) api.update();
+      });
+    });
+    mapThemeObserver.observe(document.body, { attributes: true, attributeFilter: ["class"] });
   }
 
   function createArc(start, end) {
@@ -873,6 +1338,9 @@
       if (chart && typeof chart.resize === "function") chart.resize();
     });
     if (dashboardState.maps.footprint) dashboardState.maps.footprint.invalidateSize();
+    // Axis labels shorten and label budgets change below 560 px, so the maps rebuild their options after a resize.
+    if (dashboardState.impact.api) dashboardState.impact.api.update();
+    if (dashboardState.collab.api) dashboardState.collab.api.update();
   }
 
   let resizeFrame = null;
@@ -907,6 +1375,7 @@
           renderImpactMap(payload.impactGraph || {});
           renderCollabNetwork(payload.network && payload.network.collaboration);
           renderFootprintMap(payload.footprint || {});
+          watchMapTheme();
           refreshLayout();
         });
       })
