@@ -200,7 +200,7 @@ body:not(.dark) .rdm {
 .pll-panel-tiers span { color:var(--rdm-muted); }
 
 /* Topic Evolution: three phase bars per term, a trend label, and the matching papers on selection. */
-.td-grid { display:grid; grid-template-columns:minmax(120px, 1.1fr) repeat(3, minmax(0, 1fr)) 88px; gap:4px 10px; align-items:center; }
+.td-grid { display:grid; grid-template-columns:minmax(120px, 1.1fr) repeat(3, minmax(0, 1fr)) 104px; gap:4px 10px; align-items:center; }
 .td-head { padding-bottom:6px; border-bottom:1px solid var(--rdm-line); font-size:0.75rem; font-weight:700; color:var(--rdm-text); }
 .td-head span { display:block; font:400 0.68rem 'Fira Code', monospace; color:var(--rdm-muted); }
 .td-row { display:contents; }
@@ -213,7 +213,7 @@ body:not(.dark) .rdm {
 .td-fill { display:block; height:100%; width:var(--w); border-radius:3px; background:var(--rdm-series); }
 .td-val { font:0.72rem 'Fira Code', monospace; text-align:right; color:var(--rdm-body); }
 .td-val.is-zero { color:var(--rdm-muted); }
-.td-trend { display:inline-flex; align-items:center; gap:6px; font-size:0.75rem; font-weight:600; color:var(--rdm-body); }
+.td-trend { display:inline-flex; align-items:center; gap:6px; white-space:nowrap; font-size:0.75rem; font-weight:600; color:var(--rdm-body); }
 .td-trend::before { content:""; width:0; height:0; border:5px solid transparent; }
 .td-rise::before { border-bottom:8px solid var(--rdm-series); border-top-width:0; }
 .td-fall::before { border-top:8px solid var(--rdm-muted); border-bottom-width:0; }
