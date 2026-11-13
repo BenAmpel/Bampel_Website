@@ -133,8 +133,12 @@ h1[tabindex="-1"]:focus { outline: none; }
 .sheet-scrim { position: fixed; inset: var(--nav-h) 0 0 0; background: var(--scrim); z-index: 90; animation: fade 0.2s var(--ease); }
 .sheet { position: fixed; top: var(--nav-h); left: 0; right: 0; z-index: 95; background: var(--surface);
   border-bottom: 1px solid var(--line); box-shadow: var(--shadow-lg); padding: 8px var(--gutter) 20px;
-  transform-origin: top right; animation: sheetIn 0.32s var(--ease); max-height: calc(100vh - var(--nav-h)); overflow-y: auto; }
+  transform-origin: top right; animation: sheetIn 0.32s var(--ease); max-height: calc(100vh - var(--nav-h)); overflow-y: auto; overscroll-behavior: contain; }
 .sheet ul { list-style: none; }
+/* Menu open: the page behind does not scroll. Set on <html> by NavBar (ccair-components.jsx); both elements, since iOS
+   Safari before 16 ignores body alone. The gutter stays reserved so a classic scrollbar leaves no layout shift. */
+html.menu-open, html.menu-open body { overflow: hidden; }
+html.menu-open { scrollbar-gutter: stable; }
 .sheet a { display: flex; align-items: center; justify-content: space-between; padding: 14px 4px; font-size: 19px; font-weight: 600; color: var(--text); border-bottom: 1px solid var(--line); }
 .sheet a:hover { text-decoration: none; color: var(--accent); }
 .sheet a[aria-current="page"] { color: var(--accent); }

@@ -202,24 +202,38 @@ function CCAIRNav({ currentPage }) {
   useEffect(() => { setOpen(false); }, [currentPage]);
 
   // While the sheet is open: Escape closes it, Tab stays inside it (the toggle and the sheet's links),
-  // focus moves into it, and the page behind does not scroll.
+  // focus moves into it, and the page behind does not scroll. The lock is the .menu-open class on <html> (ccair.css:
+  // overflow hidden on html and body) plus a touchmove guard, because iOS Safari before 16 ignores overflow: hidden
+  // on body. Every focus() here passes preventScroll: the toggle and the sheet sit inside the scroll-padding-top band,
+  // so a plain focus() scrolls the page behind them (it jumped to the top on Escape).
   useEffect(() => {
     if (!open) return;
+    const focusNoScroll = (el) => el && el.focus({ preventScroll: true });
     const onKey = (e) => {
-      if (e.key === 'Escape') { setOpen(false); btnRef.current && btnRef.current.focus(); return; }
+      if (e.key === 'Escape') { setOpen(false); focusNoScroll(btnRef.current); return; }
       if (e.key !== 'Tab' || !sheetRef.current) return;
       const items = [btnRef.current, ...sheetRef.current.querySelectorAll('a[href], button')].filter(Boolean);
       const first = items[0], last = items[items.length - 1];
       const inside = items.includes(document.activeElement);
-      if (e.shiftKey && (document.activeElement === first || !inside)) { e.preventDefault(); last.focus(); }
-      else if (!e.shiftKey && (document.activeElement === last || !inside)) { e.preventDefault(); first.focus(); }
+      if (e.shiftKey && (document.activeElement === first || !inside)) { e.preventDefault(); focusNoScroll(last); }
+      else if (!e.shiftKey && (document.activeElement === last || !inside)) { e.preventDefault(); focusNoScroll(first); }
+    };
+    // A drag may scroll only the sheet itself, and only when it overflows; everywhere else (scrim, bar) it is ignored.
+    const onTouchMove = (e) => {
+      if (e.touches && e.touches.length > 1) return; // pinch zoom
+      const sheet = sheetRef.current;
+      if (sheet && sheet.contains(e.target) && sheet.scrollHeight > sheet.clientHeight) return;
+      if (e.cancelable) e.preventDefault();
     };
     document.addEventListener('keydown', onKey);
-    const first = sheetRef.current && sheetRef.current.querySelector('a');
-    first && first.focus();
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
+    document.addEventListener('touchmove', onTouchMove, { passive: false });
+    focusNoScroll(sheetRef.current && sheetRef.current.querySelector('a'));
+    document.documentElement.classList.add('menu-open');
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('touchmove', onTouchMove);
+      document.documentElement.classList.remove('menu-open');
+    };
   }, [open]);
 
   return (
