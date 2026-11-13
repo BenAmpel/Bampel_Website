@@ -67,6 +67,9 @@ jobs:
       - name: Lab tests
         run: npm run test:lab
 
+      - name: Webfonts cache rule test
+        run: node tests/webfonts-cache.test.mjs
+
       - name: Publications filter test
         run: node --test tests/publications-filter.test.mjs
 
