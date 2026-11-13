@@ -99,6 +99,104 @@ function HeroGlow({ heroRef, innerRef }) {
 }
 const STAT_STYLE = { display: 'flex', flexDirection: 'column-reverse', justifyContent: 'flex-end' };
 
+// The research constellation: every publication as a point of light, grouped by research area, with papers that share
+// two or more co-authors joined. It uses the same self-hosted three.js bundle as bampel.com's home page, fetched only
+// once the page is idle and only where WebGL runs at full speed; otherwise nothing is drawn and the page is unchanged.
+const SITE3D_SRC = '/vendor/three/0.170.0/site-3d.min.js';
+// One colour per research area (PILLARS order), checked for colour-blind separation on both surfaces.
+const PILLAR_COLORS = { dark: ['#0b8fd6', '#c4850f', '#8f6cf0', '#0f9e8f'], light: ['#0071ce', '#b45309', '#7c3aed', '#0d9488'] };
+// Tried in order on the title; anything unmatched is threat intelligence (01), the center's core program.
+const PILLAR_RULES = [
+  { group: 1, re: /phish|vish|deepfake|social engineering|deception|scam|fraud|following friends/i },
+  { group: 3, re: /analyst|human|training|trust|explan|team|ai-assisted|ai-augmented|information systems research/i },
+  { group: 2, re: /language model|\bllms?\b|safety alignment|prompt|adversarial|robust|jailbreak|bias detection/i },
+];
+const pillarOf = (p) => { const r = PILLAR_RULES.find((x) => x.re.test(p.title || '')); return r ? r.group : 0; };
+const prefersDark = () => !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+function canWebGL() {
+  try {
+    const c = document.createElement('canvas');
+    const o = { failIfMajorPerformanceCaveat: true };
+    const gl = c.getContext('webgl2', o) || c.getContext('webgl', o);
+    const lose = gl && gl.getExtension('WEBGL_lose_context');
+    if (lose) lose.loseContext();
+    return !!gl;
+  } catch (e) { return false; }
+}
+// One load per page, shared with any other view that asks (window.__site3dLoad is the same promise bampel.com uses).
+function loadSite3D() {
+  if (window.Site3D) return Promise.resolve(window.Site3D);
+  if (!window.__site3dLoad) {
+    const src = new URL(SITE3D_SRC, window.location.origin).href;
+    window.__site3dLoad = new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = src; s.async = true;
+      s.addEventListener('load', () => resolve(window.Site3D), { once: true });
+      s.addEventListener('error', reject, { once: true });
+      document.head.appendChild(s);
+    });
+  }
+  return window.__site3dLoad;
+}
+function whenIdle(cb) {
+  let id = 0, idle = false;
+  const go = () => { idle = !!window.requestIdleCallback; id = idle ? window.requestIdleCallback(cb, { timeout: 2000 }) : window.setTimeout(cb, 300); };
+  if (document.readyState === 'complete') go(); else window.addEventListener('load', go, { once: true });
+  return () => { window.removeEventListener('load', go); if (id) (idle ? window.cancelIdleCallback(id) : window.clearTimeout(id)); };
+}
+
+function Constellation({ publications, className, dark, focus = -1, onFail }) {
+  const ref = React.useRef(null);
+  const viewRef = React.useRef(null);
+  const [live, setLive] = usePageState(false);
+  const [failed, setFailed] = usePageState(false);
+  usePageEffect(() => {
+    if (!publications.length || !ref.current) return undefined;
+    const el = ref.current;
+    let cancelled = false, view = null, mq = null;
+    const fail = () => { if (!cancelled) { setLive(false); setFailed(true); if (onFail) onFail(); } };
+    const theme = () => { const d = dark || prefersDark(); return { dark: d, palette: PILLAR_COLORS[d ? 'dark' : 'light'], other: d ? '#8b949e' : '#6e7781' }; };
+    const onScheme = () => { if (view) view.setTheme(theme()); };
+    const stop = whenIdle(() => {
+      if (cancelled) return;
+      if (!canWebGL()) { fail(); return; }
+      loadSite3D().then((S) => {
+        if (cancelled) return;
+        if (!S || !S.hero || !S.supported()) { fail(); return; }
+        const data = S.heroData.fromPublications(publications, { rules: PILLAR_RULES, defaultGroup: 0, minShared: 2 });
+        view = S.hero.create(el, { data, groups: PILLARS.length, theme: theme(), focus, seed: 11, onReady: () => { if (!cancelled) setLive(true); }, onLost: fail });
+        viewRef.current = view;
+        if (!dark && window.matchMedia) { mq = window.matchMedia('(prefers-color-scheme: dark)'); mq.addEventListener('change', onScheme); }
+      }).catch(fail);
+    });
+    return () => { cancelled = true; stop(); if (mq) mq.removeEventListener('change', onScheme); if (view) view.dispose(); viewRef.current = null; };
+  }, [publications, dark]);
+  usePageEffect(() => { if (viewRef.current) viewRef.current.focus(focus); }, [focus]);
+  if (failed) return null;
+  return <div ref={ref} className={`ccair-constellation ${className || ''}${live ? ' is-live' : ''}`} aria-hidden="true" />;
+}
+
+// Research page: the constellation with a key that names each area, counts its papers, and brings it forward.
+function ResearchMap({ publications }) {
+  const [focus, setFocus] = usePageState(-1);
+  const [failed, setFailed] = usePageState(false);
+  const counts = usePageMemo(() => publications.reduce((a, p) => { a[pillarOf(p)] += 1; return a; }, PILLARS.map(() => 0)), [publications]);
+  return (
+    <div className={`ccair-map${failed ? ' is-static' : ''}`}>
+      {!failed && <Constellation publications={publications} focus={focus} className="ccair-constellation--map" onFail={() => setFailed(true)} />}
+      <div className="ccair-map__key" role="group" aria-label={failed ? 'Publications by research area' : 'Highlight a research area'}>
+        {PILLARS.map((p, i) => {
+          const inner = (<><span className="ccair-map__dot" aria-hidden="true" /><span className="ccair-map__name">{p.title}</span><span className="ccair-map__n">{counts[i]}</span></>);
+          return failed
+            ? <span key={p.n} className={`ccair-map__area ccair-map__area--${i}`}>{inner}</span>
+            : <button key={p.n} type="button" className={`ccair-map__area ccair-map__area--${i}`} aria-pressed={focus === i} onClick={() => setFocus(focus === i ? -1 : i)}>{inner}</button>;
+        })}
+      </div>
+    </div>
+  );
+}
+
 function HomePage() {
   const { publications, people, news, courses, paperPages } = useData();
   const phdCount = (people.students || []).length + (people.mentees || []).length;
@@ -137,6 +235,7 @@ function HomePage() {
         <section className="hero photo-hero" aria-labelledby="hero-title" ref={heroRef}>
           <div className="hero-stage">
             <div className="hero-photo">{photo && <Picture photo={photo} sizes="100vw" priority decorative />}</div>
+            <Constellation publications={publications} className="ccair-constellation--hero" dark />
             <div className="wrap">{heroText}</div>
             {photo && <p className="photo-credit hero-credit"><PhotoCredit photo={photo} /></p>}
           </div>
@@ -222,6 +321,12 @@ function ResearchPage() {
             </Reveal>
           ))}
         </div>
+      </Section>
+
+      <Section id="map" title="Research map" intro="Every center publication as a point of light, grouped by research area. Papers that share two or more co-authors are joined. Choose an area to bring it forward.">
+        <DataSection needs={['publications']} what="the research map" reserve="380px">
+          {pubsReady && <ResearchMap publications={publications} />}
+        </DataSection>
       </Section>
 
       <Section id="portfolio" alt title="Research portfolio" intro="CCAIR organizes research investments into three tiers based on risk and expected coherence with the center thesis.">
