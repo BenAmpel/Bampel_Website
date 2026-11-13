@@ -207,39 +207,78 @@
     return `Co-authorship network with ${others.length} co-authors. Most frequent: ${top}.`;
   }
 
+  // Citations per year: one series in the site accent, text in text tokens, the current year drawn lighter and labelled
+  // "so far" because it is still counting. The tooltip adds the change on the year before.
   function renderLine(history) {
     const dom = document.getElementById(IDS.LINE);
     if (!dom || !history || !history.length) return;
+    dashboardState.lineHistory = history;
     if (dashboardState.charts.line) dashboardState.charts.line.dispose();
     const chart = window.echarts.init(dom, 'v5');
     dashboardState.charts.line = chart;
-    const isDark = document.body.classList.contains("dark");
+    const t = mapTheme();
+    const thisYear = String(new Date().getFullYear());
+    const partial = (year) => String(year) === thisYear;
+    const note = document.getElementById("dashboard-timeline-note");
+    if (note && history.some((item) => partial(item.year))) {
+      note.textContent = `${thisYear} is the year so far. Hover a bar for the change on the year before.`;
+    }
     chart.setOption(
       withReducedMotion({
-        tooltip: { trigger: "axis", formatter: "{b}: {c} Citations" },
+        tooltip: Object.assign(mapTooltip(t), {
+          trigger: "axis",
+          axisPointer: { type: "shadow", shadowStyle: { color: t.dark ? "rgba(139,148,158,0.12)" : "rgba(89,99,110,0.08)" } },
+          formatter: (params) => {
+            const p = params[0];
+            const i = p.dataIndex;
+            const cur = history[i].citations;
+            const prev = i > 0 ? history[i - 1].citations : null;
+            let change = "";
+            if (prev) {
+              const pct = Math.round(((cur - prev) / prev) * 100);
+              change = `<div style="color:${t.muted}">${pct >= 0 ? "+" : ""}${pct}% on ${history[i - 1].year}</div>`;
+            }
+            const label = partial(history[i].year) ? `${history[i].year} (so far)` : history[i].year;
+            return `<div style="font-weight:700">${escapeHtml(label)}</div><div>${cur} citations</div>${change}`;
+          },
+        }),
         // The description carries the numbers, since a screen reader cannot see the bars.
-        aria: { enabled: true, description: `Citations by year: ${history.map((item) => `${item.year}, ${item.citations}`).join("; ")}.` },
-        grid: { top: 10, right: 10, bottom: 20, left: 30, containLabel: true },
+        aria: { enabled: true, description: `Citations by year: ${history.map((item) => `${item.year}, ${item.citations}${partial(item.year) ? " so far" : ""}`).join("; ")}.` },
+        grid: { top: 18, right: 8, bottom: 4, left: 4, containLabel: true },
         xAxis: {
           type: "category",
           data: history.map((item) => item.year),
-          axisLine: { show: false },
-          axisLabel: { color: isDark ? "#888" : "#666", fontSize: 9 },
+          axisLine: { lineStyle: { color: t.grid } },
+          axisTick: { show: false },
+          axisLabel: { color: t.muted, fontSize: 11, fontFamily: "Fira Code, monospace" },
         },
         yAxis: {
           type: "value",
-          splitLine: { show: false },
-          axisLabel: { color: isDark ? "#888" : "#666", fontSize: 9 },
+          splitNumber: 3,
+          splitLine: { lineStyle: { color: t.grid } },
+          axisLabel: { color: t.muted, fontSize: 11, fontFamily: "Fira Code, monospace" },
         },
         series: [
           {
             type: "bar",
-            data: history.map((item) => item.citations),
-            itemStyle: {
-              color: isDark ? "#00e5ff" : "#1a0dab",
-              borderRadius: [2, 2, 0, 0],
+            barMaxWidth: 36,
+            data: history.map((item) => ({
+              value: item.citations,
+              itemStyle: {
+                color: t.accent,
+                opacity: partial(item.year) ? 0.45 : 1,
+                borderRadius: [4, 4, 0, 0],
+              },
+            })),
+            label: {
+              show: true,
+              position: "top",
+              color: t.body,
+              fontSize: 11,
+              fontFamily: "Fira Code, monospace",
+              formatter: (p) => (p.dataIndex === history.length - 1 || p.dataIndex === 0 ? String(p.value) : ""),
             },
-            barWidth: "40%",
+            emphasis: { itemStyle: { opacity: 1 } },
           },
         ],
       })
@@ -1153,6 +1192,7 @@
         const api = dashboardState[key] && dashboardState[key].api;
         if (api) api.update();
       });
+      if (dashboardState.lineHistory) renderLine(dashboardState.lineHistory);
     });
     mapThemeObserver.observe(document.body, { attributes: true, attributeFilter: ["class"] });
   }

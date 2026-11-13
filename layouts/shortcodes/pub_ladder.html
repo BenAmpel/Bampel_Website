@@ -1,25 +1,18 @@
-<div class="pll-root" id="pub-ladder-root">
-  <div class="pll-header">
+{{- /* Publication Trajectory: every paper as a dot, by year and venue tier. Logic: assets/js/widgets/pub-ladder.js. */ -}}
+<section class="rdm rdm-card pll-root" id="pub-ladder-root" aria-labelledby="pll-heading">
+  <div class="rdm-head">
     <div>
-      <h3 class="pll-title">Publication Quality Trajectory</h3>
-      <p class="pll-desc">Each dot is a paper — hover for details. The upward migration toward premier venues marks growing research maturity.</p>
+      <h3 class="rdm-title" id="pll-heading">Publication Trajectory</h3>
+      <p class="rdm-sub">Each dot is a paper, placed by year and venue tier. Select one to see the paper; select a tier to hide or show it.</p>
     </div>
   </div>
-  <div class="pll-body" id="pll-body" aria-live="polite" aria-atomic="false">
-    <div class="pll-loader">Loading…</div>
+  <div class="im-legend" id="pll-legend" role="group" aria-label="Venue tiers; select one to hide or show it"></div>
+  <div class="im-body">
+    <div class="pll-body" id="pll-body"><p class="rdm-loading">Loading publications…</p></div>
+    <aside class="im-panel" id="pll-panel" aria-live="polite" aria-label="Paper details"></aside>
   </div>
-  <div class="pll-footer">
-    <div class="pll-legend">
-      <span class="pll-li pll-li-1"><span class="pll-sq"></span>Workshop</span>
-      <span class="pll-li pll-li-2"><span class="pll-sq"></span>Conference</span>
-      <span class="pll-li pll-li-3"><span class="pll-sq"></span>Journal</span>
-      <span class="pll-li pll-li-4"><span class="pll-sq"></span>Premier Journal</span>
-    </div>
-    <div class="pll-insight" id="pll-insight"></div>
-  </div>
-  <div class="pll-tip" id="pll-tip" aria-hidden="true"></div>
-</div>
+  <p class="rdm-insight" id="pll-insight"></p>
+</section>
 
-{{ partial "functions/css_tag" "css/widgets/pub-ladder.css" }}
-
+{{ partial "rdm_css" .Page }}
 {{ with resources.Get "js/widgets/pub-ladder.js" | minify | fingerprint }}<script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}"></script>{{ end }}

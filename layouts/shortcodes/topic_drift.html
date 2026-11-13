@@ -1,21 +1,20 @@
-<div class="tdrift-root" id="topic-drift-root">
-  <div class="tdrift-hdr">
+{{- /* Topic Evolution: share of papers mentioning each research term in three career phases.
+     Logic: assets/js/widgets/topic-drift.js. */ -}}
+<section class="rdm rdm-card td-root" id="topic-drift-root" aria-labelledby="td-heading">
+  <div class="rdm-head">
     <div>
-      <h3 class="tdrift-title">Research Topic Evolution</h3>
-      <p class="tdrift-sub">How the focus of each paper shifted across three career phases — derived from title &amp; abstract analysis.</p>
+      <h3 class="rdm-title" id="td-heading">Research Topic Evolution</h3>
+      <p class="rdm-sub">Share of papers in each career phase whose title or abstract mentions a topic. Select a topic to list those papers.</p>
+    </div>
+    <div class="rdm-toolbar">
+      <div class="rdm-seg" id="td-filter" role="group" aria-label="Show topics" hidden></div>
     </div>
   </div>
-  <div class="tdrift-phases-hdr" id="tdrift-phases-hdr"></div>
-  <div class="tdrift-table" id="tdrift-table">
-    <div class="tdrift-loading">Loading…</div>
+  <div class="im-body">
+    <div class="td-grid" id="tdrift-table"><p class="rdm-loading">Loading publications…</p></div>
+    <aside class="im-panel" id="td-panel" aria-live="polite" aria-label="Papers for the selected topic"></aside>
   </div>
-  <div class="tdrift-legend">
-    <span class="tdrift-li"><span class="tdrift-sq tdrift-sq-rise"></span>Growing focus</span>
-    <span class="tdrift-li"><span class="tdrift-sq tdrift-sq-fall"></span>Past focus</span>
-    <span class="tdrift-li"><span class="tdrift-sq tdrift-sq-stable"></span>Steady presence</span>
-  </div>
-</div>
+</section>
 
-{{ partial "functions/css_tag" "css/widgets/topic-drift.css" }}
-
+{{ partial "rdm_css" .Page }}
 {{ with resources.Get "js/widgets/topic-drift.js" | minify | fingerprint }}<script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}"></script>{{ end }}
