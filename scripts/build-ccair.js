@@ -146,6 +146,15 @@ console.log('CCAIR home hero: %d preload candidates written to dist/hero-preload
 // from the page's <PageHead> in ccair-pages.jsx, plus links to every page) in place of the home summary, so search engines
 // index each page and shared links show the right card. The app reads the page from the path (ccair-app.jsx).
 // The files are build output (.gitignore).
+const ROUTE_HERO_SLOTS = { people: 'people-band' };
+function heroLinkFor(page) {
+  const slot = ROUTE_HERO_SLOTS[page];
+  if (!slot) return '';
+  const photo = (JSON.parse(fs.readFileSync(path.join(ccairDir, 'data', 'photos.json'), 'utf8')).photos || []).find((p) => p.slot === slot);
+  if (!photo || photo.mobile) return '';
+  const set = photo.widths.map((w) => `/ccair/assets/photos/${photo.base}-${w}.avif ${w}w`).join(', ');
+  return `\n  <link rel="preload" as="image" type="image/avif" imagesrcset="${set}" imagesizes="100vw" fetchpriority="high">\n  `;
+}
 function writeRoutePages() {
   const shell = fs.readFileSync(path.join(ccairDir, 'index.html'), 'utf8');
   const appSrc = fs.readFileSync(path.join(ccairDir, 'ccair-app.jsx'), 'utf8');
@@ -182,7 +191,9 @@ function writeRoutePages() {
     html = swap(html, /(<meta name="twitter:title" content=")[^"]*/, `$1${esc(title)}`);
     html = swap(html, /(<meta name="twitter:description" content=")[^"]*/, `$1${esc(desc)}`);
     // The home page's hero image preload is for the home route only.
-    html = html.replace(/\n  <script src="\/ccair\/dist\/hero-preload.js"><\/script>\n  /, '');
+    // People page: its hero is rendered by the app after the data loads, so the preload is written into the page's own
+    // <head> (no script) for the same AVIF candidates the Picture component asks for.
+    html = html.replace(/\n  <script src="\/ccair\/dist\/hero-preload.js"><\/script>\n  /, heroLinkFor(f.name));
     html = swap(html, /<div class="narrow" style="padding:64px 0">[\s\S]*?<\/nav>\n    <\/div>/,
       `<div class="narrow" style="padding:64px 0">\n      <h1 style="font-size:40px;line-height:1.1;font-weight:300;margin-bottom:20px">${esc(heading)}</h1>\n      <p class="lede" style="margin-bottom:16px">${esc(lede)}</p>\n      <p style="margin-bottom:16px"><a href="/ccair/">Center for CyberAI Research (CCAIR), Georgia State University</a></p>\n      ${nav}\n    </div>`);
     fs.mkdirSync(path.join(ccairDir, f.name), { recursive: true });
