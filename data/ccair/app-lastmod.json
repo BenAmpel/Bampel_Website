@@ -1,17 +1,17 @@
 {
-  "note": "Written by scripts/build-ccair.js. lastmod is the date the hash of the page's function in ccair-pages.jsx and the data files it reads last changed. Commit this file after a build that changes it.",
+  "note": "Written by scripts/build-ccair.js. lastmod is the date the hash of the page's function in ccair-pages.jsx and the data files it reads last changed. Dates come from git history (scripts/ccair-lastmod.js), not the clock, so a rebuild of the same commit rewrites this file identically; committing it keeps shallow clones accurate.",
   "pages": {
     "/ccair/": {
-      "hash": "334bd5127d061efd038549ef75d6f7e4f9903aee03b296791a1fe7a6cde0f790",
-      "lastmod": "2026-11-06"
+      "hash": "1d5364fcf64dc6769795a0ede06265d41de689ecc1ad217178de6ef22b21e654",
+      "lastmod": "2026-11-13"
     },
     "/ccair/research/": {
-      "hash": "30a94653332ec0afbdee3ab6ea9f897a9646593ada54e83867aa892099b81295",
-      "lastmod": "2026-11-06"
+      "hash": "8247580efd007cce42724bcd710975c99b0969bcbd209135adbf10b754a72f20",
+      "lastmod": "2026-11-11"
     },
     "/ccair/publications/": {
-      "hash": "6f1262ed5ebb638c0090f8d090b43315e03736aee36893f1067ca68fd4671fd6",
-      "lastmod": "2026-11-06"
+      "hash": "cbee7db171f68494c3564d9f7a4b79b89a46bfe09034d1bb4d14646c0a25b6a6",
+      "lastmod": "2026-11-13"
     },
     "/ccair/people/": {
       "hash": "e53bdf720f426cf2bce918e10950e73c02935da101d20662620827d79ba3d83a",
@@ -22,16 +22,16 @@
       "lastmod": "2026-10-30"
     },
     "/ccair/materials/": {
-      "hash": "120e63be5f6a832c74d1483bb0f608e496b06e38b990dba92a795e9313f0dc19",
-      "lastmod": "2026-10-28"
+      "hash": "ae8669fdff4a4974ff0eca47b95f4eb6021e214bcbdb0ee6daad42332aa4f75d",
+      "lastmod": "2026-11-08"
     },
     "/ccair/about/": {
       "hash": "3a740bc23903f987e124e735b77c46e0167a422ef5095aa703943ea9d68f0dce",
       "lastmod": "2026-11-06"
     },
     "/ccair/contact/": {
-      "hash": "40bf0a6afd0db013d7d7adc0f0f87c94e625a74ef6cdd1c23850bfbdffdd79fd",
-      "lastmod": "2026-11-06"
+      "hash": "60e4c5cd38151ed5fe2f2b2b8658e11b9da07b03ed7abacd2ce31f503066dabc",
+      "lastmod": "2026-11-08"
     }
   }
 }
