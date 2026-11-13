@@ -24,6 +24,16 @@ export function supported() {
   return support;
 }
 
+// Sets a three.js Color from any CSS colour and returns its alpha: Color.set ignores the alpha of rgba() (with a
+// warning), and the site's grid tokens are rgba, so the alpha is carried into the line or point opacity instead.
+const RGBA = /^rgba\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*\)$/i;
+export function setColor(color, css) {
+  const m = RGBA.exec(String(css).trim());
+  if (!m) { color.set(css); return 1; }
+  color.setRGB(+m[1] / 255, +m[2] / 255, +m[3] / 255, 'srgb');
+  return +m[4];
+}
+
 export const blendOf = (additive) => (additive ? AdditiveBlending : NormalBlending);
 
 // Throws if no context can be made; callers fall back to their 2D view. onLost runs if the GPU drops the context later.
@@ -166,7 +176,7 @@ export function glowPoints(max, { additive = true, core = 0.6 } = {}) {
     points, max,
     set(i, x, y, z, color, s, a) {
       pos[i * 3] = x; pos[i * 3 + 1] = y; pos[i * 3 + 2] = z;
-      tmp.set(color);
+      a *= setColor(tmp, color);
       col[i * 3] = tmp.r; col[i * 3 + 1] = tmp.g; col[i * 3 + 2] = tmp.b;
       size[i] = s; alpha[i] = a;
     },
@@ -206,6 +216,7 @@ export function labelLayer(container, className = 't3-labels') {
         if (el.className !== cls) el.className = cls;
         el._p = item.p;
         el._dy = item.dy || 0;
+        el._dx = item.dx || 0;
         next.set(item.key, el);
       });
       items.forEach((el) => el.remove());
@@ -216,7 +227,7 @@ export function labelLayer(container, className = 't3-labels') {
       items.forEach((el) => {
         const [x, y, ok] = project(el._p);
         // The stylesheet's --lx/--ly anchor the label (above, left, right of its point); _dy clears the mark's radius.
-        el.style.transform = `translate(${x.toFixed(1)}px, ${(y + el._dy).toFixed(1)}px) translate(var(--lx, -50%), var(--ly, -50%))`;
+        el.style.transform = `translate(${(x + el._dx).toFixed(1)}px, ${(y + el._dy).toFixed(1)}px) translate(var(--lx, -50%), var(--ly, -50%))`;
         el.style.visibility = ok ? 'visible' : 'hidden';
       });
     },

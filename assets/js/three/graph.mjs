@@ -13,7 +13,7 @@ import {
   BufferGeometry, BufferAttribute, LineSegments, LineBasicMaterial, Matrix4, Vector3, Quaternion, Color,
   AdditiveBlending, NormalBlending,
 } from 'three';
-import { createStage, glowPoints, labelLayer, easeOut, whenVisible, prefersReducedMotion } from './core.mjs';
+import { createStage, setColor, glowPoints, labelLayer, easeOut, whenVisible, prefersReducedMotion } from './core.mjs';
 
 const FOV = 28;
 const SEG = 14; // segments per curved edge
@@ -246,7 +246,7 @@ export function create(container, opts = {}) {
         if (!n.label) return;
         const r = n.size / 2 + 6;
         const pos = n.labelPos || 'above';
-        list.push({ key: `n:${n.id}`, text: n.label, p: n.cur, cls: `is-${pos} ${n.labelCls || ''}`, dy: pos === 'above' ? -r : pos === 'below' ? r : 0, node: n });
+        list.push({ key: `n:${n.id}`, text: n.label, p: n.cur, cls: `is-${pos} ${n.labelCls || ''}`, dy: pos === 'above' ? -r : pos === 'below' ? r : 0, dx: pos === 'left' ? -r : pos === 'right' ? r : 0, node: n });
       });
       labels.set(list);
     }
@@ -263,13 +263,13 @@ export function create(container, opts = {}) {
         i += 1;
       };
       guides.forEach((g) => {
-        col.set(g.color);
+        const ga = g.alpha * setColor(col, g.color);
         const n = g.points.length;
         const segs = g.closed ? n : n - 1;
         for (let k = 0; k < segs; k += 1) {
           if (g.dashed && k % 2) continue;
-          push(g.points[k], col, g.alpha);
-          push(g.points[(k + 1) % n], col, g.alpha);
+          push(g.points[k], col, ga);
+          push(g.points[(k + 1) % n], col, ga);
         }
       });
       const p0 = [0, 0, 0];
@@ -279,12 +279,12 @@ export function create(container, opts = {}) {
         const b = byId.get(e.b);
         if (!a || !b) return;
         const c = control(a.cur, b.cur, e.inward, e.lift);
-        col.set(e.color);
+        const ea = e.alpha * setColor(col, e.color);
         for (let k = 0; k < SEG; k += 1) {
           bezier(a.cur, c, b.cur, k / SEG, p0);
           bezier(a.cur, c, b.cur, (k + 1) / SEG, p1);
-          push(p0, col, e.alpha);
-          push(p1, col, e.alpha);
+          push(p0, col, ea);
+          push(p1, col, ea);
         }
       });
       lineGeo.setDrawRange(0, i);

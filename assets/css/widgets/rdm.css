@@ -77,6 +77,7 @@ body:not(.dark) .rdm :is(.rdm-btn, .rdm-input, .im-legend-btn, .im-clear, .im-it
 .t3-label.is-left { --lx:-100%; }
 .t3-label.is-right { --lx:0%; }
 .t3-label.is-pill { padding:3px 7px; border-radius:4px; font-size:0.78rem; background:var(--rdm-input); border:1px solid var(--rdm-line); box-shadow:0 4px 14px rgba(0,0,0,0.22); }
+.t3-label.is-strong { font-weight:700; }
 .t3-axis { color:var(--rdm-body); font-size:0.78rem; }
 .t3-axis-num { color:var(--rdm-muted); font:0.7rem 'Fira Code', monospace; }
 .t3-tip { position:absolute; top:0; left:0; z-index:3; max-width:300px; padding:8px 10px; border-radius:8px; font:0.75rem/1.4 Lato, sans-serif;
@@ -150,6 +151,7 @@ body:not(.dark) .rdm {
 .rg-chart-title { margin:0; font-size:0.9rem; font-weight:700; color:var(--rdm-text); }
 .rg-chart-note { margin:0; font-size:0.78rem; color:var(--rdm-muted); }
 .rg-chart { width:100%; height:220px; }
+.rg-chart.is-3d { height:280px; touch-action:pan-y; }
 
 /* Research Footprint: controls above, legend below, nothing floating over the map. */
 .rf-controls { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 20px; margin-bottom:12px; }

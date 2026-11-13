@@ -3,5 +3,6 @@
 import '../footprint-globe.mjs'; // sets window.FootprintGlobe
 import { supported } from './core.mjs';
 import * as graph from './graph.mjs';
+import * as fan from './fan.mjs';
 
-window.Site3D = { supported, graph, globe: window.FootprintGlobe };
+window.Site3D = { supported, graph, fan, globe: window.FootprintGlobe };
