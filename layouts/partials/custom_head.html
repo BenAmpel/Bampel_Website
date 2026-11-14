@@ -12,6 +12,9 @@
 {{/* BreadcrumbList JSON-LD on every page except home, /ccair/ and /lab/. */}}
 {{ partial "breadcrumb_jsonld.html" . }}
 
+{{/* ItemList of ScholarlyArticle on /publications/ only. */}}
+{{ partial "publications_itemlist_jsonld.html" . }}
+
 {{/*
   Site-wide custom layer (animated background, hero effects, scroll
   progress, dashboard/timeline/skill styling, Scholar widget, Altmetric loader,
