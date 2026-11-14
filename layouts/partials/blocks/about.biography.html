@@ -198,11 +198,16 @@
               {{ with .logo }}
               {{ $logo := resources.Get (printf "media/%s.png" .) }}
               {{ if $logo }}
-              {{ $logo_img := $logo.Fit "120x120" }}
+              {{/* Shown at about 32 px: 68 px is twice that, enough for a 2x screen. WebP first, PNG fallback. */}}
+              {{ $logo_img := $logo.Fit "68x68" }}
+              {{ $logo_webp := $logo_img.Process "webp q60" }}
               {{/* Alt text names the institution from the education entry (the logo file name is only a key). */}}
               {{ $logoAlt := $institution | default . }}
               <div class="edu-logo">
-                <img src="{{ $logo_img.RelPermalink }}" width="{{ $logo_img.Width }}" height="{{ $logo_img.Height }}" alt="{{ $logoAlt }} logo" loading="lazy" decoding="async">
+                <picture>
+                  <source srcset="{{ $logo_webp.RelPermalink }}" type="image/webp">
+                  <img src="{{ $logo_img.RelPermalink }}" width="{{ $logo_img.Width }}" height="{{ $logo_img.Height }}" alt="{{ $logoAlt }} logo" loading="lazy" decoding="async">
+                </picture>
               </div>
               {{ end }}
               {{ end }}
