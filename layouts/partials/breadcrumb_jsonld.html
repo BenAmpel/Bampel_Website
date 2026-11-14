@@ -1,0 +1,34 @@
+{{/*
+  BreadcrumbList JSON-LD (schema.org) for every Hugo page except the home page.
+  Home > section(s) > page. The last item is the text of the visible h1: .Title (page_header.html), or the first block title on landing pages.
+  The three publication sections share one parent: the Publications landing page (/publications/), not the bare section list.
+  Skipped: home, the 404 page, and anything under /ccair/ or /lab/ (those are static apps, but the guard keeps them out if one
+  ever becomes a Hugo page). Emitted like the other JSON-LD blocks here (jsonify + safeJS); it is data, so the CSP is unaffected.
+  tests/breadcrumb-jsonld.test.mjs checks the built site.
+*/}}
+{{ $skip := or .IsHome (eq .Kind "404") (hasPrefix .RelPermalink "/ccair/") (hasPrefix .RelPermalink "/lab/") }}
+{{ if and (not $skip) .Title }}
+  {{/* Landing pages (type: landing) print the first block's content.title as the h1 (landing_page.html, parse_block_v2.html),
+       so the last crumb uses it when present; every other page prints .Title. */}}
+  {{ $h1 := .Title }}
+  {{ with .Params.sections }}{{ with index . 0 }}{{ with .content }}{{ with .title }}{{ $h1 = . | markdownify | plainify | htmlUnescape }}{{ end }}{{ end }}{{ end }}{{ end }}
+  {{ $pubSections := slice "journal_publication" "conference_publication" "workshop_publication" }}
+  {{ $home := site.Home }}
+  {{ $trail := slice (dict "name" "Home" "url" $home.Permalink) }}
+  {{ $inPub := in $pubSections .Section }}
+  {{ if $inPub }}
+    {{ with site.GetPage "/publications" }}{{ $trail = $trail | append (dict "name" .Title "url" .Permalink) }}{{ end }}
+  {{ end }}
+  {{ range .Ancestors.Reverse }}
+    {{ if and (not .IsHome) (not (and $inPub (in $pubSections .Section))) .Title }}
+      {{ $trail = $trail | append (dict "name" .Title "url" .Permalink) }}
+    {{ end }}
+  {{ end }}
+  {{ $trail = $trail | append (dict "name" $h1 "url" .Permalink) }}
+  {{ $items := slice }}
+  {{ range $i, $c := $trail }}
+    {{ $items = $items | append (dict "@type" "ListItem" "position" (add $i 1) "name" $c.name "item" $c.url) }}
+  {{ end }}
+  {{ $ld := dict "@context" "https://schema.org" "@type" "BreadcrumbList" "itemListElement" $items }}
+  <script type="application/ld+json">{{ $ld | jsonify | safeJS }}</script>
+{{ end }}
