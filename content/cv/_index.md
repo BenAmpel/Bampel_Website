@@ -1,6 +1,6 @@
 ---
 title: CV
-summary: Curriculum vitae — invited talks, honors and awards, professional service, media, and contact.
+summary: Curriculum vitae of Benjamin M. Ampel. Download the PDF, or browse invited talks, honors and awards, professional service, media and contact details.
 type: landing
 
 sections:
