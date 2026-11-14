@@ -1,0 +1,29 @@
+{{/*
+  ItemList JSON-LD (schema.org) of ScholarlyArticle items for the /publications/ list page only.
+  Built from static/data/publications.json, the same file, filter and order that layouts/shortcodes/publications_filter.html
+  renders visibly (year descending, then title), so the item count equals the number of visible entries.
+  Fields come straight from the record (runs of whitespace collapsed to one space, as a browser shows them) and are skipped when the record lacks them: name (title), datePublished (full date,
+  else year), isPartOf (the venue; a Periodical for journals), author, url (made absolute). Nothing is invented; the data
+  holds no DOI. Emitted like the other JSON-LD blocks here (jsonify + safeJS). tests/publications-itemlist.test.mjs checks it.
+*/}}
+{{ if eq .RelPermalink "/publications/" }}
+  {{ $pubs := os.ReadFile "static/data/publications.json" | transform.Unmarshal }}
+  {{ if reflect.IsMap $pubs }}{{ $pubs = index $pubs "publications" | default slice }}{{ end }}
+  {{ $years := slice }}{{ range $pubs }}{{ $years = $years | append .year }}{{ end }}
+  {{ $years = sort (uniq $years) "value" "desc" }}
+  {{ $items := slice }}
+  {{ range $y := $years }}{{ range sort (where $pubs "year" $y) "title" }}
+    {{ $art := dict "@type" "ScholarlyArticle" "name" (trim (replaceRE `\s+` " " .title) " ") }}
+    {{ with .date }}{{ $art = merge $art (dict "datePublished" .) }}{{ else }}{{ with .year }}{{ $art = merge $art (dict "datePublished" (string .)) }}{{ end }}{{ end }}
+    {{ $kind := cond (eq .type "journal") "Periodical" "CreativeWork" }}
+    {{ with .venue }}{{ $art = merge $art (dict "isPartOf" (dict "@type" $kind "name" (trim (replaceRE `\s+` " " .) " "))) }}{{ end }}
+    {{ with .authors }}
+      {{ $people := slice }}{{ range . }}{{ $people = $people | append (dict "@type" "Person" "name" (trim (replaceRE `\s+` " " .) " ")) }}{{ end }}
+      {{ $art = merge $art (dict "author" $people) }}
+    {{ end }}
+    {{ with .url }}{{ $art = merge $art (dict "url" (cond (findRE `^https?://` .) . (absURL .))) }}{{ end }}
+    {{ $items = $items | append (dict "@type" "ListItem" "position" (add (len $items) 1) "item" $art) }}
+  {{ end }}{{ end }}
+  {{ $ld := dict "@context" "https://schema.org" "@type" "ItemList" "numberOfItems" (len $items) "itemListElement" $items }}
+  <script type="application/ld+json">{{ $ld | jsonify | safeJS }}</script>
+{{ end }}
