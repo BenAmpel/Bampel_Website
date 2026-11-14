@@ -1,6 +1,6 @@
 ---
 title: Publications
-summary: Peer-reviewed journal, conference, and workshop publications by Dr. Benjamin M. Ampel.
+summary: Journal, conference and workshop publications by Benjamin M. Ampel. Filter the list by type, year, venue or co-author, with Altmetric attention data.
 type: landing
 
 sections:

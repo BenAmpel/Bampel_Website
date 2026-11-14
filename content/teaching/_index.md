@@ -1,6 +1,6 @@
 ---
 title: Teaching
-summary: Courses and teaching outcomes — Georgia State University and University of Arizona.
+summary: Courses taught by Benjamin M. Ampel at Georgia State University and the University of Arizona, with terms and student evaluation scores for each offering.
 type: landing
 
 sections:
