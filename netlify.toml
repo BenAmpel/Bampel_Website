@@ -11,7 +11,7 @@
   # the second removes unused rules from css/wowchemy.css with PostCSS and PurgeCSS (postcss.config.js) and writes the site.
   # scripts/fingerprint-ccair.mjs then gives the CCAIR app's CSS and scripts content-hashed names in public/ (see the
   # /ccair/ cache rules below); the CI workflow runs the same step.
-  command = "curl -sSfL -o /tmp/dart-sass.tar.gz https://github.com/sass/dart-sass/releases/download/${DART_SASS_VERSION}/dart-sass-${DART_SASS_VERSION}-linux-x64.tar.gz && printf '%s  %s\\n' ${DART_SASS_SHA256} /tmp/dart-sass.tar.gz | sha256sum -c - && tar -xzf /tmp/dart-sass.tar.gz -C /tmp && export PATH=/tmp/dart-sass:$PATH && npm ci && node scripts/lab/build-info.mjs && npm run build:ccair && hugo --gc --minify --destination \"$(mktemp -d)\" && WC_PURGE_CSS=true hugo --gc --minify --ignoreCache && node scripts/fingerprint-ccair.mjs public"
+  command = "curl -sSfL -o /tmp/dart-sass.tar.gz https://github.com/sass/dart-sass/releases/download/${DART_SASS_VERSION}/dart-sass-${DART_SASS_VERSION}-linux-x64.tar.gz && printf '%s  %s\\n' ${DART_SASS_SHA256} /tmp/dart-sass.tar.gz | sha256sum -c - && tar -xzf /tmp/dart-sass.tar.gz -C /tmp && export PATH=/tmp/dart-sass:$PATH && npm ci && node scripts/lab/build-info.mjs && npm run build:ccair && hugo --gc --minify --destination \"$(mktemp -d)\" && WC_PURGE_CSS=true hugo --gc --minify --ignoreCache && node scripts/fingerprint-ccair.mjs public && node scripts/minify-ccair-assets.mjs public"
   publish = "public"
 
 # Site-wide security headers (added 2026-10-16). HSTS, nosniff and Referrer-Policy come from the _headers file that the
