@@ -440,7 +440,8 @@ function pageHtml(p, idx, main, order, modified, image, robots) {
       ...(p.slug === 'data' ? [datasetLd()] : [])
     ]
   };
-  const scripts = [`/ccair/assets/pathways/pathways.js?v=${ASSET_V}-anon3-css1`, ...(p.slug === 'data' ? [`/ccair/assets/students/students.js?v=${ASSET_V}-2`] : [])];
+  // Only the shared motion layer: the role filters and the quiz in pathways.js run on the Pathway Finder alone.
+  const scripts = [`/ccair/assets/pathways/pathways-motion.js?v=${ASSET_V}-m1`, ...(p.slug === 'data' ? [`/ccair/assets/students/students.js?v=${ASSET_V}-2`] : [])];
   return `${baseHead({ title: p.metaTitle, ogTitle: p.title, desc: p.desc, url, ogType: 'article', image, robots, extra: feedLink,
     css: [`/ccair/assets/pathways/pathways.css?v=${ASSET_V}-gsu1-a11y2`, `/ccair/assets/students/students.css?v=${ASSET_V}-gsu1-refs`] })}
 <meta property="article:modified_time" content="${modified}">
