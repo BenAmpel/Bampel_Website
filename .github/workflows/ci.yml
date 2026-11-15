@@ -92,6 +92,9 @@ jobs:
       - name: Publications ItemList JSON-LD (matches the visible list)
         run: node --test tests/publications-itemlist.test.mjs
 
+      - name: Student dataset catalog ItemList JSON-LD (matches the cards)
+        run: node --test tests/students-data-itemlist.test.mjs
+
       - name: Internal links
         run: node scripts/check-links.mjs public
 

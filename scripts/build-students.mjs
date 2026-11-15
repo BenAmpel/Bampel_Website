@@ -242,6 +242,17 @@ function datasetLd() {
   };
 }
 
+// Plain ItemList of the dataset cards, in card order. ListItems carry position, name and url only: the datasets are third-party,
+// so no Dataset node is made for each one. url is the same dataset page the card links to (build check above requires it).
+function datasetListLd() {
+  const list = sortedDatasets();
+  return {
+    '@type': 'ItemList', '@id': `${BASE}data/#datasets`, name: 'Cybersecurity datasets in the CCAIR catalog', numberOfItems: list.length,
+    itemListOrder: 'https://schema.org/ItemListUnordered', mainEntityOfPage: { '@id': `${BASE}data/` },
+    itemListElement: list.map((d, i) => ({ '@type': 'ListItem', position: i + 1, name: d.name, url: d.link }))
+  };
+}
+
 function csvCell(v) {
   const s = String(v ?? '');
   return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
@@ -437,7 +448,7 @@ function pageHtml(p, idx, main, order, modified, image, robots) {
         audience: { '@type': 'EducationalAudience', educationalRole: 'student' }, about: { '@type': 'Thing', name: 'Cybersecurity careers and education' },
         image: image.url, citation: order.map((id) => S.refs[id].url) },
       { '@type': 'BreadcrumbList', '@id': `${url}#breadcrumb`, itemListElement: crumbLd },
-      ...(p.slug === 'data' ? [datasetLd()] : [])
+      ...(p.slug === 'data' ? [datasetLd(), datasetListLd()] : [])
     ]
   };
   // Only the shared motion layer: the role filters and the quiz in pathways.js run on the Pathway Finder alone.
