@@ -63,6 +63,7 @@ jobs:
             echo "::error::Hugo printed warnings or errors (the build is kept warning-free)"; exit 1
           fi
           node scripts/fingerprint-ccair.mjs public
+          node scripts/minify-ccair-assets.mjs public
 
       - name: Lab tests
         run: npm run test:lab
