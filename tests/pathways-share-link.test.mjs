@@ -11,7 +11,7 @@ import { JSDOM } from 'jsdom';
 // The page's own <script> tags never run: runScripts 'outside-only' runs only the window.eval below, and jsdom loads no
 // external resources by default.
 const HUB = readFileSync(new URL('../static/ccair/pathways/index.html', import.meta.url), 'utf8');
-const SCRIPT = readFileSync(new URL('../static/ccair/assets/pathways/pathways.js', import.meta.url), 'utf8');
+const SCRIPT = ['pathways-motion.js', 'pathways.js'].map((f) => readFileSync(new URL(`../static/ccair/assets/pathways/${f}`, import.meta.url), 'utf8')).join('\n');
 const BASE = 'https://bampel.test/ccair/pathways/';
 const tick = (ms = 0) => new Promise((r) => setTimeout(r, ms));
 

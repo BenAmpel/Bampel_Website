@@ -9,7 +9,7 @@ import { JSDOM } from 'jsdom';
 
 const root = new URL('../static/ccair/', import.meta.url);
 const read = (rel) => readFileSync(new URL(rel, root), 'utf8');
-const SCRIPT = read('assets/pathways/pathways.js');
+const SCRIPT = read('assets/pathways/pathways-motion.js') + '\n' + read('assets/pathways/pathways.js');
 const CSS = read('assets/pathways/pathways.css');
 const HUB = read('pathways/index.html');
 const pages = [['pathways/index.html', HUB]];
