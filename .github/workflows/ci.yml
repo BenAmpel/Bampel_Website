@@ -95,6 +95,9 @@ jobs:
       - name: Student dataset catalog ItemList JSON-LD (matches the cards)
         run: node --test tests/students-data-itemlist.test.mjs
 
+      - name: Lab public pages share cards (Open Graph and Twitter tags, og:url equals canonical)
+        run: node --test tests/lab-share-cards.test.mjs
+
       - name: Internal links
         run: node scripts/check-links.mjs public
 
