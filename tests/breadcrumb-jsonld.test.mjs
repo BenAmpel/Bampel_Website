@@ -11,6 +11,7 @@ import { JSDOM } from 'jsdom';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SITE = path.resolve(process.env.BREADCRUMB_SITE || path.join(ROOT, 'public'));
+const LAB_OWN = new Set(['lab/guide/index.html', 'lab/analysis/index.html', 'lab/support/index.html']);
 const SKIP = /^(ccair|lab)(\/|$)/;
 const norm = (s) => s.replace(/\s+/g, ' ').trim();
 
@@ -71,7 +72,7 @@ test('every Hugo page has one valid BreadcrumbList whose last name is the h1', (
 test('/ccair/ and /lab/ get none from the site partial', () => {
   for (const file of pages(SITE)) {
     if (!/^(ccair|lab)\//.test(file)) continue;
-    // static CCAIR pages may carry their own; the Hugo-built lab pages must not
-    if (file.startsWith('lab/')) assert.equal(inspect(file).crumbs.length, 0, file);
+    // static CCAIR pages may carry their own; the four public lab pages write their own (tests/lab-jsonld.test.mjs); no other lab page may
+    if (file.startsWith('lab/') && !LAB_OWN.has(file)) assert.equal(inspect(file).crumbs.length, 0, file);
   }
 });
