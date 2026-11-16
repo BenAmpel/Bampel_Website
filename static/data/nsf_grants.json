@@ -1,6 +1,24 @@
 {
-  "refresh_date": "2026-11-09",
+  "refresh_date": "2026-11-16",
   "grants": [
+    {
+      "title": "REU Site: Hands-On Research in Federated Learning Security through Red Team vs. Blue Team Exercises",
+      "awardId": "2548041",
+      "piName": "Junggab Son",
+      "institution": "University of Nevada Las Vegas",
+      "estimatedTotalAmt": "460922",
+      "startDate": "10/01/2026",
+      "expDate": "09/30/2029",
+      "abstractText": "This Research Experiences for Undergraduates Site at the University of Nevada, Las Vegas supports 10 students each year in a 10-week summer research program on the security of federated learning, a way for many devices or organizations to train a shared artificial intelligence model without exchanging their raw data. This approach can help protect privacy, but it also creates new security risks because attackers may try to corrupt the training process, steal information from the model, or reduce system reliability. The project\u2019s novelties are the integration of hands-on attack-and-defense research across the full federated learning process and the use of Red Team versus Blue Team exercises to study these problems in realistic settings. The project's broader significance and importance are that it advances safer privacy-preserving artificial intelligence, expands access to advanced undergraduate research opportunities, and helps prepare the future artificial intelligence and cybersecurity workforce. The project contributes to a stronger national capacity for building trustworthy data-driven systems.\r\n\r\nThe research project focuses on threats and defenses in the data collection, training, and inference stages of federated learning. Students and mentors investigate representative attacks including botnet-style disruption, poisoning, backdoor insertion, privacy leakage, membership inference, and data reconstruction, and they evaluate defenses such as robust aggregation, anomaly detection, and differential privacy. The work uses a dedicated federated learning cybersecurity range, realistic datasets from computer vision, language, and network traffic applications, and distributed computing resources for controlled experimentation. Through iterative Red Team and Blue Team studies, the project produces software, tutorials, datasets, and empirical results that improve understanding of secure and privacy-preserving distributed learning. The anticipated outcome is stronger technical foundations for trustworthy artificial intelligence and a broader pipeline of students prepared for research and professional practice in cybersecurity and artificial intelligence.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2548041",
+      "keywords": [
+        "Cybersecurity",
+        "Malware"
+      ]
+    },
     {
       "title": "Research Initiation Award: Leveraging Machine Learning for Secure and Privacy-Preserving Vehicular Cyber-Physical Systems (VCPS)",
       "awardId": "2500079",
@@ -16,6 +34,43 @@
       "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2500079",
       "keywords": [
         "Cybersecurity"
+      ]
+    },
+    {
+      "title": "Collaborative Research: CER: Educating the Next Generation for Copyright and Privacy Risks in LLMs",
+      "awardId": "2618891",
+      "piName": "Dongwon Lee",
+      "institution": "Pennsylvania State Univ University Park",
+      "estimatedTotalAmt": "369905",
+      "startDate": "10/01/2026",
+      "expDate": "09/30/2029",
+      "abstractText": "Artificial intelligence (AI) tools that generate text and images, known as large language models (LLMs), are now widely used in classrooms and workplaces. These LLMs can unexpectedly reproduce copyrighted materials from books and other protected works, or reveal private personal information contained in the data used to train them. The same LLM system may refuse a request in one instance yet reveal protected content in another, making it difficult for students, teachers, and other users to determine when these tools can be trusted. Recent lawsuits and major settlements involving the use of copyrighted materials demonstrate the significance of these risks. Despite these concerns, most computing and cybersecurity courses treat AI as a finished product to use rather than a system to be scrutinized and tested. As a result, students rarely learn how to examine AI behavior, identify potential vulnerabilities, and assess risks. This project addresses that gap by providing teaching materials, practical tools, and a website that enable learners to investigate how AI systems handle copyrighted and private information, collect evidence, and communicate their findings. The project serves the national interest by helping prepare a skilled workforce for fast-growing jobs in AI safety, oversight, and security. Because the website and tools run in a standard web browser and require neither special equipment nor programming experience, they can be adopted by K-12 schools and under-resourced institutions, expanding access to AI and cybersecurity education. \r\n\r\nThis project researches an education-centered pipeline that teaches high school and undergraduate learners to detect, measure, and communicate copyright and privacy risks in LLMs, and develops a use-inspired theory for AI security education tools. The work is organized into three interconnected activities. First, the project develops a flexible curriculum centered on AI safety and red teaming -- the practice of deliberately testing a system to identify and expose its weaknesses. Offered as a full course, a shorter module, or a high school version, the curriculum trains learners to probe AI models, assess similarity to protected sources, estimate uncertainty, interpret findings within legal and ethical frameworks, and communicate evidence clearly and effectively. Second, the project builds Copyright Detective, an open-source, web-based tool offering separate tracks for computing students and the public that supports controlled prompting of AI models, visual comparison against reference text, multiple similarity measures, and uncertainty estimates across runs. Building on a working prototype that detects word-for-word reproduction, the project adds components for memorized knowledge, persuasion-style jailbreaks, and drift across model versions. Third, mixed-methods studies examine how learners using Copyright Detective reason about uncertain, context-dependent system behavior; the findings from these studies will inform iterative refinement of both the curriculum and Copyright Detective. These activities produce new teaching knowledge, portable low-barrier resources, and an openly released platform that advances workforce readiness for AI security, privacy, and trustworthiness.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2618891",
+      "keywords": [
+        "LLM / GenAI",
+        "Cybersecurity"
+      ]
+    },
+    {
+      "title": "REU Site: Applied Research in Deep Learning",
+      "awardId": "2548161",
+      "piName": "Mohammed Belkhouche",
+      "institution": "Missouri State University",
+      "estimatedTotalAmt": "489183",
+      "startDate": "10/01/2026",
+      "expDate": "09/30/2029",
+      "abstractText": "This project will provide undergraduate students with hands-on research experiences in the rapidly growing field of deep learning. Over three years, the program will engage 30 students from computer science, engineering, information technology, and related disciplines in meaningful research projects guided by faculty mentors. Participants will explore how deep learning techniques can be used to address real-world challenges in cybersecurity, robotics, hate speech in social media, and autonomous systems. Through these experiences, students will gain exposure to how deep learning technologies can be used to benefit society across a wide range of applications. In addition to research activities, the program will provide structured training to help students develop important professional skills, including scientific writing, oral communication, teamwork, and responsible research practices. By working in a collaborative and supportive environment, students will strengthen both their technical abilities and their confidence as emerging researchers. Overall, the program aims to inspire and prepare the next generation of scientists and engineers by giving them early, meaningful exposure to research in deep learning and its many beneficial uses.\r\n\r\nThis project establishes a structured, research-intensive undergraduate training program aimed at increasing student engagement in state-of-the-art deep learning methodologies and applications. Research activities will focus on the design, analysis, and application of modern deep learning techniques to address contemporary challenges in areas such as multimedia security, robotic motion planning, autonomous multi-agent coordination, and malicious network activity detection. Faculty-mentored projects will emphasize both methodological advances and applied system development, with students contributing to end-to-end research pipelines including data preprocessing, model design, training, evaluation, and deployment-oriented analysis. Key objectives include: (i) developing students\u2019 problem-solving and critical thinking skills in the context of deep learning research; (ii) building proficiency in contemporary deep learning frameworks and methodologies; (iii) training students in scholarly communication and research dissemination practices; and (iv) enhancing collaboration and teamwork. Collectively, this REU Site aims to cultivate a pipeline of well-prepared undergraduate researchers equipped for graduate study and careers in machine learning and artificial intelligence research.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2548161",
+      "keywords": [
+        "Cybersecurity",
+        "Deep Learning",
+        "Multi-Agent AI"
       ]
     },
     {
@@ -54,23 +109,6 @@
     },
     {
       "title": "CICI: IPAAI: XAI-Driven Data Forensics for Nuclear Edge LLMs: Provenance, Detection, and Recovery",
-      "awardId": "2613797",
-      "piName": "Xiaolong Guo",
-      "institution": "Kansas State University",
-      "estimatedTotalAmt": "899868",
-      "startDate": "11/01/2026",
-      "expDate": "11/30/2026",
-      "abstractText": "Nuclear reactors supply a large share of reliable electricity, and reactor operators increasingly turn to large language models to help interpret procedures, sensor logs, and alarm messages in real time. Running these models on-site, close to the reactor, keeps sensitive data in-house and speeds decision-making, but it also opens new ways for these systems to fail or be attacked. Poisoned or low-quality training data, foundation models that carry hidden backdoors, and manipulated prompts can each push a model toward confident but incorrect recommendations, a serious hazard that could threaten safety or force a costly shutdown. This project builds an explainable artificial intelligence framework that secures the entire workflow of nuclear-domain large language models. \r\n\r\nThe team develops interpretability methods that trace a model's outputs back to specific inputs and internal representations, then uses those signals to detect and remove poisoned or low-quality training data through machine unlearning. To confirm a model's origin, hardware-based fingerprinting techniques are employed. At inference time, layered defenses screen inputs, flag risky prompts, and validate outputs before any recommendation reaches an operator. The methods are validated with real operational data from a research nuclear reactor. By establishing a unified approach to data integrity, model provenance, and output reliability, the project advances the safe deployment of large language models in critical infrastructure, protecting public welfare and national security. Openly shared tools, datasets, and a fingerprint library, along with new university courses and K\u201312 outreach, will help build a security-aware technical workforce.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
-      "primaryProgram": [
-        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
-      ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2613797",
-      "keywords": [
-        "LLM / GenAI"
-      ]
-    },
-    {
-      "title": "CICI: IPAAI: XAI-Driven Data Forensics for Nuclear Edge LLMs: Provenance, Detection, and Recovery",
       "awardId": "2641406",
       "piName": "Xiaolong Guo",
       "institution": "Lehigh University",
@@ -82,6 +120,23 @@
         "01002627DB NSF RESEARCH & RELATED ACTIVIT"
       ],
       "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2641406",
+      "keywords": [
+        "LLM / GenAI"
+      ]
+    },
+    {
+      "title": "CICI: IPAAI: XAI-Driven Data Forensics for Nuclear Edge LLMs: Provenance, Detection, and Recovery",
+      "awardId": "2613797",
+      "piName": "Xiaolong Guo",
+      "institution": "Kansas State University",
+      "estimatedTotalAmt": "899868",
+      "startDate": "11/01/2026",
+      "expDate": "11/30/2026",
+      "abstractText": "Nuclear reactors supply a large share of reliable electricity, and reactor operators increasingly turn to large language models to help interpret procedures, sensor logs, and alarm messages in real time. Running these models on-site, close to the reactor, keeps sensitive data in-house and speeds decision-making, but it also opens new ways for these systems to fail or be attacked. Poisoned or low-quality training data, foundation models that carry hidden backdoors, and manipulated prompts can each push a model toward confident but incorrect recommendations, a serious hazard that could threaten safety or force a costly shutdown. This project builds an explainable artificial intelligence framework that secures the entire workflow of nuclear-domain large language models. \r\n\r\nThe team develops interpretability methods that trace a model's outputs back to specific inputs and internal representations, then uses those signals to detect and remove poisoned or low-quality training data through machine unlearning. To confirm a model's origin, hardware-based fingerprinting techniques are employed. At inference time, layered defenses screen inputs, flag risky prompts, and validate outputs before any recommendation reaches an operator. The methods are validated with real operational data from a research nuclear reactor. By establishing a unified approach to data integrity, model provenance, and output reliability, the project advances the safe deployment of large language models in critical infrastructure, protecting public welfare and national security. Openly shared tools, datasets, and a fingerprint library, along with new university courses and K\u201312 outreach, will help build a security-aware technical workforce.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2613797",
       "keywords": [
         "LLM / GenAI"
       ]
