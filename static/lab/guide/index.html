@@ -67,7 +67,7 @@
 <li>Next time, sign in at <a href="/lab/signin/">/lab/signin/</a>. You land on <strong>My studies</strong>, which lists the studies your account can open and your role in each.</li>
 </ol>
 <p>Forgot your password? Email the lab (the sign-in page has a link) and the owner sends a reset link that lasts 24 hours. Lost your authenticator? Use one of the recovery codes you saved, or ask the owner to remove it. Account settings are at <a href="/lab/account/">/lab/account/</a>.</p>
-<h3>Roles</h3>
+<h3 id="roles">Roles</h3>
 <p>Your role is set per study. The owner can change it at any time.</p>
 <div class="table-scroll"><table><thead><tr><th>Role</th><th>What it allows</th></tr></thead><tbody>
 <tr><td>Viewer</td><td>See progress and download data.</td></tr>
@@ -93,17 +93,17 @@
 <p>Participants sign in with an email address on an allowed domain (for example GSU addresses), or with a pilot access code. There is no password for participants and no verification email, so anyone who knows a classmate's address could sign in as that person. Keep that in mind when you write the protocol.</p>
 
 <h2 id="types">Study types</h2>
-<h3>Alert triage</h3>
+<h3 id="alert-triage">Alert triage</h3>
 <p>Participants review security alerts with click-to-reveal evidence and, depending on condition, advice from an AI assistant. It is used by the built-in verification study: four weekly sessions, with and without AI advice.</p>
-<h3>Vignettes and surveys</h3>
+<h3 id="vignettes-and-surveys">Vignettes and surveys</h3>
 <p>Scenarios shown as plain text or emails, each followed by questions you choose: rating scales, multiple choice, dropdowns, text, a confidence line, numbers, and select-all. Conditions are defined in the content, and each item can have different wording per condition, so a manipulation needs no code. A study with no scenarios is a survey, including a longitudinal one. Questions can be shown or hidden depending on earlier answers, the participant's condition, or embedded data such as a Prolific ID read from the link.</p>
-<h3>Economic games</h3>
+<h3 id="economic-games">Economic games</h3>
 <p>Prisoner's dilemma, public goods, trust, ultimatum, dictator, or a game you define with payoff formulas. Games can be played live (participants are matched in real time) or asynchronously (each participant decides alone and is matched with stored decisions). See <a href="#games">Running economic games</a>.</p>
 
-<h3>Reaction times (Stroop or flanker)</h3>
+<h3 id="reaction-times-stroop-or-flanker">Reaction times (Stroop or flanker)</h3>
 <p>A keyboard reaction-time task for a classic interference effect: the Stroop task (press the key for the ink colour of a colour word) or the flanker task (the direction of the middle arrow). Start from the <em>Stroop or flanker task</em> template; its <strong>Task</strong> tab sets the trials, practice, timing, and keys. Trials are balanced between congruent and incongruent, response times run from the first display frame of each stimulus, and the template asks for a computer, full screen, and a quick measurement of each participant's screen. The data have one row per trial, ready for the classic analysis (slower, less accurate answers on incongruent trials).</p>
 
-<h3>Media, voice, and conversations</h3>
+<h3 id="media-voice-and-conversations">Media, voice, and conversations</h3>
 <p>Items of five kinds, mixed freely: text (for example training material), an image, an audio clip, a video clip, or a <strong>phone call</strong> from an AI voice caller. After each item you can ask for a decision (for example accept, verify, or refuse) with mouse tracking, any of your questions, and a spoken answer. Items are grouped into blocks that run in order, each shown in a fixed or shuffled order. See <a href="#media">Audio, video, and phone calls</a>.</p>
 
 <h2 id="media">Audio, video, and phone calls</h2>
@@ -132,7 +132,7 @@
 <p>On <strong>Study content</strong>, <strong>Devices &amp; timing</strong>, tick <em>Load every picture, sound, and video before the session starts</em>. Participants see a progress bar, and the session starts only when every file is ready, so a slow connection cannot delay a stimulus. Upload timing-critical files to the study rather than linking to another website. Every trial records <code>onset_ms</code> (the first display frame after the item appeared) and <code>frame_ms</code> (the screen's refresh interval; 16.67 ms is 60 Hz). For response times from onset, use <code>rt_ms</code> minus <code>onset_delay_ms</code>.</p>
 <p>To check the computers you test on, open the <a href="/lab/timing/">timing self-check</a>: it measures the screen's refresh rate, frame jitter, dropped frames, timer lag, and the delay from speaker to microphone, and saves the numbers as a file. Studies can also measure each participant's screen before every session (<em>Measure each participant's display</em> on Devices &amp; timing).</p>
 
-<h3>Checking participants' setup</h3>
+<h3 id="checking-participants-setup">Checking participants' setup</h3>
 <p>Also on <strong>Devices &amp; timing</strong>: allow computers only, require Chrome or Edge for studies where people talk, check the microphone with a level meter, run a short headphone check in session 1 (the Huggins-pitch test of Milne et al., 2021, which people on loudspeakers fail), and ask for full screen. You choose whether a failed microphone or headphone check ends the study for that person or is only recorded. Leaving full screen never stops a session, but every exit is recorded. The <em>language</em> setting tells screen readers and the phone-call voices and speech recognizer which language the study is in; you write the text yourself.</p>
 
 <h2 id="import">Importing a survey</h2>
@@ -147,7 +147,7 @@
 
 <h2 id="games">Running economic games</h2>
 <p>Create the study with the type "Economic game", then use the Presets tab to start from a standard game and edit it. The Payoffs tab has a "Check the design" button that tests your formulas before you save.</p>
-<h3>Live games</h3>
+<h3 id="live-games">Live games</h3>
 <p>Participants are matched with each other in real time and decide round by round. Because groups form from whoever is present, plan sessions the way you would for a lab session:</p>
 <ul>
 <li>Choose a start time and tell participants to arrive within a window of a few minutes. Groups form in multiples of the group size, so invite a few more people than a multiple and let the leftover fallback handle the rest (a participation fee, or asynchronous play if stored decisions exist).</li>
@@ -155,11 +155,11 @@
 <li>Have one person on the Game operations tab during the session. It shows groups, rounds, who is waiting or has left, and lets a manager close a stalled group.</li>
 <li>Do not edit the study while anyone is waiting or playing.</li>
 </ul>
-<h3>Asynchronous games</h3>
+<h3 id="asynchronous-games">Asynchronous games</h3>
 <p>Each participant decides alone, at any time, and is matched afterward with a stored decision of another participant. There is nothing to schedule. A later mover can state a response for every possible earlier move (the strategy method). Run "Resolve pending matches" after the data are in, and download payments again if any were pending.</p>
-<h3>Cost note</h3>
+<h3 id="cost-note">Cost note</h3>
 <p>Live games poll the server, and every poll is one request to the lab's Netlify functions. At the default of one poll every 2 seconds, a participant uses about 35 requests per minute, so 100 participants for 20 minutes is about 70,000 requests. Asynchronous play uses about the number of rounds plus 6 requests per participant. Check the plan's request allowance before a large live session, and prefer asynchronous play when live matching is not essential.</p>
-<h3>The self-test</h3>
+<h3 id="the-self-test">The self-test</h3>
 <p>On the Participants tab (owner), the self-test plays a whole simulated session on the real store, including a participant who stops responding, checks groups, moves, payoffs, and exports, and deletes everything it created. Run it after every change to the design and before you recruit. Its time is simulated, so it does not test real waiting. Pilot with real people too.</p>
 <p>Payments are exported as a payments CSV (and a Prolific bulk-bonus file). Preview totals first.</p>
 
