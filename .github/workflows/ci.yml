@@ -101,6 +101,9 @@ jobs:
       - name: Lab public pages JSON-LD (lab organization, breadcrumbs, URLs equal canonical)
         run: node --test tests/lab-jsonld.test.mjs
 
+      - name: Lab researcher guide deep links (unique heading ids, working in-page links, no skipped levels)
+        run: node --test tests/lab-guide-headings.test.mjs
+
       - name: Internal links
         run: node scripts/check-links.mjs public
 
