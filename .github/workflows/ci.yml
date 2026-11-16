@@ -98,6 +98,9 @@ jobs:
       - name: Lab public pages share cards (Open Graph and Twitter tags, og:url equals canonical)
         run: node --test tests/lab-share-cards.test.mjs
 
+      - name: Lab public pages JSON-LD (lab organization, breadcrumbs, URLs equal canonical)
+        run: node --test tests/lab-jsonld.test.mjs
+
       - name: Internal links
         run: node scripts/check-links.mjs public
 
