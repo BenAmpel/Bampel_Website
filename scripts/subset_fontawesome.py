@@ -67,7 +67,10 @@ def main() -> int:
     if css_path is None:
         print("no css/vendor-bundle*.css in the build", file=sys.stderr)
         return 2
-    mapping = class_map(css_path.read_text(encoding="utf-8"))
+    built_map = class_map(css_path.read_text(encoding="utf-8"))
+    # The built bundle has its unused icon rules purged (scripts/postcss-fa), so the full list comes from the stock stylesheet.
+    source = ROOT / "assets" / "css" / "libs" / "fontawesome" / "all.min.css"
+    mapping = class_map(source.read_text(encoding="utf-8")) if source.is_file() else built_map
     names, points = used(args.build, "vendor-bundle")
     unknown = sorted(n for n in names if n not in mapping)
     points |= {mapping[n] for n in names if n in mapping}
@@ -77,12 +80,16 @@ def main() -> int:
         for name in FONTS:
             have |= set(TTFont(OUT / f"{name}.woff2").getBestCmap())
         missing = sorted(points - have)
+        # An icon the site names but the built bundle has no rule for would draw nothing: the purge dropped it.
+        purged = sorted(n for n in names if n in mapping and n not in built_map)
+        for n in purged:
+            print(f"  {n} is used but has no rule in {css_path.name}: add it to the scripts/postcss-fa safelist")
         print(f"{len(names)} icon classes and {len(points)} code points in use; missing from static/webfonts: {len(missing)}")
         for cp in missing:
             print(f"  U+{cp:04X} " + ", ".join(n for n in names if mapping.get(n) == cp))
         if missing:
             print("Run: python scripts/subset_fontawesome.py --build public --theme <wowchemy/v5 module>", file=sys.stderr)
-        return 1 if missing else 0
+        return 1 if missing or purged else 0
 
     if not args.theme:
         ap.error("--theme is required when subsetting")
