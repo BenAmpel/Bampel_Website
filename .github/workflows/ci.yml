@@ -71,6 +71,9 @@ jobs:
       - name: Webfonts cache rule test
         run: node tests/webfonts-cache.test.mjs
 
+      - name: Academicons subset test
+        run: node tests/academicons-subset.test.mjs
+
       - name: Publications filter test
         run: node --test tests/publications-filter.test.mjs
 
