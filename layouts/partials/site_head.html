@@ -53,6 +53,10 @@
     {{- $stylesheets = $stylesheets | append (resources.Get (printf "css/libs/%s.css" . ) ) -}}
   {{- end -}}
   {{ $stylesheets = $stylesheets | resources.Concat "css/vendor-bundle.css" | minify }}
+  {{/* Unused Font Awesome icon rules removed (scripts/postcss-fa/postcss.config.js): same condition as the wowchemy.css purge below. */}}
+  {{- if eq (getenv "WC_PURGE_CSS") "true" -}}
+    {{- $stylesheets = $stylesheets | css.PostCSS (dict "config" "scripts/postcss-fa") -}}
+  {{- end -}}
   {{- if eq (getenv "WC_POST_CSS") "true" -}}
     {{- $stylesheets = $stylesheets | postCSS -}}
   {{- end -}}
