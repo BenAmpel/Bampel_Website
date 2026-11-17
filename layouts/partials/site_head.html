@@ -73,7 +73,11 @@
   {{ else }}
     {{ $scr.Set "use_cdn" 1 }}
     {{ if site.Params.extensions.academicons.enable }}
-      {{ printf "<link rel=\"stylesheet\" href=\"%s\" integrity=\"%s\" crossorigin=\"anonymous\" media=\"print\" data-swap>" (printf "/vendor/academicons/%s/css/academicons.min.css" $css.academicons.version) $css.academicons.sri | safeHTML }}
+      {{/* Academicons subset (2026-11-17): the site shows four icons (cv, google-scholar, orcid, semantic-scholar); the full
+           63 KB font is replaced by a 1 KB woff2 of those glyphs. The path is new, not the old file, because /vendor/academicons/*
+           is cached as immutable. The integrity hash is of that css file: tests/academicons-subset.test.mjs checks it and
+           that no page uses an icon the subset lacks. To add an icon, rebuild the subset and update both. */}}
+      {{ printf "<link rel=\"stylesheet\" href=\"%s\" integrity=\"%s\" crossorigin=\"anonymous\" media=\"print\" data-swap>" "/vendor/academicons/1.9.2-subset/css/academicons.min.css" "sha512-tlzaobRPBhLw9KkKGna8lyBXCTcByDi1HdPkX6B6VO5CBoXSvOeIvsn2KUpQDHM+2ijYKORc/GpoEk/qD2osWw==" | safeHTML }}
     {{ end }}
 
     {{/* Workaround `.HasShortcode "gallery"` not parsing page resources (widget page sections) */}}
