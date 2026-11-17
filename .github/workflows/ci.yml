@@ -110,6 +110,9 @@ jobs:
       - name: Lab researcher guide deep links (unique heading ids, working in-page links, no skipped levels)
         run: node --test tests/lab-guide-headings.test.mjs
 
+      - name: Pathway Finder and student guide pages (one h1, main, skip link, canonical, description 110-160, JSON-LD parses)
+        run: node --test tests/pathway-pages.test.mjs
+
       - name: Internal links
         run: node scripts/check-links.mjs public
 
