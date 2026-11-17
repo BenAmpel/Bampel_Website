@@ -56,7 +56,9 @@ function top(current) {
 }
 
 // The hub carries a photo, so its footer lists the photo credits; role pages have no photos.
-const foot = (photoCredits = false) => baseFoot({ note: `Reviewed ${REVIEWED}`, scripts: [`/ccair/assets/pathways/pathways-motion.js?v=${ASSET_V}-m1`, `/ccair/assets/pathways/pathways.js?v=${ASSET_V}-anon3-css1-m1`], photoCredits });
+// pathways.js (the role filters and the quiz) runs on the hub alone: a role page has no chips, no #pf-data and no #quiz, so
+// it would download and parse it for nothing. Role pages load the shared motion layer only (as the student guides do).
+const foot = (photoCredits = false) => baseFoot({ note: `Reviewed ${REVIEWED}`, scripts: [`/ccair/assets/pathways/pathways-motion.js?v=${ASSET_V}-m1`, ...(photoCredits ? [`/ccair/assets/pathways/pathways.js?v=${ASSET_V}-anon3-css1-m1`] : [])], photoCredits });
 
 function faqHtml(faq) {
   return `<div class="faq">${faq.map((f, i) => `<details class="reveal ${dly(i * 0.05)}"><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join('')}</div>`;
