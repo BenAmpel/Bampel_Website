@@ -193,7 +193,12 @@
   {{ end }}
 
   {{/* Hugo Chroma Syntax Highlighter Initialization */}}
-  {{/* TODO: optimize to only include the Chroma CSS themes when the page has code blocks. */}}
+  {{/* The Chroma themes load only on pages whose rendered content holds a highlighted code block (Hugo marks one with
+     class="chroma"). No page on the site has one today (checked in the built output, 2026-11-17); a page that gains a fenced
+     code block gets both stylesheets by itself. wowchemy-theming.js already copes with the links being absent. */}}
+  {{ $hl_needed := false }}
+  {{ with .Content }}{{ $hl_needed = strings.Contains (string .) "chroma" }}{{ end }}
+  {{ if $hl_needed }}
   {{ $hl_theme_light := site.Params.features.syntax_highlighter.theme_light | default "github-light" }}
   {{ $hl_theme_dark := site.Params.features.syntax_highlighter.theme_dark | default "dracula" }}
   {{ $hl_theme_light_path := printf "css/libs/chroma/%s.css" $hl_theme_light }}
@@ -205,6 +210,7 @@
     {{ $hl_theme_dark_css := resources.Get $hl_theme_dark_path | minify }}
     <link rel="stylesheet" href="{{ $hl_theme_light_css.RelPermalink }}" title="hl-light" media="print" data-swap {{ if ne ($scr.Get "light") true }}disabled{{end}}>
     <link rel="stylesheet" href="{{ $hl_theme_dark_css.RelPermalink }}" title="hl-dark" media="print" data-swap {{ if eq ($scr.Get "light") true }}disabled{{end}}>
+  {{ end }}
   {{ end }}
 
   {{/* Load SEO module */}}
