@@ -214,7 +214,8 @@
   {{ end }}
 
   {{/* Load SEO module */}}
-  {{ partial "wowchemy_seo" . }}
+  {{/* The 404 page carries no canonical, hreflang or og:url (they pointed at /404.html); custom_head adds noindex. */}}
+  {{ if ne .Kind "404" }}{{ partial "wowchemy_seo" . }}{{ end }}
 
   {{/* RSS Feed */}}
   {{ with .OutputFormats.Get "RSS" }}

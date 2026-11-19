@@ -4,6 +4,15 @@
 
   <h1>{{ i18n "page_not_found" }}</h1>
 
+  <p>That address does not lead anywhere. These are the main sections of the site:</p>
+  <ul>
+    <li><a href="{{ "/" | relURL }}">Home</a></li>
+    <li><a href="{{ "/research/" | relURL }}">Research</a></li>
+    <li><a href="{{ "/publications/" | relURL }}">Publications</a></li>
+    <li><a href="{{ "/cv/" | relURL }}">CV</a></li>
+    <li><a href="{{ "/teaching/" | relURL }}">Teaching</a></li>
+  </ul>
+
   {{/* Show search box if built-in search engine is enabled. */}}
   {{ if in (slice "wowchemy" "algolia") (lower site.Params.features.search.provider) }}
   <form class="d-flex align-items-center mb-3">
