@@ -5976,3 +5976,97 @@ section#cv-download a {
   align-items: center;
   min-height: 44px;
 }
+
+// CV page print / save-as-PDF (2026-11-19): black on white, no site chrome or controls, and no entry split across pages.
+// Scoped to the page that has #cv-download, so other pages print as before. Styling only; no content changes.
+@media print {
+  :root:has(section#cv-download) {
+    background: #fff !important;
+    color-scheme: light;
+  }
+
+  // Bootstrap's print sheet sets A3; a CV prints on Letter or the user's own paper size.
+  @page cv {
+    size: auto;
+    margin: 0.5in;
+  }
+
+  body:has(section#cv-download) {
+    page: cv;
+
+    &, &.dark {
+      background: #fff !important;
+      color: #000 !important;
+    }
+
+    &::before,
+    &::after,
+    .skip-link,
+    .page-header,
+    .scroll-progress,
+    .search-modal,
+    .site-footer,
+    .home-section-bg,
+    .talks-controls,
+    .talks-years,
+    .talks-tags,
+    .awards-timeline-hint,
+    .awards-nodes,
+    .media-controls,
+    .service-controls,
+    .service-toggle,
+    .visitor-stats,
+    #cookieconsent,
+    .cc-window,
+    .back-to-top,
+    button {
+      display: none !important;
+    }
+
+    main,
+    main * {
+      background: transparent !important;
+      background-image: none !important;
+      color: #000 !important;
+      box-shadow: none !important;
+      text-shadow: none !important;
+      border-color: #999 !important;
+      animation: none !important;
+      transition: none !important;
+      opacity: 1 !important;
+    }
+
+    main a,
+    main a * {
+      color: #000 !important;
+      text-decoration: underline;
+    }
+
+    // Collapsed panels (Professional Service, Released Software, Media Spotlight) print open.
+    main details:not([open])::details-content {
+      content-visibility: visible;
+      display: block;
+    }
+
+    main h1,
+    main h2,
+    main h3,
+    main h4,
+    main summary {
+      break-after: avoid;
+      page-break-after: avoid;
+    }
+
+    main .talks-card,
+    main .awards-detail-item,
+    main .media-card,
+    main .media-featured,
+    main .service-card,
+    main .service-item,
+    main .spoiler,
+    main .wg-contact li {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+  }
+}
