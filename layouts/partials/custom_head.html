@@ -30,4 +30,4 @@
 {{ partial "hooks/prestige-polish.html" . }}
 
 {{/* Pages that set `noindex: true` in front matter (e.g. /watchlight/privacy/) ask search engines not to index them. */}}
-{{ if .Params.noindex }}<meta name="robots" content="noindex">{{ end }}
+{{ if or .Params.noindex (eq .Kind "404") }}<meta name="robots" content="noindex">{{ end }}
