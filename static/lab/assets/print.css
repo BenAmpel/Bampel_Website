@@ -1,0 +1,39 @@
+/* CCAIR Behavioral Lab researcher guide: print / save as PDF (2026-11-20). Linked with media="print" from guide/index.html only.
+   Black on white, no site chrome or controls, URLs after external links, and blocks kept whole across pages. Screen styles are untouched. */
+@page { size: auto; margin: 0.6in; }
+
+html, body { background: #fff !important; color: #000 !important; color-scheme: light; }
+body { font-size: 11pt; line-height: 1.45; margin: 0; padding: 0; }
+
+.skip, .labbar, .labfoot, .cta, .card > .cta + .muted, .lockup-slot, button { display: none !important; }
+
+.wrap, .wrap.wide, main.page { max-width: none !important; width: auto !important; margin: 0 !important; padding: 0 !important; }
+.card { background: none !important; border: 0 !important; box-shadow: none !important; border-radius: 0 !important; padding: 0 !important; margin: 0 !important; }
+
+*, *::before, *::after { box-shadow: none !important; text-shadow: none !important; }
+.page h1, .page h2, .page h3, .page p, .page li, .page td, .page th, .page code, .page strong, .page em, .page summary, .page a { color: #000 !important; }
+.page a { text-decoration: underline; }
+.page code { background: none !important; border: 0 !important; }
+
+.page h1 { font-size: 20pt; }
+.page h2 { font-size: 15pt; margin-top: 18pt; }
+.page h3 { font-size: 12pt; }
+h1, h2, h3, summary { break-after: avoid; page-break-after: avoid; }
+
+/* Web addresses after external links; in-page and mailto links print as they are. */
+.page a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 9pt; word-break: break-all; overflow-wrap: anywhere; }
+
+.toc, .note, .page details, table, tr, pre, figure, blockquote { break-inside: avoid; page-break-inside: avoid; }
+.toc, .note, .page details { background: none !important; border: 1px solid #777 !important; border-radius: 0 !important; }
+.note { border-left: 3px solid #000 !important; }
+.toc ol { columns: 2; }
+.table-scroll { overflow: visible !important; max-width: none !important; }
+table { width: 100%; border-collapse: collapse; }
+th, td { border: 1px solid #777 !important; background: none !important; color: #000 !important; padding: 3pt 5pt; vertical-align: top; }
+thead { display: table-header-group; }
+p, li { orphans: 3; widows: 3; }
+
+/* Collapsed FAQ answers print open. */
+.page details::details-content { content-visibility: visible; display: block; height: auto; }
+.page details > summary { list-style: none; }
+.page details > summary::-webkit-details-marker { display: none; }
