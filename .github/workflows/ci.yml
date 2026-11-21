@@ -83,6 +83,9 @@ jobs:
       - name: Pathway Finder share link test
         run: node --test tests/pathways-share-link.test.mjs
 
+      - name: Pathway Finder keyboard scope test (quiz keys act only when focus is in the quiz)
+        run: node --test tests/pathways-keyboard-scope.test.mjs
+
       - name: Pathway Finder has no inline style attributes
         run: node --test tests/pathways-no-inline-style.test.mjs
 
