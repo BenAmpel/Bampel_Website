@@ -468,3 +468,58 @@ footer .photo-credits p { margin-top: 6px; }
 .top .wrap { height: 68px; }
 .brand .wm-short { display: none; }
 @media (max-width: 640px) { .brand small, .brand .wm-full { display: none; } .brand .wm-short { display: inline; } .brand { min-height: 24px; padding: 4px 0; } }
+
+/* Print: student guide pages and role pages (main.guide), 2026-11-21. Black on white, no site chrome, quiz and
+   filter controls hidden, web addresses after external links, and cards and sections kept whole across pages.
+   Everything is inside @media print, so the screen view is unchanged. The Pathway Finder hub keeps its own block above. */
+@media print {
+  @page { margin: 0.6in; }
+  html, body { background: #fff !important; color: #000 !important; color-scheme: light; }
+  body { font-size: 11pt; line-height: 1.45; }
+  *, *::before, *::after { box-shadow: none !important; text-shadow: none !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+
+  /* Site chrome, controls, the quiz and filters, and the closing call to action */
+  .skip, .backdrop, header.top, footer, .crumbs, .toc, .guide-nav, .pager, .cta-band, .ask, .download-links,
+  .ds-controls, .filters, .chip, .res-actions, .quiz, #quiz, button, form, .photo-band, .theme-toggle { display: none !important; }
+
+  /* Scroll reveal: everything visible */
+  .js .reveal, .reveal { opacity: 1 !important; transform: none !important; transition: none !important; animation: none !important; }
+
+  /* Layout: full page width, no card chrome */
+  main.guide, main.guide .narrow, main.guide .wide { max-width: none !important; width: auto !important; margin: 0 !important; padding: 0 !important; }
+  main.guide section { padding: 14pt 0 !important; border-top-color: #999 !important; }
+  .split .w { overflow: visible !important; }
+  .split .w > span { transform: none !important; opacity: 1 !important; transition: none !important; }
+  .scan, .guide ol.list::after { display: none !important; }
+  main.guide :is(ul.list, ol.list) li::before { background: none !important; color: #000 !important; box-shadow: none !important; }
+  main.guide ul.list li::before { background: #000 !important; }
+  main.guide :is(h1, h2, h3) { font-weight: 700 !important; }
+
+  /* Black text on white */
+  main.guide :is(h1, h2, h3, h4, p, li, dt, dd, small, span, b, strong, em, code, td, th, caption, summary, label, sup, a),
+  main.guide .grad, main.guide .lede, main.guide .answer b, main.guide .badge, main.guide .eyebrow { color: #000 !important; background: none !important; -webkit-text-fill-color: #000 !important; }
+  main.guide a { text-decoration: underline !important; }
+  main.guide .grad { background-image: none !important; }
+  main.guide .badge, main.guide .eyebrow { border: 1px solid #555 !important; }
+
+  /* Cards, panels and answer boxes: plain outlines */
+  main.guide :is(.card, .keyfacts > div, .numbers > div, .res a, .note, .answer, .ds article, .faq details, .table-wrap, .download) { background: none !important; border-color: #777 !important; border-radius: 0 !important; }
+  main.guide .answer { border-left: 3px solid #000 !important; }
+
+  /* Web addresses after external links; in-page anchors, site paths and mailto links print as they are */
+  main.guide a[href^="http"]::after { content: " (" attr(href) ")"; position: static; inset: auto; z-index: auto; opacity: 1; display: inline; background: none; border: 0; font-size: 9pt; font-weight: 400; overflow-wrap: anywhere; word-break: break-all; }
+  main.guide .res a { display: block; }
+
+  /* Keep headings with what follows, and blocks whole */
+  main.guide :is(h1, h2, h3, h4, summary, .sub-h) { break-after: avoid; page-break-after: avoid; }
+  main.guide :is(.card, .keyfacts > div, .numbers > div, .res a, .note, .answer, .ds article, .faq details, .certs > div, .guide-hero, figure, table, tr, blockquote, .refs li) { break-inside: avoid; page-break-inside: avoid; }
+  main.guide :is(p, li) { orphans: 3; widows: 3; }
+  main.guide .table-wrap { overflow: visible !important; max-width: none !important; }
+  main.guide thead { display: table-header-group; }
+  main.guide :is(td, th) { border-color: #777 !important; }
+
+  /* Collapsed FAQ answers print open */
+  main.guide details::details-content { content-visibility: visible; display: block; height: auto; }
+  main.guide summary { list-style: none; }
+  main.guide summary::-webkit-details-marker, main.guide summary::after { display: none !important; }
+}
