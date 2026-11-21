@@ -48,6 +48,8 @@ const ROLE = Object.fromEntries(P.roles.map((r) => [r.slug, r]));
 const out = path.join(CCAIR, 'students');
 const OG_DIR = path.join(CCAIR, 'assets', 'students', 'og');
 const BASE = `${SITE}/ccair/students/`;
+// Keep a "?v=" on every asset URL below: scripts/minify-ccair-assets.mjs replaces the value with a content hash at build time
+// but only rewrites a query that exists. The value itself is a placeholder; it is only seen by a build without that step.
 const ASSET_V = S.updated.replace(/-/g, '');
 const PUBLISHED = '2026-10-22'; // datePublished for a page without its own "published" date (YYYY-MM-DD) in students.json
 const TODAY = new Date().toISOString().slice(0, 10);
