@@ -4,8 +4,9 @@
 // build output, after the last Hugo pass and scripts/fingerprint-ccair.mjs (netlify.toml and .github/workflows/ci.yml), and
 // rewrites each file in public/ with esbuild's minifier (whitespace, names and syntax only; no bundling, no behaviour change).
 // Cache busting: these files keep their names, so every page's "?v=" query is replaced with the first 10 hex digits of the
-// SHA-256 of the minified bytes. A changed file always gets a new URL, and the hand-kept suffixes in build-pathways.mjs and
-// build-students.mjs no longer matter for the built site.
+// SHA-256 of the minified bytes. A changed file always gets a new URL. The suffix VALUES in build-pathways.mjs and
+// build-students.mjs no longer matter, but a "?v=" must still be there: only an existing query is rewritten, so a bare
+// URL would stay unversioned (and an unmatched build throws below).
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';

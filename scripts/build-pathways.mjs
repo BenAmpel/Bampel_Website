@@ -43,6 +43,8 @@ const REVIEWED = fmtDate(D.updated);
 
 // Reveal delay as a class (d-0 ... d-60 in pathways.css: hundredths of a second), never a style attribute (CSP).
 const dly = (sec) => `d-${Math.min(60, Math.round(sec * 100))}`;
+// Keep a "?v=" on every asset URL below: scripts/minify-ccair-assets.mjs replaces the value with a content hash at build time
+// but only rewrites a query that exists. The value itself is a placeholder; it is only seen by a build without that step.
 const head = (o) => baseHead({ ...o, css: [`/ccair/assets/pathways/pathways.css?v=${ASSET_V}-gsu1-a11y2`] });
 
 function top(current) {
