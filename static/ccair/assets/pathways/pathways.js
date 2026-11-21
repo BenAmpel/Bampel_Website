@@ -259,8 +259,9 @@
     if (!mount.querySelector('.qcard [data-v]') || e.metaKey || e.ctrlKey || e.altKey) return;
     // Shortcuts belong to the quiz: act only while focus is inside it (each question moves focus to its heading), so
     // digits, Backspace and the arrow keys keep their normal job everywhere else on the page (WCAG 2.1.4).
-    if (!mount.contains(document.activeElement)) return;
-    var t = e.target; if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
+    var t = e.target;
+    if (!mount.contains(document.activeElement) || !(t instanceof Node) || !mount.contains(t)) return;
+    if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable || (t.closest && t.closest('[contenteditable]:not([contenteditable="false"])'))) return;
     var n = parseInt(e.key, 10);
     if (n >= 1 && n <= 9) {
       var b = mount.querySelector('.answers [data-v="' + (n - 1) + '"]');
