@@ -8,5 +8,6 @@ import multimodal from './multimodal.mjs';
 import reaction from './reaction.mjs';
 import smishing from './smishing.mjs';
 import quiz from './quiz.mjs';
+import chatbot from './chatbot.mjs';
 
-export const TYPES = { [alertTriage.id]: alertTriage, [vignettes.id]: vignettes, [game.id]: game, [multimodal.id]: multimodal, [reaction.id]: reaction, [smishing.id]: smishing, [quiz.id]: quiz };
+export const TYPES = { [alertTriage.id]: alertTriage, [vignettes.id]: vignettes, [game.id]: game, [multimodal.id]: multimodal, [reaction.id]: reaction, [smishing.id]: smishing, [quiz.id]: quiz, [chatbot.id]: chatbot };

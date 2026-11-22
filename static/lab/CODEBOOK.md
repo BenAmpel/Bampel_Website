@@ -150,6 +150,49 @@ The full mouse path (`[x, y, ms]` points) is in the full JSON export under `reco
 
 **Recordings** (managers and owners): one audio file per call or spoken answer, named `<code>_s<session>_<item>_<call|voice>`. Recorded only with the participant's recording consent; never copied to the backup store.
 
+## Chatbot studies (study type `chatbot`)
+
+Trials CSV columns after `trial_index` (the generic identifier, behavior, and context columns above also apply). One row per session: the conversation and the questions asked after it.
+
+| Column | Meaning |
+|---|---|
+| `item_id` | Always `chat` |
+| `chat_mode` | How the participant could talk to the chatbot: `text`, `voice`, or `either` |
+| `chat_turns` | Turns completed (one turn = one participant message and the chatbot's reply) |
+| `chat_voice_turns`, `chat_edited_turns` | Turns the participant spoke; spoken turns where they changed the transcribed text before sending |
+| `chat_words_user`, `chat_words_bot` | Words from the participant and from the chatbot, all turns |
+| `chat_ms` | Time from the conversation starting to it ending, on the participant's clock |
+| `chat_ended` | `user` = the participant ended it; `max` = the turn limit was reached; `error` = the chatbot stopped answering and the participant went on to the questions |
+| `chat_reached_min` | The conversation reached the minimum number of turns (1/0) |
+| `chat_safety_turns` | Turns answered with the fixed crisis message instead of the chatbot |
+| `chat_model` | The model that wrote the replies |
+| `chat_prompt_hash` | Short hash of the full instruction the chatbot was given (shared, condition, safety, format). Two values within one condition mean an instruction was edited during data collection |
+| `chat_median_llm_ms` | Median time the model took to reply |
+| `chat_llm_errors`, `chat_stt_errors`, `chat_tts_errors` | Replies that failed; recordings that could not be turned into text; replies the voice service could not speak |
+| `chat_bot_audio`, `chat_browser_voice` | Replies spoken with the study's voice; replies read aloud by the participant's own browser instead |
+| `chat_mic_blocked` | The browser refused the microphone, so the participant typed (1/0) |
+| `rt_ms`, `first_answer_ms`, `answer_changes` | Time from the page appearing to submitting the questions; time to the first answer; number of answer changes |
+| `a_{question}` | Answer to each question asked after the conversation |
+
+**Conversations CSV** (`chat.csv`, Conversations tab, managers and owners): one row per turn.
+
+| Column | Meaning |
+|---|---|
+| `code`, `session`, `trial_index`, `turn` | Participant, session, trial (always 0), and turn number from 1 |
+| `condition` | The participant's condition |
+| `test` | 1 for a test participant or self-test run |
+| `at`, `since_ms` | Server time the turn was stored; time since the conversation started, on the participant's clock |
+| `input` | `text` (typed) or `voice` (spoken, then transcribed) |
+| `user_text` | What the participant sent, with emails, street addresses, and long numbers masked |
+| `heard_text`, `edited` | For spoken turns: the transcription before the participant touched it, and whether they changed it (1/0) |
+| `bot_text` | The reply |
+| `source` | `llm` = written by the model; `safety` = the fixed crisis message |
+| `model`, `llm_ms` | The model and its reply time (blank and 0 for a safety turn) |
+| `prompt_hash` | Hash of the full instruction in force for this turn |
+| `user_words`, `bot_words` | Word counts |
+
+No recording of the participant is kept. Failed replies store no turn, so the transcript has no gaps or placeholder lines; failures are counted in `chat_llm_errors`.
+
 ## Smishing warning studies (study type `smishing`)
 
 One row per message (4 practice + 72 main) and per warning-comprehension screen (5, `row_kind = comprehension`). The post-task items (`imc_choice`, `fpr_tolerance_pct`, `dem_age`, `dem_sms`) are in the surveys CSV; IMC passes when `imc_choice` is `none`. Exclusion rule (07 (f)): `attn_fail_count` = failures among ATT1, ATT2 and the IMC; exclude at 2 or more. Funnel and outcome definitions follow the study's measures instrument (07_measures_instrument.md); `engaged` on smishing messages is the primary outcome. Warnings, tiers and certainty are assigned by design (Option A), never by a live detector.

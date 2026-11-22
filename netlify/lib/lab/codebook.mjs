@@ -229,6 +229,21 @@ const TYPE_COLUMNS = {
     ['rt_ms', 'ms', 'Time on the question, from the screen appearing to Next.'],
     ['option_order', 'list', 'Options in the order this student saw them, as editor option numbers (> separated; 3>1>2 = the third option first).']
   ],
+  chatbot: [
+    ['item_id', 'category', 'Always "chat": one conversation per session.'], ['chat_mode', 'category', 'How the participant could talk to the chatbot.', 'text; voice; either'],
+    ['chat_turns', 'integer', 'Turns completed (one turn = one participant message and the chatbot\'s reply).'], ['chat_voice_turns', 'integer', 'Turns where the participant spoke instead of typing.'],
+    ['chat_edited_turns', 'integer', 'Spoken turns where the participant changed the transcribed text before sending it.'],
+    ['chat_words_user', 'integer', 'Words the participant wrote or said, all turns.'], ['chat_words_bot', 'integer', 'Words in the chatbot\'s replies, all turns.'],
+    ['chat_ms', 'ms', 'Time from the conversation starting to it ending, on the participant\'s clock.'],
+    ['chat_ended', 'category', 'How the conversation ended.', 'user = the participant ended it; max = the turn limit was reached; error = the chatbot stopped answering'],
+    ['chat_reached_min', 'binary', 'The conversation reached the minimum number of turns.'], ['chat_safety_turns', 'integer', 'Turns answered with the fixed crisis message instead of the chatbot.'],
+    ['chat_model', 'category', 'The model that wrote the replies.'], ['chat_prompt_hash', 'category', 'Short hash of the full instruction the chatbot was given (shared, condition, safety, format). It changes when anyone edits an instruction.'],
+    ['chat_median_llm_ms', 'ms', 'Median time the model took to reply.'], ['chat_llm_errors', 'integer', 'Replies that failed and were retried or abandoned.'],
+    ['chat_stt_errors', 'integer', 'Recordings that could not be turned into text.'], ['chat_tts_errors', 'integer', 'Replies the voice service could not speak.'],
+    ['chat_bot_audio', 'integer', 'Replies spoken with the study\'s voice.'], ['chat_browser_voice', 'integer', 'Replies read aloud by the participant\'s own browser because the voice service did not answer.'],
+    ['chat_mic_blocked', 'binary', 'The browser refused the microphone, so the participant typed.'],
+    ['rt_ms', 'ms', 'Time from the page appearing to submitting the questions.'], ['first_answer_ms', 'ms', 'Time to the first answer.'], ['answer_changes', 'integer', 'Number of answer changes.']
+  ],
   game: [
     ['stage', 'category', 'Game stage.'], ['step', 'integer', 'Step within the round.'], ['acting', 'category', 'Role acting in this step.'], ['auto', 'binary', 'Decision made automatically (time-out or stored partner).', '0 = no; 1 = yes'],
     ['payoff', 'number', 'Payoff for the round.'], ['round', 'integer', 'Round number.'], ['group', 'integer', 'Group within the round.'], ['d_{decision}', 'number', 'This participant\'s value for each decision.'], ['o_{decision}', 'list', 'Other players\' values for each decision (| separated).']
