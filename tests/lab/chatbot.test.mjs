@@ -19,7 +19,7 @@ const WEBM = Buffer.concat([Buffer.from('1a45dfa3', 'hex'), Buffer.alloc(600, 7)
 function services(mode = {}) {
   const calls = { llm: [], tts: [], stt: [] };
   const fetchImpl = async (url, init) => {
-    if (url.includes('api.anthropic.com')) {
+    if (new URL(url).hostname === 'api.anthropic.com') {
       const body = JSON.parse(init.body); calls.llm.push(body);
       if (mode.llm === 'fail') return new Response('{"type":"error"}', { status: 529 });
       if (mode.llm === 'refuse') return Response.json({ content: [], stop_reason: 'refusal', model: body.model });
