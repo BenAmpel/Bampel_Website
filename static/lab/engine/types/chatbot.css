@@ -1,0 +1,24 @@
+/* Study type "chatbot": the conversation screen. Colors come from the shared variables in ../../assets/study.css, so
+   dark mode follows the rest of the lab. The only motion is the recording dot, and it stops under reduced motion. */
+.cb-scenario { margin: 0 0 12px; }
+.cb-scenario p { margin: 0 0 10px; }
+.cb-note { margin: 0 0 14px; padding: 8px 12px; border-left: 3px solid var(--accent); background: var(--accent-soft); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; font-size: .9375rem; }
+.cb-log { display: flex; flex-direction: column; gap: 12px; min-height: 9em; max-height: 52vh; overflow-y: auto; padding: 14px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--bg-2); }
+.cb-log:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.cb-turn { max-width: 85%; padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid var(--line); background: var(--card); color: var(--text); }
+.cb-user { align-self: flex-end; background: var(--accent-soft); border-color: var(--accent); }
+.cb-bot { align-self: flex-start; }
+.cb-who { display: block; margin-bottom: 2px; font-size: .8125rem; font-weight: 700; color: var(--muted); }
+.cb-text p { margin: 0 0 8px; overflow-wrap: anywhere; }
+.cb-text p:last-child { margin-bottom: 0; }
+.cb-status { min-height: 1.5em; margin: 8px 0 0; }
+.cb-compose { margin-top: 4px; }
+.cb-compose label { display: block; margin-bottom: 6px; font-weight: 700; }
+.cb-compose textarea { width: 100%; min-height: 5em; }
+.cb-hint { margin: 8px 0 0; }
+.cb-actions { margin-top: 12px; }
+.cb-warn { margin: 12px 0 0; padding: 8px 12px; border-radius: var(--radius-sm); color: var(--warn); background: var(--warn-bg); }
+button.cb-live::before { content: ""; display: inline-block; width: .6em; height: .6em; margin-right: .5em; border-radius: 50%; background: var(--error); animation: cb-pulse 1.2s ease-in-out infinite; }
+@keyframes cb-pulse { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { button.cb-live::before { animation: none; } }
+@media (max-width: 560px) { .cb-turn { max-width: 94%; } .cb-log { max-height: 46vh; padding: 10px; } }
