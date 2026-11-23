@@ -12,7 +12,7 @@
 import { randomBytes } from 'node:crypto';
 import { cleanAnswers, loadParticipant, toCsv } from '../engine.mjs';
 import { sealLog, logValue } from '../seal.mjs';
-import { validateQuestions } from '../content.mjs';
+import { validateQuestions, getContent } from '../content.mjs';
 import { publicQuestions, evalDisplay, orderItems } from '../logic.mjs';
 import { getMany, setNew } from '../store.mjs';
 import { redact } from '../voicebot.mjs';
@@ -181,6 +181,20 @@ async function chatSummary(S, tag, chat) {
 }
 
 // ---------- researcher routes ----------
+// The chatbot speaks when the study says so; the instruction for one condition is built here and nowhere else, so a
+// reply in the compare tab comes from exactly the text a participant's chatbot would be given.
+const speaks = ch => ch.mode !== 'text' && !!ch.voice.speak || ch.mode === 'voice';
+const systemOf = (ch, condition) => bot.buildSystem({ basePrompt: ch.basePrompt, conditionPrompt: ch.prompts[condition] || '', safetyRule: ch.safety.rule, spoken: speaks(ch) });
+const RUBRIC_MAX = 12;
+// The compare tab calls paid services from a researcher's browser, so each study has a daily allowance
+// (LAB_BENCH_DAILY, default 600 calls). Only the count is kept: nothing typed into the tab is stored.
+async function benchAllowed(S, now) {
+  const key = `chatbench/${new Date(now).toISOString().slice(0, 10)}`, n = Number((await S.store.get(key))?.n) || 0;
+  if (n >= (Number(envOf(S).LAB_BENCH_DAILY) || 600)) return false;
+  await S.store.set(key, { n: n + 1 });
+  return true;
+}
+const BENCH_FULL = { error: 'bench_limit', status: 429, hint: 'This study has used its allowance of test replies for today. It resets at midnight UTC.' };
 const iso = ms => (Number.isFinite(ms) ? new Date(ms).toISOString() : '');
 const adminRoutes = {
   // The transcript, one row per turn, for every participant.
@@ -195,6 +209,42 @@ const adminRoutes = {
     }
     await audit('chat.export', `${rows.length} turns`);
     return { csv: toCsv(rows, ['code', 'session', 'trial_index', 'turn']), filename: `${S.study.id}-chat.csv` };
+  } },
+
+  // The compare tab: one message, answered as one condition's chatbot would answer it. The browser asks once per
+  // condition. Uses the saved study, the same instruction a participant's chatbot gets, and the same crisis rule.
+  bench: { need: 'editor', post: true, handler: async (S, { body, now }) => {
+    const c = await getContent(S.store, S.type), ch = c.chat, condition = String(body.condition || '');
+    if (!(c.design?.conditions || []).some(x => x.id === condition)) return { error: 'bad_condition', status: 400, hint: 'That condition is not in the saved study. Reload the page.' };
+    const text = String(body.text || '').replace(/\s+/g, ' ').trim().slice(0, MAX_USER);
+    if (!text) return { error: 'empty', status: 400, hint: 'Write a message first.' };
+    const turns = (Array.isArray(body.turns) ? body.turns : []).filter(t => t && str(t.user, MAX_USER) && str(t.bot, bot.MAX_REPLY)).slice(-40).map(t => ({ user: redact(t.user), bot: t.bot }));
+    const system = systemOf(ch, condition), base = { condition, promptHash: bot.promptHash(system) };
+    if (bot.isCrisis(text)) return { ...base, text: ch.safety.crisisLine, source: 'safety', model: null, ms: 0, words: wordCount(ch.safety.crisisLine) };
+    if (!(await benchAllowed(S, now))) return BENCH_FULL;
+    const r = await bot.reply({ system, opening: ch.opening || '', turns, text: redact(text), env: envOf(S), fetchImpl: fetchOf(S) });
+    if (r.error) return { error: 'llm_' + r.error, status: 502, hint: r.error === 'not_configured' ? 'The chatbot is not set up on this site (no Anthropic API key).' : r.error === 'timeout' ? 'The chatbot took too long to answer. Try again.' : 'The chatbot did not answer (' + r.error + '). Try again.' };
+    return { ...base, text: r.text, source: 'llm', model: r.model, ms: r.ms, words: wordCount(r.text) };
+  } },
+
+  // Which of the study's listed behaviours one reply shows. A separate request, so it can never change a reply.
+  'bench-code': { need: 'editor', post: true, handler: async (S, { body, now }) => {
+    const c = await getContent(S.store, S.type), rubric = c.chat.rubric || [];
+    if (!rubric.length) return { error: 'no_rubric', status: 400, hint: 'This study lists no behaviours to check. Add them on the Conditions tab and save.' };
+    const text = String(body.text || '').trim();
+    if (!text) return { error: 'empty', status: 400 };
+    if (!(await benchAllowed(S, now))) return BENCH_FULL;
+    const r = await bot.code({ rubric, text, env: envOf(S), fetchImpl: fetchOf(S) });
+    return r.error ? { error: 'code_' + r.error, status: 502, hint: 'The check did not come back (' + r.error + ').' } : r;
+  } },
+
+  // A reply read aloud in the study's voice.
+  'bench-voice': { need: 'editor', post: true, handler: async (S, { body, now }) => {
+    const c = await getContent(S.store, S.type), text = String(body.text || '').trim();
+    if (!text) return { error: 'empty', status: 400 };
+    if (!(await benchAllowed(S, now))) return BENCH_FULL;
+    const v = await bot.speak(text, { voiceId: c.chat.voice.voiceId, env: envOf(S), fetchImpl: fetchOf(S) });
+    return v.error ? { error: 'voice_' + v.error, status: 502, hint: 'The voice service did not answer.' } : { audio: v.audio.toString('base64'), mime: v.mime, engine: v.engine, ms: v.ms };
   } }
 };
 
@@ -207,7 +257,7 @@ export default {
   surveyRules: [],
   conditionsOf: c => (c.design?.conditions || []).map(x => x.id),
   sessionCount: c => c.design.sessions.length,
-  editorMeta: () => { const s = bot.services(); return { ...s, defaultVoice: bot.DEFAULT_VOICE, formatRule: bot.FORMAT_RULE, spokenRule: bot.SPOKEN_RULE }; },
+  editorMeta: () => { const s = bot.services(); return { ...s, defaultVoice: bot.DEFAULT_VOICE, formatRule: bot.FORMAT_RULE, spokenRule: bot.SPOKEN_RULE, rubricMax: RUBRIC_MAX }; },
 
   defaultContent() {
     const AGREE = ['Strongly disagree', 'Disagree', 'Somewhat disagree', 'Neither agree nor disagree', 'Somewhat agree', 'Agree', 'Strongly agree'];
@@ -223,7 +273,8 @@ export default {
         prompts: { main: '' },
         promptsReviewed: false,
         safety: { rule: DEFAULT_SAFETY, crisisLine: DEFAULT_CRISIS },
-        voice: { speak: false, voiceId: '' }
+        voice: { speak: false, voiceId: '' },
+        rubric: []
       },
       questions: [
         { id: 'understood', text: 'The chatbot understood what I was telling it.', type: 'scale', n: 7, lo: AGREE[0], hi: AGREE[6], labels: AGREE, required: true, showIf: 'always', conditions: [] },
@@ -239,6 +290,7 @@ export default {
     const ch = c.chat || {};
     c.chat = { ...d.chat, ...ch, prompts: ch.prompts && typeof ch.prompts === 'object' ? ch.prompts : { ...d.chat.prompts }, safety: { ...d.chat.safety, ...(ch.safety || {}) }, voice: { ...d.chat.voice, ...(ch.voice || {}) } };
     for (const id of (c.design.conditions || []).map(x => x && x.id)) if (id && typeof c.chat.prompts[id] !== 'string') c.chat.prompts[id] = '';
+    if (!Array.isArray(c.chat.rubric)) c.chat.rubric = [];
     for (const q of c.questions || []) { if (!Array.isArray(q.conditions)) q.conditions = []; if (!q.showIf) q.showIf = 'always'; }
   },
 
@@ -265,12 +317,20 @@ export default {
     if (!str(ch.safety?.rule, 2000)) e.push('Chatbot: the safety rule is required.');
     if (!str(ch.safety?.crisisLine, 1200)) e.push('Chatbot: the crisis message is required.');
     if (ch.voice?.voiceId && !bot.VOICE_RE.test(ch.voice.voiceId)) e.push('Chatbot: the ElevenLabs voice ID should be 10 to 40 letters and numbers.');
+    const rubric = ch.rubric == null ? [] : ch.rubric, seen = [];
+    if (!Array.isArray(rubric) || rubric.length > RUBRIC_MAX) e.push(`Chatbot: list at most ${RUBRIC_MAX} behaviours to check.`);
+    else rubric.forEach((b, i) => {
+      if (!b || !/^[a-z][a-z0-9_]{0,30}$/.test(b.id || '')) e.push(`Behaviour ${i + 1}: the ID must start with a letter and use only lowercase letters, numbers, and underscores.`);
+      else if (seen.includes(b.id)) e.push(`Two behaviours share the ID "${b.id}".`);
+      seen.push(b && b.id);
+      if (!b || !str(b.label, 80)) e.push(`Behaviour ${i + 1}: a short name is required (80 characters at most).`);
+      if (!b || !str(b.definition, 600)) e.push(`Behaviour ${i + 1}: a definition is required (600 characters at most).`);
+    });
     validateQuestions(c.questions || [], 'Question', e, { nSessions: 99, conditions: conds, rules: [], allowSessions: false, embedded: (c.embedded || []).map(x => x && x.name) });
   },
 
   buildPlan(p, session, c) {
-    const ch = c.chat, speak = ch.mode !== 'text' && !!ch.voice.speak || ch.mode === 'voice';
-    const system = bot.buildSystem({ basePrompt: ch.basePrompt, conditionPrompt: ch.prompts[p.condition] || '', safetyRule: ch.safety.rule, spoken: speak });
+    const ch = c.chat, speak = speaks(ch), system = systemOf(ch, p.condition);
     const item = { botName: ch.botName, scenario: ch.scenario, opening: ch.opening || '', mode: ch.mode, minTurns: ch.minTurns, maxTurns: ch.maxTurns, speak };
     return {
       questions: (c.questions || []).filter(q => !q.conditions.length || q.conditions.includes(p.condition)),
