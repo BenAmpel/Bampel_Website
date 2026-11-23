@@ -213,19 +213,19 @@ export async function panelIdFor(S, code, sent) {
 // browsers (publicContent sends only that one is set), and wrong guesses for the whole study are capped per window.
 export const PASSCODE_WINDOW_MS = 15 * 60000;
 export const PASSCODE_FAIL_LIMIT = 30;
-const passNorm = v => String(v == null ? '' : v).trim().toLowerCase().slice(0, 64);
-export function passcodeMatches(sent, want) {
+const codeNorm = v => String(v == null ? '' : v).trim().toLowerCase().slice(0, 64);
+export function accessCodeMatches(sent, want) {
   // Fixed-length buffers (normalized values are at most 64 chars, so 256 bytes fits any UTF-8) for a constant-time compare.
-  const pad = v => { const b = Buffer.alloc(256); b.write(passNorm(v), 'utf8'); return b; };
-  const x = passNorm(sent), y = passNorm(want);
+  const pad = v => { const b = Buffer.alloc(256); b.write(codeNorm(v), 'utf8'); return b; };
+  const x = codeNorm(sent), y = codeNorm(want);
   return timingSafeEqual(pad(x), pad(y)) && x.length === y.length && y.length > 0;
 }
-async function passcodeCheck(store, sent, want, now) {
+async function accessGateCheck(store, sent, want, now) {
   const since = now - PASSCODE_WINDOW_MS, keys = await store.list('passcode-try/');
   const recent = keys.filter(k => Number(k.slice(13).split('-')[0]) >= since);
   await Promise.all(keys.filter(k => !recent.includes(k)).map(k => store.delete(k)));   // old failures
   if (recent.length >= PASSCODE_FAIL_LIMIT) return { error: 'too_many_tries', status: 429 };
-  if (passcodeMatches(sent, want)) return null;
+  if (accessCodeMatches(sent, want)) return null;
   await store.set(`passcode-try/${now}-${randomBytes(4).toString('hex')}`, { at: now });
   return { error: 'passcode', status: 401 };
 }
@@ -234,8 +234,8 @@ export async function login(S, creds = {}, now = Date.now()) {
   const store = S.store;
   const gate = (await getContent(store, S.type)).enrollment.passcode;
   // Preview and self-test links (test participants made by the research team) skip the access code.
-  if (gate && creds.code != null) { const t = await loadParticipant(S, creds.code); if (!(t && t.test)) { const bad = await passcodeCheck(store, creds.passcode, gate, now); if (bad) return bad; } }
-  else if (gate) { const bad = await passcodeCheck(store, creds.passcode, gate, now); if (bad) return bad; }
+  if (gate && creds.code != null) { const t = await loadParticipant(S, creds.code); if (!(t && t.test)) { const bad = await accessGateCheck(store, creds.passcode, gate, now); if (bad) return bad; } }
+  else if (gate) { const bad = await accessGateCheck(store, creds.passcode, gate, now); if (bad) return bad; }
   let p;
   if (gate && creds.email == null && creds.panelId == null && creds.code == null) {
     // The access code alone: a new anonymous participant (the browser keeps the sign-in, so a reload goes on).
