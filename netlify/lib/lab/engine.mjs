@@ -226,6 +226,9 @@ async function accessGateCheck(store, sent, want, now) {
   await Promise.all(keys.filter(k => !recent.includes(k)).map(k => store.delete(k)));   // old failures
   if (recent.length >= PASSCODE_FAIL_LIMIT) return { error: 'too_many_tries', status: 429 };
   if (accessCodeMatches(sent, want)) return null;
+  // Only a real guess counts toward the cap: a link that signs in on its own without the password (a code in the
+  // URL) is refused but must not lock everyone else out.
+  if (!codeNorm(sent)) return { error: 'passcode', status: 401 };
   await store.set(`passcode-try/${now}-${randomBytes(4).toString('hex')}`, { at: now });
   return { error: 'passcode', status: 401 };
 }

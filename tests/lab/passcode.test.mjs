@@ -44,12 +44,21 @@ assert.equal((await exportDesign(S(store), { now })).content.enrollment.passcode
 assert.equal((await exportDesign(S(store), { redact: false, now })).content.enrollment.passcode, 'Demo-7');
 
 // Wrong guesses: capped for the whole study per window, then the right code is refused too until the window passes.
-const before = (await store.list('passcode-try/')).length; assert.equal(before, 3, 'the three refused sign-ins above were counted');
-for (let i = before; i < E.PASSCODE_FAIL_LIMIT; i++) assert.equal((await core.login(store, { passcode: 'guess' + i }, now + i)).error, 'passcode');
+const before = (await store.list('passcode-try/')).length; assert.equal(before, 0, 'sign-ins that sent no password are refused but not counted');
+assert.equal((await core.login(store, { code: pa, passcode: 'nope' }, now)).error, 'passcode');
+assert.equal((await store.list('passcode-try/')).length, 1, 'a wrong password is counted');
+for (let i = 1; i < E.PASSCODE_FAIL_LIMIT; i++) assert.equal((await core.login(store, { passcode: 'guess' + i }, now + i)).error, 'passcode');
 assert.equal((await core.login(store, { passcode: 'demo-7' }, now + 100)).error, 'too_many_tries');
 assert((await core.login(store, { passcode: 'demo-7' }, now + E.PASSCODE_WINDOW_MS + 1000)).token, 'window passed, code works again');
 assert.equal((await store.list('passcode-try/')).length, 0, 'old failures cleaned up');
 console.log('wrong guesses capped per window and cleaned up after');
+
+// The study's cap holds: once it is full, a new password sign-in gets the "study is full" record, not a place.
+const c3 = structuredClone(await content.getContent(store)); c3.enrollment.quota = { total: (await store.list('cond/')).length, perCondition: {} };
+await content.saveContent(store, c3, 't', (await content.getContent(store)).version, now);
+const late = await core.login(store, { passcode: 'demo-7' }, now + E.PASSCODE_WINDOW_MS + 2000);
+assert.equal((await core.loadParticipant(store, await core.verifyToken(store, late.token, now + E.PASSCODE_WINDOW_MS + 2000))).screenedOut.reason, 'quota_full');
+console.log('the study cap stops new password sign-ins');
 
 // Clearing it restores the usual sign-in.
 const c2 = structuredClone(await content.getContent(store)); c2.enrollment.passcode = '';
