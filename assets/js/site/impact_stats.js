@@ -34,6 +34,17 @@
   const triggerFilter = (detail) => {
     if (!detail) return;
     const publications = document.getElementById("publications");
+    if (!publications) {
+      // This page has no publication list to filter (the home page), so open the Publications page with the filter
+      // already chosen; publications_filter.js reads type and year from the address.
+      // Only plain words and whole numbers go into the address, and the path must be a site-relative one.
+      const params = new URLSearchParams();
+      if (typeof detail.type === "string" && /^[a-z-]+$/.test(detail.type)) params.set("type", detail.type);
+      if (Number.isInteger(detail.year)) params.set("year", String(detail.year));
+      const path = /^\/[\w\-\/]*$/.test(base) ? base : "/";
+      window.location.assign(`${path}publications/?${params.toString()}`);
+      return;
+    }
     if (publications) {
       publications.scrollIntoView({
         behavior: prefersReducedMotion ? "auto" : "smooth",
