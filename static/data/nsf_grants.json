@@ -1,24 +1,6 @@
 {
-  "refresh_date": "2026-11-16",
+  "refresh_date": "2026-11-23",
   "grants": [
-    {
-      "title": "REU Site: Hands-On Research in Federated Learning Security through Red Team vs. Blue Team Exercises",
-      "awardId": "2548041",
-      "piName": "Junggab Son",
-      "institution": "University of Nevada Las Vegas",
-      "estimatedTotalAmt": "460922",
-      "startDate": "10/01/2026",
-      "expDate": "09/30/2029",
-      "abstractText": "This Research Experiences for Undergraduates Site at the University of Nevada, Las Vegas supports 10 students each year in a 10-week summer research program on the security of federated learning, a way for many devices or organizations to train a shared artificial intelligence model without exchanging their raw data. This approach can help protect privacy, but it also creates new security risks because attackers may try to corrupt the training process, steal information from the model, or reduce system reliability. The project\u2019s novelties are the integration of hands-on attack-and-defense research across the full federated learning process and the use of Red Team versus Blue Team exercises to study these problems in realistic settings. The project's broader significance and importance are that it advances safer privacy-preserving artificial intelligence, expands access to advanced undergraduate research opportunities, and helps prepare the future artificial intelligence and cybersecurity workforce. The project contributes to a stronger national capacity for building trustworthy data-driven systems.\r\n\r\nThe research project focuses on threats and defenses in the data collection, training, and inference stages of federated learning. Students and mentors investigate representative attacks including botnet-style disruption, poisoning, backdoor insertion, privacy leakage, membership inference, and data reconstruction, and they evaluate defenses such as robust aggregation, anomaly detection, and differential privacy. The work uses a dedicated federated learning cybersecurity range, realistic datasets from computer vision, language, and network traffic applications, and distributed computing resources for controlled experimentation. Through iterative Red Team and Blue Team studies, the project produces software, tutorials, datasets, and empirical results that improve understanding of secure and privacy-preserving distributed learning. The anticipated outcome is stronger technical foundations for trustworthy artificial intelligence and a broader pipeline of students prepared for research and professional practice in cybersecurity and artificial intelligence.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
-      "primaryProgram": [
-        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
-      ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2548041",
-      "keywords": [
-        "Cybersecurity",
-        "Malware"
-      ]
-    },
     {
       "title": "Research Initiation Award: Leveraging Machine Learning for Secure and Privacy-Preserving Vehicular Cyber-Physical Systems (VCPS)",
       "awardId": "2500079",
@@ -34,43 +16,6 @@
       "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2500079",
       "keywords": [
         "Cybersecurity"
-      ]
-    },
-    {
-      "title": "Collaborative Research: CER: Educating the Next Generation for Copyright and Privacy Risks in LLMs",
-      "awardId": "2618891",
-      "piName": "Dongwon Lee",
-      "institution": "Pennsylvania State Univ University Park",
-      "estimatedTotalAmt": "369905",
-      "startDate": "10/01/2026",
-      "expDate": "09/30/2029",
-      "abstractText": "Artificial intelligence (AI) tools that generate text and images, known as large language models (LLMs), are now widely used in classrooms and workplaces. These LLMs can unexpectedly reproduce copyrighted materials from books and other protected works, or reveal private personal information contained in the data used to train them. The same LLM system may refuse a request in one instance yet reveal protected content in another, making it difficult for students, teachers, and other users to determine when these tools can be trusted. Recent lawsuits and major settlements involving the use of copyrighted materials demonstrate the significance of these risks. Despite these concerns, most computing and cybersecurity courses treat AI as a finished product to use rather than a system to be scrutinized and tested. As a result, students rarely learn how to examine AI behavior, identify potential vulnerabilities, and assess risks. This project addresses that gap by providing teaching materials, practical tools, and a website that enable learners to investigate how AI systems handle copyrighted and private information, collect evidence, and communicate their findings. The project serves the national interest by helping prepare a skilled workforce for fast-growing jobs in AI safety, oversight, and security. Because the website and tools run in a standard web browser and require neither special equipment nor programming experience, they can be adopted by K-12 schools and under-resourced institutions, expanding access to AI and cybersecurity education. \r\n\r\nThis project researches an education-centered pipeline that teaches high school and undergraduate learners to detect, measure, and communicate copyright and privacy risks in LLMs, and develops a use-inspired theory for AI security education tools. The work is organized into three interconnected activities. First, the project develops a flexible curriculum centered on AI safety and red teaming -- the practice of deliberately testing a system to identify and expose its weaknesses. Offered as a full course, a shorter module, or a high school version, the curriculum trains learners to probe AI models, assess similarity to protected sources, estimate uncertainty, interpret findings within legal and ethical frameworks, and communicate evidence clearly and effectively. Second, the project builds Copyright Detective, an open-source, web-based tool offering separate tracks for computing students and the public that supports controlled prompting of AI models, visual comparison against reference text, multiple similarity measures, and uncertainty estimates across runs. Building on a working prototype that detects word-for-word reproduction, the project adds components for memorized knowledge, persuasion-style jailbreaks, and drift across model versions. Third, mixed-methods studies examine how learners using Copyright Detective reason about uncertain, context-dependent system behavior; the findings from these studies will inform iterative refinement of both the curriculum and Copyright Detective. These activities produce new teaching knowledge, portable low-barrier resources, and an openly released platform that advances workforce readiness for AI security, privacy, and trustworthiness.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
-      "primaryProgram": [
-        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
-      ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2618891",
-      "keywords": [
-        "LLM / GenAI",
-        "Cybersecurity"
-      ]
-    },
-    {
-      "title": "REU Site: Applied Research in Deep Learning",
-      "awardId": "2548161",
-      "piName": "Mohammed Belkhouche",
-      "institution": "Missouri State University",
-      "estimatedTotalAmt": "489183",
-      "startDate": "10/01/2026",
-      "expDate": "09/30/2029",
-      "abstractText": "This project will provide undergraduate students with hands-on research experiences in the rapidly growing field of deep learning. Over three years, the program will engage 30 students from computer science, engineering, information technology, and related disciplines in meaningful research projects guided by faculty mentors. Participants will explore how deep learning techniques can be used to address real-world challenges in cybersecurity, robotics, hate speech in social media, and autonomous systems. Through these experiences, students will gain exposure to how deep learning technologies can be used to benefit society across a wide range of applications. In addition to research activities, the program will provide structured training to help students develop important professional skills, including scientific writing, oral communication, teamwork, and responsible research practices. By working in a collaborative and supportive environment, students will strengthen both their technical abilities and their confidence as emerging researchers. Overall, the program aims to inspire and prepare the next generation of scientists and engineers by giving them early, meaningful exposure to research in deep learning and its many beneficial uses.\r\n\r\nThis project establishes a structured, research-intensive undergraduate training program aimed at increasing student engagement in state-of-the-art deep learning methodologies and applications. Research activities will focus on the design, analysis, and application of modern deep learning techniques to address contemporary challenges in areas such as multimedia security, robotic motion planning, autonomous multi-agent coordination, and malicious network activity detection. Faculty-mentored projects will emphasize both methodological advances and applied system development, with students contributing to end-to-end research pipelines including data preprocessing, model design, training, evaluation, and deployment-oriented analysis. Key objectives include: (i) developing students\u2019 problem-solving and critical thinking skills in the context of deep learning research; (ii) building proficiency in contemporary deep learning frameworks and methodologies; (iii) training students in scholarly communication and research dissemination practices; and (iv) enhancing collaboration and teamwork. Collectively, this REU Site aims to cultivate a pipeline of well-prepared undergraduate researchers equipped for graduate study and careers in machine learning and artificial intelligence research.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
-      "primaryProgram": [
-        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
-      ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2548161",
-      "keywords": [
-        "Cybersecurity",
-        "Deep Learning",
-        "Multi-Agent AI"
       ]
     },
     {
@@ -91,10 +36,27 @@
       ]
     },
     {
+      "title": "CAREER: Improving Software Test Quality and Developer Skills through Developer-in-the-Loop Test Optimization",
+      "awardId": "2544248",
+      "piName": "Ajay Jha",
+      "institution": "North Dakota State University Fargo",
+      "estimatedTotalAmt": "500000",
+      "startDate": "01/01/2027",
+      "expDate": "12/31/2031",
+      "abstractText": "Software testing plays a critical role in improving software quality by detecting defects before release. However, software tests often contain quality issues that make them difficult to understand, maintain, and evolve, reducing their effectiveness and increasing maintenance costs. Many developers receive limited training in writing high-quality tests, and existing automated tools provide limited support for identifying and addressing these issues. This project investigates how software tests can be systematically improved while helping students and developers strengthen their testing skills through hands-on interaction with intelligent tool support. The project's novelties are the integration of empirical evidence from real-world software development with developer-centered learning to create an interactive environment that supports both test improvement and skill development. The project's broader significance and importance are reducing software maintenance costs, improving software reliability, advancing software testing education, and preparing a workforce with stronger software testing expertise. The project also produces openly available datasets, software tools, and educational resources that benefit researchers, educators, and practitioners.\r\n\r\nThe project investigates how developers identify, understand, and address software test quality issues by analyzing open-source repositories, developer discussions, surveys, and interviews. These empirical findings inform the development of automated methods that combine rule-based program analysis, large language models, and validation mechanisms to identify test quality issues and generate context-aware recommendations to improve tests as software evolves. The project integrates these methods into an evolution-aware developer-in-the-loop framework that continuously identifies test quality issues, suggests improvements, and provides explanations for each recommendation, while enabling developers to review, modify, and learn from the suggestions during development. User studies with students and practitioners evaluate both improvements in test quality and gains in testing skills. The project contributes to more reliable and maintainable software systems and helps students and developers strengthen their skills in writing and improving software tests.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2544248",
+      "keywords": [
+        "LLM / GenAI"
+      ]
+    },
+    {
       "title": "Collaborative Research: A Subspace Optimization Framework for Resource-Efficient and Private Fine-Tuning of Large Language Models",
-      "awardId": "2619080",
-      "piName": "Yanmin Gong",
-      "institution": "Texas A&M University",
+      "awardId": "2619079",
+      "piName": "Yuanxiong Guo",
+      "institution": "University of Texas at San Antonio",
       "estimatedTotalAmt": "120000",
       "startDate": "01/01/2027",
       "expDate": "12/31/2029",
@@ -102,7 +64,58 @@
       "primaryProgram": [
         "01002627DB NSF RESEARCH & RELATED ACTIVIT"
       ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2619080",
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2619079",
+      "keywords": [
+        "LLM / GenAI"
+      ]
+    },
+    {
+      "title": "EPSCoR Research Fellows: NSF: AI-Secure Command Channels for Autonomous Space Systems",
+      "awardId": "2624437",
+      "piName": "Efren Lopez Morales",
+      "institution": "New Mexico State University",
+      "estimatedTotalAmt": "299665",
+      "startDate": "01/01/2027",
+      "expDate": "12/31/2028",
+      "abstractText": "This Research Infrastructure Improvement (RII) EPSCoR Research Fellows project provides a fellowship to an Assistant Professor and training for one student trainee at New Mexico State University. This work will be conducted in collaboration with collaborators at the University of California, Santa Cruz. Through the fellowship, the PI will investigate how artificial intelligence (AI) can be used safely to support command decisions for autonomous spacecraft. The project will develop methods to detect and prevent cyberattacks that manipulate AI\u2013generated spacecraft commands before they can affect mission operations. This research combines cybersecurity, artificial intelligence, and aerospace engineering to improve the security and resilience of future autonomous space systems. The fellowship will strengthen research capacity in New Mexico by training the next generation of cybersecurity researchers, expanding collaboration between the two institutions, and advancing technologies that improve the reliability, safety, and security of future space missions.\r\n\r\nThis project will establish a research program focused on securing AI-enabled spacecraft. The project will advance the state of the art by introducing a formal framework for modeling how AI systems transform inputs into spacecraft commands, characterizing AI-enabled command manipulation attacks, and developing runtime mechanisms that validate AI-generated commands against mission and safety constraints before execution. The proposed methodology will integrate formal threat modeling, taxonomy development, experimental prototype implementation, and empirical evaluation using an AI-enabled satellite command prototype that combines AI reasoning components with realistic spacecraft command and telemetry interfaces. The fellowship will strengthen research infrastructure at New Mexico State University by expanding faculty expertise in AI-enabled cyber-physical systems, establishing new collaborations with the University of California, Santa Cruz, and providing research training for undergraduate and graduate students. The fellowship will support the development of a sustainable research program, future external funding, curriculum development in AI and cybersecurity, and a workforce prepared to secure next-generation space systems.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2624437",
+      "keywords": [
+        "Cybersecurity"
+      ]
+    },
+    {
+      "title": "Continuous Process Verification for Trustworthy Manufacturing",
+      "awardId": "2626557",
+      "piName": "Liang He",
+      "institution": "University of Nebraska-Lincoln",
+      "estimatedTotalAmt": "307868",
+      "startDate": "01/01/2027",
+      "expDate": "12/31/2028",
+      "abstractText": "This project supports research to advance the trustworthiness of manufacturing systems. Manufacturing is undergoing a rapid transformation as factories increasingly rely on automation, intelligent decision making, and data-driven optimization to improve productivity, quality, and resilience. These advances depend on trustworthy systems that monitor and control physical manufacturing processes. If process measurements are compromised by cyberattacks, equipment failures, or sensing errors, manufacturers may unknowingly make incorrect decisions that reduce product quality, increase waste, disrupt production, and create safety risks. However, today\u2019s manufacturing systems are designed primarily to maximize production efficiency rather than continuously verify the integrity of process information. This project addresses this fundamental challenge by enabling manufacturing systems to continuously verify that sensed data faithfully represent physical processes. The resulting advances will improve the security, resilience, and reliability of advanced manufacturing, facilitate the adoption of intelligent manufacturing technologies, educate the future workforce, and strengthen the nation\u2019s economic competitiveness.\r\n\r\nThe specific goal of the research is to develop a control-monitoring co-randomization framework for trustworthy manufacturing. The research investigates whether carefully designed stochastic control and monitoring actions can generate physical watermarks that reveal discrepancies caused by cyberattacks, equipment faults, or compromised sensing. The framework integrates randomized control strategies, adaptive process monitoring, statistical signal analysis, system identification, and predictive control to continuously validate process integrity while preserving production quality and operational efficiency. The framework will be evaluated on representative manufacturing platforms, including automated assembly systems and chemical production processes. By tightly coupling physical process dynamics with cybersecurity mechanisms, this research establishes the scientific foundations for manufacturing systems that can continuously validate the trustworthiness of process information, enabling more reliable automation and the next generation of intelligent manufacturing.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2626557",
+      "keywords": [
+        "Cybersecurity"
+      ]
+    },
+    {
+      "title": "CICI: IPAAI: XAI-Driven Data Forensics for Nuclear Edge LLMs: Provenance, Detection, and Recovery",
+      "awardId": "2613797",
+      "piName": "Xiaolong Guo",
+      "institution": "Kansas State University",
+      "estimatedTotalAmt": "899868",
+      "startDate": "11/01/2026",
+      "expDate": "11/30/2026",
+      "abstractText": "Nuclear reactors supply a large share of reliable electricity, and reactor operators increasingly turn to large language models to help interpret procedures, sensor logs, and alarm messages in real time. Running these models on-site, close to the reactor, keeps sensitive data in-house and speeds decision-making, but it also opens new ways for these systems to fail or be attacked. Poisoned or low-quality training data, foundation models that carry hidden backdoors, and manipulated prompts can each push a model toward confident but incorrect recommendations, a serious hazard that could threaten safety or force a costly shutdown. This project builds an explainable artificial intelligence framework that secures the entire workflow of nuclear-domain large language models. \r\n\r\nThe team develops interpretability methods that trace a model's outputs back to specific inputs and internal representations, then uses those signals to detect and remove poisoned or low-quality training data through machine unlearning. To confirm a model's origin, hardware-based fingerprinting techniques are employed. At inference time, layered defenses screen inputs, flag risky prompts, and validate outputs before any recommendation reaches an operator. The methods are validated with real operational data from a research nuclear reactor. By establishing a unified approach to data integrity, model provenance, and output reliability, the project advances the safe deployment of large language models in critical infrastructure, protecting public welfare and national security. Openly shared tools, datasets, and a fingerprint library, along with new university courses and K\u201312 outreach, will help build a security-aware technical workforce.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2613797",
       "keywords": [
         "LLM / GenAI"
       ]
@@ -125,23 +138,6 @@
       ]
     },
     {
-      "title": "CICI: IPAAI: XAI-Driven Data Forensics for Nuclear Edge LLMs: Provenance, Detection, and Recovery",
-      "awardId": "2613797",
-      "piName": "Xiaolong Guo",
-      "institution": "Kansas State University",
-      "estimatedTotalAmt": "899868",
-      "startDate": "11/01/2026",
-      "expDate": "11/30/2026",
-      "abstractText": "Nuclear reactors supply a large share of reliable electricity, and reactor operators increasingly turn to large language models to help interpret procedures, sensor logs, and alarm messages in real time. Running these models on-site, close to the reactor, keeps sensitive data in-house and speeds decision-making, but it also opens new ways for these systems to fail or be attacked. Poisoned or low-quality training data, foundation models that carry hidden backdoors, and manipulated prompts can each push a model toward confident but incorrect recommendations, a serious hazard that could threaten safety or force a costly shutdown. This project builds an explainable artificial intelligence framework that secures the entire workflow of nuclear-domain large language models. \r\n\r\nThe team develops interpretability methods that trace a model's outputs back to specific inputs and internal representations, then uses those signals to detect and remove poisoned or low-quality training data through machine unlearning. To confirm a model's origin, hardware-based fingerprinting techniques are employed. At inference time, layered defenses screen inputs, flag risky prompts, and validate outputs before any recommendation reaches an operator. The methods are validated with real operational data from a research nuclear reactor. By establishing a unified approach to data integrity, model provenance, and output reliability, the project advances the safe deployment of large language models in critical infrastructure, protecting public welfare and national security. Openly shared tools, datasets, and a fingerprint library, along with new university courses and K\u201312 outreach, will help build a security-aware technical workforce.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
-      "primaryProgram": [
-        "01002627DB NSF RESEARCH & RELATED ACTIVIT"
-      ],
-      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2613797",
-      "keywords": [
-        "LLM / GenAI"
-      ]
-    },
-    {
       "title": "Adaptive Troubleshooting in Engineering: Developing Cognitive Flexibility to Address Complex Challenges Among Undergraduates",
       "awardId": "2613590",
       "piName": "Ahmet Sabuncu",
@@ -156,6 +152,25 @@
       "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2613590",
       "keywords": [
         "LLM / GenAI"
+      ]
+    },
+    {
+      "title": "PDaSP Track 2: Secure Analytics over Federated Environments for Biomedical Science (SAFE-Bio)",
+      "awardId": "2628738",
+      "piName": "Ronald Hutchins",
+      "institution": "University of Virginia Main Campus",
+      "estimatedTotalAmt": "1000000",
+      "startDate": "10/01/2026",
+      "expDate": "09/30/2028",
+      "abstractText": "Biomedical research increasingly depends on combining sensitive health information held by many different hospitals and universities. Doctors and scientists could make faster progress against disease if they were able to analyze large collections of patient data together, but this information is private and legally protected, and institutions are often unable to share it because doing so risks exposing personal details. A central difficulty is that even if data are \"locked\" and protected when they are stored or sent across a network, they need be \"unlocked\" inside a computer's memory in order to be analyzed, which creates a point of vulnerability. This project is building a software system to allow computers to analyze such sensitive information while it stays locked and hidden, even from computer system administrators who may have direct access to the computing systems. The aim is to let different institutions work together on shared scientific questions without ever revealing private data. Success of such a system would enable researchers to collaborate in areas involving sensitive data, such as genetics, personalized treatment, and public health, while protecting the privacy of the individuals whose information makes those advances possible. The benefits reach beyond medicine to any setting in which organizations need to cooperate on confidential information that they cannot otherwise share freely.\r\n\r\nThis project is developing and validating a framework called SAFE-Bio: Secure Analytics over Federated Environments for Biomedical research, which applies confidential computing to secure, collaborative analysis across independent institutions. Confidential computing relies on hardware isolated enclaves that keep data encrypted even while they are being processed, so that the information remains inaccessible to system administrators and to other software running on the same machine. The framework provides a portable middleware layer that hides the differences among competing hardware platforms, allowing both new and legacy analytical applications to be moved onto the secure environment with little modification. The technical work is organized into research and development, testing and evaluation, and a pathway toward broader adoption. Central contributions include a certifier component for transparent deployment of confidential hardware, a chain of trust architecture that attests to the integrity of the full software stack, a curated operating system and container environment for general purpose applications, and security orchestration that extends confidential guarantees across distributed federated workflows. The framework is evaluated through realistic biomedical scenarios that involve distributed genomic datasets and analytics driven by artificial intelligence (AI), using established community testbeds and measurement methods to quantify security, performance, and the runtime overhead introduced by enclave based execution. The team of researchers spans the University of Virginia, Datica Research, the University of Southern California, and the National Institute of Standards and Technology, combining expertise in cybersecurity, distributed systems, biomedical informatics, and standards development. The project contributes reusable architectures, middleware, evaluation methods, and deployment guidance that lower barriers to secure collaboration, together with training opportunities for postdoctoral researchers and research computing professionals.\r\n\r\nThis award reflects NSF's statutory mission and has been deemed worthy of support through evaluation using the Foundation's intellectual merit and broader impacts review criteria.",
+      "primaryProgram": [
+        "01002627DB NSF RESEARCH & RELATED ACTIVIT",
+        "01002728DB NSF RESEARCH & RELATED ACTIVIT"
+      ],
+      "nsf_url": "https://www.nsf.gov/awardsearch/showAward?AWD_ID=2628738",
+      "keywords": [
+        "Cybersecurity",
+        "Vulnerability"
       ]
     }
   ]

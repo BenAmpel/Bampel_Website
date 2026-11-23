@@ -319,7 +319,7 @@
       "abstract": "The rapid proliferation of complex information systems has been met by an ever-increasing quantity of exploits that can cause irreparable cyber breaches. To mitigate these cyber threats, academia and industry have placed a significant focus on proactively identifying and labeling exploits developed by the international hacker community. However, prevailing approaches for labeling exploits in hacker forums do not leverage metadata from exploit darknet markets or public exploit repositories to enhance labeling performance. In this study, we adopted the computational design science paradigm to develop a novel information technology artifact, the deep transfer learning exploit labeler (DTL-EL). DTL-EL incorporates a pre-initialization design, multi-layer deep transfer learning (DTL), and a self-attention mechanism to automatically label exploits in hacker forums. We rigorously evaluated the proposed DTL-EL against state-of-the-art non-DTL benchmark methods based in classical machine learning and deep learning. Results suggest that the proposed DTL-EL significantly outperforms benchmark methods based on accuracy, precision, recall, and F1-score. Our proposed DTL-EL framework provides important practical implications for key stakeholders such as cybersecurity managers, analysts, and educators.",
       "award": null,
       "featured": true,
-      "citations": 50,
+      "citations": 51,
       "topic": "AI / Deep Learning"
     },
     {
@@ -357,7 +357,7 @@
       "abstract": "Cyberattacks have been increasing in volume and intensity, necessitating proactive measures. Cybersecurity risk management frameworks are deployed to provide actionable intelligence to mitigate potential threats by analyzing the available cybersecurity data. Existing frameworks, such as MITRE ATT&CK, provide timely mitigation strategies against attacker capabilities yet do not account for hacker data when developing cyber threat intelligence. Therefore, we developed a novel information technology artifact, ATT&CK-Link, which incorporates a novel transformer and multi-teacher knowledge distillation design, to link hacker threats to this broadly used framework. Here, we illustrated how hospital systems can use this framework to proactively protect their cyberinfrastructure against hacker threats. Our ATT&CK-Link framework has practical implications for cybersecurity professionals, who can implement our framework to generate strategic, operational, and tactical cyber threat intelligence. ATT&CK-Link also contributes to the information systems knowledge base by providing design principles to pursue targeted cybersecurity analytics, risk management, and broader text analytics research through simultaneous multi-modal (e.g., text and code) distillation and classification.",
       "award": null,
       "featured": true,
-      "citations": 83,
+      "citations": 84,
       "topic": "Cybersecurity"
     },
     {
@@ -449,7 +449,7 @@
       "abstract": "The exponential growth of digital content has generated massive textual datasets, necessitating the use of advanced analytical approaches. Large Language Models (LLMs) have emerged as tools that are capable of processing and extracting insights from massive unstructured textual datasets. However, how to leverage LLMs for text analytics Information Systems (IS) research is currently unclear. To assist the IS community in understanding how to operationalize LLMs, we propose a Text Analytics for Information Systems Research (TAISR) framework. Our proposed framework provides detailed recommendations grounded in IS and LLM literature on how to conduct meaningful text analytics IS research for design science, behavioral, and econometric streams. We conducted three business intelligence case studies using our TAISR framework to demonstrate its application in several IS research contexts. We also outline the potential challenges and limitations of adopting LLMs for IS. By offering a systematic approach and evidence of its utility, our TAISR framework contributes to future IS research streams looking to incorporate powerful LLMs for text analytics.",
       "award": null,
       "featured": false,
-      "citations": 60,
+      "citations": 61,
       "topic": "LLMs & NLP"
     },
     {
@@ -597,7 +597,7 @@
       "abstract": "Large Language Models (LLMs) are increasingly used as conversational search engines for academic literature, yet whether they judge papers on content or on authority signals has not been tested causally. We investigate authority bias: systematic preference for papers based on author prestige, venue, and citations rather than content. Holding title and abstract constant, we vary authority metadata across three counterfactual conditions (original, flipped, boosted) over eight LLMs (five open-weight and three frontier closed-weight). Our experiments show that authority bias is substantial and directional, varies markedly across models, and is only partially addressable through prompt-level debiasing. We further document a say-do gap: debiasing instructions suppress authority mentions far faster than authority-driven flips, so surface auditing systematically underestimates behavioral bias.",
       "award": null,
       "featured": false,
-      "citations": 1,
+      "citations": 2,
       "topic": "Behavioral"
     },
     {
@@ -656,6 +656,28 @@
       "featured": true,
       "citations": 9,
       "topic": "Cybersecurity"
+    },
+    {
+      "title": "Calibrating LLM Tutor Initiation to Learner Expertise: Proactive and Reactive Support for Computational Thinking",
+      "authors": [
+        "Arun Rai",
+        "L Chen",
+        "Balasubramaniam Ramesh",
+        "Cynthia Breazeal",
+        "Y Long",
+        "Benjamin M. Ampel",
+        "A Aria"
+      ],
+      "year": 2026,
+      "type": "conference",
+      "venue": "Available at SSRN",
+      "url": "/conference_publication/calibrating-llm-tutor-initiation-to-learner-expertise-proactive-and-re/",
+      "date": "2026-01-01",
+      "abstract": null,
+      "award": null,
+      "featured": false,
+      "citations": 0,
+      "topic": "LLMs & NLP"
     },
     {
       "title": "Cyber Threat Classification Under Non-Stationary Environments: An Adapt In-Context Learning (Adapt-ICL) Approach",
@@ -1140,7 +1162,7 @@
       {
         "id": 16,
         "name": "Creating Proactive Cyber Threat Intelligence with Hacker Exploit Labels: A Deep Transfer Learning Approach",
-        "value": 50,
+        "value": 51,
         "year": 2024,
         "authors": [
           "Benjamin M. Ampel",
@@ -1151,7 +1173,7 @@
         "venue": "MIS Quarterly",
         "type": "journal",
         "topic": "AI / Deep Learning",
-        "symbolSize": 35.56119346723285
+        "symbolSize": 35.732627221969096
       },
       {
         "id": 17,
@@ -1171,7 +1193,7 @@
       {
         "id": 18,
         "name": "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach",
-        "value": 83,
+        "value": 84,
         "year": 2024,
         "authors": [
           "Benjamin M. Ampel",
@@ -1183,7 +1205,7 @@
         "venue": "Journal of Management Information Systems",
         "type": "journal",
         "topic": "Cybersecurity",
-        "symbolSize": 39.98386130841285
+        "symbolSize": 40.08912566628157
       },
       {
         "id": 19,
@@ -1249,7 +1271,7 @@
       {
         "id": 23,
         "name": "Large Language Models for Conducting Advanced Text Analytics Information Systems Research",
-        "value": 60,
+        "value": 61,
         "year": 2025,
         "authors": [
           "Benjamin M. Ampel",
@@ -1260,7 +1282,7 @@
         "venue": "ACM Transactions on Management Information Systems",
         "type": "journal",
         "topic": "LLMs & NLP",
-        "symbolSize": 37.14420946540582
+        "symbolSize": 37.28821253752379
       },
       {
         "id": 24,
@@ -1371,7 +1393,7 @@
       {
         "id": 31,
         "name": "Authority Bias in Conversational Search Engines for Academic Paper Recommendation",
-        "value": 1,
+        "value": 2,
         "year": 2026,
         "authors": [
           "Uthman Jinadu",
@@ -1384,7 +1406,7 @@
         "venue": "EMNLP",
         "type": "conference",
         "topic": "Behavioral",
-        "symbolSize": 10
+        "symbolSize": 12.476649250079015
       },
       {
         "id": 32,
@@ -1436,6 +1458,25 @@
       },
       {
         "id": 35,
+        "name": "Calibrating LLM Tutor Initiation to Learner Expertise: Proactive and Reactive Support for Computational Thinking",
+        "value": 0,
+        "year": 2026,
+        "authors": [
+          "Arun Rai",
+          "L Chen",
+          "Balasubramaniam Ramesh",
+          "Cynthia Breazeal",
+          "Y Long",
+          "Benjamin M. Ampel",
+          "A Aria"
+        ],
+        "venue": "Available at SSRN",
+        "type": "conference",
+        "topic": "LLMs & NLP",
+        "symbolSize": 10
+      },
+      {
+        "id": 36,
         "name": "Cyber Threat Classification Under Non-Stationary Environments: An Adapt In-Context Learning (Adapt-ICL) Approach",
         "value": 0,
         "year": 2026,
@@ -1451,7 +1492,7 @@
         "symbolSize": 10
       },
       {
-        "id": 36,
+        "id": 37,
         "name": "HackerSignal: A Multi-Source, CVE-Linked Corpus and Prospective Benchmark for Cyber Threat Intelligence",
         "value": 0,
         "year": 2026,
@@ -1465,7 +1506,7 @@
         "symbolSize": 10
       },
       {
-        "id": 37,
+        "id": 38,
         "name": "Identifying Protected Health Information in Hacker Communities: A Multi-Task Relation Learning Approach",
         "value": 0,
         "year": 2026,
@@ -1481,7 +1522,7 @@
         "symbolSize": 10
       },
       {
-        "id": 38,
+        "id": 39,
         "name": "Multimodal Phishing Detection on Social Media: Evaluating Text-Image Fusion",
         "value": 0,
         "year": 2026,
@@ -1496,7 +1537,7 @@
         "symbolSize": 10
       },
       {
-        "id": 39,
+        "id": 40,
         "name": "Pathways to AI-Ready Entry-Level Talent for Industry Domains: Modular, Adaptive Design Principles for Business-School Curriculum",
         "value": 0,
         "year": 2026,
@@ -1516,7 +1557,7 @@
         "symbolSize": 10
       },
       {
-        "id": 40,
+        "id": 41,
         "name": "Performance Transfer and Behavioral Reliance in AI-Assisted Cybersecurity Training",
         "value": 0,
         "year": 2026,
@@ -1531,7 +1572,7 @@
         "symbolSize": 10
       },
       {
-        "id": 41,
+        "id": 42,
         "name": "Prosody Training for Lowering Vishing Susceptibility",
         "value": 0,
         "year": 2026,
@@ -1545,7 +1586,7 @@
         "symbolSize": 10
       },
       {
-        "id": 42,
+        "id": 43,
         "name": "Seeing Is Not Believing: A Deepfake Video Call Scam at Pan-Asia Trading",
         "value": 0,
         "year": 2026,
@@ -1558,7 +1599,7 @@
         "symbolSize": 10
       },
       {
-        "id": 43,
+        "id": 44,
         "name": "Semantic Conformance Scoring for Electric Vehicle Charging Station Cybersecurity Review Prioritization Using NIST IR 8473",
         "value": 0,
         "year": 2026,
@@ -1574,7 +1615,7 @@
         "symbolSize": 10
       },
       {
-        "id": 44,
+        "id": 45,
         "name": "Understanding the Role of Prompt Template in Knowledge Distillation for Safety Alignment",
         "value": 0,
         "year": 2026,
@@ -1590,7 +1631,7 @@
         "symbolSize": 10
       },
       {
-        "id": 45,
+        "id": 46,
         "name": "Vendor-Conditioned Contrastive Learning for Predicting Organizational Cyber Threat Targets",
         "value": 3,
         "year": 2026,
@@ -1603,7 +1644,7 @@
         "symbolSize": 14.484941211906902
       },
       {
-        "id": 46,
+        "id": 47,
         "name": "Prediction Markets Are Efficient at Rest and Dislocated in Motion",
         "value": 0,
         "year": 2027,
@@ -1781,7 +1822,7 @@
       {
         "source": 0,
         "target": 16,
-        "value": 9.838689371230027,
+        "value": 9.846522287201754,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -1797,7 +1838,7 @@
       {
         "source": 0,
         "target": 18,
-        "value": 10.077748306942642,
+        "value": 10.084429832466713,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -1845,7 +1886,7 @@
       {
         "source": 0,
         "target": 23,
-        "value": 9.915236591248696,
+        "value": 9.92268077526189,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -1940,22 +1981,6 @@
       },
       {
         "source": 0,
-        "target": 37,
-        "value": 9.383419064727335,
-        "reason": "1 Co-Authors",
-        "types": {
-          "topic": false,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 5,
-          "opacity": 0.45000000000000007,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 0,
         "target": 38,
         "value": 9.383419064727335,
         "reason": "1 Co-Authors",
@@ -1972,7 +1997,23 @@
       },
       {
         "source": 0,
-        "target": 43,
+        "target": 39,
+        "value": 9.383419064727335,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 0,
+        "target": 44,
         "value": 9.383419064727335,
         "reason": "1 Co-Authors",
         "types": {
@@ -2181,7 +2222,7 @@
       {
         "source": 1,
         "target": 16,
-        "value": 14.70999373465548,
+        "value": 14.726568488935357,
         "reason": "3 Co-Authors",
         "types": {
           "topic": false,
@@ -2213,7 +2254,7 @@
       {
         "source": 1,
         "target": 18,
-        "value": 15.178555762218709,
+        "value": 15.190701577567637,
         "reason": "3 Co-Authors",
         "types": {
           "topic": false,
@@ -2277,7 +2318,7 @@
       {
         "source": 1,
         "target": 23,
-        "value": 8.86803450814222,
+        "value": 8.882960004421971,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -2436,22 +2477,6 @@
       },
       {
         "source": 1,
-        "target": 35,
-        "value": 7.4935984103309865,
-        "reason": "1 Co-Authors",
-        "types": {
-          "topic": false,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 5,
-          "opacity": 0.45000000000000007,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 1,
         "target": 36,
         "value": 7.4935984103309865,
         "reason": "1 Co-Authors",
@@ -2469,22 +2494,6 @@
       {
         "source": 1,
         "target": 37,
-        "value": 8.493598410330986,
-        "reason": "1 Keywords, 1 Co-Authors",
-        "types": {
-          "topic": true,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 5,
-          "opacity": 0.55,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 1,
-        "target": 38,
         "value": 7.4935984103309865,
         "reason": "1 Co-Authors",
         "types": {
@@ -2500,7 +2509,39 @@
       },
       {
         "source": 1,
-        "target": 43,
+        "target": 38,
+        "value": 8.493598410330986,
+        "reason": "1 Keywords, 1 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.55,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 1,
+        "target": 39,
+        "value": 7.4935984103309865,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 1,
+        "target": 44,
         "value": 10.493598410330986,
         "reason": "2 Co-Authors",
         "types": {
@@ -2693,7 +2734,7 @@
       {
         "source": 2,
         "target": 16,
-        "value": 23.038027536102724,
+        "value": 23.051360957228592,
         "reason": "8 Keywords, 3 Co-Authors",
         "types": {
           "topic": true,
@@ -2725,7 +2766,7 @@
       {
         "source": 2,
         "target": 18,
-        "value": 16.425379842790942,
+        "value": 16.435689161722586,
         "reason": "1 Keywords, 3 Co-Authors",
         "types": {
           "topic": true,
@@ -2789,7 +2830,7 @@
       {
         "source": 2,
         "target": 23,
-        "value": 9.166310796259967,
+        "value": 9.178555762218709,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -2948,22 +2989,6 @@
       },
       {
         "source": 2,
-        "target": 35,
-        "value": 11.15098080672772,
-        "reason": "3 Keywords, 1 Co-Authors",
-        "types": {
-          "topic": true,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 5,
-          "opacity": 0.7,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 2,
         "target": 36,
         "value": 11.15098080672772,
         "reason": "3 Keywords, 1 Co-Authors",
@@ -2981,6 +3006,22 @@
       {
         "source": 2,
         "target": 37,
+        "value": 11.15098080672772,
+        "reason": "3 Keywords, 1 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.7,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 2,
+        "target": 38,
         "value": 10.15098080672772,
         "reason": "2 Keywords, 1 Co-Authors",
         "types": {
@@ -2996,7 +3037,7 @@
       },
       {
         "source": 2,
-        "target": 38,
+        "target": 39,
         "value": 8.15098080672772,
         "reason": "1 Co-Authors",
         "types": {
@@ -3012,7 +3053,7 @@
       },
       {
         "source": 2,
-        "target": 43,
+        "target": 44,
         "value": 11.15098080672772,
         "reason": "2 Co-Authors",
         "types": {
@@ -3028,7 +3069,7 @@
       },
       {
         "source": 2,
-        "target": 45,
+        "target": 46,
         "value": 8.221860134003538,
         "reason": "3 Keywords",
         "types": {
@@ -3045,7 +3086,7 @@
       {
         "source": 3,
         "target": 16,
-        "value": 6.887144807032223,
+        "value": 6.915717099488265,
         "reason": "2 Keywords",
         "types": {
           "topic": true,
@@ -3061,7 +3102,7 @@
       {
         "source": 3,
         "target": 18,
-        "value": 7.624256113895557,
+        "value": 7.641800173540344,
         "reason": "2 Keywords",
         "types": {
           "topic": true,
@@ -3076,7 +3117,7 @@
       },
       {
         "source": 3,
-        "target": 45,
+        "target": 46,
         "value": 4.374436097811232,
         "reason": "3 Keywords",
         "types": {
@@ -3253,7 +3294,7 @@
       {
         "source": 4,
         "target": 16,
-        "value": 14.354299044722055,
+        "value": 14.375278407684165,
         "reason": "3 Co-Authors",
         "types": {
           "topic": false,
@@ -3285,7 +3326,7 @@
       {
         "source": 4,
         "target": 18,
-        "value": 14.926865577872142,
+        "value": 14.941219754396368,
         "reason": "3 Co-Authors",
         "types": {
           "topic": false,
@@ -3349,7 +3390,7 @@
       {
         "source": 4,
         "target": 23,
-        "value": 8.551952961168741,
+        "value": 8.570358100056461,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -3508,22 +3549,6 @@
       },
       {
         "source": 4,
-        "target": 35,
-        "value": 6.527062885745217,
-        "reason": "1 Co-Authors",
-        "types": {
-          "topic": false,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 5,
-          "opacity": 0.45000000000000007,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 4,
         "target": 36,
         "value": 6.527062885745217,
         "reason": "1 Co-Authors",
@@ -3572,7 +3597,23 @@
       },
       {
         "source": 4,
-        "target": 43,
+        "target": 39,
+        "value": 6.527062885745217,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 4,
+        "target": 44,
         "value": 9.527062885745217,
         "reason": "2 Co-Authors",
         "types": {
@@ -3685,7 +3726,7 @@
       {
         "source": 5,
         "target": 16,
-        "value": 9.15098080672772,
+        "value": 9.174981318747381,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
           "topic": true,
@@ -3701,7 +3742,7 @@
       {
         "source": 5,
         "target": 18,
-        "value": 9.791094566560893,
+        "value": 9.806801516361837,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
           "topic": true,
@@ -3749,7 +3790,7 @@
       {
         "source": 5,
         "target": 23,
-        "value": 9.375278407684165,
+        "value": 9.395968390882668,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
           "topic": true,
@@ -3844,7 +3885,7 @@
       },
       {
         "source": 5,
-        "target": 37,
+        "target": 38,
         "value": 6.687639203842083,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -3860,7 +3901,7 @@
       },
       {
         "source": 5,
-        "target": 38,
+        "target": 39,
         "value": 5.687639203842083,
         "reason": "1 Co-Authors",
         "types": {
@@ -3876,7 +3917,7 @@
       },
       {
         "source": 5,
-        "target": 43,
+        "target": 44,
         "value": 5.687639203842083,
         "reason": "1 Co-Authors",
         "types": {
@@ -3989,7 +4030,7 @@
       {
         "source": 6,
         "target": 16,
-        "value": 15.050943744979712,
+        "value": 15.076585395018661,
         "reason": "1 Keywords, 3 Co-Authors",
         "types": {
           "topic": true,
@@ -4021,7 +4062,7 @@
       {
         "source": 6,
         "target": 18,
-        "value": 14.726568488935357,
+        "value": 14.742962094733642,
         "reason": "3 Co-Authors",
         "types": {
           "topic": false,
@@ -4085,7 +4126,7 @@
       {
         "source": 6,
         "target": 23,
-        "value": 8.289540786924242,
+        "value": 8.311438986055972,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -4212,22 +4253,6 @@
       },
       {
         "source": 6,
-        "target": 35,
-        "value": 5.079441541679836,
-        "reason": "1 Co-Authors",
-        "types": {
-          "topic": false,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 3.5794415416798357,
-          "opacity": 0.45000000000000007,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 6,
         "target": 36,
         "value": 5.079441541679836,
         "reason": "1 Co-Authors",
@@ -4276,7 +4301,23 @@
       },
       {
         "source": 6,
-        "target": 43,
+        "target": 39,
+        "value": 5.079441541679836,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 3.5794415416798357,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 6,
+        "target": 44,
         "value": 5.079441541679836,
         "reason": "1 Co-Authors",
         "types": {
@@ -4373,7 +4414,7 @@
       {
         "source": 7,
         "target": 16,
-        "value": 11.436511399464548,
+        "value": 11.456379239589578,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -4405,7 +4446,7 @@
       {
         "source": 7,
         "target": 18,
-        "value": 11.983476069846411,
+        "value": 11.997301052503797,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -4469,7 +4510,7 @@
       {
         "source": 7,
         "target": 23,
-        "value": 8.624256113895557,
+        "value": 8.641800173540343,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -4596,22 +4637,6 @@
       },
       {
         "source": 7,
-        "target": 35,
-        "value": 6.788592966462383,
-        "reason": "1 Co-Authors",
-        "types": {
-          "topic": false,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 5,
-          "opacity": 0.45000000000000007,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 7,
         "target": 36,
         "value": 6.788592966462383,
         "reason": "1 Co-Authors",
@@ -4629,22 +4654,6 @@
       {
         "source": 7,
         "target": 37,
-        "value": 7.788592966462383,
-        "reason": "1 Keywords, 1 Co-Authors",
-        "types": {
-          "topic": true,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 5,
-          "opacity": 0.55,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 7,
-        "target": 38,
         "value": 6.788592966462383,
         "reason": "1 Co-Authors",
         "types": {
@@ -4660,7 +4669,39 @@
       },
       {
         "source": 7,
-        "target": 43,
+        "target": 38,
+        "value": 7.788592966462383,
+        "reason": "1 Keywords, 1 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.55,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 7,
+        "target": 39,
+        "value": 6.788592966462383,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 7,
+        "target": 44,
         "value": 6.788592966462383,
         "reason": "1 Co-Authors",
         "types": {
@@ -4757,7 +4798,7 @@
       {
         "source": 8,
         "target": 16,
-        "value": 12.515708132780526,
+        "value": 12.525416904538952,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -4789,7 +4830,7 @@
       {
         "source": 8,
         "target": 18,
-        "value": 12.806942154441963,
+        "value": 12.814942173405006,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -4853,7 +4894,7 @@
       {
         "source": 8,
         "target": 23,
-        "value": 9.61007887089638,
+        "value": 9.619197440010952,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -5012,22 +5053,6 @@
       },
       {
         "source": 8,
-        "target": 35,
-        "value": 8.926865577872142,
-        "reason": "1 Co-Authors",
-        "types": {
-          "topic": false,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 5,
-          "opacity": 0.45000000000000007,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 8,
         "target": 36,
         "value": 8.926865577872142,
         "reason": "1 Co-Authors",
@@ -5076,7 +5101,23 @@
       },
       {
         "source": 8,
-        "target": 43,
+        "target": 39,
+        "value": 8.926865577872142,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 8,
+        "target": 44,
         "value": 11.926865577872142,
         "reason": "2 Co-Authors",
         "types": {
@@ -5092,7 +5133,7 @@
       },
       {
         "source": 9,
-        "target": 39,
+        "target": 40,
         "value": 3.3744360978112327,
         "reason": "Same Venue",
         "types": {
@@ -5108,7 +5149,7 @@
       },
       {
         "source": 9,
-        "target": 41,
+        "target": 42,
         "value": 3.3744360978112327,
         "reason": "Same Venue",
         "types": {
@@ -5189,7 +5230,7 @@
       {
         "source": 10,
         "target": 16,
-        "value": 11.126590025420048,
+        "value": 11.15098080672772,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -5221,7 +5262,7 @@
       {
         "source": 10,
         "target": 18,
-        "value": 11.775221402565087,
+        "value": 11.791094566560893,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -5285,7 +5326,7 @@
       {
         "source": 10,
         "target": 23,
-        "value": 12.354299044722055,
+        "value": 12.375278407684165,
         "reason": "1 Keywords, 2 Co-Authors",
         "types": {
           "topic": true,
@@ -5412,7 +5453,7 @@
       },
       {
         "source": 10,
-        "target": 35,
+        "target": 36,
         "value": 8.557122138357638,
         "reason": "2 Co-Authors",
         "types": {
@@ -5423,22 +5464,6 @@
         "lineStyle": {
           "width": 5,
           "opacity": 0.7,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 10,
-        "target": 36,
-        "value": 5.557122138357638,
-        "reason": "1 Co-Authors",
-        "types": {
-          "topic": false,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 4.057122138357638,
-          "opacity": 0.45000000000000007,
           "curveness": 0.2
         }
       },
@@ -5461,6 +5486,22 @@
       {
         "source": 10,
         "target": 38,
+        "value": 5.557122138357638,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 4.057122138357638,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 10,
+        "target": 39,
         "value": 6.557122138357638,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -5476,7 +5517,7 @@
       },
       {
         "source": 10,
-        "target": 43,
+        "target": 44,
         "value": 5.557122138357638,
         "reason": "1 Co-Authors",
         "types": {
@@ -5525,7 +5566,7 @@
       {
         "source": 11,
         "target": 16,
-        "value": 14.076585395018661,
+        "value": 14.101796072493233,
         "reason": "3 Co-Authors",
         "types": {
           "topic": false,
@@ -5557,7 +5598,7 @@
       {
         "source": 11,
         "target": 18,
-        "value": 14.742962094733642,
+        "value": 14.759178468889965,
         "reason": "3 Co-Authors",
         "types": {
           "topic": false,
@@ -5621,7 +5662,7 @@
       {
         "source": 11,
         "target": 23,
-        "value": 8.311438986055972,
+        "value": 8.33302209223412,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -5748,22 +5789,6 @@
       },
       {
         "source": 11,
-        "target": 35,
-        "value": 5.256116095164411,
-        "reason": "1 Co-Authors",
-        "types": {
-          "topic": false,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 3.756116095164411,
-          "opacity": 0.45000000000000007,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 11,
         "target": 36,
         "value": 5.256116095164411,
         "reason": "1 Co-Authors",
@@ -5812,7 +5837,23 @@
       },
       {
         "source": 11,
-        "target": 43,
+        "target": 39,
+        "value": 5.256116095164411,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 3.756116095164411,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 11,
+        "target": 44,
         "value": 5.256116095164411,
         "reason": "1 Co-Authors",
         "types": {
@@ -5845,7 +5886,7 @@
       {
         "source": 12,
         "target": 16,
-        "value": 11.887144807032223,
+        "value": 11.915717099488266,
         "reason": "1 Keywords, 2 Co-Authors",
         "types": {
           "topic": true,
@@ -5877,7 +5918,7 @@
       {
         "source": 12,
         "target": 18,
-        "value": 11.624256113895557,
+        "value": 11.641800173540343,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -5988,7 +6029,7 @@
       },
       {
         "source": 12,
-        "target": 35,
+        "target": 36,
         "value": 7.0,
         "reason": "1 Keywords, 2 Co-Authors",
         "types": {
@@ -6004,7 +6045,7 @@
       },
       {
         "source": 12,
-        "target": 36,
+        "target": 37,
         "value": 3.0,
         "reason": "1 Co-Authors",
         "types": {
@@ -6021,7 +6062,7 @@
       {
         "source": 13,
         "target": 16,
-        "value": 12.15098080672772,
+        "value": 12.174981318747381,
         "reason": "1 Keywords, 2 Co-Authors",
         "types": {
           "topic": true,
@@ -6053,7 +6094,7 @@
       {
         "source": 13,
         "target": 18,
-        "value": 11.791094566560893,
+        "value": 11.806801516361837,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -6117,7 +6158,7 @@
       {
         "source": 13,
         "target": 23,
-        "value": 8.375278407684165,
+        "value": 8.395968390882668,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -6244,7 +6285,7 @@
       },
       {
         "source": 13,
-        "target": 35,
+        "target": 36,
         "value": 5.687639203842083,
         "reason": "1 Co-Authors",
         "types": {
@@ -6255,22 +6296,6 @@
         "lineStyle": {
           "width": 4.187639203842083,
           "opacity": 0.45000000000000007,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 13,
-        "target": 36,
-        "value": 6.687639203842083,
-        "reason": "1 Keywords, 1 Co-Authors",
-        "types": {
-          "topic": true,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 4.687639203842083,
-          "opacity": 0.55,
           "curveness": 0.2
         }
       },
@@ -6293,6 +6318,22 @@
       {
         "source": 13,
         "target": 38,
+        "value": 6.687639203842083,
+        "reason": "1 Keywords, 1 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 4.687639203842083,
+          "opacity": 0.55,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 13,
+        "target": 39,
         "value": 5.687639203842083,
         "reason": "1 Co-Authors",
         "types": {
@@ -6308,7 +6349,7 @@
       },
       {
         "source": 13,
-        "target": 43,
+        "target": 44,
         "value": 5.687639203842083,
         "reason": "1 Co-Authors",
         "types": {
@@ -6388,7 +6429,7 @@
       },
       {
         "source": 15,
-        "target": 43,
+        "target": 44,
         "value": 4.039720770839918,
         "reason": "1 Co-Authors",
         "types": {
@@ -6405,7 +6446,7 @@
       {
         "source": 16,
         "target": 17,
-        "value": 9.050943744979712,
+        "value": 9.076585395018661,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
           "topic": true,
@@ -6421,7 +6462,7 @@
       {
         "source": 16,
         "target": 18,
-        "value": 16.318191396817724,
+        "value": 16.34025061790227,
         "reason": "1 Keywords, 3 Co-Authors",
         "types": {
           "topic": true,
@@ -6437,7 +6478,7 @@
       {
         "source": 16,
         "target": 19,
-        "value": 11.915717099488266,
+        "value": 11.943755299006494,
         "reason": "1 Keywords, 2 Co-Authors",
         "types": {
           "topic": true,
@@ -6453,70 +6494,6 @@
       {
         "source": 16,
         "target": 21,
-        "value": 7.887144807032223,
-        "reason": "1 Co-Authors",
-        "types": {
-          "topic": false,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 5,
-          "opacity": 0.45000000000000007,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 16,
-        "target": 22,
-        "value": 8.943755299006494,
-        "reason": "1 Keywords, 1 Co-Authors",
-        "types": {
-          "topic": true,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 5,
-          "opacity": 0.55,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 16,
-        "target": 23,
-        "value": 9.038027536102724,
-        "reason": "1 Co-Authors",
-        "types": {
-          "topic": false,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 5,
-          "opacity": 0.45000000000000007,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 16,
-        "target": 24,
-        "value": 7.943755299006494,
-        "reason": "1 Co-Authors",
-        "types": {
-          "topic": false,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 5,
-          "opacity": 0.45000000000000007,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 16,
-        "target": 27,
         "value": 7.915717099488265,
         "reason": "1 Co-Authors",
         "types": {
@@ -6532,8 +6509,72 @@
       },
       {
         "source": 16,
+        "target": 22,
+        "value": 8.971279007008789,
+        "reason": "1 Keywords, 1 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.55,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 16,
+        "target": 23,
+        "value": 9.064576901751826,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 16,
+        "target": 24,
+        "value": 7.971279007008789,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 16,
+        "target": 27,
+        "value": 7.943755299006494,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 16,
         "target": 29,
-        "value": 7.887144807032223,
+        "value": 7.915717099488265,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -6549,7 +6590,7 @@
       {
         "source": 16,
         "target": 30,
-        "value": 7.887144807032223,
+        "value": 7.915717099488265,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -6565,22 +6606,6 @@
       {
         "source": 16,
         "target": 32,
-        "value": 8.887144807032223,
-        "reason": "1 Keywords, 1 Co-Authors",
-        "types": {
-          "topic": true,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 5,
-          "opacity": 0.55,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 16,
-        "target": 33,
         "value": 8.915717099488266,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -6596,8 +6621,24 @@
       },
       {
         "source": 16,
+        "target": 33,
+        "value": 8.943755299006494,
+        "reason": "1 Keywords, 1 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.55,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 16,
         "target": 34,
-        "value": 13.126590025420048,
+        "value": 13.15098080672772,
         "reason": "Same Venue, 2 Co-Authors",
         "types": {
           "topic": false,
@@ -6612,24 +6653,8 @@
       },
       {
         "source": 16,
-        "target": 35,
-        "value": 10.887144807032223,
-        "reason": "3 Keywords, 1 Co-Authors",
-        "types": {
-          "topic": true,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 5,
-          "opacity": 0.7,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 16,
         "target": 36,
-        "value": 10.887144807032223,
+        "value": 10.915717099488266,
         "reason": "3 Keywords, 1 Co-Authors",
         "types": {
           "topic": true,
@@ -6645,7 +6670,23 @@
       {
         "source": 16,
         "target": 37,
-        "value": 9.887144807032223,
+        "value": 10.915717099488266,
+        "reason": "3 Keywords, 1 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.7,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 16,
+        "target": 38,
+        "value": 9.915717099488266,
         "reason": "2 Keywords, 1 Co-Authors",
         "types": {
           "topic": true,
@@ -6660,8 +6701,8 @@
       },
       {
         "source": 16,
-        "target": 38,
-        "value": 7.887144807032223,
+        "target": 39,
+        "value": 7.915717099488265,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -6676,8 +6717,8 @@
       },
       {
         "source": 16,
-        "target": 43,
-        "value": 7.887144807032223,
+        "target": 44,
+        "value": 7.915717099488265,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -6692,8 +6733,8 @@
       },
       {
         "source": 16,
-        "target": 45,
-        "value": 7.971279007008789,
+        "target": 46,
+        "value": 7.9983067652628055,
         "reason": "3 Keywords",
         "types": {
           "topic": true,
@@ -6709,7 +6750,7 @@
       {
         "source": 17,
         "target": 18,
-        "value": 8.726568488935357,
+        "value": 8.742962094733642,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -6804,7 +6845,7 @@
       },
       {
         "source": 17,
-        "target": 35,
+        "target": 36,
         "value": 9.079441541679836,
         "reason": "1 Keywords, 2 Co-Authors",
         "types": {
@@ -6820,7 +6861,7 @@
       },
       {
         "source": 17,
-        "target": 36,
+        "target": 37,
         "value": 5.079441541679836,
         "reason": "1 Co-Authors",
         "types": {
@@ -6837,7 +6878,7 @@
       {
         "source": 18,
         "target": 19,
-        "value": 12.641800173540343,
+        "value": 12.659141407141957,
         "reason": "1 Keywords, 2 Co-Authors",
         "types": {
           "topic": true,
@@ -6853,7 +6894,7 @@
       {
         "source": 18,
         "target": 20,
-        "value": 7.641800173540344,
+        "value": 7.6591414071419575,
         "reason": "2 Keywords",
         "types": {
           "topic": true,
@@ -6869,7 +6910,7 @@
       {
         "source": 18,
         "target": 21,
-        "value": 8.624256113895557,
+        "value": 8.641800173540343,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -6885,7 +6926,7 @@
       {
         "source": 18,
         "target": 22,
-        "value": 8.659141407141957,
+        "value": 8.676284450877391,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -6901,7 +6942,7 @@
       {
         "source": 18,
         "target": 23,
-        "value": 9.425379842790942,
+        "value": 9.445928109328186,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -6917,7 +6958,7 @@
       {
         "source": 18,
         "target": 24,
-        "value": 8.659141407141957,
+        "value": 8.676284450877391,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -6933,7 +6974,7 @@
       {
         "source": 18,
         "target": 27,
-        "value": 8.641800173540343,
+        "value": 8.659141407141957,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -6949,54 +6990,6 @@
       {
         "source": 18,
         "target": 29,
-        "value": 8.624256113895557,
-        "reason": "1 Co-Authors",
-        "types": {
-          "topic": false,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 5,
-          "opacity": 0.45000000000000007,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 18,
-        "target": 30,
-        "value": 8.624256113895557,
-        "reason": "1 Co-Authors",
-        "types": {
-          "topic": false,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 5,
-          "opacity": 0.45000000000000007,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 18,
-        "target": 32,
-        "value": 8.624256113895557,
-        "reason": "1 Co-Authors",
-        "types": {
-          "topic": false,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 5,
-          "opacity": 0.45000000000000007,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 18,
-        "target": 33,
         "value": 8.641800173540343,
         "reason": "1 Co-Authors",
         "types": {
@@ -7012,8 +7005,56 @@
       },
       {
         "source": 18,
+        "target": 30,
+        "value": 8.641800173540343,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 18,
+        "target": 32,
+        "value": 8.641800173540343,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 18,
+        "target": 33,
+        "value": 8.659141407141957,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 18,
         "target": 34,
-        "value": 11.775221402565087,
+        "value": 11.791094566560893,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -7028,24 +7069,8 @@
       },
       {
         "source": 18,
-        "target": 35,
-        "value": 9.624256113895557,
-        "reason": "1 Keywords, 1 Co-Authors",
-        "types": {
-          "topic": true,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 5,
-          "opacity": 0.55,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 18,
         "target": 36,
-        "value": 9.624256113895557,
+        "value": 9.641800173540343,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
           "topic": true,
@@ -7061,7 +7086,23 @@
       {
         "source": 18,
         "target": 37,
-        "value": 10.624256113895557,
+        "value": 9.641800173540343,
+        "reason": "1 Keywords, 1 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.55,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 18,
+        "target": 38,
+        "value": 10.641800173540343,
         "reason": "Same Venue, 1 Co-Authors",
         "types": {
           "topic": false,
@@ -7076,8 +7117,8 @@
       },
       {
         "source": 18,
-        "target": 38,
-        "value": 8.624256113895557,
+        "target": 39,
+        "value": 8.641800173540343,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -7092,8 +7133,8 @@
       },
       {
         "source": 18,
-        "target": 43,
-        "value": 9.624256113895557,
+        "target": 44,
+        "value": 9.641800173540343,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
           "topic": true,
@@ -7141,7 +7182,7 @@
       {
         "source": 19,
         "target": 23,
-        "value": 9.174981318747381,
+        "value": 9.19860385419959,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
           "topic": true,
@@ -7300,7 +7341,7 @@
       },
       {
         "source": 19,
-        "target": 35,
+        "target": 36,
         "value": 3.6081976621622465,
         "reason": "1 Co-Authors",
         "types": {
@@ -7316,7 +7357,7 @@
       },
       {
         "source": 19,
-        "target": 36,
+        "target": 37,
         "value": 4.6081976621622465,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -7327,22 +7368,6 @@
         "lineStyle": {
           "width": 2.6081976621622465,
           "opacity": 0.55,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 19,
-        "target": 37,
-        "value": 3.6081976621622465,
-        "reason": "1 Co-Authors",
-        "types": {
-          "topic": false,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 2.1081976621622465,
-          "opacity": 0.45000000000000007,
           "curveness": 0.2
         }
       },
@@ -7364,7 +7389,23 @@
       },
       {
         "source": 19,
-        "target": 43,
+        "target": 39,
+        "value": 3.6081976621622465,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 2.1081976621622465,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 19,
+        "target": 44,
         "value": 7.6081976621622465,
         "reason": "1 Keywords, 2 Co-Authors",
         "types": {
@@ -7396,7 +7437,7 @@
       },
       {
         "source": 20,
-        "target": 37,
+        "target": 38,
         "value": 2.6081976621622465,
         "reason": "2 Keywords",
         "types": {
@@ -7413,7 +7454,7 @@
       {
         "source": 21,
         "target": 23,
-        "value": 8.15098080672772,
+        "value": 8.174981318747381,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -7508,7 +7549,7 @@
       },
       {
         "source": 21,
-        "target": 37,
+        "target": 38,
         "value": 3.0,
         "reason": "1 Co-Authors",
         "types": {
@@ -7524,7 +7565,7 @@
       },
       {
         "source": 21,
-        "target": 38,
+        "target": 39,
         "value": 6.0,
         "reason": "1 Keywords, Same Venue, 1 Co-Authors",
         "types": {
@@ -7540,7 +7581,7 @@
       },
       {
         "source": 21,
-        "target": 43,
+        "target": 44,
         "value": 5.0,
         "reason": "Same Venue, 1 Co-Authors",
         "types": {
@@ -7620,7 +7661,7 @@
       },
       {
         "source": 22,
-        "target": 35,
+        "target": 36,
         "value": 8.039720770839917,
         "reason": "1 Keywords, 2 Co-Authors",
         "types": {
@@ -7636,7 +7677,7 @@
       },
       {
         "source": 22,
-        "target": 36,
+        "target": 37,
         "value": 4.039720770839918,
         "reason": "1 Co-Authors",
         "types": {
@@ -7653,7 +7694,7 @@
       {
         "source": 23,
         "target": 24,
-        "value": 11.19860385419959,
+        "value": 11.221860134003538,
         "reason": "3 Keywords, 1 Co-Authors",
         "types": {
           "topic": true,
@@ -7669,7 +7710,7 @@
       {
         "source": 23,
         "target": 25,
-        "value": 7.19860385419959,
+        "value": 7.2218601340035375,
         "reason": "2 Keywords",
         "types": {
           "topic": true,
@@ -7685,7 +7726,7 @@
       {
         "source": 23,
         "target": 26,
-        "value": 7.15098080672772,
+        "value": 7.174981318747381,
         "reason": "2 Keywords",
         "types": {
           "topic": true,
@@ -7701,7 +7742,7 @@
       {
         "source": 23,
         "target": 30,
-        "value": 11.15098080672772,
+        "value": 11.174981318747381,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -7717,7 +7758,7 @@
       {
         "source": 23,
         "target": 32,
-        "value": 8.15098080672772,
+        "value": 8.174981318747381,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -7733,7 +7774,7 @@
       {
         "source": 23,
         "target": 33,
-        "value": 9.174981318747381,
+        "value": 9.19860385419959,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
           "topic": true,
@@ -7749,23 +7790,7 @@
       {
         "source": 23,
         "target": 34,
-        "value": 9.354299044722055,
-        "reason": "1 Keywords, 1 Co-Authors",
-        "types": {
-          "topic": true,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 5,
-          "opacity": 0.55,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 23,
-        "target": 37,
-        "value": 9.15098080672772,
+        "value": 9.375278407684165,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
           "topic": true,
@@ -7781,7 +7806,7 @@
       {
         "source": 23,
         "target": 38,
-        "value": 9.15098080672772,
+        "value": 9.174981318747381,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
           "topic": true,
@@ -7796,8 +7821,24 @@
       },
       {
         "source": 23,
-        "target": 43,
-        "value": 8.15098080672772,
+        "target": 39,
+        "value": 9.174981318747381,
+        "reason": "1 Keywords, 1 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 5,
+          "opacity": 0.55,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 23,
+        "target": 44,
+        "value": 8.174981318747381,
         "reason": "1 Co-Authors",
         "types": {
           "topic": false,
@@ -7876,7 +7917,7 @@
       },
       {
         "source": 24,
-        "target": 37,
+        "target": 38,
         "value": 4.039720770839918,
         "reason": "1 Co-Authors",
         "types": {
@@ -7892,7 +7933,7 @@
       },
       {
         "source": 24,
-        "target": 38,
+        "target": 39,
         "value": 6.039720770839918,
         "reason": "Same Venue, 1 Co-Authors",
         "types": {
@@ -7908,7 +7949,7 @@
       },
       {
         "source": 24,
-        "target": 43,
+        "target": 44,
         "value": 6.039720770839918,
         "reason": "Same Venue, 1 Co-Authors",
         "types": {
@@ -7956,7 +7997,7 @@
       },
       {
         "source": 25,
-        "target": 37,
+        "target": 38,
         "value": 3.039720770839918,
         "reason": "2 Keywords",
         "types": {
@@ -7972,7 +8013,7 @@
       },
       {
         "source": 25,
-        "target": 43,
+        "target": 44,
         "value": 4.039720770839918,
         "reason": "1 Co-Authors",
         "types": {
@@ -8004,7 +8045,7 @@
       },
       {
         "source": 26,
-        "target": 37,
+        "target": 38,
         "value": 2.0,
         "reason": "2 Keywords",
         "types": {
@@ -8020,7 +8061,7 @@
       },
       {
         "source": 26,
-        "target": 43,
+        "target": 44,
         "value": 3.0,
         "reason": "1 Co-Authors",
         "types": {
@@ -8084,7 +8125,7 @@
       },
       {
         "source": 27,
-        "target": 35,
+        "target": 36,
         "value": 6.6081976621622465,
         "reason": "2 Co-Authors",
         "types": {
@@ -8100,7 +8141,7 @@
       },
       {
         "source": 27,
-        "target": 36,
+        "target": 37,
         "value": 4.6081976621622465,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -8116,7 +8157,7 @@
       },
       {
         "source": 27,
-        "target": 46,
+        "target": 47,
         "value": 2.6081976621622465,
         "reason": "Same Venue",
         "types": {
@@ -8164,7 +8205,7 @@
       },
       {
         "source": 28,
-        "target": 38,
+        "target": 39,
         "value": 2.0,
         "reason": "2 Keywords",
         "types": {
@@ -8180,7 +8221,7 @@
       },
       {
         "source": 28,
-        "target": 40,
+        "target": 41,
         "value": 2.0,
         "reason": "Same Venue",
         "types": {
@@ -8196,7 +8237,7 @@
       },
       {
         "source": 28,
-        "target": 45,
+        "target": 46,
         "value": 3.3744360978112327,
         "reason": "Same Venue",
         "types": {
@@ -8228,7 +8269,7 @@
       },
       {
         "source": 29,
-        "target": 35,
+        "target": 36,
         "value": 6.0,
         "reason": "2 Co-Authors",
         "types": {
@@ -8244,7 +8285,7 @@
       },
       {
         "source": 29,
-        "target": 36,
+        "target": 37,
         "value": 4.0,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -8308,7 +8349,7 @@
       },
       {
         "source": 30,
-        "target": 37,
+        "target": 38,
         "value": 3.0,
         "reason": "1 Co-Authors",
         "types": {
@@ -8324,7 +8365,7 @@
       },
       {
         "source": 30,
-        "target": 38,
+        "target": 39,
         "value": 4.0,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -8340,7 +8381,7 @@
       },
       {
         "source": 30,
-        "target": 40,
+        "target": 41,
         "value": 2.0,
         "reason": "Same Venue",
         "types": {
@@ -8356,7 +8397,7 @@
       },
       {
         "source": 30,
-        "target": 43,
+        "target": 44,
         "value": 3.0,
         "reason": "1 Co-Authors",
         "types": {
@@ -8372,7 +8413,7 @@
       },
       {
         "source": 30,
-        "target": 45,
+        "target": 46,
         "value": 3.3744360978112327,
         "reason": "Same Venue",
         "types": {
@@ -8388,8 +8429,8 @@
       },
       {
         "source": 31,
-        "target": 44,
-        "value": 6.6081976621622465,
+        "target": 45,
+        "value": 7.039720770839918,
         "reason": "2 Co-Authors",
         "types": {
           "topic": false,
@@ -8397,7 +8438,7 @@
           "author": true
         },
         "lineStyle": {
-          "width": 3.6081976621622465,
+          "width": 4.039720770839918,
           "opacity": 0.7,
           "curveness": 0.2
         }
@@ -8436,7 +8477,7 @@
       },
       {
         "source": 32,
-        "target": 37,
+        "target": 38,
         "value": 4.0,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -8452,7 +8493,7 @@
       },
       {
         "source": 32,
-        "target": 38,
+        "target": 39,
         "value": 3.0,
         "reason": "1 Co-Authors",
         "types": {
@@ -8468,7 +8509,7 @@
       },
       {
         "source": 32,
-        "target": 40,
+        "target": 41,
         "value": 2.0,
         "reason": "Same Venue",
         "types": {
@@ -8484,7 +8525,7 @@
       },
       {
         "source": 32,
-        "target": 43,
+        "target": 44,
         "value": 6.0,
         "reason": "2 Co-Authors",
         "types": {
@@ -8500,7 +8541,7 @@
       },
       {
         "source": 32,
-        "target": 45,
+        "target": 46,
         "value": 5.374436097811232,
         "reason": "2 Keywords, Same Venue",
         "types": {
@@ -8532,7 +8573,7 @@
       },
       {
         "source": 33,
-        "target": 37,
+        "target": 38,
         "value": 14.608197662162247,
         "reason": "5 Keywords, 3 Co-Authors",
         "types": {
@@ -8548,7 +8589,7 @@
       },
       {
         "source": 33,
-        "target": 38,
+        "target": 39,
         "value": 3.6081976621622465,
         "reason": "1 Co-Authors",
         "types": {
@@ -8564,7 +8605,7 @@
       },
       {
         "source": 33,
-        "target": 43,
+        "target": 44,
         "value": 3.6081976621622465,
         "reason": "1 Co-Authors",
         "types": {
@@ -8580,7 +8621,7 @@
       },
       {
         "source": 33,
-        "target": 46,
+        "target": 47,
         "value": 2.6081976621622465,
         "reason": "Same Venue",
         "types": {
@@ -8591,22 +8632,6 @@
         "lineStyle": {
           "width": 1.6081976621622465,
           "opacity": 0.35,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 34,
-        "target": 35,
-        "value": 5.557122138357638,
-        "reason": "1 Co-Authors",
-        "types": {
-          "topic": false,
-          "venue": false,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 4.057122138357638,
-          "opacity": 0.45000000000000007,
           "curveness": 0.2
         }
       },
@@ -8645,6 +8670,22 @@
       {
         "source": 34,
         "target": 38,
+        "value": 5.557122138357638,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 4.057122138357638,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 34,
+        "target": 39,
         "value": 6.557122138357638,
         "reason": "1 Keywords, 1 Co-Authors",
         "types": {
@@ -8660,7 +8701,7 @@
       },
       {
         "source": 34,
-        "target": 43,
+        "target": 44,
         "value": 5.557122138357638,
         "reason": "1 Co-Authors",
         "types": {
@@ -8676,55 +8717,23 @@
       },
       {
         "source": 35,
-        "target": 36,
-        "value": 5.0,
-        "reason": "2 Keywords, 1 Co-Authors",
+        "target": 40,
+        "value": 9.0,
+        "reason": "3 Co-Authors",
         "types": {
-          "topic": true,
+          "topic": false,
           "venue": false,
           "author": true
         },
         "lineStyle": {
-          "width": 2.5,
-          "opacity": 0.65,
+          "width": 4.5,
+          "opacity": 0.7,
           "curveness": 0.2
         }
       },
       {
         "source": 35,
-        "target": 45,
-        "value": 4.374436097811232,
-        "reason": "3 Keywords",
-        "types": {
-          "topic": true,
-          "venue": false,
-          "author": false
-        },
-        "lineStyle": {
-          "width": 2.8744360978112327,
-          "opacity": 0.45000000000000007,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 36,
-        "target": 45,
-        "value": 3.3744360978112327,
-        "reason": "2 Keywords",
-        "types": {
-          "topic": true,
-          "venue": false,
-          "author": false
-        },
-        "lineStyle": {
-          "width": 2.3744360978112327,
-          "opacity": 0.35,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 37,
-        "target": 38,
+        "target": 41,
         "value": 3.0,
         "reason": "1 Co-Authors",
         "types": {
@@ -8739,8 +8748,56 @@
         }
       },
       {
+        "source": 36,
+        "target": 37,
+        "value": 5.0,
+        "reason": "2 Keywords, 1 Co-Authors",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 2.5,
+          "opacity": 0.65,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 36,
+        "target": 46,
+        "value": 4.374436097811232,
+        "reason": "3 Keywords",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": false
+        },
+        "lineStyle": {
+          "width": 2.8744360978112327,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
         "source": 37,
-        "target": 43,
+        "target": 46,
+        "value": 3.3744360978112327,
+        "reason": "2 Keywords",
+        "types": {
+          "topic": true,
+          "venue": false,
+          "author": false
+        },
+        "lineStyle": {
+          "width": 2.3744360978112327,
+          "opacity": 0.35,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 38,
+        "target": 39,
         "value": 3.0,
         "reason": "1 Co-Authors",
         "types": {
@@ -8756,23 +8813,7 @@
       },
       {
         "source": 38,
-        "target": 43,
-        "value": 5.0,
-        "reason": "Same Venue, 1 Co-Authors",
-        "types": {
-          "topic": false,
-          "venue": true,
-          "author": true
-        },
-        "lineStyle": {
-          "width": 2.5,
-          "opacity": 0.65,
-          "curveness": 0.2
-        }
-      },
-      {
-        "source": 39,
-        "target": 40,
+        "target": 44,
         "value": 3.0,
         "reason": "1 Co-Authors",
         "types": {
@@ -8788,7 +8829,39 @@
       },
       {
         "source": 39,
+        "target": 44,
+        "value": 5.0,
+        "reason": "Same Venue, 1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": true,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 2.5,
+          "opacity": 0.65,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 40,
         "target": 41,
+        "value": 3.0,
+        "reason": "1 Co-Authors",
+        "types": {
+          "topic": false,
+          "venue": false,
+          "author": true
+        },
+        "lineStyle": {
+          "width": 1.5,
+          "opacity": 0.45000000000000007,
+          "curveness": 0.2
+        }
+      },
+      {
+        "source": 40,
+        "target": 42,
         "value": 2.0,
         "reason": "Same Venue",
         "types": {
@@ -8803,8 +8876,8 @@
         }
       },
       {
-        "source": 40,
-        "target": 45,
+        "source": 41,
+        "target": 46,
         "value": 3.3744360978112327,
         "reason": "Same Venue",
         "types": {
@@ -8819,8 +8892,8 @@
         }
       },
       {
-        "source": 41,
-        "target": 46,
+        "source": 42,
+        "target": 47,
         "value": 3.0,
         "reason": "1 Co-Authors",
         "types": {
@@ -8839,11 +8912,11 @@
   "scholar": {
     "lastUpdated": "November 2026",
     "metrics": {
-      "citations": 655,
+      "citations": 659,
       "hIndex": 10,
       "i10Index": 11,
-      "publications": 44,
-      "citationVelocity": 166,
+      "publications": 45,
+      "citationVelocity": 169,
       "interests": [
         "Learning",
         "Hacker",
@@ -8880,7 +8953,7 @@
       },
       {
         "year": "2026",
-        "citations": 166
+        "citations": 169
       }
     ]
   },
@@ -8890,20 +8963,20 @@
     "latestYearCount": 1,
     "journals": {
       "value": 9,
-      "base": 47,
-      "meta": "9 of 47 total publications",
+      "base": 48,
+      "meta": "9 of 48 total publications",
       "tooltip": "Peer-reviewed journal articles."
     },
     "conferences": {
-      "value": 28,
-      "base": 47,
-      "meta": "28 of 47 total publications",
+      "value": 29,
+      "base": 48,
+      "meta": "29 of 48 total publications",
       "tooltip": "Conference papers and proceedings."
     },
     "workshops": {
       "value": 10,
-      "base": 47,
-      "meta": "10 of 47 total publications",
+      "base": 48,
+      "meta": "10 of 48 total publications",
       "tooltip": "Workshop and pre-conference papers."
     },
     "best-paper": {
@@ -8975,63 +9048,67 @@
       },
       {
         "month": "202611",
-        "visitors": 220
+        "visitors": 325
       }
     ],
     "devices": [
       {
         "device": "desktop",
-        "users": 333
+        "users": 363
       },
       {
         "device": "mobile",
-        "users": 91
+        "users": 107
+      },
+      {
+        "device": "tablet",
+        "users": 1
       }
     ],
     "topPages": [
       {
-        "path": "/ccair/pathways/",
-        "views": 785
-      },
-      {
         "path": "/",
-        "views": 166
+        "views": 190
       },
       {
         "path": "/publications/",
-        "views": 47
+        "views": 61
+      },
+      {
+        "path": "/ccair/pathways/",
+        "views": 58
       },
       {
         "path": "/research/",
-        "views": 43
+        "views": 46
       },
       {
         "path": "/cv/",
-        "views": 31
+        "views": 37
       },
       {
         "path": "/teaching/",
-        "views": 20
-      },
-      {
-        "path": "/journal_publication/llm_tmis/",
-        "views": 13
-      },
-      {
-        "path": "/journal_publication/voice-phishing-misq/",
-        "views": 13
-      },
-      {
-        "path": "/ccair/pathways/soc-analyst/",
-        "views": 10
+        "views": 24
       },
       {
         "path": "/ccair/pathways/digital-forensics-investigator/",
-        "views": 9
+        "views": 15
+      },
+      {
+        "path": "/ccair/students/scholarships/",
+        "views": 15
+      },
+      {
+        "path": "/journal_publication/llm_tmis/",
+        "views": 14
+      },
+      {
+        "path": "/journal_publication/voice-phishing-misq/",
+        "views": 14
       }
     ],
-    "totalLast30Days": 421,
-    "lifetimeTotal": 3141,
+    "totalLast30Days": 469,
+    "lifetimeTotal": 3245,
     "ranges": {
       "30": {
         "locations": [
@@ -9050,7 +9127,7 @@
             "region": "VA",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 21,
+            "visitors": 20,
             "display": "Ashburn, VA, USA",
             "lat": 39.0438,
             "lng": -77.4874
@@ -9060,7 +9137,7 @@
             "region": "GA",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 21,
+            "visitors": 19,
             "display": "Atlanta, GA, USA",
             "lat": 33.749,
             "lng": -84.388
@@ -9070,7 +9147,7 @@
             "region": "Shanghai",
             "country": "China",
             "countryRaw": "China",
-            "visitors": 16,
+            "visitors": 19,
             "display": "Shanghai, Shanghai, China"
           },
           {
@@ -9078,7 +9155,7 @@
             "region": "NY",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 9,
+            "visitors": 8,
             "display": "New York, NY, USA",
             "lat": 40.7128,
             "lng": -74.006
@@ -9092,48 +9169,62 @@
             "display": "Los Angeles, CA, USA"
           },
           {
-            "city": "Council Bluffs",
-            "region": "IA",
-            "country": "USA",
-            "countryRaw": "United States",
-            "visitors": 4,
-            "display": "Council Bluffs, IA, USA"
-          },
-          {
             "city": "The Dalles",
             "region": "OR",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 4,
+            "visitors": 6,
             "display": "The Dalles, OR, USA"
           },
           {
-            "city": "Hong Kong",
-            "region": "",
-            "country": "Hong Kong",
-            "countryRaw": "Hong Kong",
-            "visitors": 3,
-            "display": "Hong Kong, —, Hong Kong"
+            "city": "Council Bluffs",
+            "region": "IA",
+            "country": "USA",
+            "countryRaw": "United States",
+            "visitors": 5,
+            "display": "Council Bluffs, IA, USA"
           },
           {
-            "city": "Houston",
+            "city": "Arlington",
             "region": "TX",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 3,
-            "display": "Houston, TX, USA"
+            "visitors": 4,
+            "display": "Arlington, TX, USA",
+            "lat": 38.8816,
+            "lng": -77.091
           },
           {
-            "city": "San Francisco",
-            "region": "CA",
+            "city": "Boardman",
+            "region": "OR",
+            "country": "USA",
+            "countryRaw": "United States",
+            "visitors": 4,
+            "display": "Boardman, OR, USA",
+            "lat": 45.8399,
+            "lng": -119.7011
+          },
+          {
+            "city": "Singapore",
+            "region": "",
+            "country": "Singapore",
+            "countryRaw": "Singapore",
+            "visitors": 4,
+            "display": "Singapore, —, Singapore",
+            "lat": 1.3521,
+            "lng": 103.8198
+          },
+          {
+            "city": "Denver",
+            "region": "CO",
             "country": "USA",
             "countryRaw": "United States",
             "visitors": 3,
-            "display": "San Francisco, CA, USA"
+            "display": "Denver, CO, USA"
           }
         ],
-        "usPct": 38,
-        "intlPct": 62,
+        "usPct": 39,
+        "intlPct": 61,
         "topRegion": "Singapore",
         "topThreeWithCoords": [
           {
@@ -9151,7 +9242,7 @@
             "region": "VA",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 21,
+            "visitors": 20,
             "display": "Ashburn, VA, USA",
             "lat": 39.0438,
             "lng": -77.4874
@@ -9161,7 +9252,7 @@
             "region": "GA",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 21,
+            "visitors": 19,
             "display": "Atlanta, GA, USA",
             "lat": 33.749,
             "lng": -84.388
@@ -9175,7 +9266,7 @@
             "region": "",
             "country": "Singapore",
             "countryRaw": "Singapore",
-            "visitors": 366,
+            "visitors": 339,
             "display": "Singapore, —, Singapore",
             "lat": 1.3521,
             "lng": 103.8198
@@ -9185,7 +9276,7 @@
             "region": "GA",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 39,
+            "visitors": 40,
             "display": "Atlanta, GA, USA",
             "lat": 33.749,
             "lng": -84.388
@@ -9195,7 +9286,7 @@
             "region": "VA",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 28,
+            "visitors": 27,
             "display": "Ashburn, VA, USA",
             "lat": 39.0438,
             "lng": -77.4874
@@ -9205,33 +9296,33 @@
             "region": "Shanghai",
             "country": "China",
             "countryRaw": "China",
-            "visitors": 22,
+            "visitors": 23,
             "display": "Shanghai, Shanghai, China"
-          },
-          {
-            "city": "New York",
-            "region": "NY",
-            "country": "USA",
-            "countryRaw": "United States",
-            "visitors": 16,
-            "display": "New York, NY, USA",
-            "lat": 40.7128,
-            "lng": -74.006
           },
           {
             "city": "Council Bluffs",
             "region": "IA",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 14,
+            "visitors": 17,
             "display": "Council Bluffs, IA, USA"
+          },
+          {
+            "city": "New York",
+            "region": "NY",
+            "country": "USA",
+            "countryRaw": "United States",
+            "visitors": 15,
+            "display": "New York, NY, USA",
+            "lat": 40.7128,
+            "lng": -74.006
           },
           {
             "city": "Los Angeles",
             "region": "CA",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 10,
+            "visitors": 11,
             "display": "Los Angeles, CA, USA"
           },
           {
@@ -9239,18 +9330,18 @@
             "region": "OR",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 7,
+            "visitors": 9,
             "display": "Boardman, OR, USA",
             "lat": 45.8399,
             "lng": -119.7011
           },
           {
-            "city": "Chongqing",
-            "region": "Chongqing",
-            "country": "China",
-            "countryRaw": "China",
-            "visitors": 7,
-            "display": "Chongqing, Chongqing, China"
+            "city": "Moses Lake",
+            "region": "WA",
+            "country": "USA",
+            "countryRaw": "United States",
+            "visitors": 8,
+            "display": "Moses Lake, WA, USA"
           },
           {
             "city": "San Jose",
@@ -9269,24 +9360,16 @@
             "display": "Seoul, Seoul, South Korea"
           },
           {
-            "city": "Zhangjiajie",
-            "region": "Hunan",
-            "country": "China",
-            "countryRaw": "China",
+            "city": "The Dalles",
+            "region": "OR",
+            "country": "USA",
+            "countryRaw": "United States",
             "visitors": 7,
-            "display": "Zhangjiajie, Hunan, China"
-          },
-          {
-            "city": "Hong Kong",
-            "region": "",
-            "country": "Hong Kong",
-            "countryRaw": "Hong Kong",
-            "visitors": 6,
-            "display": "Hong Kong, —, Hong Kong"
+            "display": "The Dalles, OR, USA"
           }
         ],
-        "usPct": 23,
-        "intlPct": 77,
+        "usPct": 28,
+        "intlPct": 72,
         "topRegion": "Singapore",
         "topThreeWithCoords": [
           {
@@ -9294,7 +9377,7 @@
             "region": "",
             "country": "Singapore",
             "countryRaw": "Singapore",
-            "visitors": 366,
+            "visitors": 339,
             "display": "Singapore, —, Singapore",
             "lat": 1.3521,
             "lng": 103.8198
@@ -9304,7 +9387,7 @@
             "region": "GA",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 39,
+            "visitors": 40,
             "display": "Atlanta, GA, USA",
             "lat": 33.749,
             "lng": -84.388
@@ -9314,7 +9397,7 @@
             "region": "VA",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 28,
+            "visitors": 27,
             "display": "Ashburn, VA, USA",
             "lat": 39.0438,
             "lng": -77.4874
@@ -9328,7 +9411,7 @@
             "region": "",
             "country": "Singapore",
             "countryRaw": "Singapore",
-            "visitors": 1215,
+            "visitors": 1227,
             "display": "Singapore, —, Singapore",
             "lat": 1.3521,
             "lng": 103.8198
@@ -9348,7 +9431,7 @@
             "region": "GA",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 110,
+            "visitors": 112,
             "display": "Atlanta, GA, USA",
             "lat": 33.749,
             "lng": -84.388
@@ -9368,7 +9451,7 @@
             "region": "Shanghai",
             "country": "China",
             "countryRaw": "China",
-            "visitors": 35,
+            "visitors": 38,
             "display": "Shanghai, Shanghai, China"
           },
           {
@@ -9382,20 +9465,28 @@
             "lng": -74.006
           },
           {
+            "city": "Los Angeles",
+            "region": "CA",
+            "country": "USA",
+            "countryRaw": "United States",
+            "visitors": 20,
+            "display": "Los Angeles, CA, USA"
+          },
+          {
+            "city": "Council Bluffs",
+            "region": "IA",
+            "country": "USA",
+            "countryRaw": "United States",
+            "visitors": 19,
+            "display": "Council Bluffs, IA, USA"
+          },
+          {
             "city": "Ho Chi Minh City",
             "region": "Ho Chi Minh",
             "country": "Vietnam",
             "countryRaw": "Vietnam",
             "visitors": 19,
             "display": "Ho Chi Minh City, Ho Chi Minh, Vietnam"
-          },
-          {
-            "city": "Los Angeles",
-            "region": "CA",
-            "country": "USA",
-            "countryRaw": "United States",
-            "visitors": 19,
-            "display": "Los Angeles, CA, USA"
           },
           {
             "city": "Tehran",
@@ -9426,20 +9517,20 @@
             "display": "Hong Kong, —, Hong Kong"
           },
           {
-            "city": "Council Bluffs",
-            "region": "IA",
+            "city": "Moses Lake",
+            "region": "WA",
             "country": "USA",
             "countryRaw": "United States",
             "visitors": 16,
-            "display": "Council Bluffs, IA, USA"
+            "display": "Moses Lake, WA, USA"
           },
           {
-            "city": "San Jose",
-            "region": "CA",
-            "country": "USA",
-            "countryRaw": "United States",
+            "city": "Bogota",
+            "region": "Bogota",
+            "country": "Colombia",
+            "countryRaw": "Colombia",
             "visitors": 15,
-            "display": "San Jose, CA, USA"
+            "display": "Bogota, Bogota, Colombia"
           }
         ],
         "usPct": 14,
@@ -9451,7 +9542,7 @@
             "region": "",
             "country": "Singapore",
             "countryRaw": "Singapore",
-            "visitors": 1215,
+            "visitors": 1227,
             "display": "Singapore, —, Singapore",
             "lat": 1.3521,
             "lng": 103.8198
@@ -9471,7 +9562,7 @@
             "region": "GA",
             "country": "USA",
             "countryRaw": "United States",
-            "visitors": 110,
+            "visitors": 112,
             "display": "Atlanta, GA, USA",
             "lat": 33.749,
             "lng": -84.388
@@ -9622,7 +9713,7 @@
           "degree": 8,
           "topicLinks": 3,
           "venueLinks": 8,
-          "authorLinks": 71,
+          "authorLinks": 72,
           "authors": [
             "Benjamin M. Ampel",
             "Mark Patton",
@@ -9640,7 +9731,7 @@
           "degree": 9,
           "topicLinks": 29,
           "venueLinks": 8,
-          "authorLinks": 108,
+          "authorLinks": 109,
           "authors": [
             "Ben Lazarine",
             "Sagar Samtani",
@@ -9660,9 +9751,9 @@
           "eigen": 0.3544108176303386,
           "between": 130.15770724373664,
           "degree": 16,
-          "topicLinks": 45,
+          "topicLinks": 46,
           "venueLinks": 8,
-          "authorLinks": 104,
+          "authorLinks": 105,
           "authors": [
             "Benjamin M. Ampel",
             "Sagar Samtani",
@@ -9682,7 +9773,7 @@
           "degree": 7,
           "topicLinks": 31,
           "venueLinks": 0,
-          "authorLinks": 46,
+          "authorLinks": 47,
           "authors": [
             "Benjamin M. Ampel"
           ]
@@ -9698,7 +9789,7 @@
           "degree": 8,
           "topicLinks": 29,
           "venueLinks": 8,
-          "authorLinks": 108,
+          "authorLinks": 109,
           "authors": [
             "Steven Ullman",
             "Sagar Samtani",
@@ -9720,7 +9811,7 @@
           "degree": 8,
           "topicLinks": 12,
           "venueLinks": 8,
-          "authorLinks": 69,
+          "authorLinks": 70,
           "authors": [
             "Benjamin M. Ampel",
             "Hsinchun Chen"
@@ -9737,7 +9828,7 @@
           "degree": 9,
           "topicLinks": 27,
           "venueLinks": 8,
-          "authorLinks": 96,
+          "authorLinks": 97,
           "authors": [
             "Kaeli Otto",
             "Benjamin M. Ampel",
@@ -9757,7 +9848,7 @@
           "degree": 9,
           "topicLinks": 21,
           "venueLinks": 8,
-          "authorLinks": 89,
+          "authorLinks": 90,
           "authors": [
             "Tala Vahedi",
             "Benjamin M. Ampel",
@@ -9776,7 +9867,7 @@
           "degree": 2,
           "topicLinks": 23,
           "venueLinks": 0,
-          "authorLinks": 97,
+          "authorLinks": 98,
           "authors": [
             "Benjamin M. Ampel",
             "Sagar Samtani",
@@ -9795,7 +9886,7 @@
           "degree": 2,
           "topicLinks": 0,
           "venueLinks": 2,
-          "authorLinks": 48,
+          "authorLinks": 49,
           "authors": [
             "Carolin Marx",
             "Benjamin M. Ampel",
@@ -9813,7 +9904,7 @@
           "degree": 5,
           "topicLinks": 18,
           "venueLinks": 1,
-          "authorLinks": 94,
+          "authorLinks": 95,
           "authors": [
             "Benjamin M. Ampel",
             "Yang Gao",
@@ -9833,7 +9924,7 @@
           "degree": 8,
           "topicLinks": 24,
           "venueLinks": 8,
-          "authorLinks": 96,
+          "authorLinks": 97,
           "authors": [
             "Benjamin M. Ampel",
             "Kaeli Otto",
@@ -9853,7 +9944,7 @@
           "degree": 10,
           "topicLinks": 38,
           "venueLinks": 0,
-          "authorLinks": 76,
+          "authorLinks": 77,
           "authors": [
             "Yang Gao",
             "Sagar Samtani",
@@ -9873,7 +9964,7 @@
           "degree": 14,
           "topicLinks": 32,
           "venueLinks": 8,
-          "authorLinks": 89,
+          "authorLinks": 90,
           "authors": [
             "Benjamin M. Ampel",
             "Tala Vahedi",
@@ -9892,7 +9983,7 @@
           "degree": 1,
           "topicLinks": 0,
           "venueLinks": 1,
-          "authorLinks": 46,
+          "authorLinks": 47,
           "authors": [
             "Benjamin M. Ampel"
           ]
@@ -9903,12 +9994,12 @@
           "year": 2023,
           "venue": "Transactions on Replication Research",
           "citations": 2,
-          "eigen": 5.904380761963741e-29,
+          "eigen": 5.904380761963742e-29,
           "between": 0.0,
           "degree": 0,
           "topicLinks": 0,
           "venueLinks": 0,
-          "authorLinks": 55,
+          "authorLinks": 56,
           "authors": [
             "Benjamin M. Ampel",
             "Steven Ullman"
@@ -9919,13 +10010,13 @@
           "title": "Creating Proactive Cyber Threat Intelligence with Hacker Exploit Labels: A Deep Transfer Learning Approach",
           "year": 2024,
           "venue": "MIS Quarterly",
-          "citations": 50,
+          "citations": 51,
           "eigen": 0.20511007939967382,
           "between": 51.4688890085949,
           "degree": 11,
-          "topicLinks": 47,
+          "topicLinks": 48,
           "venueLinks": 1,
-          "authorLinks": 95,
+          "authorLinks": 96,
           "authors": [
             "Benjamin M. Ampel",
             "Sagar Samtani",
@@ -9944,7 +10035,7 @@
           "degree": 2,
           "topicLinks": 21,
           "venueLinks": 0,
-          "authorLinks": 69,
+          "authorLinks": 70,
           "authors": [
             "Yang Gao",
             "Benjamin M. Ampel",
@@ -9956,13 +10047,13 @@
           "title": "Improving Threat Mitigation Through a Cybersecurity Risk Management Framework: A Computational Design Science Approach",
           "year": 2024,
           "venue": "Journal of Management Information Systems",
-          "citations": 83,
+          "citations": 84,
           "eigen": 0.09131016005842431,
           "between": 22.9126739001739,
           "degree": 8,
-          "topicLinks": 34,
+          "topicLinks": 35,
           "venueLinks": 1,
-          "authorLinks": 95,
+          "authorLinks": 96,
           "authors": [
             "Benjamin M. Ampel",
             "Sagar Samtani",
@@ -9977,12 +10068,12 @@
           "year": 2024,
           "venue": "ACM KDD",
           "citations": 1,
-          "eigen": 5.904380761963741e-29,
+          "eigen": 5.904380761963742e-29,
           "between": 0.0,
           "degree": 0,
           "topicLinks": 9,
           "venueLinks": 0,
-          "authorLinks": 97,
+          "authorLinks": 98,
           "authors": [
             "Steven Ullman",
             "Benjamin M. Ampel",
@@ -10000,9 +10091,9 @@
           "eigen": 0.02178057811610439,
           "between": 1.0833333333333333,
           "degree": 3,
-          "topicLinks": 15,
+          "topicLinks": 16,
           "venueLinks": 0,
-          "authorLinks": 46,
+          "authorLinks": 47,
           "authors": [
             "Benjamin M. Ampel"
           ]
@@ -10018,7 +10109,7 @@
           "degree": 7,
           "topicLinks": 25,
           "venueLinks": 3,
-          "authorLinks": 70,
+          "authorLinks": 71,
           "authors": [
             "Mason Wagner",
             "Benjamin M. Ampel",
@@ -10037,7 +10128,7 @@
           "degree": 6,
           "topicLinks": 28,
           "venueLinks": 0,
-          "authorLinks": 69,
+          "authorLinks": 70,
           "authors": [
             "Yang Gao",
             "Benjamin M. Ampel",
@@ -10049,13 +10140,13 @@
           "title": "Large Language Models for Conducting Advanced Text Analytics Information Systems Research",
           "year": 2025,
           "venue": "ACM Transactions on Management Information Systems",
-          "citations": 60,
+          "citations": 61,
           "eigen": 0.005741545153819761,
           "between": 17.44283216783217,
           "degree": 3,
           "topicLinks": 16,
           "venueLinks": 0,
-          "authorLinks": 71,
+          "authorLinks": 72,
           "authors": [
             "Benjamin M. Ampel",
             "Chi-Heng Yang",
@@ -10074,7 +10165,7 @@
           "degree": 4,
           "topicLinks": 7,
           "venueLinks": 3,
-          "authorLinks": 69,
+          "authorLinks": 70,
           "authors": [
             "Raul Reyes",
             "Benjamin M. Ampel",
@@ -10092,7 +10183,7 @@
           "degree": 5,
           "topicLinks": 22,
           "venueLinks": 0,
-          "authorLinks": 55,
+          "authorLinks": 56,
           "authors": [
             "Benjamin M. Ampel",
             "Steven Ullman"
@@ -10109,7 +10200,7 @@
           "degree": 3,
           "topicLinks": 17,
           "venueLinks": 0,
-          "authorLinks": 55,
+          "authorLinks": 56,
           "authors": [
             "Benjamin M. Ampel",
             "Steven Ullman"
@@ -10126,7 +10217,7 @@
           "degree": 5,
           "topicLinks": 18,
           "venueLinks": 2,
-          "authorLinks": 67,
+          "authorLinks": 68,
           "authors": [
             "Chengjun Zhang",
             "Benjamin M. Ampel",
@@ -10144,7 +10235,7 @@
           "degree": 7,
           "topicLinks": 14,
           "venueLinks": 4,
-          "authorLinks": 46,
+          "authorLinks": 47,
           "authors": [
             "Abena M. Darko",
             "Benjamin M. Ampel"
@@ -10161,7 +10252,7 @@
           "degree": 2,
           "topicLinks": 12,
           "venueLinks": 0,
-          "authorLinks": 67,
+          "authorLinks": 68,
           "authors": [
             "Ting Chen",
             "Chengjun Zhang",
@@ -10180,7 +10271,7 @@
           "degree": 8,
           "topicLinks": 28,
           "venueLinks": 4,
-          "authorLinks": 72,
+          "authorLinks": 73,
           "authors": [
             "Noah Abdellatif",
             "Mason Wagner",
@@ -10195,13 +10286,13 @@
           "title": "Authority Bias in Conversational Search Engines for Academic Paper Recommendation",
           "year": 2026,
           "venue": "EMNLP",
-          "citations": 1,
-          "eigen": 5.904380761963741e-29,
+          "citations": 2,
+          "eigen": 5.904380761963742e-29,
           "between": 0.0,
           "degree": 0,
           "topicLinks": 0,
           "venueLinks": 0,
-          "authorLinks": 48,
+          "authorLinks": 49,
           "authors": [
             "Uthman Jinadu",
             "Parsa Ghazvinian",
@@ -10222,7 +10313,7 @@
           "degree": 5,
           "topicLinks": 14,
           "venueLinks": 4,
-          "authorLinks": 78,
+          "authorLinks": 79,
           "authors": [
             "Joseph Chen",
             "Benjamin M. Ampel",
@@ -10242,7 +10333,7 @@
           "degree": 4,
           "topicLinks": 13,
           "venueLinks": 2,
-          "authorLinks": 71,
+          "authorLinks": 72,
           "authors": [
             "Cade Dacosta",
             "Benjamin M. Ampel",
@@ -10261,7 +10352,7 @@
           "degree": 4,
           "topicLinks": 26,
           "venueLinks": 1,
-          "authorLinks": 88,
+          "authorLinks": 89,
           "authors": [
             "Benjamin M. Ampel",
             "Sagar Samtani",
@@ -10270,6 +10361,28 @@
         },
         {
           "index": 35,
+          "title": "Calibrating LLM Tutor Initiation to Learner Expertise: Proactive and Reactive Support for Computational Thinking",
+          "year": 2026,
+          "venue": "Available at SSRN",
+          "citations": 0,
+          "eigen": 5.904380761963742e-29,
+          "between": 0.0,
+          "degree": 0,
+          "topicLinks": 4,
+          "venueLinks": 0,
+          "authorLinks": 51,
+          "authors": [
+            "Arun Rai",
+            "L Chen",
+            "Balasubramaniam Ramesh",
+            "Cynthia Breazeal",
+            "Y Long",
+            "Benjamin M. Ampel",
+            "A Aria"
+          ]
+        },
+        {
+          "index": 36,
           "title": "Cyber Threat Classification Under Non-Stationary Environments: An Adapt In-Context Learning (Adapt-ICL) Approach",
           "year": 2026,
           "venue": "INFORMS WDS",
@@ -10279,7 +10392,7 @@
           "degree": 9,
           "topicLinks": 35,
           "venueLinks": 0,
-          "authorLinks": 71,
+          "authorLinks": 72,
           "authors": [
             "Chengjun Zhang",
             "Yang Gao",
@@ -10288,7 +10401,7 @@
           ]
         },
         {
-          "index": 36,
+          "index": 37,
           "title": "HackerSignal: A Multi-Source, CVE-Linked Corpus and Prospective Benchmark for Cyber Threat Intelligence",
           "year": 2026,
           "venue": "NeurIPS ED Track",
@@ -10298,14 +10411,14 @@
           "degree": 4,
           "topicLinks": 18,
           "venueLinks": 0,
-          "authorLinks": 65,
+          "authorLinks": 66,
           "authors": [
             "Benjamin M. Ampel",
             "Sagar Samtani"
           ]
         },
         {
-          "index": 37,
+          "index": 38,
           "title": "Identifying Protected Health Information in Hacker Communities: A Multi-Task Relation Learning Approach",
           "year": 2026,
           "venue": "Journal of Management Information Systems",
@@ -10315,7 +10428,7 @@
           "degree": 13,
           "topicLinks": 46,
           "venueLinks": 1,
-          "authorLinks": 71,
+          "authorLinks": 72,
           "authors": [
             "Cade Dacosta",
             "Benjamin M. Ampel",
@@ -10324,7 +10437,7 @@
           ]
         },
         {
-          "index": 38,
+          "index": 39,
           "title": "Multimodal Phishing Detection on Social Media: Evaluating Text-Image Fusion",
           "year": 2026,
           "venue": "WISP",
@@ -10334,7 +10447,7 @@
           "degree": 7,
           "topicLinks": 15,
           "venueLinks": 3,
-          "authorLinks": 69,
+          "authorLinks": 70,
           "authors": [
             "Kayla Redwing",
             "Benjamin M. Ampel",
@@ -10342,7 +10455,7 @@
           ]
         },
         {
-          "index": 39,
+          "index": 40,
           "title": "Pathways to AI-Ready Entry-Level Talent for Industry Domains: Modular, Adaptive Design Principles for Business-School Curriculum",
           "year": 2026,
           "venue": "ICIS",
@@ -10352,7 +10465,7 @@
           "degree": 2,
           "topicLinks": 4,
           "venueLinks": 2,
-          "authorLinks": 47,
+          "authorLinks": 51,
           "authors": [
             "Arun Rai",
             "Balasubramaniam Ramesh",
@@ -10365,7 +10478,7 @@
           ]
         },
         {
-          "index": 40,
+          "index": 41,
           "title": "Performance Transfer and Behavioral Reliance in AI-Assisted Cybersecurity Training",
           "year": 2026,
           "venue": "IEEE CARS",
@@ -10375,7 +10488,7 @@
           "degree": 4,
           "topicLinks": 8,
           "venueLinks": 4,
-          "authorLinks": 47,
+          "authorLinks": 49,
           "authors": [
             "Kameron Clark",
             "Benjamin M. Ampel",
@@ -10383,7 +10496,7 @@
           ]
         },
         {
-          "index": 41,
+          "index": 42,
           "title": "Prosody Training for Lowering Vishing Susceptibility",
           "year": 2026,
           "venue": "ICIS",
@@ -10393,30 +10506,30 @@
           "degree": 2,
           "topicLinks": 1,
           "venueLinks": 2,
-          "authorLinks": 47,
+          "authorLinks": 48,
           "authors": [
             "Benjamin M. Ampel",
             "Joseph Buckman"
           ]
         },
         {
-          "index": 42,
+          "index": 43,
           "title": "Seeing Is Not Believing: A Deepfake Video Call Scam at Pan-Asia Trading",
           "year": 2026,
           "venue": "Journal of Information Systems Education",
           "citations": 0,
-          "eigen": 5.904380761963741e-29,
+          "eigen": 5.904380761963742e-29,
           "between": 0.0,
           "degree": 0,
           "topicLinks": 0,
           "venueLinks": 0,
-          "authorLinks": 46,
+          "authorLinks": 47,
           "authors": [
             "Benjamin M. Ampel"
           ]
         },
         {
-          "index": 43,
+          "index": 44,
           "title": "Semantic Conformance Scoring for Electric Vehicle Charging Station Cybersecurity Review Prioritization Using NIST IR 8473",
           "year": 2026,
           "venue": "WISP",
@@ -10426,7 +10539,7 @@
           "degree": 3,
           "topicLinks": 5,
           "venueLinks": 3,
-          "authorLinks": 78,
+          "authorLinks": 79,
           "authors": [
             "Jizell Quijada",
             "Benjamin M. Ampel",
@@ -10435,17 +10548,17 @@
           ]
         },
         {
-          "index": 44,
+          "index": 45,
           "title": "Understanding the Role of Prompt Template in Knowledge Distillation for Safety Alignment",
           "year": 2026,
           "venue": "EMNLP Findings",
           "citations": 0,
-          "eigen": 5.904380761963741e-29,
+          "eigen": 5.904380761963742e-29,
           "between": 0.0,
           "degree": 0,
           "topicLinks": 1,
           "venueLinks": 0,
-          "authorLinks": 48,
+          "authorLinks": 49,
           "authors": [
             "Anjila Budathoki",
             "Manish Dhakal",
@@ -10454,7 +10567,7 @@
           ]
         },
         {
-          "index": 45,
+          "index": 46,
           "title": "Vendor-Conditioned Contrastive Learning for Predicting Organizational Cyber Threat Targets",
           "year": 2026,
           "venue": "IEEE CARS",
@@ -10464,13 +10577,13 @@
           "degree": 9,
           "topicLinks": 21,
           "venueLinks": 4,
-          "authorLinks": 46,
+          "authorLinks": 47,
           "authors": [
             "Benjamin M. Ampel"
           ]
         },
         {
-          "index": 46,
+          "index": 47,
           "title": "Prediction Markets Are Efficient at Rest and Dislocated in Motion",
           "year": 2027,
           "venue": "HICSS",
@@ -10480,7 +10593,7 @@
           "degree": 2,
           "topicLinks": 0,
           "venueLinks": 2,
-          "authorLinks": 47,
+          "authorLinks": 48,
           "authors": [
             "Benjamin M. Ampel",
             "Joseph Buckman"
@@ -10488,20 +10601,20 @@
         }
       ],
       "metrics": {
-        "density": 0.1193,
+        "density": 0.1144,
         "avgPath": 2.498,
-        "clustering": 0.569
+        "clustering": 0.5572
       },
       "thresholds": {
         "topic": 27,
         "venue": 4,
-        "author": 88,
+        "author": 89,
         "citation": 9
       },
       "maxLinks": {
-        "topic": 47,
+        "topic": 48,
         "venue": 8,
-        "author": 108
+        "author": 109
       }
     },
     "collaboration": {
@@ -10511,7 +10624,7 @@
           "nodes": [
             {
               "id": "Benjamin M. Ampel",
-              "count": 47
+              "count": 48
             },
             {
               "id": "Hsinchun Chen",
@@ -10634,23 +10747,35 @@
               "count": 2
             },
             {
+              "id": "A Aria",
+              "count": 1
+            },
+            {
+              "id": "Arun Rai",
+              "count": 2
+            },
+            {
+              "id": "Balasubramaniam Ramesh",
+              "count": 3
+            },
+            {
+              "id": "Cynthia Breazeal",
+              "count": 2
+            },
+            {
+              "id": "L Chen",
+              "count": 1
+            },
+            {
+              "id": "Y Long",
+              "count": 1
+            },
+            {
               "id": "Kayla Redwing",
               "count": 1
             },
             {
               "id": "Amrita George",
-              "count": 1
-            },
-            {
-              "id": "Arun Rai",
-              "count": 1
-            },
-            {
-              "id": "Balasubramaniam Ramesh",
-              "count": 2
-            },
-            {
-              "id": "Cynthia Breazeal",
               "count": 1
             },
             {
@@ -11179,6 +11304,111 @@
               "count": 2
             },
             {
+              "source": "A Aria",
+              "target": "Arun Rai",
+              "count": 1
+            },
+            {
+              "source": "A Aria",
+              "target": "Balasubramaniam Ramesh",
+              "count": 1
+            },
+            {
+              "source": "A Aria",
+              "target": "Benjamin M. Ampel",
+              "count": 1
+            },
+            {
+              "source": "A Aria",
+              "target": "Cynthia Breazeal",
+              "count": 1
+            },
+            {
+              "source": "A Aria",
+              "target": "L Chen",
+              "count": 1
+            },
+            {
+              "source": "A Aria",
+              "target": "Y Long",
+              "count": 1
+            },
+            {
+              "source": "Arun Rai",
+              "target": "Balasubramaniam Ramesh",
+              "count": 2
+            },
+            {
+              "source": "Arun Rai",
+              "target": "Benjamin M. Ampel",
+              "count": 2
+            },
+            {
+              "source": "Arun Rai",
+              "target": "Cynthia Breazeal",
+              "count": 2
+            },
+            {
+              "source": "Arun Rai",
+              "target": "L Chen",
+              "count": 1
+            },
+            {
+              "source": "Arun Rai",
+              "target": "Y Long",
+              "count": 1
+            },
+            {
+              "source": "Balasubramaniam Ramesh",
+              "target": "Benjamin M. Ampel",
+              "count": 3
+            },
+            {
+              "source": "Balasubramaniam Ramesh",
+              "target": "Cynthia Breazeal",
+              "count": 2
+            },
+            {
+              "source": "Balasubramaniam Ramesh",
+              "target": "L Chen",
+              "count": 1
+            },
+            {
+              "source": "Balasubramaniam Ramesh",
+              "target": "Y Long",
+              "count": 1
+            },
+            {
+              "source": "Benjamin M. Ampel",
+              "target": "Cynthia Breazeal",
+              "count": 2
+            },
+            {
+              "source": "Benjamin M. Ampel",
+              "target": "L Chen",
+              "count": 1
+            },
+            {
+              "source": "Benjamin M. Ampel",
+              "target": "Y Long",
+              "count": 1
+            },
+            {
+              "source": "Cynthia Breazeal",
+              "target": "L Chen",
+              "count": 1
+            },
+            {
+              "source": "Cynthia Breazeal",
+              "target": "Y Long",
+              "count": 1
+            },
+            {
+              "source": "L Chen",
+              "target": "Y Long",
+              "count": 1
+            },
+            {
               "source": "Chengjun Zhang",
               "target": "Yang Gao",
               "count": 1
@@ -11230,21 +11460,6 @@
             },
             {
               "source": "Arun Rai",
-              "target": "Balasubramaniam Ramesh",
-              "count": 1
-            },
-            {
-              "source": "Arun Rai",
-              "target": "Benjamin M. Ampel",
-              "count": 1
-            },
-            {
-              "source": "Arun Rai",
-              "target": "Cynthia Breazeal",
-              "count": 1
-            },
-            {
-              "source": "Arun Rai",
               "target": "Eric Klopfer",
               "count": 1
             },
@@ -11260,16 +11475,6 @@
             },
             {
               "source": "Balasubramaniam Ramesh",
-              "target": "Benjamin M. Ampel",
-              "count": 2
-            },
-            {
-              "source": "Balasubramaniam Ramesh",
-              "target": "Cynthia Breazeal",
-              "count": 1
-            },
-            {
-              "source": "Balasubramaniam Ramesh",
               "target": "Eric Klopfer",
               "count": 1
             },
@@ -11281,11 +11486,6 @@
             {
               "source": "Balasubramaniam Ramesh",
               "target": "Xinyu Fu",
-              "count": 1
-            },
-            {
-              "source": "Benjamin M. Ampel",
-              "target": "Cynthia Breazeal",
               "count": 1
             },
             {
@@ -11381,7 +11581,7 @@
           ],
           "authorMeta": {
             "Benjamin M. Ampel": {
-              "count": 47,
+              "count": 48,
               "years": [
                 2019,
                 2020,
@@ -11414,6 +11614,7 @@
                 "IEEE CARS": 5,
                 "BlackboxNLP": 1,
                 "EMNLP": 1,
+                "Available at SSRN": 1,
                 "INFORMS WDS": 1,
                 "NeurIPS ED Track": 1,
                 "Journal of Information Systems Education": 1,
@@ -11450,11 +11651,14 @@
                 "Yi Ding": 2,
                 "Joseph Chen": 1,
                 "Cade Dacosta": 2,
+                "A Aria": 1,
+                "Arun Rai": 2,
+                "Balasubramaniam Ramesh": 3,
+                "Cynthia Breazeal": 2,
+                "L Chen": 1,
+                "Y Long": 1,
                 "Kayla Redwing": 1,
                 "Amrita George": 1,
-                "Arun Rai": 1,
-                "Balasubramaniam Ramesh": 2,
-                "Cynthia Breazeal": 1,
                 "Eric Klopfer": 1,
                 "Madhu Kota": 1,
                 "Xinyu Fu": 1,
@@ -12047,6 +12251,125 @@
                 "Matthew Hashim": 2
               }
             },
+            "A Aria": {
+              "count": 1,
+              "years": [
+                2026
+              ],
+              "venues": {
+                "Available at SSRN": 1
+              },
+              "coauthors": {
+                "Arun Rai": 1,
+                "Balasubramaniam Ramesh": 1,
+                "Benjamin M. Ampel": 1,
+                "Cynthia Breazeal": 1,
+                "L Chen": 1,
+                "Y Long": 1
+              }
+            },
+            "Arun Rai": {
+              "count": 2,
+              "years": [
+                2026
+              ],
+              "venues": {
+                "Available at SSRN": 1,
+                "ICIS": 1
+              },
+              "coauthors": {
+                "A Aria": 1,
+                "Balasubramaniam Ramesh": 2,
+                "Benjamin M. Ampel": 2,
+                "Cynthia Breazeal": 2,
+                "L Chen": 1,
+                "Y Long": 1,
+                "Amrita George": 1,
+                "Eric Klopfer": 1,
+                "Madhu Kota": 1,
+                "Xinyu Fu": 1
+              }
+            },
+            "Balasubramaniam Ramesh": {
+              "count": 3,
+              "years": [
+                2026
+              ],
+              "venues": {
+                "Available at SSRN": 1,
+                "ICIS": 1,
+                "IEEE CARS": 1
+              },
+              "coauthors": {
+                "A Aria": 1,
+                "Arun Rai": 2,
+                "Benjamin M. Ampel": 3,
+                "Cynthia Breazeal": 2,
+                "L Chen": 1,
+                "Y Long": 1,
+                "Amrita George": 1,
+                "Eric Klopfer": 1,
+                "Madhu Kota": 1,
+                "Xinyu Fu": 1,
+                "Kameron Clark": 1
+              }
+            },
+            "Cynthia Breazeal": {
+              "count": 2,
+              "years": [
+                2026
+              ],
+              "venues": {
+                "Available at SSRN": 1,
+                "ICIS": 1
+              },
+              "coauthors": {
+                "A Aria": 1,
+                "Arun Rai": 2,
+                "Balasubramaniam Ramesh": 2,
+                "Benjamin M. Ampel": 2,
+                "L Chen": 1,
+                "Y Long": 1,
+                "Amrita George": 1,
+                "Eric Klopfer": 1,
+                "Madhu Kota": 1,
+                "Xinyu Fu": 1
+              }
+            },
+            "L Chen": {
+              "count": 1,
+              "years": [
+                2026
+              ],
+              "venues": {
+                "Available at SSRN": 1
+              },
+              "coauthors": {
+                "A Aria": 1,
+                "Arun Rai": 1,
+                "Balasubramaniam Ramesh": 1,
+                "Benjamin M. Ampel": 1,
+                "Cynthia Breazeal": 1,
+                "Y Long": 1
+              }
+            },
+            "Y Long": {
+              "count": 1,
+              "years": [
+                2026
+              ],
+              "venues": {
+                "Available at SSRN": 1
+              },
+              "coauthors": {
+                "A Aria": 1,
+                "Arun Rai": 1,
+                "Balasubramaniam Ramesh": 1,
+                "Benjamin M. Ampel": 1,
+                "Cynthia Breazeal": 1,
+                "L Chen": 1
+              }
+            },
             "Kayla Redwing": {
               "count": 1,
               "years": [
@@ -12073,62 +12396,6 @@
                 "Balasubramaniam Ramesh": 1,
                 "Benjamin M. Ampel": 1,
                 "Cynthia Breazeal": 1,
-                "Eric Klopfer": 1,
-                "Madhu Kota": 1,
-                "Xinyu Fu": 1
-              }
-            },
-            "Arun Rai": {
-              "count": 1,
-              "years": [
-                2026
-              ],
-              "venues": {
-                "ICIS": 1
-              },
-              "coauthors": {
-                "Amrita George": 1,
-                "Balasubramaniam Ramesh": 1,
-                "Benjamin M. Ampel": 1,
-                "Cynthia Breazeal": 1,
-                "Eric Klopfer": 1,
-                "Madhu Kota": 1,
-                "Xinyu Fu": 1
-              }
-            },
-            "Balasubramaniam Ramesh": {
-              "count": 2,
-              "years": [
-                2026
-              ],
-              "venues": {
-                "ICIS": 1,
-                "IEEE CARS": 1
-              },
-              "coauthors": {
-                "Amrita George": 1,
-                "Arun Rai": 1,
-                "Benjamin M. Ampel": 2,
-                "Cynthia Breazeal": 1,
-                "Eric Klopfer": 1,
-                "Madhu Kota": 1,
-                "Xinyu Fu": 1,
-                "Kameron Clark": 1
-              }
-            },
-            "Cynthia Breazeal": {
-              "count": 1,
-              "years": [
-                2026
-              ],
-              "venues": {
-                "ICIS": 1
-              },
-              "coauthors": {
-                "Amrita George": 1,
-                "Arun Rai": 1,
-                "Balasubramaniam Ramesh": 1,
-                "Benjamin M. Ampel": 1,
                 "Eric Klopfer": 1,
                 "Madhu Kota": 1,
                 "Xinyu Fu": 1
@@ -12250,7 +12517,7 @@
           "nodes": [
             {
               "id": "Benjamin M. Ampel",
-              "count": 37
+              "count": 38
             },
             {
               "id": "Hsinchun Chen",
@@ -12361,23 +12628,35 @@
               "count": 2
             },
             {
+              "id": "A Aria",
+              "count": 1
+            },
+            {
+              "id": "Arun Rai",
+              "count": 2
+            },
+            {
+              "id": "Balasubramaniam Ramesh",
+              "count": 3
+            },
+            {
+              "id": "Cynthia Breazeal",
+              "count": 2
+            },
+            {
+              "id": "L Chen",
+              "count": 1
+            },
+            {
+              "id": "Y Long",
+              "count": 1
+            },
+            {
               "id": "Kayla Redwing",
               "count": 1
             },
             {
               "id": "Amrita George",
-              "count": 1
-            },
-            {
-              "id": "Arun Rai",
-              "count": 1
-            },
-            {
-              "id": "Balasubramaniam Ramesh",
-              "count": 2
-            },
-            {
-              "id": "Cynthia Breazeal",
               "count": 1
             },
             {
@@ -12836,6 +13115,111 @@
               "count": 2
             },
             {
+              "source": "A Aria",
+              "target": "Arun Rai",
+              "count": 1
+            },
+            {
+              "source": "A Aria",
+              "target": "Balasubramaniam Ramesh",
+              "count": 1
+            },
+            {
+              "source": "A Aria",
+              "target": "Benjamin M. Ampel",
+              "count": 1
+            },
+            {
+              "source": "A Aria",
+              "target": "Cynthia Breazeal",
+              "count": 1
+            },
+            {
+              "source": "A Aria",
+              "target": "L Chen",
+              "count": 1
+            },
+            {
+              "source": "A Aria",
+              "target": "Y Long",
+              "count": 1
+            },
+            {
+              "source": "Arun Rai",
+              "target": "Balasubramaniam Ramesh",
+              "count": 2
+            },
+            {
+              "source": "Arun Rai",
+              "target": "Benjamin M. Ampel",
+              "count": 2
+            },
+            {
+              "source": "Arun Rai",
+              "target": "Cynthia Breazeal",
+              "count": 2
+            },
+            {
+              "source": "Arun Rai",
+              "target": "L Chen",
+              "count": 1
+            },
+            {
+              "source": "Arun Rai",
+              "target": "Y Long",
+              "count": 1
+            },
+            {
+              "source": "Balasubramaniam Ramesh",
+              "target": "Benjamin M. Ampel",
+              "count": 3
+            },
+            {
+              "source": "Balasubramaniam Ramesh",
+              "target": "Cynthia Breazeal",
+              "count": 2
+            },
+            {
+              "source": "Balasubramaniam Ramesh",
+              "target": "L Chen",
+              "count": 1
+            },
+            {
+              "source": "Balasubramaniam Ramesh",
+              "target": "Y Long",
+              "count": 1
+            },
+            {
+              "source": "Benjamin M. Ampel",
+              "target": "Cynthia Breazeal",
+              "count": 2
+            },
+            {
+              "source": "Benjamin M. Ampel",
+              "target": "L Chen",
+              "count": 1
+            },
+            {
+              "source": "Benjamin M. Ampel",
+              "target": "Y Long",
+              "count": 1
+            },
+            {
+              "source": "Cynthia Breazeal",
+              "target": "L Chen",
+              "count": 1
+            },
+            {
+              "source": "Cynthia Breazeal",
+              "target": "Y Long",
+              "count": 1
+            },
+            {
+              "source": "L Chen",
+              "target": "Y Long",
+              "count": 1
+            },
+            {
               "source": "Chengjun Zhang",
               "target": "Yang Gao",
               "count": 1
@@ -12887,21 +13271,6 @@
             },
             {
               "source": "Arun Rai",
-              "target": "Balasubramaniam Ramesh",
-              "count": 1
-            },
-            {
-              "source": "Arun Rai",
-              "target": "Benjamin M. Ampel",
-              "count": 1
-            },
-            {
-              "source": "Arun Rai",
-              "target": "Cynthia Breazeal",
-              "count": 1
-            },
-            {
-              "source": "Arun Rai",
               "target": "Eric Klopfer",
               "count": 1
             },
@@ -12917,16 +13286,6 @@
             },
             {
               "source": "Balasubramaniam Ramesh",
-              "target": "Benjamin M. Ampel",
-              "count": 2
-            },
-            {
-              "source": "Balasubramaniam Ramesh",
-              "target": "Cynthia Breazeal",
-              "count": 1
-            },
-            {
-              "source": "Balasubramaniam Ramesh",
               "target": "Eric Klopfer",
               "count": 1
             },
@@ -12938,11 +13297,6 @@
             {
               "source": "Balasubramaniam Ramesh",
               "target": "Xinyu Fu",
-              "count": 1
-            },
-            {
-              "source": "Benjamin M. Ampel",
-              "target": "Cynthia Breazeal",
               "count": 1
             },
             {
@@ -13038,7 +13392,7 @@
           ],
           "authorMeta": {
             "Benjamin M. Ampel": {
-              "count": 37,
+              "count": 38,
               "years": [
                 2023,
                 2024,
@@ -13065,6 +13419,7 @@
                 "IEEE CARS": 5,
                 "BlackboxNLP": 1,
                 "EMNLP": 1,
+                "Available at SSRN": 1,
                 "INFORMS WDS": 1,
                 "NeurIPS ED Track": 1,
                 "ICIS": 2,
@@ -13099,11 +13454,14 @@
                 "Yi Ding": 2,
                 "Joseph Chen": 1,
                 "Cade Dacosta": 2,
+                "A Aria": 1,
+                "Arun Rai": 2,
+                "Balasubramaniam Ramesh": 3,
+                "Cynthia Breazeal": 2,
+                "L Chen": 1,
+                "Y Long": 1,
                 "Kayla Redwing": 1,
                 "Amrita George": 1,
-                "Arun Rai": 1,
-                "Balasubramaniam Ramesh": 2,
-                "Cynthia Breazeal": 1,
                 "Eric Klopfer": 1,
                 "Madhu Kota": 1,
                 "Xinyu Fu": 1,
@@ -13620,6 +13978,125 @@
                 "Matthew Hashim": 2
               }
             },
+            "A Aria": {
+              "count": 1,
+              "years": [
+                2026
+              ],
+              "venues": {
+                "Available at SSRN": 1
+              },
+              "coauthors": {
+                "Arun Rai": 1,
+                "Balasubramaniam Ramesh": 1,
+                "Benjamin M. Ampel": 1,
+                "Cynthia Breazeal": 1,
+                "L Chen": 1,
+                "Y Long": 1
+              }
+            },
+            "Arun Rai": {
+              "count": 2,
+              "years": [
+                2026
+              ],
+              "venues": {
+                "Available at SSRN": 1,
+                "ICIS": 1
+              },
+              "coauthors": {
+                "A Aria": 1,
+                "Balasubramaniam Ramesh": 2,
+                "Benjamin M. Ampel": 2,
+                "Cynthia Breazeal": 2,
+                "L Chen": 1,
+                "Y Long": 1,
+                "Amrita George": 1,
+                "Eric Klopfer": 1,
+                "Madhu Kota": 1,
+                "Xinyu Fu": 1
+              }
+            },
+            "Balasubramaniam Ramesh": {
+              "count": 3,
+              "years": [
+                2026
+              ],
+              "venues": {
+                "Available at SSRN": 1,
+                "ICIS": 1,
+                "IEEE CARS": 1
+              },
+              "coauthors": {
+                "A Aria": 1,
+                "Arun Rai": 2,
+                "Benjamin M. Ampel": 3,
+                "Cynthia Breazeal": 2,
+                "L Chen": 1,
+                "Y Long": 1,
+                "Amrita George": 1,
+                "Eric Klopfer": 1,
+                "Madhu Kota": 1,
+                "Xinyu Fu": 1,
+                "Kameron Clark": 1
+              }
+            },
+            "Cynthia Breazeal": {
+              "count": 2,
+              "years": [
+                2026
+              ],
+              "venues": {
+                "Available at SSRN": 1,
+                "ICIS": 1
+              },
+              "coauthors": {
+                "A Aria": 1,
+                "Arun Rai": 2,
+                "Balasubramaniam Ramesh": 2,
+                "Benjamin M. Ampel": 2,
+                "L Chen": 1,
+                "Y Long": 1,
+                "Amrita George": 1,
+                "Eric Klopfer": 1,
+                "Madhu Kota": 1,
+                "Xinyu Fu": 1
+              }
+            },
+            "L Chen": {
+              "count": 1,
+              "years": [
+                2026
+              ],
+              "venues": {
+                "Available at SSRN": 1
+              },
+              "coauthors": {
+                "A Aria": 1,
+                "Arun Rai": 1,
+                "Balasubramaniam Ramesh": 1,
+                "Benjamin M. Ampel": 1,
+                "Cynthia Breazeal": 1,
+                "Y Long": 1
+              }
+            },
+            "Y Long": {
+              "count": 1,
+              "years": [
+                2026
+              ],
+              "venues": {
+                "Available at SSRN": 1
+              },
+              "coauthors": {
+                "A Aria": 1,
+                "Arun Rai": 1,
+                "Balasubramaniam Ramesh": 1,
+                "Benjamin M. Ampel": 1,
+                "Cynthia Breazeal": 1,
+                "L Chen": 1
+              }
+            },
             "Kayla Redwing": {
               "count": 1,
               "years": [
@@ -13646,62 +14123,6 @@
                 "Balasubramaniam Ramesh": 1,
                 "Benjamin M. Ampel": 1,
                 "Cynthia Breazeal": 1,
-                "Eric Klopfer": 1,
-                "Madhu Kota": 1,
-                "Xinyu Fu": 1
-              }
-            },
-            "Arun Rai": {
-              "count": 1,
-              "years": [
-                2026
-              ],
-              "venues": {
-                "ICIS": 1
-              },
-              "coauthors": {
-                "Amrita George": 1,
-                "Balasubramaniam Ramesh": 1,
-                "Benjamin M. Ampel": 1,
-                "Cynthia Breazeal": 1,
-                "Eric Klopfer": 1,
-                "Madhu Kota": 1,
-                "Xinyu Fu": 1
-              }
-            },
-            "Balasubramaniam Ramesh": {
-              "count": 2,
-              "years": [
-                2026
-              ],
-              "venues": {
-                "ICIS": 1,
-                "IEEE CARS": 1
-              },
-              "coauthors": {
-                "Amrita George": 1,
-                "Arun Rai": 1,
-                "Benjamin M. Ampel": 2,
-                "Cynthia Breazeal": 1,
-                "Eric Klopfer": 1,
-                "Madhu Kota": 1,
-                "Xinyu Fu": 1,
-                "Kameron Clark": 1
-              }
-            },
-            "Cynthia Breazeal": {
-              "count": 1,
-              "years": [
-                2026
-              ],
-              "venues": {
-                "ICIS": 1
-              },
-              "coauthors": {
-                "Amrita George": 1,
-                "Arun Rai": 1,
-                "Balasubramaniam Ramesh": 1,
-                "Benjamin M. Ampel": 1,
                 "Eric Klopfer": 1,
                 "Madhu Kota": 1,
                 "Xinyu Fu": 1
@@ -13823,7 +14244,7 @@
           "nodes": [
             {
               "id": "Benjamin M. Ampel",
-              "count": 31
+              "count": 32
             },
             {
               "id": "Hongyi Zhu",
@@ -13922,23 +14343,35 @@
               "count": 2
             },
             {
+              "id": "A Aria",
+              "count": 1
+            },
+            {
+              "id": "Arun Rai",
+              "count": 2
+            },
+            {
+              "id": "Balasubramaniam Ramesh",
+              "count": 3
+            },
+            {
+              "id": "Cynthia Breazeal",
+              "count": 2
+            },
+            {
+              "id": "L Chen",
+              "count": 1
+            },
+            {
+              "id": "Y Long",
+              "count": 1
+            },
+            {
               "id": "Kayla Redwing",
               "count": 1
             },
             {
               "id": "Amrita George",
-              "count": 1
-            },
-            {
-              "id": "Arun Rai",
-              "count": 1
-            },
-            {
-              "id": "Balasubramaniam Ramesh",
-              "count": 2
-            },
-            {
-              "id": "Cynthia Breazeal",
               "count": 1
             },
             {
@@ -14322,6 +14755,111 @@
               "count": 2
             },
             {
+              "source": "A Aria",
+              "target": "Arun Rai",
+              "count": 1
+            },
+            {
+              "source": "A Aria",
+              "target": "Balasubramaniam Ramesh",
+              "count": 1
+            },
+            {
+              "source": "A Aria",
+              "target": "Benjamin M. Ampel",
+              "count": 1
+            },
+            {
+              "source": "A Aria",
+              "target": "Cynthia Breazeal",
+              "count": 1
+            },
+            {
+              "source": "A Aria",
+              "target": "L Chen",
+              "count": 1
+            },
+            {
+              "source": "A Aria",
+              "target": "Y Long",
+              "count": 1
+            },
+            {
+              "source": "Arun Rai",
+              "target": "Balasubramaniam Ramesh",
+              "count": 2
+            },
+            {
+              "source": "Arun Rai",
+              "target": "Benjamin M. Ampel",
+              "count": 2
+            },
+            {
+              "source": "Arun Rai",
+              "target": "Cynthia Breazeal",
+              "count": 2
+            },
+            {
+              "source": "Arun Rai",
+              "target": "L Chen",
+              "count": 1
+            },
+            {
+              "source": "Arun Rai",
+              "target": "Y Long",
+              "count": 1
+            },
+            {
+              "source": "Balasubramaniam Ramesh",
+              "target": "Benjamin M. Ampel",
+              "count": 3
+            },
+            {
+              "source": "Balasubramaniam Ramesh",
+              "target": "Cynthia Breazeal",
+              "count": 2
+            },
+            {
+              "source": "Balasubramaniam Ramesh",
+              "target": "L Chen",
+              "count": 1
+            },
+            {
+              "source": "Balasubramaniam Ramesh",
+              "target": "Y Long",
+              "count": 1
+            },
+            {
+              "source": "Benjamin M. Ampel",
+              "target": "Cynthia Breazeal",
+              "count": 2
+            },
+            {
+              "source": "Benjamin M. Ampel",
+              "target": "L Chen",
+              "count": 1
+            },
+            {
+              "source": "Benjamin M. Ampel",
+              "target": "Y Long",
+              "count": 1
+            },
+            {
+              "source": "Cynthia Breazeal",
+              "target": "L Chen",
+              "count": 1
+            },
+            {
+              "source": "Cynthia Breazeal",
+              "target": "Y Long",
+              "count": 1
+            },
+            {
+              "source": "L Chen",
+              "target": "Y Long",
+              "count": 1
+            },
+            {
               "source": "Chengjun Zhang",
               "target": "Yang Gao",
               "count": 1
@@ -14373,21 +14911,6 @@
             },
             {
               "source": "Arun Rai",
-              "target": "Balasubramaniam Ramesh",
-              "count": 1
-            },
-            {
-              "source": "Arun Rai",
-              "target": "Benjamin M. Ampel",
-              "count": 1
-            },
-            {
-              "source": "Arun Rai",
-              "target": "Cynthia Breazeal",
-              "count": 1
-            },
-            {
-              "source": "Arun Rai",
               "target": "Eric Klopfer",
               "count": 1
             },
@@ -14403,16 +14926,6 @@
             },
             {
               "source": "Balasubramaniam Ramesh",
-              "target": "Benjamin M. Ampel",
-              "count": 2
-            },
-            {
-              "source": "Balasubramaniam Ramesh",
-              "target": "Cynthia Breazeal",
-              "count": 1
-            },
-            {
-              "source": "Balasubramaniam Ramesh",
               "target": "Eric Klopfer",
               "count": 1
             },
@@ -14424,11 +14937,6 @@
             {
               "source": "Balasubramaniam Ramesh",
               "target": "Xinyu Fu",
-              "count": 1
-            },
-            {
-              "source": "Benjamin M. Ampel",
-              "target": "Cynthia Breazeal",
               "count": 1
             },
             {
@@ -14524,7 +15032,7 @@
           ],
           "authorMeta": {
             "Benjamin M. Ampel": {
-              "count": 31,
+              "count": 32,
               "years": [
                 2024,
                 2025,
@@ -14546,6 +15054,7 @@
                 "IEEE CARS": 5,
                 "BlackboxNLP": 1,
                 "EMNLP": 1,
+                "Available at SSRN": 1,
                 "INFORMS WDS": 1,
                 "NeurIPS ED Track": 1,
                 "ICIS": 2,
@@ -14577,11 +15086,14 @@
                 "Yi Ding": 2,
                 "Joseph Chen": 1,
                 "Cade Dacosta": 2,
+                "A Aria": 1,
+                "Arun Rai": 2,
+                "Balasubramaniam Ramesh": 3,
+                "Cynthia Breazeal": 2,
+                "L Chen": 1,
+                "Y Long": 1,
                 "Kayla Redwing": 1,
                 "Amrita George": 1,
-                "Arun Rai": 1,
-                "Balasubramaniam Ramesh": 2,
-                "Cynthia Breazeal": 1,
                 "Eric Klopfer": 1,
                 "Madhu Kota": 1,
                 "Xinyu Fu": 1,
@@ -15021,6 +15533,125 @@
                 "Matthew Hashim": 2
               }
             },
+            "A Aria": {
+              "count": 1,
+              "years": [
+                2026
+              ],
+              "venues": {
+                "Available at SSRN": 1
+              },
+              "coauthors": {
+                "Arun Rai": 1,
+                "Balasubramaniam Ramesh": 1,
+                "Benjamin M. Ampel": 1,
+                "Cynthia Breazeal": 1,
+                "L Chen": 1,
+                "Y Long": 1
+              }
+            },
+            "Arun Rai": {
+              "count": 2,
+              "years": [
+                2026
+              ],
+              "venues": {
+                "Available at SSRN": 1,
+                "ICIS": 1
+              },
+              "coauthors": {
+                "A Aria": 1,
+                "Balasubramaniam Ramesh": 2,
+                "Benjamin M. Ampel": 2,
+                "Cynthia Breazeal": 2,
+                "L Chen": 1,
+                "Y Long": 1,
+                "Amrita George": 1,
+                "Eric Klopfer": 1,
+                "Madhu Kota": 1,
+                "Xinyu Fu": 1
+              }
+            },
+            "Balasubramaniam Ramesh": {
+              "count": 3,
+              "years": [
+                2026
+              ],
+              "venues": {
+                "Available at SSRN": 1,
+                "ICIS": 1,
+                "IEEE CARS": 1
+              },
+              "coauthors": {
+                "A Aria": 1,
+                "Arun Rai": 2,
+                "Benjamin M. Ampel": 3,
+                "Cynthia Breazeal": 2,
+                "L Chen": 1,
+                "Y Long": 1,
+                "Amrita George": 1,
+                "Eric Klopfer": 1,
+                "Madhu Kota": 1,
+                "Xinyu Fu": 1,
+                "Kameron Clark": 1
+              }
+            },
+            "Cynthia Breazeal": {
+              "count": 2,
+              "years": [
+                2026
+              ],
+              "venues": {
+                "Available at SSRN": 1,
+                "ICIS": 1
+              },
+              "coauthors": {
+                "A Aria": 1,
+                "Arun Rai": 2,
+                "Balasubramaniam Ramesh": 2,
+                "Benjamin M. Ampel": 2,
+                "L Chen": 1,
+                "Y Long": 1,
+                "Amrita George": 1,
+                "Eric Klopfer": 1,
+                "Madhu Kota": 1,
+                "Xinyu Fu": 1
+              }
+            },
+            "L Chen": {
+              "count": 1,
+              "years": [
+                2026
+              ],
+              "venues": {
+                "Available at SSRN": 1
+              },
+              "coauthors": {
+                "A Aria": 1,
+                "Arun Rai": 1,
+                "Balasubramaniam Ramesh": 1,
+                "Benjamin M. Ampel": 1,
+                "Cynthia Breazeal": 1,
+                "Y Long": 1
+              }
+            },
+            "Y Long": {
+              "count": 1,
+              "years": [
+                2026
+              ],
+              "venues": {
+                "Available at SSRN": 1
+              },
+              "coauthors": {
+                "A Aria": 1,
+                "Arun Rai": 1,
+                "Balasubramaniam Ramesh": 1,
+                "Benjamin M. Ampel": 1,
+                "Cynthia Breazeal": 1,
+                "L Chen": 1
+              }
+            },
             "Kayla Redwing": {
               "count": 1,
               "years": [
@@ -15047,62 +15678,6 @@
                 "Balasubramaniam Ramesh": 1,
                 "Benjamin M. Ampel": 1,
                 "Cynthia Breazeal": 1,
-                "Eric Klopfer": 1,
-                "Madhu Kota": 1,
-                "Xinyu Fu": 1
-              }
-            },
-            "Arun Rai": {
-              "count": 1,
-              "years": [
-                2026
-              ],
-              "venues": {
-                "ICIS": 1
-              },
-              "coauthors": {
-                "Amrita George": 1,
-                "Balasubramaniam Ramesh": 1,
-                "Benjamin M. Ampel": 1,
-                "Cynthia Breazeal": 1,
-                "Eric Klopfer": 1,
-                "Madhu Kota": 1,
-                "Xinyu Fu": 1
-              }
-            },
-            "Balasubramaniam Ramesh": {
-              "count": 2,
-              "years": [
-                2026
-              ],
-              "venues": {
-                "ICIS": 1,
-                "IEEE CARS": 1
-              },
-              "coauthors": {
-                "Amrita George": 1,
-                "Arun Rai": 1,
-                "Benjamin M. Ampel": 2,
-                "Cynthia Breazeal": 1,
-                "Eric Klopfer": 1,
-                "Madhu Kota": 1,
-                "Xinyu Fu": 1,
-                "Kameron Clark": 1
-              }
-            },
-            "Cynthia Breazeal": {
-              "count": 1,
-              "years": [
-                2026
-              ],
-              "venues": {
-                "ICIS": 1
-              },
-              "coauthors": {
-                "Amrita George": 1,
-                "Arun Rai": 1,
-                "Balasubramaniam Ramesh": 1,
-                "Benjamin M. Ampel": 1,
                 "Eric Klopfer": 1,
                 "Madhu Kota": 1,
                 "Xinyu Fu": 1
@@ -15224,7 +15799,7 @@
           "nodes": [
             {
               "id": "Benjamin M. Ampel",
-              "count": 27
+              "count": 28
             },
             {
               "id": "Hsinchun Chen",
@@ -15311,23 +15886,35 @@
               "count": 2
             },
             {
+              "id": "A Aria",
+              "count": 1
+            },
+            {
+              "id": "Arun Rai",
+              "count": 2
+            },
+            {
+              "id": "Balasubramaniam Ramesh",
+              "count": 3
+            },
+            {
+              "id": "Cynthia Breazeal",
+              "count": 2
+            },
+            {
+              "id": "L Chen",
+              "count": 1
+            },
+            {
+              "id": "Y Long",
+              "count": 1
+            },
+            {
               "id": "Kayla Redwing",
               "count": 1
             },
             {
               "id": "Amrita George",
-              "count": 1
-            },
-            {
-              "id": "Arun Rai",
-              "count": 1
-            },
-            {
-              "id": "Balasubramaniam Ramesh",
-              "count": 2
-            },
-            {
-              "id": "Cynthia Breazeal",
               "count": 1
             },
             {
@@ -15651,6 +16238,111 @@
               "count": 1
             },
             {
+              "source": "A Aria",
+              "target": "Arun Rai",
+              "count": 1
+            },
+            {
+              "source": "A Aria",
+              "target": "Balasubramaniam Ramesh",
+              "count": 1
+            },
+            {
+              "source": "A Aria",
+              "target": "Benjamin M. Ampel",
+              "count": 1
+            },
+            {
+              "source": "A Aria",
+              "target": "Cynthia Breazeal",
+              "count": 1
+            },
+            {
+              "source": "A Aria",
+              "target": "L Chen",
+              "count": 1
+            },
+            {
+              "source": "A Aria",
+              "target": "Y Long",
+              "count": 1
+            },
+            {
+              "source": "Arun Rai",
+              "target": "Balasubramaniam Ramesh",
+              "count": 2
+            },
+            {
+              "source": "Arun Rai",
+              "target": "Benjamin M. Ampel",
+              "count": 2
+            },
+            {
+              "source": "Arun Rai",
+              "target": "Cynthia Breazeal",
+              "count": 2
+            },
+            {
+              "source": "Arun Rai",
+              "target": "L Chen",
+              "count": 1
+            },
+            {
+              "source": "Arun Rai",
+              "target": "Y Long",
+              "count": 1
+            },
+            {
+              "source": "Balasubramaniam Ramesh",
+              "target": "Benjamin M. Ampel",
+              "count": 3
+            },
+            {
+              "source": "Balasubramaniam Ramesh",
+              "target": "Cynthia Breazeal",
+              "count": 2
+            },
+            {
+              "source": "Balasubramaniam Ramesh",
+              "target": "L Chen",
+              "count": 1
+            },
+            {
+              "source": "Balasubramaniam Ramesh",
+              "target": "Y Long",
+              "count": 1
+            },
+            {
+              "source": "Benjamin M. Ampel",
+              "target": "Cynthia Breazeal",
+              "count": 2
+            },
+            {
+              "source": "Benjamin M. Ampel",
+              "target": "L Chen",
+              "count": 1
+            },
+            {
+              "source": "Benjamin M. Ampel",
+              "target": "Y Long",
+              "count": 1
+            },
+            {
+              "source": "Cynthia Breazeal",
+              "target": "L Chen",
+              "count": 1
+            },
+            {
+              "source": "Cynthia Breazeal",
+              "target": "Y Long",
+              "count": 1
+            },
+            {
+              "source": "L Chen",
+              "target": "Y Long",
+              "count": 1
+            },
+            {
               "source": "Chengjun Zhang",
               "target": "Yang Gao",
               "count": 1
@@ -15702,21 +16394,6 @@
             },
             {
               "source": "Arun Rai",
-              "target": "Balasubramaniam Ramesh",
-              "count": 1
-            },
-            {
-              "source": "Arun Rai",
-              "target": "Benjamin M. Ampel",
-              "count": 1
-            },
-            {
-              "source": "Arun Rai",
-              "target": "Cynthia Breazeal",
-              "count": 1
-            },
-            {
-              "source": "Arun Rai",
               "target": "Eric Klopfer",
               "count": 1
             },
@@ -15732,16 +16409,6 @@
             },
             {
               "source": "Balasubramaniam Ramesh",
-              "target": "Benjamin M. Ampel",
-              "count": 2
-            },
-            {
-              "source": "Balasubramaniam Ramesh",
-              "target": "Cynthia Breazeal",
-              "count": 1
-            },
-            {
-              "source": "Balasubramaniam Ramesh",
               "target": "Eric Klopfer",
               "count": 1
             },
@@ -15753,11 +16420,6 @@
             {
               "source": "Balasubramaniam Ramesh",
               "target": "Xinyu Fu",
-              "count": 1
-            },
-            {
-              "source": "Benjamin M. Ampel",
-              "target": "Cynthia Breazeal",
               "count": 1
             },
             {
@@ -15853,7 +16515,7 @@
           ],
           "authorMeta": {
             "Benjamin M. Ampel": {
-              "count": 27,
+              "count": 28,
               "years": [
                 2025,
                 2026,
@@ -15871,6 +16533,7 @@
                 "BlackboxNLP": 1,
                 "EMNLP": 1,
                 "MIS Quarterly": 1,
+                "Available at SSRN": 1,
                 "INFORMS WDS": 1,
                 "NeurIPS ED Track": 1,
                 "Journal of Management Information Systems": 1,
@@ -15900,11 +16563,14 @@
                 "Yi Ding": 2,
                 "Joseph Chen": 1,
                 "Cade Dacosta": 2,
+                "A Aria": 1,
+                "Arun Rai": 2,
+                "Balasubramaniam Ramesh": 3,
+                "Cynthia Breazeal": 2,
+                "L Chen": 1,
+                "Y Long": 1,
                 "Kayla Redwing": 1,
                 "Amrita George": 1,
-                "Arun Rai": 1,
-                "Balasubramaniam Ramesh": 2,
-                "Cynthia Breazeal": 1,
                 "Eric Klopfer": 1,
                 "Madhu Kota": 1,
                 "Xinyu Fu": 1,
@@ -16279,6 +16945,125 @@
                 "Matthew Hashim": 2
               }
             },
+            "A Aria": {
+              "count": 1,
+              "years": [
+                2026
+              ],
+              "venues": {
+                "Available at SSRN": 1
+              },
+              "coauthors": {
+                "Arun Rai": 1,
+                "Balasubramaniam Ramesh": 1,
+                "Benjamin M. Ampel": 1,
+                "Cynthia Breazeal": 1,
+                "L Chen": 1,
+                "Y Long": 1
+              }
+            },
+            "Arun Rai": {
+              "count": 2,
+              "years": [
+                2026
+              ],
+              "venues": {
+                "Available at SSRN": 1,
+                "ICIS": 1
+              },
+              "coauthors": {
+                "A Aria": 1,
+                "Balasubramaniam Ramesh": 2,
+                "Benjamin M. Ampel": 2,
+                "Cynthia Breazeal": 2,
+                "L Chen": 1,
+                "Y Long": 1,
+                "Amrita George": 1,
+                "Eric Klopfer": 1,
+                "Madhu Kota": 1,
+                "Xinyu Fu": 1
+              }
+            },
+            "Balasubramaniam Ramesh": {
+              "count": 3,
+              "years": [
+                2026
+              ],
+              "venues": {
+                "Available at SSRN": 1,
+                "ICIS": 1,
+                "IEEE CARS": 1
+              },
+              "coauthors": {
+                "A Aria": 1,
+                "Arun Rai": 2,
+                "Benjamin M. Ampel": 3,
+                "Cynthia Breazeal": 2,
+                "L Chen": 1,
+                "Y Long": 1,
+                "Amrita George": 1,
+                "Eric Klopfer": 1,
+                "Madhu Kota": 1,
+                "Xinyu Fu": 1,
+                "Kameron Clark": 1
+              }
+            },
+            "Cynthia Breazeal": {
+              "count": 2,
+              "years": [
+                2026
+              ],
+              "venues": {
+                "Available at SSRN": 1,
+                "ICIS": 1
+              },
+              "coauthors": {
+                "A Aria": 1,
+                "Arun Rai": 2,
+                "Balasubramaniam Ramesh": 2,
+                "Benjamin M. Ampel": 2,
+                "L Chen": 1,
+                "Y Long": 1,
+                "Amrita George": 1,
+                "Eric Klopfer": 1,
+                "Madhu Kota": 1,
+                "Xinyu Fu": 1
+              }
+            },
+            "L Chen": {
+              "count": 1,
+              "years": [
+                2026
+              ],
+              "venues": {
+                "Available at SSRN": 1
+              },
+              "coauthors": {
+                "A Aria": 1,
+                "Arun Rai": 1,
+                "Balasubramaniam Ramesh": 1,
+                "Benjamin M. Ampel": 1,
+                "Cynthia Breazeal": 1,
+                "Y Long": 1
+              }
+            },
+            "Y Long": {
+              "count": 1,
+              "years": [
+                2026
+              ],
+              "venues": {
+                "Available at SSRN": 1
+              },
+              "coauthors": {
+                "A Aria": 1,
+                "Arun Rai": 1,
+                "Balasubramaniam Ramesh": 1,
+                "Benjamin M. Ampel": 1,
+                "Cynthia Breazeal": 1,
+                "L Chen": 1
+              }
+            },
             "Kayla Redwing": {
               "count": 1,
               "years": [
@@ -16305,62 +17090,6 @@
                 "Balasubramaniam Ramesh": 1,
                 "Benjamin M. Ampel": 1,
                 "Cynthia Breazeal": 1,
-                "Eric Klopfer": 1,
-                "Madhu Kota": 1,
-                "Xinyu Fu": 1
-              }
-            },
-            "Arun Rai": {
-              "count": 1,
-              "years": [
-                2026
-              ],
-              "venues": {
-                "ICIS": 1
-              },
-              "coauthors": {
-                "Amrita George": 1,
-                "Balasubramaniam Ramesh": 1,
-                "Benjamin M. Ampel": 1,
-                "Cynthia Breazeal": 1,
-                "Eric Klopfer": 1,
-                "Madhu Kota": 1,
-                "Xinyu Fu": 1
-              }
-            },
-            "Balasubramaniam Ramesh": {
-              "count": 2,
-              "years": [
-                2026
-              ],
-              "venues": {
-                "ICIS": 1,
-                "IEEE CARS": 1
-              },
-              "coauthors": {
-                "Amrita George": 1,
-                "Arun Rai": 1,
-                "Benjamin M. Ampel": 2,
-                "Cynthia Breazeal": 1,
-                "Eric Klopfer": 1,
-                "Madhu Kota": 1,
-                "Xinyu Fu": 1,
-                "Kameron Clark": 1
-              }
-            },
-            "Cynthia Breazeal": {
-              "count": 1,
-              "years": [
-                2026
-              ],
-              "venues": {
-                "ICIS": 1
-              },
-              "coauthors": {
-                "Amrita George": 1,
-                "Arun Rai": 1,
-                "Balasubramaniam Ramesh": 1,
-                "Benjamin M. Ampel": 1,
                 "Eric Klopfer": 1,
                 "Madhu Kota": 1,
                 "Xinyu Fu": 1
