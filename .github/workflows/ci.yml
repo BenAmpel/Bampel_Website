@@ -98,6 +98,9 @@ jobs:
       - name: CV ProfilePage JSON-LD (mainEntity is the homepage Person @id)
         run: node --test tests/cv-profilepage-jsonld.test.mjs
 
+      - name: CV print shows every talks and awards year
+        run: node --test tests/cv-print-all-years.test.mjs
+
       - name: Publications ItemList JSON-LD (matches the visible list)
         run: node --test tests/publications-itemlist.test.mjs
 

@@ -92,16 +92,7 @@
       renderCards();
     };
 
-    const renderCards = () => {
-      const filtered = items.filter((item) => item.year === activeYear)
-        .filter((item) => activeTag === 'All' || item.tags.includes(activeTag));
-
-      if (!filtered.length) {
-        cardsEl.innerHTML = `<div class="talks-empty">No talks for ${activeYear} with ${activeTag}.</div>`;
-        return;
-      }
-
-      cardsEl.innerHTML = filtered.map((item) => {
+    const cardMarkup = (list) => list.map((item) => {
         const typeClass = slugify(item.type);
         const tagMarkup = item.tags.length
           ? `<div class="talks-card-tags">${item.tags.map((tag) => `<span class="talks-tag-chip">${tag}</span>`).join('')}</div>`
@@ -122,7 +113,37 @@
           </div>
         `;
       }).join('');
+
+    const renderCards = () => {
+      const filtered = items.filter((item) => item.year === activeYear)
+        .filter((item) => activeTag === 'All' || item.tags.includes(activeTag));
+
+      if (!filtered.length) {
+        cardsEl.innerHTML = `<div class="talks-empty">No talks for ${activeYear} with ${activeTag}.</div>`;
+        return;
+      }
+
+      cardsEl.innerHTML = cardMarkup(filtered);
     };
+
+    // Print and save-as-PDF: the on-screen year and topic filters would print one year only, so every talk is drawn
+    // (items is already newest first) while printing and the filtered view is restored afterwards. Screen is unchanged.
+    let printing = false;
+    const beforePrint = () => {
+      if (printing) return;
+      printing = true;
+      cardsEl.innerHTML = cardMarkup(items);
+    };
+    const afterPrint = () => {
+      if (!printing) return;
+      printing = false;
+      renderCards();
+    };
+    window.addEventListener('beforeprint', beforePrint);
+    window.addEventListener('afterprint', afterPrint);
+    if (window.matchMedia) {
+      window.matchMedia('print').addEventListener('change', (e) => (e.matches ? beforePrint() : afterPrint()));
+    }
 
     // The shortcode renders the year and topic buttons; draw them here only if it did not (keeps the layout still).
     if (!yearsEl.querySelector('.talks-year')) yearsEl.innerHTML = years.map((year) => {

@@ -36,10 +36,10 @@
 
     const years = Array.from(grouped.keys()).sort((a, b) => a - b);
 
-    const renderDetail = (year) => {
+    const detailMarkup = (year) => {
       const list = grouped.get(year) || [];
       const label = toLabel(list[0]);
-      detailEl.innerHTML = `
+      return `
         <div class="awards-detail-year">${label}</div>
         <div class="awards-detail-list">
           ${list.map((item) => `
@@ -55,7 +55,32 @@
       `;
     };
 
+    const renderDetail = (year) => {
+      detailEl.innerHTML = detailMarkup(year);
+    };
+
+    // Print and save-as-PDF: only the selected year is on screen, so every year is drawn (newest first) while
+    // printing and the selected year is restored afterwards. Screen is unchanged.
+    let activeYear = null;
+    let printing = false;
+    const beforePrint = () => {
+      if (printing) return;
+      printing = true;
+      detailEl.innerHTML = years.slice().reverse().map(detailMarkup).join('');
+    };
+    const afterPrint = () => {
+      if (!printing) return;
+      printing = false;
+      if (activeYear !== null) renderDetail(activeYear);
+    };
+    window.addEventListener('beforeprint', beforePrint);
+    window.addEventListener('afterprint', afterPrint);
+    if (window.matchMedia) {
+      window.matchMedia('print').addEventListener('change', (e) => (e.matches ? beforePrint() : afterPrint()));
+    }
+
     const setActive = (year) => {
+      activeYear = year;
       nodesEl.querySelectorAll('.awards-node').forEach((node) => {
         node.classList.toggle('active', Number(node.dataset.year) === year);
         node.setAttribute('aria-pressed', Number(node.dataset.year) === year ? 'true' : 'false');
