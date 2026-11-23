@@ -58,6 +58,12 @@ async function person(S, condition) {
 }
 const R = type.routes;
 
+// Quoted-field CSV reader for checking exports (message text has commas in it).
+const csvTable = csv => { const rows = [[]]; let f = '', q = false; for (let i = 0; i < csv.length; i++) { const c = csv[i];
+  if (q) { if (c === '"' && csv[i + 1] === '"') { f += '"'; i++; } else if (c === '"') q = false; else f += c; }
+  else if (c === '"') q = true; else if (c === ',') { rows.at(-1).push(f); f = ''; } else if (c === '\n') { rows.at(-1).push(f); f = ''; rows.push([]); } else if (c !== '\r') f += c; }
+  if (f || rows.at(-1).length) rows.at(-1).push(f); return rows.filter(r => r.length > 1); };
+
 // ---------- content ----------
 {
   const d = C.normalize(C.defaultContent(type), type);
@@ -112,9 +118,9 @@ const R = type.routes;
   const stored = await base.get(`chats/${code}/s1/t0/000`);
   assert(!stored.user.includes('jo@example.com'), 'emails are masked before a message is stored'); assert.equal(stored.condition, 'synthetic');
   assert.equal(stored.input, 'text'); assert.equal(stored.source, 'llm'); assert.equal(stored.sinceMs, 4200); assert(stored.promptHash);
-  await R['chat/turn'](S, code, { ...at, seq: 1, text: 'second' }, 3000);
+  await R['chat/turn'](S, code, { ...at, seq: 1, text: 'Thanks, that helps. Sorry, can you say more about why?', sinceMs: 9000 }, 3000);
   assert.equal(calls.llm[1].messages.length >= 3, true, 'earlier turns are sent as history');
-  const last = await R['chat/turn'](S, code, { ...at, seq: 2, text: 'third' }, 4000);
+  const last = await R['chat/turn'](S, code, { ...at, seq: 2, text: 'third', sinceMs: 20000 }, 4000);
   assert.equal(last.done, true, 'the last allowed turn says the conversation is over');
   assert.equal((await R['chat/turn'](S, code, { ...at, seq: 3, text: 'fourth' })).error, 'chat_over');
   assert.equal((await R['chat/state'](S, code, at)).turns.length, 3, 'a reload gets the conversation back');
@@ -124,6 +130,7 @@ const R = type.routes;
   assert(saved.ok, JSON.stringify(saved));
   const full = await E.exportRecords(S, [code]), rec = full.records.find(x => /\/t0$/.test(x.key)), row = E.trialRow(S, rec, full.participants[0]);
   assert.equal(row.chat_turns, 3); assert.equal(row.chat_ended, 'max'); assert.equal(row.chat_ms, 51000); assert.equal(row.chat_reached_min, 1);
+  assert.equal(row.chat_median_gap_ms, 4800, 'median gap between messages (4800 and 11000)'); assert.equal(row.chat_first_safety_turn, ''); assert.equal(row.chat_turns_after_safety, '');
   assert.equal(row.chat_model, bot.DEFAULT_MODEL); assert.equal(row.chat_prompt_hash, stored.promptHash); assert.equal(row.chat_llm_errors, 0); assert.equal(String(row.a_je_understood), '6');
   assert(!JSON.stringify(rec).includes('junk'), 'unknown client fields are dropped');
   assert.equal((await R['chat/state'](S, code, at)).error, 'chat_over', 'no more turns after the item is submitted');
@@ -132,7 +139,11 @@ const R = type.routes;
   const audits = [], out = await type.adminRoutes['chat.csv'].handler(S, { audit: async (a, d) => { audits.push([a, d]); } }), csv = out.csv;
   assert.equal(type.adminRoutes['chat.csv'].need, 'manager'); assert.deepEqual(audits, [['chat.export', '3 turns']], 'the download is audited');
   assert(csv.split('\n')[0].startsWith('code,session,trial_index,turn,condition'), 'transcript header: ' + csv.slice(0, 80));
-  assert.equal(csv.trim().split('\n').length, 4, 'one row per turn'); assert(csv.includes('synthetic') && csv.includes('Reply 1'));
+  assert.equal(csv.trim().split('\n').length, 4, 'one row per turn');
+  const tab = csvTable(csv), head = tab[0], cell = (r, c) => tab[r][head.indexOf(c)];
+  for (const c of ['speech_ms', 'speech_wpm', 'user_thanks', 'user_please', 'user_greeting', 'user_goodbye', 'user_sorry', 'user_you', 'user_i', 'user_question']) assert(head.includes(c), 'transcript has ' + c);
+  assert.equal(cell(2, 'user_thanks'), '1'); assert.equal(cell(2, 'user_sorry'), '1'); assert.equal(cell(2, 'user_you'), '1'); assert.equal(cell(2, 'user_question'), '1');
+  assert.equal(cell(1, 'user_i'), '1', '"to me"'); assert.equal(cell(1, 'user_thanks'), '0'); assert.equal(cell(2, 'speech_ms'), '', 'typed turns have no speech length'); assert(csv.includes('synthetic') && csv.includes('Reply 1'));
   console.log('chatbot: turns are write-once, ordered, capped, summarised on submit, and exported one row per turn');
 
   // deleting the participant removes the conversation
@@ -148,6 +159,10 @@ const R = type.routes;
   assert.equal(t.bot, content.chat.safety.crisisLine); assert.equal(calls.llm.length, 0, 'the model is not asked');
   assert.equal(t.safety, true, 'the page is told, so it can let the participant end at once');
   assert.equal((await base.get(`chats/${code}/s1/t0/000`)).source, 'safety');
+  await R['chat/turn'](S, code, { ...at, seq: 1, text: 'ok' }, 2000);
+  await E.saveTrial(S, code, 1, 0, { answers: {}, rtMs: 1, chat: { ended: 'user', chatMs: 10 } });
+  const sfull = await E.exportRecords(S, [code]), srow = E.trialRow(S, sfull.records.find(x => /\/t0$/.test(x.key)), sfull.participants[0]);
+  assert.equal(srow.chat_first_safety_turn, 1); assert.equal(srow.chat_turns_after_safety, 1, 'the participant went on for one turn after the crisis message');
   assert(bot.isCrisis('i have been thinking about suicide') && !bot.isCrisis('this deadline is killing my weekend'));
 }
 for (const how of ['fail', 'refuse']) {
@@ -181,7 +196,9 @@ for (const how of ['fail', 'refuse']) {
   assert(!JSON.stringify([...base.m.values()]).includes(WEBM.slice(0, 60)), 'the recording itself is not stored');
   const t = await R['chat/turn'](S, a.code, { ...a.at, seq: 0, text: 'I have been worried about work and sleep', heard: h.id }, 2000);
   const stored = await base.get(`chats/${a.code}/s1/t0/000`);
-  assert.equal(stored.input, 'voice'); assert.equal(stored.heardText, 'I have been worried about work'); assert.equal(stored.edited, true);
+  assert.equal(stored.input, 'voice'); assert.equal(stored.heardText, 'I have been worried about work'); assert.equal(stored.edited, true); assert.equal(stored.heardMs, 3100);
+  const sc = csvTable((await type.adminRoutes['chat.csv'].handler(S, { audit: async () => {} })).csv), sh = sc[0], sr = sc[1];
+  assert.equal(sr[sh.indexOf('speech_ms')], '3100'); assert.equal(sr[sh.indexOf('speech_wpm')], '116.1', '6 words heard in 3.1 s'); assert.equal(sr[sh.indexOf('user_i')], '1');
   assert(JSON.stringify(calls.llm[0].system).toLowerCase().includes('aloud') || JSON.stringify(calls.llm[0].system).includes(bot.SPOKEN_RULE), 'the spoken-format rule is added');
   const open = await R['chat/voice'](S, a.code, { ...a.at, seq: 'open' }, 3000), v0 = await R['chat/voice'](S, a.code, { ...a.at, seq: 0 }, 3100);
   assert(open.audio.includes('/file/f-') && v0.audio.includes('/file/f-')); assert.equal(calls.tts.length, 2);
