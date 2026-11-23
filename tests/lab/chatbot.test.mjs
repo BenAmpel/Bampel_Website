@@ -224,3 +224,82 @@ for (const env of [KEYS, {}]) {
   assert.deepEqual([...base.m.keys()].filter(k => /^(chats|chatstt|chattts|chaterr|data|plans)\//.test(k)), [], 'the self-test leaves nothing behind');
 }
 console.log('chatbot: the live self-test passes with the services on and off');
+
+// ---------- the Compare tab: every condition answers one message, and each reply is checked against a list ----------
+{
+  const RUBRIC = [{ id: 'names_feeling', label: 'Names a feeling', definition: 'The reply names an emotion the person may be having.' }, { id: 'asks', label: 'Asks a question', definition: 'The reply asks the person something.' }];
+  const { S, base, calls } = await setup({ edit: c => { c.chat.rubric = structuredClone(RUBRIC); } });
+  const A = type.adminRoutes, bench = (body, now = 5000) => A.bench.handler(S, { body, now });
+  for (const k of ['bench', 'bench-code', 'bench-voice']) { assert.equal(A[k].need, 'editor'); assert.equal(A[k].post, true); }
+
+  // The reply is built from the instruction a participant in that condition is given.
+  const { plan } = await person(S, 'sympathy');
+  const before = calls.llm.length, r = await bench({ condition: 'sympathy', text: '  I failed   an exam. ' });
+  assert.equal(r.source, 'llm'); assert.equal(r.condition, 'sympathy'); assert(r.words > 0 && r.text.includes('I failed an exam.'));
+  const sent = calls.llm.at(-1), stored = [...base.m.values()].map(v => typeof v === 'string' ? v : JSON.stringify(v)).find(v => /"promptHash":"/.test(v));
+  const live = stored.match(/"promptHash":"([^"]+)"/)[1];
+  assert.equal(r.promptHash, live, 'the same instruction, by hash, as the participant\'s own plan');
+  assert.equal(bot.promptHash(sent.system), live); assert(!JSON.stringify(plan).includes(sent.system.slice(0, 60)), 'and the plan a participant sees still leaves it out');
+  assert.equal(calls.llm.length, before + 1);
+  const other = await bench({ condition: 'control', text: 'I failed an exam.' });
+  assert.notEqual(other.promptHash, r.promptHash, 'conditions differ by instruction');
+
+  // Each condition carries its own history; nothing is stored but the day's count.
+  const keysBefore = [...base.m.keys()].filter(k => !k.startsWith('chatbench/')).sort();
+  await bench({ condition: 'control', turns: [{ user: 'first', bot: 'first answer' }, { user: '', bot: 'dropped' }], text: 'second' });
+  assert.deepEqual(calls.llm.at(-1).messages.map(m => m.content).slice(-3), ['first', 'first answer', 'second']);
+  assert.deepEqual([...base.m.keys()].filter(k => !k.startsWith('chatbench/')).sort(), keysBefore, 'no message or reply is kept on the server');
+
+  // Refusals: an unknown condition, an empty message, a crisis message (no model call), a failing model.
+  assert.equal((await bench({ condition: 'ghost', text: 'hi' })).error, 'bad_condition');
+  assert.equal((await bench({ condition: 'control', text: '   ' })).error, 'empty');
+  const n = calls.llm.length, crisis = await bench({ condition: 'synthetic', text: 'I want to kill myself' });
+  assert.equal(crisis.source, 'safety'); assert.equal(crisis.text, (await C.getContent(base, type)).chat.safety.crisisLine); assert.equal(calls.llm.length, n, 'the crisis message never reaches the model, in any condition');
+
+  // The check: the answer is parsed, and evidence counts only when it is in the reply word for word.
+  const answer = t => { S.fetchImpl = async (url, init) => { calls.llm.push(JSON.parse(init.body)); return Response.json({ content: [{ type: 'text', text: t }], stop_reason: 'end_turn', model: 'stub' }); }; };
+  answer('Here you go: {"codes":[{"id":"names_feeling","present":true,"evidence":"sounds  discouraging"},{"id":"asks","present":true,"evidence":"words that are not there"},{"id":"extra","present":true,"evidence":"x"}]}');
+  const coded = await A['bench-code'].handler(S, { body: { text: 'That sounds\ndiscouraging. What happened?' }, now: 5000 });
+  assert.deepEqual(coded.codes, [{ id: 'names_feeling', present: true, evidence: 'sounds discouraging' }, { id: 'asks', present: true, evidence: '' }]);
+  assert.equal(coded.rubricHash, bot.rubricHash(RUBRIC)); assert.notEqual(coded.rubricHash, bot.rubricHash([{ ...RUBRIC[0], definition: 'changed' }, RUBRIC[1]]));
+  const asked = calls.llm.at(-1); assert(asked.messages[0].content.includes('names an emotion') && asked.messages[0].content.includes('What happened?')); assert(!asked.system.includes('sympathy'), 'the coder is told nothing about the condition');
+  answer('{"codes":[{"id":"asks","present":"maybe"}]}');
+  assert.deepEqual((await A['bench-code'].handler(S, { body: { text: 'Hello.' }, now: 5000 })).codes.map(c => c.present), [null, null], 'a behaviour the answer skips or fudges is left uncoded');
+  answer('I would rather not.');
+  const badAns = await A['bench-code'].handler(S, { body: { text: 'Hello.' }, now: 5000 }); assert.equal(badAns.error, 'code_bad_answer'); assert.equal(badAns.status, 502);
+  assert.equal((await A['bench-code'].handler(S, { body: { text: ' ' }, now: 5000 })).error, 'empty');
+
+  // The voice, and the daily limit across all three.
+  const svc = services(); S.fetchImpl = svc.fetchImpl;
+  const v = await A['bench-voice'].handler(S, { body: { text: 'Read this aloud.' }, now: 5000 });
+  assert.equal(Buffer.from(v.audio, 'base64').subarray(0, 3).toString(), 'ID3'); assert.equal(v.mime, 'audio/mpeg');
+  S.env = { ...KEYS, LAB_BENCH_DAILY: '2' };
+  const day2 = 5000 + 2 * 86400000;
+  assert.equal((await bench({ condition: 'control', text: 'one' }, day2)).source, 'llm');
+  assert.equal((await A['bench-voice'].handler(S, { body: { text: 'two' }, now: day2 })).mime, 'audio/mpeg');
+  const full = await bench({ condition: 'control', text: 'three' }, day2); assert.equal(full.status, 429); assert(full.hint);
+  assert.equal((await A['bench-code'].handler(S, { body: { text: 'three' }, now: day2 })).status, 429);
+  assert.equal((await bench({ condition: 'control', text: 'I want to kill myself' }, day2)).source, 'safety', 'the crisis message is not subject to the limit');
+  console.log('chatbot: the Compare tab answers from the live instruction, keeps nothing, checks replies against the listed behaviours, and is capped');
+}
+{
+  const failing = await setup({ mode: { llm: 'fail', tts: 'fail' }, edit: c => { c.chat.rubric = [{ id: 'a', label: 'A', definition: 'Any.' }]; } });
+  const A = type.adminRoutes, x = await A.bench.handler(failing.S, { body: { condition: 'control', text: 'hi' }, now: 1 });
+  assert.equal(x.status, 502); assert(/^llm_/.test(x.error) && x.hint);
+  assert.equal((await A['bench-code'].handler(failing.S, { body: { text: 'hi' }, now: 1 })).status, 502);
+  assert.equal((await A['bench-voice'].handler(failing.S, { body: { text: 'hi' }, now: 1 })).status, 502);
+  const none = await setup();
+  assert.equal((await A['bench-code'].handler(none.S, { body: { text: 'hi' }, now: 1 })).error, 'no_rubric');
+  const off = await setup({ env: {} }), o = await A.bench.handler(off.S, { body: { condition: 'control', text: 'hi' }, now: 1 }); assert.equal(o.error, 'llm_not_configured');
+
+  // The list of behaviours is validated like the rest of the study.
+  const ok = C.normalize({ ...C.defaultContent(type), ...TEMPLATES['chatbot-empathy'].content() }, type);
+  assert.deepEqual(ok.chat.rubric, [], 'the template lists none: a study writes its own');
+  const tryIt = r => { const c = structuredClone(ok); c.chat.rubric = r; return C.validateContent(c, type); };
+  assert.deepEqual(tryIt([{ id: 'a', label: 'A', definition: 'Any.' }]), []);
+  assert(tryIt([{ id: 'Bad Id', label: 'A', definition: 'x' }]).length); assert(tryIt([{ id: 'a', label: '', definition: 'x' }]).length); assert(tryIt([{ id: 'a', label: 'A', definition: '' }]).length);
+  assert(tryIt([{ id: 'a', label: 'A', definition: 'x' }, { id: 'a', label: 'B', definition: 'y' }]).length, 'two behaviours cannot share an id');
+  assert(tryIt(Array.from({ length: 13 }, (_, i) => ({ id: 'b' + i, label: 'B', definition: 'x' }))).length, 'at most twelve');
+  const legacy = structuredClone(ok); delete legacy.chat.rubric; assert.deepEqual(C.normalize(legacy, type).chat.rubric, [], 'a study saved before the list existed still loads');
+  console.log('chatbot: Compare failures are reported, and the list of behaviours is validated');
+}
