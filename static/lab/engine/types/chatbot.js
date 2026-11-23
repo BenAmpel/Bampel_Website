@@ -199,17 +199,18 @@
         });
       }
       function speaking(on) {
-        if (!call) return;
+        if (!call || st.ended) return;
         orbSet(on ? 'speaking' : 'idle');
         status.textContent = on ? T('chat_speaking', { bot: it.botName }) : '';
       }
       function say(seq, text) {
         if (!it.speak || !text) return;
         st.last = { seq: seq, text: text }; if (replay) replay.hidden = false;
-        var played = function (ok) { if (!ok && call && !st.ended) showText(text, 'unplayed'); if (!ok) speaking(false); };
+        // The reply that reached the turn limit is still said (or shown, if it cannot play) after the questions appear.
+        var played = function (ok) { if (!ok && call && (!st.ended || seq === st.lastSeq)) showText(text, 'unplayed'); if (!ok) speaking(false); };
         if (call) { status.textContent = T('chat_thinking_call', { bot: it.botName }); orbSet('thinking'); }
         ui.call('chat/voice', Object.assign({ seq: seq }, where)).then(function (r) {
-          if (st.ended || st.rec) return;   // never talk over a recording or the questions
+          if ((st.ended && seq !== st.lastSeq) || st.rec) return;   // never talk over a recording, or start a new reply once the questions are up
           if (!r || !r.audio) { speaking(true); return browserSay(text).then(played); }
           hush();
           var a = new Audio(r.audio); st.playing = a;
@@ -267,7 +268,7 @@
             botSays(seq, r.bot, true);
             if (call && r.safety) showText(r.bot, 'safety');
             ctx.record('chat_turn', String(st.seq)); counter();
-            if (r.done) return finish('max');
+            if (r.done) { st.lastSeq = seq; return finish('max'); }
             if (!typed.hidden) box.focus(); else if (rec) rec.focus();
             return;
           }
@@ -356,7 +357,7 @@
       var set = ui.questionSet(after, qs, tmsg, submit, function (n, v) { ctx.record(n, v); });
       submit.addEventListener('click', function () {
         if (!st.ended || !set.check()) return;
-        submit.disabled = true;
+        submit.disabled = true; hush();
         ctx.submit({ answers: set.answers, rtMs: ctx.ms(), chat: { ended: st.ended, chatMs: Math.round(st.endedAt - st.started), browserVoice: st.browserVoice, audioPlayed: st.audioPlayed,
           micBlocked: st.micBlocked, retries: st.retries, textShown: st.textShown } }, function (err) { submit.disabled = false; tmsg.innerHTML = ui.errorBox(err); });
       });
