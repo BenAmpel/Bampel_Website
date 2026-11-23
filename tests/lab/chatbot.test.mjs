@@ -261,6 +261,8 @@ console.log('chatbot: the live self-test passes with the services on and off');
   answer('Here you go: {"codes":[{"id":"names_feeling","present":true,"evidence":"sounds  discouraging"},{"id":"asks","present":true,"evidence":"words that are not there"},{"id":"extra","present":true,"evidence":"x"}]}');
   const coded = await A['bench-code'].handler(S, { body: { text: 'That sounds\ndiscouraging. What happened?' }, now: 5000 });
   assert.deepEqual(coded.codes, [{ id: 'names_feeling', present: true, evidence: 'sounds discouraging' }, { id: 'asks', present: true, evidence: '' }]);
+  answer('```json\n{"codes":[{"id":"names_feeling","present":false,"evidence":""},{"id":"asks","present":true,"evidence":"What happened?"}]}\n```\nLet me know if you need more.');
+  assert.deepEqual((await A['bench-code'].handler(S, { body: { text: 'That sounds discouraging. What happened?' }, now: 5000 })).codes.map(c => [c.present, c.evidence]), [[false, ''], [true, 'What happened?']], 'an answer wrapped in a code fence with a trailing sentence still reads');
   assert.equal(coded.rubricHash, bot.rubricHash(RUBRIC)); assert.notEqual(coded.rubricHash, bot.rubricHash([{ ...RUBRIC[0], definition: 'changed' }, RUBRIC[1]]));
   const asked = calls.llm.at(-1); assert(asked.messages[0].content.includes('names an emotion') && asked.messages[0].content.includes('What happened?')); assert(!asked.system.includes('sympathy'), 'the coder is told nothing about the condition');
   answer('{"codes":[{"id":"asks","present":"maybe"}]}');
