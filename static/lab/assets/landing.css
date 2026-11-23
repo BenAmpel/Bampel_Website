@@ -1,49 +1,128 @@
-/* Lab landing page only (static/lab/index.html). Loaded right after study.css, where the page's inline <style> block used to be,
-   so the cascade order is unchanged. Participant pages do not load this file. */
-/* Lab home: the shared tokens from study.css, laid out as a page. Georgia State web standards: GSU Blue and white,
-   Lato (self-hosted, so no visitor data goes to a font service), a text wordmark and no unit logo. */
-body { padding: 0; }
-.skip { position: absolute; left: -9999px; top: 8px; z-index: 100; background: var(--accent); color: var(--accent-text); padding: 8px 14px; border-radius: 8px; font-weight: 700; }
-.skip:focus { left: 16px; }
-main:focus { outline: none; }
-.wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
-header.site { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--card) 92%, transparent); -webkit-backdrop-filter: blur(18px) saturate(170%); backdrop-filter: blur(18px) saturate(170%); border-top: 4px solid var(--gsu-blue); border-bottom: 1px solid var(--line); }
-header.site .wrap { display: flex; justify-content: space-between; align-items: center; gap: 12px 20px; padding-top: 10px; padding-bottom: 10px; flex-wrap: wrap; }
-.brandrow { display: flex; align-items: center; gap: 16px; }
-nav a { color: var(--link); text-decoration: none; margin-left: 12px; padding: 12px 6px; display: inline-block; white-space: nowrap; font-size: .9375rem; font-weight: 700; }
-nav a:first-child { margin-left: 0; }
-nav a:hover { text-decoration: underline; text-underline-offset: .3em; text-decoration-thickness: 2px; }
-.hero-band { background: var(--hero-bg, #0039a6); color: #ffffff; }
-:root { --hero-bg: #0039a6; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --hero-bg: #13213f; } }
-:root[data-theme="dark"] { --hero-bg: #13213f; }
-.hero { max-width: 1080px; margin: 0 auto; padding: clamp(40px, 7vw, 84px) 20px clamp(36px, 6vw, 64px); }
-.eyebrow { color: #97caeb; font-size: .8125rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
-.hero h1 { color: #ffffff; font-weight: 300; font-size: clamp(2.1rem, 1.4rem + 3vw, 3.4rem); line-height: 1.1; letter-spacing: -.01em; margin: 12px 0 18px; max-width: 860px; }
-.hero .lede { color: #ffffff; font-size: 1.125rem; line-height: 1.6; max-width: 720px; margin: 0; }
-.hero :focus-visible { outline-color: #ffffff; }
-.lede { color: var(--muted); }
-section { padding: 36px 0; }
-section h2 { color: var(--heading-brand); font-size: 1.75rem; letter-spacing: -.01em; margin: 0 0 18px; }
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
-.card { border-radius: var(--radius); padding: 22px; }
-.grid .card { border-top: 4px solid var(--accent); }
-.card h3 { margin: 0 0 6px; font-size: 1.0625rem; }
-.card p { margin: 0; color: var(--muted); font-size: .9375rem; }
-.tag { display: inline-block; font-size: .75rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--text); margin-bottom: 10px; }
-.study { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
-.btn { display: inline-flex; }
-ul.plain { padding-left: 18px; color: var(--muted); margin: 0; }
-ul.plain li { margin: 6px 0; }
-footer { border-top: 1px solid var(--line); padding: 24px 0 40px; color: var(--muted); font-size: .8125rem; }
-footer a { display: inline-block; padding: 4px 2px; }
-/* Phones: the header scrolls away instead of taking 143px of every screen, and the links stay one line each. */
-@media (max-width: 760px) { header.site { position: static; } nav { display: flex; flex-wrap: wrap; } nav a { margin-left: 0; padding: 6px 8px; } }
+/* Lab landing page. Tokens come from study.css; this file adds layout and type for /lab/ only. */
 
-/* Formerly inline style="" attributes. One class each; every rule here outranks the only competing rules (study.css's
-   bare p and a selectors), so these still win as the attributes did. */
-.fine { color: var(--muted); font-size: 14px; }
-.fine-top { margin-top: 12px; }
-.measure { max-width: 720px; }
-.signin-link { margin-left: 14px; display: inline-block; padding: 12px 4px; }
-.study-live { margin-top: 14px; }
+body { padding: 0; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+/* Skip link (pages.css and admin.css refer to this rule) */
+.skip { position: absolute; left: -9999px; top: 8px; z-index: 20; padding: 8px 14px; border-radius: var(--radius-sm); background: var(--accent); color: var(--accent-text); }
+.skip:focus { left: 12px; }
+
+/* Header: translucent bar over the content, GSU rule on top */
+header.site {
+  position: sticky; top: 0; z-index: 10;
+  border-top: 4px solid var(--gsu-blue, #0039a6);
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--line) 70%, transparent);
+}
+header.site .wrap { display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 60px; }
+.brandrow { display: flex; align-items: center; gap: 14px; }
+.wordmark { display: flex; flex-direction: column; text-decoration: none; color: var(--heading); line-height: 1.2; }
+.wordmark b { font-weight: 700; font-size: 1rem; letter-spacing: -0.01em; }
+.wordmark small { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.005em; }
+header.site nav { display: flex; gap: 22px; font-size: 0.875rem; }
+header.site nav a { color: var(--text); text-decoration: none; padding: 6px 0; transition: color 0.15s var(--ease); }
+header.site nav a:hover { color: var(--accent); }
+
+/* Hero */
+.hero { padding: clamp(64px, 10vw, 128px) 0 clamp(48px, 7vw, 88px); }
+.hero h1 {
+  max-width: 20ch; margin: 0 0 24px;
+  font-size: clamp(2.5rem, 1.5rem + 4vw, 4.5rem); font-weight: 700;
+  line-height: 1.04; letter-spacing: -0.03em; color: var(--heading); text-wrap: balance;
+}
+.lede { max-width: 38em; margin: 0; font-size: clamp(1.125rem, 1rem + 0.4vw, 1.3125rem); font-weight: 300; line-height: 1.5; color: var(--muted); }
+.cta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px; margin: 36px 0 0; }
+.cta .btn { padding: 12px 22px; font-size: 1rem; }
+.more { font-weight: 400; color: var(--accent); text-decoration: none; }
+.more::after { content: " \203A"; }
+.more:hover { text-decoration: underline; text-underline-offset: 3px; }
+.cta-note { margin: 14px 0 0; font-size: 0.875rem; color: var(--muted); }
+
+/* Showcase: the two real demo screens on a tinted stage */
+.stage {
+  display: grid; grid-template-columns: 1fr 1fr; gap: clamp(20px, 3vw, 40px); align-items: start;
+  margin-top: clamp(48px, 7vw, 80px); padding: clamp(20px, 4vw, 56px);
+  border-radius: 28px; background: color-mix(in srgb, var(--bg-2) 60%, var(--bg));
+}
+.shot { margin: 0; }
+.shot img {
+  display: block; width: 100%; height: auto; border-radius: 16px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.06), 0 24px 48px -24px rgb(0 0 0 / 0.28);
+}
+.shot figcaption { margin-top: 16px; font-size: 0.9375rem; line-height: 1.45; color: var(--muted); }
+.shot figcaption b { font-weight: 700; color: var(--heading); }
+
+/* Sections */
+section[id] { scroll-margin-top: 72px; }
+.band { padding: clamp(56px, 9vw, 112px) 0; border-top: 1px solid var(--line); }
+.band h2 { margin: 0 0 12px; font-size: clamp(1.75rem, 1.2rem + 2vw, 2.5rem); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; color: var(--heading); }
+.sub { max-width: 40em; margin: 0; font-size: 1.0625rem; line-height: 1.55; color: var(--muted); }
+.fine { margin: 28px 0 0; max-width: 46em; font-size: 0.875rem; line-height: 1.55; color: var(--muted); }
+
+/* Studies: hairline rows */
+.rows { list-style: none; margin: 32px 0 0; padding: 0; }
+#live .rows { margin-top: 0; }
+.row {
+  display: grid; grid-template-columns: 7rem 1fr auto; gap: 8px 32px; align-items: center;
+  padding: 28px 0; border-bottom: 1px solid var(--line);
+}
+.rows:first-child .row:first-child, #studies > .wrap > .rows .row:first-child { border-top: 1px solid var(--line); }
+.row-kind { margin: 0; font-size: 0.875rem; font-weight: 700; color: var(--accent); }
+.row-body h3 { margin: 0 0 4px; font-size: 1.25rem; font-weight: 700; letter-spacing: -0.01em; color: var(--heading); }
+.row-body p { margin: 0; max-width: 40em; color: var(--muted); line-height: 1.5; }
+
+/* What a study can record: heading left, spec list right */
+.split { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 24px 64px; }
+.split-head { align-self: start; position: sticky; top: 96px; }
+.specs { margin: 0; }
+.specs > div { display: grid; grid-template-columns: 9.5rem 1fr; gap: 4px 24px; padding: 18px 0; border-top: 1px solid var(--line); }
+.specs > div:last-child { border-bottom: 1px solid var(--line); }
+.specs dt { font-weight: 700; color: var(--heading); }
+.specs dd { margin: 0; line-height: 1.55; color: var(--text); }
+.split-foot { grid-column: 2; margin-top: 4px; }
+
+/* Privacy: four short statements */
+.facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px 64px; margin-top: 36px; }
+.facts h3 { margin: 0 0 8px; font-size: 1.125rem; font-weight: 700; letter-spacing: -0.01em; color: var(--heading); }
+.facts p { margin: 0; line-height: 1.55; color: var(--muted); }
+
+/* For researchers */
+#researchers { border-top: 0; padding-top: 0; }
+.panel { padding: clamp(28px, 5vw, 64px); border-radius: 28px; background: color-mix(in srgb, var(--bg-2) 60%, var(--bg)); }
+.panel .cta { margin-top: 28px; }
+
+footer { padding: 40px 0 56px; border-top: 1px solid var(--line); font-size: 0.875rem; color: var(--muted); }
+footer a { color: var(--muted); }
+footer a:hover { color: var(--accent); }
+
+/* Phones and narrow windows */
+@media (max-width: 860px) {
+  .split { grid-template-columns: 1fr; }
+  .split-head { position: static; }
+  .split-foot { grid-column: 1; }
+}
+@media (max-width: 760px) {
+  .wrap { padding: 0 16px; }
+  header.site { position: static; }
+  header.site .wrap { flex-direction: column; align-items: flex-start; gap: 6px; padding-top: 12px; padding-bottom: 10px; }
+  header.site nav { flex-wrap: wrap; gap: 4px 18px; }
+  .stage { grid-template-columns: 1fr; border-radius: 20px; }
+  .row { grid-template-columns: 1fr; gap: 6px; padding: 24px 0; }
+  .row .btn { justify-self: start; margin-top: 10px; }
+  .specs > div { grid-template-columns: 1fr; }
+  .facts { grid-template-columns: 1fr; gap: 28px; }
+  .panel { border-radius: 20px; }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  header.site { background: var(--bg); -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+@media (prefers-contrast: more) {
+  header.site { background: var(--bg); -webkit-backdrop-filter: none; backdrop-filter: none; border-bottom: 1px solid var(--line-strong); }
+  .stage, .panel { outline: 1px solid var(--line-strong); }
+}
+@media (prefers-reduced-motion: reduce) {
+  header.site nav a { transition: none; }
+}
