@@ -215,8 +215,10 @@ export const PASSCODE_WINDOW_MS = 15 * 60000;
 export const PASSCODE_FAIL_LIMIT = 30;
 const passNorm = v => String(v == null ? '' : v).trim().toLowerCase().slice(0, 64);
 export function passcodeMatches(sent, want) {
-  const a = createHmac('sha256', 'passcode').update(passNorm(sent)).digest(), b = createHmac('sha256', 'passcode').update(passNorm(want)).digest();
-  return timingSafeEqual(a, b);
+  // Fixed-length buffers (normalized values are at most 64 chars, so 256 bytes fits any UTF-8) for a constant-time compare.
+  const pad = v => { const b = Buffer.alloc(256); b.write(passNorm(v), 'utf8'); return b; };
+  const x = passNorm(sent), y = passNorm(want);
+  return timingSafeEqual(pad(x), pad(y)) && x.length === y.length && y.length > 0;
 }
 async function passcodeCheck(store, sent, want, now) {
   const since = now - PASSCODE_WINDOW_MS, keys = await store.list('passcode-try/');
