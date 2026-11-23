@@ -158,7 +158,7 @@ Trials CSV columns after `trial_index` (the generic identifier, behavior, and co
 |---|---|
 | `item_id` | Always `chat` |
 | `chat_mode` | How the participant could talk to the chatbot: `text`, `voice`, or `either` |
-| `chat_audio_only` | Audio only: the participant heard the conversation and saw no transcript (1/0) |
+| `chat_audio_only` | Audio only: the participant heard the conversation and saw no transcript (1/0); if chat_mic_blocked = 1, they typed and saw it |
 | `chat_turns` | Turns completed (one turn = one participant message and the chatbot's reply) |
 | `chat_voice_turns`, `chat_edited_turns` | Turns the participant spoke; spoken turns where they changed the transcribed text before sending |
 | `chat_words_user`, `chat_words_bot` | Words from the participant and from the chatbot, all turns |

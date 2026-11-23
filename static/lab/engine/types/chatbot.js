@@ -6,6 +6,7 @@
    Audio only (chat.voice.audioOnly, spoken studies): the participant sees an animated orb instead of the transcript,
    like a phone call. The transcript stays in the page for screen readers. The crisis message is always shown as text,
    and a reply that cannot be played at all is shown as text too (counted as chat.textShown).
+   If the microphone fails, the participant types and the transcript is shown (chat.micBlocked marks the row).
    Server side: netlify/lib/lab/types/chatbot.mjs. */
 (function () {
   'use strict';
@@ -296,6 +297,8 @@
       }
       function typeInstead(key) {
         typed.hidden = false; send.hidden = false;
+        // Audio only with no mic: the participant now types, so the call becomes a visible text chat (export: chat_mic_blocked).
+        if (call) { log.classList.remove('cb-sr'); log.setAttribute('aria-live', 'polite'); log.tabIndex = 0; }
         msg.innerHTML = '<p class="cb-warn" role="alert">' + Th(key) + '</p>'; box.focus();
       }
       function recLabel(on) {

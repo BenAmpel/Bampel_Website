@@ -231,7 +231,7 @@ const TYPE_COLUMNS = {
   ],
   chatbot: [
     ['item_id', 'category', 'Always "chat": one conversation per session.'], ['chat_mode', 'category', 'How the participant could talk to the chatbot.', 'text; voice; either'],
-    ['chat_audio_only', 'binary', 'Audio only: the participant heard the conversation and saw no transcript.'],
+    ['chat_audio_only', 'binary', 'Audio only: the participant heard the conversation and saw no transcript (if chat_mic_blocked = 1, they typed and saw it).'],
     ['chat_turns', 'integer', 'Turns completed (one turn = one participant message and the chatbot\'s reply).'], ['chat_voice_turns', 'integer', 'Turns where the participant spoke instead of typing.'],
     ['chat_edited_turns', 'integer', 'Spoken turns where the participant changed the transcribed text before sending it.'],
     ['chat_words_user', 'integer', 'Words the participant wrote or said, all turns.'], ['chat_words_bot', 'integer', 'Words in the chatbot\'s replies, all turns.'],
