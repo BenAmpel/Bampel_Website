@@ -30,6 +30,7 @@ import { trajectoryMetrics, cleanPoints } from '../trajectory.mjs';
 import * as bot from '../voicebot.mjs';
 import { transcribe, saidWord, asrConfigured } from '../asr.mjs';
 import { synthesize } from '../tts.mjs';
+import { reply as chatReply, speak, hear, isCrisis, llmConfigured as claudeReady, promptHash, services, SPOKEN_RULE, VOICE_RE } from '../chatbot.mjs';
 import * as X from './multimodal-study.mjs';
 
 const KINDS = ['text', 'image', 'audio', 'video', 'call', 'check'];
@@ -190,6 +191,14 @@ function validateItem(it, e, conds, qids, where) {
       else if (!opt(c.script[k], 1000)) e.push(`${where}: the "${k}" line is too long (1,000 characters at most).`);
     }
     if (!opt(c.persona, 1500)) e.push(`${where}: the caller description is too long.`);
+    if (c.mode != null && !['', 'scripted', 'open'].includes(c.mode)) e.push(`${where}: choose a scripted call or an open conversation.`);
+    if (c.elevenVoice != null && c.elevenVoice !== '' && !VOICE_RE.test(c.elevenVoice)) e.push(`${where}: the ElevenLabs voice ID must be 10 to 40 letters and digits.`);
+    if (c.mode === 'open') {
+      if (c.intent !== 'benign') e.push(`${where}: an open conversation is for legitimate (benign) callers only. Use the scripted call for an attack.`);
+      if (c.code || c.gate || c.scored || (c.audio && Object.values(c.audio).some(Boolean))) e.push(`${where}: an open conversation cannot send a code, gate the study, score points, or use recorded lines.`);
+      if (!str(c.persona, 1500)) e.push(`${where}: an open conversation needs a caller description (who is calling and how they talk).`);
+      if (!str(c.script && c.script.opener, 1000)) e.push(`${where}: an open conversation needs an opening line.`);
+    }
     for (const k of ['completeRe', 'lossRe']) if (c[k] != null) { let ok = typeof c[k] === 'string' && c[k].length <= 300; try { if (ok) new RegExp(c[k], 'i'); } catch { ok = false; } if (!ok) e.push(`${where}: the ${k === 'lossRe' ? 'loss' : 'completion'} pattern must be a valid pattern of 300 characters at most.`); }
     if (c.debriefName != null && !str(c.debriefName, 120)) e.push(`${where}: the debrief name is too long.`);
     if (c.audio && typeof c.audio === 'object') for (const [k, u] of Object.entries(c.audio)) if (u && !MEDIA_RE.test(u)) e.push(`${where}: the recorded "${k}" line must be an https:// address or an uploaded file.`);
@@ -242,16 +251,29 @@ async function callTurn(S, pid, body, now) {
   if (st.done && !['hangup', 'hold', 'resume'].includes(kind)) return { error: 'call_over', status: 409 };
 
   // The participant's words: typed, or spoken and transcribed here by the lab's own speech server (audio: WAV, base64).
-  let said = typeof body.said === 'string' ? body.said.slice(0, 2000) : '', asrMs = null;
+  // Open conversation (call.mode 'open'): decided when the call is answered and kept in the call's state, so a call
+  // never switches modes halfway. The pilot's scripted flag and a missing Claude key both keep the scripted call.
+  const open = kind === 'answer' ? call.mode === 'open' && !(ctx.p.flags && ctx.p.flags.scripted) && claudeReady() : st.mode === 'open';
+  let said = typeof body.said === 'string' ? body.said.slice(0, 2000) : '', asrMs = null, asrEngine = null;
   if (kind === 'say' && typeof body.audio === 'string' && body.audio) {
     if (body.audio.length > 2_000_000 || !/^[A-Za-z0-9+/=]+$/.test(body.audio)) return { error: 'bad_data', status: 400 };
-    const r = await transcribe(Buffer.from(body.audio, 'base64'));
+    const buf = Buffer.from(body.audio, 'base64');
+    const r = open ? await hear(buf, { mime: 'audio/wav', env: budget(t0, 'speech') }) : await transcribe(buf);
     if (r.error) return { error: 'asr_unavailable', status: 503 };
-    said = r.text; asrMs = r.ms;
+    said = r.text; asrMs = r.ms; asrEngine = r.engine || null;
   }
-  const rec = { seq, kind, at: now, clientMs: num(body.clientMs, 0, 36e5), latencyMs: num(body.latencyMs, 0, 6e4), asr: kind === 'say' && (asrMs != null || body.asr === true), ...(asrMs != null ? { asrServer: true, asrMs } : {}) };
+  const rec = { seq, kind, at: now, clientMs: num(body.clientMs, 0, 36e5), latencyMs: num(body.latencyMs, 0, 6e4), asr: kind === 'say' && (asrMs != null || body.asr === true), ...(asrMs != null ? { asrServer: true, asrMs } : {}), ...(asrEngine ? { asrEngine } : {}) };
+  if (open && kind === 'say') {
+    const o = await openTurn(call, turns, st, said, t0);
+    Object.assign(rec, o.rec);
+    rec.after = o.after;
+    if (o.say) Object.assign(rec, { say: o.say }, await openVoice(S, o.say, call, t0, now));
+    rec.serverMs = Date.now() - t0;
+    if (!(await setNew(S.store, key, rec))) return pub(await S.store.get(key));
+    return pub(rec, said.slice(0, 600));
+  }
   let after = st, line = '';
-  if (kind === 'answer') { after = { ...bot.START, state: 'opener' }; line = call.script.opener; }
+  if (kind === 'answer') { after = { ...bot.START, state: 'opener', ...(open ? { mode: 'open' } : {}) }; line = call.script.opener; }
   else if (kind === 'decline' || kind === 'timeout') after = { ...bot.START, done: true, outcome: kind === 'decline' ? 'declined' : 'missed' };
   else if (kind === 'hangup') after = { ...st, done: true, outcome: st.outcome || 'hung_up' };
   else if (kind === 'say') {
@@ -272,13 +294,84 @@ async function callTurn(S, pid, body, now) {
     const history = turns.flatMap(t => [t.heard ? { speaker: 'participant', text: t.heard } : null, t.say ? { speaker: 'caller', text: t.say } : null]).filter(Boolean);
     const recorded = call.audio && call.audio[after.state];
     const scripted = call.llm === false || !!(ctx.p.flags && ctx.p.flags.scripted);   // pilot: the scripted fallback tree only
-    const out = recorded || scripted ? { text: line, source: recorded ? 'recorded' : 'script' } : await bot.phrase({ state: after.state, line, persona: call.persona, heard: rec.heard || '', history });
+    // An open conversation's first line is the study's opener, word for word.
+    const out = recorded || scripted || open ? { text: line, source: recorded ? 'recorded' : 'script' } : await bot.phrase({ state: after.state, line, persona: call.persona, heard: rec.heard || '', history });
     Object.assign(rec, { say: out.text, source: out.source, llmError: out.error, audio: recorded || null });
-    if (!recorded) Object.assign(rec, await voiceFor(S, out.text, call.voice, now));
+    if (open) Object.assign(rec, await openVoice(S, out.text, call, t0, now));
+    else if (!recorded) Object.assign(rec, await voiceFor(S, out.text, call.voice, now));
   }
   rec.serverMs = Date.now() - t0;
   if (!(await setNew(S.store, key, rec))) return pub(await S.store.get(key));
   return pub(rec, kind === 'say' ? said.slice(0, 600) : null);
+}
+
+// ---------- open conversation ----------
+// Claude writes each caller line from the study's caller description and purpose; ElevenLabs speaks it and transcribes
+// the participant (with the lab's own speech services as the fallback). One request has about 9 seconds in all, so each
+// outside call gets what is left of that budget: transcription up to 3.5 s, Claude up to 5 s, the voice up to 3.5 s.
+// A turn that runs out of time still answers: a short "say that again" line, or the browser's own voice.
+const OPEN_BUDGET_MS = 9000;
+function budget(t0, kind) {
+  const left = OPEN_BUDGET_MS - (Date.now() - t0);
+  const ms = kind === 'chat' ? Math.min(5000, left - 2000) : Math.min(3500, left);
+  return { ...process.env, [kind === 'chat' ? 'LAB_CHAT_TIMEOUT_MS' : 'LAB_SPEECH_TIMEOUT_MS']: String(Math.max(800, ms)) };
+}
+export const OPEN_END = '<end/>';
+export const OPEN_RETRY = 'Sorry, you cut out for a second there. Could you say that again?';
+export const OPEN_CRISIS = 'I am sorry you are going through that. If you are in danger or thinking about hurting yourself, please call or text 988 right now. I will let you go.';
+export function openSystem(call, last) {
+  const sc = call.script || {}, purpose = [sc.pretext, sc.ask].filter(Boolean).join(' ');
+  return 'You voice a phone caller in a university research study about everyday phone calls. The person you are talking to agreed to take part and knows the calls are part of a study. The organisation, the people and every detail are fictional.\n\n' +
+    'Caller: ' + String(call.persona || '').slice(0, 1500) + '\nCalling as: ' + String(call.caller || '').slice(0, 80) +
+    (purpose ? '\nWhy you are calling: ' + purpose.slice(0, 2000) : '') + '\n\n' +
+    'Talk with the person naturally and answer what they actually say. Keep each turn to one to three short spoken sentences. Stay with the reason for the call. ' +
+    'Never ask for a password, a one-time code, a card or bank number, a Social Security number, or a full date of birth, and never threaten, rush, or pressure the person. ' +
+    'If they would rather not answer, accept it. If they want to check you are genuine, tell them to call the number they already have for ' + String(call.caller || 'the organisation').slice(0, 80) + '. ' +
+    'Do not bring up being an AI or a study yourself. ' + SPOKEN_RULE + ' Reply with the words to speak only, with no stage directions or markup. ' +
+    (last ? 'This is your last turn: thank them and say goodbye in one short sentence.' : 'When the reason for the call is taken care of, or the person wants to end the call, say a short goodbye and put ' + OPEN_END + ' at the very end of that reply.');
+}
+// What Claude is given: the opener and every turn since, as stored (the participant's words already redacted).
+function openHistory(turns) {
+  const out = [], said = turns.filter(t => t.say || t.kind === 'say');
+  for (const t of said) {
+    if (t.kind === 'answer') out.push({ user: '(The person answers the phone.)', bot: t.say });
+    else if (t.kind === 'say' && t.say) out.push({ user: t.heard || '(The person says nothing.)', bot: t.say });
+  }
+  return out;
+}
+async function openTurn(call, turns, st, said, t0) {
+  const s = { ...st, turns: (st.turns || 0) + 1 }, heard = bot.redact(said);
+  const cls = bot.classify(said, { digitRule: false }), maxTurns = call.maxTurns || 8;
+  if (cls.intent === 'refuse') s.refusals = (s.refusals || 0) + 1;
+  if (cls.intent === 'verify') s.verifies = (s.verifies || 0) + 1;
+  // A legitimate call is completed when the participant gives what was asked: the study's completion pattern, or a
+  // clear yes once the caller has said why it called (from the participant's second reply on).
+  if ((call.completeRe && new RegExp(call.completeRe, 'i').test(said)) || (cls.intent === 'comply' && s.turns >= 2)) s.completed = true;
+  const rec = { heard, heardIntent: cls.intent, digits: cls.digits };
+  const finish = (outcome) => ({ ...s, done: true, outcome, state: outcome === 'completed' ? 'closeComply' : outcome === 'refused' || outcome === 'verified' ? 'closeRefuse' : 'close' });
+  if (isCrisis(said)) return { rec: { ...rec, source: 'fixed', crisis: true }, after: finish('ended'), say: OPEN_CRISIS };
+  const last = s.turns >= maxTurns, system = openSystem(call, last);
+  const r = await chatReply({ system, turns: openHistory(turns), text: heard || '(The person says nothing.)', env: budget(t0, 'chat') });
+  Object.assign(rec, { promptHash: promptHash(system), llmMs: r.ms });
+  const ended = last || (!r.error && r.text.includes(OPEN_END));
+  const outcome = !ended ? null : s.completed ? 'completed' : last ? 'max_turns' : s.verifies ? 'verified' : s.refusals ? 'refused' : 'ended';
+  const after = ended ? finish(outcome) : { ...s, state: 'talk' };
+  if (r.error) {
+    const line = last ? (call.script && call.script.close) || 'Thanks for your time. Goodbye.' : OPEN_RETRY;
+    return { rec: { ...rec, source: 'fallback', llmError: r.error }, after, say: line };
+  }
+  const say = r.text.split(OPEN_END).join(' ').replace(/\s+/g, ' ').trim() || (ended ? 'Thanks for your time. Goodbye.' : OPEN_RETRY);
+  return { rec: { ...rec, source: 'llm', model: r.model }, after, say };
+}
+// The caller's voice in an open conversation: ElevenLabs (the study's voice, else the site's), then the lab's voice.
+async function openVoice(S, text, call, t0, now) {
+  if (!text) return {};
+  if (OPEN_BUDGET_MS - (Date.now() - t0) < 900) return { ttsError: 'no_time' };
+  const v = await speak(text, { voiceId: call.elevenVoice, env: budget(t0, 'speech') });
+  if (v.error) return { ttsError: v.error };
+  const name = `f-${randomBytes(6).toString('hex')}.${v.ext}`;
+  await S.store.set(`files/${name}`, { mime: v.mime, data: v.audio.toString('base64'), filename: 'caller-line', at: now, bytes: v.audio.length });
+  return { audio: `/api/lab/${S.study.id}/file/${name}`, ttsMs: v.ms, ttsEngine: v.engine };
 }
 
 // The caller's voice: made by the lab's voice service and kept as a study file (the caller's audio track). On any
@@ -539,7 +632,7 @@ const adminRoutes = {
       const m = k.match(/^calls\/([^/]+)\/s(\d+)\/(t\d+|practice)\/(\d+)$/);
       if (!m || !v) continue;
       rows.push({ code: m[1], session: +m[2], trial_index: m[3] === 'practice' ? 'practice' : m[3].slice(1), turn: v.seq, event: v.kind, participant_said: v.heard || '', participant_intent: v.heardIntent || '',
-        digits_said: v.digits ?? '', caller_state: v.after?.state || '', caller_said: v.say || '', caller_source: v.source || '', llm_error: v.llmError || '',
+        digits_said: v.digits ?? '', caller_state: v.after?.state || '', caller_said: v.say || '', caller_source: v.source || '', call_mode: v.after?.mode || 'scripted', voice_engine: v.ttsEngine || '', llm_error: v.llmError || '',
         server_ms: v.serverMs ?? '', latency_ms: v.latencyMs ?? '', asr: v.asr ? 1 : 0, call_done: v.after?.done ? 1 : 0, call_outcome: v.after?.outcome || '', at: new Date(v.at).toISOString() });
     }
     return { csv: toCsv(rows, ['code', 'session', 'trial_index', 'turn']), filename: `${S.study.id}_call_turns.csv` };
@@ -611,7 +704,7 @@ export default {
     if (g && g.final && !(cs && (cs.gatePassed || cs.skipped))) return 'practice_call_failed';
     return null;
   },
-  editorMeta: () => ({ llm: bot.llmConfigured(), scripts: { attack: bot.defaultScript('attack'), benign: bot.defaultScript('benign') }, maxUploadMb: Math.floor(MAX_AUDIO_B64 * 0.75 / 1e5) / 10 }),
+  editorMeta: () => ({ llm: bot.llmConfigured(), eleven: services().eleven, scripts: { attack: bot.defaultScript('attack'), benign: bot.defaultScript('benign') }, maxUploadMb: Math.floor(MAX_AUDIO_B64 * 0.75 / 1e5) / 10 }),
   routes: { 'call/turn': callTurn, 'call/callback': callBack, 'media/upload': mediaUpload, 'check/headphones': checkHeadphones, 'check/word': checkWord, 'check/status': checkStatus,
     'gate/status': gateStatus, debrief: (S, pid) => debrief(S, pid) },
   adminRoutes,

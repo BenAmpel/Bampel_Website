@@ -129,8 +129,14 @@
       '<label class="check"><input type="radio" name="intent" data-intent="' + base + '" value="benign"' + (c.intent === 'benign' ? ' checked' : '') + '> A legitimate caller</label></div></div>' +
       '<div class="grid3">' + field('Rings for (seconds)', A.num(base + '.call.ringSeconds', c.ringSeconds || 30, 5, 120)) + field('Most turns before the caller ends the call', A.num(base + '.call.maxTurns', c.maxTurns || 8, 3, 20)) + '</div>' +
       field('Who the caller is (for the AI voice; one or two sentences)', area3(A, base + '.call.persona', c.persona || '')) +
-      '<p class="muted">' + (meta.llm ? 'Claude rephrases each line below so it answers what the participant said, keeping its meaning. If it is slow or unavailable, the line is spoken as written.' : 'The caller speaks these lines as written. To have them rephrased naturally by Claude, add ANTHROPIC_API_KEY (see the researcher guide).') +
-      ' The caller moves through the lines in order; asking to verify or call back gets the "verify" line; refusing twice, or doing what was asked, ends the call. Blank lines use the default shown in grey.</p>';
+      '<div class="grid3">' + field('How the caller talks', '<select data-path="' + base + '.call.mode"><option value=""' + (c.mode === 'open' ? '' : ' selected') + '>Scripted: the lines below, in order</option><option value="open"' + (c.mode === 'open' ? ' selected' : '') + '>Open conversation: Claude answers freely</option></select>') +
+      (c.mode === 'open' ? field('ElevenLabs voice ID (blank uses the site default)', inp(base + '.call.elevenVoice', c.elevenVoice || '')) : '') + '</div>' +
+      (c.mode === 'open' ? '<p class="muted">Open conversation is for legitimate callers only. The caller opens with the first line below, word for word, then Claude writes every reply from the caller description and the pretext and request lines, and ElevenLabs speaks it.' +
+        (meta.llm ? '' : ' This site has no ANTHROPIC_API_KEY, so the call runs scripted until it is added.') +
+        (meta.eleven ? '' : ' This site has no ELEVENLABS_API_KEY, so the lab\'s own voice speaks instead.') +
+        ' Participants\' spoken answers are sent to ElevenLabs to be transcribed and their words (with numbers and addresses removed) to Anthropic, so the consent form must say so.</p>' : '') +
+      (c.mode === 'open' ? '' : '<p class="muted">' + (meta.llm ? 'Claude rephrases each line below so it answers what the participant said, keeping its meaning. If it is slow or unavailable, the line is spoken as written.' : 'The caller speaks these lines as written. To have them rephrased naturally by Claude, add ANTHROPIC_API_KEY (see the researcher guide).') +
+      ' The caller moves through the lines in order; asking to verify or call back gets the "verify" line; refusing twice, or doing what was asked, ends the call. Blank lines use the default shown in grey.</p>');
     STATES.forEach(function (s) {
       h += field(s[1], '<textarea rows="2" data-script="' + base + '|' + s[0] + '" placeholder="' + esc(defs[s[0]] || '') + '">' + esc((c.script || {})[s[0]] || '') + '</textarea>');
     });
