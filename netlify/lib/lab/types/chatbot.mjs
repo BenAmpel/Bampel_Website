@@ -58,6 +58,15 @@ const jsonSize = v => { try { return JSON.stringify(v).length; } catch { return 
 const pad = n => String(n).padStart(3, '0');
 const wordCount = s => String(s || '').split(/\s+/).filter(Boolean).length;
 const median = a => { const s = a.filter(x => Number.isFinite(x)).sort((x, y) => x - y); return s.length ? s[Math.floor((s.length - 1) / 2)] : null; };
+// Word markers in what the participant sent, counted at export time from the stored text, so they also work on
+// conversations collected before they existed. English word lists; a spoken turn depends on the transcription.
+const MARKERS = {
+  thanks: /\b(thanks?|thank\s+you|thx|ty|appreciate[ds]?)\b/gi, please: /\b(please|pls|plz)\b/gi,
+  greeting: /^\W*(hi|hello|hey|hiya|good\s+(morning|afternoon|evening))\b/gi, goodbye: /\b(bye|goodbye|see\s+you|take\s+care|good\s*night)\b/gi,
+  sorry: /\b(sorry|apologi[sz]e[ds]?)\b/gi, you: /\b(you|your|yours|yourself|you're|youre|u)\b/gi,
+  i: /\b(i|me|my|mine|myself|i'm|im|i've|ive|i'd|i'll)\b/gi, question: /\?/g
+};
+const markersOf = s => Object.fromEntries(Object.entries(MARKERS).map(([k, re]) => [`user_${k}`, (String(s || '').replace(/[\u2018\u2019]/g, "'").match(re) || []).length]));
 const MODES = ['text', 'voice', 'either'];
 const MAX_USER = 1500, MAX_HEARD = 60;
 const envOf = S => S.env || process.env, fetchOf = S => S.fetchImpl || globalThis.fetch;
@@ -123,7 +132,7 @@ async function chatTurn(S, pid, body, now) {
     }
     out = { text: r.text, source: 'llm', model: r.model, ms: r.ms };
   }
-  const rec = { seq, at: now, condition: ctx.p.condition, promptHash: chat.promptHash, user, input: heard ? 'voice' : 'text', heardText: heard ? heard.text : null, edited: heard ? heard.text !== user : null,
+  const rec = { seq, at: now, condition: ctx.p.condition, promptHash: chat.promptHash, user, input: heard ? 'voice' : 'text', heardText: heard ? heard.text : null, edited: heard ? heard.text !== user : null, heardMs: heard ? heard.durationMs ?? null : null,
     bot: out.text, source: out.source, model: out.model, llmMs: out.ms, sinceMs: num(body.sinceMs, 0, 864e5), userWords: wordCount(user), botWords: wordCount(out.text), ...(ctx.p.test ? { test: true } : {}) };
   if (!(await setNew(S.store, key, rec))) return publicTurn(await S.store.get(key), chat.maxTurns);
   return publicTurn(rec, chat.maxTurns);
@@ -180,7 +189,12 @@ async function chatSummary(S, tag, chat) {
     wordsUser: turns.reduce((n, t) => n + (t.userWords || 0), 0), wordsBot: turns.reduce((n, t) => n + (t.botWords || 0), 0),
     safetyTurns: turns.filter(t => t.source === 'safety').length, model: turns.map(t => t.model).filter(Boolean).pop() || null, promptHash: chat.promptHash,
     medianLlmMs: median(turns.filter(t => t.source === 'llm').map(t => t.llmMs)), llmErrors: count('llm'), sttErrors: count('stt'), ttsErrors: count('tts'), botAudio: ttsKeys.length,
-    reachedMin: turns.length >= chat.minTurns };
+    reachedMin: turns.length >= chat.minTurns, ...safetyTiming(turns), medianSinceMs: median(turns.map(t => t.sinceMs)) };
+}
+// When the crisis message first came (turn number from 1) and how many turns the participant took after it.
+function safetyTiming(turns) {
+  const i = turns.findIndex(t => t.source === 'safety');
+  return i < 0 ? { firstSafetyTurn: null, turnsAfterSafety: null } : { firstSafetyTurn: i + 1, turnsAfterSafety: turns.length - i - 1 };
 }
 
 // ---------- researcher routes ----------
@@ -200,6 +214,12 @@ async function benchAllowed(S, now) {
   return true;
 }
 const BENCH_FULL = { error: 'bench_limit', status: 429, hint: 'This study has used its allowance of test replies for today. It resets at midnight UTC.' };
+// Length of the recording and the speaking rate (words heard per minute); blank for typed turns and older data.
+const speechOf = t => {
+  const ms = Number(t.heardMs);
+  if (t.input !== 'voice' || !(ms > 0)) return { speech_ms: '', speech_wpm: '' };
+  return { speech_ms: ms, speech_wpm: ms >= 500 ? Math.round(wordCount(t.heardText) / (ms / 60000) * 10) / 10 : '' };
+};
 const iso = ms => (Number.isFinite(ms) ? new Date(ms).toISOString() : '');
 const adminRoutes = {
   // The transcript, one row per turn, for every participant.
@@ -210,7 +230,7 @@ const adminRoutes = {
       if (!m || !t) continue;
       rows.push({ code: m[1], session: +m[2], trial_index: +m[3], turn: +m[4] + 1, condition: t.condition || '', test: t.test ? 1 : 0, at: iso(t.at), since_ms: t.sinceMs ?? '', input: t.input || '',
         user_text: t.user || '', heard_text: t.heardText ?? '', edited: t.edited == null ? '' : t.edited ? 1 : 0, bot_text: t.bot || '', source: t.source || '', model: t.model || '', llm_ms: t.llmMs ?? '',
-        prompt_hash: t.promptHash || '', user_words: t.userWords ?? '', bot_words: t.botWords ?? '' });
+        prompt_hash: t.promptHash || '', user_words: t.userWords ?? '', bot_words: t.botWords ?? '', ...speechOf(t), ...markersOf(t.user) });
     }
     await audit('chat.export', `${rows.length} turns`);
     return { csv: toCsv(rows, ['code', 'session', 'trial_index', 'turn']), filename: `${S.study.id}-chat.csv` };
@@ -376,7 +396,7 @@ export default {
     const d = r.data || {}, tr = d.traces || {}, cs = d.chatServer || {}, cc = d.chat || {};
     const row = { item_id: r.itemId, chat_mode: r.item?.mode || '', chat_audio_only: r.item?.audioOnly ? 1 : 0, chat_turns: cs.turns ?? '', chat_voice_turns: cs.voiceTurns ?? '', chat_edited_turns: cs.editedTurns ?? '',
       chat_words_user: cs.wordsUser ?? '', chat_words_bot: cs.wordsBot ?? '', chat_ms: cc.chatMs ?? '', chat_ended: cc.ended || '', chat_reached_min: cs.reachedMin == null ? '' : cs.reachedMin ? 1 : 0,
-      chat_safety_turns: cs.safetyTurns ?? '', chat_model: cs.model || '', chat_prompt_hash: cs.promptHash || '', chat_median_llm_ms: cs.medianLlmMs ?? '',
+      chat_safety_turns: cs.safetyTurns ?? '', chat_first_safety_turn: cs.firstSafetyTurn ?? '', chat_turns_after_safety: cs.turnsAfterSafety ?? '', chat_median_since_ms: cs.medianSinceMs ?? '', chat_model: cs.model || '', chat_prompt_hash: cs.promptHash || '', chat_median_llm_ms: cs.medianLlmMs ?? '',
       chat_llm_errors: cs.llmErrors ?? '', chat_stt_errors: cs.sttErrors ?? '', chat_tts_errors: cs.ttsErrors ?? '', chat_bot_audio: cs.botAudio ?? '', chat_browser_voice: cc.browserVoice ?? '',
       chat_mic_blocked: cc.micBlocked ? 1 : 0, chat_text_shown: cc.textShown ?? '', rt_ms: d.rtMs ?? '', first_answer_ms: tr.firstAnswerMs ?? '', answer_changes: tr.answerChanges ?? '' };
     for (const q of r.questions || Object.keys(d.answers || {})) row[`a_${q}`] = (d.answers || {})[q] ?? '';

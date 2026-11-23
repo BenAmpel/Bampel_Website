@@ -166,6 +166,8 @@ Trials CSV columns after `trial_index` (the generic identifier, behavior, and co
 | `chat_ended` | `user` = the participant ended it; `max` = the turn limit was reached; `error` = the chatbot stopped answering and the participant went on to the questions |
 | `chat_reached_min` | The conversation reached the minimum number of turns (1/0) |
 | `chat_safety_turns` | Turns answered with the fixed crisis message instead of the chatbot |
+| `chat_first_safety_turn`, `chat_turns_after_safety` | Turn number (from 1) that first got the crisis message; turns the participant took after it. Blank if no crisis message came; blank with `chat_safety_turns` above 0 means the row was submitted before these columns existed (as is `chat_median_since_ms` then) |
+| `chat_median_since_ms` | Median of `since_ms` in the transcript: time from the chatbot's message appearing to the participant sending theirs (reading plus writing or speaking) |
 | `chat_model` | The model that wrote the replies |
 | `chat_prompt_hash` | Short hash of the full instruction the chatbot was given (shared, condition, safety, format). Two values within one condition mean an instruction was edited during data collection |
 | `chat_median_llm_ms` | Median time the model took to reply |
@@ -183,7 +185,7 @@ Trials CSV columns after `trial_index` (the generic identifier, behavior, and co
 | `code`, `session`, `trial_index`, `turn` | Participant, session, trial (always 0), and turn number from 1 |
 | `condition` | The participant's condition |
 | `test` | 1 for a test participant or self-test run |
-| `at`, `since_ms` | Server time the turn was stored; time since the conversation started, on the participant's clock |
+| `at`, `since_ms` | Server time the turn was stored; time from the chatbot's previous message (the opening line for turn 1) appearing to the participant sending this one, on the participant's clock. In spoken studies it starts when the reply arrives, so it includes listening to it; after a page reload it starts again from the reload |
 | `input` | `text` (typed) or `voice` (spoken, then transcribed) |
 | `user_text` | What the participant sent, with emails, street addresses, and long numbers masked |
 | `heard_text`, `edited` | For spoken turns: the transcription before the participant touched it, and whether they changed it (1/0) |
@@ -192,6 +194,9 @@ Trials CSV columns after `trial_index` (the generic identifier, behavior, and co
 | `model`, `llm_ms` | The model and its reply time (blank and 0 for a safety turn) |
 | `prompt_hash` | Hash of the full instruction in force for this turn |
 | `user_words`, `bot_words` | Word counts |
+| `speech_ms`, `speech_wpm` | Spoken turns: length of the recording, and words heard per minute of it (blank for typed turns, recordings under half a second, and turns stored before this column existed) |
+| `user_thanks`, `user_please`, `user_greeting`, `user_goodbye`, `user_sorry` | Times the participant's message used thanks, please, a greeting at its start, a goodbye, or an apology (English word lists, counted from `user_text`) |
+| `user_you`, `user_i`, `user_question` | Second-person words (you, your), first-person singular words (I, me, my), and question marks in the participant's message. A spoken turn depends on the transcription's punctuation |
 
 No recording of the participant is kept. Failed replies store no turn, so the transcript has no gaps or placeholder lines; failures are counted in `chat_llm_errors`.
 
