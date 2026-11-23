@@ -227,7 +227,7 @@ async function passcodeCheck(store, sent, want, now) {
   if (recent.length >= PASSCODE_FAIL_LIMIT) return { error: 'too_many_tries', status: 429 };
   if (passcodeMatches(sent, want)) return null;
   await store.set(`passcode-try/${now}-${randomBytes(4).toString('hex')}`, { at: now });
-  return { error: 'passcode', status: 401, passcode: true };
+  return { error: 'passcode', status: 401 };
 }
 
 export async function login(S, creds = {}, now = Date.now()) {
