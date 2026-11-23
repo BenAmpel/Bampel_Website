@@ -211,6 +211,21 @@ for (const how of ['fail', 'refuse']) {
   const { code, at, plan } = await person(S, 'control');
   assert.equal(plan.trials[0].item.speak, false);
   assert.equal((await R['chat/hear'](S, code, { ...at, data: WEBM, mime: 'audio/webm' })).error, 'voice_off');
+  assert.equal(plan.trials[0].item.audioOnly, false, 'audio-only needs voice mode');
+}
+{
+  const { S } = await setup({ edit: c => { c.chat.mode = 'voice'; c.chat.voice.audioOnly = true; } });
+  const { code, at, plan } = await person(S, 'control');
+  assert.equal(plan.trials[0].item.audioOnly, true, 'voice mode with audioOnly hides the text');
+  await R['chat/turn'](S, code, { ...at, seq: 0, text: 'hello' }, 2000);
+  await E.saveTrial(S, code, 1, 0, { answers: {}, rtMs: 1, chat: { ended: 'user', chatMs: 10, textShown: 2 } });
+  const full = await E.exportRecords(S, [code]), row = E.trialRow(S, full.records.find(x => /\/t0$/.test(x.key)), full.participants[0]);
+  assert.equal(row.chat_audio_only, 1); assert.equal(row.chat_text_shown, 2);
+}
+{
+  const { S } = await setup({ edit: c => { c.chat.mode = 'either'; c.chat.voice.audioOnly = true; } });
+  const { code, at, plan } = await person(S, 'control');
+  assert.equal(plan.trials[0].item.audioOnly, false, 'either mode ignores audioOnly: a participant who types must see text');
   assert.equal((await R['chat/voice'](S, code, { ...at, seq: 'open' })).error, 'voice_off');
   console.log('chatbot: speech to text, the chatbot\'s voice, the shared opening line, and both fallbacks behave');
 }

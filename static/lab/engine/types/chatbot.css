@@ -1,24 +1,71 @@
 /* Study type "chatbot": the conversation screen. Colors come from the shared variables in ../../assets/study.css, so
-   dark mode follows the rest of the lab. The only motion is the recording dot, and it stops under reduced motion. */
+   light and dark follow the rest of the lab (and the page's theme switch). Motion: messages rise in, the typing dots
+   bounce, the recording button pulses; all of it stops under reduced motion (study.css turns animations off). */
 .cb-scenario { margin: 0 0 12px; }
 .cb-scenario p { margin: 0 0 10px; }
 .cb-note { margin: 0 0 14px; padding: 8px 12px; border-left: 3px solid var(--accent); background: var(--accent-soft); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; font-size: .9375rem; }
-.cb-log { display: flex; flex-direction: column; gap: 12px; min-height: 9em; max-height: 52vh; overflow-y: auto; padding: 14px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--bg-2); }
+
+/* Visually hidden, still read by screen readers. */
+.cb-sr, .cb-log.cb-sr { position: absolute !important; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
+
+/* ---------- the transcript ---------- */
+.cb-log { display: flex; flex-direction: column; gap: 10px; min-height: 11em; max-height: 54vh; overflow-y: auto; padding: 16px; border: 1px solid var(--line); border-radius: 16px; background: var(--bg-2); scroll-behavior: smooth; }
 .cb-log:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.cb-turn { max-width: 85%; padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid var(--line); background: var(--card); color: var(--text); }
-.cb-user { align-self: flex-end; background: var(--accent-soft); border-color: var(--accent); }
-.cb-bot { align-self: flex-start; }
-.cb-who { display: block; margin-bottom: 2px; font-size: .8125rem; font-weight: 700; color: var(--muted); }
+.cb-turn { max-width: 82%; padding: 10px 14px; border-radius: 18px; border: 1px solid var(--line); background: var(--card); color: var(--text); animation: cb-in 260ms cubic-bezier(.2, .8, .2, 1) both; }
+.cb-bot { align-self: flex-start; border-bottom-left-radius: 6px; }
+.cb-user { align-self: flex-end; border-bottom-right-radius: 6px; background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+.cb-user .cb-who { color: inherit; opacity: .85; }
+.cb-pending { opacity: .72; }
+.cb-who { display: block; margin-bottom: 2px; font-size: .75rem; font-weight: 700; letter-spacing: .01em; color: var(--muted); }
 .cb-text p { margin: 0 0 8px; overflow-wrap: anywhere; }
 .cb-text p:last-child { margin-bottom: 0; }
+@keyframes cb-in { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
+
+/* Three dots while the reply is written. */
+.cb-typing { display: inline-flex; align-items: center; gap: 5px; padding: 14px 16px; }
+.cb-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); animation: cb-bounce 1.2s ease-in-out infinite; }
+.cb-dot:nth-child(2) { animation-delay: .15s; }
+.cb-dot:nth-child(3) { animation-delay: .3s; }
+@keyframes cb-bounce { 0%, 60%, 100% { transform: none; opacity: .45; } 30% { transform: translateY(-5px); opacity: 1; } }
+
 .cb-status { min-height: 1.5em; margin: 8px 0 0; }
-.cb-compose { margin-top: 4px; }
-.cb-compose label { display: block; margin-bottom: 6px; font-weight: 700; }
-.cb-compose textarea { width: 100%; min-height: 5em; }
+
+/* ---------- writing and recording ---------- */
+.cb-compose { margin-top: 12px; }
+.cb-bar { display: flex; align-items: flex-end; gap: 8px; }
+.cb-bar textarea { flex: 1; min-width: 0; min-height: 3.25em; max-height: 12em; padding: 10px 14px; border-radius: 14px; resize: vertical; }
+.cb-ico { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.cb-ico-fill { fill: currentColor; stroke: none; }
+.cb-send, .cb-replay { display: inline-flex; align-items: center; gap: 6px; }
+.cb-round { flex: none; display: inline-grid; place-items: center; width: 46px; height: 46px; padding: 0; border-radius: 50%; }
+.cb-round.cb-live { background: var(--error); border-color: var(--error); color: var(--error-text); animation: cb-ring 1.4s ease-out infinite; }
 .cb-hint { margin: 8px 0 0; }
 .cb-actions { margin-top: 12px; }
 .cb-warn { margin: 12px 0 0; padding: 8px 12px; border-radius: var(--radius-sm); color: var(--warn); background: var(--warn-bg); }
-button.cb-live::before { content: ""; display: inline-block; width: .6em; height: .6em; margin-right: .5em; border-radius: 50%; background: var(--error); animation: cb-pulse 1.2s ease-in-out infinite; }
-@keyframes cb-pulse { 50% { opacity: .35; } }
-@media (prefers-reduced-motion: reduce) { button.cb-live::before { animation: none; } }
-@media (max-width: 560px) { .cb-turn { max-width: 94%; } .cb-log { max-height: 46vh; padding: 10px; } }
+
+/* Spoken studies: one large microphone in the middle. */
+.cb-voicebar { display: flex; justify-content: center; margin-top: 6px; }
+button.cb-big { display: inline-flex; flex-direction: column; align-items: center; gap: 8px; padding: 6px 12px; border: 0; background: transparent; color: var(--text); font-weight: 600; }
+button.cb-big:hover:not([disabled]) { background: transparent; color: var(--text); }
+.cb-big .cb-mic-ico { display: grid; place-items: center; width: 76px; height: 76px; border-radius: 50%; background: var(--accent); color: var(--accent-text); box-shadow: var(--shadow); transition: transform 160ms ease, background-color 160ms ease; }
+.cb-big .cb-ico { width: 30px; height: 30px; }
+.cb-big:hover:not([disabled]) .cb-mic-ico { background: var(--accent-hover); }
+.cb-big:active:not([disabled]) .cb-mic-ico { transform: scale(.95); }
+.cb-big[disabled] .cb-mic-ico { opacity: .5; }
+.cb-big.cb-live .cb-mic-ico { background: var(--error); color: var(--error-text); animation: cb-ring 1.4s ease-out infinite; }
+@keyframes cb-ring { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--error) 55%, transparent); } 100% { box-shadow: 0 0 0 16px color-mix(in srgb, var(--error) 0%, transparent); } }
+.cb-compose-voice .cb-hint, .cb-compose-call .cb-hint { text-align: center; }
+.cb-compose-voice .cb-actions, .cb-compose-call .cb-actions { justify-content: center; }
+
+/* ---------- audio only: the call view ---------- */
+.cb-call { display: flex; flex-direction: column; align-items: center; margin: 8px 0 0; animation: cb-in 400ms cubic-bezier(.2, .8, .2, 1) both; }
+.cb-orb { display: block; width: min(62vw, 240px); height: auto; aspect-ratio: 1; }
+.cb-call-name { margin: 4px 0 0; font-weight: 700; color: var(--heading, var(--text)); }
+.cb-status-call { text-align: center; margin-top: 2px; }
+.cb-shown { margin: 12px 0 0; }
+.cb-shown-in { padding: 12px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); animation: cb-in 260ms ease-out both; }
+.cb-shown-in p { margin: 0 0 8px; } .cb-shown-in p:last-child { margin: 0; }
+.cb-shown-safety { border: 2px solid var(--warn); background: var(--warn-bg); color: var(--text); }
+
+@media (prefers-reduced-motion: reduce) { .cb-log { scroll-behavior: auto; } }
+@media (max-width: 560px) { .cb-turn { max-width: 92%; } .cb-log { max-height: 48vh; padding: 10px; } .cb-send span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); } .cb-send { width: 46px; height: 46px; padding: 0; justify-content: center; border-radius: 50%; } }

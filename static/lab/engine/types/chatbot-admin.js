@@ -31,7 +31,8 @@
       A.field('The chatbot\'s first line (the same in every condition; leave empty to let the participant begin)', A.area('chat.opening', c.opening, 2)) +
       '<h3>Voice</h3>' +
       (voice
-        ? (c.mode === 'voice' ? '<p class="muted">In a spoken conversation the chatbot always answers aloud.</p>' : A.checkbox('data-path="chat.voice.speak" data-bool="1"', c.voice.speak, 'The chatbot also reads its messages aloud')) +
+        ? (c.mode === 'voice' ? '<p class="muted">In a spoken conversation the chatbot always answers aloud.</p>' +
+            A.checkbox('data-path="chat.voice.audioOnly" data-bool="1"', !!c.voice.audioOnly, 'Audio only: participants see an animated orb, like a phone call, and never the text. The crisis message is still shown, and a reply that cannot be played at all is shown as text and counted (<code>chat_text_shown</code>).') : A.checkbox('data-path="chat.voice.speak" data-bool="1"', c.voice.speak, 'The chatbot also reads its messages aloud')) +
           A.field('ElevenLabs voice ID (empty uses the lab\'s default' + (m.defaultVoice ? ', ' + esc(m.defaultVoice) : '') + ')', A.inp('chat.voice.voiceId', c.voice.voiceId, ' class="mono"')) +
           '<p class="muted">Recordings are sent to be turned into text and are not kept; only the text is stored. In "Typing or speaking" the participant reads the text over before sending it, and the data records whether they changed it. If the voice service does not answer, the participant\'s browser reads the message aloud and the trial data counts it (<code>chat_browser_voice</code>).</p>'
         : '<p class="muted">Choose Speaking or Typing or speaking above to use the microphone and a spoken chatbot.</p>') +

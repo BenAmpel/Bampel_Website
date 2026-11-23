@@ -158,6 +158,7 @@ Trials CSV columns after `trial_index` (the generic identifier, behavior, and co
 |---|---|
 | `item_id` | Always `chat` |
 | `chat_mode` | How the participant could talk to the chatbot: `text`, `voice`, or `either` |
+| `chat_audio_only` | Audio only: the participant heard the conversation and saw no transcript (1/0); if chat_mic_blocked = 1, they typed and saw it |
 | `chat_turns` | Turns completed (one turn = one participant message and the chatbot's reply) |
 | `chat_voice_turns`, `chat_edited_turns` | Turns the participant spoke; spoken turns where they changed the transcribed text before sending |
 | `chat_words_user`, `chat_words_bot` | Words from the participant and from the chatbot, all turns |
@@ -171,6 +172,7 @@ Trials CSV columns after `trial_index` (the generic identifier, behavior, and co
 | `chat_llm_errors`, `chat_stt_errors`, `chat_tts_errors` | Replies that failed; recordings that could not be turned into text; replies the voice service could not speak |
 | `chat_bot_audio`, `chat_browser_voice` | Replies spoken with the study's voice; replies read aloud by the participant's own browser instead |
 | `chat_mic_blocked` | The browser refused the microphone, so the participant typed (1/0) |
+| `chat_text_shown` | Audio only: replies shown as text because neither voice could play them (the crisis message is not counted) |
 | `rt_ms`, `first_answer_ms`, `answer_changes` | Time from the page appearing to submitting the questions; time to the first answer; number of answer changes |
 | `a_{question}` | Answer to each question asked after the conversation |
 
