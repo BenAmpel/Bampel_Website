@@ -31,12 +31,17 @@ function removeQueryParamsFromUrl() {
  * Toggle search dialog.
  * --------------------------------------------------------------------------- */
 
+// The control that opened the search dialog, so closing it puts keyboard focus back there instead of on the page body.
+let searchOpener = null;
+
 function toggleSearchDialog() {
   const body = document.querySelector('body');
   if (body.classList.contains('searching')) {
     // Clear search query and hide search modal.
     document.getElementById('search-query').blur();
     body.classList.remove('searching', 'compensate-for-scrollbar');
+    if (searchOpener && document.contains(searchOpener)) searchOpener.focus();
+    searchOpener = null;
 
     // Remove search query params from URL as user has finished searching.
     removeQueryParamsFromUrl();
@@ -56,6 +61,8 @@ function toggleSearchDialog() {
     }
 
     // Show search modal.
+    const active = document.activeElement;
+    searchOpener = active && active !== body && active !== document.documentElement ? active : null;
     body.classList.add('searching');
 
     // Fade the results in over 200 ms (no jQuery; theme plan stage 2).
