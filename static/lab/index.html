@@ -47,13 +47,29 @@
       <p class="cta-note">About three minutes. Nothing leaves your browser.</p>
     </div>
     <div class="wrap">
+      <figure class="scene">
+        <picture>
+          <source srcset="/lab/assets/shots/scene-dark-1000.webp 1000w, /lab/assets/shots/scene-dark.webp 1672w" sizes="(max-width: 1080px) 100vw, 1032px" media="(prefers-color-scheme: dark)">
+          <img src="/lab/assets/shots/scene-light.webp" srcset="/lab/assets/shots/scene-light-1000.webp 1000w, /lab/assets/shots/scene-light.webp 1672w" sizes="(max-width: 1080px) 100vw, 1032px" width="1672" height="941" fetchpriority="high" alt="A laptop on a desk at dusk showing the first demo item: a payroll email with Phishing selected.">
+        </picture>
+        <figcaption>The screen is a real capture of the demo. The room is an illustration.</figcaption>
+      </figure>
+    </div>
+    <div class="wrap">
       <div class="stage">
         <figure class="shot">
           <picture>
             <source srcset="/lab/assets/shots/email-dark.webp" media="(prefers-color-scheme: dark)">
             <img src="/lab/assets/shots/email-light.webp" width="760" height="840" alt="Demo screen: a payroll email asking the reader to confirm direct deposit by 5 PM, with Phishing selected and a confidence slider at 51.">
           </picture>
-          <figcaption><b>What the participant sees.</b> An email, a judgment, and a confidence rating.</figcaption>
+          <svg class="trace" viewBox="0 0 760 840" aria-hidden="true" focusable="false">
+            <path class="trace-line" pathLength="1" d="M640 232 C560 262 330 300 196 338 C150 350 112 360 120 348 C128 336 160 342 150 356 C138 372 104 362 118 346 C150 330 176 360 168 392 C150 470 96 560 64 590 C52 600 50 572 58 548 C62 536 64 532 62 530 C110 560 250 640 320 680 C340 690 352 690 366 689 C420 689 470 690 520 689"/>
+            <circle class="trace-dot trace-d1" cx="136" cy="352" r="22"/>
+            <circle class="trace-dot trace-d2" cx="61" cy="593" r="9"/>
+            <circle class="trace-dot trace-d3" cx="61" cy="531" r="9"/>
+            <circle class="trace-dot trace-d4" cx="520" cy="689" r="9"/>
+          </svg>
+          <figcaption><b>What the participant sees.</b> An email, a judgment, and a confidence rating. The drawn line is an illustration of a pointer path: a pause on the link, a changed answer, a slider move.</figcaption>
         </figure>
         <figure class="shot">
           <picture>
@@ -94,6 +110,7 @@
       <div class="split-head">
         <h2>What a study can record</h2>
         <p class="sub">Signals the lab can collect in the browser, alongside each answer.</p>
+        <img class="trace-art" src="/lab/assets/shots/trace-render.webp" width="1504" height="643" loading="lazy" decoding="async" alt="">
       </div>
       <dl class="specs">
         <div><dt>Timing</dt><dd>Time on each item, delay before the first move, idle pauses, and when answers were given.</dd></div>
