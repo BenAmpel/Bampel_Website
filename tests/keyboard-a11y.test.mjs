@@ -95,7 +95,7 @@ test('home impact cards: Enter and Space open Publications filtered by type; non
 
 test('home page "New in <year>" button opens Publications filtered by that year (no dead control)', () => {
   const js = fs.readFileSync(path.join(ROOT, 'assets/js/site/impact_stats.js'), 'utf8');
-  assert.match(js, /window\.location\.assign\(`\$\{base\}publications\/\?/);
+  assert.match(js, /window\.location\.assign\(`\$\{path\}publications\/\?/);
   assert.match(js, /params\.set\("year"/);
 });
 
