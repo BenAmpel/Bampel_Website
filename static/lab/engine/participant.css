@@ -24,18 +24,48 @@ fieldset.q-group.missing, div.q-group.missing { border-left-color: var(--warn); 
 .checks { display: grid; gap: 8px; }
 .option > span { flex: 1; }
 .option.agree { margin-top: 16px; }
-/* Labeled rating scales: one row on wide screens, stacked on phones. */
-.likert { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 6px; }
-.likert .scale-pt { flex-direction: column; align-items: center; text-align: center; gap: 4px; padding: 10px 4px; min-height: 64px; }
-.likert .pt-num { font-weight: 600; flex: 0; }
-.likert .pt-lab { font-size: 12.5px; line-height: 1.25; color: var(--muted); flex: 0; }
-.likert:not(.labeled) .scale-pt { min-height: 48px; }
-@media (max-width: 640px) {
-  .likert { grid-template-columns: 1fr; }
-  .likert .scale-pt { flex-direction: row; justify-content: flex-start; text-align: left; min-height: 48px; padding: 10px 12px; }
-  .likert .pt-num { min-width: 1.6em; }
-  .likert .pt-lab { flex: 1 1 auto; font-size: 15px; color: var(--text); }
-  .likert .pt-num { flex: 0 0 auto; }
+/* Rating scales: one compact bar of equal segments (label on top, radio and number below), not a card per
+   point. Every point keeps its label, spacing stays even and every point stays visible (Krosnick & Presser
+   2010; Tourangeau, Couper & Conrad 2004; Funke, Reips & Thomas 2011). Where the row would squeeze the labels,
+   the same bar turns into a short joined list; orientation itself does not change answers (Mockovak 2018). */
+.q-group:has(> .likert) { container-type: inline-size; }
+.likert { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 0; border: 1.5px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--card); overflow: hidden; }
+.likert .scale-pt {
+  display: grid; grid-template-columns: 1fr auto auto 1fr; grid-template-rows: 1fr auto; align-items: center;
+  column-gap: 6px; row-gap: 6px; min-height: 0; padding: 8px 4px 10px; border: 0; border-radius: 0; box-shadow: none; text-align: center;
+}
+.likert .scale-pt + .scale-pt { border-left: 1px solid var(--line); }
+.likert .scale-pt:active { transform: none; }
+.likert .scale-pt:hover { background: color-mix(in srgb, var(--accent-soft) 55%, transparent); }
+.likert .scale-pt:has(input:checked) { background: var(--accent-soft); box-shadow: inset 0 -3px 0 var(--accent); }
+.likert .scale-pt:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: -3px; }
+.likert .scale-pt input { grid-row: 2; grid-column: 2; width: 18px; height: 18px; }
+.likert .pt-num { grid-row: 2; grid-column: 3; font-weight: 600; font-size: 14px; flex: none; }
+.likert .pt-lab { grid-row: 1; grid-column: 1 / -1; align-self: end; font-size: 12.5px; line-height: 1.25; color: var(--muted); flex: none; }
+.likert:not(.labeled) .scale-pt { padding-top: 10px; }
+/* Endpoint-only scales: the two end labels run along the top edge instead of wrapping inside one narrow cell. */
+.likert:not(.labeled) .pt-lab { white-space: nowrap; position: relative; z-index: 1; }
+.likert:not(.labeled) .scale-pt:first-child .pt-lab { justify-self: start; text-align: left; }
+.likert:not(.labeled) .scale-pt:last-child .pt-lab { justify-self: end; text-align: right; }
+/* Matrix rows have no numbers: the radio sits alone, centered under its label. */
+.likert .scale-pt:not(:has(.pt-num)) input { grid-column: 2 / 4; justify-self: center; }
+@container (max-width: 34rem) {
+  .likert.labeled { grid-template-columns: 1fr; }
+  .likert.labeled .scale-pt { grid-template-columns: auto auto 1fr; grid-template-rows: auto; justify-content: start; text-align: left; column-gap: 10px; min-height: 44px; padding: 6px 12px; }
+  .likert.labeled .scale-pt + .scale-pt { border-left: 0; border-top: 1px solid var(--line); }
+  .likert.labeled .scale-pt input, .likert.labeled .pt-num { grid-row: 1; grid-column: auto; }
+  .likert.labeled .pt-num { min-width: 1.4em; }
+  .likert.labeled .pt-lab { grid-row: 1; grid-column: auto; align-self: center; font-size: 15px; color: var(--text); }
+  .likert.labeled .scale-pt:not(:has(.pt-num)) { grid-template-columns: auto 1fr; }
+  .likert.labeled .scale-pt:not(:has(.pt-num)) input { grid-column: auto; justify-self: start; }
+  .likert.labeled .scale-pt:has(input:checked) { box-shadow: inset 3px 0 0 var(--accent); }
+}
+@container (max-width: 22rem) {
+  .likert:not(.labeled) { grid-template-columns: 1fr; }
+  .likert:not(.labeled) .scale-pt { grid-template-columns: auto auto 1fr; grid-template-rows: auto; justify-content: start; text-align: left; column-gap: 10px; min-height: 44px; padding: 6px 12px; }
+  .likert:not(.labeled) .scale-pt + .scale-pt { border-left: 0; border-top: 1px solid var(--line); }
+  .likert:not(.labeled) .scale-pt input, .likert:not(.labeled) .pt-num, .likert:not(.labeled) .pt-lab { grid-row: 1; grid-column: auto; }
+  .likert:not(.labeled) .pt-lab { grid-column: auto; align-self: center; justify-self: start; text-align: left; white-space: normal; }
 }
 /* Confidence: click-anywhere line, no handle until the participant chooses. */
 .vas { padding: 18px 14px 8px; border: 1.5px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--card); cursor: pointer; touch-action: none; user-select: none; }

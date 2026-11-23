@@ -156,7 +156,8 @@ assert.equal(T.nameFrom('?'), '');
 {
   const css = T.scopeCss(readFileSync(here('../../static/lab/assets/study.css'), 'utf8') + '\n' + readFileSync(here('../../static/lab/engine/participant.css'), 'utf8'));
   assert(!/:root|@font-face/.test(css), 'no :root and no fonts (the admin page loads them)');
-  assert(/@container lp \(max-width: 640px\)/.test(css) && /@container lp \(max-width: 560px\)/.test(css), 'width media queries become container queries');
+  assert(/@container lp \(max-width: 560px\)/.test(css) && !/@media \((?:max|min)-width/.test(css), 'width media queries become container queries');
+  assert(/@container \(max-width: 34rem\)/.test(css) && /\.q-group:has\(> \.likert\) \{ container-type: inline-size; \}/.test(css), 'rating scales keep their own per-question container query');
   assert(/@media \(prefers-color-scheme: dark\)/.test(css) && /@media \(prefers-reduced-motion: reduce\)/.test(css), 'other media queries stay');
   assert(/\.lp-root, \.lp-body \{ margin: 0; \}/.test(css) && /\n\.lp-body \{/.test(css), 'html and body become the canvas root and body');
   assert(/\.mail-body/.test(css) && /\.panel-body/.test(css), 'class names that end in "body" are untouched');
