@@ -35,6 +35,7 @@ export async function exportDesign(S, { redact = true, maxFileBytes = MAX_FILE_B
   // Normalized against the plain type (not a template's starting content), so the file holds every part explicitly.
   const cur = await getContent(S.store, S.type), plain = TYPES[S.study.type] || S.type, full = normalize(structuredClone(cur), plain);
   const content = Object.fromEntries(contentKeysFor(plain).map(k => [k, full[k]]));
+  if (redact && content.enrollment && content.enrollment.passcode) content.enrollment.passcode = '';   // the study access code
   if (redact && content.enrollment && content.enrollment.panel) for (const k of ['completionCode', 'screenOutCode', 'returnCode']) if (content.enrollment.panel[k]) content.enrollment.panel[k] = '';
   const names = fileRefs(content), files = [], filesLeftOut = [];
   let used = 0;

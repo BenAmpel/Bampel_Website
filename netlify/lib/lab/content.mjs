@@ -182,7 +182,7 @@ export function clearContentCache(store) { if (store) caches.delete(store.name);
 // What participants' browsers receive: no answer keys or type-private parts.
 export function publicContent(c, type, study) {
   return { study: study.id, type: type.id, name: study.name, version: c.version, minutesPerSession: c.minutesPerSession, consent: c.consent,
-    text: c.text, sessions: type.sessionCount(c), signup: c.enrollment.open ? c.enrollment.domains : [],
+    text: c.text, sessions: type.sessionCount(c), signup: c.enrollment.open ? c.enrollment.domains : [], passcode: !!c.enrollment.passcode,
     // Never the completion codes: the browser asks for its code (route "handoff") once the participant has one.
     panel: c.enrollment.panel && c.enrollment.panel.enabled ? { param: c.enrollment.panel.param, completionUrl: c.enrollment.panel.redirectUrl ? '' : c.enrollment.panel.completionUrl || '',
       studyParam: c.enrollment.panel.studyParam || '', sessionParam: c.enrollment.panel.sessionParam || '',
@@ -339,6 +339,7 @@ export function validateContent(c, type) {
     if (!Array.isArray(en.domains) || !en.domains.every(x => /^[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/.test(x))) e.push('Sign-up domains must look like gsu.edu (one per line, no @).');
     else if (en.open && !en.domains.length) e.push('Add at least one email domain, or turn off self sign-up.');
     if (!intIn(en.gapDays, 0, 60)) e.push('Gap days for self sign-ups must be a whole number from 0 to 60.');
+    if (en.passcode != null && en.passcode !== '' && !(typeof en.passcode === 'string' && /^[A-Za-z0-9-]{3,64}$/.test(en.passcode.trim()))) e.push('The study access code must be 3 to 64 letters, numbers or hyphens.');
     if (en.label != null && typeof en.label === 'string' && en.label.length > 40) e.push('The self sign-up label must be 40 characters or fewer.');
     const pn = en.panel;
     if (pn && pn.enabled) {
