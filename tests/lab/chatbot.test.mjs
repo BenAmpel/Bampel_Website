@@ -130,7 +130,7 @@ const csvTable = csv => { const rows = [[]]; let f = '', q = false; for (let i =
   assert(saved.ok, JSON.stringify(saved));
   const full = await E.exportRecords(S, [code]), rec = full.records.find(x => /\/t0$/.test(x.key)), row = E.trialRow(S, rec, full.participants[0]);
   assert.equal(row.chat_turns, 3); assert.equal(row.chat_ended, 'max'); assert.equal(row.chat_ms, 51000); assert.equal(row.chat_reached_min, 1);
-  assert.equal(row.chat_median_gap_ms, 4800, 'median gap between messages (4800 and 11000)'); assert.equal(row.chat_first_safety_turn, ''); assert.equal(row.chat_turns_after_safety, '');
+  assert.equal(row.chat_median_since_ms, 9000, 'median of 4200, 9000 and 20000'); assert.equal(row.chat_first_safety_turn, ''); assert.equal(row.chat_turns_after_safety, '');
   assert.equal(row.chat_model, bot.DEFAULT_MODEL); assert.equal(row.chat_prompt_hash, stored.promptHash); assert.equal(row.chat_llm_errors, 0); assert.equal(String(row.a_je_understood), '6');
   assert(!JSON.stringify(rec).includes('junk'), 'unknown client fields are dropped');
   assert.equal((await R['chat/state'](S, code, at)).error, 'chat_over', 'no more turns after the item is submitted');

@@ -189,7 +189,7 @@ async function chatSummary(S, tag, chat) {
     wordsUser: turns.reduce((n, t) => n + (t.userWords || 0), 0), wordsBot: turns.reduce((n, t) => n + (t.botWords || 0), 0),
     safetyTurns: turns.filter(t => t.source === 'safety').length, model: turns.map(t => t.model).filter(Boolean).pop() || null, promptHash: chat.promptHash,
     medianLlmMs: median(turns.filter(t => t.source === 'llm').map(t => t.llmMs)), llmErrors: count('llm'), sttErrors: count('stt'), ttsErrors: count('tts'), botAudio: ttsKeys.length,
-    reachedMin: turns.length >= chat.minTurns, ...safetyTiming(turns), medianGapMs: median(turns.slice(1).map((t, i) => t.sinceMs - turns[i].sinceMs).filter(x => x >= 0)) };
+    reachedMin: turns.length >= chat.minTurns, ...safetyTiming(turns), medianSinceMs: median(turns.map(t => t.sinceMs)) };
 }
 // When the crisis message first came (turn number from 1) and how many turns the participant took after it.
 function safetyTiming(turns) {
@@ -396,7 +396,7 @@ export default {
     const d = r.data || {}, tr = d.traces || {}, cs = d.chatServer || {}, cc = d.chat || {};
     const row = { item_id: r.itemId, chat_mode: r.item?.mode || '', chat_audio_only: r.item?.audioOnly ? 1 : 0, chat_turns: cs.turns ?? '', chat_voice_turns: cs.voiceTurns ?? '', chat_edited_turns: cs.editedTurns ?? '',
       chat_words_user: cs.wordsUser ?? '', chat_words_bot: cs.wordsBot ?? '', chat_ms: cc.chatMs ?? '', chat_ended: cc.ended || '', chat_reached_min: cs.reachedMin == null ? '' : cs.reachedMin ? 1 : 0,
-      chat_safety_turns: cs.safetyTurns ?? '', chat_first_safety_turn: cs.firstSafetyTurn ?? '', chat_turns_after_safety: cs.turnsAfterSafety ?? '', chat_median_gap_ms: cs.medianGapMs ?? '', chat_model: cs.model || '', chat_prompt_hash: cs.promptHash || '', chat_median_llm_ms: cs.medianLlmMs ?? '',
+      chat_safety_turns: cs.safetyTurns ?? '', chat_first_safety_turn: cs.firstSafetyTurn ?? '', chat_turns_after_safety: cs.turnsAfterSafety ?? '', chat_median_since_ms: cs.medianSinceMs ?? '', chat_model: cs.model || '', chat_prompt_hash: cs.promptHash || '', chat_median_llm_ms: cs.medianLlmMs ?? '',
       chat_llm_errors: cs.llmErrors ?? '', chat_stt_errors: cs.sttErrors ?? '', chat_tts_errors: cs.ttsErrors ?? '', chat_bot_audio: cs.botAudio ?? '', chat_browser_voice: cc.browserVoice ?? '',
       chat_mic_blocked: cc.micBlocked ? 1 : 0, chat_text_shown: cc.textShown ?? '', rt_ms: d.rtMs ?? '', first_answer_ms: tr.firstAnswerMs ?? '', answer_changes: tr.answerChanges ?? '' };
     for (const q of r.questions || Object.keys(d.answers || {})) row[`a_${q}`] = (d.answers || {})[q] ?? '';
