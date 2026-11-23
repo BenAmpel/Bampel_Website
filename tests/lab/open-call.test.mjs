@@ -23,7 +23,7 @@ globalThis.fetch = async (url, init = {}) => {
   if (u === 'https://api.elevenlabs.io/v1/speech-to-text') return Response.json({ text: 'We switched to Aetna this year', language_code: 'en' });
   return new Response('not here', { status: 404 });
 };
-const eleven = () => seen.filter(u => u.includes('elevenlabs.io'));
+const eleven = () => seen.filter(u => new URL(u).hostname === 'api.elevenlabs.io');
 
 const OWNER = 'owner-key-for-tests-0123456789';
 const getStore = memBlobs();
