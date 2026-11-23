@@ -126,3 +126,57 @@ footer a:hover { color: var(--accent); }
 @media (prefers-reduced-motion: reduce) {
   header.site nav a { transition: none; }
 }
+
+/* Visuals and motion (2026-11-22). Animate transform and opacity only; everything is visible without JS. */
+.scene { margin: 8px 0 56px; }
+.scene img { display: block; width: 100%; height: auto; border-radius: 28px; box-shadow: 0 1px 0 var(--line), 0 40px 80px -48px rgb(0 20 60 / 0.55); }
+.scene figcaption { margin-top: 12px; font-size: 0.875rem; color: var(--muted); text-align: center; }
+
+.shot { position: relative; }
+.shot img { transition: transform 0.5s var(--ease), box-shadow 0.5s var(--ease); }
+.shot:hover img { transform: translateY(-4px); }
+
+.trace { position: absolute; top: 0; left: 0; width: 100%; height: auto; aspect-ratio: 760 / 840; pointer-events: none; overflow: visible; }
+.trace-line { fill: none; stroke: var(--accent); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; opacity: 0.85; }
+.trace-dot { fill: none; stroke: var(--accent); stroke-width: 3; }
+.trace-d1 { stroke-dasharray: 4 6; }
+.trace-armed .trace-line { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.trace-armed .trace-dot { opacity: 0; transform-box: fill-box; transform-origin: center; transform: scale(0.4); }
+.trace-armed.is-in .trace-line { animation: trace-draw 3.2s var(--ease) 0.2s forwards; }
+.trace-armed.is-in .trace-dot { animation: trace-pop 0.5s var(--ease) forwards; }
+.trace-armed.is-in .trace-d1 { animation-delay: 1.1s; }
+.trace-armed.is-in .trace-d3 { animation-delay: 1.9s; }
+.trace-armed.is-in .trace-d2 { animation-delay: 2.2s; }
+.trace-armed.is-in .trace-d4 { animation-delay: 3.2s; }
+@keyframes trace-draw { to { stroke-dashoffset: 0; } }
+@keyframes trace-pop { to { opacity: 1; transform: scale(1); } }
+
+.trace-art { display: block; width: 100%; height: auto; margin-top: 28px; }
+
+@keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes settle { from { transform: scale(0.97); } to { transform: none; } }
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero h1 { animation: rise 0.8s var(--ease) both; }
+  .hero .lede { animation: rise 0.8s var(--ease) 0.08s both; }
+  .hero .cta, .hero .cta-note { animation: rise 0.8s var(--ease) 0.16s both; }
+  .scene img { animation: settle 1.1s var(--ease) 0.22s both; }
+
+  @supports (animation-timeline: view()) {
+    .stage .shot, .band .row, .specs > *, .facts > *, .trace-art {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 55%;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shot img { transition: none; }
+  .shot:hover img { transform: none; }
+}
+
+@media (max-width: 760px) {
+  .scene { margin: 0 0 36px; }
+  .scene img { border-radius: 18px; }
+}

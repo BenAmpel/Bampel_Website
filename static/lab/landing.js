@@ -8,3 +8,14 @@
         '<a class="btn secondary" href="' + esc(s.paths.participant) + '">Sign in</a></li>';
     }).join('') + '</ul>';
   }).catch(function () {});
+
+// Pointer trace on the demo shot: drawn by default, animated once when it scrolls into view (skipped under reduced motion).
+(function () {
+  var t = document.querySelector('.trace');
+  if (!t || !('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  t.classList.add('trace-armed');
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (e) { if (e.isIntersecting) { t.classList.add('is-in'); io.disconnect(); } });
+  }, { threshold: 0.45 });
+  io.observe(t);
+})();
