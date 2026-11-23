@@ -34,75 +34,105 @@
 <header class="site">
   <div class="wrap">
     <div class="brandrow"><a class="wordmark" href="/lab/"><b>CCAIR Behavioral Lab</b><small>Georgia State University · J. Mack Robinson College of Business</small></a><span class="lockup-slot" data-official-lockup></span></div>
-    <nav aria-label="Main"><a href="/ccair/">CCAIR</a><a href="#studies">Studies</a><a href="#data">Data &amp; privacy</a><a href="#researchers">For researchers</a><a href="/">bampel.com</a></nav>
+    <nav aria-label="Main"><a href="#studies">Studies</a><a href="#traces">What we record</a><a href="#data">Privacy</a><a href="#researchers">For researchers</a><a href="/ccair/">CCAIR</a></nav>
   </div>
 </header>
 
-<section class="hero-band" aria-labelledby="hero-title">
-  <div class="hero">
-    <div class="eyebrow">Center for CyberAI Research · Georgia State University</div>
-    <h1 id="hero-title">How people judge cyber threats, measured as they decide.</h1>
-    <p class="lede">The CCAIR Behavioral Lab runs browser-based studies of security decisions such as spotting phishing, judging links, and responding to suspicious calls. Each study records the answer and how the person arrived at it (timing, hesitation, where attention went), so we can study the decision process rather than only its outcome.</p>
-  </div>
-</section>
-
-<main class="wrap" id="main" tabindex="-1">
-  <section id="studies">
-    <h2>Studies</h2>
-    <div class="card study">
-      <div>
-        <span class="tag">Demo · no data leaves your browser</span>
-        <h3>Email judgment demo</h3>
-        <p>Judge two emails and a link, explain one decision, and see what the lab records. About three minutes.</p>
+<main id="main" tabindex="-1">
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="wrap">
+      <h1 id="hero-title">How people judge cyber threats, measured as they decide.</h1>
+      <p class="lede">The CCAIR Behavioral Lab runs browser studies of security decisions: spotting phishing, judging links, and answering suspicious calls. Each study records the answer and the path to it, so we can study how a decision forms and not only where it lands.</p>
+      <p class="cta"><a class="btn" href="/lab/studies/demo-phishing/">Try the demo</a><a class="more" href="#researchers">Run a study with the lab</a></p>
+      <p class="cta-note">About three minutes. Nothing leaves your browser.</p>
+    </div>
+    <div class="wrap">
+      <div class="stage">
+        <figure class="shot">
+          <picture>
+            <source srcset="/lab/assets/shots/email-dark.webp" media="(prefers-color-scheme: dark)">
+            <img src="/lab/assets/shots/email-light.webp" width="760" height="840" alt="Demo screen: a payroll email asking the reader to confirm direct deposit by 5 PM, with Phishing selected and a confidence slider at 51.">
+          </picture>
+          <figcaption><b>What the participant sees.</b> An email, a judgment, and a confidence rating.</figcaption>
+        </figure>
+        <figure class="shot">
+          <picture>
+            <source srcset="/lab/assets/shots/summary-dark.webp" media="(prefers-color-scheme: dark)">
+            <img src="/lab/assets/shots/summary-light.webp" width="760" height="723" alt="Demo end screen: a table of what was recorded for each item, including time on item, delay before the first move, answer changes, pointer path length, pauses, keys and deletions, and what was hovered.">
+          </picture>
+          <figcaption><b>What the study records.</b> Timing, pointer path, changed answers, and what the reader hovered before deciding.</figcaption>
+        </figure>
       </div>
-      <a class="btn" href="/lab/studies/demo-phishing/">Try the demo</a>
     </div>
-    <div id="live">
-    <div class="card study">
-      <div>
-        <span class="tag">Pilot · GSU email sign-in</span>
-        <h3>Security alert verification</h3>
-        <p>Four weekly sessions of security alert triage, with and without an AI assistant. GSU students sign in with their university email.</p>
+  </section>
+
+  <section id="studies" class="band">
+    <div class="wrap">
+      <h2>Studies</h2>
+      <ul class="rows">
+        <li class="row">
+          <p class="row-kind">Demo</p>
+          <div class="row-body"><h3>Email judgment demo</h3><p>Judge two emails and a link, explain one decision, and see what the lab records. Runs in your browser and stores nothing.</p></div>
+          <a class="btn" href="/lab/studies/demo-phishing/">Try the demo</a>
+        </li>
+      </ul>
+      <div id="live">
+        <ul class="rows">
+          <li class="row">
+            <p class="row-kind">Pilot</p>
+            <div class="row-body"><h3>Security alert verification</h3><p>Four weekly sessions of security alert triage, with and without an AI assistant. GSU students sign in with their university email.</p></div>
+            <a class="btn secondary" href="/lab/studies/verification/">Sign in</a>
+          </li>
+        </ul>
       </div>
-      <a class="btn" href="/lab/studies/verification/">Sign in</a>
+      <p class="fine">Live studies appear here once they have IRB approval. Participants reach them through the study link they are given.</p>
     </div>
-    </div>
-    <p class="fine fine-top">Live studies appear here once they have IRB approval. Participants reach them through the study link they are given.</p>
   </section>
 
-  <section id="traces">
-    <h2>What a study can record</h2>
-    <div class="grid">
-      <div class="card"><h3>Timing</h3><p>Time on each item, delay before the first move, idle pauses, and when answers were given.</p></div>
-      <div class="card"><h3>Pointer</h3><p>Sampled cursor path, speed, direction changes, clicks, and how long the pointer rested on links, headers, and options.</p></div>
-      <div class="card"><h3>Answer changes</h3><p>Every change to a response, not just the final choice, including confidence adjustments.</p></div>
-      <div class="card"><h3>Typing rhythm</h3><p>Keystroke timing, deletions, and paste events. The lab records the kind of key (letter, space, delete), never the key itself.</p></div>
-      <div class="card"><h3>Attention</h3><p>Time the tab was hidden, window focus loss, scrolling, and window resizing.</p></div>
-      <div class="card"><h3>Media</h3><p>For audio or video stimuli: delay before playing, share of the clip heard, replays, and seeks.</p></div>
+  <section id="traces" class="band">
+    <div class="wrap split">
+      <div class="split-head">
+        <h2>What a study can record</h2>
+        <p class="sub">Signals the lab can collect in the browser, alongside each answer.</p>
+      </div>
+      <dl class="specs">
+        <div><dt>Timing</dt><dd>Time on each item, delay before the first move, idle pauses, and when answers were given.</dd></div>
+        <div><dt>Pointer</dt><dd>Sampled cursor path, speed, direction changes, clicks, and how long the pointer rested on links, headers, and options.</dd></div>
+        <div><dt>Answer changes</dt><dd>Every change to a response, including confidence adjustments, and the final choice.</dd></div>
+        <div><dt>Typing rhythm</dt><dd>Keystroke timing, deletions, and paste events. The lab records the kind of key (letter, space, delete), never the key itself.</dd></div>
+        <div><dt>Attention</dt><dd>Time the tab was hidden, window focus loss, scrolling, and window resizing.</dd></div>
+        <div><dt>Media</dt><dd>For audio or video stimuli, the delay before playing, the share of the clip heard, replays, and seeks.</dd></div>
+      </dl>
+      <p class="fine split-foot">Webcam modules (gaze and facial expression) are planned as an opt-in add-on for studies that need them. They will compute features in the browser and will not upload video.</p>
     </div>
-    <p class="fine fine-top">Webcam modules (gaze and facial expression) are planned as an opt-in add-on for studies that need them. They will compute features in the browser and will not upload video.</p>
   </section>
 
-  <section id="researchers">
-    <h2>For researchers</h2>
-    <p class="measure">Researchers can run studies in the lab: surveys and vignettes (including imports from Qualtrics, LimeSurvey, and REDCap), security-alert tasks, and economic games, live or asynchronous. Access is by invitation.</p>
-    <p><a class="btn" href="/lab/guide/">Read the researcher guide</a> <a class="signin-link" href="/lab/signin/">Researcher sign-in</a></p>
-    <p class="fine">These two links open your email app with a prepared message: <a href="mailto:bampel@gsu.edu?subject=CCAIR%20Behavioral%20Lab&amp;body=Name%3A%0AInstitution%20and%20email%3A%0AStudy%20(title%20and%20short%20description)%3A%0AIRB%20status%3A%0AWhat%20you%20need%3A">Request researcher access</a> · <a href="mailto:bampel@gsu.edu?subject=CCAIR%20Behavioral%20Lab&amp;body=Name%3A%0AYour%20message%3A">Contact the lab</a>. Messages go to the lab director's university inbox (bampel@gsu.edu). Nothing is sent from this page. <a href="/lab/support/">Support and FAQ</a></p>
+  <section id="data" class="band">
+    <div class="wrap">
+      <h2>Data and privacy</h2>
+      <div class="facts">
+        <div><h3>Consent comes first.</h3><p>Nothing is recorded before a participant gives consent on the study's first page.</p></div>
+        <div><h3>No keys, no camera.</h3><p>The lab never records which keys were pressed. It uses the camera or microphone only when a study asks for it and the participant agrees.</p></div>
+        <div><h3>Stored by protocol.</h3><p>Live studies store data only where the approved IRB protocol says, under a study ID and never a name.</p></div>
+        <div><h3>The demo keeps nothing.</h3><p>Its data stays in the browser tab and disappears when the tab closes.</p></div>
+      </div>
+    </div>
   </section>
 
-  <section id="data">
-    <h2>Data and privacy</h2>
-    <ul class="plain">
-      <li>Nothing is recorded before a participant gives consent on the study's first page.</li>
-      <li>The lab never records which keys were pressed, and never uses the camera or microphone unless a study asks for it and the participant agrees.</li>
-      <li>Live studies store data only where the approved IRB protocol says, under a study ID rather than a name.</li>
-      <li>The demo stores nothing: its data stays in the browser tab and disappears when the tab closes.</li>
-    </ul>
+  <section id="researchers" class="band">
+    <div class="wrap">
+      <div class="panel">
+        <h2>For researchers</h2>
+        <p class="sub">Researchers can run studies in the lab: surveys and vignettes (including imports from Qualtrics, LimeSurvey, and REDCap), security-alert tasks, and economic games, live or asynchronous. Access is by invitation.</p>
+        <p class="cta"><a class="btn" href="/lab/guide/">Read the researcher guide</a><a class="more" href="/lab/signin/">Researcher sign-in</a></p>
+        <p class="fine">These two links open your email app with a prepared message: <a href="mailto:bampel@gsu.edu?subject=CCAIR%20Behavioral%20Lab&amp;body=Name%3A%0AInstitution%20and%20email%3A%0AStudy%20(title%20and%20short%20description)%3A%0AIRB%20status%3A%0AWhat%20you%20need%3A">Request researcher access</a> · <a href="mailto:bampel@gsu.edu?subject=CCAIR%20Behavioral%20Lab&amp;body=Name%3A%0AYour%20message%3A">Contact the lab</a>. Messages go to the lab director's university inbox (bampel@gsu.edu). Nothing is sent from this page. <a href="/lab/support/">Support and FAQ</a></p>
+      </div>
+    </div>
   </section>
 </main>
 
 <footer>
-  <div class="wrap">CCAIR Behavioral Lab · Directed by Dr. Benjamin M. Ampel · <a href="mailto:bampel@gsu.edu?subject=CCAIR%20Behavioral%20Lab&amp;body=Name%3A%0AYour%20message%3A">bampel@gsu.edu</a> · <a href="/lab/support/">Support</a> · <a href="/lab/guide/">Researcher guide</a></div>
+  <div class="wrap">CCAIR Behavioral Lab · Directed by Dr. Benjamin M. Ampel · <a href="mailto:bampel@gsu.edu?subject=CCAIR%20Behavioral%20Lab&amp;body=Name%3A%0AYour%20message%3A">bampel@gsu.edu</a> · <a href="/lab/support/">Support</a> · <a href="/lab/guide/">Researcher guide</a> · <a href="/">bampel.com</a></div>
 </footer>
 <script src="/lab/landing.js"></script>
 </body>
