@@ -208,10 +208,39 @@ export async function panelIdFor(S, code, sent) {
 
 // ---------- participant routes ----------
 
+// Study access code (enrollment.passcode): a short shared word that every new sign-in must give, for a demo or pilot
+// shared by link. It is a light gate, not an account password: compared without case or outer spaces, never sent to
+// browsers (publicContent sends only that one is set), and wrong guesses for the whole study are capped per window.
+export const PASSCODE_WINDOW_MS = 15 * 60000;
+export const PASSCODE_FAIL_LIMIT = 30;
+const passNorm = v => String(v == null ? '' : v).trim().toLowerCase().slice(0, 64);
+export function passcodeMatches(sent, want) {
+  const a = createHmac('sha256', 'passcode').update(passNorm(sent)).digest(), b = createHmac('sha256', 'passcode').update(passNorm(want)).digest();
+  return timingSafeEqual(a, b);
+}
+async function passcodeCheck(store, sent, want, now) {
+  const since = now - PASSCODE_WINDOW_MS, keys = await store.list('passcode-try/');
+  const recent = keys.filter(k => Number(k.slice(13).split('-')[0]) >= since);
+  await Promise.all(keys.filter(k => !recent.includes(k)).map(k => store.delete(k)));   // old failures
+  if (recent.length >= PASSCODE_FAIL_LIMIT) return { error: 'too_many_tries', status: 429 };
+  if (passcodeMatches(sent, want)) return null;
+  await store.set(`passcode-try/${now}-${randomBytes(4).toString('hex')}`, { at: now });
+  return { error: 'passcode', status: 401, passcode: true };
+}
+
 export async function login(S, creds = {}, now = Date.now()) {
   const store = S.store;
+  const gate = (await getContent(store, S.type)).enrollment.passcode;
+  // Preview and self-test links (test participants made by the research team) skip the access code.
+  if (gate && creds.code != null) { const t = await loadParticipant(S, creds.code); if (!(t && t.test)) { const bad = await passcodeCheck(store, creds.passcode, gate, now); if (bad) return bad; } }
+  else if (gate) { const bad = await passcodeCheck(store, creds.passcode, gate, now); if (bad) return bad; }
   let p;
-  if (creds.email != null) {
+  if (gate && creds.email == null && creds.panelId == null && creds.code == null) {
+    // The access code alone: a new anonymous participant (the browser keeps the sign-in, so a reload goes on).
+    const en = (await getContent(store, S.type)).enrollment;
+    [p] = (await createParticipants(S, 1, { gapDays: en.gapDays, label: 'access-code', selfSignup: true }, now)).created;
+    p = await loadParticipant(S, p.code);
+  } else if (creds.email != null) {
     const email = normalizeEmail(creds.email), en = (await getContent(store, S.type)).enrollment;
     const canSignUp = en.open && EMAIL_RE.test(email) && domainAllowed(email, en.domains);
     const pepper = await getPepper(store, canSignUp);

@@ -76,7 +76,8 @@ export async function handle(req, { getStore, env, now }) {
     // a file name never hints at a condition or an answer. Range requests let browsers seek (Safari needs them).
     const fm = route.match(/^file\/(f-[0-9a-f]{12}\.[a-z0-9]{2,4})$/);
     if (fm && (req.method === 'GET' || req.method === 'HEAD')) return await serveFile(S.store, fm[1], req);
-    if (route === 'login') return reply(await E.login(S, body.email != null ? { email: body.email, confirm: body.confirm === true } : body.panelId != null ? { panelId: body.panelId, panelMeta: { study: body.panelStudy, session: body.panelSession } } : { code: body.code }));
+    if (route === 'login') { const pass = body.passcode != null ? { passcode: String(body.passcode) } : {};
+      return reply(await E.login(S, body.email != null ? { email: body.email, confirm: body.confirm === true, ...pass } : body.panelId != null ? { panelId: body.panelId, panelMeta: { study: body.panelStudy, session: body.panelSession }, ...pass } : body.code != null ? { code: body.code, ...pass } : pass)); }
     if (['resume', 'consent', 'session', 'view', 'trial', 'survey', 'handoff', 'withdraw', 'checks', 'dq'].includes(route)) {
       const pid = await E.verifyToken(S, body.token);
       if (!pid) return json({ error: 'expired' }, 401);

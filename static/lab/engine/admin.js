@@ -809,6 +809,8 @@
         '<p class="muted">Participants type their email each session; the first time, they confirm it. There is no verification email, so the study relies on people entering their own address. Emails added on the Students tab can always sign in, even with sign-up off.</p>' +
         '<div class="grid3">' + field('Email domains (one per line, no @)', '<textarea data-domains="1" rows="3" class="mono">' + esc(en.domains.join('\n')) + '</textarea>') +
         field('Gap days between sessions (self sign-ups)', num('enrollment.gapDays', en.gapDays, 0, 60)) + field('Label for self sign-ups', inp('enrollment.label', en.label || '')) + '</div>' +
+        '<div class="grid3">' + field('Study password (optional)', inp('enrollment.passcode', en.passcode || '', ' autocomplete="off" spellcheck="false"')) + '</div>' +
+        '<p class="muted">When set, the sign-in page asks only for this password, and each person who gives it starts as a new anonymous participant. Share it with the link, for a demo or pilot. Preview links skip it. Leave it blank for email or panel sign-in.</p>' +
         '<h3 style="margin:20px 0 8px">Online panel (Prolific, SONA, MTurk, CloudResearch)</h3>' +
         checkbox('data-path="enrollment.panel.enabled" data-bool="1"', en.panel && en.panel.enabled, 'Participants arrive from an online panel: the study link signs them in with the panel\'s participant ID') +
         (en.panel && en.panel.enabled ? panelEditor(en.panel) : '') +

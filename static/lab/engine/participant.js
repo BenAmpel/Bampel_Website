@@ -94,6 +94,8 @@
   function errorBox(msg, id) { return '<p class="error" role="alert"' + (id ? ' id="' + id + '"' : '') + '>' + esc(msg) + '</p>'; }
   var ERR = {
     invalid_code: 'That access code was not recognized. Check it and try again.',
+    passcode: 'That study password is not right. Check it and try again.',
+    too_many_tries: 'Too many wrong tries. Please wait 15 minutes and try again.',
     not_enrolled: 'That email can\'t be used for this study. Contact the research team if you think this is a mistake.',
     expired: 'Your sign-in expired. Sign in again to pick up where you left off.',
     network: 'Could not reach the study server. Check your connection and try again.',
@@ -422,6 +424,14 @@
   // ---------- sign-in ----------
   function showLogin(msg, mode, email) {
     progress.textContent = '';
+    // A study with an access code (enrollment.passcode): the code alone starts a new participant; this tab keeps the sign-in.
+    if (S.content && S.content.passcode) {
+      show('<h1>' + Th('login_title') + '</h1><p>Enter the study password you were given.</p>' +
+        '<form id="f" novalidate><label class="field" for="passcode">Study password</label><input type="text" id="passcode" autocomplete="off" autocapitalize="none" spellcheck="false"' + (msg ? ' aria-describedby="loginerr" aria-invalid="true"' : '') + '>' +
+        (msg ? errorBox(msg, 'loginerr') : '') + '<div class="actions"><button type="submit">Continue</button></div></form>');
+      document.getElementById('f').addEventListener('submit', function (e) { e.preventDefault(); var pc = document.getElementById('passcode').value.trim(); if (pc) signIn({ passcode: pc }); });
+      return;
+    }
     if (mode === 'code') {
       show('<h1>' + Th('login_title') + '</h1><p>Enter your pilot access code.</p>' +
         '<form id="f" novalidate><label class="field" for="code">Access code</label><input type="text" id="code" class="code" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XX-XXXX-XXXX">' +
