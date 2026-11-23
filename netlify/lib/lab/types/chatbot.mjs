@@ -34,6 +34,9 @@ const textFields = [
   F('Conversation', 'chat_recording', 'Shown while recording', 'Recording. Speak now.'),
   F('Conversation', 'chat_transcribing', 'Shown while a recording is turned into text', 'Writing down what you said...'),
   F('Conversation', 'chat_thinking', 'Shown while the chatbot writes ({bot})', '{bot} is writing...'),
+  F('Conversation', 'chat_thinking_call', 'Shown while the chatbot prepares a spoken reply, audio only ({bot})', '{bot} is thinking...'),
+  F('Conversation', 'chat_speaking', 'Shown while the chatbot speaks, audio only ({bot})', '{bot} is speaking...'),
+  F('Conversation', 'chat_replay', 'Button that plays the last reply again, audio only', 'Hear the last reply again'),
   F('Conversation', 'chat_you', 'Name on the participant\'s messages', 'You'),
   F('Conversation', 'chat_turns', 'Turn counter ({i}, {n})', 'Message {i} of up to {n}'),
   F('Conversation', 'chat_min', 'Shown until the conversation can be ended ({n} = messages still needed)', 'Send at least {n} more before ending the conversation.'),
@@ -184,6 +187,8 @@ async function chatSummary(S, tag, chat) {
 // The chatbot speaks when the study says so; the instruction for one condition is built here and nowhere else, so a
 // reply in the compare tab comes from exactly the text a participant's chatbot would be given.
 const speaks = ch => ch.mode !== 'text' && !!ch.voice.speak || ch.mode === 'voice';
+// Audio only hides the transcript; it needs a spoken study (nobody can read over text they never see).
+const audioOnly = ch => ch.mode === 'voice' && ch.voice.audioOnly === true;
 const systemOf = (ch, condition) => bot.buildSystem({ basePrompt: ch.basePrompt, conditionPrompt: ch.prompts[condition] || '', safetyRule: ch.safety.rule, spoken: speaks(ch) });
 const RUBRIC_MAX = 12;
 // The compare tab calls paid services from a researcher's browser, so each study has a daily allowance
@@ -273,7 +278,7 @@ export default {
         prompts: { main: '' },
         promptsReviewed: false,
         safety: { rule: DEFAULT_SAFETY, crisisLine: DEFAULT_CRISIS },
-        voice: { speak: false, voiceId: '' },
+        voice: { speak: false, voiceId: '', audioOnly: false },
         rubric: []
       },
       questions: [
@@ -331,7 +336,7 @@ export default {
 
   buildPlan(p, session, c) {
     const ch = c.chat, speak = speaks(ch), system = systemOf(ch, p.condition);
-    const item = { botName: ch.botName, scenario: ch.scenario, opening: ch.opening || '', mode: ch.mode, minTurns: ch.minTurns, maxTurns: ch.maxTurns, speak };
+    const item = { botName: ch.botName, scenario: ch.scenario, opening: ch.opening || '', mode: ch.mode, minTurns: ch.minTurns, maxTurns: ch.maxTurns, speak, audioOnly: audioOnly(ch) };
     return {
       questions: (c.questions || []).filter(q => !q.conditions.length || q.conditions.includes(p.condition)),
       // Private to the server: the page never receives the instruction, only the conversation.
@@ -360,20 +365,20 @@ export default {
     sealLog(answerLog, plan.questions || [], plan.seal);
     return { answers: cleanAnswers(d.answers, plan.questions || [], { condition: plan.condition, embedded: plan.embedded, seal: plan.seal }), rtMs: num(d.rtMs, 0, 864e5), answerLog, traces: small(d.traces, 50000),
       chat: { ended: ['user', 'max', 'error'].includes(ch.ended) ? ch.ended : null, chatMs: num(ch.chatMs, 0, 864e5), browserVoice: num(ch.browserVoice, 0, 999), audioPlayed: num(ch.audioPlayed, 0, 999),
-        micBlocked: ch.micBlocked === true, retries: num(ch.retries, 0, 999) },
+        micBlocked: ch.micBlocked === true, retries: num(ch.retries, 0, 999), textShown: num(ch.textShown, 0, 999) },
       chatServer: small(d.chatServer, 4000),
       viewport: d.viewport ? { w: num(d.viewport.w, 0, 20000), h: num(d.viewport.h, 0, 20000) } : null, device: small(d.device, 4000), selfTest: d.selfTest === true || undefined };
   },
 
-  recordFields: (t, plan) => ({ itemId: t.itemId, item: { id: 'chat', mode: t.item.mode, speak: t.item.speak, minTurns: t.item.minTurns, maxTurns: t.item.maxTurns }, questions: (plan.questions || []).filter(q => q.type !== 'info').map(q => q.id) }),
+  recordFields: (t, plan) => ({ itemId: t.itemId, item: { id: 'chat', mode: t.item.mode, speak: t.item.speak, audioOnly: t.item.audioOnly === true, minTurns: t.item.minTurns, maxTurns: t.item.maxTurns }, questions: (plan.questions || []).filter(q => q.type !== 'info').map(q => q.id) }),
 
   trialRow(r) {
     const d = r.data || {}, tr = d.traces || {}, cs = d.chatServer || {}, cc = d.chat || {};
-    const row = { item_id: r.itemId, chat_mode: r.item?.mode || '', chat_turns: cs.turns ?? '', chat_voice_turns: cs.voiceTurns ?? '', chat_edited_turns: cs.editedTurns ?? '',
+    const row = { item_id: r.itemId, chat_mode: r.item?.mode || '', chat_audio_only: r.item?.audioOnly ? 1 : 0, chat_turns: cs.turns ?? '', chat_voice_turns: cs.voiceTurns ?? '', chat_edited_turns: cs.editedTurns ?? '',
       chat_words_user: cs.wordsUser ?? '', chat_words_bot: cs.wordsBot ?? '', chat_ms: cc.chatMs ?? '', chat_ended: cc.ended || '', chat_reached_min: cs.reachedMin == null ? '' : cs.reachedMin ? 1 : 0,
       chat_safety_turns: cs.safetyTurns ?? '', chat_model: cs.model || '', chat_prompt_hash: cs.promptHash || '', chat_median_llm_ms: cs.medianLlmMs ?? '',
       chat_llm_errors: cs.llmErrors ?? '', chat_stt_errors: cs.sttErrors ?? '', chat_tts_errors: cs.ttsErrors ?? '', chat_bot_audio: cs.botAudio ?? '', chat_browser_voice: cc.browserVoice ?? '',
-      chat_mic_blocked: cc.micBlocked ? 1 : 0, rt_ms: d.rtMs ?? '', first_answer_ms: tr.firstAnswerMs ?? '', answer_changes: tr.answerChanges ?? '' };
+      chat_mic_blocked: cc.micBlocked ? 1 : 0, chat_text_shown: cc.textShown ?? '', rt_ms: d.rtMs ?? '', first_answer_ms: tr.firstAnswerMs ?? '', answer_changes: tr.answerChanges ?? '' };
     for (const q of r.questions || Object.keys(d.answers || {})) row[`a_${q}`] = (d.answers || {})[q] ?? '';
     return row;
   },

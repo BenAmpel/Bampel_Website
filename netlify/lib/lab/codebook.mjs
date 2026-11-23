@@ -231,6 +231,7 @@ const TYPE_COLUMNS = {
   ],
   chatbot: [
     ['item_id', 'category', 'Always "chat": one conversation per session.'], ['chat_mode', 'category', 'How the participant could talk to the chatbot.', 'text; voice; either'],
+    ['chat_audio_only', 'binary', 'Audio only: the participant heard the conversation and saw no transcript.'],
     ['chat_turns', 'integer', 'Turns completed (one turn = one participant message and the chatbot\'s reply).'], ['chat_voice_turns', 'integer', 'Turns where the participant spoke instead of typing.'],
     ['chat_edited_turns', 'integer', 'Spoken turns where the participant changed the transcribed text before sending it.'],
     ['chat_words_user', 'integer', 'Words the participant wrote or said, all turns.'], ['chat_words_bot', 'integer', 'Words in the chatbot\'s replies, all turns.'],
@@ -242,6 +243,7 @@ const TYPE_COLUMNS = {
     ['chat_stt_errors', 'integer', 'Recordings that could not be turned into text.'], ['chat_tts_errors', 'integer', 'Replies the voice service could not speak.'],
     ['chat_bot_audio', 'integer', 'Replies spoken with the study\'s voice.'], ['chat_browser_voice', 'integer', 'Replies read aloud by the participant\'s own browser because the voice service did not answer.'],
     ['chat_mic_blocked', 'binary', 'The browser refused the microphone, so the participant typed.'],
+    ['chat_text_shown', 'integer', 'Audio only: replies shown as text because neither voice could play them (the crisis message is not counted).'],
     ['rt_ms', 'ms', 'Time from the page appearing to submitting the questions.'], ['first_answer_ms', 'ms', 'Time to the first answer.'], ['answer_changes', 'integer', 'Number of answer changes.']
   ],
   game: [
