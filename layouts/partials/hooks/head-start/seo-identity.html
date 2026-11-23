@@ -42,3 +42,20 @@
 }}
 <script type="application/ld+json">{{ $ld | jsonify (dict "indent" "  ") | safeJS }}</script>
 {{ end }}
+{{/* ProfilePage for the CV (/cv/, content/cv/_index.md): points at the homepage Person by @id and adds no facts about
+   them. name and description repeat the page's own <title> and meta description. The site's WebSite block carries no
+   @id, so isPartOf names it by url. tests/cv-profilepage-jsonld.test.mjs checks the built page. */}}
+{{ if and (eq .Kind "section") (eq .RelPermalink "/cv/") }}
+{{ $pp := dict
+    "@context" "https://schema.org"
+    "@type" "ProfilePage"
+    "@id" (printf "%scv/#profilepage" site.BaseURL)
+    "url" .Permalink
+    "name" (printf "%s | %s" .Title site.Title)
+    "description" (.Description | default .Params.summary | plainify)
+    "isPartOf" (dict "@type" "WebSite" "url" site.BaseURL)
+    "mainEntity" (dict "@id" (printf "%s#person" site.BaseURL))
+}}
+{{ with .Lastmod }}{{ if not .IsZero }}{{ $pp = merge $pp (dict "dateModified" (.Format "2006-01-02")) }}{{ end }}{{ end }}
+<script type="application/ld+json">{{ $pp | jsonify (dict "indent" "  ") | safeJS }}</script>
+{{ end }}

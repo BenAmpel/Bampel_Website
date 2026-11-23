@@ -95,6 +95,9 @@ jobs:
       - name: BreadcrumbList JSON-LD (valid, last item equals the h1)
         run: node --test tests/breadcrumb-jsonld.test.mjs
 
+      - name: CV ProfilePage JSON-LD (mainEntity is the homepage Person @id)
+        run: node --test tests/cv-profilepage-jsonld.test.mjs
+
       - name: Publications ItemList JSON-LD (matches the visible list)
         run: node --test tests/publications-itemlist.test.mjs
 
