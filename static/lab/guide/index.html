@@ -91,7 +91,17 @@
 <p><strong>Randomizing order.</strong> Open a question's <em>Display logic and layout</em>. <em>Shuffle</em> makes it trade places with the other shuffled questions on the same page; questions you do not tick stay where they are. <em>Show the options in a random order</em> shuffles its answers; tick the options that must stay at the end, such as "Other" or "None of the above". Each participant keeps one order for the whole session, and the order they saw is saved next to their answers.</p>
 <p><strong>Counterbalancing block order.</strong> In multimodal and vignette studies, <em>Block order</em> turns on a Latin square: each participant sees the session's blocks (or, in vignette studies, its items) in one of a set of orders in which every block appears equally often in every position and right after every other block. Orders are handed out evenly within each condition, the tab previews them, and the data say which order each participant had.</p>
 <p><strong>Copying and sharing a design.</strong> <em>Clone</em> (lab console, owners) makes a new study with the same design and media, new completion codes (enter them in the new study's panel), and no participants: use it for a second wave or a replication. To remove a study for good, archive it first, download its complete backup if you need one, then choose <em>Delete permanently</em> on the archived row and type the study's link name. Every participant record, recording, and backup copy is deleted, and it cannot be undone. A <strong>study design file</strong> (Study content tab, <em>Download study design</em>) is one JSON file with the whole design and no data, stamped with the platform version that made it. Give it to another lab, put it in a paper's materials, or start a new study from it on the lab console (<em>Create a study from a design file</em>). Completion codes are left out of the file, so the new study gets fresh ones to enter in its panel.</p>
-<p>Participants sign in with an email address on an allowed domain (for example GSU addresses), or with a pilot access code. There is no password for participants and no verification email, so anyone who knows a classmate's address could sign in as that person. Keep that in mind when you write the protocol.</p>
+<p>By default, participants sign in with an email address on an allowed domain (for example GSU addresses), or with a pilot access code. There is no verification email, so anyone who knows a classmate's address could sign in as that person. Keep that in mind when you write the protocol. A study can instead ask for a shared study password (see below).</p>
+
+<h3 id="study-password">Study password</h3>
+<p>A study password is a short shared word that people type before they can take part. Use it for a demo or a pilot that you share by link. It is a light gate, not an account password, and it does not verify who someone is.</p>
+<ol>
+<li><strong>Turn it on.</strong> On Study content, Sign-up &amp; consent, type a word into <em>Study password (optional)</em> and save. Use 3 to 64 letters, numbers, or hyphens. Leave it blank to keep email or panel sign-in. Do not use it together with an online panel.</li>
+<li><strong>What participants see.</strong> The sign-in page asks only for the study password. Capitals and spaces at the ends do not matter. Each person who gives it starts as a new anonymous participant, so one person who signs in twice on two devices counts twice. A study cap (Quotas) still applies.</li>
+<li><strong>Preview and test links.</strong> Links made by the research team for test participants skip the password. Every other sign-in needs it.</li>
+<li><strong>Limits.</strong> After 30 wrong guesses in 15 minutes the study refuses every password, including the right one, until the window passes. Participants then see "Too many wrong tries. Please wait 15 minutes and try again."</li>
+<li><strong>Where it is stored.</strong> The password is never sent to participants' browsers (they are told only that one is set). A downloaded study design file leaves it blank, so enter a new one when you start a study from that file.</li>
+</ol>
 
 <h2 id="types">Study types</h2>
 <h3 id="alert-triage">Alert triage</h3>
@@ -118,6 +128,18 @@
 <li><strong>Before launch,</strong> preview every arm, run the self-test, and pilot with a few lab members on the computers and browsers your participants will use.</li>
 </ol>
 <p>What gets saved for each call: every turn of the conversation (what the participant said, with numbers, emails, and street addresses removed before saving; what the caller said; the step the caller was on; response times), how the call ended (for example <em>disclosed</em>, <em>verified</em>, <em>refused</em>, <em>declined</em>), callbacks to the directory, and the recording when the participant agreed to one. The codebook lists every column.</p>
+
+<h3 id="open-calls">Open conversation calls</h3>
+<p>A call item is scripted by default: the caller moves through the lines you wrote. For a legitimate caller you can switch it to an open conversation. The caller still opens with your first line, word for word. After that, Claude writes every reply from your caller description and your reason-for-calling and request lines, and ElevenLabs speaks it. Existing studies stay scripted unless you change this.</p>
+<ol>
+<li><strong>Turn it on.</strong> On the call item, set <em>How the caller talks</em> to <em>Open conversation: Claude answers freely</em>. Write a caller description (who is calling and how they talk) and an opening line. The save is refused without both.</li>
+<li><strong>Voice.</strong> <em>ElevenLabs voice ID</em> takes 10 to 40 letters and digits. Leave it blank to use the site's default voice. <em>Most turns before the caller ends the call</em> (3 to 20, default 8) closes the call with a goodbye.</li>
+<li><strong>Limits on the item.</strong> Open conversation is refused for attacker callers, and for items that send a code, gate the study, score points, or use recorded lines.</li>
+<li><strong>Keys.</strong> The site needs <code>ANTHROPIC_API_KEY</code> for Claude and <code>ELEVENLABS_API_KEY</code> for the ElevenLabs voice and transcription. Without the Anthropic key the item runs as the scripted call. Without the ElevenLabs key the lab's own voice speaks. The editor says which key is missing.</li>
+<li><strong>How a call ends.</strong> The caller ends it when the reason for the call is taken care of or the person wants to stop. If Claude does not answer in time, the caller asks the person to say it again. A crisis phrase gets a fixed message that gives 988 and ends the call without going to Claude. The mode is fixed when the call is answered, so a call never switches halfway.</li>
+<li><strong>What is stored.</strong> The same turn-by-turn record as a scripted call, with the participant's words already stripped of numbers and addresses. Claude receives only that stripped text. The per-turn calls export adds <code>call_mode</code> and <code>voice_engine</code> columns.</li>
+<li><strong>Consent.</strong> Spoken answers go to ElevenLabs to be transcribed, and the stripped words go to Anthropic. Your consent text must say so.</li>
+</ol>
 
 <h2 id="panels">Recruiting from Prolific, SONA, MTurk, or CloudResearch</h2>
 <p>On <strong>Study content</strong>, <strong>Sign-up &amp; consent</strong>, turn on <em>Online panel</em> and pick your panel. The lab fills in the settings that panel needs and shows the study link to paste into it. Participants arrive already signed in: their panel ID links their sessions, and is kept only in the payment list, never in the research data.</p>
@@ -197,6 +219,7 @@
 <li>Backups: the lab copies each study to a backup store every hour. For a copy outside Netlify, the study owner downloads the complete backup and saves it to GSU-approved storage on a schedule. It contains emails, so treat it as identifiable.</li>
 <li>Withdrawals: the owner can delete a participant, which removes answers, traces, plans, and email, and removes them from the backup store. Copies you downloaded earlier are not changed, so record withdrawals so you can remove those people from saved files.</li>
 <li>Studies that record voices: the consent describes recording, the IRB has approved a deletion schedule for audio, and someone owns deleting it on time (Recordings &amp; calls tab). Voice is biometric data in some states (for example Illinois, Texas, and Washington); on Prolific, exclude those states or get counsel's sign-off first.</li>
+<li>Studies with open conversation calls: the consent says spoken answers are sent to ElevenLabs for transcription and the participant's words, without numbers and addresses, to Anthropic.</li>
 <li>Studies with simulated scam calls: the consent says calls "may attempt to obtain information" without saying which, all caller details are fictional, and the debrief explains the deception.</li>
 <li>Run the self-test, pilot, and delete the test participants.</li>
 <li>Decide before data collection how you will handle participants who are not paid or credited because a group stalled.</li>
