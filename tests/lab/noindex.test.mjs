@@ -40,7 +40,7 @@ const isPrivate = u => {
   const path = u.replace(/^https?:\/\/[^/]+/i, '').split(/[?#]/)[0].toLowerCase();
   return PRIVATE.some(p => path === `/lab/${p}` || path.startsWith(`/lab/${p}/`)) || path.startsWith('/lab/studies/') || path.startsWith('/lab/timing');
 };
-const sitemap = read('static/lab/sitemap.xml').replace(/<!--[\s\S]*?-->/g, '');
+const sitemap = read('static/lab/sitemap.xml');
 const locs = [...sitemap.matchAll(/<loc>\s*([^<]+?)\s*<\/loc>/g)].map(m => m[1]);
 assert(locs.length > 0, 'static/lab/sitemap.xml lists pages');
 for (const u of locs) assert(!isPrivate(u), `static/lab/sitemap.xml must not list the private path ${u}`);
@@ -49,7 +49,7 @@ assert.deepEqual([...locs].sort(), ['/lab/', '/lab/analysis/', '/lab/guide/', '/
 // other static sitemap sources: any sitemap file under static/ or layouts/, and the writers and robots.txt
 const others = ['layouts/robots.txt', 'scripts/ccair-static.mjs', 'static/ccair/sitemap.xml', 'layouts/sitemap.xml', 'layouts/_default/sitemap.xml', 'static/sitemap.xml'];
 for (const f of others.filter(f => existsSync(join(ROOT, f)))) {
-  const text = read(f).replace(/<!--[\s\S]*?-->/g, '');
+  const text = read(f);
   for (const p of PRIVATE) {
     const re = new RegExp(`/lab/${p}(/|\\b)`, 'i');
     for (const line of text.split('\n').filter(l => /sitemap|<loc>|<url>/i.test(l))) {
