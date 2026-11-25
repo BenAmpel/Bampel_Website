@@ -682,7 +682,7 @@ export default {
   id: 'multimodal',
   label: 'Media, voice, and conversations (multimodal)',
   description: 'Text, images, audio and video clips, and phone calls with an AI voice caller, in blocks shown in order or shuffled, with per-condition wording and media. Each item can ask for a mouse-tracked decision, any questions, and a spoken answer. Records play behavior, decision paths, answer changes, call transcripts, and (with consent) participant audio.',
-  contentKeys: ['design', 'items', 'practice', 'questions', 'decision', 'directory', 'screening', 'persona', 'clipLibrary', 'shift', 'payoff', 'pilot', 'debrief'],
+  contentKeys: ['design', 'items', 'practice', 'questions', 'decision', 'directory', 'screening', 'persona', 'clipLibrary', 'shift', 'payoff', 'pilot', 'debrief', 'builder'],
   textFields,
   surveyRules: [],
   conditionsOf: c => (c.design?.conditions || []).map(x => x.id),
@@ -690,6 +690,8 @@ export default {
   assignAtSession: c => c.design?.assignAtSession || 1,
   assignFlags: X.assignFlags,
   allocate: X.allocate,
+  // Studies built on the canvas (content.builder) take their arm from the block list when session 1 starts.
+  deferAssignment: c => !!(c && c.builder),
   publicContent: c => ({ continuous: !!c.design?.continuous, noSoundCheck: !!c.design?.noSoundCheck, debrief: c.debrief && c.debrief.body ? { title: c.debrief.title || 'About this study', body: c.debrief.body } : null }),
   // Engine hooks: eligibility answers (start-of-session survey) and failed equipment checks end the study.
   screenSurvey(c, kind, session, answers) {

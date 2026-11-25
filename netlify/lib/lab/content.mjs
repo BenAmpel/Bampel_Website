@@ -10,6 +10,7 @@ import { quotaDefaults, validateQuota } from './quota.mjs';
 import { environmentDefaults, validateEnvironment } from './envcheck.mjs';
 import { validateLatin } from './latin.mjs';
 import { EXTRA_TYPES, validateExtra } from './questiontypes.mjs';
+import { getMany } from './store.mjs';
 
 // Screen text used by the shared participant app (types add or override fields).
 export const ENGINE_TEXT = [
@@ -376,6 +377,9 @@ export async function saveContent(store, type, next, who, baseVersion, now = Dat
   normalize(clean, type);
   const errors = validateContent(clean, type);
   if (errors.length) return { error: 'invalid', status: 400, errors };
+  // Adding builder switches how a study assigns arms (at session 1, from the block list), so it is refused once a
+  // real participant exists. Only a hand-edited save can reach this; it is the one save that lists participants.
+  if (clean.builder && !cur.builder && await hasRealParticipant(store)) return { error: 'structure_locked', status: 409, hint: 'This study already has real participants, so it cannot be switched to the builder.' };
   const version = (cur.version || 0) + 1;
   const saved = { version, savedAt: now, savedBy: who, ...clean };
   const hk = `content/history/v${String(version).padStart(5, '0')}`;
@@ -384,6 +388,12 @@ export async function saveContent(store, type, next, who, baseVersion, now = Dat
   await store.set('content/current', saved);
   clearContentCache(store);
   return { ok: true, version };
+}
+
+export async function hasRealParticipant(store) {
+  const keys = await store.list('participants/');
+  for (let i = 0; i < keys.length; i += 40) if ((await getMany(store, keys.slice(i, i + 40))).some(([, p]) => p && !p.test)) return true;
+  return false;
 }
 
 export async function contentHistory(store) {

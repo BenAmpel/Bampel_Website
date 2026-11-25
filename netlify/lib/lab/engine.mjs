@@ -525,7 +525,8 @@ export async function sessionGate(S, c, n, now = Date.now(), health = { asr: asr
 // that session, so people screened out in earlier sessions never hold an arm or count toward one.
 const assignAt = (S, c) => (S.type.assignAtSession ? S.type.assignAtSession(c) : 1);
 // deferAssignment: the arm is chosen when session 1 starts (after login has recorded the panel's study ID), not at enrollment.
-const deferred = (S, c) => assignAt(S, c) > 1 || !!S.type.deferAssignment;
+// It is a boolean, or a function of the content (multimodal: only studies built on the canvas).
+const deferred = (S, c) => { const d = S.type.deferAssignment; return assignAt(S, c) > 1 || !!(typeof d === 'function' ? d(c) : d); };
 async function assignNow(S, p, now, rand = Math.random) {
   // A type can allocate from its own list (for example permuted blocks fixed in advance); otherwise minimization.
   const condition = (S.type.allocate && await S.type.allocate(S, p, await getContent(S.store, S.type))) || await pickCondition(S, !!p.test, rand, !!p.selfSignup);

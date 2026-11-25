@@ -341,4 +341,28 @@ for (const cond of ['a0', 'a4']) {
   assert.equal(r.json.failed, 0, JSON.stringify(r.json).slice(0, 1200));
 }
 console.log('self-test: passes for the multimodal type');
+// builder survives a save, the design file (export and import), a clone, and a form-editor save
+{
+  assert((await call('/api/lab/_lab/create', { key: OWNER, body: { id: 'bld-keep', name: 'Builder keep', template: 'image-video' } })).json.ok);
+  const B = '/api/lab/bld-keep/', strip = x => Object.fromEntries(Object.entries(x).filter(([k]) => k[0] !== '_'));
+  const cur = strip((await call(B + 'admin/content', { key: OWNER })).json);
+  cur.design.conditions = [{ id: 'a', label: 'A' }, { id: 'b', label: 'B' }];
+  cur.design.randomization = { method: 'blocks', blockSize: 4, seed: 'keep' };
+  cur.builder = { v: 1 };
+  r = await call(B + 'admin/content-save', { key: OWNER, body: { content: cur, baseVersion: cur.version || 0 } });
+  assert(r.json.ok, r.text);
+  const got = async path => (await call(path + 'admin/content', { key: OWNER })).json.builder;
+  assert.deepEqual(await got(B), { v: 1 }, 'save keeps builder');
+  const d = (await call(B + 'admin/design.json', { key: OWNER })).json;
+  assert.deepEqual(d.content.builder, { v: 1 }, 'export carries builder');
+  assert.equal((await call('/api/lab/_lab/create', { key: OWNER, body: { design: d, id: 'bld-imported', name: 'Imported' } })).status, 200);
+  assert.deepEqual(await got('/api/lab/bld-imported/'), { v: 1 }, 'import keeps builder');
+  assert.equal((await call('/api/lab/_lab/clone', { key: OWNER, body: { from: 'bld-keep', id: 'bld-cloned', name: 'Cloned' } })).status, 200);
+  assert.deepEqual(await got('/api/lab/bld-cloned/'), { v: 1 }, 'clone keeps builder');
+  // the form editor saves a deep clone of the whole content it read, minus the _ keys (admin.js loadContent)
+  const form = strip((await call(B + 'admin/content', { key: OWNER })).json); form.minutesPerSession = 7;
+  assert((await call(B + 'admin/content-save', { key: OWNER, body: { content: form, baseVersion: form.version } })).json.ok);
+  assert.deepEqual(await got(B), { v: 1 }, 'a form-editor save keeps builder');
+  console.log('builder: kept by save, export, import, clone and the form editor');
+}
 console.log('multimodal: all checks passed');
