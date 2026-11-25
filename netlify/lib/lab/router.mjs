@@ -39,7 +39,7 @@ const NEED = {
   content: 'viewer', 'content-history': 'viewer',
   'content-save': 'editor', 'content-restore': 'editor', import: 'editor', preview: 'editor',
   roster: 'manager', lookup: 'manager', 'credit.csv': 'manager', integrity: 'manager', create: 'manager', 'set-test': 'manager',
-  delete: 'owner', 'delete-test': 'owner', 'self-test': 'owner', 'backup-status': 'owner', 'backup-run': 'owner', 'backup-part': 'owner',
+  delete: 'owner', 'delete-test': 'owner', 'structure-reset': 'owner', 'self-test': 'owner', 'backup-status': 'owner', 'backup-run': 'owner', 'backup-part': 'owner',
   team: 'owner', 'team-add': 'owner', 'team-remove': 'owner', activity: 'owner',
   seal: 'viewer', 'seal-set': 'owner', members: 'owner', 'member-set': 'owner'   // the study's public key for sealed fields (seal.mjs); the private key never comes here
 };
@@ -170,7 +170,7 @@ export async function handle(req, { getStore, env, now }) {
         }
         case 'records': return json(await E.exportRecords(S, codes.length ? codes : ['none']));
         case 'raw': return json(codes.length === 1 ? await E.exportRaw(S, codes[0]) : { error: 'one_code' });
-        case 'content': return json({ ...c, _textFields: content.textFieldsFor(type), _meta: type.editorMeta ? type.editorMeta() : {}, _type: type.id,
+        case 'content': return json({ ...c, ...(type.structureOf && await S.store.get('lock/structure') ? { locked: true } : {}), _textFields: content.textFieldsFor(type), _meta: type.editorMeta ? type.editorMeta() : {}, _type: type.id,
           _conditions: type.conditionsOf(c), _surveyRules: type.surveyRules || [], _questionTypes: content.QUESTION_TYPES, _panelPresets: recruit.presetList(), _languages: LANGUAGES });
         case 'content-history': return json(await content.contentHistory(S.store));
         case 'team': return json(await admin.listMembers(S.store));
@@ -215,6 +215,11 @@ export async function handle(req, { getStore, env, now }) {
             await admin.audit(S.store, who, 'survey.import_preview', `survey import previewed: ${r.report.detected}, ${r.report.counts.questions} questions${r.report.filename ? ' (' + r.report.filename.replace(/[^\w. -]/g, '').slice(0, 60) + ')' : ''}`);
             return json(r);
           } catch (e) { if (e instanceof ImportError) return json({ error: 'import_failed', hint: e.userMessage }, 400); throw e; }
+        }
+        case 'structure-reset': {
+          const r = await content.resetStructure(S.store);
+          if (r.ok) await admin.audit(S.store, who, 'structure.reset', `structure unlocked${r.slots ? `, ${r.slots} allocation slots cleared` : ''}`);
+          return reply(r);
         }
         case 'content-restore': {
           const r = await content.restoreContent(S.store, type, Number(body.version), who.name);

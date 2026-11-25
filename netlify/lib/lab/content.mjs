@@ -10,6 +10,7 @@ import { quotaDefaults, validateQuota } from './quota.mjs';
 import { environmentDefaults, validateEnvironment } from './envcheck.mjs';
 import { validateLatin } from './latin.mjs';
 import { EXTRA_TYPES, validateExtra } from './questiontypes.mjs';
+import { getMany, deleteKeys } from './store.mjs';
 
 // Screen text used by the shared participant app (types add or override fields).
 export const ENGINE_TEXT = [
@@ -376,8 +377,19 @@ export async function saveContent(store, type, next, who, baseVersion, now = Dat
   normalize(clean, type);
   const errors = validateContent(clean, type);
   if (errors.length) return { error: 'invalid', status: 400, errors };
+  // Adding builder switches how a study assigns arms (at session 1, from the block list), so it is refused once a
+  // real participant exists. Only a hand-edited save can reach this; it is the one save that lists participants.
+  if (clean.builder && !cur.builder && await hasRealParticipant(store)) return { error: 'structure_locked', status: 409, hint: 'This study already has real participants, so it cannot be switched to the builder.' };
+  // The structure lock: once real participants have signed up, the parts of a builder study that assignment depends on
+  // are frozen. Checked when either version has builder, so removing the key is caught too.
+  let afterLock = false;
+  if (type.structureOf && (cur.builder || clean.builder) && await store.get('lock/structure')) {
+    const a = type.structureOf(cur), b = type.structureOf(clean);
+    if (JSON.stringify(a) !== JSON.stringify(b)) return { error: 'structure_locked', status: 409, fields: changedParts(a, b), hint: STRUCTURE_LOCKED_HINT };
+    afterLock = true;
+  }
   const version = (cur.version || 0) + 1;
-  const saved = { version, savedAt: now, savedBy: who, ...clean };
+  const saved = { version, savedAt: now, savedBy: who, ...(afterLock ? { afterLock: true } : {}), ...clean };
   const hk = `content/history/v${String(version).padStart(5, '0')}`;
   if (store.setIf) { if (!(await store.setIf(hk, saved, { onlyIfNew: true }))) return { error: 'conflict', status: 409, version }; }
   else await store.set(hk, saved);
@@ -386,10 +398,28 @@ export async function saveContent(store, type, next, who, baseVersion, now = Dat
   return { ok: true, version };
 }
 
+export const STRUCTURE_LOCKED_HINT = 'Arms, sessions, task blocks and arm-only questions are locked because real participants have signed up. Wording, media and shared questions can still change.';
+const changedParts = (a, b) => { a = a || {}; b = b || {}; return [...new Set(Object.keys(a).concat(Object.keys(b)))].filter(k => JSON.stringify(a[k]) !== JSON.stringify(b[k])); };
+
+// The owner's way out of a lock set by mistake: only once every real participant record has been deleted.
+export async function resetStructure(store) {
+  if (await hasRealParticipant(store)) return { error: 'real_participants', status: 409, hint: 'Real participants are still signed up. The structure can only be unlocked once every real participant has been deleted.' };
+  const slots = (await Promise.all(['alloc-arm/', 'alloc-arm-test/'].map(p => store.list(p)))).flat();
+  const had = !!(await store.get('lock/structure'));
+  await deleteKeys(store, slots.concat(['lock/structure']));
+  return { ok: true, wasLocked: had, slots: slots.length };
+}
+
+export async function hasRealParticipant(store) {
+  const keys = await store.list('participants/');
+  for (let i = 0; i < keys.length; i += 40) if ((await getMany(store, keys.slice(i, i + 40))).some(([, p]) => p && !p.test)) return true;
+  return false;
+}
+
 export async function contentHistory(store) {
   const keys = (await store.list('content/history/')).sort().reverse();
   const vals = await Promise.all(keys.slice(0, 100).map(k => store.get(k)));
-  return vals.filter(Boolean).map(c => ({ version: c.version, savedAt: c.savedAt, savedBy: c.savedBy, restoredFrom: c.restoredFrom ?? null }));
+  return vals.filter(Boolean).map(c => ({ version: c.version, savedAt: c.savedAt, savedBy: c.savedBy, restoredFrom: c.restoredFrom ?? null, ...(c.afterLock ? { afterLock: true } : {}) }));
 }
 
 export async function restoreContent(store, type, version, who, now = Date.now()) {

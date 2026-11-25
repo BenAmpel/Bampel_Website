@@ -32,7 +32,10 @@ export async function allocate(S, p, c) {
   if (!list) return null;
   const prefix = p.test ? 'alloc-arm-test/' : 'alloc-arm/';
   for (let k = (await S.store.list(prefix)).length; k < list.length; k++) {
-    if (await setNew(S.store, `${prefix}${String(k).padStart(6, '0')}`, { code: p.code, arm: list[k], at: Date.now() })) return list[k];
+    const key = `${prefix}${String(k).padStart(6, '0')}`;
+    // Read the slot back: where conditional writes are not atomic (seen on live Netlify), two people can both
+    // "win" the same slot; only the one whose code is stored keeps it, the other moves on to the next slot.
+    if (await setNew(S.store, key, { code: p.code, arm: list[k], at: Date.now() })) { const got = await S.store.get(key); if (!got || got.code === p.code) return list[k]; }
   }
   return null;   // the list is used up: fall back to the platform's own assignment
 }

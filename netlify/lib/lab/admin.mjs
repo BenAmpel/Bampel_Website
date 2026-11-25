@@ -20,11 +20,11 @@ const sha = s => createHash('sha256').update(s).digest('hex');
 export async function authAdmin(store, key, ownerKey, now = Date.now(), ctx = {}) {
   if (ctx.account) {
     const a = ctx.account, role = a.labOwner ? 'owner' : (ctx.studyId && a.studyRoles && Object.hasOwn(a.studyRoles, ctx.studyId) ? a.studyRoles[ctx.studyId] : null);
-    return role && ROLES.includes(role) ? { id: 'account', name: a.name, role, accountId: a.id } : null;
+    return role && ROLES.includes(role) ? { id: 'account', name: a.name, role, accountId: a.id, labOwner: !!a.labOwner } : null;
   }
   key = String(key || '');
   if (!key) return null;
-  if (ownerKey && ownerKey.length >= 16 && key.length === ownerKey.length && timingSafeEqual(Buffer.from(key), Buffer.from(ownerKey))) return { id: 'owner', name: 'Owner', role: 'owner' };
+  if (ownerKey && ownerKey.length >= 16 && key.length === ownerKey.length && timingSafeEqual(Buffer.from(key), Buffer.from(ownerKey))) return { id: 'owner', name: 'Owner', role: 'owner', labOwner: true };
   if (!/^vca_[A-Za-z0-9_-]{32}$/.test(key)) return null;
   const id = sha(key);
   const m = await store.get(`admins/${id}`);

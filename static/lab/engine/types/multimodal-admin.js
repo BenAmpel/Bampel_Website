@@ -263,13 +263,39 @@
     });
   }
 
+  // The Builder tab (builder.js) is offered for a builder study only when the canvas can draw it exactly; otherwise the
+  // study opens in the form tabs with a note, and the paths that differ go to the console for whoever debugs it.
+  var FORM_TABS = [['design', 'Arms & blocks'], ['items', 'Items'], ['decision', 'Decision & directory'], ['questions', 'Item questions']];
+  function canvasFits(c) { return !!(c && c.builder && window.LabBuilderModel && window.LabBuilderModel.roundTrips(c).ok); }
+  var warned = null;
+  function builderNote(A) {
+    var c = A.draft; if (!c.builder || !window.LabBuilderModel) return '';
+    var rt = window.LabBuilderModel.roundTrips(c); if (rt.ok) return '';
+    if (warned !== rt.paths.join()) { warned = rt.paths.join(); if (window.console) console.warn('Study builder: the canvas cannot show this study exactly; it differs at', rt.paths); }
+    return '<div class="warn">This study opened in the form editor because the canvas cannot show it exactly.</div>';
+  }
+  function mountBuilder(A) {
+    var host = document.getElementById('builder'); if (!host) return;
+    if (!document.querySelector('link[href="/lab/engine/builder.css"]')) { var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = '/lab/engine/builder.css'; document.head.appendChild(l); }
+    (window.LabBuilder ? Promise.resolve(true) : A.loadScript('/lab/engine/builder.js')).then(function (ok) {
+      if (!host.isConnected) return;
+      if (!ok || !window.LabBuilder) { host.innerHTML = '<p class="error">The builder could not be loaded. Use the Arms & blocks tab.</p>'; return; }
+      window.LabBuilder.mount(host, { draft: A.draft, esc: A.esc, readOnly: !A.can('editor'), locked: A.locked, kinds: KINDS,
+        onChange: A.markDirty, newItem: blankItem, newQuestion: A.newQuestion,
+        editItem: function (id) { itemSel = id; A.goto('items'); } });
+    });
+  }
+
   LabAdmin.registerType('multimodal', {
-    subtabs: [['design', 'Arms & blocks'], ['items', 'Items'], ['decision', 'Decision & directory'], ['questions', 'Item questions']],
+    scripts: ['/lab/engine/builder-model.js'],
+    subtabs: function (c) { return canvasFits(c) ? [['builder', 'Builder']].concat(FORM_TABS) : FORM_TABS; },
     conditions: conds,
     tabs: [{ id: 'recordings', label: 'Recordings & calls', role: 'viewer', render: recordingsTab }],
+    afterRender: function (sub, A) { if (sub === 'builder') mountBuilder(A); },
     onLoad: function (A) { if (!itemById(A, itemSel)) itemSel = (items(A)[0] || { id: 'practice' }).id; },
     render: function (sub, A) {
-      if (sub === 'design') return renderDesign(A);
+      if (sub === 'builder') return '<div id="builder"><p class="muted">Loading the builder…</p></div>';
+      if (sub === 'design') return builderNote(A) + renderDesign(A);
       if (sub === 'items') return renderItems(A);
       if (sub === 'decision') return renderDecision(A);
       return '<p class="muted">Questions an item can ask after its stimulus (choose which on the Items tab). Tick arms to ask a question only in those arms. The variable name becomes the column <code>a_&lt;name&gt;</code>.</p>' +

@@ -665,8 +665,10 @@ const adminRoutes = {
     return { csv: lines.join('\n') + (lines.length ? '\n' : ''), filename: `${S.study.id}_prolific_bonus.csv` };
   } },
   // The permuted-block allocation list fixed by the seed (for the preregistration), with the slots already used.
-  'allocation.csv': { need: 'viewer', handler: async S => {
+  // For a builder study the list says which arm the next sign-up gets, so only lab owners may read it (blinding).
+  'allocation.csv': { need: 'viewer', handler: async (S, { who } = {}) => {
     const c = await getContent(S.store, S.type), list = X.allocationList(c);
+    if (c.builder && !(who && who.labOwner)) return { error: 'lab_owner_only', status: 403, hint: 'The allocation list of a builder study is open to lab owners only, so the team stays blind to the next arm.' };
     if (!list) return { error: 'no_block_randomization', status: 400 };
     const used = new Set((await S.store.list('alloc-arm/')).map(k => Number(k.slice(10))));
     const size = c.design.randomization.blockSize, rows = list.map((arm, k) => ({ slot: k + 1, block: Math.floor(k / size) + 1, arm, used: used.has(k) ? 1 : 0 }));
@@ -682,7 +684,7 @@ export default {
   id: 'multimodal',
   label: 'Media, voice, and conversations (multimodal)',
   description: 'Text, images, audio and video clips, and phone calls with an AI voice caller, in blocks shown in order or shuffled, with per-condition wording and media. Each item can ask for a mouse-tracked decision, any questions, and a spoken answer. Records play behavior, decision paths, answer changes, call transcripts, and (with consent) participant audio.',
-  contentKeys: ['design', 'items', 'practice', 'questions', 'decision', 'directory', 'screening', 'persona', 'clipLibrary', 'shift', 'payoff', 'pilot', 'debrief'],
+  contentKeys: ['design', 'items', 'practice', 'questions', 'decision', 'directory', 'screening', 'persona', 'clipLibrary', 'shift', 'payoff', 'pilot', 'debrief', 'builder'],
   textFields,
   surveyRules: [],
   conditionsOf: c => (c.design?.conditions || []).map(x => x.id),
@@ -690,6 +692,20 @@ export default {
   assignAtSession: c => c.design?.assignAtSession || 1,
   assignFlags: X.assignFlags,
   allocate: X.allocate,
+  // Studies built on the canvas (content.builder) take their arm from the block list when session 1 starts.
+  deferAssignment: c => !!(c && c.builder),
+  // The structure a builder study's assignment depends on (docs/designs/study-builder.md, Technical Plan item 6).
+  // Once real participants exist, saveContent refuses any save that changes it. Blocks have no id: a block is its
+  // position in the session, with its items (and pool). null for studies not built on the canvas: they never lock.
+  structureOf: c => {
+    if (!c || !c.builder) return null;
+    const d = c.design || {}, r = d.randomization || {};
+    const armOnly = qs => (Array.isArray(qs) ? qs : []).filter(q => q && Array.isArray(q.conditions) && q.conditions.length).map(q => [q.id, q.conditions]);
+    return { v: c.builder.v ?? null, arms: (d.conditions || []).map(x => x.id), assignAt: d.assignAtSession || 1,
+      sessions: (d.sessions || []).map(s => (s.blocks || []).map(b => [b.items || [], b.pool || null])),
+      armOnly: { pre: armOnly(c.survey && c.survey.pre), post: armOnly(c.survey && c.survey.post) },
+      randomization: [r.method || null, r.blockSize ?? null, r.seed ?? null] };
+  },
   publicContent: c => ({ continuous: !!c.design?.continuous, noSoundCheck: !!c.design?.noSoundCheck, debrief: c.debrief && c.debrief.body ? { title: c.debrief.title || 'About this study', body: c.debrief.body } : null }),
   // Engine hooks: eligibility answers (start-of-session survey) and failed equipment checks end the study.
   screenSurvey(c, kind, session, answers) {
@@ -782,6 +798,14 @@ export default {
     const rz = d && d.randomization;
     if (rz && (rz.method !== 'blocks' || !int(rz.blockSize, d.conditions.length, 100) || rz.blockSize % d.conditions.length || !str(String(rz.seed || ''), 80)))
       e.push(`Permuted blocks need a block size that is a multiple of the ${d.conditions.length} arms, and a seed.`);
+    // Builder studies (docs/designs/study-builder.md, Phase 5): what the canvas can run in v1.
+    if (c.builder) {
+      const nA = d && Array.isArray(d.conditions) ? d.conditions.length : 0, q = c.enrollment && c.enrollment.quota;
+      if (!rz || rz.method !== 'blocks') e.push('Builder studies assign arms in blocks.');
+      else if (!Number.isInteger(rz.blockSize) || !nA || rz.blockSize % nA || rz.blockSize < 2 * nA) e.push('The block size must be a multiple of the number of arms, at least twice it.');
+      if (q && (q.total != null || Object.values(q.perCondition || {}).some(v => v != null))) e.push('Builder studies cannot cap sign-ups yet; remove the quota.');
+      if (JSON.stringify(c.builder) !== '{"v":1}') e.push('This study was saved by a newer builder; open it in the form editor.');
+    }
     if (d && d.assignAtSession > 1) {
       const early = d.sessions.slice(0, d.assignAtSession - 1).flatMap(s => s.blocks.flatMap(b => b.items));
       const armed = (c.items || []).filter(it => early.includes(it.id) && Object.keys(it.variants || {}).length).map(it => it.id);

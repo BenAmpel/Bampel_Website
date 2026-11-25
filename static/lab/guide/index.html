@@ -43,7 +43,7 @@
 <p class="muted">Both email links open your own email app with a prepared message. Messages go to the lab director's university inbox (bampel@gsu.edu). Nothing is sent from this page, and the lab does not store what you write.</p>
 
 <nav class="toc" aria-label="On this page"><strong>On this page</strong><ol>
-<li><a href="#what">What the lab is</a></li><li><a href="#local">Run it on your computer</a></li><li><a href="#access">Getting access</a></li><li><a href="#create">Creating a study</a></li><li><a href="#types">Study types</a></li><li><a href="#media">Audio, video, and phone calls</a></li>
+<li><a href="#what">What the lab is</a></li><li><a href="#local">Run it on your computer</a></li><li><a href="#access">Getting access</a></li><li><a href="#create">Creating a study</a></li><li><a href="#types">Study types</a></li><li><a href="#builder">The study builder</a></li><li><a href="#media">Audio, video, and phone calls</a></li>
 <li><a href="#panels">Recruiting from Prolific, SONA, MTurk, or CloudResearch</a></li><li><a href="#timing">Timing-critical studies</a></li><li><a href="#import">Importing a survey</a></li><li><a href="#games">Running economic games</a></li><li><a href="#pilot">Piloting</a></li><li><a href="#export">Exports and codebooks</a></li>
 <li><a href="#irb">IRB and data checklist</a></li><li><a href="#faq">Questions</a></li></ol></nav>
 
@@ -116,6 +116,29 @@
 
 <h3 id="media-voice-and-conversations">Media, voice, and conversations</h3>
 <p>Items of five kinds, mixed freely: text (for example training material), an image, an audio clip, a video clip, or a <strong>phone call</strong> from an AI voice caller. After each item you can ask for a decision (for example accept, verify, or refuse) with mouse tracking, any of your questions, and a spoken answer. Items are grouped into blocks that run in order, each shown in a fixed or shuffled order. See <a href="#media">Audio, video, and phone calls</a>.</p>
+
+<h2 id="builder">The study builder</h2>
+<p>The <em>Two arms, shared final survey (builder)</em> template gives you a canvas instead of forms. Open the study, go to <strong>Study content</strong>, and the <strong>Builder</strong> tab shows the whole design on one screen: the arms along the top and one column per session.</p>
+<ol>
+<li><strong>Arms.</strong> Name each arm in its box; add or remove arms with the buttons (two to six). Every arm gets the same number of people.</li>
+<li><strong>Sessions.</strong> Each column is one session, with the questions asked at the start, the task blocks, and the questions asked at the end. Press <em>Add a session</em> for another.</li>
+<li><strong>Questions.</strong> Type a new question in the box under a list, or choose one from <em>Add an existing question…</em>. Drag a question to move it, or use the arrow buttons. Change <em>Every arm</em> to <em>Only</em> an arm to ask it of part of the sample.</li>
+<li><strong>What differs by arm.</strong> Open <em>Differs by arm</em> on a task item to give each arm its own prompt, text, clip or image description. This is your manipulation.</li>
+<li><strong>Save.</strong> Nothing is stored until you press Save. Before you invite anyone, use <em>Preview as a participant</em> once for each arm.</li>
+</ol>
+<p>Participants get their arm when they start the assignment session (session 1 unless you choose a later one), from a list fixed when the study was made. Only lab owners can download that list, so the rest of the team cannot tell which arm the next person will get.</p>
+<h3 id="builder-lock">When the design locks</h3>
+<p>As soon as one real participant signs up (test participants do not count), the arms, sessions, task blocks, assignment session and arm-only questions are fixed, so everyone already assigned stays in a design that still exists. You can keep fixing wording, titles and what differs by arm. If every real sign-up was a mistake, an owner deletes those participants and then presses <em>Unlock the structure</em> in the note at the top of Study content.</p>
+<h3 id="builder-words">Words used on the canvas</h3>
+<dl>
+<dt>Arm</dt><dd>One version of the study. Each participant sees exactly one arm.</dd>
+<dt>Session</dt><dd>One visit. A study can have several, days or weeks apart.</dd>
+<dt>Block</dt><dd>A group of task items shown together, in order or shuffled.</dd>
+<dt>Assignment</dt><dd>The moment a participant gets an arm: the start of the assignment session.</dd>
+<dt>Block size</dt><dd>How many sign-ups it takes for every arm to be used equally. It is a multiple of the number of arms.</dd>
+<dt>Lock</dt><dd>The point after which the design can no longer change shape, only wording.</dd>
+<dt>Differs by arm</dt><dd>A prompt, text, clip or description that each arm sees in its own version.</dd>
+</dl>
 
 <h2 id="media">Audio, video, and phone calls</h2>
 <ol>

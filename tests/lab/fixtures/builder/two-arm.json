@@ -1,0 +1,337 @@
+{
+  "version": 0,
+  "embedded": [],
+  "minutesPerSession": 8,
+  "consent": {
+    "approved": false,
+    "paragraphs": [
+      "[Paste the IRB-approved consent text here. Leave a blank line between paragraphs.]"
+    ],
+    "agreeLabel": "I am 18 or older and I agree to participate."
+  },
+  "enrollment": {
+    "open": true,
+    "domains": [
+      "gsu.edu",
+      "student.gsu.edu"
+    ],
+    "gapDays": 0,
+    "label": "self-signup",
+    "panel": {
+      "enabled": false,
+      "param": "PROLIFIC_PID",
+      "completionUrl": "",
+      "screenOutUrl": "",
+      "label": "panel",
+      "preset": "custom",
+      "studyParam": "",
+      "sessionParam": "",
+      "redirectUrl": "",
+      "completionCode": "",
+      "screenOutCode": "",
+      "returnCode": ""
+    },
+    "quota": {
+      "total": null,
+      "perCondition": {}
+    }
+  },
+  "survey": {
+    "pre": [
+      {
+        "id": "work_email",
+        "text": "How many work emails do you get on a typical day?",
+        "type": "number",
+        "required": false,
+        "showIf": "always",
+        "conditions": [],
+        "sessions": [
+          1
+        ]
+      }
+    ],
+    "post": [
+      {
+        "id": "final_thoughts",
+        "text": "Is there anything else you want to tell us about these messages?",
+        "type": "text",
+        "required": false,
+        "showIf": "always",
+        "conditions": [],
+        "sessions": [
+          2
+        ]
+      }
+    ]
+  },
+  "environment": {
+    "preload": false,
+    "fullscreen": false,
+    "desktopOnly": false,
+    "speechBrowser": false,
+    "micCheck": false,
+    "micRequired": false,
+    "headphoneCheck": false,
+    "headphoneFail": "record",
+    "timingCheck": false,
+    "language": "en-US"
+  },
+  "builder": {
+    "v": 1
+  },
+  "design": {
+    "conditions": [
+      {
+        "id": "control",
+        "label": "Control"
+      },
+      {
+        "id": "treatment",
+        "label": "Treatment"
+      }
+    ],
+    "assignAtSession": 1,
+    "practice": false,
+    "randomization": {
+      "method": "blocks",
+      "blockSize": 4,
+      "seed": "builder"
+    },
+    "sessions": [
+      {
+        "blocks": [
+          {
+            "title": "Task",
+            "items": [
+              "msg-1"
+            ],
+            "randomize": false
+          }
+        ]
+      },
+      {
+        "blocks": [
+          {
+            "title": "Task",
+            "items": [
+              "msg-2"
+            ],
+            "randomize": false
+          }
+        ]
+      }
+    ]
+  },
+  "decision": {
+    "prompt": "Would you trust this message?",
+    "options": [
+      {
+        "value": "trust",
+        "label": "Trust it"
+      },
+      {
+        "value": "distrust",
+        "label": "Do not trust it"
+      }
+    ],
+    "mouseTracking": false
+  },
+  "directory": [],
+  "items": [
+    {
+      "id": "msg-1",
+      "title": "A message",
+      "kind": "text",
+      "body": "Your manager writes: \"Please buy three gift cards for a client and send me the codes today.\"",
+      "media": "",
+      "mediaAlt": "",
+      "transcript": "",
+      "decide": true,
+      "ask": [
+        "confidence"
+      ],
+      "variants": {
+        "treatment": {
+          "body": "Your manager writes: \"Please buy three gift cards for a client and send me the codes today.\" [External sender: this message came from outside your organization.]"
+        }
+      }
+    },
+    {
+      "id": "msg-2",
+      "title": "Another message",
+      "kind": "text",
+      "body": "IT support writes: \"Your password expires today. Reply with your current password to keep your account.\"",
+      "media": "",
+      "mediaAlt": "",
+      "transcript": "",
+      "decide": true,
+      "ask": [
+        "confidence"
+      ],
+      "variants": {}
+    }
+  ],
+  "practice": null,
+  "questions": [
+    {
+      "id": "confidence",
+      "text": "How confident are you?",
+      "type": "scale",
+      "required": true,
+      "showIf": "always",
+      "conditions": [],
+      "n": 7,
+      "lo": "Not at all",
+      "hi": "Completely",
+      "labels": [
+        "Not at all",
+        "Slightly",
+        "Somewhat",
+        "Moderately",
+        "Quite",
+        "Very",
+        "Completely"
+      ]
+    }
+  ],
+  "text": {
+    "login_title": "Research study",
+    "login_intro": "Enter your GSU email address. Use the same email each session so your sessions stay together and your participation is recorded.",
+    "confirm_title": "Is this your email?",
+    "confirm_body": "You are starting the study as {email}. Use this same address every time. If it has a typo, change it now.",
+    "confirm_yes": "Yes, that is my email",
+    "confirm_no": "Change email",
+    "consent_title": "Consent to participate",
+    "decline_body": "You have chosen not to take part. You can close this page.",
+    "start_title": "Session {session} of {total}",
+    "start_body": "This session takes about {minutes} minutes. Please complete it in one sitting, somewhere you will not be interrupted.\n\nIf you get disconnected, sign in again and you will pick up where you left off.",
+    "start_button": "Start session {session}",
+    "progress_done": "You have completed {completed} of {total} sessions.",
+    "wait_title": "Your next session is not open yet",
+    "wait_body": "Session {session} opens on {date}. Come back then and sign in the same way.",
+    "instr_title": "How this session works",
+    "instr_intro": "You will go through {n} short items: some to read, some to listen to or watch, and possibly a phone call. Take each one as it comes and answer the questions after it.",
+    "instr_practice": "You will start with one practice item that does not count.",
+    "begin_button": "Begin",
+    "progress_trial": "Session {session} · Item {i} of {n}",
+    "progress_practice": "Practice item",
+    "submit_button": "Continue",
+    "practice_submit": "Finish practice",
+    "conf_help": "Click or tap anywhere on the line to set your answer. You can adjust it before you continue.",
+    "conf_low": "0",
+    "conf_high": "100",
+    "conf_needed": "Set your answer on the line to continue.",
+    "practice_done_title": "Practice complete",
+    "practice_done_body": "The real items start now. They will look the same as the practice item.",
+    "practice_done_button": "Start",
+    "pre_title": "A few questions about you",
+    "post_title": "About this session",
+    "continue_button": "Continue",
+    "survey_page": "Page {i} of {n}",
+    "number_invalid": "Enter a number using digits only (for example 25).",
+    "skip_prompt": "You left {n} question(s) unanswered. Your answers help the study, but you can continue without them.",
+    "skip_continue": "Continue anyway",
+    "required_prompt": "Please answer the highlighted question(s) to continue.",
+    "done_title": "Session complete",
+    "done_body": "Thank you. Your answers are saved.",
+    "done_next": "Your next session opens on {date}. Sign in the same way.",
+    "finished_title": "Thank you",
+    "finished_body": "You have completed all sessions of the study. You can close this page.",
+    "calendar_button": "Add the next session to my calendar",
+    "sign_out": "Sign out",
+    "preload_title": "Getting the study ready",
+    "preload_body": "Loading the pictures and sounds for this session, so everything plays without delay.",
+    "preload_progress": "Loaded {i} of {n} files",
+    "preload_failed_title": "Some files did not load",
+    "preload_failed_body": "{n} file(s) could not be loaded. Check your internet connection, then try again.",
+    "preload_retry": "Try again",
+    "preload_continue": "Continue anyway",
+    "screenout_title": "Thank you for your interest",
+    "screenout_body": "Unfortunately you are not able to take part in this study. Please return to Prolific using the button below. Thank you for your time.",
+    "full_title": "This study is full",
+    "full_body": "Thank you for your interest. Enough people have already taken part, so the study is closed to new participants.",
+    "check_title": "Check your setup",
+    "check_body": "Before the session starts, a short check makes sure your computer is ready for this study.",
+    "check_desktop": "This study needs a laptop or desktop computer with a mouse or trackpad. Please open the study link again on a computer.",
+    "check_speech": "This study needs a browser that understands speech: Google Chrome or Microsoft Edge on a computer. Please open the study link again in one of them.",
+    "mic_check_title": "Check your microphone",
+    "mic_check_body": "Click Start, allow the microphone if your browser asks, then say a few words out loud, such as your favorite color. The bar moves when we hear you.",
+    "mic_check_start": "Start",
+    "mic_check_ok": "We can hear you.",
+    "mic_check_fail": "We could not hear your microphone. Check that it is plugged in and allowed for this page, then try again.",
+    "hp_title": "Check your headphones",
+    "hp_body": "Put on your headphones. You will hear three tones. Choose the one that is quietest. There are {n} rounds.",
+    "hp_play": "Play the tones",
+    "hp_question": "Which noise had the faint tone?",
+    "hp_fail": "It seems you are not wearing headphones, or the tone was hard to hear.",
+    "timing_wait": "Measuring your screen. This takes a few seconds; please keep this page in front.",
+    "fs_title": "This study uses the full screen",
+    "fs_body": "Click the button to switch to full screen. Please stay in full screen until the end of the session.",
+    "fs_button": "Switch to full screen",
+    "fs_back": "Return to full screen",
+    "handoff_code": "Your code for this study:",
+    "handoff_button": "Return to {panel}",
+    "stop_link": "I want to stop taking part",
+    "stop_title": "Stop taking part?",
+    "stop_body": "You can stop at any time without giving a reason. Answers you have already given are kept unless you ask the research team to delete them.",
+    "stop_keep": "Keep going",
+    "stop_confirm": "Stop taking part",
+    "returned_title": "You have stopped taking part",
+    "returned_body": "Thank you for your time. You can close this page.",
+    "start_body_panel": "This session takes about {minutes} minutes. Please complete it in one sitting, somewhere you will not be interrupted.\n\nIf you get disconnected, open the study link in {panel} again and you will pick up where you left off.",
+    "finished_body_panel": "You have completed all sessions of the study. Click the button below to return to {panel}, so your participation is recorded. If {panel} asks for a code, copy the one shown here.",
+    "finished_body_panel_code": "You have completed all sessions of the study. Copy the code below and enter it in {panel}, so your participation is recorded.",
+    "finished_body_panel_wait": "You have completed all sessions of the study. How to record your participation in {panel} appears below in a moment.",
+    "finished_body_panel_none": "You have completed all sessions of the study. Thank you. There is no code to enter: the research team records your participation.",
+    "consent_draft_banner": "Draft consent text, pending IRB approval. Do not enroll participants with this version.",
+    "play_button": "Play",
+    "pause_button": "Pause",
+    "replay_button": "Play again",
+    "plays_left": "{n} play(s) left",
+    "media_wait": "Listen to the whole clip before answering.",
+    "transcript_label": "Show transcript",
+    "decision_start": "Start",
+    "decision_hint": "Click Start, then choose your answer.",
+    "call_incoming": "Incoming call",
+    "call_answer": "Answer",
+    "call_decline": "Decline",
+    "call_hangup": "Hang up",
+    "call_hold": "Hold",
+    "call_resume": "Resume",
+    "call_talk": "Tap to talk",
+    "call_listening": "Listening… tap again when you are done",
+    "call_type_label": "Or type what you would say",
+    "call_send": "Say it",
+    "call_ended": "Call ended",
+    "call_missed": "Missed call",
+    "call_captions": "Captions",
+    "call_recording": "This call is being recorded for the study.",
+    "directory_title": "Phone directory",
+    "directory_call": "Call",
+    "directory_open": "Look up a number",
+    "voice_record": "Record your answer",
+    "voice_stop": "Stop recording",
+    "voice_redo": "Record again",
+    "voice_typed": "Type your answer instead",
+    "mic_title": "Check your sound",
+    "mic_body": "This study plays audio and may ask you to speak. Turn your volume up, then click Test sound. If you agreed to be recorded, your browser will ask to use your microphone: please allow it.",
+    "mic_only_body": "This study may record your spoken answers. If your browser asks to use your microphone, please allow it. The bar moves when we hear you.",
+    "mic_test": "Test sound",
+    "mic_ok": "Sound works, continue",
+    "mic_denied": "Your microphone is blocked, so you will type instead of speaking. That is fine.",
+    "hp_choose": "Which tone was the quietest?",
+    "word_body": "You will hear one word. After it plays, click Record, say the word out loud, then click Stop.",
+    "word_play": "Play the word",
+    "word_record": "Record",
+    "word_stop": "Stop",
+    "check_retry": "That did not work. Please check your headphones and microphone and try once more.",
+    "check_passed": "Thanks, that worked.",
+    "check_mic_needed": "This study needs your microphone. Please allow it in your browser and try again.",
+    "check_server_down": "Our speech system is not responding right now. You can continue.",
+    "continuous_title": "Before you begin",
+    "continuous_button": "Begin"
+  },
+  "screening": {
+    "rules": []
+  }
+}

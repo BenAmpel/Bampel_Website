@@ -2,6 +2,7 @@
 // Built-in studies are listed here; studies created on the lab admin page are stored in the
 // "lab-registry" Blobs store (studies/{id}). Each study has its own Blobs store for data and one for
 // its backup mirror, so studies never share participants or data.
+import { randomBytes } from 'node:crypto';
 import { TYPES } from './types/index.mjs';
 import { seed as dataQualitySeed } from './studies/data-quality.mjs';
 import { TEMPLATES } from './templates.mjs';
@@ -31,7 +32,9 @@ export const BUILT_IN = {
 // (a built-in study's seed, or the template it was created from).
 export function typeFor(study) {
   const t = TYPES[study.type], tpl = study.template && TEMPLATES[study.template];
-  const seed = study.seed || (tpl && tpl.type === study.type ? tpl.content : null);
+  let seed = study.seed || (tpl && tpl.type === study.type ? tpl.content : null);
+  // A study made from the builder template has its own allocation seed, so no two builder studies share a block list.
+  if (seed && !study.seed && study.allocSeed) { const base = seed; seed = () => { const c = base(); if (c.design && c.design.randomization) c.design.randomization.seed = study.allocSeed; return c; }; }
   return t && seed ? { ...t, defaultContent: seed } : t;
 }
 
@@ -68,7 +71,7 @@ export async function createStudy(registry, { id, name, type, description, templ
   if (!String(name || '').trim()) return { error: 'name_required', status: 400, hint: 'Give the study a name.' };
   const prefix = (id.replace(/[^a-z]/g, '') + 'xx').slice(0, 2).toUpperCase();
   const s = { id, name: String(name).trim().slice(0, 120), type, description: String(description || '').slice(0, 500),
-    storeName: `lab-${id}`, backupName: `lab-${id}-backup`, codePrefix: prefix, listed: false, createdAt: now, createdBy: who.name, ...(who.accountId ? { createdByAccount: who.accountId } : {}), ...(template ? { template } : {}) };
+    storeName: `lab-${id}`, backupName: `lab-${id}-backup`, codePrefix: prefix, listed: false, createdAt: now, createdBy: who.name, ...(who.accountId ? { createdByAccount: who.accountId } : {}), ...(template ? { template } : {}), ...(template === 'multimodal-builder' ? { allocSeed: randomBytes(9).toString('base64url') } : {}) };
   if (registry.setIf) { if (!(await registry.setIf(`studies/${id}`, s, { onlyIfNew: true }))) return { error: 'exists', status: 409 }; }
   else { if (await registry.get(`studies/${id}`)) return { error: 'exists', status: 409 }; await registry.set(`studies/${id}`, s); }
   return { ok: true, study: withPaths(s) };

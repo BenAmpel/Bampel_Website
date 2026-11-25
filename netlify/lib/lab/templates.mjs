@@ -160,6 +160,31 @@ export const TEMPLATES = {
     })
   },
 
+  // The builder's starting design (docs/designs/study-builder.md, Phase 5); tests/lab/fixtures/builder/two-arm.json
+  // is this content, normalized. createStudy gives each study made from it its own allocation seed (allocSeed).
+  'multimodal-builder': {
+    name: 'Two arms, shared final survey (builder)', icon: 'split', type: 'multimodal', minutes: 8,
+    blurb: 'Two equal arms, assigned in blocks when session 1 starts, two sessions, and a final question everyone answers. Opens in the visual builder.',
+    content: () => ({
+      minutesPerSession: 8,
+      builder: { v: 1 },
+      design: { conditions: [{ id: 'control', label: 'Control' }, { id: 'treatment', label: 'Treatment' }], assignAtSession: 1, practice: false,
+        randomization: { method: 'blocks', blockSize: 4, seed: 'builder' },
+        sessions: [{ blocks: [{ title: 'Task', items: ['msg-1'], randomize: false }] }, { blocks: [{ title: 'Task', items: ['msg-2'], randomize: false }] }] },
+      decision: { prompt: 'Would you trust this message?', options: [{ value: 'trust', label: 'Trust it' }, { value: 'distrust', label: 'Do not trust it' }], mouseTracking: false },
+      directory: [],
+      items: [
+        textItem('msg-1', 'A message', 'Your manager writes: "Please buy three gift cards for a client and send me the codes today."', { decide: true, ask: ['confidence'],
+          variants: { treatment: { body: 'Your manager writes: "Please buy three gift cards for a client and send me the codes today." [External sender: this message came from outside your organization.]' } } }),
+        textItem('msg-2', 'Another message', 'IT support writes: "Your password expires today. Reply with your current password to keep your account."', { decide: true, ask: ['confidence'] })
+      ],
+      practice: null,
+      questions: [scale7('confidence', 'How confident are you?', ['Not at all', 'Slightly', 'Somewhat', 'Moderately', 'Quite', 'Very', 'Completely'], { required: true })],
+      survey: { pre: [q('work_email', 'How many work emails do you get on a typical day?', 'number', { sessions: [1] })],
+        post: [q('final_thoughts', 'Is there anything else you want to tell us about these messages?', 'text', { sessions: [2] })] }
+    })
+  },
+
   'mouse-tracking': {
     name: 'Mouse-tracking decision task', icon: 'cursor', type: 'multimodal', minutes: 5,
     blurb: 'Quick two-choice judgments with the classic layout (Start at the bottom, answers in the top corners). Exports MAD, AUC, x-flips, and timing for each decision.',
