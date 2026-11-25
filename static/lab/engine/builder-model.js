@@ -148,10 +148,10 @@
       if (!(s.n < at)) return;
       var z = obj(s.zones);
       arr(z.task).forEach(function (b) { arr(b && b.items).forEach(function (id) {
-        if (Object.keys(obj(obj(cv.variants)[id])).length) no('before_assignment', '"' + id + '" is in session ' + s.n + ', before arms are assigned at session ' + at + ', so it cannot differ by arm.');
+        if (Object.keys(obj(obj(cv.variants)[id])).length) no('before_assignment', '"' + id + '" is in session ' + s.n + ', before arms are assigned at session ' + at + ', so it cannot differ by arm; empty its "Differs by arm" boxes first, or move it to session ' + at + ' or later.');
       }); });
       arr(z.start).concat(arr(z.end)).forEach(function (id) {
-        if (arr(obj(cv.armOnly)[id]).length) no('before_assignment', '"' + id + '" is in session ' + s.n + ', before arms are assigned at session ' + at + ', so it cannot be shown to one arm only.');
+        if (arr(obj(cv.armOnly)[id]).length) no('before_assignment', '"' + id + '" is in session ' + s.n + ', before arms are assigned at session ' + at + ', so it cannot be shown to one arm only; set it to "Every arm" first, or move it to session ' + at + ' or later.');
       });
     });
     return out;

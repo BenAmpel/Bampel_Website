@@ -97,6 +97,7 @@
     passcode: 'That study password is not right. Check it and try again.',
     too_many_tries: 'Too many wrong tries. Please wait 15 minutes and try again.',
     not_enrolled: 'That email can\'t be used for this study. Contact the research team if you think this is a mistake.',
+    not_open: 'This study is not open for sign-ups yet. Please check back later, or contact the research team.',
     expired: 'Your sign-in expired. Sign in again to pick up where you left off.',
     network: 'Could not reach the study server. Check your connection and try again.',
     seal_required: 'This study accepts answers only when they are encrypted in your browser, and this browser could not do that. Please use a current version of Chrome, Edge, Firefox, or Safari.',

@@ -238,8 +238,7 @@
         var desc = function () { $('roledesc').textContent = m.roles[$('trole').value]; }; $('trole').addEventListener('change', desc); desc();
         if (can('editor')) {
           $('previewbar').hidden = false;
-          $('pvcond').innerHTML = '<option value="">Any (balanced, as for real participants)</option>' + m.conditions.map(function (c) { return '<option value="' + esc(c) + '">' + esc(c) + '</option>'; }).join('');
-          $('pvcondwrap').hidden = m.conditions.length < 2;
+          armNames = m.armLabels || {}; fillPreviewArms(m.conditions);
         }
         $('selftest').textContent = 'Run self-test (' + (m.conditions.length === 1 ? 'one group' : 'all ' + m.conditions.length + ' groups') + ')';
         $('rpintro').innerHTML = plugin.reportIntro || 'How the items and sessions are performing, for tuning the study after a pilot.';
@@ -356,7 +355,7 @@
       if (show === 'test' && !p.test) return false;
       if (show === 'active' && (finished(p) || !p.inProgress)) return false;
       if (show === 'done' && !finished(p)) return false;
-      return !q || [p.code, p.label, p.condition, p.type].some(function (x) { return String(x || '').toLowerCase().indexOf(q) >= 0; });
+      return !q || [p.code, p.label, p.condition, armName(p.condition), p.type].some(function (x) { return String(x || '').toLowerCase().indexOf(q) >= 0; });
     });
     $('ptcount').textContent = rows.length === people.length ? people.length + ' shown' : rows.length + ' of ' + people.length + ' shown';
     var more = can('manager') || can('owner');
@@ -364,7 +363,7 @@
       var st = status(p);
       return '<tr' + (p.test ? ' class="is-test"' : '') + '><td><code>' + esc(p.code) + '</code>' + (p.test ? ' <span class="pill pt-test">Test</span>' : '') +
         '<div class="pt-sub">' + esc([p.type, p.label].filter(Boolean).join(' · ')) + (p.gapDays ? ' · ' + p.gapDays + '-day gap' : '') + '</div></td>' +
-        '<td><code>' + esc(p.condition) + '</code></td><td class="num">' + p.completedSessions + ' / ' + p.totalSessions + '</td>' +
+        '<td>' + armCell(p.condition) + '</td><td class="num">' + p.completedSessions + ' / ' + p.totalSessions + '</td>' +
         '<td>' + (st[0] ? '<span class="pt-st ' + st[1] + '">' + esc(st[0]) + '</span>' : '') + '</td><td class="pt-seen">' + esc(fmt(p.lastSeenAt)) + '</td>' +
         '<td class="pt-acts"><button type="button" class="secondary small" data-replay="' + esc(p.code) + '" aria-label="Replay ' + esc(p.code) + '\'s trials">Replay</button>' +
         (more ? '<details class="pt-menu pt-row"><summary class="btn small" aria-label="More for ' + esc(p.code) + '">⋯</summary><div class="pt-pop">' +
@@ -401,7 +400,7 @@
     var id = e.target.getAttribute && e.target.getAttribute('data-del'); if (!id) return;
     var p = people.filter(function (x) { return x.code === id; })[0] || {};
     if (!confirm('Permanently delete ' + id + (p.test ? ' (test)' : '') + ' and all of their answers and traces?' +
-      (p.test ? '' : '\n\nThis is a REAL participant. Only do this if they withdrew or asked for their data to be removed.') + '\n\nThis cannot be undone.')) return;
+      (p.test ? '' : '\n\nThis is a REAL participant. Only do this if they withdrew, asked for their data to be removed, or signed up by mistake (for example, while the study was being set up).') + '\n\nThis cannot be undone.')) return;
     postJSON('delete', { id: id }).then(function (r) { load(); setTimeout(function () { $('exprog').innerHTML = '<span class="ok">Deleted ' + esc(r.code) + ' and ' + r.records + ' records.</span>'; }, 600); }).catch(function (x) { err(x.message); });
   });
   // Figures (figures.js, with replay.js for reading traces), Analyze (analyze.js with stats.js), and Integrity
@@ -594,7 +593,16 @@
 
   // ---------- study content editor ----------
   // Engine parts (surveys, consent, screen text) are edited here; each study type adds its own tabs.
-  var saved = null, draft = null, dirty = false, sub = null, META = {};
+  // Arm names (from /me, refreshed from the content after each load). Shown as "Practice with feedback (arm3)".
+  var armNames = {};
+  function armName(id) { var l = armNames[id]; return l && l !== id ? l : ''; }
+  function armCell(id) { var l = armName(id); return id == null || id === '' ? '<span class="muted">not yet</span>' : (l ? esc(l) + ' ' : '') + '<code>' + esc(id) + '</code>'; }
+  function fillPreviewArms(ids) {
+    var cur = $('pvcond').value;
+    $('pvcond').innerHTML = '<option value="">Any (balanced, as for real participants)</option>' + ids.map(function (c) { var l = armName(c); return '<option value="' + esc(c) + '"' + (c === cur ? ' selected' : '') + '>' + esc(l ? l + ' (' + c + ')' : c) + '</option>'; }).join('');
+    $('pvcondwrap').hidden = ids.length < 2;
+  }
+  var saved = null, draft = null, dirty = false, sub = null, META = {}, flash = '';
   var QTYPE_LABEL = { scale: 'Rating scale', choice: 'Multiple choice', select: 'Dropdown', text: 'Text answer', confidence: 'Confidence line (0–100)', number: 'Number (typed in)', multi: 'Select all that apply', info: 'Descriptive text (no answer)', slider: 'Slider (no starting point)', rank: 'Ranking (put in order)', matrix: 'Matrix (several statements, same answers)' };
   var AGREE7 = ['Strongly disagree', 'Disagree', 'Somewhat disagree', 'Neither agree nor disagree', 'Somewhat agree', 'Agree', 'Strongly agree'];
   function setDirty(v) { dirty = v; $('dirty').innerHTML = v ? '<strong>Unsaved changes.</strong>' : 'No unsaved changes.'; $('save').disabled = !v; $('discard').disabled = !v; }
@@ -623,7 +631,13 @@
       A.counts = {}; res[2].forEach(function (p) { if (!p.test && p.condition) A.counts[p.condition] = (A.counts[p.condition] || 0) + 1; });   // for the quota boxes
       A.started = started;
       $('contentinfo').textContent = 'Current version: ' + (saved.version || 0) + (saved.version ? ', saved ' + fmt(saved.savedAt) + ' by ' + saved.savedBy : ' (the built-in defaults)') + '.' + (can('editor') ? '' : ' You can view the content but not change it.');
-      $('contentwarn').innerHTML = (A.locked ? '<div class="warn" id="lockwarn"><strong>Structure locked.</strong> Real participants have signed up, so the arms, sessions, task blocks, assignment session and arm-only questions are fixed. Wording, media and shared questions can still change.' +
+      if (saved.design && Array.isArray(saved.design.conditions) && can('editor')) {   // names may have changed (or arms been added) since the page loaded
+        armNames = {}; saved.design.conditions.forEach(function (x) { if (x && x.id && x.label) armNames[x.id] = x.label; });
+        fillPreviewArms(saved.design.conditions.map(function (x) { return x.id; }));
+      }
+      var shown = flash; flash = '';
+      $('contentwarn').innerHTML = (shown ? '<p class="ok" role="status">' + esc(shown) + '</p>' : '') +
+        (saved.builder && !(saved.consent && saved.consent.approved) ? '<div class="warn"><strong>Sign-ups are closed.</strong> The consent is not marked IRB-approved, so real people cannot sign up yet (one real sign-up would lock the structure). Previews still work. Mark the consent approved on the Sign-up &amp; consent tab when it is.</div>' : '') + (A.locked ? '<div class="warn" id="lockwarn"><strong>Structure locked.</strong> Real participants have signed up, so the arms, sessions, task blocks, assignment session, block size and arm-only questions are fixed. Wording, media and shared questions can still change.' +
         (can('owner') ? ' If every real sign-up was a mistake, delete those participants first, then <button type="button" class="secondary small" id="unlock">Unlock the structure…</button>' : ' Only an owner can unlock it, after every real participant is deleted.') + '</div>' : '') +
         (started ? '<div class="warn">' + started + ' real participant' + (started === 1 ? ' has' : 's have') + ' already started. Changes apply from each participant\'s next session (a session in progress keeps the plan it started with). Answers record the version they were collected under, and each answer keeps a copy of the item as shown. Changing the design mid-study makes sessions hard to compare, so check with the team first.</div>' : '');
       $('vtbl').innerHTML = '<tr><th>Version</th><th>Saved</th><th>By</th><th></th></tr>' + res[1].map(function (v) {
@@ -638,7 +652,7 @@
     if (!e.target.closest || !e.target.closest('#unlock')) return;
     if (dirty && !confirm('Unlocking reloads the content and drops your unsaved changes. Go on?')) return;
     if (!confirm('Unlock the structure? Arms, sessions and blocks can then change again, and the block list starts over from its first slot.')) return;
-    err(); postJSON('structure-reset', {}).then(function () { loadContent(true); $('say').textContent = 'The structure is unlocked.'; }).catch(function (x) { err(x.message); });
+    err(); postJSON('structure-reset', {}).then(function () { flash = 'Structure unlocked. Arms, sessions and blocks can change again, and the block list starts again from its first slot.'; loadContent(true); }).catch(function (x) { err(x.message); });
   });
   $('vtbl').addEventListener('click', function (e) {
     var v = e.target.getAttribute && e.target.getAttribute('data-restore'); if (v == null) return;

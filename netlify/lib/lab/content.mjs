@@ -398,7 +398,7 @@ export async function saveContent(store, type, next, who, baseVersion, now = Dat
   return { ok: true, version };
 }
 
-export const STRUCTURE_LOCKED_HINT = 'Arms, sessions, task blocks and arm-only questions are locked because real participants have signed up. Wording, media and shared questions can still change.';
+export const STRUCTURE_LOCKED_HINT = 'Arms, sessions, task blocks, the assignment session, the block size and arm-only questions are locked because real participants have signed up. Wording, media and shared questions can still change.';
 const changedParts = (a, b) => { a = a || {}; b = b || {}; return [...new Set(Object.keys(a).concat(Object.keys(b)))].filter(k => JSON.stringify(a[k]) !== JSON.stringify(b[k])); };
 
 // The owner's way out of a lock set by mistake: only once every real participant record has been deleted.

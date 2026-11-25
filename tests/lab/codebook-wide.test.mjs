@@ -63,7 +63,9 @@ assert.equal(armOnly.label, "'=SUM(1,2) Only in the first arm", 'a formula in a 
 assert.match(cb.find(x => x.column === 'devices').values, /any of \(\| separated\): phone = A phone; pc = A computer/);
 assert(!cb.some(x => x.column === 'note'), 'descriptive text has no column');
 assert.match(cb.find(x => x.column === 'ed_src').values, /link parameter SRC/);
-assert.equal(cb.find(x => x.column === 'condition' && x.file === 'trials').values, conds.join('; '));
+const armLabel = id => (c.design?.conditions || []).find(x => x.id === id)?.label;
+assert.equal(cb.find(x => x.column === 'condition' && x.file === 'trials').values, conds.map(id => armLabel(id) ? `${id} = ${armLabel(id)}` : id).join('; '), 'arm names are in the codebook');
+assert.match(cb.find(x => x.column === 'condition' && x.file === 'trials').values, / = /, 'this study names its arms');
 const itemQ = c.questions.find(q => q.type !== 'info');
 assert.equal(cb.find(x => x.column === 'a_' + itemQ.id).label, itemQ.text, 'per-item questions too');
 
