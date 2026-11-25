@@ -189,6 +189,167 @@
     return { ok: !paths.length, why: paths.length ? 'differs' : null, paths: paths };
   }
 
+  // ---------- edits ----------
+  // Each edit takes a canvas and returns a new one; the input is never changed. Every edit ends in canonical(), which
+  // draws the zones the way decompile would (start and end zones in survey order; an "every" question in each session
+  // it reaches), so after any edit the canvas equals decompile(compile(canvas, base)).
+  function kindOf(cv, id) { return cv.order.pre.indexOf(id) >= 0 ? 'pre' : cv.order.post.indexOf(id) >= 0 ? 'post' : null; }
+  function zoneOf(kind) { return kind === 'pre' ? 'start' : 'end'; }
+  function canonical(cv) {
+    var every = {}; cv.every = cv.every.filter(function (id) { return kindOf(cv, id); });
+    cv.every.forEach(function (id) { every[id] = true; });
+    ['pre', 'post'].forEach(function (kind) {
+      var z = zoneOf(kind), order = cv.order[kind];
+      cv.sessions.forEach(function (s) {
+        var here = {}; s.zones[z].forEach(function (id) { here[id] = true; });
+        s.zones[z] = order.filter(function (id) { return every[id] ? (kind === 'post' || s.n === 1) : here[id]; });
+      });
+    });
+    Object.keys(cv.armOnly).forEach(function (id) {
+      var keep = cv.armOnly[id].filter(function (a) { return cv.arms.some(function (x) { return x.id === a; }); });
+      if (!kindOf(cv, id) || !keep.length) delete cv.armOnly[id]; else cv.armOnly[id] = keep;
+    });
+    return cv;
+  }
+  function fitBlocks(cv) {
+    var n = cv.arms.length, b = cv.blockSize;
+    if (!(typeof b === 'number' && b % 1 === 0 && n && b % n === 0 && b >= 2 * n && b <= 100)) cv.blockSize = 2 * n;
+    return cv;
+  }
+  // A question drawn in a session because it was saved with sessions [] gets its sessions written out before the
+  // researcher changes one of them, so the change touches only that session.
+  function unEvery(cv, id) { cv.every = cv.every.filter(function (x) { return x !== id; }); }
+  function newArmId(cv) {
+    for (var k = cv.arms.length + 1; ; k++) { var id = 'arm' + k; if (!cv.arms.some(function (a) { return a.id === id; })) return id; }
+  }
+  var ops = {
+    addArm: function (canvas, label) {
+      var cv = clone(canvas), id = newArmId(cv);
+      cv.arms.push({ id: id, label: label || 'Arm ' + (cv.arms.length + 1) });
+      return fitBlocks(canonical(cv));
+    },
+    renameArm: function (canvas, id, label) {
+      var cv = clone(canvas); cv.arms.forEach(function (a) { if (a.id === id) a.label = label; }); return cv;
+    },
+    removeArm: function (canvas, id) {
+      var cv = clone(canvas);
+      cv.arms = cv.arms.filter(function (a) { return a.id !== id; });
+      Object.keys(cv.variants).forEach(function (it) {
+        Object.keys(cv.variants[it]).forEach(function (f) { delete cv.variants[it][f][id]; if (!Object.keys(cv.variants[it][f]).length) delete cv.variants[it][f]; });
+        if (!Object.keys(cv.variants[it]).length) delete cv.variants[it];
+      });
+      return fitBlocks(canonical(cv));
+    },
+    setAssignAt: function (canvas, n) { var cv = clone(canvas); cv.assignAt = n; return cv; },
+    setBlockSize: function (canvas, n) { var cv = clone(canvas); cv.blockSize = n; return cv; },
+    addSession: function (canvas) {
+      var cv = clone(canvas);
+      cv.sessions.push({ n: cv.sessions.length + 1, zones: { start: [], task: [{ title: '', items: [], randomize: false }], end: [] } });
+      return canonical(cv);
+    },
+    // Questions shown only in the removed session go with it; later sessions move up by one.
+    removeSession: function (canvas, n) {
+      var cv = clone(canvas), gone = cv.sessions[n - 1];
+      if (!gone || cv.sessions.length < 2) return cv;
+      cv.sessions.splice(n - 1, 1);
+      cv.sessions.forEach(function (s, i) { s.n = i + 1; });
+      ['pre', 'post'].forEach(function (kind) {
+        var z = zoneOf(kind);
+        cv.order[kind] = cv.order[kind].filter(function (id) {
+          return cv.every.indexOf(id) >= 0 || cv.sessions.some(function (s) { return s.zones[z].indexOf(id) >= 0; });
+        });
+      });
+      if (cv.assignAt > cv.sessions.length) cv.assignAt = cv.sessions.length;
+      else if (cv.assignAt > n) cv.assignAt -= 1;
+      return canonical(cv);
+    },
+    // Puts question id into session n's start or end zone, just before the question `before` in that zone (or last).
+    // A question can sit in start zones or in end zones, not both: moving it across moves every placement.
+    placeQuestion: function (canvas, id, n, zone, before, fromN) {
+      var cv = clone(canvas), kind = zone === 'start' ? 'pre' : 'post', was = kindOf(cv, id), z = zoneOf(kind);
+      unEvery(cv, id);
+      if (was && was !== kind) {
+        cv.sessions.forEach(function (s) { var l = s.zones[zoneOf(was)]; if (l.indexOf(id) >= 0) l.splice(l.indexOf(id), 1); });
+        cv.order[was] = cv.order[was].filter(function (x) { return x !== id; });
+      } else if (fromN && fromN !== n) {
+        var fl = cv.sessions[fromN - 1].zones[z]; if (fl.indexOf(id) >= 0) fl.splice(fl.indexOf(id), 1);
+      }
+      var s = cv.sessions[n - 1], list = s.zones[z].filter(function (x) { return x !== id; });
+      var at = before && list.indexOf(before) >= 0 ? list.indexOf(before) : list.length;
+      list.splice(at, 0, id); s.zones[z] = list;
+      // Survey order is one list across sessions: put id next to its new neighbour in this zone.
+      var order = cv.order[kind].filter(function (x) { return x !== id; }), next = list[at + 1], prev = list[at - 1];
+      if (next != null && order.indexOf(next) >= 0) order.splice(order.indexOf(next), 0, id);
+      else if (prev != null && order.indexOf(prev) >= 0) order.splice(order.indexOf(prev) + 1, 0, id);
+      else order.push(id);
+      cv.order[kind] = order;
+      return canonical(cv);
+    },
+    // Takes a question out of one session. Its last placement deletes it from the survey (the caller confirms).
+    removeQuestion: function (canvas, id, n) {
+      var cv = clone(canvas), kind = kindOf(cv, id); if (!kind) return cv;
+      var z = zoneOf(kind);
+      unEvery(cv, id);
+      var l = cv.sessions[n - 1].zones[z]; if (l.indexOf(id) >= 0) l.splice(l.indexOf(id), 1);
+      if (!cv.sessions.some(function (s) { return s.zones[z].indexOf(id) >= 0; })) cv.order[kind] = cv.order[kind].filter(function (x) { return x !== id; });
+      return canonical(cv);
+    },
+    lastPlacement: function (canvas, id) {
+      var kind = kindOf(canvas, id); if (!kind) return false;
+      var z = zoneOf(kind), n = 0; canvas.sessions.forEach(function (s) { if (s.zones[z].indexOf(id) >= 0) n++; });
+      return n <= 1;
+    },
+    // arms: [] for everyone, else the arms that see the question.
+    setShownTo: function (canvas, id, arms) {
+      var cv = clone(canvas);
+      if (arms && arms.length) cv.armOnly[id] = cv.arms.map(function (a) { return a.id; }).filter(function (a) { return arms.indexOf(a) >= 0; });
+      else delete cv.armOnly[id];
+      return canonical(cv);
+    },
+    addBlock: function (canvas, n) {
+      var cv = clone(canvas); cv.sessions[n - 1].zones.task.push({ title: '', items: [], randomize: false }); return cv;
+    },
+    removeBlock: function (canvas, n, b) { var cv = clone(canvas); cv.sessions[n - 1].zones.task.splice(b, 1); return cv; },
+    setBlock: function (canvas, n, b, patch) {
+      var cv = clone(canvas), blk = cv.sessions[n - 1].zones.task[b];
+      Object.keys(patch).forEach(function (k) { blk[k] = patch[k]; });
+      return cv;
+    },
+    moveBlock: function (canvas, n, b, by) {
+      var cv = clone(canvas), l = cv.sessions[n - 1].zones.task, j = b + by;
+      if (j < 0 || j >= l.length) return cv;
+      var t = l[b]; l[b] = l[j]; l[j] = t; return cv;
+    },
+    // Puts item id into block b of session n before `before` (or last), taking it out of block (fromN, fromB) first.
+    placeItem: function (canvas, id, n, b, before, fromN, fromB) {
+      var cv = clone(canvas);
+      if (fromN) { var fl = cv.sessions[fromN - 1].zones.task[fromB].items; if (fl.indexOf(id) >= 0) fl.splice(fl.indexOf(id), 1); }
+      var list = cv.sessions[n - 1].zones.task[b].items.filter(function (x) { return x !== id; });
+      var at = before && list.indexOf(before) >= 0 ? list.indexOf(before) : list.length;
+      list.splice(at, 0, id); cv.sessions[n - 1].zones.task[b].items = list;
+      return cv;
+    },
+    removeItem: function (canvas, id, n, b) {
+      var cv = clone(canvas), l = cv.sessions[n - 1].zones.task[b].items; if (l.indexOf(id) >= 0) l.splice(l.indexOf(id), 1); return cv;
+    },
+    // value '' or null removes the arm's wording for that field, so the arm sees the item's own text.
+    setVariant: function (canvas, id, field, arm, value) {
+      var cv = clone(canvas), v = cv.variants[id] = cv.variants[id] || {}, f = v[field] = v[field] || {};
+      if (value === '' || value == null) delete f[arm]; else f[arm] = value;
+      if (!Object.keys(f).length) delete v[field];
+      if (!Object.keys(v).length) delete cv.variants[id];
+      return cv;
+    }
+  };
+
+  // Codes check() reports for next that it did not report for prev: an edit is refused only for what it introduces,
+  // so a study that already breaks a rule (say, a quota set on another tab) can still be edited here.
+  function introduced(prev, next) {
+    var had = {}; check(prev).forEach(function (r) { had[r.message] = true; });
+    return check(next).filter(function (r) { return !had[r.message]; });
+  }
+
   root.LabBuilderModel = { decompile: decompile, compile: compile, check: check, roundTrips: roundTrips, diff: diff,
+    ops: ops, canonical: canonical, introduced: introduced,
     VARIANT_FIELDS: VARIANT_FIELDS, MIN_ARMS: MIN_ARMS, MAX_ARMS: MAX_ARMS, VERSION: VERSION };
 })(typeof window !== 'undefined' ? window : globalThis);

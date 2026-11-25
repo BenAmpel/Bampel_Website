@@ -136,4 +136,62 @@ console.log('builder model: check refuses arm_limit, block_size, quota_with_bloc
   assert.equal(rt.ok, false); assert(rt.paths.some(p => p.includes('survey.post[0].sessions')), J(rt.paths).join(','));
   console.log('builder model: studies the canvas cannot show exactly fail the round-trip check');
 }
+// ---------- the canvas edits the builder makes (M.ops) ----------
+// Every edit, applied in turn: it introduces no refusal, compiles to content the server accepts, that content opens
+// on the canvas again (round trip), and it decompiles to exactly the canvas the researcher sees.
+{
+  const O = M.ops, start = J(fx['arm-questions']);
+  let base = start, cv = J(M.decompile(base));
+  const step = (name, edit) => {
+    const next = J(edit(cv));
+    deq(J(M.introduced(cv, next)), [], name + ': introduces no refusal');
+    const c = J(M.compile(next, base));
+    valid(c, name);
+    const rt = M.roundTrips(c); assert(rt.ok, name + ': round-trips; differs at ' + J(rt.paths).join(', '));
+    deq(M.decompile(c), next, name + ': the saved study draws the same canvas');
+    base = c; cv = next;
+  };
+  const q = id => base.survey.pre.concat(base.survey.post).find(x => x.id === id);
+  step('add an arm', x => O.addArm(x, 'Video'));
+  assert.equal(cv.arms.length, 3); assert.equal(cv.blockSize, 6, 'blocks grow to twice the arms');
+  step('rename it', x => O.renameArm(x, cv.arms[2].id, 'Video warning'));
+  assert.equal(base.design.conditions[2].label, 'Video warning');
+  step('show a question to two arms', x => O.setShownTo(x, 'saw_banner', ['treatment', cv.arms[2].id]));
+  deq(q('saw_banner').conditions, ['treatment', cv.arms[2].id]);
+  step('move a question to session 1, above another', x => O.placeQuestion(x, 'final_thoughts', 1, 'end', 'saw_banner', 2));
+  deq(q('final_thoughts').sessions, [1]); assert(base.survey.post.findIndex(x => x.id === 'final_thoughts') < base.survey.post.findIndex(x => x.id === 'saw_banner'));
+  step('also ask a start question in session 2', x => O.placeQuestion(x, 'work_email', 2, 'start'));
+  deq(q('work_email').sessions, [1, 2]);
+  step('drop an every-session question from session 2', x => O.removeQuestion(x, 'trust', 2));
+  deq(q('trust').sessions, [1], 'its sessions are written out');
+  step('move a start question to the end survey', x => O.placeQuestion(x, 'control_note', 1, 'end', null, 1));
+  assert(!base.survey.pre.some(x => x.id === 'control_note') && q('control_note').sessions[0] === 1);
+  step('add a session', x => O.addSession(x));
+  assert.equal(base.design.sessions.length, 3);
+  step('move an item to session 3', x => O.placeItem(x, 'msg-1', 3, 0, null, 1, 0));
+  step('add a block and put an item in it', x => O.placeItem(O.addBlock(x, 1), 'msg-2', 1, 1));
+  step('word an item differently for one arm', x => O.setVariant(x, 'msg-2', 'body', cv.arms[2].id, 'Watch this first.'));
+  assert.equal(base.items.find(i => i.id === 'msg-2').variants[cv.arms[2].id].body, 'Watch this first.');
+  // moving the band below session 1 would leave arm-only questions above it: refused, and nothing changes
+  assert(M.introduced(cv, O.setAssignAt(cv, 2)).some(r => r.code === 'before_assignment'), 'the band cannot pass arm-only questions');
+  step('remove an arm', x => O.removeArm(x, 'control'));
+  assert(!('control_note' in cv.armOnly), 'a question shown only to the removed arm is shown to everyone');
+  assert.equal(cv.blockSize, 6, 'blocks of 6 still fit two arms');
+  step('remove session 2', x => O.removeSession(x, 2));
+  assert.equal(base.design.sessions.length, 2); deq(base.design.sessions[1].blocks[0].items, ['msg-1'], 'session 3 moved up');
+  step('set the block size', x => O.setBlockSize(x, 8));
+  assert.equal(base.design.randomization.blockSize, 8); assert.equal(base.design.randomization.seed, start.design.randomization.seed, 'the seed stays');
+  step('reorder and rename blocks', x => O.setBlock(O.moveBlock(x, 1, 1, -1), 1, 0, { title: 'Warm-up', randomize: true }));
+  assert.equal(base.design.sessions[0].blocks[0].title, 'Warm-up');
+  assert(O.lastPlacement(cv, 'final_thoughts'));
+  step('delete a question with its last placement', x => O.removeQuestion(x, 'final_thoughts', 1));
+  assert(!q('final_thoughts'));
+  step('reset the variant', x => O.setVariant(x, 'msg-2', 'body', cv.arms[1].id, ''));
+  // keys the canvas does not own come through every edit untouched
+  for (const k of Object.keys(start)) if (!['design', 'survey', 'items', 'builder'].includes(k)) deq(base[k], start[k], k + ' untouched');
+  // an edit to a study that already breaks a rule elsewhere (a quota set on the Sign-up tab) is still allowed
+  const quota = J(M.decompile(J(fx['two-arm']))); quota.quota = true;
+  deq(J(M.introduced(quota, M.ops.addArm(quota, 'Third'))), [], 'an existing refusal does not block other edits');
+  console.log('builder model: 17 canvas edits compile to valid content that round-trips and redraws the same canvas');
+}
 console.log('builder-model: all checks passed');
