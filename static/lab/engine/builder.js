@@ -79,10 +79,11 @@
       return '<details class="bd-var" data-open="' + esc(id) + '"' + (ui.open[id] ? ' open' : '') + '><summary>Differs by arm' + (nv ? ' (' + nv + ')' : '') + '</summary>' +
         M.VARIANT_FIELDS.map(function (f) {
           return '<fieldset class="bd-vf"><legend>' + VLABEL[f] + '</legend>' + canvas.arms.map(function (a) {
-            var val = (v[f] || {})[a.id] || '', ph = short(it[f], 80) || '(empty)', big = f === 'body';
-            return '<label><span>' + esc(a.label) + '</span>' + (big ? '<textarea rows="2"' : '<input type="text"') + ' data-b="var" data-it="' + esc(id) + '" data-f="' + f + '" data-arm="' + esc(a.id) + '" data-k="v-' + esc(id) + f + a.id + '" placeholder="Same as the item: ' + esc(ph) + '"' + (big ? '>' + esc(val) + '</textarea>' : ' value="' + esc(val) + '">') + '</label>';
+            var val = (v[f] || {})[a.id] || '', own = short(it[f], 80), dflt = f === 'decisionPrompt' && it.decide !== false ? short(draft.decision && draft.decision.prompt, 80) : '', big = f === 'body';
+            var ph = own ? 'Same as the item: ' + own : dflt ? 'Same as the study: ' + dflt : 'Same as the item: (empty)';
+            return '<label><span>' + esc(a.label) + '</span>' + (big ? '<textarea rows="2"' : '<input type="text"') + ' data-b="var" data-it="' + esc(id) + '" data-f="' + f + '" data-arm="' + esc(a.id) + '" data-k="v-' + esc(id) + f + a.id + '" placeholder="' + esc(ph) + '"' + (big ? '>' + esc(val) + '</textarea>' : ' value="' + esc(val) + '">') + '</label>';
           }).join('') + '</fieldset>';
-        }).join('') + '<p class="muted">Leave a box empty and that arm sees the item\'s own wording (edit it on the Items tab).</p></details>';
+        }).join('') + '<p class="muted">Leave a box empty and that arm sees the item\'s own wording (edit it on the Items tab). A different decision question keeps the same answer buttons for every arm.</p></details>';
     }
     function taskZone(s) {
       var blocks = s.zones.task;
@@ -105,8 +106,15 @@
       }).join('') + (editable ? '<button type="button" class="secondary small" data-b="blk-add" data-n="' + s.n + '">Add a block</button>' : '') + '</div>';
     }
 
+    // A field commits on change, which fires as it loses focus: before the click or Tab that moved focus lands. Redrawing
+    // then would replace the button being clicked (the click is lost) or the field being tabbed to. So a redraw asked for
+    // during a change waits: until the pointer is released (the click has run by the next task), else to the next task.
+    var changing = false, pressing = false, pending = false;
+    function flush() { if (pending && !pressing) draw(); }
     function draw() {
-      var focus = document.activeElement && host.contains(document.activeElement) ? document.activeElement.getAttribute('data-k') : null;
+      if (changing) { pending = true; setTimeout(pressing ? function () { pressing = false; flush(); } : flush, pressing ? 1500 : 0); return; }   // 1.5 s: a release outside the window
+      pending = false;
+      var a = document.activeElement && host.contains(document.activeElement) ? document.activeElement : null, focus = a && keyOf(a);
       var probs = M.check(canvas), h = '<div class="bd">';
       if (probs.length) h += '<div class="warn">Fix before saving: ' + probs.map(function (r) { return esc(r.message); }).join(' ') + '</div>';
       h += '<p class="muted bd-intro">Lay out the study: what each session asks at the start, the task blocks, and what it asks at the end. Drag a card to move it, or use its menu. Wording is edited on the Items and survey tabs.</p>';
@@ -123,13 +131,16 @@
         '<dt>Task block</dt><dd>A group of items shown in order (or shuffled). Every arm sees the same items; what differs is set under "Differs by arm".</dd>' +
         '<dt>Structure lock</dt><dd>After the first real participant signs up, the parts above that decide assignment cannot change, so every participant is in the same design.</dd></dl></details></div>';
       host.innerHTML = h; say(ui.msg, ui.msgBad);
-      if (focus) { var f = host.querySelector('[data-k="' + focus + '"]'); if (f) f.focus(); }
+      if (focus) { var f = [].filter.call(host.querySelectorAll('input,select,textarea,button,summary'), function (x) { return keyOf(x) === focus; })[0]; if (f) f.focus(); }
     }
 
     // ---------- events (stopped here, so admin.js's own editor handlers never see them) ----------
     function data(t, k) { return t.getAttribute('data-' + k); }
+    // Which control this is, so focus can come back to it after a redraw (buttons have no data-k).
+    function keyOf(x) { return x.getAttribute('data-k') || ['b', 'n', 'z', 'q', 'it', 'arm', 'blk'].map(function (k) { return x.getAttribute('data-' + k) || ''; }).join('|').replace(/^\|+$/, '') || null; }
     function num(t, k) { return Number(data(t, k)); }
-    function onChange(e) {
+    function onChange(e) { changing = true; try { change(e); } finally { changing = false; } }
+    function change(e) {
       e.stopPropagation(); var t = e.target, b = data(t, 'b'), O = M.ops; if (!b) return;
       if (b === 'arm-label') { if (t.value.trim()) commit(O.renameArm(canvas, data(t, 'arm'), t.value.trim())); else draw(); }
       else if (b === 'assign') commit(O.setAssignAt(canvas, Number(t.value))) || draw();
@@ -173,7 +184,8 @@
         var kind = z === 'start' ? 'pre' : 'post', base = JSON.parse(JSON.stringify(draft)), all = base.survey.pre.concat(base.survey.post);
         var qid = uid('q', function (x) { return all.some(function (q) { return q.id === x; }); }), q = o.newQuestion(qid, kind);
         q.text = text; q.sessions = [n]; base.survey[kind].push(q);
-        var cv = M.decompile(base); commit(cv, base);
+        var cv = M.decompile(base);
+        if (commit(cv, base)) say('Added "' + qid + '" as a 7-point agree/disagree scale. To change its answer type or its column name (' + qid + '), open the ' + (kind === 'pre' ? 'Start' : 'End') + '-of-session survey tab.');
       }
       else if (b === 'blk-add') commit(O.addBlock(canvas, n));
       else if (b === 'blk-del') { if (!canvas.sessions[n - 1].zones.task[bk].items.length || confirm('Remove this block? Its items stay on the Items tab.')) commit(O.removeBlock(canvas, n, bk)); }
@@ -200,6 +212,11 @@
     function onDragEnd() { drag = null; host.querySelectorAll('.bd-over,.bd-dragging').forEach(function (x) { x.classList.remove('bd-over', 'bd-dragging'); }); }
 
     host.addEventListener('change', onChange);
+    host.addEventListener('pointerdown', function () { pressing = true; }, true);
+    // On document so a release outside the canvas counts; removed once this canvas is gone (each mount adds its own).
+    function release() { if (!host.isConnected) { document.removeEventListener('pointerup', release, true); document.removeEventListener('pointercancel', release, true); return; } if (!pressing) return; pressing = false; if (pending) setTimeout(flush, 0); }
+    document.addEventListener('pointerup', release, true); document.addEventListener('pointercancel', release, true);
+    host.addEventListener('dragstart', release, true);
     host.addEventListener('input', function (e) { e.stopPropagation(); });
     host.addEventListener('click', onClick);
     host.addEventListener('toggle', function (e) { var id = e.target.getAttribute && e.target.getAttribute('data-open'); if (id != null) ui.open[id] = e.target.open; }, true);

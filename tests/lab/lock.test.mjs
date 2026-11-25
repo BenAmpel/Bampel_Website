@@ -87,7 +87,7 @@ console.log('lock: first real sign-up or setTest(false) locks; test sign-ups and
     assert.equal(r.error, 'structure_locked', `${what} is refused: ${JSON.stringify(r)}`);
     assert.equal(r.status, 409);
     assert(Array.isArray(r.fields) && r.fields.length, `${what}: fields name the locked parts`);
-    assert.match(r.hint, /^Arms, sessions, task blocks and arm-only questions are locked/);
+    assert.match(r.hint, /^Arms, sessions, task blocks, the assignment session, the block size and arm-only questions are locked/);
   }
   const v = (await cur(S)).version;
   assert.equal(v, 1, 'nothing was saved');

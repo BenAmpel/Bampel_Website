@@ -242,11 +242,12 @@ export async function login(S, creds = {}, now = Date.now()) {
   let p;
   if (gate && creds.email == null && creds.panelId == null && creds.code == null) {
     // The access code alone: a new anonymous participant (the browser keeps the sign-in, so a reload goes on).
-    const en = (await getContent(store, S.type)).enrollment;
+    const c0 = await getContent(store, S.type), en = c0.enrollment;
+    if (notOpen(S, c0)) return NOT_OPEN;
     [p] = (await createParticipants(S, 1, { gapDays: en.gapDays, label: 'access-code', selfSignup: true }, now)).created;
     p = await loadParticipant(S, p.code);
   } else if (creds.email != null) {
-    const email = normalizeEmail(creds.email), en = (await getContent(store, S.type)).enrollment;
+    const email = normalizeEmail(creds.email), c0 = await getContent(store, S.type), en = c0.enrollment;
     const canSignUp = en.open && EMAIL_RE.test(email) && domainAllowed(email, en.domains);
     const pepper = await getPepper(store, canSignUp);
     const notEnrolled = { error: 'not_enrolled', status: 401, domains: en.open ? en.domains : [] };
@@ -255,6 +256,7 @@ export async function login(S, creds = {}, now = Date.now()) {
     p = await store.get(pKey(pid));
     if (!p) {
       if (!canSignUp) return notEnrolled;
+      if (notOpen(S, c0)) return NOT_OPEN;
       if (!creds.confirm) return { error: 'confirm_new', status: 401, email };
       [p] = await enroll(S, [pid], { gapDays: en.gapDays, label: en.label || null, selfSignup: true }, now, Math.random);
     }
@@ -264,11 +266,12 @@ export async function login(S, creds = {}, now = Date.now()) {
     // Online panels (Prolific, MTurk, CloudResearch): the panel's participant ID arrives in the study link
     // (?PROLIFIC_PID=...). The study ID is a keyed hash of it, like an email, so the same person always gets the
     // same record and the panel ID itself is kept only under contact/{id} (for paying bonuses).
-    const en = (await getContent(store, S.type)).enrollment, panel = en.panel || {};
+    const c0 = await getContent(store, S.type), en = c0.enrollment, panel = en.panel || {};
     const id = String(creds.panelId || '').trim();
     if (!panel.enabled || !/^[A-Za-z0-9_-]{4,64}$/.test(id)) return { error: 'not_enrolled', status: 401, domains: [] };
     const pepper = await getPepper(store, true), pid = 'P-' + hmac(pepper, 'panel|' + id).toString('hex').slice(0, 16);
     p = await store.get(pKey(pid));
+    if (!p && notOpen(S, c0)) return NOT_OPEN;
     if (!p) [p] = await enroll(S, [pid], { gapDays: en.gapDays, label: panel.label || 'panel', selfSignup: true }, now, Math.random);
     // keepId: false (a study whose consent promises the panel ID is stored only hashed) skips the raw copy; the
     // record is still found again from the same ID, but bonus lists and {pid} completion links cannot name it.
@@ -474,6 +477,10 @@ export async function saveSurvey(S, code, session, kind, data, now = Date.now())
 }
 
 // ---------- enrollment ----------
+// A builder study whose consent is not marked IRB-approved takes no new self sign-ups: the first real one would lock its
+// structure (lockStructure), and the draft consent banner already says not to enroll. Previews and staff-made codes still work.
+const NOT_OPEN = { error: 'not_open', status: 403 };
+const notOpen = (S, c) => !!(S.type.structureOf && c.builder && !(c.consent && c.consent.approved));
 // Conditions are assigned by minimization: the condition with the fewest participants so far (ties at
 // random), counted from write-once marker keys. Test participants are counted separately.
 // capped (self sign-ups): conditions at their quota are skipped, and null means the study is full (quota.mjs).
@@ -687,10 +694,12 @@ export async function rawEventRows(S, code) {
 }
 
 // One analysis row per trial: shared columns, then the type's measures. Definitions: static/lab/CODEBOOK.md.
+// condition: the arm the record was made under. A builder study that assigns at session 2 or later records session-1
+// rows before the arm exists; those take the participant's arm once it is known, so filtering on condition keeps them.
 export function trialRow(S, r, p) {
   const d = r.data || {}, s = p?.sessions?.[r.session] || {}, prev = (p?.completed || []).find(x => x.session === r.session - 1);
   return {
-    code: r.code, condition: r.condition, test: p?.test ? 1 : 0, label: p?.label || '', self_signup: p?.selfSignup ? 1 : 0,
+    code: r.code, condition: r.condition || p?.condition || '', test: p?.test ? 1 : 0, label: p?.label || '', self_signup: p?.selfSignup ? 1 : 0,
     session: r.session, trial_index: r.index,
     ...S.type.trialRow(r),
     trial_ms: d.traces?.durationMs ?? '', mouse_path_px: d.traces?.mousePathPx ?? '', idle_ms: d.traces?.idleMs ?? '', hidden_ms: d.traces?.hiddenMs ?? '',
@@ -722,7 +731,7 @@ function traceColumns(tr, raw) {
 }
 
 export function surveyRow(r, p) {
-  const row = { code: r.code, condition: r.condition, test: p?.test ? 1 : 0, label: p?.label || '', self_signup: p?.selfSignup ? 1 : 0,
+  const row = { code: r.code, condition: r.condition || p?.condition || '', test: p?.test ? 1 : 0, label: p?.label || '', self_signup: p?.selfSignup ? 1 : 0,
     session: r.session, survey: r.kind, content_version: r.contentVersion ?? 0, received_at: r.receivedAt ? new Date(r.receivedAt).toISOString() : '' };
   for (const [k, v] of Object.entries(r.embedded || {})) if (/^[a-z][a-z0-9_]{0,40}$/.test(k)) row[`ed_${k}`] = v;   // embedded data (URL parameters, constants)
   for (const [k, v] of Object.entries(r.data || {})) if (/^[a-z][a-z0-9_]{0,40}$/.test(k)) row[k in row ? `q_${k}` : k] = v;

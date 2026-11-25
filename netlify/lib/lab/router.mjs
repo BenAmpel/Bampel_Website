@@ -28,6 +28,9 @@ import { saveDq } from './quality.mjs';
 import { buildBundle } from './bundle.mjs';
 import { sealInfo, setSealKey, setRequireBrowser, publicSeal } from './seal.mjs';
 
+// Arm names by id, so admin pages can show "Practice with feedback (arm3)" instead of the bare id.
+const armLabels = c => Object.fromEntries((Array.isArray(c?.design?.conditions) ? c.design.conditions : []).filter(x => x && typeof x.id === 'string' && typeof x.label === 'string' && x.label.trim()).map(x => [x.id, x.label.trim()]));
+
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
 const csv = (text, name) => new Response(text, { headers: { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': `attachment; filename="${name}"`, 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
 const reply = r => r && r.error ? json(r, r.status || 400) : json(r);
@@ -139,7 +142,7 @@ export async function handle(req, { getStore, env, now }) {
       const c = await content.getContent(S.store, type);
 
       switch (action) {
-        case 'me': return json({ name: who.name, role: who.role, roles: admin.ROLE_INFO, study: { id: study.id, name: study.name, type: type.id, typeLabel: type.label, paths: study.paths }, conditions: type.conditionsOf(c) });
+        case 'me': return json({ name: who.name, role: who.role, roles: admin.ROLE_INFO, study: { id: study.id, name: study.name, type: type.id, typeLabel: type.label, paths: study.paths }, conditions: type.conditionsOf(c), armLabels: armLabels(c) });
         case 'participants': return json(await E.listParticipants(S));
         // The integrity report (integrity.mjs): reasons worth a look, per person and per pair. Each view is in the activity log.
         case 'integrity': {

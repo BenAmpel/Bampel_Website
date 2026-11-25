@@ -11,7 +11,7 @@ import { DQ_CODEBOOK } from './quality.mjs';
 
 const SHARED_ID = [
   ['code', 'id', 'Study ID: a keyed hash of the email or panel ID (P-...), or a pilot access code. Never the email or panel ID.'],
-  ['condition', 'category', 'Condition (arm) the participant was assigned to; blank if not yet assigned.'],
+  ['condition', 'category', 'Condition (arm) the participant was assigned to; blank if not yet assigned. Rows recorded before a later-session assignment show the arm once it is known.'],
   ['test', 'binary', '1 = test or pilot participant (exclude from analysis).', '0 = real; 1 = test'],
   ['label', 'text', 'Enrollment label (a class, pilot, self-signup, panel).'],
   ['self_signup', 'binary', '1 = signed up themselves (email domain or online panel).', '0 = no; 1 = yes'],
@@ -292,7 +292,9 @@ export function buildCodebook(S, c) {
   const add = (file, rows, source, applies = 'everyone') => { for (const [column, kind, label, values] of rows) out.push({ file, column, kind, values: values || '', label, applies_to: applies, source }); };
 
   // ----- trials CSV -----
-  const condValues = conds.join('; ');
+  // Arm names, when the study gives them (builder studies), so the codebook says what control/treatment/arm3 mean.
+  const armName = Object.fromEntries((Array.isArray(c?.design?.conditions) ? c.design.conditions : []).filter(x => x && typeof x.label === 'string' && x.label.trim() && x.label.trim() !== x.id).map(x => [x.id, x.label.trim()]));
+  const condValues = conds.map(id => armName[id] ? `${id} = ${armName[id]}` : id).join('; ');
   add('trials', SHARED_ID.map(r => (r[0] === 'condition' ? [r[0], r[1], r[2], condValues] : r)), 'engine');
   add('trials', [['trial_index', 'integer', 'Position of the trial within the session (0 = first shown).']], 'engine');
   add('trials', TYPE_COLUMNS[typeId] || [], typeId);

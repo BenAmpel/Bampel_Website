@@ -81,6 +81,7 @@ try {
   assert.equal(arms(doc).length, before.design.conditions.length, 'one name box per arm');
   assert.equal(doc.querySelectorAll('#builder .bd-sess').length, 2, 'two sessions');
   assert.equal(doc.querySelector('#builder .bd-fs').disabled, false, 'editable');
+  assert.match(doc.getElementById('contentwarn').textContent, /Sign-ups are closed/, 'draft consent: the page says real sign-ups are closed');
   console.log('opens on the Builder subtab with the template\'s arms and sessions');
 
   // 2. Edits, then Save.
@@ -106,6 +107,34 @@ try {
   window.close();
   console.log('canvas edits save as content the server accepts');
 
+  // 2b. Arm names (B2) and the click or Tab that follows an edit (B1). Nothing here is saved.
+  const me = await api('/api/lab/bui/admin/me');
+  const third3 = after.design.conditions[2];
+  assert.equal(me.armLabels[third3.id], 'Human review', '/me gives arm names');
+  ({ window, doc } = await open('bui'));
+  await until(() => doc.querySelector('#builder .bd-lanes'), 'the canvas');
+  await until(() => [...doc.querySelectorAll('#pvcond option')].length > 1, 'the preview arm menu');
+  assert([...doc.querySelectorAll('#pvcond option')].some(o => o.textContent === `Human review (${third3.id})`), 'the preview menu shows "name (id)"');
+  // A click: pressing Add blurs the name box (change), then the click lands. The click must not be lost.
+  const pev = (el, t) => el.dispatchEvent(new window.Event(t, { bubbles: true, cancelable: true }));
+  let box = doc.querySelectorAll('#builder [data-b="arm-label"]')[0];
+  box.focus(); box.value = 'Plain warning';
+  const add = doc.querySelector('#builder [data-b="arm-add"]');
+  pev(add, 'pointerdown'); change(window, box); pev(add, 'pointerup'); add.click();
+  await wait(30);
+  assert.equal(arms(doc)[0], 'Plain warning', 'the edit was kept');
+  assert.equal(arms(doc).length, 4, 'and the click on Add that ended it was not lost');
+  // Tab: change fires as focus leaves; focus must land on (the redrawn copy of) the next box.
+  box = doc.querySelectorAll('#builder [data-b="arm-label"]')[1];
+  const nextKey = doc.querySelectorAll('#builder [data-b="arm-label"]')[2].getAttribute('data-k');
+  box.focus(); change(window, box, 'Loss framing');
+  doc.querySelectorAll('#builder [data-b="arm-label"]')[2].focus();
+  await wait(30);
+  assert.equal(arms(doc)[1], 'Loss framing');
+  assert.equal(doc.activeElement && doc.activeElement.getAttribute('data-k'), nextKey, 'focus is on the next name box after the redraw');
+  window.close();
+  console.log('arm names in /me and the preview menu; the click or Tab after an edit is not lost');
+
   // 3. The structure lock.
   await getStore({ name: 'lab-bui' }).setJSON('lock/structure', { at: Date.now() });
   ({ window, doc } = await open('bui'));
@@ -126,6 +155,7 @@ try {
   doc.getElementById('unlock').click();
   await until(() => !doc.getElementById('lockwarn') && doc.querySelector('#builder .bd-lanes'), 'the reload after unlocking');
   assert.equal(await getStore({ name: 'lab-bui' }).get('lock/structure'), null, 'the stamp is gone');
+  assert.match(doc.getElementById('contentwarn').textContent, /Structure unlocked/, 'unlocking says so');
   doc.querySelector('#builder [data-b="arm-add"]').click();
   assert.equal(arms(doc).length, 4, 'adding an arm works again');
   window.close();
