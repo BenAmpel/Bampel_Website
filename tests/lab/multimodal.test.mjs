@@ -2,6 +2,7 @@
 // consent, AI voice calls (state machine, retries, callbacks, transcripts), participant audio, uploaded stimulus
 // files, mouse-tracking measures, Prolific sign-in, exports, deletion, and the live self-test.
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { handle } from '../../netlify/lib/lab/router.mjs';
 import { memBlobs } from './memstore.mjs';
 import { trajectoryMetrics } from '../../netlify/lib/lab/trajectory.mjs';
@@ -143,6 +144,30 @@ for (const [id, t] of Object.entries(TEMPLATES)) {
 }
 assert.equal(templateList().length, Object.keys(TEMPLATES).length);
 console.log('templates: all ' + templateList().length + ' validate as created');
+
+// ---------- the builder template (docs/designs/study-builder.md, Phase 5) ----------
+{
+  const type = typeFor({ type: 'multimodal', template: 'multimodal-builder' });
+  const made = content.normalize(content.defaultContent(type), type);
+  const noSeed = c => { const x = JSON.parse(JSON.stringify(c)); delete x.design.randomization.seed; return x; };
+  const fixture = JSON.parse(readFileSync(new URL('./fixtures/builder/two-arm.json', import.meta.url), 'utf8'));
+  assert.deepEqual(noSeed(made), noSeed(fixture), 'the builder template matches fixtures/builder/two-arm.json');
+  const refused = (edit, msg) => {
+    const c = structuredClone(made); edit(c);
+    const e = content.validateContent(content.normalize(c, type), type);
+    assert(e.includes(msg), `expected "${msg}", got: ${e.join('; ')}`);
+  };
+  refused(c => { c.design.randomization.method = 'minimization'; }, 'Builder studies assign arms in blocks.');
+  refused(c => { c.design.randomization.blockSize = 2; }, 'The block size must be a multiple of the number of arms, at least twice it.');
+  refused(c => { c.enrollment.quota = { total: 40, perCondition: {} }; }, 'Builder studies cannot cap sign-ups yet; remove the quota.');
+  refused(c => { c.enrollment.quota = { total: null, perCondition: { control: 20 } }; }, 'Builder studies cannot cap sign-ups yet; remove the quota.');
+  refused(c => { c.builder = { v: 2 }; }, 'This study was saved by a newer builder; open it in the form editor.');
+  // the same edits on a study without builder are not refused by these rules
+  const plain = structuredClone(made); delete plain.builder; plain.enrollment.quota = { total: 40, perCondition: {} };
+  const plainType = typeFor({ type: 'multimodal' });
+  assert(!content.validateContent(content.normalize(plain, plainType), plainType).some(m => /Builder|builder/.test(m)), 'non-builder studies skip the builder rules');
+  console.log('builder template: matches its fixture; blocks, block size, quota and version rules refuse');
+}
 
 // ---------- over HTTP ----------
 const getStore = memBlobs();
@@ -364,5 +389,15 @@ console.log('self-test: passes for the multimodal type');
   assert((await call(B + 'admin/content-save', { key: OWNER, body: { content: form, baseVersion: form.version } })).json.ok);
   assert.deepEqual(await got(B), { v: 1 }, 'a form-editor save keeps builder');
   console.log('builder: kept by save, export, import, clone and the form editor');
+}
+// two studies made from the builder template get their own allocation seed
+{
+  const seedOf = async id => (await call('/api/lab/' + id + '/admin/content', { key: OWNER })).json.design.randomization.seed;
+  for (const id of ['bld-one', 'bld-two']) assert((await call('/api/lab/_lab/create', { key: OWNER, body: { id, name: id, template: 'multimodal-builder' } })).json.ok);
+  const s1 = await seedOf('bld-one'), s2 = await seedOf('bld-two');
+  assert(s1 && s2 && s1 !== 'builder' && s2 !== 'builder', 'the seed is per study, not the template default');
+  assert.notEqual(s1, s2, 'two studies get different seeds');
+  assert.equal(await seedOf('bld-one'), s1, 'and a study keeps its seed across reads');
+  console.log('builder template: each study gets its own seed');
 }
 console.log('multimodal: all checks passed');
