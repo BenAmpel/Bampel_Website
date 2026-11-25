@@ -1094,12 +1094,14 @@
     postJSON('seal-set', { requireBrowser: on }).then(loadSeal).catch(function (e) { err(e.message); loadSeal(); });
   });
   function sealUnsupported() { err('This browser cannot do X25519 encryption (needs Chrome or Edge 133+, Firefox 130+, or Safari 17+). Use the command line instead: node scripts/lab/seal.mjs.'); }
-  function readFile(input) { var f = input.files && input.files[0]; input.value = ''; return f ? f.text() : Promise.reject(new Error('Choose a file.')); }
+  // Not named readFile: a second function declaration with that name in this scope replaced the file reader above
+  // (line ~767) for every caller, which broke the survey import, "create from a survey file" and "create from a design file".
+  function readKeyFile(input) { var f = input.files && input.files[0]; input.value = ''; return f ? f.text() : Promise.reject(new Error('Choose a file.')); }
   $('sealfile').addEventListener('change', function () {
     err(); var input = this;
     LabSeal.supported().then(function (ok) {
       if (!ok) return sealUnsupported();
-      return readFile(input).then(loadKeyText).then(loadSeal);
+      return readKeyFile(input).then(loadKeyText).then(loadSeal);
     }).catch(function (e) { err(e.message); });
   });
   // A key file, or its passphrase-protected copy (scripts/lab/seal.mjs keygen --wrap): the passphrase is asked for, used once, not kept.
@@ -1127,7 +1129,7 @@
   var pendingPub = null;
   $('sealcheck').addEventListener('change', function () {
     err(); var input = this;
-    readFile(input).then(loadKeyText).then(function (k) {
+    readKeyFile(input).then(loadKeyText).then(function (k) {
       if (!pendingKid || k.kid !== pendingKid) throw new Error('That is not the key file just made (' + (pendingKid || 'none') + '). Choose the file that was downloaded.');
       return postJSON('seal-set', { publicKey: pendingPub });
     }).then(function () { pendingKid = pendingPub = null; $('sealconfirm').hidden = true; loadSeal(); }).catch(function (e) { err(e.message); });
