@@ -194,4 +194,8 @@ console.log('builder model: check refuses arm_limit, block_size, quota_with_bloc
   deq(J(M.introduced(quota, M.ops.addArm(quota, 'Third'))), [], 'an existing refusal does not block other edits');
   console.log('builder model: 17 canvas edits compile to valid content that round-trips and redraws the same canvas');
 }
+// The browser's copy of the structure lock agrees with the server's on every fixture and on a non-builder study.
+for (const [name, c] of Object.entries(fx)) deq(J(M.structure(J(c))), J(type.structureOf(J(c))), name + ': structure matches the server lock');
+assert.equal(M.structure({ design: {} }), type.structureOf({ design: {} }));
+console.log('builder model: the structure the lock freezes matches the server on every fixture');
 console.log('builder-model: all checks passed');

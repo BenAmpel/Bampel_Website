@@ -206,7 +206,7 @@
     return new Promise(function (res) {
       if (types[type]) return res(types[type]);
       var s = document.createElement('script'); s.src = '/lab/engine/types/' + type + '-admin.js';
-      s.onload = function () { res(types[type] || {}); }; s.onerror = function () { res({}); };
+      s.onload = function () { var p = types[type] || {}; Promise.all((p.scripts || []).map(loadScript)).then(function () { res(p); }); };   // a plugin's helper scripts load before its first render s.onerror = function () { res({}); };
       document.head.appendChild(s);
     });
   }
@@ -244,7 +244,7 @@
         $('selftest').textContent = 'Run self-test (' + (m.conditions.length === 1 ? 'one group' : 'all ' + m.conditions.length + ' groups') + ')';
         $('rpintro').innerHTML = plugin.reportIntro || 'How the items and sessions are performing, for tuning the study after a pilot.';
         var last = null; try { last = sessionStorage.getItem(tabKey); } catch (e) {}
-        if (location.hash === '#import' && can('editor') && plugin.subtabs && plugin.subtabs.some(function (s) { return s[0] === 'import'; })) { sub = 'import'; last = 'content'; }   // opened from the lab console's "create from a survey file"
+        if (location.hash === '#import' && can('editor') && pluginSubs().some(function (s) { return s[0] === 'import'; })) { sub = 'import'; last = 'content'; }   // opened from the lab console's "create from a survey file"
         showTab(TABS.some(function (t) { return t[0] === last && can(t[2]); }) ? last : 'participants');
       });
     }).catch(function (e) { if (e.code !== 'no_study') { setKey(''); if (e.code !== 'forbidden' || !getSession()) setSession(null); } $('signinbox').hidden = false; $('app').hidden = true; err(e.message); });
@@ -599,7 +599,9 @@
   var AGREE7 = ['Strongly disagree', 'Disagree', 'Somewhat disagree', 'Neither agree nor disagree', 'Somewhat agree', 'Agree', 'Strongly agree'];
   function setDirty(v) { dirty = v; $('dirty').innerHTML = v ? '<strong>Unsaved changes.</strong>' : 'No unsaved changes.'; $('save').disabled = !v; $('discard').disabled = !v; }
   window.addEventListener('beforeunload', function (e) { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
-  function subs() { return (plugin.subtabs || []).concat([['pre', 'Start-of-session survey'], ['post', 'End-of-session survey'], ['consent', 'Sign-up & consent'], ['environment', 'Devices & timing']].concat(me && /^(multimodal|vignettes)$/.test(me.study.type) ? [['order', 'Block order']] : []).concat([['text', 'Screen text']])); }
+  // A plugin's subtabs: a list, or a function of the content (the Builder tab shows only for studies it can draw).
+  function pluginSubs() { return (typeof plugin.subtabs === 'function' ? plugin.subtabs(draft || {}) : plugin.subtabs) || []; }
+  function subs() { return pluginSubs().concat([['pre', 'Start-of-session survey'], ['post', 'End-of-session survey'], ['consent', 'Sign-up & consent'], ['environment', 'Devices & timing']].concat(me && /^(multimodal|vignettes)$/.test(me.study.type) ? [['order', 'Block order']] : []).concat([['text', 'Screen text']])); }
   // The rows of a Williams design (as netlify/lib/lab/latin.mjs builds them), for the preview on the Block order tab.
   function williams(n) {
     var first = [0], k, rows = [], r;
@@ -613,6 +615,7 @@
       var c = res[0];
       META = { text: c._textFields, type: c._meta || {}, conditions: c._conditions || [], rules: c._surveyRules || [], qtypes: c._questionTypes || Object.keys(QTYPE_LABEL), presets: c._panelPresets || [], languages: c._languages || null };
       Object.keys(c).forEach(function (k) { if (k[0] === '_') delete c[k]; });
+      A.locked = !!c.locked; delete c.locked;   // the structure lock (a builder study with real participants), not part of the content
       saved = c; draft = clone(saved); A.draft = draft; setDirty(false);
       if (!sub || !subs().some(function (s) { return s[0] === sub; })) sub = subs()[0][0];
       if (plugin.onLoad) plugin.onLoad(A);
@@ -620,7 +623,9 @@
       A.counts = {}; res[2].forEach(function (p) { if (!p.test && p.condition) A.counts[p.condition] = (A.counts[p.condition] || 0) + 1; });   // for the quota boxes
       A.started = started;
       $('contentinfo').textContent = 'Current version: ' + (saved.version || 0) + (saved.version ? ', saved ' + fmt(saved.savedAt) + ' by ' + saved.savedBy : ' (the built-in defaults)') + '.' + (can('editor') ? '' : ' You can view the content but not change it.');
-      $('contentwarn').innerHTML = started ? '<div class="warn">' + started + ' real participant' + (started === 1 ? ' has' : 's have') + ' already started. Changes apply from each participant\'s next session (a session in progress keeps the plan it started with). Answers record the version they were collected under, and each answer keeps a copy of the item as shown. Changing the design mid-study makes sessions hard to compare, so check with the team first.</div>' : '';
+      $('contentwarn').innerHTML = (A.locked ? '<div class="warn" id="lockwarn"><strong>Structure locked.</strong> Real participants have signed up, so the arms, sessions, task blocks, assignment session and arm-only questions are fixed. Wording, media and shared questions can still change.' +
+        (can('owner') ? ' If every real sign-up was a mistake, delete those participants first, then <button type="button" class="secondary small" id="unlock">Unlock the structure…</button>' : ' Only an owner can unlock it, after every real participant is deleted.') + '</div>' : '') +
+        (started ? '<div class="warn">' + started + ' real participant' + (started === 1 ? ' has' : 's have') + ' already started. Changes apply from each participant\'s next session (a session in progress keeps the plan it started with). Answers record the version they were collected under, and each answer keeps a copy of the item as shown. Changing the design mid-study makes sessions hard to compare, so check with the team first.</div>' : '');
       $('vtbl').innerHTML = '<tr><th>Version</th><th>Saved</th><th>By</th><th></th></tr>' + res[1].map(function (v) {
         return '<tr><td>' + v.version + (v.version === saved.version ? ' (current)' : '') + '</td><td>' + esc(fmt(v.savedAt)) + '</td><td>' + esc(v.savedBy) + (v.restoredFrom != null ? ' (restored v' + v.restoredFrom + ')' : '') + '</td><td>' +
           (can('editor') && v.version !== saved.version ? '<button type="button" class="secondary small" data-restore="' + v.version + '">Restore</button>' : '') + '</td></tr>';
@@ -628,6 +633,13 @@
       renderEditor();
     }).catch(function (e) { err(e.message); });
   }
+  // The owner's way out of a structure lock set by mistake (route structure-reset, refused while real participants remain).
+  $('contentwarn').addEventListener('click', function (e) {
+    if (!e.target.closest || !e.target.closest('#unlock')) return;
+    if (dirty && !confirm('Unlocking reloads the content and drops your unsaved changes. Go on?')) return;
+    if (!confirm('Unlock the structure? Arms, sessions and blocks can then change again, and the block list starts over from its first slot.')) return;
+    err(); postJSON('structure-reset', {}).then(function () { loadContent(true); $('say').textContent = 'The structure is unlocked.'; }).catch(function (x) { err(x.message); });
+  });
   $('vtbl').addEventListener('click', function (e) {
     var v = e.target.getAttribute && e.target.getAttribute('data-restore'); if (v == null) return;
     if (!confirm((dirty ? 'Your unsaved changes will be discarded. ' : '') + 'Restore version ' + v + '? It will be saved as a new version.')) return;
@@ -758,7 +770,7 @@
     getPath: getPath, setPath: setPath, clone: clone, qlist: qlist, can: can,
     // for study types that import or generate content
     studyId: studyId, started: 0, post: function (p, b) { return postJSON(p, b); }, err: err, say: function (m) { $('say').textContent = m || ''; },
-    markDirty: function () { setDirty(true); }, rerender: function () { renderEditor(); }, goto: function (s) { sub = s; renderEditor(); }, readFile: readFile, fmt: fmt,
+    markDirty: function () { setDirty(true); }, rerender: function () { renderEditor(); }, goto: function (s) { sub = s; renderEditor(); }, readFile: readFile, fmt: fmt, loadScript: loadScript, newQuestion: newQuestion, locked: false,
     api: { getJSON: getJSON, postJSON: postJSON } };
 
   // Online panel: a preset fills the link parameters and the redirect address; three codes (completed, screened out,
@@ -793,8 +805,10 @@
       '<div class="grid3">' + field('Whole study (now ' + total + ')', capInput('data-quota="total"', q.total, 'Cap for the whole study')) +
       conds.map(function (cn) { return field(esc(cn) + ' (now ' + (counts[cn] || 0) + ')', capInput('data-quota="' + esc(cn) + '"', (q.perCondition || {})[cn], 'Cap for ' + cn)); }).join('') + '</div>';
   }
+  function newQuestion(id, kind) { return { id: id, text: '', type: 'scale', n: 7, lo: AGREE7[0], hi: AGREE7[6], labels: AGREE7.slice(), required: false, showIf: 'always', sessions: kind === 'pre' ? [1] : [], conditions: [] }; }
   function genCode() { var a = '23456789ABCDEFGHJKMNPQRSTVWXYZ', s = '', r = new Uint32Array(8); (window.crypto || {}).getRandomValues ? crypto.getRandomValues(r) : r.forEach(function (x, i) { r[i] = Math.random() * 4294967296; }); for (var i = 0; i < 8; i++) s += a[r[i] % a.length]; return s; }
   function renderEditor() {
+    if (!subs().some(function (s) { return s[0] === sub; })) sub = subs()[0][0];   // an edit elsewhere can take the Builder tab away
     $('subtabs').innerHTML = subs().map(function (s) { return '<button type="button" data-sub="' + s[0] + '"' + (s[0] === sub ? ' aria-current="true"' : '') + '>' + s[1] + '</button>'; }).join('');
     var h = '';
     if (sub === 'pre' || sub === 'post') {
@@ -876,8 +890,8 @@
     $('editor').innerHTML = h;
     // Viewers: the designer is read-only by itself (and disables its own settings panel), so its bar (Preview, Phone,
     // pages) stays usable; every other editor tab is disabled as a whole.
-    $('editor').disabled = !can('editor') && !$('designer');
-    document.body.classList.toggle('lc-wide', !!$('designer'));
+    $('editor').disabled = !can('editor') && !$('designer') && !$('builder');   // the builder disables its own controls
+    document.body.classList.toggle('lc-wide', !!$('designer') || !!$('builder'));
     if ($('designer')) mountDesigner($('designer'), sub);
     if (plugin.afterRender) plugin.afterRender(sub, A);
   }
@@ -978,7 +992,7 @@
     if ((v = t.getAttribute('data-add'))) {
       var items = getPath(v), n = items.length + 1, id = 'q' + n;
       while (items.some(function (x) { return x.id === id; })) id = 'q' + (++n);
-      items.push({ id: id, text: '', type: 'scale', n: 7, lo: AGREE7[0], hi: AGREE7[6], labels: AGREE7.slice(), required: false, showIf: 'always', sessions: v === 'survey.pre' ? [1] : [], conditions: [] });
+      items.push(newQuestion(id, v === 'survey.pre' ? 'pre' : 'post'));
     } else if ((v = t.getAttribute('data-remove'))) {
       var r = v.split('|'); if (!confirm('Remove this question?')) return; getPath(r[0]).splice(Number(r[1]), 1);
     } else if ((v = t.getAttribute('data-dupq'))) {

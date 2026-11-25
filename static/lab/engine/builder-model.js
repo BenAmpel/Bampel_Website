@@ -349,7 +349,19 @@
     return check(next).filter(function (r) { return !had[r.message]; });
   }
 
+  // What the structure lock freezes, as netlify/lib/lab/types/multimodal.mjs structureOf builds it (a test keeps the
+  // two equal). Once a real participant has signed up, an edit that changes this is refused before the server sees it.
+  function structure(content) {
+    var c = obj(content); if (!c.builder) return null;
+    var d = obj(c.design), r = obj(d.randomization), s = obj(c.survey);
+    function armOnly(qs) { return arr(qs).filter(function (q) { return q && arr(q.conditions).length; }).map(function (q) { return [q.id, q.conditions]; }); }
+    return { v: c.builder.v == null ? null : c.builder.v, arms: arr(d.conditions).map(function (x) { return x.id; }), assignAt: d.assignAtSession || 1,
+      sessions: arr(d.sessions).map(function (x) { return arr(obj(x).blocks).map(function (b) { return [b.items || [], b.pool || null]; }); }),
+      armOnly: { pre: armOnly(s.pre), post: armOnly(s.post) },
+      randomization: [r.method || null, r.blockSize == null ? null : r.blockSize, r.seed == null ? null : r.seed] };
+  }
+
   root.LabBuilderModel = { decompile: decompile, compile: compile, check: check, roundTrips: roundTrips, diff: diff,
-    ops: ops, canonical: canonical, introduced: introduced,
+    ops: ops, canonical: canonical, introduced: introduced, structure: structure,
     VARIANT_FIELDS: VARIANT_FIELDS, MIN_ARMS: MIN_ARMS, MAX_ARMS: MAX_ARMS, VERSION: VERSION };
 })(typeof window !== 'undefined' ? window : globalThis);
