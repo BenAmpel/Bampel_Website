@@ -486,6 +486,12 @@ async function pickCondition(S, test, rand, capped = false) {
   return opts[Math.floor(rand() * opts.length)];
 }
 
+// The structure lock (docs/designs/study-builder.md): the first real participant record of a study whose type returns
+// a structure fingerprint writes lock/structure. setNew: the first write wins; deleting the participant never removes it.
+export async function lockStructure(S, c, now = Date.now()) {
+  if (S.type.structureOf && S.type.structureOf(c) != null) await setNew(S.store, 'lock/structure', { at: now });
+}
+
 export async function enroll(S, ids, opts, now, rand) {
   const made = [];
   const c = await getContent(S.store, S.type), conds = S.type.conditionsOf(c), defer = deferred(S, c);
@@ -500,6 +506,7 @@ export async function enroll(S, ids, opts, now, rand) {
     if (await setNew(S.store, pKey(id), p)) { if (condition != null) await S.store.set(`${p.test ? 'cond-test' : 'cond'}/${condition}/${id}`, { at: now }); made.push(p); }
     else made.push(await S.store.get(pKey(id)));
   }
+  if (!opts.test && made.some(p => p && !p.test)) await lockStructure(S, c, now);
   return made;
 }
 
@@ -772,6 +779,7 @@ export async function setTest(S, id, test) {
   const p = u.value;   // move the assignment marker so real and test participants are balanced separately
   await S.store.delete(`${test ? 'cond' : 'cond-test'}/${p.condition}/${p.code}`);
   await S.store.set(`${test ? 'cond-test' : 'cond'}/${p.condition}/${p.code}`, { at: Date.now() });
+  if (!p.test) await lockStructure(S, await getContent(S.store, S.type));   // a test participant made real locks the structure
   return { ok: true, code: p.code, test: p.test };
 }
 
