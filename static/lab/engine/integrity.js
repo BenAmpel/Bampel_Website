@@ -21,7 +21,7 @@
         '<div class="row">' + '<button type="button" class="secondary small" data-int-replay="' + esc(x.code) + '">Replay</button></div></li>';
     }
     function render() {
-      var d = data, h = '<h2>Integrity</h2>' + (d ? intro(d.mode) : '') +
+      var d = data, h = '<h2>Data quality</h2>' + (d ? intro(d.mode) : '') +
         '<div class="row"><label class="check"><input type="checkbox" id="int-test"' + (includeTest ? ' checked' : '') + '> Include test participants</label>' +
         '<button type="button" class="secondary small" id="int-refresh"' + (busy ? ' disabled' : '') + '>' + (busy ? 'Working…' : 'Refresh') + '</button></div>';
       if (!d) { sec.innerHTML = h + '<p class="muted" role="status">' + (busy ? 'Reading every answer and trace…' : '') + '</p>'; return; }

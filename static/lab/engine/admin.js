@@ -52,7 +52,7 @@
     var read = data instanceof Blob ? data.text() : Promise.resolve(String(data));
     read.then(function (text) {
       if (text.search(LabSeal.RE) < 0) return saveRaw(data, name, type);
-      if (!LabSeal.loaded()) { saveRaw(data, name, type); return err('This file has encrypted values (they start with "sealed:v1"). To open them, unlock the Encryption tab with the study\'s key file and download again, or run node scripts/lab/seal.mjs open.'); }
+      if (!LabSeal.loaded()) { saveRaw(data, name, type); return err('This file has encrypted values (they start with "sealed:v1"). To open them, unlock More → Encryption with the study\'s key file and download again, or run node scripts/lab/seal.mjs open.'); }
       return LabSeal.openText(text, /\.jsonl?$/i.test(name) ? 'json' : 'csv').then(function (r) {
         saveRaw(new Blob([r.text], { type: (data instanceof Blob && data.type) || type || 'text/plain' }), name, type);
         if (r.other) err(r.other + ' value' + (r.other === 1 ? ' was' : 's were') + ' encrypted with a different key and ' + (r.other === 1 ? 'was' : 'were') + ' left as is. Unlock with the older key file to open ' + (r.other === 1 ? 'it' : 'them') + '.');
@@ -94,8 +94,14 @@
 
   // ======================= study admin =======================
   // Every user-facing tab name, and the status line's text, in one place (docs/designs/console-ia.md).
-  var LABELS = { content: 'Edit study', participants: 'Participants', report: 'Pilot report', figures: 'Figures', analyze: 'Analyze', integrity: 'Integrity',
+  var LABELS = { content: 'Edit study', participants: 'Participants', report: 'Pilot report', figures: 'Figures', analyze: 'Analyze', integrity: 'Data quality',
     students: 'Students', team: 'Team', privacy: 'Encryption', activity: 'Activity', testing: 'Testing tools',
+    results: 'Results', more: 'More', sharing: 'Backups & sharing',
+    groups: { before: 'Before the task', study: 'The study', after: 'After the task', throughout: 'Throughout', delivery: 'Delivery' },
+    purpose: { report: 'How the items and sessions are performing, for tuning the study after a pilot.',
+      figures: 'Figures of pointer movement from the raw traces, one panel per condition, to share or put in a paper.',
+      analyze: 'Quick tests on real participants\' answers, with R and Python code that reproduces them from the download.' },
+    toDownload: 'To download the data, go to Participants → Download.',
     state: { draft: 'Draft: no real sign-ups yet', locked: 'Draft: no one has consented yet. The design is locked because a real person registered.',
       seeEdit: 'See Edit study for the design.', live: 'Live: real participants have signed up', one: 'Live: 1 real participant', many: function (n) { return 'Live: ' + n + ' real participants'; } } };
   root.innerHTML = '<div class="who"><div class="brandmark"><span class="wordmark"><b>CCAIR Behavioral Lab</b><small>Georgia State University · J. Mack Robinson College of Business</small></span><h1 class="h-flush" id="title">Study admin</h1><p class="muted" id="studystate" hidden></p></div><span id="whoami" class="muted"></span></div>' + SIGNIN + '<div id="app" hidden>' +
@@ -103,6 +109,11 @@
     '<div class="tabrow"><nav class="tabs" id="tabs" aria-label="Study admin sections"></nav>' +
     '<div class="preview-bar" id="previewbar" hidden><label id="pvcondwrap">Arm <select id="pvcond"></select></label><button type="button" class="primary small" id="preview" title="Opens the study in a new tab as a test participant (left out of real counts), with no wait between sessions.">Preview as participant</button></div></div>' +
     '<p class="muted" id="pvout" role="status"></p>' +
+    // Results: one tab for Pilot report, Figures and Analyze. The bar sits outside the panels (mountTool rewrites the
+    // figures and analyze panels) and is shown while one of the three is open.
+    '<div class="resultsbar" id="resultsbar" hidden><div class="lc-seg rs-seg" role="group" aria-label="Results view">' +
+      ['report', 'figures', 'analyze'].map(function (v) { return '<button type="button" data-view="' + v + '" aria-pressed="false">' + LABELS[v] + '</button>'; }).join('') +
+      '</div><p class="muted" id="rspurpose"></p><p class="muted rs-dl">' + LABELS.toDownload + ' <button type="button" class="secondary small" id="rsgo">Open Participants</button></p></div>' +
     '<section data-tab="participants">' +
       // Summary figures, then one Download menu (every export, the codebook, analysis starters), then the filtered list.
       '<div class="pt-head"><div class="pt-stats" id="summary" aria-live="polite"></div><div class="pt-actions">' +
@@ -130,8 +141,6 @@
         [['all', 'All'], ['real', 'Real'], ['test', 'Test'], ['active', 'In progress'], ['done', 'Finished']].map(function (f, i) { return '<button type="button" role="radio" data-show="' + f[0] + '" aria-checked="' + (i === 0) + '" tabindex="' + (i ? -1 : 0) + '">' + f[1] + '</button>'; }).join('') +
         '</div><input type="search" id="ptq" placeholder="Search ID, label, or condition" aria-label="Search participants"><span class="muted" id="ptcount"></span></div>' +
       '<div class="table-wrap pt-table"><table id="tbl"></table></div><div class="section rp" id="replaybox" hidden></div>' +
-      '<div class="section" data-role="owner"><h2>Backups</h2><p class="muted">Every hour the study data is copied to a separate backup store on Netlify (answers once, changing records every time). That protects against mistakes and bugs. For a copy outside Netlify, download a complete backup (every record, raw traces, emails, study content, team, and activity log) and save it to GSU-approved storage, for example weekly. It contains emails, so treat it as identifiable data. Deleting a participant also removes them from the backup store.</p>' +
-        '<p id="bkstatus" class="muted"></p><div class="row"><button type="button" class="secondary" id="bkrun">Run backup now</button><button type="button" class="secondary" id="bkdl">Download complete backup (.json.gz)</button></div><p id="bkprog" class="muted"></p></div>' +
       '<details class="section testing-tools" data-role="owner"><summary>' + LABELS.testing + '</summary><h3>Live self-test</h3><p class="muted">Runs one throwaway test participant per group through every session of the current design on this live site (practice, surveys, every item), then checks what was saved and what the exports say, and deletes the test participants. Real participants are not touched.</p>' +
         '<div class="row"><button type="button" id="selftest">Run self-test</button><label class="check"><input type="checkbox" id="stkeep"> Keep the test participants so I can look at them (delete later with "Delete all test participants")</label></div><p class="muted" id="stprog"></p><div id="stout"></div>' +
         '<div class="pt-danger"><div><strong>Test participants</strong><p class="muted">Pilots, previews, and kept self-test runs. Deleting them removes their answers and traces for good; real participants are not touched.</p></div><button type="button" class="danger secondary" id="deltest">Delete all test participants</button></div></details>' +
@@ -151,14 +160,11 @@
       '<div class="section"><h2>Create pilot access codes</h2><p class="muted">For pilots and team testing without a roster. Mark them as test so they are excluded from the counts and can be deleted in one step. Gap days sets the minimum wait between sessions (0 for piloting).</p>' +
       '<form class="row" id="createform"><label>How many <input class="w90" type="number" id="count" min="1" max="300" value="3"></label><label>Label (optional) <input class="w160" type="text" id="label" placeholder="pilot-oct"></label>' +
       '<label>Gap days <input class="w90" type="number" id="gap" min="0" max="60" placeholder="default"></label><label class="check"><input type="checkbox" id="test" checked> Test codes</label><button type="submit">Create</button></form><div id="created" class="keybox" hidden></div></div></section>' +
-    '<section data-tab="content" hidden><p class="muted" id="contentinfo"></p><div id="contentwarn"></div><p class="ok" id="say" role="status"></p><nav class="tabs sub" id="subtabs" aria-label="Edit study sections"></nav><div id="viewsw"></div><fieldset class="fs-plain" id="editor"></fieldset>' +
+    '<section data-tab="content" hidden><p class="muted" id="contentinfo"></p><div id="contentwarn"></div><p class="ok" id="say" role="status"></p><div class="editgrid"><nav class="tabs sub" id="subtabs" aria-label="Edit study sections"></nav><div class="editpane"><div id="viewsw"></div><fieldset class="fs-plain" id="editor"></fieldset></div></div>' +
       '<div class="savebar" id="savebar" data-role="editor"><span id="dirty" class="muted">No unsaved changes.</span><input type="text" id="note" class="grow" placeholder="What changed? (optional, shown in the activity log)">' +
       '<button type="button" class="secondary" id="discard" disabled>Discard changes</button><button type="button" id="save" disabled>Save changes</button></div>' +
       '<div class="section"><h2>Versions</h2><p class="muted">Every save makes a new version. Restoring an old version saves it again as the newest version, so nothing is lost. Each answer records the version it was collected under.</p><div class="table-wrap"><table id="vtbl"></table></div></div>' +
-      '<div class="section"><h2>Study design file</h2><p class="muted">One file with this study\'s whole design: items, questions, conditions, screen text, consent, and settings, with uploaded media up to about 3 MB. It has no participants and no answers. Use it to share the study with another lab, to deposit it with a paper, or to start a new study from it on the lab console (owners). Completion codes are left blank in the file.</p>' +
-      '<div class="row"><button type="button" class="secondary" id="designdl">Download study design (JSON)</button></div><p class="muted" id="designmsg" role="status"></p>' +
-      '<h3>Reproducibility bundle</h3><p class="muted">One .zip to deposit with a paper: the design file, this study\'s codebook (CSV and Markdown), the platform version and code commit, the list of content versions, how to cite, and the fields for a Zenodo upload (which gives it a DOI). It holds no participant data. Make it from the content version you ran.</p>' +
-      '<div class="row"><button type="button" class="secondary" id="bundledl">Download reproducibility bundle (.zip)</button></div></div></section>' +
+    '</section>' +
     '<section data-tab="team" hidden><h2>Researchers on this study</h2><p class="muted">People with a researcher account (email and password). Add someone by email: a new person gets an invitation link for you to send, and sees this study only. ' +
       'Viewers see progress and download data; editors also edit the content; managers also handle students and the extra-credit list; owners can do everything, including deleting data and managing this list.</p>' +
       '<div class="table-wrap"><table id="memtbl"></table></div>' +
@@ -183,21 +189,61 @@
       'A browser too old to encrypt (before Chrome or Edge 133, Firefox 130, Safari 17) sends them over the encrypted connection and the server encrypts them on arrival. Tick this to refuse that instead: such browsers are turned away before consent. ' +
       'Each saved record notes how many values the browser encrypted and how many the server did.</p><label class="f check"><input type="checkbox" id="sealreq"> Accept free text and link data only when encrypted in the participant\'s browser</label></div>' +
       '<p><button type="button" class="danger secondary small" id="sealoff" hidden>Stop encrypting new values</button></p></div></section>' +
+    // Backups & sharing (More): the owner's backups, and the design file and reproducibility bundle for everyone.
+    '<section data-tab="sharing" hidden>' +
+      '<div class="section" data-role="owner"><h2>Backups</h2><p class="muted">Every hour the study data is copied to a separate backup store on Netlify (answers once, changing records every time). That protects against mistakes and bugs. For a copy outside Netlify, download a complete backup (every record, raw traces, emails, study content, team, and activity log) and save it to GSU-approved storage, for example weekly. It contains emails, so treat it as identifiable data. Deleting a participant also removes them from the backup store.</p>' +
+        '<p id="bkstatus" class="muted"></p><div class="row"><button type="button" class="secondary" id="bkrun">Run backup now</button><button type="button" class="secondary" id="bkdl">Download complete backup (.json.gz)</button></div><p id="bkprog" class="muted"></p></div>' +
+      '<div class="section"><h2>Study design file</h2><p class="muted">One file with this study\'s whole design: items, questions, conditions, screen text, consent, and settings, with uploaded media up to about 3 MB. It has no participants and no answers. Use it to share the study with another lab, to deposit it with a paper, or to start a new study from it on the lab console (owners). Completion codes are left blank in the file.</p>' +
+      '<div class="row"><button type="button" class="secondary" id="designdl">Download study design (JSON)</button></div><p class="muted" id="designmsg" role="status"></p>' +
+      '<h3>Reproducibility bundle</h3><p class="muted">One .zip to deposit with a paper: the design file, this study\'s codebook (CSV and Markdown), the platform version and code commit, the list of content versions, how to cite, and the fields for a Zenodo upload (which gives it a DOI). It holds no participant data. Make it from the content version you ran.</p>' +
+      '<div class="row"><button type="button" class="secondary" id="bundledl">Download reproducibility bundle (.zip)</button></div></div>' +
+    '</section>' +
     '<section data-tab="activity" hidden><p class="muted">Who added students, changed content, ran self-tests, deleted data, or changed the team.</p><div class="table-wrap"><table id="acttbl"></table></div></section></div>';
   $('keyhelp').innerHTML = 'Sign in with your researcher account, or use the lab owner key (the <code>LAB_ADMIN_KEY</code> or <code>VC_ADMIN_KEY</code> Netlify variable) or the team key the owner gave you. Keys and sign-ins are kept in this tab only. New here? Read the <a href="/lab/guide/">researcher guide</a>.';
 
   // ---------- sign-in and tabs ----------
-  var TABS = [['content', 'viewer'], ['participants', 'viewer'], ['report', 'viewer'], ['figures', 'viewer'], ['analyze', 'viewer'], ['integrity', 'manager'], ['students', 'manager'], ['team', 'owner'], ['privacy', 'viewer'], ['activity', 'owner']]
+  var TABS = [['content', 'viewer'], ['participants', 'viewer'], ['report', 'viewer'], ['figures', 'viewer'], ['analyze', 'viewer'], ['integrity', 'manager'], ['students', 'manager'], ['team', 'owner'], ['privacy', 'viewer'], ['activity', 'owner'], ['sharing', 'viewer']]
     .map(function (t) { return [t[0], LABELS[t[0]], t[1]]; });
   var tabKey = 'lab_admin_tab_' + studyId;
+  // Where each tab is drawn: in the Results tab's view switch, in the More menu, or (any id not listed, plugin tabs too) in the row.
+  var PLACE = { report: 'results', figures: 'results', analyze: 'results', integrity: 'more', team: 'more', privacy: 'more', activity: 'more', sharing: 'more' };
+  var MORE_ORDER = ['integrity', 'team', 'privacy', 'activity', 'sharing'];
+  var resultsView = 'report';   // the Results view last shown; the Results button opens it
+  // aria-current="true" goes on the one row control for the shown tab: its row button, the Results button, or the More summary.
+  // aria-current, not aria-selected: these are navigation buttons, not role=tab. admin.css styles it and
+  // types/vignettes-admin.js finds the current subtab by it.
+  function markCurrent(id) {
+    $('tabs').querySelectorAll('[aria-current]').forEach(function (el) { el.removeAttribute('aria-current'); });
+    var el = PLACE[id] === 'results' ? $('tabs').querySelector('button[data-results]') : PLACE[id] === 'more' ? $('tabs').querySelector('.more-menu > summary') : $('tabs').querySelector(':scope > button[data-tab="' + id + '"]');
+    if (el) el.setAttribute('aria-current', 'true');
+    var inResults = PLACE[id] === 'results';
+    $('resultsbar').hidden = !inResults;
+    if (inResults) {
+      resultsView = id;
+      $('resultsbar').querySelectorAll('[data-view]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-view') === id)); });
+      $('rspurpose').textContent = LABELS.purpose[id];
+    }
+  }
+  // The row: Edit study, Participants, Results, Students and plugin tabs, then More (left out when the role sees none of its items).
+  function drawTabs() {
+    var shown = TABS.filter(function (t) { return can(t[2]); }), results = false, h = '';
+    shown.forEach(function (t) {
+      if (PLACE[t[0]] === 'more') return;
+      if (PLACE[t[0]] === 'results') { if (!results) h += '<button type="button" data-tab="report" data-results>' + LABELS.results + '</button>'; results = true; return; }
+      h += '<button type="button" data-tab="' + t[0] + '"' + (t[0] === 'content' ? ' class="tab-main"' : '') + '>' + t[1] + '</button>';
+    });
+    var more = MORE_ORDER.filter(function (id) { return shown.some(function (t) { return t[0] === id; }); });
+    if (more.length) h += '<details class="pt-menu more-menu"><summary>' + LABELS.more + '</summary><div class="pt-pop" role="group" aria-label="More sections">' +
+      more.map(function (id) { return '<button type="button" data-tab="' + id + '">' + LABELS[id] + '</button>'; }).join('') + '</div></details>';
+    $('tabs').innerHTML = h;
+  }
   function showTab(name, opts) {   // opts.remember === false: an automatic choice, not saved as the user's tab
     document.querySelectorAll('section[data-tab]').forEach(function (s) { s.hidden = s.getAttribute('data-tab') !== name; });
-    // aria-current="true", not aria-selected: these buttons are section navigation, not role=tab, and aria-selected is ignored
-    // without that role. Keep this attribute: admin.css styles it and types/vignettes-admin.js finds the current subtab by it.
-    $('tabs').querySelectorAll('button').forEach(function (b) { if (b.getAttribute('data-tab') === name) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); });
+    markCurrent(name);
     if (!(opts && opts.remember === false)) try { sessionStorage.setItem(tabKey, name); } catch (e) {}
     err();
-    if (name === 'participants') { load(); if (can('owner')) loadBackup(); }
+    if (name === 'participants') load();
+    if (name === 'sharing' && can('owner')) loadBackup();
     if (name === 'report') initReport();
     if (name === 'figures' || name === 'analyze' || name === 'integrity') mountTool(name);
     if (name === 'content') loadContent();
@@ -247,8 +293,7 @@
         $('whoami').innerHTML = esc(m.name) + ' <span class="pill">' + esc(m.role) + '</span>' + (getSession() ? ' <a href="/lab/admin/">My studies</a> · <a href="/lab/account/">Account</a>' : '') + ' <button type="button" class="secondary small" id="signout">Sign out</button>';
         $('signout').addEventListener('click', function () { if (dirty && !confirm('Discard unsaved content changes?')) return; dirty = false; endSession().then(function () { location.reload(); }); });
         document.querySelectorAll('[data-role]').forEach(function (el) { el.hidden = !can(el.getAttribute('data-role')); });
-        $('tabs').innerHTML = TABS.filter(function (t) { return can(t[2]); }).map(function (t) { return '<button type="button" data-tab="' + t[0] + '"' + (t[0] === 'content' ? ' class="tab-main"' : '') + '>' + t[1] + '</button>'; }).join('');
-        $('tabs').querySelectorAll('button').forEach(function (b) { b.addEventListener('click', function () { showTab(b.getAttribute('data-tab')); }); });
+        drawTabs();
         $('trole').innerHTML = ['viewer', 'editor', 'manager'].map(function (r) { return '<option value="' + r + '">' + r[0].toUpperCase() + r.slice(1) + '</option>'; }).join('');
         var desc = function () { $('roledesc').textContent = m.roles[$('trole').value]; }; $('trole').addEventListener('change', desc); desc();
         if (can('editor')) {
@@ -267,6 +312,15 @@
       });
     }).catch(function (e) { if (e.code !== 'no_study') { setKey(''); if (e.code !== 'forbidden' || !getSession()) setSession(null); } $('signinbox').hidden = false; $('app').hidden = true; err(e.message); });
   }
+  // Row buttons, the Results button (opens the last Results view) and More items. The page's pt-menu handler closes More.
+  $('tabs').addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('button[data-tab]'); if (!b) return;
+    showTab(b.hasAttribute('data-results') ? resultsView : b.getAttribute('data-tab'));
+  });
+  $('resultsbar').addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('button'); if (!b) return;
+    if (b.id === 'rsgo') showTab('participants'); else if (b.getAttribute('data-view')) showTab(b.getAttribute('data-view'));
+  });
   // Signing out of a researcher session also revokes the token on the server, so a copy of it stops working.
   function endSession() {
     var ses = getSession(); setKey(''); setSession(null);
@@ -632,6 +686,18 @@
   window.addEventListener('beforeunload', function (e) { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
   // A plugin's subtabs: a list, or a function of the content (the Builder tab shows only for studies it can draw).
   function pluginSubs() { return (typeof plugin.subtabs === 'function' ? plugin.subtabs(draft || {}) : plugin.subtabs) || []; }
+  // The side list is drawn in the order a participant meets it. subs() keeps its order; only the drawing is grouped.
+  var GROUP = { consent: 'before', pre: 'before', post: 'after', text: 'throughout', environment: 'delivery', order: 'delivery' };
+  function subGroups() {
+    var list = subs();
+    return ['before', 'study', 'after', 'throughout', 'delivery'].map(function (g) {
+      var items = list.filter(function (s) { return (GROUP[s[0]] || 'study') === g; });
+      if (g === 'before') items.sort(function (a, b) { return (a[0] === 'consent' ? 0 : 1) - (b[0] === 'consent' ? 0 : 1); });
+      return [g, items];
+    }).filter(function (g) { return g[1].length; });
+  }
+  // The default section: the study type's first section (Builder on builder studies); with none, the first one drawn.
+  function firstSub() { var f = subs()[0][0]; return GROUP[f] ? subGroups()[0][1][0][0] : f; }
   function subs() { return pluginSubs().concat([['pre', 'Start-of-session survey'], ['post', 'End-of-session survey'], ['consent', 'Sign-up & consent'], ['environment', 'Devices & timing']].concat(me && /^(multimodal|vignettes)$/.test(me.study.type) ? [['order', 'Block order']] : []).concat([['text', 'Screen text']])); }
   // The rows of a Williams design (as netlify/lib/lab/latin.mjs builds them), for the preview on the Block order tab.
   function williams(n) {
@@ -648,7 +714,7 @@
       Object.keys(c).forEach(function (k) { if (k[0] === '_') delete c[k]; });
       A.locked = !!c.locked; delete c.locked;   // the structure lock (a builder study with real participants), not part of the content
       saved = c; draft = clone(saved); A.draft = draft; setDirty(false);
-      if (!sub || !subs().some(function (s) { return s[0] === sub; })) sub = subs()[0][0];
+      if (!sub || !subs().some(function (s) { return s[0] === sub; })) sub = firstSub();
       if (plugin.onLoad) plugin.onLoad(A);
       var started = res[2].filter(function (p) { return !p.test && (p.consented || p.completedSessions); }).length;
       A.counts = {}; res[2].forEach(function (p) { if (!p.test && p.condition) A.counts[p.condition] = (A.counts[p.condition] || 0) + 1; });   // for the quota boxes
@@ -683,7 +749,10 @@
     postJSON('content-restore', { version: Number(v) }).then(function () { loadContent(true); }).catch(function (e) { err(e.message); });
   });
   $('bundledl').addEventListener('click', function () {
-    err(); call('bundle.zip').then(function (r) { return r.blob(); }).then(function (blob) { saveFile(blob, studyId + '_materials_v' + (saved ? saved.version || 0 : 0) + '.zip'); }).catch(function (e) { err(e.message); });
+    // Backups & sharing can be opened without Edit study, so the content version is read here when the editor has not loaded it.
+    err(); (saved ? Promise.resolve(saved.version || 0) : getJSON('content').then(function (c) { return c.version || 0; })).then(function (v) {
+      return call('bundle.zip').then(function (r) { return r.blob(); }).then(function (blob) { saveFile(blob, studyId + '_materials_v' + v + '.zip'); });
+    }).catch(function (e) { err(e.message); });
   });
   $('designdl').addEventListener('click', function () {
     err(); getJSON('design.json').then(function (d) {
@@ -845,8 +914,10 @@
   function newQuestion(id, kind) { return { id: id, text: '', type: 'scale', n: 7, lo: AGREE7[0], hi: AGREE7[6], labels: AGREE7.slice(), required: false, showIf: 'always', sessions: kind === 'pre' ? [1] : [], conditions: [] }; }
   function genCode() { var a = '23456789ABCDEFGHJKMNPQRSTVWXYZ', s = '', r = new Uint32Array(8); (window.crypto || {}).getRandomValues ? crypto.getRandomValues(r) : r.forEach(function (x, i) { r[i] = Math.random() * 4294967296; }); for (var i = 0; i < 8; i++) s += a[r[i] % a.length]; return s; }
   function renderEditor() {
-    if (!subs().some(function (s) { return s[0] === sub; })) sub = subs()[0][0];   // an edit elsewhere can take the Builder tab away
-    $('subtabs').innerHTML = subs().map(function (s) { return '<button type="button" data-sub="' + s[0] + '"' + (s[0] === sub ? ' aria-current="true"' : '') + '>' + s[1] + '</button>'; }).join('');
+    if (!subs().some(function (s) { return s[0] === sub; })) sub = firstSub();   // an edit elsewhere can take the Builder tab away
+    $('subtabs').innerHTML = subGroups().map(function (g) {
+      return '<h3>' + LABELS.groups[g[0]] + '</h3>' + g[1].map(function (s) { return '<button type="button" data-sub="' + s[0] + '"' + (s[0] === sub ? ' aria-current="true"' : '') + '>' + s[1] + '</button>'; }).join('');
+    }).join('');
     var h = '';
     if (sub === 'pre' || sub === 'post') {
       h = '<p class="muted">' + (sub === 'pre' ? 'Shown at the start of a session, before the items. By default only in session 1; list other session numbers to ask again (for example, 1, 4).' : 'Shown at the end of a session. Leave "Sessions" blank to ask every session.') +
@@ -1204,7 +1275,7 @@
       '<form id="impform"><div class="grid3"><label class="f">Name<input type="text" id="iname" placeholder="Attitudes survey"></label>' +
       '<label class="f">ID (in the link)<input type="text" id="iid" class="mono" placeholder="attitudes-survey"></label>' +
       '<label class="f">Survey file<input type="file" id="ifile" accept=".qsf,.lss,.csv,.xlsx,.txt"></label></div><div class="row"><button type="submit">Create study and open the import page</button></div></form><div id="impout" role="status"></div></div>' +
-      '<div class="section" data-create><h2>Create a study from a design file</h2><p class="muted">A study design file (.json) holds a study\'s whole design and no data. Download one from a study\'s Edit study tab, or get one from another lab or a paper\'s materials. The new study starts unlisted, with no participants.</p>' +
+      '<div class="section" data-create><h2>Create a study from a design file</h2><p class="muted">A study design file (.json) holds a study\'s whole design and no data. Download one from a study\'s More → Backups &amp; sharing, or get one from another lab or a paper\'s materials. The new study starts unlisted, with no participants.</p>' +
       '<form id="dsgform"><div class="grid3"><label class="f">Name<input type="text" id="dname" placeholder="Leave empty to keep the file\'s name"></label><label class="f">Link name<input type="text" id="did" class="mono" placeholder="replication-1"></label>' +
       '<label class="f">Design file<input type="file" id="dfile" accept=".json,application/json"></label></div><div class="row"><button type="submit">Create study from the file</button></div></form><div id="dsgout" role="status"></div></div>' +
       '<div class="section" id="researchers"><h2>Researchers</h2><p class="muted">Each researcher has their own account (email and password, with an optional authenticator app) and a role in each study: viewer, editor, manager, or owner. There is no email service here: an invitation is a link you copy or send from your own mail app. A link works once. Invitations last 7 days and password-reset links 24 hours. The owner key always works, whatever happens to accounts.</p>' +
@@ -1400,7 +1471,7 @@
       var s = ROWS.filter(function (x) { return x.id === id; })[0] || { name: id }, box = $('clonebox');
       box.innerHTML = '<form class="qcard" id="delf"><h3 id="delhead" tabindex="-1">Delete ' + esc(s.name) + ' permanently</h3>' +
         '<p><strong>This cannot be undone.</strong> Every participant, answer, recording, uploaded file, setting, and team key of this study is deleted, and so is its copy in the backup store. Researchers lose their access to it. The lab activity log keeps a note that it was deleted, and by whom.</p>' +
-        '<p>Download the complete backup first and keep it in GSU-approved storage, if your IRB protocol or data plan says to keep the data: click Restore, open the study\'s admin page, use "Download complete backup" in its Backups section, then archive it again.</p>' +
+        '<p>Download the complete backup first and keep it in GSU-approved storage, if your IRB protocol or data plan says to keep the data: click Restore, open the study\'s admin page, use "Download complete backup" under More → Backups &amp; sharing, then archive it again.</p>' +
         '<label class="f">To confirm, type the link name <span class="mono">' + esc(id) + '</span><input type="text" id="delconfirm" class="mono" autocomplete="off" spellcheck="false"></label>' +
         '<div class="row"><button type="submit" class="danger">Delete permanently</button><button type="button" class="secondary" id="delcancel">Cancel</button></div><p class="muted" id="delprog" role="status"></p></form>';
       $('delhead').focus();

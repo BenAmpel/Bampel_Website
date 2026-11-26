@@ -7,6 +7,9 @@
 // And the first tab and the status line (docs/designs/console-ia.md, Stage 1): a draft opens on Edit study for an
 // editor, a live study on Participants; a tab saved in this browser tab wins; #import opens the import section; the
 // automatic choice is not saved; the line under the title says Draft or Live.
+// And the grouped row (Stage 2): Results holds Pilot report, Figures and Analyze behind one tab with a view switch;
+// More holds Data quality, Team, Encryption, Activity and Backups & sharing; the current control is the row button,
+// the Results button or the More summary; Edit study's side list is grouped in the order a participant meets it.
 // Runs the real admin.js in jsdom against the local lab server on in-memory stores (nothing is saved).
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -66,14 +69,17 @@ async function openAdmin({ study = 'tab-test', key = KEY, hash = '', savedTab, d
     return append.call(this, el);
   };
   window.eval(ADMIN_JS);
-  const tabs = await until(() => { const t = doc.getElementById('tabs'); return t && t.querySelector('button[aria-current="true"]') && t; }, 'a current section tab');
+  const tabs = await until(() => { const t = doc.getElementById('tabs'); return t && t.querySelector('[aria-current="true"]') && t; }, 'a current section tab');
   const state = doc.getElementById('studystate');
   return { window, doc, tabs, state, saved: () => window.sessionStorage.getItem('lab_admin_tab_' + study) };
 }
-const current = nav => [...nav.querySelectorAll('button')].filter(b => b.getAttribute('aria-current') === 'true').map(b => b.getAttribute('data-tab') || b.getAttribute('data-sub'));
+const current = nav => [...nav.querySelectorAll('button, summary')].filter(b => b.getAttribute('aria-current') === 'true').map(b => b.getAttribute('data-tab') || b.getAttribute('data-sub') || 'more');
+const rowLabels = nav => [...nav.children].map(el => el.tagName === 'DETAILS' ? el.querySelector('summary').textContent : el.textContent);
+// Opens More and clicks one of its items.
+const viaMore = (nav, id) => { nav.querySelector('details.more-menu').open = true; nav.querySelector(`.more-menu button[data-tab="${id}"]`).click(); };
 
 try {
-  for (const [id, body] of [['tab-test', { type: 'vignettes' }], ['tab-live', { type: 'vignettes' }], ['tab-lock', { type: 'multimodal', template: 'multimodal-builder' }]]) {
+  for (const [id, body] of [['tab-test', { type: 'vignettes' }], ['tab-live', { type: 'vignettes' }], ['tab-lock', { type: 'multimodal', template: 'multimodal-builder' }], ['tab-chat', { type: 'chatbot' }]]) {
     const made = await post('/api/lab/_lab/create', { id, name: id, ...body });
     assert(made.ok, JSON.stringify(made));
   }
@@ -131,8 +137,8 @@ try {
   assert.deepEqual(shown(), ['content']);
   assert.equal(doc.querySelectorAll('h1').length, 1, 'one h1');
 
-  for (const name of ['report', 'students', 'activity', 'participants']) {
-    tabs.querySelector(`button[data-tab="${name}"]`).click();
+  for (const name of ['report', 'students', 'participants']) {
+    tabs.querySelector(`:scope > button[data-tab="${name}"]`).click();
     assert.deepEqual(current(tabs), [name], `${name}: only that tab is current`);
     assert.deepEqual(shown(), [name], `${name}: only its section is shown`);
     assert.equal(A.saved(), name, `${name}: a clicked tab is saved`);
@@ -140,6 +146,40 @@ try {
   tabs.querySelector('button[data-tab="content"]').click();
   assert.deepEqual(current(tabs), ['content']);
   console.log('section tabs: aria-current follows the click, one at a time, and matches the shown section');
+
+  // More: an item click opens its section, marks the summary current and closes the menu; Escape closes it and focuses the summary.
+  const more = tabs.querySelector('details.more-menu'), summary = more.querySelector('summary');
+  assert.equal(tabs.lastElementChild, more, 'More is last in the row');
+  assert.deepEqual([...more.querySelectorAll('button')].map(b => b.textContent), ['Data quality', 'Team', 'Encryption', 'Activity', 'Backups & sharing'], 'owner: More items in order');
+  viaMore(tabs, 'team');
+  assert.deepEqual(current(tabs), ['more'], 'Team open: the More summary is current');
+  assert.deepEqual(shown(), ['team']);
+  assert.equal(A.saved(), 'team', 'a More item is saved like any tab');
+  assert.equal(more.open, false, 'an item click closes More');
+  more.open = true; summary.focus();
+  doc.dispatchEvent(new A.window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  assert.equal(more.open, false, 'Escape closes More');
+  assert.equal(doc.activeElement, summary, 'Escape leaves focus on the summary');
+  viaMore(tabs, 'activity');
+  assert.deepEqual(shown(), ['activity']); assert.deepEqual(current(tabs), ['more']);
+  console.log('More: items in order, summary current, item click and Escape close it');
+
+  // Results: one row button; the view switch changes the panel, the row button stays current, the bar follows.
+  const bar = doc.getElementById('resultsbar');
+  const pressed = () => [...bar.querySelectorAll('[data-view]')].filter(b => b.getAttribute('aria-pressed') === 'true').map(b => b.getAttribute('data-view'));
+  tabs.querySelector('button[data-results]').click();
+  assert.equal(bar.hidden, false, 'the Results bar shows on Results');
+  bar.querySelector('[data-view="figures"]').click();
+  assert.deepEqual(shown(), ['figures']); assert.deepEqual(current(tabs), ['report'], 'Figures: the Results button is current');
+  assert.deepEqual(pressed(), ['figures'], 'Figures is pressed');
+  tabs.querySelector(':scope > button[data-tab="students"]').click();
+  assert.equal(bar.hidden, true, 'the bar hides off Results');
+  tabs.querySelector('button[data-results]').click();
+  assert.deepEqual(shown(), ['figures'], 'Results reopens the last view');
+  bar.querySelector('#rsgo').click();
+  assert.deepEqual(shown(), ['participants'], 'the download link opens Participants');
+  tabs.querySelector(':scope > button[data-tab="content"]').click();
+  console.log('Results: one row button, a view switch, the last view remembered, a way to the download');
 
   const subtabs = await until(() => { const t = doc.getElementById('subtabs'); return t && t.querySelector('button') && t; }, 'the content subtabs');
   assert.equal(subtabs.getAttribute('aria-label'), 'Edit study sections');
@@ -155,6 +195,45 @@ try {
   assert.equal(doc.querySelectorAll('[aria-selected]').length, 0);
   assert.deepEqual(current(tabs), ['content'], 'switching subtabs leaves the section tab alone');
   console.log('subtabs: aria-current follows the click and focus returns to the rebuilt current subtab');
+
+  // The side list's groups, in the order a participant meets them; consent before pre-survey; the type's first own section opens.
+  const heads = [...subtabs.querySelectorAll('h3')].map(h => h.textContent);
+  assert.equal(heads[0], 'Before the task');
+  const order = ['Before the task', 'The study', 'After the task', 'Throughout', 'Delivery'];
+  assert.deepEqual(heads, order.filter(h => heads.includes(h)), 'groups in order: ' + heads.join());
+  const firstUnder = name => { const h = [...doc.querySelectorAll('#subtabs h3')].find(x => x.textContent === name); return h.nextElementSibling.getAttribute('data-sub'); };
+  assert.equal(firstUnder('Before the task'), 'consent', 'consent is drawn before the pre-survey');
+  const P = await openAdmin({ savedTab: 'content' });
+  const psub = await until(() => { const t = P.doc.getElementById('subtabs'); return t && t.querySelector('button[aria-current="true"]') && t; }, 'a current subtab');
+  const pFirst = [...psub.querySelectorAll('h3')].find(x => x.textContent === 'The study').nextElementSibling.getAttribute('data-sub');
+  assert.deepEqual(current(psub), [pFirst], 'the type\'s first own section (first under The study) is current');
+  console.log('side list: groups in order, consent first, opens on the type\'s first own section');
+
+  // A chat study's row for an owner and a viewer; a saved Results view; Backups & sharing.
+  const chatViewer = (await post('/api/lab/tab-chat/admin/team-add', { name: 'V', role: 'viewer' })).key;
+  const CO = await openAdmin({ study: 'tab-chat', savedTab: 'analyze' });
+  assert.deepEqual(rowLabels(CO.tabs), ['Edit study', 'Participants', 'Results', 'Students', 'Compare', 'Conversations', 'More'], 'chat study, owner: ' + rowLabels(CO.tabs).join());
+  assert.equal(CO.doc.querySelector('section[data-tab="analyze"]').hidden, false, 'a saved analyze tab opens Analyze');
+  assert.deepEqual(current(CO.tabs), ['report']);
+  const CV = await openAdmin({ study: 'tab-chat', key: chatViewer, savedTab: 'sharing' });
+  assert.deepEqual(rowLabels(CV.tabs), ['Edit study', 'Participants', 'Results', 'More'], 'chat study, viewer: ' + rowLabels(CV.tabs).join());
+  const share = CV.doc.querySelector('section[data-tab="sharing"]');
+  assert.equal(share.hidden, false, 'a saved sharing tab opens Backups & sharing');
+  assert(share.querySelector('#bundledl'), 'a viewer sees the reproducibility bundle');
+  assert.equal(share.querySelector('[data-role="owner"]').hidden, true, 'a viewer does not see Backups');
+  // The bundle's file name carries the content version even when Edit study was never opened on this page.
+  const get = async path => (await fetch(base + path, { headers: { 'x-admin-key': KEY } })).json();
+  const chatContent = await get('/api/lab/tab-chat/admin/content');
+  for (const k of Object.keys(chatContent)) if (k[0] === '_' || k === 'locked') delete chatContent[k];
+  const savedV = await post('/api/lab/tab-chat/admin/content-save', { content: chatContent, baseVersion: chatContent.version || 0 });
+  assert(savedV.ok && savedV.version >= 1, JSON.stringify(savedV));
+  const names = [];
+  CV.window.URL.createObjectURL = () => 'blob:test'; CV.window.URL.revokeObjectURL = () => {};
+  CV.window.HTMLAnchorElement.prototype.click = function () { if (this.download) names.push(this.download); };
+  share.querySelector('#bundledl').click();
+  await until(() => names.length, 'the bundle download');
+  assert.deepEqual(names, [`tab-chat_materials_v${savedV.version}.zip`], 'bundle file name from the content version: ' + names.join());
+  console.log('chat study row for owner and viewer; saved analyze and sharing tabs; Backups owner-only; bundle name without the editor');
 } finally {
   await until(() => inFlight === 0, 'the pages\' own requests').catch(() => {});
   await wait(50);

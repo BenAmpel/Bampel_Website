@@ -43,6 +43,35 @@ nav.tabs button.tab-main[aria-current=true] { box-shadow: inset 0 -2px 0 var(--a
 #studystate { margin: 2px 0 0; font-size: 14px; }
 .testing-tools > summary { cursor: pointer; font-size: 1.375rem; font-weight: 700; letter-spacing: -.015em; padding: 4px 0; }
 .testing-tools[open] > summary { margin-bottom: 8px; }
+/* Stage 2: More at the row's end, a Results view switch, and the Edit study side list. */
+#tabs { align-items: center; }
+#tabs .more-menu { margin-left: auto; }
+#tabs .more-menu > summary { border: 0; background: transparent; color: var(--muted); padding: 7px 16px; min-height: 38px; font-size: inherit; }
+#tabs .more-menu > summary::after { content: '▾'; font-size: .85em; }
+#tabs .more-menu > summary[aria-current=true] { background: var(--card); color: var(--text); box-shadow: 0 1px 2px rgba(0, 25, 75, .12), 0 2px 8px rgba(0, 25, 75, .08); }
+#tabs .more-menu .pt-pop { width: 220px; left: auto; right: 0; }
+nav.tabs .pt-pop button, nav.tabs .pt-pop button:hover:not([disabled]) { all: unset; box-sizing: border-box; display: block; padding: 8px 12px; border-radius: 9px; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--text); }
+nav.tabs .pt-pop button:hover, nav.tabs .pt-pop button:focus-visible { background: var(--accent-soft); }
+.resultsbar { margin: 12px 0 4px; }
+.resultsbar[hidden] { display: none; }
+.rs-seg { display: inline-flex; gap: 2px; padding: 3px; background: var(--bg-2); border-radius: 999px; }
+.rs-seg button { background: transparent; color: var(--muted); border: 0; border-radius: 999px; padding: 5px 14px; min-height: 32px; font-size: 14px; font-weight: 600; }
+.rs-seg button[aria-pressed=true] { background: var(--card); color: var(--text); box-shadow: 0 1px 2px rgba(0, 25, 75, .12); }
+.resultsbar p { margin: 6px 0 0; font-size: 14px; }
+.editgrid { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 24px; align-items: start; }
+.editpane, .editpane > fieldset { min-width: 0; }
+.editgrid #subtabs { display: block; width: auto; margin: 0; padding: 0; background: none; border-radius: 0; position: sticky; top: 12px; }
+.editgrid #subtabs h3 { margin: 14px 0 4px; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.editgrid #subtabs h3:first-child { margin-top: 0; }
+.editgrid #subtabs button { display: block; width: 100%; text-align: left; border-radius: 0 8px 8px 0; border-left: 3px solid transparent; padding: 6px 10px; min-height: 34px; }
+.editgrid #subtabs button[aria-current=true] { border-left-color: var(--accent); box-shadow: none; background: var(--card); }
+@media (max-width: 760px) {
+  .editgrid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .editgrid #subtabs { position: static; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+  .editgrid #subtabs h3 { flex-basis: 100%; margin: 6px 0 0; font-size: 11px; font-variant: small-caps; text-transform: none; letter-spacing: .02em; }
+  .editgrid #subtabs button { display: inline-block; width: auto; border-left: 0; border-bottom: 2px solid transparent; border-radius: 8px; }
+  .editgrid #subtabs button[aria-current=true] { border-bottom-color: var(--accent); }
+}
 .who { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
 .pill { font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: 999px; background: var(--bg-2); color: var(--muted); }
 .qcard { border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin: 12px 0; background: var(--card); }
