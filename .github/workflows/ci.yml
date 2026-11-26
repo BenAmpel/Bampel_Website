@@ -89,6 +89,9 @@ jobs:
       - name: Pathway Finder has no inline style attributes
         run: node --test tests/pathways-no-inline-style.test.mjs
 
+      - name: CCAIR publications shell lists every publication (static count equals publications.json)
+        run: node --test tests/ccair-publications-static.test.mjs
+
       - name: CCAIR mobile menu scroll lock
         run: node --test tests/ccair-menu-lock.test.mjs
 
