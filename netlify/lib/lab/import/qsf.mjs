@@ -88,7 +88,7 @@ export function importQsf(text, { sourceName } = {}) {
         case 'Group': walk(f.Flow, ctx); break;
         case 'EmbeddedData': declareEmbedded(f.EmbeddedData, ctx); break;
         case 'EndSurvey':
-          if (f.EndingType && f.EndingType !== 'Default' && (f.Options?.Advanced === 'true' || f.EndingType === 'Redirect' || f.Options?.EOSRedirectURL)) unsupported(report, `end of survey (${f.FlowID || ''})`, 'A redirect or custom ending is not followed; the lab shows its own completion text (Study content > Screen text).');
+          if (f.EndingType && f.EndingType !== 'Default' && (f.Options?.Advanced === 'true' || f.EndingType === 'Redirect' || f.Options?.EOSRedirectURL)) unsupported(report, `end of survey (${f.FlowID || ''})`, 'A redirect or custom ending is not followed; the lab shows its own completion text (Edit study > Screen text).');
           if (!ctx.branches.length) { stopped = true; if (!ctx.rand.length) report.warnings.push('The survey flow ends early; blocks after that point were not imported.'); }
           else ends.push({ branches: ctx.branches, after: segments.length });
           break;

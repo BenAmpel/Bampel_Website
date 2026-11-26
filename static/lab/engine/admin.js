@@ -93,11 +93,16 @@
   if (!studyId) return labConsole();
 
   // ======================= study admin =======================
-  root.innerHTML = '<div class="who"><div class="brandmark"><span class="wordmark"><b>CCAIR Behavioral Lab</b><small>Georgia State University · J. Mack Robinson College of Business</small></span><h1 class="h-flush" id="title">Study admin</h1></div><span id="whoami" class="muted"></span></div>' + SIGNIN + '<div id="app" hidden>' +
+  // Every user-facing tab name, and the status line's text, in one place (docs/designs/console-ia.md).
+  var LABELS = { content: 'Edit study', participants: 'Participants', report: 'Pilot report', figures: 'Figures', analyze: 'Analyze', integrity: 'Integrity',
+    students: 'Students', team: 'Team', privacy: 'Encryption', activity: 'Activity', testing: 'Testing tools',
+    state: { draft: 'Draft: no real sign-ups yet', locked: 'Draft: no one has consented yet. The design is locked because a real person registered.',
+      seeEdit: 'See Edit study for the design.', live: 'Live: real participants have signed up', one: 'Live: 1 real participant', many: function (n) { return 'Live: ' + n + ' real participants'; } } };
+  root.innerHTML = '<div class="who"><div class="brandmark"><span class="wordmark"><b>CCAIR Behavioral Lab</b><small>Georgia State University · J. Mack Robinson College of Business</small></span><h1 class="h-flush" id="title">Study admin</h1><p class="muted" id="studystate" hidden></p></div><span id="whoami" class="muted"></span></div>' + SIGNIN + '<div id="app" hidden>' +
     '<p class="muted links" id="links"></p>' +
-    '<div class="preview-bar" id="previewbar" hidden><div><strong>See it as a participant</strong><span class="muted">Opens the study in a new tab as a test participant (left out of real counts), with no wait between sessions.</span></div>' +
-      '<div class="row"><label id="pvcondwrap">Arm <select id="pvcond"></select></label><button type="button" class="primary" id="preview">Preview as a participant</button></div><p class="muted" id="pvout" role="status"></p></div>' +
-    '<nav class="tabs" id="tabs" aria-label="Study admin sections"></nav>' +
+    '<div class="tabrow"><nav class="tabs" id="tabs" aria-label="Study admin sections"></nav>' +
+    '<div class="preview-bar" id="previewbar" hidden><label id="pvcondwrap">Arm <select id="pvcond"></select></label><button type="button" class="primary small" id="preview" title="Opens the study in a new tab as a test participant (left out of real counts), with no wait between sessions.">Preview as participant</button></div></div>' +
+    '<p class="muted" id="pvout" role="status"></p>' +
     '<section data-tab="participants">' +
       // Summary figures, then one Download menu (every export, the codebook, analysis starters), then the filtered list.
       '<div class="pt-head"><div class="pt-stats" id="summary" aria-live="polite"></div><div class="pt-actions">' +
@@ -127,16 +132,16 @@
       '<div class="table-wrap pt-table"><table id="tbl"></table></div><div class="section rp" id="replaybox" hidden></div>' +
       '<div class="section" data-role="owner"><h2>Backups</h2><p class="muted">Every hour the study data is copied to a separate backup store on Netlify (answers once, changing records every time). That protects against mistakes and bugs. For a copy outside Netlify, download a complete backup (every record, raw traces, emails, study content, team, and activity log) and save it to GSU-approved storage, for example weekly. It contains emails, so treat it as identifiable data. Deleting a participant also removes them from the backup store.</p>' +
         '<p id="bkstatus" class="muted"></p><div class="row"><button type="button" class="secondary" id="bkrun">Run backup now</button><button type="button" class="secondary" id="bkdl">Download complete backup (.json.gz)</button></div><p id="bkprog" class="muted"></p></div>' +
-      '<div class="section" data-role="owner"><h2>Live self-test</h2><p class="muted">Runs one throwaway test participant per group through every session of the current design on this live site (practice, surveys, every item), then checks what was saved and what the exports say, and deletes the test participants. Real participants are not touched.</p>' +
+      '<details class="section testing-tools" data-role="owner"><summary>' + LABELS.testing + '</summary><h3>Live self-test</h3><p class="muted">Runs one throwaway test participant per group through every session of the current design on this live site (practice, surveys, every item), then checks what was saved and what the exports say, and deletes the test participants. Real participants are not touched.</p>' +
         '<div class="row"><button type="button" id="selftest">Run self-test</button><label class="check"><input type="checkbox" id="stkeep"> Keep the test participants so I can look at them (delete later with "Delete all test participants")</label></div><p class="muted" id="stprog"></p><div id="stout"></div>' +
-        '<div class="pt-danger"><div><strong>Test participants</strong><p class="muted">Pilots, previews, and kept self-test runs. Deleting them removes their answers and traces for good; real participants are not touched.</p></div><button type="button" class="danger secondary" id="deltest">Delete all test participants</button></div></div>' +
+        '<div class="pt-danger"><div><strong>Test participants</strong><p class="muted">Pilots, previews, and kept self-test runs. Deleting them removes their answers and traces for good; real participants are not touched.</p></div><button type="button" class="danger secondary" id="deltest">Delete all test participants</button></div></details>' +
     '</section>' +
     '<section data-tab="figures" hidden></section><section data-tab="analyze" hidden></section><section data-tab="integrity" hidden></section>' +
     '<section data-tab="report" hidden><p class="muted" id="rpintro"></p><div class="row">' +
       '<label>Participants <select id="rpwho"><option value="real">Real participants only</option><option value="all">Everyone, including test</option></select></label>' +
       '<label>Label <select id="rplabel"><option value="">All labels</option></select></label><button type="button" id="rprun">Build report</button>' +
       '<button type="button" class="secondary" id="rpcsv" disabled>Download per-item table (CSV)</button></div><p class="muted" id="rpprog"></p><div id="rpout"></div></section>' +
-    '<section data-tab="students" hidden><h2>Add students</h2><p class="muted">Optional while self sign-up is on (Study content → Sign-up &amp; consent): add emails here to pre-enroll a class with its own label or gap days, to mark pilots as test, or to let in addresses outside the sign-up domains. One per line or separated by commas. Each email is stored once, apart from the answers (for extra credit); research exports identify people only by a study ID derived from the email with a secret key. Conditions are assigned so the groups stay balanced. Emails already enrolled are skipped.</p>' +
+    '<section data-tab="students" hidden><h2>Add students</h2><p class="muted">Optional while self sign-up is on (Edit study → Sign-up &amp; consent): add emails here to pre-enroll a class with its own label or gap days, to mark pilots as test, or to let in addresses outside the sign-up domains. One per line or separated by commas. Each email is stored once, apart from the answers (for extra credit); research exports identify people only by a study ID derived from the email with a secret key. Conditions are assigned so the groups stay balanced. Emails already enrolled are skipped.</p>' +
       '<form id="rosterform"><textarea id="emails" class="mono ta110" placeholder="jdoe1@student.gsu.edu&#10;asmith2@student.gsu.edu"></textarea><div class="row mt8">' +
       '<label>Label (optional) <input class="w180" type="text" id="rlabel" placeholder="CIS8080-fall26"></label><label>Gap days <input class="w90" type="number" id="rgap" min="0" max="60" placeholder="default"></label>' +
       '<label class="check"><input type="checkbox" id="rtest"> Test</label><button type="submit">Add students</button></div></form><p id="rosterout" class="muted"></p>' +
@@ -146,7 +151,7 @@
       '<div class="section"><h2>Create pilot access codes</h2><p class="muted">For pilots and team testing without a roster. Mark them as test so they are excluded from the counts and can be deleted in one step. Gap days sets the minimum wait between sessions (0 for piloting).</p>' +
       '<form class="row" id="createform"><label>How many <input class="w90" type="number" id="count" min="1" max="300" value="3"></label><label>Label (optional) <input class="w160" type="text" id="label" placeholder="pilot-oct"></label>' +
       '<label>Gap days <input class="w90" type="number" id="gap" min="0" max="60" placeholder="default"></label><label class="check"><input type="checkbox" id="test" checked> Test codes</label><button type="submit">Create</button></form><div id="created" class="keybox" hidden></div></div></section>' +
-    '<section data-tab="content" hidden><p class="muted" id="contentinfo"></p><div id="contentwarn"></div><p class="ok" id="say" role="status"></p><nav class="tabs sub" id="subtabs" aria-label="Study content sections"></nav><div id="viewsw"></div><fieldset class="fs-plain" id="editor"></fieldset>' +
+    '<section data-tab="content" hidden><p class="muted" id="contentinfo"></p><div id="contentwarn"></div><p class="ok" id="say" role="status"></p><nav class="tabs sub" id="subtabs" aria-label="Edit study sections"></nav><div id="viewsw"></div><fieldset class="fs-plain" id="editor"></fieldset>' +
       '<div class="savebar" id="savebar" data-role="editor"><span id="dirty" class="muted">No unsaved changes.</span><input type="text" id="note" class="grow" placeholder="What changed? (optional, shown in the activity log)">' +
       '<button type="button" class="secondary" id="discard" disabled>Discard changes</button><button type="button" id="save" disabled>Save changes</button></div>' +
       '<div class="section"><h2>Versions</h2><p class="muted">Every save makes a new version. Restoring an old version saves it again as the newest version, so nothing is lost. Each answer records the version it was collected under.</p><div class="table-wrap"><table id="vtbl"></table></div></div>' +
@@ -182,14 +187,15 @@
   $('keyhelp').innerHTML = 'Sign in with your researcher account, or use the lab owner key (the <code>LAB_ADMIN_KEY</code> or <code>VC_ADMIN_KEY</code> Netlify variable) or the team key the owner gave you. Keys and sign-ins are kept in this tab only. New here? Read the <a href="/lab/guide/">researcher guide</a>.';
 
   // ---------- sign-in and tabs ----------
-  var TABS = [['participants', 'Participants', 'viewer'], ['report', 'Pilot report', 'viewer'], ['figures', 'Figures', 'viewer'], ['analyze', 'Analyze', 'viewer'], ['integrity', 'Integrity', 'manager'], ['students', 'Students', 'manager'], ['content', 'Study content', 'viewer'], ['team', 'Team', 'owner'], ['privacy', 'Encryption', 'viewer'], ['activity', 'Activity', 'owner']];
+  var TABS = [['content', 'viewer'], ['participants', 'viewer'], ['report', 'viewer'], ['figures', 'viewer'], ['analyze', 'viewer'], ['integrity', 'manager'], ['students', 'manager'], ['team', 'owner'], ['privacy', 'viewer'], ['activity', 'owner']]
+    .map(function (t) { return [t[0], LABELS[t[0]], t[1]]; });
   var tabKey = 'lab_admin_tab_' + studyId;
-  function showTab(name) {
+  function showTab(name, opts) {   // opts.remember === false: an automatic choice, not saved as the user's tab
     document.querySelectorAll('section[data-tab]').forEach(function (s) { s.hidden = s.getAttribute('data-tab') !== name; });
     // aria-current="true", not aria-selected: these buttons are section navigation, not role=tab, and aria-selected is ignored
     // without that role. Keep this attribute: admin.css styles it and types/vignettes-admin.js finds the current subtab by it.
     $('tabs').querySelectorAll('button').forEach(function (b) { if (b.getAttribute('data-tab') === name) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); });
-    try { sessionStorage.setItem(tabKey, name); } catch (e) {}
+    if (!(opts && opts.remember === false)) try { sessionStorage.setItem(tabKey, name); } catch (e) {}
     err();
     if (name === 'participants') { load(); if (can('owner')) loadBackup(); }
     if (name === 'report') initReport();
@@ -200,6 +206,15 @@
     if (name === 'activity') loadActivity();
     // A study type may add top-level tabs (plugin.tabs: [{ id, label, role, render(sectionEl, api) }]), for example the economic game's operations tab.
     (plugin && plugin.tabs || []).forEach(function (t) { if (t.id === name) t.render(document.querySelector('section[data-tab="' + name + '"]'), pluginApi()); });
+  }
+  // The status line under the title: Draft or Live, from me.live and me.locked (docs/designs/console-ia.md, Status line strings).
+  function drawState() {
+    var t = '', S = LABELS.state;
+    if (typeof me.live === 'boolean') {
+      if (me.live) t = S.live;
+      else { t = me.locked ? S.locked : S.draft; if (!can('editor')) t += (me.locked ? ' ' : '. ') + S.seeEdit; }
+    }
+    $('studystate').textContent = t; $('studystate').hidden = !t;
   }
   function pluginApi() { return { getJSON: getJSON, postJSON: postJSON, call: call, saveFile: saveFile, toCsv: toCsv, esc: esc, err: err, day: day, can: can, fmt: fmt, median: median, mean: mean, studyId: studyId, me: me }; }
   function loadPlugin(type) {
@@ -232,7 +247,7 @@
         $('whoami').innerHTML = esc(m.name) + ' <span class="pill">' + esc(m.role) + '</span>' + (getSession() ? ' <a href="/lab/admin/">My studies</a> · <a href="/lab/account/">Account</a>' : '') + ' <button type="button" class="secondary small" id="signout">Sign out</button>';
         $('signout').addEventListener('click', function () { if (dirty && !confirm('Discard unsaved content changes?')) return; dirty = false; endSession().then(function () { location.reload(); }); });
         document.querySelectorAll('[data-role]').forEach(function (el) { el.hidden = !can(el.getAttribute('data-role')); });
-        $('tabs').innerHTML = TABS.filter(function (t) { return can(t[2]); }).map(function (t) { return '<button type="button" data-tab="' + t[0] + '">' + t[1] + '</button>'; }).join('');
+        $('tabs').innerHTML = TABS.filter(function (t) { return can(t[2]); }).map(function (t) { return '<button type="button" data-tab="' + t[0] + '"' + (t[0] === 'content' ? ' class="tab-main"' : '') + '>' + t[1] + '</button>'; }).join('');
         $('tabs').querySelectorAll('button').forEach(function (b) { b.addEventListener('click', function () { showTab(b.getAttribute('data-tab')); }); });
         $('trole').innerHTML = ['viewer', 'editor', 'manager'].map(function (r) { return '<option value="' + r + '">' + r[0].toUpperCase() + r.slice(1) + '</option>'; }).join('');
         var desc = function () { $('roledesc').textContent = m.roles[$('trole').value]; }; $('trole').addEventListener('change', desc); desc();
@@ -242,9 +257,13 @@
         }
         $('selftest').textContent = 'Run self-test (' + (m.conditions.length === 1 ? 'one group' : 'all ' + m.conditions.length + ' groups') + ')';
         $('rpintro').innerHTML = plugin.reportIntro || 'How the items and sessions are performing, for tuning the study after a pilot.';
+        drawState();
+        // First tab: #import (from the lab console's "create from a survey file"), else the tab this browser tab last used,
+        // else Edit study for an editor on a draft, else Participants. Only a tab the user clicks is remembered.
         var last = null; try { last = sessionStorage.getItem(tabKey); } catch (e) {}
-        if (location.hash === '#import' && can('editor') && pluginSubs().some(function (s) { return s[0] === 'import'; })) { sub = 'import'; last = 'content'; }   // opened from the lab console's "create from a survey file"
-        showTab(TABS.some(function (t) { return t[0] === last && can(t[2]); }) ? last : 'participants');
+        if (location.hash === '#import' && can('editor') && pluginSubs().some(function (s) { return s[0] === 'import'; })) { sub = 'import'; showTab('content', { remember: false }); }
+        else if (TABS.some(function (t) { return t[0] === last && can(t[2]); })) showTab(last, { remember: false });
+        else showTab(can('editor') && me.live === false ? 'content' : 'participants', { remember: false });
       });
     }).catch(function (e) { if (e.code !== 'no_study') { setKey(''); if (e.code !== 'forbidden' || !getSession()) setSession(null); } $('signinbox').hidden = false; $('app').hidden = true; err(e.message); });
   }
@@ -345,6 +364,10 @@
       $('condbox').querySelector('summary').textContent = 'Real participants by condition (' + conds.length + ')';
       $('condchips').innerHTML = conds.map(function (k) { return '<span class="pt-chip"><code>' + esc(k) + '</code><b>' + by[k] + '</b></span>'; }).join('');
       $('deltest').disabled = !(rows.length - real.length);
+      if (me && me.live === true) {   // the status line's count: real sign-ups, the rule engine.isRealSignup applies on the server
+        var n = rows.filter(function (p) { return !p.test && (p.consented || p.completedSessions > 0); }).length;
+        if (n) $('studystate').textContent = n === 1 ? LABELS.state.one : LABELS.state.many(n);
+      }
       render();
     }).catch(function (e) { err(e.message); });
   }
@@ -546,7 +569,7 @@
     var byS = {}; Object.keys(sess).forEach(function (k) { var x = sess[k]; var b = byS[x.s] = byS[x.s] || { started: 0, done: 0, mins: [] }; b.started++; if (x.end) { b.done++; if (x.start) b.mins.push((new Date(x.end) - new Date(x.start)) / 60000); } });
     var h = '<h2>Sessions</h2><div class="table-wrap"><table><tr><th>Session</th><th>Started</th><th>Completed</th><th>Median minutes</th><th>Slowest</th></tr>' +
       Object.keys(byS).sort(function (a, b) { return a - b; }).map(function (s) { var x = byS[s], md = median(x.mins); return '<tr><td>' + s + '</td><td>' + x.started + '</td><td>' + x.done + '</td><td>' + (md == null ? '–' : md.toFixed(1)) + '</td><td>' + (x.mins.length ? Math.max.apply(null, x.mins).toFixed(1) : '–') + '</td></tr>'; }).join('') +
-      '</table></div><p class="muted">Compare the median with the ' + content.minutesPerSession + ' minutes promised to participants (Study content → Sign-up &amp; consent).</p>';
+      '</table></div><p class="muted">Compare the median with the ' + content.minutesPerSession + ' minutes promised to participants (Edit study → Sign-up &amp; consent).</p>';
     var cs = {};
     rows.forEach(function (r) { var k = r.condition + '|' + r.session, x = cs[k] = cs[k] || { n: 0, secs: [] }; x.n++; var t = RA.num(r.trial_ms); if (t != null) x.secs.push(t / 1000); });
     h += '<h2>By condition and session</h2><div class="table-wrap"><table><tr><th>Condition</th><th>Session</th><th>Answered items</th><th>Median seconds per item</th></tr>' +
@@ -629,7 +652,7 @@
       if (plugin.onLoad) plugin.onLoad(A);
       var started = res[2].filter(function (p) { return !p.test && (p.consented || p.completedSessions); }).length;
       A.counts = {}; res[2].forEach(function (p) { if (!p.test && p.condition) A.counts[p.condition] = (A.counts[p.condition] || 0) + 1; });   // for the quota boxes
-      A.started = started;
+      A.started = started;   // the same rule as engine.isRealSignup, applied to the Participants list
       $('contentinfo').textContent = 'Current version: ' + (saved.version || 0) + (saved.version ? ', saved ' + fmt(saved.savedAt) + ' by ' + saved.savedBy : ' (the built-in defaults)') + '.' + (can('editor') ? '' : ' You can view the content but not change it.');
       if (saved.design && Array.isArray(saved.design.conditions) && can('editor')) {   // names may have changed (or arms been added) since the page loaded
         armNames = {}; saved.design.conditions.forEach(function (x) { if (x && x.id && x.label) armNames[x.id] = x.label; });
@@ -1169,7 +1192,7 @@
     root.innerHTML = '<div class="who"><div class="brandmark"><span class="wordmark"><b>CCAIR Behavioral Lab</b><small>Georgia State University · J. Mack Robinson College of Business</small></span><h1 class="h-flush" id="ctitle">CCAIR Lab: studies</h1></div><span id="whoami" class="muted"></span></div>' + SIGNIN + '<div id="app" hidden>' +
       '<p class="muted" id="cintro"></p>' +
       '<div class="table-wrap"><table id="stbl"></table></div><div id="clonebox"></div>' +
-      '<div data-create><div class="section start"><h2>Start a new study</h2><p class="muted">Pick a starting point. Each one is a complete, working study: you can preview it as a participant straight away, then change anything on its Study content tab.</p>' +
+      '<div data-create><div class="section start"><h2>Start a new study</h2><p class="muted">Pick a starting point. Each one is a complete, working study: you can preview it as a participant straight away, then change anything on its Edit study tab.</p>' +
       '<div class="tpl-grid" id="tplgrid" role="list"></div>' +
       '<form id="newform" class="newform"><h3 id="newhead" tabindex="-1">Name your study</h3><div class="grid3">' +
       '<label class="f">Starting point<select id="ntpl"></select></label>' +
@@ -1177,11 +1200,11 @@
       '<label class="f">Link name (lowercase letters, numbers, dashes)<input type="text" id="nid" class="mono" placeholder="phone-calls-pilot"></label></div><p class="muted" id="ntypedesc"></p>' +
       '<label class="f">Description (shown on the lab page once you list the study)<textarea id="ndesc" rows="2"></textarea></label>' +
       '<div class="row"><button type="submit" class="primary">Create study</button></div></form><div id="newout" role="status"></div></div>' +
-      '<div class="section" data-create><h2 id="impheading">Create a study from a survey file</h2><p class="muted">Start from a survey you already have: a Qualtrics export (.qsf), a LimeSurvey structure (.lss), a REDCap data dictionary (.csv), or the lab\'s spreadsheet template (.csv or .xlsx; <a href="/lab/templates/survey-template.csv" download>download the template</a>). This creates a survey study (type "Vignettes and surveys") and opens its Study content, Import a survey page with your file already read and previewed. Nothing is saved to the study until you load the preview into the editor and click Save.</p>' +
+      '<div class="section" data-create><h2 id="impheading">Create a study from a survey file</h2><p class="muted">Start from a survey you already have: a Qualtrics export (.qsf), a LimeSurvey structure (.lss), a REDCap data dictionary (.csv), or the lab\'s spreadsheet template (.csv or .xlsx; <a href="/lab/templates/survey-template.csv" download>download the template</a>). This creates a survey study (type "Vignettes and surveys") and opens its Edit study, Import a survey page with your file already read and previewed. Nothing is saved to the study until you load the preview into the editor and click Save.</p>' +
       '<form id="impform"><div class="grid3"><label class="f">Name<input type="text" id="iname" placeholder="Attitudes survey"></label>' +
       '<label class="f">ID (in the link)<input type="text" id="iid" class="mono" placeholder="attitudes-survey"></label>' +
       '<label class="f">Survey file<input type="file" id="ifile" accept=".qsf,.lss,.csv,.xlsx,.txt"></label></div><div class="row"><button type="submit">Create study and open the import page</button></div></form><div id="impout" role="status"></div></div>' +
-      '<div class="section" data-create><h2>Create a study from a design file</h2><p class="muted">A study design file (.json) holds a study\'s whole design and no data. Download one from a study\'s Study content tab, or get one from another lab or a paper\'s materials. The new study starts unlisted, with no participants.</p>' +
+      '<div class="section" data-create><h2>Create a study from a design file</h2><p class="muted">A study design file (.json) holds a study\'s whole design and no data. Download one from a study\'s Edit study tab, or get one from another lab or a paper\'s materials. The new study starts unlisted, with no participants.</p>' +
       '<form id="dsgform"><div class="grid3"><label class="f">Name<input type="text" id="dname" placeholder="Leave empty to keep the file\'s name"></label><label class="f">Link name<input type="text" id="did" class="mono" placeholder="replication-1"></label>' +
       '<label class="f">Design file<input type="file" id="dfile" accept=".json,application/json"></label></div><div class="row"><button type="submit">Create study from the file</button></div></form><div id="dsgout" role="status"></div></div>' +
       '<div class="section" id="researchers"><h2>Researchers</h2><p class="muted">Each researcher has their own account (email and password, with an optional authenticator app) and a role in each study: viewer, editor, manager, or owner. There is no email service here: an invitation is a link you copy or send from your own mail app. A link works once. Invitations last 7 days and password-reset links 24 hours. The owner key always works, whatever happens to accounts.</p>' +
@@ -1367,7 +1390,7 @@
       $('clf').addEventListener('submit', function (e) {
         e.preventDefault(); err();
         postJSON('clone', { from: id, name: $('clname').value.trim(), id: $('clid').value.trim() }).then(function (r) {
-          list(); box.innerHTML = '<div class="done-card"><h3 tabindex="-1" id="donehead">' + esc(r.study.name) + ' is ready</h3><p>A copy of ' + esc(s.name) + ' with no participants, unlisted.' + (r.newCodes && r.newCodes.length ? ' It has new completion codes: enter them in your panel (they are on its Study content → Sign-up &amp; consent page).' : '') + ' <a href="' + esc(r.study.paths.admin) + '">Open its admin page</a>.</p></div>'; $('donehead').focus();
+          list(); box.innerHTML = '<div class="done-card"><h3 tabindex="-1" id="donehead">' + esc(r.study.name) + ' is ready</h3><p>A copy of ' + esc(s.name) + ' with no participants, unlisted.' + (r.newCodes && r.newCodes.length ? ' It has new completion codes: enter them in your panel (they are on its Edit study → Sign-up &amp; consent page).' : '') + ' <a href="' + esc(r.study.paths.admin) + '">Open its admin page</a>.</p></div>'; $('donehead').focus();
         }).catch(function (x) { err(x.message); });
       });
     }
@@ -1405,7 +1428,7 @@
         var d; try { d = JSON.parse(file.data); } catch (x) { throw new Error('That file is not a study design file (it is not valid JSON).'); }
         return postJSON('create', { design: d, id: id, name: $('dname').value.trim() || undefined });
       }).then(function (r) {
-        $('dsgout').innerHTML = '<div class="done-card"><h3 tabindex="-1" id="dsghead">' + esc(r.study.name) + ' is ready</h3><p>Made from the design file' + (r.filesLeftOut ? ', but ' + r.filesLeftOut + ' media file(s) were not in it: upload them again on its Items tab' : '') + '.' + (r.newCodes && r.newCodes.length ? ' New completion codes were made (the file had none): enter them in your panel, from Study content, Sign-up &amp; consent.' : '') + ' <a href="' + esc(r.study.paths.admin) + '">Open its admin page</a>.</p></div>';
+        $('dsgout').innerHTML = '<div class="done-card"><h3 tabindex="-1" id="dsghead">' + esc(r.study.name) + ' is ready</h3><p>Made from the design file' + (r.filesLeftOut ? ', but ' + r.filesLeftOut + ' media file(s) were not in it: upload them again on its Items tab' : '') + '.' + (r.newCodes && r.newCodes.length ? ' New completion codes were made (the file had none): enter them in your panel, from Edit study, Sign-up &amp; consent.' : '') + ' <a href="' + esc(r.study.paths.admin) + '">Open its admin page</a>.</p></div>';
         $('dsghead').focus(); $('did').value = ''; $('dname').value = ''; list();
       }).catch(function (x) { err(x.message); });
     });

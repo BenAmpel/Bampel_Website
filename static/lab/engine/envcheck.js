@@ -1,5 +1,5 @@
 /* CCAIR Behavioral Lab: checks of the participant's setup before a session (loaded by participant.js only when the
-   study asks for one; settings in content.environment, edited on Study content → Devices & timing).
+   study asks for one; settings in content.environment, edited on Edit study → Devices & timing).
    - device:    a computer with a mouse or trackpad (no phones or tablets); a browser that understands speech (Chrome, Edge)
    - mic:       the microphone hears the participant: a live level meter, passed after half a second of speech-level sound
    - headphone: Huggins-pitch test (Milne et al. 2021, Behavior Research Methods 53: 1551-1562): three noises, one hides a

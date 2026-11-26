@@ -142,7 +142,14 @@ export async function handle(req, { getStore, env, now }) {
       const c = await content.getContent(S.store, type);
 
       switch (action) {
-        case 'me': return json({ name: who.name, role: who.role, roles: admin.ROLE_INFO, study: { id: study.id, name: study.name, type: type.id, typeLabel: type.label, paths: study.paths }, conditions: type.conditionsOf(c), armLabels: armLabels(c) });
+        case 'me': {
+          // live: a real person has signed up (E.hasRealSignup), for the page's Draft / Live line and first tab. Left out
+          // if it cannot be read, so the page still opens. locked: the same structure-lock check as the content route.
+          let live; try { live = await E.hasRealSignup(S); } catch (e) { console.error('me: live', e); }
+          const locked = !!(type.structureOf && await S.store.get('lock/structure'));
+          return json({ name: who.name, role: who.role, roles: admin.ROLE_INFO, study: { id: study.id, name: study.name, type: type.id, typeLabel: type.label, paths: study.paths }, conditions: type.conditionsOf(c), armLabels: armLabels(c),
+            locked, ...(typeof live === 'boolean' ? { live } : {}) });
+        }
         case 'participants': return json(await E.listParticipants(S));
         // The integrity report (integrity.mjs): reasons worth a look, per person and per pair. Each view is in the activity log.
         case 'integrity': {
