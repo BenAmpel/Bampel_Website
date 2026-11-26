@@ -51,7 +51,7 @@ export async function runSelfTest(S, { condition, code, keep = false, budgetMs =
   const hydrate = cl => Object.assign(client(cl), { round: cl.round, hb: cl.hb, stopped: cl.stopped, finished: cl.finished, moves: cl.moves || 0, last: cl.last || null });
   const dehydrate = (sc, cl) => ({ code: cl.code, round: sc.round, hb: sc.hb, stopped: sc.stopped, finished: sc.finished, moves: sc.moves, last: sc.last && { phase: sc.last.phase, deadlineAt: sc.last.deadlineAt, reason: sc.last.reason } });
   try {
-    if (st.contentVersion !== (c.version || 0)) { ok(false, 'Study content changed during the self-test; run it again'); st.stage = 'cleanup'; }
+    if (st.contentVersion !== (c.version || 0)) { ok(false, 'The study changed during the self-test; run it again'); st.stage = 'cleanup'; }
 
     if (st.stage === 'probe') {
       // The race-safety assumptions: write-once under concurrent writers, and a new key visible to a list at once.

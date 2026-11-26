@@ -664,7 +664,7 @@
     });
   }
 
-  // ---------- setup checks and full screen (engine/envcheck.js; Study content → Devices & timing) ----------
+  // ---------- setup checks and full screen (engine/envcheck.js; Edit study → Devices & timing) ----------
   // Before the first item of a session: device and browser, microphone, headphones (session 1), then full screen.
   // Results are saved once per session (route "checks"); the server decides whether a failed check ends the study.
   function loadEnv(then) {

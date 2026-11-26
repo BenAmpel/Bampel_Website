@@ -60,7 +60,7 @@ export async function runSelfTest(S, { condition, code, keep = false, budgetMs =
   const progress = () => ({ done: false, code, condition, session: st.session, sessions: nS, passed: st.checks.filter(x => x.pass).length, failed: st.checks.filter(x => !x.pass).length });
   const save = () => store.set(`selftest/${code}`, st);
   try {
-    if (st.contentVersion !== (c.version || 0)) { ok(false, 'Study content changed during the self-test; run it again'); st.stage = 'cleanup'; }
+    if (st.contentVersion !== (c.version || 0)) { ok(false, 'The study changed during the self-test; run it again'); st.stage = 'cleanup'; }
     if (st.stage === 'start') {
       const cas = await casProbe(store);
       ok(cas.etag && cas.stale === false && cas.fresh === true && cas.final === 4 && cas.created === false, `Storage honors conditional writes ${JSON.stringify(cas)}`);

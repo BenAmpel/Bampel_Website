@@ -28,13 +28,20 @@ async function until(fn, what, ms = 5000) {
 const api = (path, o = {}) => fetch(base + path, { ...o, headers: { 'x-admin-key': KEY, 'content-type': 'application/json', ...(o.headers || {}) } }).then(r => r.json());
 const stored = id => api(`/api/lab/${id}/admin/content`);
 
-// Opens the admin page for a study in jsdom, on the Study content tab.
+// Closes a page once its own requests have settled, so a late reply cannot reach a closed page (a draft opens on Edit
+// study, whose content load starts at once).
+async function settle(window) {
+  for (const end = Date.now() + 5000; (window.__inFlight || 0) > 0 && Date.now() < end;) await new Promise(r => setTimeout(r, 20));
+  await new Promise(r => setTimeout(r, 50));
+  window.close();
+}
+// Opens the admin page for a study in jsdom, on the Edit study tab.
 async function open(id) {
   const page = readFileSync(STATIC + '/lab/admin/index.html', 'utf8'), TAG = '<script src="/lab/engine/admin.js"></script>';
   const dom = new JSDOM(page.split(TAG).join(''), { url: `${base}/lab/admin/${id}/`, runScripts: 'outside-only', pretendToBeVisual: true });
   const { window } = dom, doc = window.document;
   window.sessionStorage.setItem('lab_admin_key', KEY);
-  window.fetch = (u, o) => fetch(new URL(u, base), o);
+  window.fetch = async (u, o) => { window.__inFlight = (window.__inFlight || 0) + 1; try { return await fetch(new URL(u, base), o); } finally { window.__inFlight--; } };
   window.confirm = () => true;
   window.Element.prototype.scrollIntoView = function () {};
   const append = window.HTMLHeadElement.prototype.appendChild;
@@ -104,7 +111,7 @@ try {
   const q = after.survey.pre.concat(after.survey.post).find(x => /How familiar/.test(x.text));
   assert(q, 'the new question is saved'); assert.deepEqual(q.sessions, [1], 'asked in session 1');
   assert.equal(after.design.randomization.blockSize % 3, 0, 'the block size fits three arms');
-  window.close();
+  await settle(window);
   console.log('canvas edits save as content the server accepts');
 
   // 2b. Arm names (B2) and the click or Tab that follows an edit (B1). Nothing here is saved.
@@ -132,7 +139,7 @@ try {
   await wait(30);
   assert.equal(arms(doc)[1], 'Loss framing');
   assert.equal(doc.activeElement && doc.activeElement.getAttribute('data-k'), nextKey, 'focus is on the next name box after the redraw');
-  window.close();
+  await settle(window);
   console.log('arm names in /me and the preview menu; the click or Tab after an edit is not lost');
 
   // 3. The structure lock.
@@ -158,13 +165,13 @@ try {
   assert.match(doc.getElementById('contentwarn').textContent, /Structure unlocked/, 'unlocking says so');
   doc.querySelector('#builder [data-b="arm-add"]').click();
   assert.equal(arms(doc).length, 4, 'adding an arm works again');
-  window.close();
+  await settle(window);
   console.log('the lock refuses structural edits and allows wording; the owner can unlock it');
 
   // 4. A study without the builder key keeps the form editor only.
   ({ window, doc } = await open('bui-form'));
   assert(!subs(doc).includes('builder'), 'no Builder subtab for a form-editor study');
-  window.close();
+  await settle(window);
   console.log('a form-editor study has no Builder subtab');
 } finally {
   server.closeAllConnections?.(); server.close();

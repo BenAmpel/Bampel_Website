@@ -102,6 +102,23 @@ export async function loadParticipant(S, raw) {
   return CODE_RE.test(code) ? await S.store.get(pKey(code)) : null;
 }
 
+// ---------- real sign-ups (the admin page's Draft / Live line) ----------
+// A real sign-up: not a test participant, and has consented or finished a session (a done/<code>/ key, or the older
+// single-record format's completed array, read the same way as progressOf). The Edit study page's started count
+// (admin.js A.started) applies this rule to the Participants list. Not the structure lock (any non-test record,
+// content.hasRealParticipant) and not the Participants "Real" filter (not a test).
+export const isRealSignup = (p, doneCodes) => !!p && !p.test &&
+  (!!p.consentedAt || doneCodes.has(p.code) || (Array.isArray(p.completed) && p.completed.length > 0));
+
+// Whether the study has at least one real sign-up. Stops at the first one; no progress is computed.
+export async function hasRealSignup(S) {
+  const doneCodes = new Set();
+  for (const k of await S.store.list('done/')) { const m = k.match(/^done\/([^/]+)\/s\d+-\d+$/); if (m) doneCodes.add(m[1]); }
+  const keys = await S.store.list('participants/');
+  for (let i = 0; i < keys.length; i += 40) if ((await getMany(S.store, keys.slice(i, i + 40))).some(([, p]) => isRealSignup(p, doneCodes))) return true;
+  return false;
+}
+
 // ---------- progress (read back from write-once keys) ----------
 // known: the participant's data/, done/ and started/ keys when the caller has already listed them (exports, the
 // Participants list), so they are not listed again per participant.
