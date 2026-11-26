@@ -408,6 +408,11 @@ a.chip:active { transform: scale(0.97); }
 .people-list { list-style: none; margin-bottom: 16px; }
 .people-list li { margin-bottom: 12px; }
 .people-list strong, .people-list li > span { display: block; }
+/* Static research and resources lists in the no-JavaScript summary (scripts/build-ccair.js, researchList, resourcesList); React replaces them on mount. */
+.static-list { list-style: none; margin-bottom: 16px; }
+.static-list li.static-item { margin-bottom: 12px; }
+.static-item strong, .static-item > span { display: block; }
+.static-points { margin: 4px 0 0 20px; }
 .pub-list.card .pub:last-child { border-bottom: 0; }
 .pub { padding: 18px 0; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 1fr auto; gap: 6px 16px; }
 .pub h3 { font: 600 17px/1.4 var(--sans); letter-spacing: -0.005em; }

@@ -192,6 +192,47 @@ function peopleList(esc) {
   out.push(`\n      <h2>Faculty affiliates</h2>${group('Faculty', (people.affiliates || []).map((a) => li(a.name, a.role, a.dept, a.synergy)), 3)}`);
   return out.join('');
 }
+// Static lists for the /ccair/research/ and /ccair/resources/ shells (2026-11-26). The research areas live as constants
+// in ccair-pages.jsx, so they are read from that file (the literal is evaluated in an empty vm context) instead of being
+// copied: one source for the page and the shell. Section titles and intros are read from the page's <Section> tags the
+// same way. The resources come from resources.json in file order, grouped as the page's tabs are (datasets, benchmarks,
+// tools; empty groups left out), all groups at once because there is no tab to switch without JavaScript. React replaces
+// the whole #root summary on mount, so nothing here stays in the DOM.
+function pageConst(pagesSrc, name) {
+  const m = new RegExp(`^const ${name} = (\\[[\\s\\S]*?^\\]);`, 'm').exec(pagesSrc);
+  if (!m) throw new Error(`ccair-pages.jsx: const ${name} not found`);
+  return require('vm').runInNewContext(`(${m[1]})`, Object.create(null));
+}
+function sectionText(body, id) {
+  const tag = new RegExp(`<Section id="${id}"[^>]*>`).exec(body);
+  if (!tag) throw new Error(`ccair-pages.jsx: <Section id="${id}"> not found`);
+  const attr = (n) => { const m = new RegExp(`\\b${n}="([^"]*)"`).exec(tag[0]); return m ? m[1] : ''; };
+  return { title: attr('title'), intro: attr('intro') };
+}
+function researchList(esc, pagesSrc, body) {
+  const head = (id, level = 'h2') => { const t = sectionText(body, id); return `\n      <${level}>${esc(t.title)}</${level}>${t.intro ? `\n      <p>${esc(t.intro)}</p>` : ''}`; };
+  const li = (name, desc) => `          <li class="static-item"><strong>${esc(name)}</strong><span>${esc(desc)}</span></li>`;
+  const list = (items) => `\n        <ul class="static-list">\n${items.join('\n')}\n        </ul>`;
+  const out = [head('primitives')];
+  out.push(`\n        <ol class="static-list">\n${pageConst(pagesSrc, 'PILLARS').map((p) => `          <li class="static-item"><strong>${esc(p.title)}</strong><span>${esc(p.desc)}</span>\n            <ul class="static-points">${p.points.map((pt) => `<li>${esc(pt)}</li>`).join('')}</ul></li>`).join('\n')}\n        </ol>`);
+  out.push(head('portfolio'));
+  pageConst(pagesSrc, 'RESEARCH_PORTFOLIO').forEach((t) => out.push(`\n      <h3>${esc(t.tier)}: ${esc(t.risk)}</h3>${list(t.areas.map((a) => li(a.name, a.desc)))}`));
+  out.push(head('constructs'), list(pageConst(pagesSrc, 'CONSTRUCTS').map((c) => li(c.name, c.desc))));
+  out.push(head('outputs'), list(pageConst(pagesSrc, 'CENTER_OUTPUTS').map((o) => li(o.title, o.desc))));
+  return out.join('');
+}
+function resourcesList(esc, body) {
+  const all = JSON.parse(fs.readFileSync(path.join(ccairDir, 'data', 'resources.json'), 'utf8'));
+  const t = sectionText(body, 'assets');
+  const out = [`\n      <h2>${esc(t.title)}</h2>\n      <p>${esc(t.intro)}</p>`];
+  for (const cat of ['dataset', 'benchmark', 'tool']) {
+    const items = all.filter((r) => r.category === cat);
+    if (!items.length) continue;
+    const label = cat[0].toUpperCase() + cat.slice(1) + 's';
+    out.push(`\n      <h3>${label}</h3>\n        <ul class="static-list">\n${items.map((r) => `          <li class="static-item"><strong>${esc(r.title)}</strong><span>${esc(r.status || '')}</span><span>${esc(r.description || '')}</span>${(r.tags || []).length ? `<span>${esc((r.tags || []).join(', '))}</span>` : ''}</li>`).join('\n')}\n        </ul>`);
+  }
+  return out.join('');
+}
 function writeRoutePages() {
   const shell = fs.readFileSync(path.join(ccairDir, 'index.html'), 'utf8');
   const appSrc = fs.readFileSync(path.join(ccairDir, 'ccair-app.jsx'), 'utf8');
@@ -231,7 +272,8 @@ function writeRoutePages() {
     // People page: its hero is rendered by the app after the data loads, so the preload is written into the page's own
     // <head> (no script) for the same AVIF candidates the Picture component asks for.
     html = html.replace(/\n  <script src="\/ccair\/dist\/hero-preload.js"><\/script>\n  /, heroLinkFor(f.name));
-    const extra = f.name === 'publications' ? publicationsList(esc) : f.name === 'people' ? peopleList(esc) : '';
+    const extra = f.name === 'publications' ? publicationsList(esc) : f.name === 'people' ? peopleList(esc)
+      : f.name === 'research' ? researchList(esc, pagesSrc, body) : f.name === 'resources' ? resourcesList(esc, body) : '';
     html = swap(html, /<div class="narrow" style="padding:64px 0">[\s\S]*?<\/nav>\n    <\/div>/,
       `<main id="main-content">\n    <div class="narrow" style="padding:64px 0">\n      <h1 style="font-size:40px;line-height:1.1;font-weight:300;margin-bottom:20px">${esc(heading)}</h1>\n      <p class="lede" style="margin-bottom:16px">${esc(lede)}</p>\n      <p style="margin-bottom:16px"><a href="/ccair/">Center for CyberAI Research (CCAIR), Georgia State University</a></p>\n      ${nav}${extra}\n    </div>\n    </main>`);
     fs.mkdirSync(path.join(ccairDir, f.name), { recursive: true });
