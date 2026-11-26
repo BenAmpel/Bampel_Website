@@ -92,6 +92,9 @@ jobs:
       - name: CCAIR publications shell lists every publication (static count equals publications.json)
         run: node --test tests/ccair-publications-static.test.mjs
 
+      - name: CCAIR people shell lists every person (static count equals people.json)
+        run: node --test tests/ccair-people-static.test.mjs
+
       - name: CCAIR mobile menu scroll lock
         run: node --test tests/ccair-menu-lock.test.mjs
 

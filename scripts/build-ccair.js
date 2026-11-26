@@ -171,6 +171,27 @@ function publicationsList(esc) {
   });
   return `\n      <h2 class="pub-year">All ${pubs.length} publications</h2>\n      <ol class="pub-list">\n${items.join('\n')}\n      </ol>`;
 }
+// Static list of every person for the /ccair/people/ shell (2026-11-26), grouped and ordered exactly as PeoplePage reads
+// people.json: director, then graduate researchers (Georgia State students, SFS scholars, current mentees, former
+// mentees), then faculty affiliates. Records carry no personal link, so none is written. React replaces the whole #root
+// summary on mount, so nothing here stays in the DOM.
+function peopleList(esc) {
+  const people = JSON.parse(fs.readFileSync(path.join(ccairDir, 'data', 'people.json'), 'utf8'));
+  const li = (name, ...lines) => `          <li class="person"><strong>${esc(name)}</strong>${lines.filter(Boolean).map((t) => `<span>${esc(t)}</span>`).join('')}</li>`;
+  const group = (title, items, level = 3) => items.length ? `\n      <h${level}>${esc(title)}</h${level}>\n        <ul class="people-list">\n${items.join('\n')}\n        </ul>` : '';
+  const join = (...a) => a.filter(Boolean).join(' \u00b7 ');
+  const d = people.director;
+  const mentees = people.mentees || [];
+  const out = [];
+  if (d) out.push(`\n      <h2>Director</h2>\n        <ul class="people-list">\n${li('Dr. ' + d.name, `${d.title}, ${d.dept}`)}\n        </ul>`);
+  out.push('\n      <h2>Graduate researchers</h2>');
+  out.push(group('Georgia State University', (people.students || []).map((s) => li(s.name, s.role, join(s.org, s.years)))));
+  out.push(group('NSF CyberCorps Scholarship for Service (SFS) scholars', (people.sfsScholars || []).map((s) => li(s.name, s.role, s.org))));
+  out.push(group('Mentees at partner universities', mentees.filter((s) => !s.now).map((s) => li(s.name, s.role, join(s.org, s.years)))));
+  out.push(group('Former mentees', mentees.filter((s) => s.now).map((s) => li(s.name, s.role, join(s.mentoredAt && `Mentored at ${s.mentoredAt}`, s.years), `Now at ${s.now}`))));
+  out.push(`\n      <h2>Faculty affiliates</h2>${group('Faculty', (people.affiliates || []).map((a) => li(a.name, a.role, a.dept, a.synergy)), 3)}`);
+  return out.join('');
+}
 function writeRoutePages() {
   const shell = fs.readFileSync(path.join(ccairDir, 'index.html'), 'utf8');
   const appSrc = fs.readFileSync(path.join(ccairDir, 'ccair-app.jsx'), 'utf8');
@@ -210,9 +231,9 @@ function writeRoutePages() {
     // People page: its hero is rendered by the app after the data loads, so the preload is written into the page's own
     // <head> (no script) for the same AVIF candidates the Picture component asks for.
     html = html.replace(/\n  <script src="\/ccair\/dist\/hero-preload.js"><\/script>\n  /, heroLinkFor(f.name));
-    const extra = f.name === 'publications' ? publicationsList(esc) : '';
+    const extra = f.name === 'publications' ? publicationsList(esc) : f.name === 'people' ? peopleList(esc) : '';
     html = swap(html, /<div class="narrow" style="padding:64px 0">[\s\S]*?<\/nav>\n    <\/div>/,
-      `<div class="narrow" style="padding:64px 0">\n      <h1 style="font-size:40px;line-height:1.1;font-weight:300;margin-bottom:20px">${esc(heading)}</h1>\n      <p class="lede" style="margin-bottom:16px">${esc(lede)}</p>\n      <p style="margin-bottom:16px"><a href="/ccair/">Center for CyberAI Research (CCAIR), Georgia State University</a></p>\n      ${nav}${extra}\n    </div>`);
+      `<main id="main-content">\n    <div class="narrow" style="padding:64px 0">\n      <h1 style="font-size:40px;line-height:1.1;font-weight:300;margin-bottom:20px">${esc(heading)}</h1>\n      <p class="lede" style="margin-bottom:16px">${esc(lede)}</p>\n      <p style="margin-bottom:16px"><a href="/ccair/">Center for CyberAI Research (CCAIR), Georgia State University</a></p>\n      ${nav}${extra}\n    </div>\n    </main>`);
     fs.mkdirSync(path.join(ccairDir, f.name), { recursive: true });
     fs.writeFileSync(path.join(ccairDir, f.name, 'index.html'), html);
     written++;

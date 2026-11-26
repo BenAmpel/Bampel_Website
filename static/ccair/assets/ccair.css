@@ -404,6 +404,10 @@ a.chip:active { transform: scale(0.97); }
   .pub-year { position: static; }
 }
 .pub-list { list-style: none; }
+/* Static people list in the no-JavaScript summary (scripts/build-ccair.js, peopleList); React replaces it on mount. */
+.people-list { list-style: none; margin-bottom: 16px; }
+.people-list li { margin-bottom: 12px; }
+.people-list strong, .people-list li > span { display: block; }
 .pub-list.card .pub:last-child { border-bottom: 0; }
 .pub { padding: 18px 0; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 1fr auto; gap: 6px 16px; }
 .pub h3 { font: 600 17px/1.4 var(--sans); letter-spacing: -0.005em; }
