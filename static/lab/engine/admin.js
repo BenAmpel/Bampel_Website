@@ -276,7 +276,7 @@
   }
   function start() {
     err();
-    loadScript('/lab/engine/logic.js').then(function () { return getJSON('me'); }).then(function (m) {
+    Promise.all([loadScript('/lab/engine/logic.js'), getJSON('me')]).then(function (r) { return r[1]; }).then(function (m) {
       me = m;
       return loadPlugin(m.study.type).then(function (p) {
         plugin = p;
