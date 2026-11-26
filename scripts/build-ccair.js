@@ -155,6 +155,22 @@ function heroLinkFor(page) {
   const set = photo.widths.map((w) => `/ccair/assets/photos/${photo.base}-${w}.avif ${w}w`).join(', ');
   return `\n  <link rel="preload" as="image" type="image/avif" imagesrcset="${set}" imagesizes="100vw" fetchpriority="high">\n  `;
 }
+// Static list of every publication for the /ccair/publications/ shell (2026-11-26), so crawlers and visitors without
+// JavaScript get the same entries the app lists. Same data and default order as PublicationsPage (publications.json,
+// stable sort by year, newest first); the title links to the bampel.com paper page when paper-pages.json has one, and
+// the DOI links to doi.org. React replaces the whole #root summary on mount, so nothing here stays in the DOM.
+function publicationsList(esc) {
+  const pubs = JSON.parse(fs.readFileSync(path.join(ccairDir, 'data', 'publications.json'), 'utf8'));
+  const pages = JSON.parse(fs.readFileSync(path.join(ccairDir, 'data', 'paper-pages.json'), 'utf8'));
+  const items = pubs.slice().sort((a, b) => (b.year || 0) - (a.year || 0)).map((p) => {
+    const site = pages[normTitle(p.title)] || {};
+    const title = site.page ? `<a href="${esc(site.page)}">${esc(p.title)}</a>` : esc(p.title);
+    const venue = `${p.venue || ''}${p.year ? `, ${p.year}` : ''}`;
+    const doi = p.doi ? `<div class="side"><span class="links"><a href="${esc('https://doi.org/' + p.doi)}" aria-label="${esc('DOI for ' + p.title)}">DOI</a></span></div>` : '';
+    return `        <li class="pub"><cite>${title}</cite><span class="authors">${esc(p.authors || '')}</span><span class="venue">${esc(venue)}</span>${doi}</li>`;
+  });
+  return `\n      <h2 class="pub-year">All ${pubs.length} publications</h2>\n      <ol class="pub-list">\n${items.join('\n')}\n      </ol>`;
+}
 function writeRoutePages() {
   const shell = fs.readFileSync(path.join(ccairDir, 'index.html'), 'utf8');
   const appSrc = fs.readFileSync(path.join(ccairDir, 'ccair-app.jsx'), 'utf8');
@@ -194,8 +210,9 @@ function writeRoutePages() {
     // People page: its hero is rendered by the app after the data loads, so the preload is written into the page's own
     // <head> (no script) for the same AVIF candidates the Picture component asks for.
     html = html.replace(/\n  <script src="\/ccair\/dist\/hero-preload.js"><\/script>\n  /, heroLinkFor(f.name));
+    const extra = f.name === 'publications' ? publicationsList(esc) : '';
     html = swap(html, /<div class="narrow" style="padding:64px 0">[\s\S]*?<\/nav>\n    <\/div>/,
-      `<div class="narrow" style="padding:64px 0">\n      <h1 style="font-size:40px;line-height:1.1;font-weight:300;margin-bottom:20px">${esc(heading)}</h1>\n      <p class="lede" style="margin-bottom:16px">${esc(lede)}</p>\n      <p style="margin-bottom:16px"><a href="/ccair/">Center for CyberAI Research (CCAIR), Georgia State University</a></p>\n      ${nav}\n    </div>`);
+      `<div class="narrow" style="padding:64px 0">\n      <h1 style="font-size:40px;line-height:1.1;font-weight:300;margin-bottom:20px">${esc(heading)}</h1>\n      <p class="lede" style="margin-bottom:16px">${esc(lede)}</p>\n      <p style="margin-bottom:16px"><a href="/ccair/">Center for CyberAI Research (CCAIR), Georgia State University</a></p>\n      ${nav}${extra}\n    </div>`);
     fs.mkdirSync(path.join(ccairDir, f.name), { recursive: true });
     fs.writeFileSync(path.join(ccairDir, f.name, 'index.html'), html);
     written++;
