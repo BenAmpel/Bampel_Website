@@ -45,7 +45,7 @@ if (cmd === 'keygen') {
   const { publicKey, privateKey } = generateKeys(a);
   writeFileSync(out, JSON.stringify(privateKey, null, 2) + '\n', { mode: 0o600 });
   console.log(`Private key: ${out} (key ${privateKey.kid}). Keep it off shared drives; whoever has it can read this study's sealed fields.`);
-  console.log(`Public key (paste on the study's Encryption tab): ${publicKey}`);
+  console.log(`Public key (paste under the study's More → Encryption): ${publicKey}`);
   console.log(`For a copy on shared storage, make a passphrase-protected one: node scripts/lab/seal.mjs wrap ${out}`);
 } else if (cmd === 'wrap') {
   if (!a) die(USAGE);

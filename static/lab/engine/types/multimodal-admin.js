@@ -195,8 +195,8 @@
     // file (Encryption tab), else they are saved sealed for node scripts/lab/seal.mjs open-audio. Without a study key the
     // server refuses new recordings, so say so.
     api.getJSON('seal').then(function (k) {
-      sec.querySelector('#rc-key').innerHTML = k.enabled ? 'New recordings are sealed with study key <span class="mono">' + esc(k.kid) + '</span>.' + (window.LabSeal && LabSeal.loaded() && LabSeal.loaded().kid === k.kid ? ' This tab holds that key: recordings open here.' : ' Load the key file on the Encryption tab to listen here.')
-        : '<strong>This study has no study key: new recordings are refused until one is set on the Encryption tab.</strong>';
+      sec.querySelector('#rc-key').innerHTML = k.enabled ? 'New recordings are sealed with study key <span class="mono">' + esc(k.kid) + '</span>.' + (window.LabSeal && LabSeal.loaded() && LabSeal.loaded().kid === k.kid ? ' This tab holds that key: recordings open here.' : ' Load the key file under More → Encryption to listen here.')
+        : '<strong>This study has no study key: new recordings are refused until one is set under More → Encryption.</strong>';
     }).catch(function () {});
     function fname(row, mime) { return row.code + '_s' + row.session + '_' + row.item + '_' + row.kind + '.' + (EXT[mime] || 'webm'); }
     // A recording as fetched -> { bytes, opened } (opened: readable audio) or a rejection saying why it stays sealed. The
@@ -231,7 +231,7 @@
             else api.saveFile(new Blob([o.bytes], { type: 'application/octet-stream' }), fname(row, r.mime) + '.sealed');
             out.innerHTML = (o.opened ? 'Saved.' : 'Saved sealed (key ' + esc(o.kid) + ').') + note;
           } else if (o.opened) out.innerHTML = '<audio controls autoplay src="' + URL.createObjectURL(new Blob([o.bytes], { type: r.mime })) + '"></audio>' + note;
-          else out.innerHTML = 'Sealed with key <span class="mono">' + esc(o.kid) + '</span>. Load that key file on the Encryption tab to listen.';
+          else out.innerHTML = 'Sealed with key <span class="mono">' + esc(o.kid) + '</span>. Load that key file under More → Encryption to listen.';
         });
       }).catch(function (x) { api.err(x.message); });
     });

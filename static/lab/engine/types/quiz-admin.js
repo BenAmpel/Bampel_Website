@@ -17,7 +17,7 @@
     subtabs: [['quiz', 'Questions']],
     render: function (sub, A) {
       var esc = A.esc, z = A.draft.quiz, items = z.items, kinds = (A.meta().kinds) || { single: 'One answer', multi: 'Several answers', number: 'Number', text: 'Short text (graded by hand)' };
-      var h = '<p class="muted">A graded quiz. Students see one question at a time and cannot go back. Answer keys stay on the server and the browser never receives them; scoring happens there, from a copy of each question as the student saw it. Every question also keeps the behavior traces the lab records for any study (time, tab switches, pastes, typing rhythm) for the Participants and Figures tabs.</p>' +
+      var h = '<p class="muted">A graded quiz. Students see one question at a time and cannot go back. Answer keys stay on the server and the browser never receives them; scoring happens there, from a copy of each question as the student saw it. Every question also keeps the behavior traces the lab records for any study (time, tab switches, pastes, typing rhythm) for Participants and Results → Figures.</p>' +
         '<div class="grid3">' + A.field('Time limit in minutes (0 = none)', A.num('quiz.timeLimitMin', z.timeLimitMin, 0, 600)) +
         A.field('Attempts (sessions)', '<input type="number" min="1" max="20" data-qzsessions="1" value="' + A.draft.design.sessions.length + '">') + '</div>' +
         A.checkbox('data-path="quiz.shuffleItems" data-bool="1"', z.shuffleItems, 'Shuffle the order of the questions for each student') +

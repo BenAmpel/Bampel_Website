@@ -1,11 +1,13 @@
 // The study builder canvas (static/lab/engine/builder.js) inside the real admin page, end to end:
-//  - a study made from the builder template opens on the Builder subtab, with its two arms and two sessions
+//  - a study made from the builder template opens on the Builder subtab, drawn first under "The study" in the side
+//    list (docs/designs/console-ia.md, Stage 2), with its two arms and two sessions
 //  - adding an arm, renaming it, and writing a new question on the canvas mark the draft dirty, and Save stores
 //    content the server accepts (three conditions, the new question asked in session 1)
 //  - once lock/structure exists (a real sign-up), the page shows the lock note, refuses a structural edit (adding an
 //    arm) with the lock message and leaves the draft alone, but still lets the owner rename an arm and save; the
 //    owner's Unlock button (structure-reset) clears the stamp and structural edits work again
-//  - a study the canvas cannot show exactly (no builder key) has no Builder subtab
+//  - a study the canvas cannot show exactly (no builder key) has no Builder subtab and opens on its type's first own
+//    section (the first under "The study"), not on Consent
 // Runs the real admin.js in jsdom against the local lab server on in-memory stores (nothing is saved to disk).
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -65,6 +67,8 @@ async function open(id) {
   return { window, doc };
 }
 const subs = doc => [...doc.querySelectorAll('#subtabs button')].map(b => b.getAttribute('data-sub'));
+// The first section drawn under the side list's "The study" heading.
+const studyFirst = doc => { const h = [...doc.querySelectorAll('#subtabs h3')].find(x => x.textContent === 'The study'); return h && h.nextElementSibling.getAttribute('data-sub'); };
 const arms = doc => [...doc.querySelectorAll('#builder [data-b="arm-label"]')].map(i => i.value);
 function change(window, el, value) { if (value !== undefined) el.value = value; el.dispatchEvent(new window.Event('change', { bubbles: true })); }
 async function save(doc) {
@@ -81,7 +85,7 @@ try {
 
   // 1. Opens on the canvas.
   let { window, doc } = await open('bui');
-  assert.equal(subs(doc)[0], 'builder', 'Builder is the first subtab');
+  assert.equal(studyFirst(doc), 'builder', 'Builder is the first section under The study');
   await until(() => doc.querySelector('#builder .bd-lanes'), 'the canvas');
   assert.equal(doc.querySelector('#subtabs button[aria-current="true"]').getAttribute('data-sub'), 'builder', 'Builder is current');
   const before = await stored('bui');
@@ -171,6 +175,7 @@ try {
   // 4. A study without the builder key keeps the form editor only.
   ({ window, doc } = await open('bui-form'));
   assert(!subs(doc).includes('builder'), 'no Builder subtab for a form-editor study');
+  assert.equal(doc.querySelector('#subtabs button[aria-current="true"]').getAttribute('data-sub'), studyFirst(doc), 'the type\'s first own section is current');
   await settle(window);
   console.log('a form-editor study has no Builder subtab');
 } finally {

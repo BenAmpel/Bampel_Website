@@ -220,7 +220,7 @@ const TYPE_COLUMNS = {
     ['item_id', 'category', 'The question\'s ID in the editor.'], ['item_pool', 'category', 'The pool the question was drawn from (blank = no pool; everyone got this question).'],
     ['item_kind', 'category', 'Kind of question.', 'single; multi; number; text'], ['points_possible', 'number', 'Points the question is worth.'],
     ['response', 'as described', 'The answer: option number in the editor\'s order (1 = first option) for one-answer questions, option numbers separated by | for several-answer questions, the number typed for number questions; blank for short text and for no answer.'],
-    ['response_text', 'text', 'Short-text answer (encrypted when the study has a key; the Encryption tab opens it in downloads).'],
+    ['response_text', 'text', 'Short-text answer (encrypted when the study has a key; More → Encryption on the admin page opens it in downloads).'],
     ['answered', 'binary', 'An answer was given.', '0 = no; 1 = yes'],
     ['correct', 'binary', 'Scored on the server from the stored question (blank = short text, graded by hand).', '0 = no; 1 = yes'],
     ['points', 'number', 'Points earned (blank = short text, graded by hand). Late answers earn 0.'],
