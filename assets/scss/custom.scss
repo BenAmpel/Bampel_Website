@@ -6112,3 +6112,156 @@ section#cv-download a {
     }
   }
 }
+
+// Former inline style="" attributes on the home, research, publications and CV pages, moved here with no visual change.
+// Per-item values (skill bar widths, trend dots, gantt offsets, teaching bars) stay inline: they come from data.
+.visitor-stats {
+  text-align: center;
+  margin: 40px auto;
+  font-size: 0.8rem;
+  opacity: 0.7;
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+.career-timeline {
+  max-width: 600px;
+  margin: 20px auto;
+}
+
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+#dashboard-wrapper.dash-wrap {
+  margin: 30px 0;
+}
+
+#dashboard-wrapper > .dash-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  border: 1px solid var(--card-border, #333);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--card-bg, rgba(255, 255, 255, 0.02));
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+// Altmetric summary box (shortcode on /publications/, partial on /cv/). Scoped by id so it wins over page-level rules.
+#altmetric-summary-box {
+  &.am-box {
+    display: none; // the widget script shows it with style.display = 'block'
+    margin: 30px 0;
+    padding: 25px;
+    background: var(--card-bg, rgba(255, 255, 255, 0.02));
+    border: 1px solid var(--card-border, #333);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  }
+
+  .am-head {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--card-border, #444);
+    padding-bottom: 15px;
+  }
+
+  .am-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: inherit;
+  }
+
+  .am-sub {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.8rem;
+    opacity: 0.7;
+  }
+
+  .am-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 15px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .am-cell-score {
+    padding: 10px;
+    background: rgba(0, 229, 255, 0.05);
+    border-radius: 8px;
+  }
+
+  .am-score {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--clr-cyan, #00e5ff);
+  }
+
+  .am-num {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: inherit;
+  }
+
+  .am-label-score {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.8;
+    margin-top: 5px;
+  }
+
+  .am-label {
+    font-size: 0.7rem;
+    opacity: 0.6;
+    margin-top: 5px;
+  }
+
+  .am-details {
+    font-size: 0.75rem;
+    opacity: 0.8;
+    border-top: 1px solid var(--card-border, #444);
+    padding-top: 10px;
+    cursor: pointer;
+  }
+
+  .am-summary {
+    font-weight: 600;
+    list-style: none;
+  }
+
+  .am-dotted {
+    border-bottom: 1px dotted currentColor;
+  }
+
+  .am-explain {
+    margin-top: 10px;
+    line-height: 1.5;
+    color: var(--text-muted, #aaa);
+  }
+
+  .am-p-first {
+    margin-bottom: 8px;
+  }
+
+  .am-weights {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 8px;
+  }
+
+  .am-p-last {
+    margin-top: 8px;
+    font-style: italic;
+  }
+}
