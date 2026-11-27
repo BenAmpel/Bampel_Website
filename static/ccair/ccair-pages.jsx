@@ -204,6 +204,7 @@ function HomePage() {
           <LinkCard href="/ccair/resources/" title="Resources" more="See resources"><p>Datasets, benchmarks, tools, and free career guides for students.</p></LinkCard>
           <LinkCard href="/ccair/contact/" title="Work with us" more="Get in touch"><p>Prospective students, collaborators, and partners: here is how to reach us.</p></LinkCard>
         </div>
+        <p style={{ marginTop: 24 }}>Need training data? Browse the <a href="/ccair/students/data/">AI-ready cybersecurity dataset catalog</a>, with each dataset's license and known weaknesses.</p>
       </Section>
     </div>
   );
@@ -454,7 +455,7 @@ function ResourcesPage() {
         </Reveal>
       </Section>
 
-      <Section id="assets" alt title="Research assets" intro="Datasets and tools from CCAIR studies, shared with the CyberAI community. More resources are planned.">
+      <Section id="assets" alt title="Research assets" intro="Datasets and tools from CCAIR studies, shared with the CyberAI community.">
         <DataSection needs={['resources']} what="research assets">
         <div className="toolbar"><SegmentedControl label="Asset type" options={tabs} value={tab} onChange={setTab} /></div>
         <div className="grid grid-3">
@@ -464,6 +465,7 @@ function ResourcesPage() {
               <h3>{r.title}</h3>
               <p>{r.description}</p>
               <div className="chips">{(r.tags || []).map((t) => <span key={t} className="chip">{t}</span>)}</div>
+              {r.link && <div className="actions" style={{ marginTop: 16 }}><a className="btn btn-secondary btn-sm" href={r.link}>{r.linkLabel || 'Open'}<span className="sr-only">: {r.title}</span></a></div>}
             </Reveal>
           ))}
         </div>
@@ -537,6 +539,7 @@ function MaterialsPage() {
       <section className="section" aria-labelledby="materials-list-title">
         <div className="wrap">
           <h2 id="materials-list-title" className="sr-only">Materials list</h2>
+          <p>Looking for public datasets from other teams? See the <a href="/ccair/students/data/">AI-ready cybersecurity dataset catalog</a>.</p>
           <DataSection needs={['materials']} what="research materials">
           <div className="toolbar"><SegmentedControl label="Material type" options={options} value={kind} onChange={setKind} /></div>
           {shown.length === 0 && <p className="empty">Nothing of this type is listed yet.</p>}

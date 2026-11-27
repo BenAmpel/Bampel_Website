@@ -172,7 +172,7 @@ const COLUMNS = [
   ['paper', 'Paper the creators ask you to cite (URL)'], ['caveats', 'Known weaknesses'], ['checked', 'Date CCAIR last checked the link (YYYY-MM-DD)']
 ];
 
-function datasetHtml(d) {
+function datasetHtml(d, catalogLink = false) {
   const id = `ds-${slugify(d.name)}`;
   return `<li class="ds reveal" data-cat="${esc(d.category)}">
   <article aria-labelledby="${id}">
@@ -188,7 +188,7 @@ function datasetHtml(d) {
       <div><dt>Time span</dt><dd>${orNot(d.timeSpan)}</dd></div>
       <div><dt>Link checked</dt><dd>${orNot(d.checked)}</dd></div>
     </dl>
-    <p class="ds-links">${d.link ? `<a href="${esc(d.link)}" rel="noopener" target="_blank">Dataset page<span class="sr-only"> for ${esc(d.name)} (opens in a new tab)</span></a>` : ''}${d.paper ? `<a href="${esc(d.paper)}" rel="noopener" target="_blank">Paper to cite<span class="sr-only"> for ${esc(d.name)} (opens in a new tab)</span></a>` : ''}</p>
+    <p class="ds-links">${d.link ? `<a href="${esc(d.link)}" rel="noopener" target="_blank">Dataset page<span class="sr-only"> for ${esc(d.name)} (opens in a new tab)</span></a>` : ''}${d.paper ? `<a href="${esc(d.paper)}" rel="noopener" target="_blank">Paper to cite<span class="sr-only"> for ${esc(d.name)} (opens in a new tab)</span></a>` : ''}${catalogLink ? `<a href="/ccair/students/data/#${id}">Full catalog entry<span class="sr-only"> for ${esc(d.name)}</span></a>` : ''}</p>
   </article>
 </li>`;
 }
@@ -253,6 +253,179 @@ function datasetListLd() {
     itemListOrder: 'https://schema.org/ItemListUnordered', mainEntityOfPage: { '@id': `${BASE}data/` },
     itemListElement: list.map((d, i) => ({ '@type': 'ListItem', position: i + 1, name: d.name, url: d.link }))
   };
+}
+
+/* ---------- Catalog intro and topic pages ---------- */
+// A license counts as permissive only when it is one of these exact strings. Anything with an added clause, a research-only
+// condition, mixed terms, NC, ND, SA or GPL is left out on purpose. Add a string here only after reading the dataset's terms.
+const PERMISSIVE = new Set(['MIT', 'Apache 2.0', 'Apache-2.0', 'BSD', 'BSD-3-Clause', 'CC BY 4.0', 'CC-BY-4.0', 'CC BY (CTU-13)', 'CC0',
+  'CC0 1.0 (repository)', 'CC0-1.0', 'CC0-1.0 (dual-licensed)', 'CDLA-Permissive-2.0', 'Data CC-BY-4.0, code MIT', 'ODC-BY', 'ODC-By', 'Public domain']);
+const PERMISSIVE_TEXT = 'MIT, Apache, BSD, CC0, CC BY, ODC-By, CDLA-Permissive or public domain';
+const isPermissive = (d) => PERMISSIVE.has(String(d.license || '').trim());
+const DATA_URL = '/ccair/students/data/';
+const dsAnchor = (d) => `ds-${slugify(d.name)}`;
+
+// Topic pages under /ccair/students/data/<slug>/. Counts, the permissive share and the largest entry are computed at build
+// time. "largest" names the entry whose stated size is shown (sizes are free text, so the choice is made by hand and checked
+// below). The compare paragraphs are written by hand from the entries' descriptions and caveats: reread them when an entry
+// in the topic changes.
+const CATEGORY_PAGES = [
+  { slug: 'prompt-injection', nav: 'Prompt injection', noun: 'prompt injection and jailbreak',
+    title: 'Prompt Injection and Jailbreak Datasets',
+    desc: 'Public prompt injection and jailbreak datasets for LLM security research, compared by source of attacks, size, license and known weaknesses.',
+    match: (d) => d.category.startsWith('AI and LLM') && /prompt injection|jailbreak|adversarial suffix|safety training/i.test(d.subcategory || '') && !/agent/i.test(d.subcategory || ''),
+    largest: 'WildJailbreak',
+    compare: [
+      'Use In-the-Wild Jailbreak Prompts or Tensor Trust when you need attacks that people actually wrote. AdvBench, HarmBench and JailbreakBench give a fixed list of harmful behaviors to score a model against, so results are comparable across papers.',
+      'deepset Prompt Injections and Gandalf Ignore Instructions are small labeled sets for training or testing an injection classifier. BIPIA covers indirect injection, where the attack sits in content the model reads. WildJailbreak is the largest set, but it is synthetic, so do not report it as evidence of real attacker behavior.'
+    ] },
+  { slug: 'llm-agents', nav: 'LLM agents', noun: 'LLM agent security',
+    title: 'LLM Agent Security Benchmarks',
+    desc: 'Public benchmarks for LLM agent security: prompt injection through tools, harmful multi-step tasks, and capture the flag and real-vulnerability challenges.',
+    match: (d) => /agent|capture the flag/i.test(d.subcategory || ''),
+    largest: 'CyberGym',
+    compare: [
+      'AgentDojo and InjecAgent test whether an agent follows instructions injected into the data its tools return. AgentHarm tests whether an agent completes harmful multi-step tasks. Cybench, InterCode-CTF and NYU CTF Bench measure offensive capability on capture the flag challenges, and CyberGym measures it on real vulnerabilities in open source projects.',
+      'Check the license before you build on these. NYU CTF Bench is GPL-2.0, and AgentHarm adds a usage clause to its MIT license.'
+    ] },
+  { slug: 'vulnerable-code', nav: 'Vulnerable code', noun: 'vulnerable code and software security',
+    title: 'Vulnerable Code and Vulnerability Repair Datasets',
+    desc: 'Public datasets for vulnerability detection, vulnerability repair and secure code generation, compared by label source, size, license and known weaknesses.',
+    match: (d) => d.category === 'Vulnerable code and software security',
+    largest: 'CyberGym',
+    compare: [
+      'CyberSecEval and SecurityEval test whether a code generation model writes insecure code. CVEfixes, MoreFixes, Project KB and CrossVul pair vulnerable code with the commit that fixed it, which suits repair work. Most of the remaining sets (Big-Vul, Devign, DiverseVul, PrimeVul, MegaVul and others) label functions as vulnerable or not for detection.',
+      'Read the known weaknesses before you pick a detection set. Many of these entries record label noise or duplication between training and test data, and PrimeVul was built to measure how much those problems inflate reported results.'
+    ] },
+  { slug: 'deepfake-audio', nav: 'Deepfakes', noun: 'deepfake and voice spoofing',
+    title: 'Deepfake Audio and Video Datasets',
+    desc: 'Public deepfake and voice spoofing datasets, from the ASVspoof challenges to in-the-wild audio and face-swap video, compared by access, license and size.',
+    match: (d) => d.category === 'Deepfakes and voice spoofing',
+    largest: 'ASVspoof 5',
+    compare: [
+      'ASVspoof 2019, 2021 and 5 are the standard benchmarks for spoofed speech, released under ODC-BY. In-the-Wild Audio Deepfake (recordings of 58 public figures) and WaveFake test whether a detector trained on ASVspoof generalizes to audio it has not seen.',
+      'DFDC, FaceForensics++ and FakeAVCeleb cover face-swap video and combined audio and video. Each needs registration or an academic request before you can download it.'
+    ] },
+  { slug: 'phishing', nav: 'Phishing', noun: 'phishing, spam and malicious URL',
+    title: 'Phishing, Spam and Malicious URL Datasets',
+    desc: 'Public phishing email, phishing website, malicious URL and SMS spam datasets and feeds, compared by data type, size, license and known weaknesses.',
+    match: (d) => d.category === 'Phishing, spam, and malicious URLs',
+    largest: 'PhreshPhish',
+    compare: [
+      'The email sets are Nazario, Phishing Email Curated, SpamAssassin and Enron. Enron has no phishing labels and usually serves as the legitimate class. PhiUSIIL, UCI Phishing Websites, Vrbancic, Hannousse and Yahiouche, and ISCX-URL2016 give URL and website features. Phishpedia and PhreshPhish carry page content, and SMS Spam Collection covers text message scams.',
+      'PhishTank, OpenPhish and URLhaus are live feeds that change every day. Record the date you pulled them so others can reproduce your sample.'
+    ] },
+  { slug: 'threat-intelligence', nav: 'Threat intelligence', noun: 'threat intelligence and hacker community',
+    title: 'Threat Intelligence and Hacker Forum Datasets',
+    desc: 'Public threat intelligence feeds, threat report collections and hacker forum corpora, compared by access, size, license and known weaknesses.',
+    match: (d) => d.category === 'Threat intelligence and hacker communities',
+    largest: 'Cambridge Cybercrime Centre CrimeBB',
+    compare: [
+      'CrimeBB, the Evolution Cryptomarket dataset and HackerSignal hold text written in hacker and underground communities. CrimeBB needs an institutional agreement, and HackerSignal and Evolution are open downloads. APTnotes, CyberMonitor and ORKL collect published threat reports.',
+      'The abuse.ch feeds, OTX, the MISP feeds, Spamhaus DROP and Ransomware.live change daily, so record the date you pulled them. Malpedia and MISP Galaxy give taxonomies of malware families and threat actors to label against.'
+    ] },
+  { slug: 'network-host-logs', nav: 'Network and host logs', noun: 'network traffic and host log',
+    title: 'Network Intrusion and Host Log Datasets',
+    desc: 'Public network intrusion detection datasets and host, endpoint and system log datasets, compared by collection method, size, license and known weaknesses.',
+    match: (d) => d.category === 'Network traffic and intrusion detection' || d.category === 'Host, endpoint, and security logs',
+    largest: 'LANL User-Computer Authentication Associations in Time',
+    compare: [
+      'The network sets run from the legacy DARPA 1998 and 1999 data and NSL-KDD through the CIC and ISCX collections and UNSW-NB15 to CESNET encrypted traffic. Most were captured in a lab with generated attacks, and many of their caveats report labeling problems, so test on more than one set before you claim a detector generalizes.',
+      'The host sets include LANL authentication events, Splunk BOTS v1 to v3 and Microsoft GUIDE for security operations work, Loghub and HDFS for log anomaly detection, and DARPA Transparent Computing and ATLAS for attack provenance graphs.'
+    ] },
+  { slug: 'malware', nav: 'Malware', noun: 'malware',
+    title: 'Malware Datasets',
+    desc: 'Public malware datasets for Windows, Android and IoT: feature sets, image and graph sets, and live sample repositories, compared by size, access and license.',
+    match: (d) => d.category === 'Malware and binaries',
+    largest: 'SOREL-20M',
+    compare: [
+      'EMBER, EMBER2024, SOREL-20M and MalDICT give extracted features, so you can train a classifier without handling live binaries. Malimg, MaleVis and MalNet turn samples into images or graphs. AndroZoo, Drebin, KronoDroid, MH-100K and the CIC Android sets cover Android apps.',
+      'MalwareBazaar, MalShare, VirusShare and theZoo distribute live malware. Download and analyze those samples only in an isolated environment.'
+    ] }
+].map((c) => ({ ...c, metaTitle: `${c.title} | CCAIR, Georgia State University`, url: `${DATA_URL}${c.slug}/` }));
+
+function categoryStats(c) {
+  const list = sortedDatasets().filter(c.match);
+  if (!list.length) throw new Error(`Topic page "${c.slug}" matches no datasets`);
+  const big = list.find((d) => d.name === c.largest);
+  if (!big) throw new Error(`Topic page "${c.slug}": largest "${c.largest}" is not one of its datasets`);
+  if (!big.size) throw new Error(`Topic page "${c.slug}": "${c.largest}" has no stated size`);
+  return { list, n: list.length, perm: list.filter(isPermissive).length, big };
+}
+
+const topicLinksHtml = (current) => `<div class="related reveal">${CATEGORY_PAGES.filter((c) => c.slug !== current).map((c) => `<a href="${c.url}">${esc(c.nav)}</a>`).join('')}</div>`;
+
+// Intro for the catalog page: every number comes from datasets.json.
+function catalogIntroHtml() {
+  const list = DS.datasets, n = list.length;
+  const cats = new Set(list.map((d) => d.category)).size;
+  const count = (a) => list.filter((d) => d.access === a).length;
+  const gone = list.filter((d) => /^unavailable/i.test(d.access || '')).map((d) => d.name).sort();
+  const checked = list.map((d) => d.checked).filter(Boolean).sort();
+  const names = (a) => a.length < 3 ? a.join(' and ') : `${a.slice(0, -1).join(', ')} and ${a.at(-1)}`;
+  return `<div class="catalog-intro">
+    <p class="body reveal">This catalog lists ${n} public cybersecurity datasets in ${cats} categories for machine learning and AI research. CCAIR includes a dataset only when a researcher can obtain it through an open download, free registration, an API or an academic request, and only when its creators document where the data came from.${gone.length ? ` ${names(gone)} stay${gone.length === 1 ? 's' : ''} listed with ${gone.length === 1 ? 'its' : 'their'} status because ${gone.length === 1 ? 'its download site is' : 'their download sites are'} offline.` : ''}</p>
+    <p class="body reveal">Every entry states its access method, license, data type, size, time span and at least one known weakness. ${list.filter((d) => d.paper).length} of ${n} entries also name the paper their creators ask you to cite. ${list.filter(isPermissive).length} datasets use permissive licenses (${PERMISSIVE_TEXT}). Check the terms of any other dataset before commercial use or redistribution.</p>
+    <p class="body reveal">${count('Open download')} datasets are open downloads, ${count('Free registration')} need free registration, ${count('Academic request')} need an academic request and ${count('API')} come through an API. CCAIR checked every link between ${fmtDate(checked[0])} and ${fmtDate(checked.at(-1))}, and each entry shows its own check date.</p>
+    <p class="body reveal">Topic pages compare the datasets for eight common research areas:</p>
+    ${topicLinksHtml(null)}
+  </div>`;
+}
+
+function categoryMain(c) {
+  const { list, n, perm, big } = categoryStats(c);
+  const checked = list.map((d) => d.checked).filter(Boolean).sort();
+  const lede = `${n} public ${c.noun} dataset${n === 1 ? '' : 's'} in the CCAIR catalog. ${perm} of ${n} use permissive licenses (${PERMISSIVE_TEXT}). The largest is ${big.name} (${big.size}).`;
+  const crumbs = `<li><a href="/ccair/">CCAIR</a></li><li><a href="/ccair/students/">Student guide</a></li><li><a href="${DATA_URL}">Find data</a></li><li aria-current="page">${esc(c.nav)}</li>`;
+  const main = `<main id="main" class="guide students" tabindex="-1"><div class="narrow">
+  <nav class="crumbs" aria-label="Breadcrumb"><ol>${crumbs}</ol></nav>
+  <div class="guide-hero">
+    <span class="eyebrow reveal"><span class="dot"></span>CCAIR Dataset Catalog</span>
+    <h1 class="reveal d-6">${esc(c.title)}</h1>
+    <p class="lede reveal d-12">${esc(lede)}</p>
+    <p class="guide-meta reveal d-16"><span class="verified">${checked[0] === checked.at(-1) ? `Links checked ${esc(fmtDate(checked[0]))}` : `Links checked ${esc(fmtDate(checked[0]))} to ${esc(fmtDate(checked.at(-1)))}`}</span> · Reviewed by Dr. Benjamin M. Ampel, Director of CCAIR</p>
+  </div>
+  <section id="compare" aria-labelledby="compare-h"><h2 id="compare-h" class="reveal">How these datasets compare</h2>
+    ${c.compare.map((t) => `<p class="body reveal">${esc(t)}</p>`).join('\n    ')}
+  </section>
+  <section id="datasets" aria-labelledby="datasets-h"><h2 id="datasets-h" class="reveal">The ${n} dataset${n === 1 ? '' : 's'}</h2>
+    <p class="body reveal">Each entry links to its full record in the <a href="${DATA_URL}">CCAIR cybersecurity dataset catalog</a>, where you can also download the whole catalog as CSV or JSON.</p>
+    <ul class="ds-list">${list.map((d) => datasetHtml(d, true)).join('\n')}</ul>
+  </section>
+  <section id="other-topics" aria-labelledby="other-topics-h"><h2 id="other-topics-h" class="reveal">Other topics</h2>
+    ${topicLinksHtml(c.slug)}
+    <p class="body reveal"><a href="${DATA_URL}">Browse all ${DS.datasets.length} datasets</a></p>
+  </section>
+  ${askHtml()}
+  <p class="reviewed">Compiled for students and researchers by the <a href="/ccair/">Center for CyberAI Research (CCAIR)</a> at Georgia State University. Confirm access and license terms on each dataset's own page before you use it. Found an outdated entry? Tell us through the <a href="/ccair/contact/">contact page</a>.</p>
+</div></main>`;
+  return { main, list };
+}
+
+function categoryHtml(c, main, list, modified, image) {
+  const url = `${SITE}${c.url}`;
+  const crumbLd = [['CCAIR', `${SITE}/ccair/`], ['Student guide', BASE], ['Find data', `${BASE}data/`], [c.nav, url]]
+    .map(([name, item], i) => ({ '@type': 'ListItem', position: i + 1, name, item }));
+  const graph = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      person, org,
+      { '@type': 'CollectionPage', '@id': url, url, name: c.title, description: c.desc, inLanguage: 'en-US', dateModified: modified,
+        isPartOf: { '@id': `${BASE}data/` }, publisher: { '@id': org['@id'] }, reviewedBy: { '@id': person['@id'] },
+        breadcrumb: { '@id': `${url}#breadcrumb` }, mainEntity: { '@id': `${url}#datasets` }, image: image.url },
+      { '@type': 'BreadcrumbList', '@id': `${url}#breadcrumb`, itemListElement: crumbLd },
+      { '@type': 'ItemList', '@id': `${url}#datasets`, name: c.title, numberOfItems: list.length, itemListOrder: 'https://schema.org/ItemListUnordered',
+        itemListElement: list.map((d, i) => ({ '@type': 'ListItem', position: i + 1, name: d.name, url: d.link })) }
+    ]
+  };
+  return `${baseHead({ title: c.metaTitle, ogTitle: c.title, desc: c.desc, url, ogType: 'website', image, extra: feedLink,
+    css: [`/ccair/assets/pathways/pathways.css?v=${ASSET_V}-gsu1-a11y2`, `/ccair/assets/students/students.css?v=${ASSET_V}-gsu1-refs`] })}
+${ld(graph)}
+</head>
+<body>
+${baseTop(navLinks({ slug: 'data' }))}
+${main}
+${baseFoot({ note: `Catalog version ${DS.updated}`, scripts: [`/ccair/assets/pathways/pathways-motion.js?v=${ASSET_V}-m1`] })}`;
 }
 
 function csvCell(v) {
@@ -412,7 +585,7 @@ function pageMain(p, idx) {
     <p class="guide-meta reveal d-16"><span class="verified">Last verified: ${esc(standalone ? fmtDate(OC.updated) : S.verified)}</span> · Reviewed by Dr. Benjamin M. Ampel, Director of CCAIR</p>
     ${p.disclaimer ? `<div class="warn reveal" role="note"><b>General information, not legal advice.</b> ${esc(p.disclaimer.replace(/^General information, not legal advice\.\s*/, ''))}</div>` : ''}
     ${standalone && !OUTCOMES_LIVE ? `<div class="note reveal" role="note"><b>Data is being collected.</b> This page has no outcomes yet. It explains what will appear and how student privacy is protected.</div>` : ''}
-    ${p.slug === 'data' ? downloadHtml() : ''}${!p.slug ? '\n    ' + photoHtml('students-hero', { priority: true, sizes: '(min-width: 820px) 780px, calc(100vw - 32px)' }) : ''}
+    ${p.slug === 'data' ? catalogIntroHtml() + downloadHtml() : ''}${!p.slug ? '\n    ' + photoHtml('students-hero', { priority: true, sizes: '(min-width: 820px) 780px, calc(100vw - 32px)' }) : ''}
   </div>
   ${toc}
   ${sections}
@@ -581,6 +754,13 @@ for (const b of built) {
   nextStore.pages[u] = { hash, lastmod, sitemap: b.i >= 0 || OUTCOMES_LIVE };
   b.modified = lastmod;
 }
+// Topic pages of the dataset catalog: same lastmod rule, keyed by their own URL.
+const cats = CATEGORY_PAGES.map((c) => ({ c, ...categoryMain(c) }));
+for (const t of cats) {
+  const hash = sha(t.main), prev = store.pages[t.c.url];
+  t.modified = prev && prev.hash === hash ? prev.lastmod : TODAY;
+  nextStore.pages[t.c.url] = { hash, lastmod: t.modified, sitemap: true };
+}
 const storeText = JSON.stringify(nextStore, null, 2) + '\n';
 if (!fs.existsSync(LASTMOD_STORE) || fs.readFileSync(LASTMOD_STORE, 'utf8') !== storeText) {
   fs.writeFileSync(LASTMOD_STORE, storeText);
@@ -598,6 +778,7 @@ files.set(path.join(out, 'print', 'checklist', 'index.html'), printPage({ slug: 
 files.set(path.join(out, 'print', 'certifications', 'index.html'), printPage({ slug: 'certifications', title: 'Cybersecurity certification map',
   desc: `A one-page printable map of cybersecurity certifications: who each is for, when to take it, what it costs, and the starter certifications for ${P.roles.length} roles.`,
   intro: `Who each certification is for, when to take it and what it costs, plus the starter certifications for ${P.roles.length} roles.`, body: certMapBody(), parent: ['Certifications', '/ccair/students/certifications/'] }));
+for (const t of cats) files.set(path.join(out, 'data', t.c.slug, 'index.html'), categoryHtml(t.c, t.main, t.list, t.modified, OG_IMAGES.data));
 files.set(path.join(out, 'feed.xml'), feedXml());
 
 // Every link to a guide page or anchor must resolve (keeps renamed headings from breaking links).
@@ -630,5 +811,5 @@ for (const u of [...Object.entries(nextStore.pages).filter(([, e]) => e.sitemap)
 }
 
 const n = writeSitemap();
-console.log('Student guide build complete: %d pages + outcomes (%s) + 2 printables, %d datasets (CSV and JSON), feed with %d entries, sitemap with %d URLs',
-  S.pages.length, OUTCOMES_LIVE ? `${OC.rows.length} rows` : 'collecting, noindex', DS.datasets.length, S.changes.length, n);
+console.log('Student guide build complete: %d pages + outcomes (%s) + %d dataset topic pages + 2 printables, %d datasets (CSV and JSON), feed with %d entries, sitemap with %d URLs',
+  S.pages.length, OUTCOMES_LIVE ? `${OC.rows.length} rows` : 'collecting, noindex', cats.length, DS.datasets.length, S.changes.length, n);

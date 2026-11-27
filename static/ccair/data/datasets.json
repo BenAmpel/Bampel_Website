@@ -1,6 +1,21 @@
 {
-  "updated": "2026-11-08",
+  "updated": "2026-11-26",
   "datasets": [
+    {
+      "name": "HackerSignal",
+      "category": "Threat intelligence and hacker communities",
+      "subcategory": "Hacker forum and exploit corpus with CVE links",
+      "description": "HackerSignal is a CCAIR corpus that links hacker community posts, exploit archives, vulnerability advisories, bug bounty reports, and fix commits through a shared CVE identifier space. It includes three benchmark tasks: CVE linkage retrieval, exploit type classification, and temporal generalization to unseen vulnerabilities.",
+      "access": "Open download",
+      "link": "https://huggingface.co/datasets/BenAmpel/HackerSignal",
+      "dataType": "Text records with source, timestamp, and CVE fields, plus JSONL benchmark splits",
+      "size": "7,447,646 documents from 64 public source identifiers (about 12 GB), 360,004 CVE-linked rows",
+      "timeSpan": "1988 to 2026",
+      "license": "Mixed, set per source in the release manifest",
+      "paper": "",
+      "caveats": "Terms differ by source. The release manifest marks 5 source files as redistributable text, 9 as research text with no commercial reuse, and 13 as metadata or pointers only, so check each source before reuse. Forum posts make up about 94% of rows (6,974,128), so the other seven source layers are small by comparison. CCAIR built this dataset, so this entry is self-reported.",
+      "checked": "2026-11-26"
+    },
     {
       "name": "AdvBench",
       "category": "AI and LLM security",
