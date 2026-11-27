@@ -1,7 +1,7 @@
 {{/* Local override: the modal title is an h2 so the page h1 stays the only h1 (audit 2026-10-24); baseof.html includes this partial after <main>, so the page h1 is also the first heading. */}}
 {{ $search_provider := lower site.Params.features.search.provider }}
 {{ if in (slice "wowchemy" "algolia") $search_provider }}
-<aside class="search-modal" id="search">
+<aside class="search-modal" id="search" role="dialog" aria-modal="true" aria-label="{{ i18n "search" }}">
   <div class="container">
     <section class="search-header">
 
@@ -10,7 +10,7 @@
           <h2 class="h1">{{ i18n "search" }}</h2>
         </div>
         <div class="col-6 col-search-close">
-          <a class="js-search" href="#" aria-label="{{i18n "close" | default "Close"}}"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+          <button type="button" class="js-search" aria-label="{{i18n "close" | default "Close"}}"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></button>
         </div>
       </div>
 
