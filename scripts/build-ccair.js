@@ -229,7 +229,7 @@ function resourcesList(esc, body) {
     const items = all.filter((r) => r.category === cat);
     if (!items.length) continue;
     const label = cat[0].toUpperCase() + cat.slice(1) + 's';
-    out.push(`\n      <h3>${label}</h3>\n        <ul class="static-list">\n${items.map((r) => `          <li class="static-item"><strong>${esc(r.title)}</strong><span>${esc(r.status || '')}</span><span>${esc(r.description || '')}</span>${(r.tags || []).length ? `<span>${esc((r.tags || []).join(', '))}</span>` : ''}</li>`).join('\n')}\n        </ul>`);
+    out.push(`\n      <h3>${label}</h3>\n        <ul class="static-list">\n${items.map((r) => `          <li class="static-item"><strong>${esc(r.title)}</strong><span>${esc(r.status || '')}</span><span>${esc(r.description || '')}</span>${(r.tags || []).length ? `<span>${esc((r.tags || []).join(', '))}</span>` : ''}${r.link ? `<a href="${esc(r.link)}">${esc(r.linkLabel || 'Open')}</a>` : ''}</li>`).join('\n')}\n        </ul>`);
   }
   return out.join('');
 }

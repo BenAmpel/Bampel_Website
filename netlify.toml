@@ -331,6 +331,19 @@
   status = 301
   force = true
 
+# The dataset catalog lives in the student guide. Send the short /ccair/datasets/ address there (Nov 2026).
+[[redirects]]
+  from = "/ccair/datasets/*"
+  to = "/ccair/students/data/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/ccair/datasets"
+  to = "/ccair/students/data/"
+  status = 301
+  force = true
+
 # 301s for legacy URLs driving 404 traffic (GA audit, Aug 2026).
 # Old /publication/<slug> scheme, deleted /authors/ pages, theme demo
 # leftovers, and renamed slugs. Specific rules precede catch-alls.

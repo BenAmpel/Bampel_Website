@@ -31,7 +31,15 @@ sources with the month they were checked.
 - [Certifications](https://bampel.com/ccair/students/certifications/): which certifications employers ask for at entry level and in cloud, SOC and offensive roles, with a comparison table, prices, student discounts and DoD 8140
 - [Get hired](https://bampel.com/ccair/students/get-hired/): resumes, applicant tracking systems, referrals, technical interviews, pay data, comparing offers and federal hiring
 - [Do research as a student](https://bampel.com/ccair/students/research/): how research helps industry careers, and a workflow from topic to paper with ethics approvals
-- [Find data for cybersecurity projects](https://bampel.com/ccair/students/data/): a searchable catalog of public cybersecurity datasets, each with its access, license, size, paper to cite and known weaknesses
+- [AI-Ready Cybersecurity Datasets](https://bampel.com/ccair/students/data/): a searchable catalog of public cybersecurity datasets for machine learning and AI research, each with its access, license, size, paper to cite and known weaknesses. Topic pages compare the datasets in eight areas:
+  - [Prompt Injection and Jailbreak Datasets](https://bampel.com/ccair/students/data/prompt-injection/): attack collections, behavior benchmarks and injection classifier sets for LLM security
+  - [LLM Agent Security Benchmarks](https://bampel.com/ccair/students/data/llm-agents/): tool-based prompt injection, harmful multi-step tasks, and capture the flag and real-vulnerability challenges
+  - [Vulnerable Code and Vulnerability Repair Datasets](https://bampel.com/ccair/students/data/vulnerable-code/): vulnerability detection, repair and secure code generation sets, with their label-quality caveats
+  - [Deepfake Audio and Video Datasets](https://bampel.com/ccair/students/data/deepfake-audio/): ASVspoof, in-the-wild audio deepfakes and face-swap video
+  - [Phishing, Spam and Malicious URL Datasets](https://bampel.com/ccair/students/data/phishing/): phishing email, phishing website, malicious URL and SMS spam datasets and live feeds
+  - [Threat Intelligence and Hacker Forum Datasets](https://bampel.com/ccair/students/data/threat-intelligence/): hacker forum corpora, threat report collections and threat intelligence feeds
+  - [Network Intrusion and Host Log Datasets](https://bampel.com/ccair/students/data/network-host-logs/): network intrusion detection sets and host, endpoint and system log datasets
+  - [Malware Datasets](https://bampel.com/ccair/students/data/malware/): Windows, Android and IoT malware feature sets, image and graph sets, and sample repositories
 - [Scholarships and programs](https://bampel.com/ccair/students/scholarships/): association, nonprofit and company scholarships, plus CyberCorps SFS, the DoD Cyber Service Academy and SMART
 - [Working in government or defense: security clearances](https://bampel.com/ccair/students/security-clearance/): how a US security clearance works and what students can do now (general information, not legal advice)
 - [Dataset catalog as CSV](https://bampel.com/ccair/students/data/ccair-cyber-datasets.csv) and [as JSON](https://bampel.com/ccair/students/data/ccair-cyber-datasets.json): the full CCAIR Cybersecurity Dataset Catalog, one row per dataset
