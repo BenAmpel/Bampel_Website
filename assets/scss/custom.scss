@@ -5718,7 +5718,47 @@ body:not(.dark) .impact-card:focus-visible {
   min-height: 36px;
 }
 
-a.nav-link.js-search {
+// The header search control and the dialog's close control are <button>s (keyboard: Enter and Space; 2026-11-27). The site
+// styles every button as a green outlined pill with !important rules, so these reset that, in both themes and on hover,
+// to leave them looking like the links they replaced.
+.navbar .navbar-nav button.nav-link.js-search,
+.navbar .navbar-nav button.nav-link.js-search:hover,
+.search-header .col-search-close button.js-search,
+.search-header .col-search-close button.js-search:hover {
+  appearance: none;
+  background: none !important;
+  border: 0 !important;
+  border-radius: 0;
+  box-shadow: none !important;
+  margin: 0;
+  font-family: inherit !important;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+  text-shadow: none !important;
+  text-align: inherit;
+  transform: none !important;
+  cursor: pointer;
+}
+
+.navbar .navbar-nav button.nav-link.js-search {
+  padding: 0;
+  color: $text-color !important;
+}
+
+.navbar .navbar-nav button.nav-link.js-search:hover {
+  color: $accent-green !important;
+}
+
+.search-header .col-search-close button.js-search {
+  padding: 0;
+  color: inherit !important;
+}
+
+a.nav-link.js-search,
+button.nav-link.js-search {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -5739,6 +5779,7 @@ a.nav-link.js-search {
 // 10px apart, so 5px a side is as far as they go before two targets overlap).
 .navbar-toggler,
 a.nav-link.js-search,
+button.nav-link.js-search,
 .network-icon li a {
   position: relative;
 
@@ -5749,7 +5790,8 @@ a.nav-link.js-search,
   }
 }
 
-a.nav-link.js-search::after {
+a.nav-link.js-search::after,
+button.nav-link.js-search::after {
   inset: -6px;
 }
 

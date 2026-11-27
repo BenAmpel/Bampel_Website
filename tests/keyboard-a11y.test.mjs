@@ -3,7 +3,8 @@
 // Guards: the skip link is the first focus stop and its target exists; the current page's nav link carries
 // aria-current; the CV year and topic filters expose aria-pressed; the home page impact cards (role="button") act
 // from the keyboard by opening Publications with the filter in the address; closing the search dialog returns
-// focus to the control that opened it.
+// focus to the control that opened it; the header search control is a real button (Enter and Space) that reports
+// aria-expanded.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -99,11 +100,74 @@ test('home page "New in <year>" button opens Publications filtered by that year 
   assert.match(js, /params\.set\("year"/);
 });
 
+const SEARCH_BTN = '.navbar .js-search';
+
+for (const [url, file] of Object.entries(PAGES)) {
+  test(`${url}: the header search control is a <button type="button"> with aria-haspopup and aria-expanded="false"`, () => {
+    const d = doc(file);
+    const btns = d.querySelectorAll(SEARCH_BTN);
+    assert.equal(btns.length, 1, 'one header search control');
+    const b = btns[0];
+    assert.equal(b.tagName, 'BUTTON');
+    assert.equal(b.getAttribute('type'), 'button');
+    assert.equal(b.getAttribute('aria-haspopup'), 'dialog');
+    assert.equal(b.getAttribute('aria-expanded'), 'false');
+    assert.ok(b.getAttribute('aria-label'), 'has an accessible name');
+    assert.ok(!b.hasAttribute('href'));
+    assert.equal(d.querySelector('a.js-search'), null, 'no link is left acting as a search or close control');
+    assert.equal(d.querySelector('#search .js-search').tagName, 'BUTTON', 'the dialog close control is a button too');
+  });
+}
+
+// Runs the real open/close code from assets/js/wowchemy.js against a built page.
+function searchHarness() {
+  const dom = new JSDOM(fs.readFileSync(path.join(SITE, 'index.html'), 'utf8'), { runScripts: 'outside-only' });
+  const { window } = dom;
+  const src = fs.readFileSync(path.join(ROOT, 'assets/js/wowchemy.js'), 'utf8');
+  const start = src.indexOf('// The control that opened the search dialog');
+  const end = src.indexOf('/* ----', src.indexOf('function toggleSearchDialog'));
+  assert.ok(start > 0 && end > start, 'search code found in wowchemy.js');
+  window.eval(`function removeQueryParamsFromUrl() {}\n${src.slice(start, end)}\nwindow.toggleSearchDialog = toggleSearchDialog;`);
+  const d = window.document;
+  const btn = d.querySelector(SEARCH_BTN);
+  // wowchemy.js wires the click handler (and Space/Enter reach it as a click on a button); do the same here.
+  d.querySelectorAll('.js-search').forEach((el) => el.addEventListener('click', (e) => { e.preventDefault(); window.toggleSearchDialog(); }));
+  return { d, btn };
+}
+
+test('search: opening sets aria-expanded="true", closing sets it back and returns focus to the header button', () => {
+  const { d, btn } = searchHarness();
+  btn.focus();
+  btn.click();
+  assert.ok(d.body.classList.contains('searching'));
+  assert.equal(btn.getAttribute('aria-expanded'), 'true');
+  assert.equal(d.activeElement, d.getElementById('search-query'));
+  d.querySelector('#search .js-search').click();
+  assert.ok(!d.body.classList.contains('searching'));
+  assert.equal(btn.getAttribute('aria-expanded'), 'false');
+  assert.equal(d.activeElement, btn, 'focus is back on the button after the close control');
+});
+
+test('search: opened without a focused control (the "/" key), closing still lands on the header button', () => {
+  const { d, btn } = searchHarness();
+  d.defaultView.toggleSearchDialog();
+  assert.equal(btn.getAttribute('aria-expanded'), 'true');
+  d.defaultView.toggleSearchDialog();
+  assert.equal(btn.getAttribute('aria-expanded'), 'false');
+  assert.equal(d.activeElement, btn);
+});
+
+test('search: wowchemy.js wires every .js-search control by click, so Enter and Space (native button clicks) both open it', () => {
+  const js = fs.readFileSync(path.join(ROOT, 'assets/js/wowchemy.js'), 'utf8');
+  assert.match(js, /querySelectorAll\('\.js-search'\)[\s\S]{0,120}addEventListener\('click'/);
+  assert.doesNotMatch(js, /keydown[\s\S]{0,80}js-search/, 'no custom key handler is needed on a real button');
+});
+
 test('closing the search dialog restores focus to the control that opened it', () => {
   const js = fs.readFileSync(path.join(ROOT, 'assets/js/wowchemy.js'), 'utf8');
   assert.match(js, /searchOpener = active/, 'the opener is remembered when the dialog opens');
-  assert.match(js, /searchOpener\.focus\(\)/, 'and focused again when it closes');
+  assert.match(js, /returnTo\.focus\(\)/, 'and focused again when it closes');
   const open = js.indexOf("body.classList.add('searching')");
-  const close = js.indexOf('searchOpener.focus()');
+  const close = js.indexOf('returnTo.focus()');
   assert.ok(close > 0 && open > close, 'restore happens in the close branch, remember in the open branch');
 });

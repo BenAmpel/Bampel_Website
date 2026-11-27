@@ -34,13 +34,21 @@ function removeQueryParamsFromUrl() {
 // The control that opened the search dialog, so closing it puts keyboard focus back there instead of on the page body.
 let searchOpener = null;
 
+// The header search button reports whether the dialog is open.
+function setSearchExpanded(open) {
+  document.querySelectorAll('button.nav-link.js-search').forEach((el) => el.setAttribute('aria-expanded', open ? 'true' : 'false'));
+}
+
 function toggleSearchDialog() {
   const body = document.querySelector('body');
   if (body.classList.contains('searching')) {
     // Clear search query and hide search modal.
     document.getElementById('search-query').blur();
     body.classList.remove('searching', 'compensate-for-scrollbar');
-    if (searchOpener && document.contains(searchOpener)) searchOpener.focus();
+    setSearchExpanded(false);
+    // Back to the control that opened it; if the dialog was opened by the "/" key from the page body, the header button.
+    const returnTo = searchOpener && document.contains(searchOpener) ? searchOpener : document.querySelector('.nav-link.js-search');
+    if (returnTo) returnTo.focus();
     searchOpener = null;
 
     // Remove search query params from URL as user has finished searching.
@@ -64,6 +72,7 @@ function toggleSearchDialog() {
     const active = document.activeElement;
     searchOpener = active && active !== body && active !== document.documentElement ? active : null;
     body.classList.add('searching');
+    setSearchExpanded(true);
 
     // Fade the results in over 200 ms (no jQuery; theme plan stage 2).
     document.querySelectorAll('.search-results').forEach(function (el) {
