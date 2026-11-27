@@ -53,30 +53,34 @@
       <div class="impact-meta" data-meta>{{ $stats.workshops.meta }}</div>
       <div class="impact-progress"><span data-progress></span></div>
     </div>
-    <div class="impact-card" data-metric="best-paper" data-tooltip="Best paper awards" tabindex="0">
+    <div class="impact-card" data-metric="best-paper" data-tooltip="Best paper awards">
       <div class="impact-label">Best Paper Awards</div>
       <div class="impact-value" data-value>{{ (index $stats "best-paper").value }}</div>
       <div class="impact-meta" data-meta>{{ (index $stats "best-paper").meta }}</div>
+      <span class="sr-only" data-tooltip-text>Best paper awards</span>
       <div class="impact-progress"><span data-progress></span></div>
     </div>
   </div>
   <div class="impact-stats-grid" data-impact-row="secondary">
-    <div class="impact-card" data-metric="q1" data-tooltip="Q1 journal publications" tabindex="0">
+    <div class="impact-card" data-metric="q1" data-tooltip="Q1 journal publications">
       <div class="impact-label">Q1 Journal Publications</div>
       <div class="impact-value" data-value>{{ $stats.q1.value }}</div>
       <div class="impact-meta" data-meta>{{ $stats.q1.meta }}</div>
+      <span class="sr-only" data-tooltip-text>Q1 journal publications</span>
       <div class="impact-progress"><span data-progress></span></div>
     </div>
-    <div class="impact-card" data-metric="ft50" data-tooltip="FT50 journal publications" tabindex="0">
+    <div class="impact-card" data-metric="ft50" data-tooltip="FT50 journal publications">
       <div class="impact-label">FT50 Publications</div>
       <div class="impact-value" data-value>{{ $stats.ft50.value }}</div>
       <div class="impact-meta" data-meta>{{ $stats.ft50.meta }}</div>
+      <span class="sr-only" data-tooltip-text>FT50 journal publications</span>
       <div class="impact-progress"><span data-progress></span></div>
     </div>
-    <div class="impact-card" data-metric="utd24" data-tooltip="UTD24 journal publications" tabindex="0">
+    <div class="impact-card" data-metric="utd24" data-tooltip="UTD24 journal publications">
       <div class="impact-label">UTD24 Publications</div>
       <div class="impact-value" data-value>{{ $stats.utd24.value }}</div>
       <div class="impact-meta" data-meta>{{ $stats.utd24.meta }}</div>
+      <span class="sr-only" data-tooltip-text>UTD24 journal publications</span>
       <div class="impact-progress"><span data-progress></span></div>
     </div>
   </div>
