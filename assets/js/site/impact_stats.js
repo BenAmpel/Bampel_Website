@@ -62,7 +62,11 @@
     const metaEl = card.querySelector("[data-meta]");
     if (valueEl) valueEl.textContent = String(metric.value ?? 0);
     if (metaEl) metaEl.textContent = metric.meta || "";
-    if (metric.tooltip) card.dataset.tooltip = metric.tooltip;
+    if (metric.tooltip) {
+      card.dataset.tooltip = metric.tooltip;
+      const tipEl = card.querySelector("[data-tooltip-text]");
+      if (tipEl) tipEl.textContent = metric.tooltip;
+    }
     setProgress(card, metric.value || 0, metric.base || 1);
   };
 
@@ -72,13 +76,16 @@
       ? card.querySelector(".impact-label").textContent.trim()
       : "Impact metric";
     const tooltip = card.dataset.tooltip;
-    const actionHint = filterType ? "Press Enter to filter publications." : "";
-    card.setAttribute("aria-label", [labelText, tooltip, actionHint].filter(Boolean).join(" "));
 
+    // Cards that are not filters are plain content: no focus stop, no aria-label. Their tooltip text is in the page as
+    // visually hidden text ([data-tooltip-text]), so screen readers read it in order; the hover tooltip stays CSS-only.
     if (!filterType) {
       card.setAttribute("role", "group");
+      card.removeAttribute("tabindex");
       return;
     }
+
+    card.setAttribute("aria-label", [labelText, tooltip, "Press Enter to filter publications."].filter(Boolean).join(" "));
 
     card.setAttribute("role", "button");
     card.addEventListener("click", () => triggerFilter({ type: filterType }));

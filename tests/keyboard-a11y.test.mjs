@@ -94,6 +94,28 @@ test('home impact cards: Enter and Space open Publications filtered by type; non
   assert.equal(award.getAttribute('role'), 'group');
 });
 
+test('home impact cards: non-filter cards are not Tab stops and carry their tooltip text as hidden text; filter cards stay focusable', () => {
+  const { d } = runImpactStats('index.html');
+  const cards = [...d.querySelectorAll('.impact-card')];
+  const filters = cards.filter((c) => c.dataset.filterType);
+  const plain = cards.filter((c) => !c.dataset.filterType);
+  assert.equal(filters.length, 3, 'journals, conferences and workshops filter publications');
+  assert.equal(plain.length, 4, 'best paper, Q1, FT50 and UTD24 are not filters');
+  for (const c of filters) {
+    assert.equal(c.getAttribute('tabindex'), '0', `${c.dataset.metric} stays a focus stop`);
+    assert.equal(c.getAttribute('role'), 'button');
+    assert.ok(c.getAttribute('aria-label'), `${c.dataset.metric} has an accessible name`);
+  }
+  for (const c of plain) {
+    assert.equal(c.hasAttribute('tabindex'), false, `${c.dataset.metric} is not a Tab stop`);
+    const tip = c.querySelector('[data-tooltip-text]');
+    assert.ok(tip, `${c.dataset.metric} has hidden tooltip text in the DOM`);
+    assert.ok(tip.classList.contains('sr-only'));
+    assert.equal(tip.textContent.trim(), c.dataset.tooltip, 'hidden text matches the hover tooltip');
+    assert.equal(c.hasAttribute('aria-label'), false);
+  }
+});
+
 test('home page "New in <year>" button opens Publications filtered by that year (no dead control)', () => {
   const js = fs.readFileSync(path.join(ROOT, 'assets/js/site/impact_stats.js'), 'utf8');
   assert.match(js, /window\.location\.assign\(`\$\{path\}publications\/\?/);
