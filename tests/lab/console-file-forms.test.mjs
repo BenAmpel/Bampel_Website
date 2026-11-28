@@ -34,7 +34,11 @@ async function openConsole() {
   const dom = new JSDOM(page.split(TAG).join(''), { url: `${base}/lab/admin/`, runScripts: 'outside-only', pretendToBeVisual: true, virtualConsole: vc });
   const { window } = dom, doc = window.document;
   window.sessionStorage.setItem('lab_admin_key', KEY);
-  window.fetch = (u, o) => fetch(new URL(u, base), o);
+  // A request still in flight when the test closes the window (or the server) must not call the console's error
+  // handler on a dead document: that threw an unhandled TypeError on Node 22 in CI.
+  let closed = false; const close = window.close.bind(window);
+  window.close = () => { closed = true; close(); };
+  window.fetch = (u, o) => fetch(new URL(u, base), o).catch(e => { if (closed) return new Promise(() => {}); throw e; });
   window.Element.prototype.scrollIntoView = function () {};
   window.eval(readFileSync(STATIC + '/lab/engine/admin.js', 'utf8'));
   await until(() => doc.getElementById('dsgform') && doc.getElementById('impform'), 'the console forms');
@@ -93,5 +97,6 @@ assert(design.content && design.content.items, 'the source study exports a desig
 const decls = readFileSync(STATIC + '/lab/engine/admin.js', 'utf8').match(/function readFile\s*\(/g) || [];
 assert.equal(decls.length, 1, 'exactly one function readFile in admin.js');
 
+await wait(300);
 server.close();
 console.log('console-file-forms: design-file and survey-file forms read the chosen file');
